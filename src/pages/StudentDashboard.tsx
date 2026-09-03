@@ -21,6 +21,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
@@ -34,7 +35,7 @@ import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
-import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video, Rocket, ExternalLink } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video, Rocket, ExternalLink, FileText} from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -115,6 +116,7 @@ export default function StudentDashboard() {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
           />
@@ -403,6 +405,11 @@ export default function StudentDashboard() {
             <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
+
 
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
             <div className="absolute inset-0">

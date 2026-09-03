@@ -869,6 +869,69 @@ type WeekSpec = {
   metric: { k: string; v: string }[];
 };
 
+/* =========================================================================
+   PHASE STEPPER — interactive 4-phase navigator shown on every agenda page
+   ========================================================================= */
+const PhaseStepper = ({
+  weeks,
+  current,
+  onJump,
+}: {
+  weeks: WeekSpec[];
+  current: number;
+  onJump: (index: number) => void;
+}) => (
+  <div className="flex items-stretch gap-2 sm:gap-3 mb-4">
+    {weeks.map((w, i) => {
+      const active = i === current;
+      const past = i < current;
+      return (
+        <button
+          key={w.code}
+          type="button"
+          data-no-flip
+          onClick={() => onJump(i)}
+          className="group flex-1 min-w-0 rounded-xl px-2 py-2.5 text-left transition-all duration-300 hover:scale-[1.02]"
+          style={{
+            background: active
+              ? `linear-gradient(135deg, ${w.accent}22, rgba(255,255,255,0.9))`
+              : 'rgba(255,255,255,0.72)',
+            border: `1px solid ${active ? w.accent : `${w.accent}30`}`,
+            boxShadow: active ? `0 8px 24px -12px ${w.accent}` : undefined,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center justify-center h-6 w-6 rounded-full text-[11px] font-black shrink-0"
+              style={{
+                background: past || active ? w.accent : `${w.accent}14`,
+                color: past || active ? '#fff' : w.accent,
+                border: `1px solid ${past || active ? w.accent : `${w.accent}40`}`,
+              }}
+            >
+              {past ? <Check className="h-3.5 w-3.5" /> : String(i + 1).padStart(2, '0')}
+            </span>
+            <div className="min-w-0">
+              <div
+                className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] font-bold truncate"
+                style={{ color: active ? w.accent : 'rgba(15,23,42,0.55)' }}
+              >
+                {w.week}
+              </div>
+              <div
+                className="text-[12px] sm:text-[14px] font-bold leading-tight truncate"
+                style={{ color: active ? '#0f172a' : 'rgba(15,23,42,0.65)' }}
+              >
+                {w.title}
+              </div>
+            </div>
+          </div>
+        </button>
+      );
+    })}
+  </div>
+);
+
 const MVP_WEEKS: WeekSpec[] = [
   {
     code: '07', week: 'WEEK 01', title: 'Validate', accent: '#10b981',
@@ -924,45 +987,131 @@ const MVP_WEEKS: WeekSpec[] = [
   },
 ];
 
-/* Deliverables panel — the GrowthTree3D from the partners brochure grows
-   behind the deliverables list, cycling through the 4 growth stages. */
-const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
+/* Deliverables panel — full-size GrowthSection (same tree scale as /forpartners)
+   with MVP-specific stage benefits and deliverables. */
+const MVP_GROWTH_BENEFITS = [
+  { id: 'w1-validate', stage: 0, label: 'Week 1 · Validate', line: 'Prove the problem, customer and market before building.' },
+  { id: 'w2-build', stage: 1, label: 'Week 2 · Build', line: 'MVP strategy, design, architecture and daily deploys.' },
+  { id: 'w3-launch', stage: 2, label: 'Week 3 · Test & Launch', line: 'First users, pricing tests, traction metrics and GTM plan.' },
+  { id: 'w4-fund', stage: 3, label: 'Week 4 · Grow & Fund', line: 'Growth experiments, investor narrative and Demo Day.' },
+];
+
+const MVP_MONTH_FOCUS = [
+  'Week 1: discovery and problem validation with customer evidence.',
+  'Week 2: MVP strategy, product design, technical development and deploy.',
+  'Week 3: early users, pricing tests, unit economics and GTM planning.',
+  'Week 4: growth strategy, investor narrative, pitch and Demo Day.',
+];
+
+const MVP_GROWTH_STAGES = [
+  { label: 'W01', note: 'Validate' },
+  { label: 'W02', note: 'Build' },
+  { label: 'W03', note: 'Launch' },
+  { label: 'W04', note: 'Fund' },
+];
+
+const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
   const [stage, setStage] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
   useEffect(() => {
+    if (pinned) return;
     const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
     return () => window.clearInterval(id);
-  }, []);
+  }, [pinned]);
+
   return (
-    <div
-      className="relative rounded-2xl p-4 flex-1 min-h-0 overflow-hidden flex flex-col"
-      style={{ background: `linear-gradient(150deg, ${spec.accent}14, rgba(255,255,255,0.9))`, border: `1px solid ${spec.accent}33` }}
-    >
-      {/* animated growth tree background (same animation as /forpartners) */}
-      <div className="absolute inset-0 opacity-80 pointer-events-none">
+    <div className="relative flex-1 min-h-0 h-full overflow-hidden rounded-2xl border" style={{ borderColor: `${spec.accent}33` }}>
+      {/* ambient radial glow */}
+      <div
+        className="absolute inset-0"
+        style={{ background: `radial-gradient(circle at 62% 60%, ${spec.accent}14, transparent 70%)` }}
+      />
+
+      {/* 3D tree — same component used in /forpartners */}
+      <div className="absolute inset-0">
         <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
       </div>
-      {/* readability veil */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.72) 45%, rgba(255,255,255,0.25) 100%)' }}
-      />
-      <div className="relative z-10 flex items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.22em] font-bold" style={{ color: spec.accent }}>Deliverables</span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">growth · {String(stage + 1).padStart(2, '0')}/04</span>
+
+      {/* floating week benefit cards (left side only so the tree stays visible) */}
+      <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
+        {MVP_GROWTH_BENEFITS.map((b) => {
+          const on = b.stage === stage;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              data-no-flip
+              onClick={() => { setStage(b.stage); setPinned(true); }}
+              onMouseEnter={() => { setStage(b.stage); setPinned(true); }}
+              onMouseLeave={() => setPinned(false)}
+              className="text-left rounded-xl px-3 py-2 transition-all duration-300"
+              style={{
+                border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
+                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.78)',
+                boxShadow: on ? `0 8px 24px -12px ${spec.accent}` : undefined,
+              }}
+            >
+              <span
+                className="block font-mono text-[12px] uppercase tracking-[0.08em] font-bold leading-tight"
+                style={{ color: on ? spec.accent : 'rgba(15,23,42,0.55)' }}
+              >
+                {b.label}
+              </span>
+              <span className="block text-[13px] leading-snug text-slate-700">{b.line}</span>
+            </button>
+          );
+        })}
       </div>
-      <div className="relative z-10 mt-2 flex flex-col flex-1 justify-evenly gap-2">
-        {spec.outputs.map((o) => (
-          <motion.div key={o} whileHover={{ x: 4 }} className="flex items-start gap-2">
-            <Check className="h-4 w-4 mt-[2px] shrink-0" style={{ color: spec.accent, filter: `drop-shadow(0 0 6px ${spec.accent})` }} />
-            <span className="text-[14px] leading-snug text-slate-800 font-medium">{o}</span>
-          </motion.div>
+
+      {/* stage selector pills — bottom right */}
+      <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5 max-w-[55%] z-10">
+        {MVP_GROWTH_STAGES.map((s, i) => {
+          const active = i === stage;
+          return (
+            <button
+              key={s.label}
+              type="button"
+              data-no-flip
+              onClick={() => { setStage(i); setPinned(true); }}
+              className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono uppercase font-bold transition-all"
+              style={{
+                background: active ? spec.accent : 'rgba(255,255,255,0.82)',
+                color: active ? '#fff' : spec.accent,
+                border: `1px solid ${spec.accent}${active ? '88' : '44'}`,
+              }}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* root inputs — bottom left, under the cards */}
+      <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[40%] z-10">
+        {['Founder', 'Problem', 'Market', 'Mentor'].map((r) => (
+          <span
+            key={r}
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
+            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.78)' }}
+          >
+            {r}
+          </span>
         ))}
       </div>
     </div>
   );
 };
 
-const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
+const WeekAgendaSlide = ({
+  spec,
+  currentIndex,
+  onJump,
+}: {
+  spec: WeekSpec;
+  currentIndex: number;
+  onJump: (index: number) => void;
+}) => (
   <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
     <PageTitle
       kicker={`${spec.week} · MVP Program`}
@@ -972,7 +1121,10 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
 
     <p className="text-[15px] leading-relaxed text-slate-600 max-w-3xl -mt-2 mb-3">{spec.lead}</p>
 
-    <div className="flex-1 min-h-0 grid grid-cols-[1.55fr_1fr] gap-4">
+    {/* interactive 4-phase navigator */}
+    <PhaseStepper weeks={MVP_WEEKS} current={currentIndex} onJump={onJump} />
+
+    <div className="flex-1 min-h-0 grid grid-cols-[1fr_1.15fr] gap-4">
       {/* day rail — cards stretch to fill the full column height */}
       <div className="relative flex flex-col gap-2 min-h-0 h-full">
         <div
@@ -1010,23 +1162,25 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
         ))}
       </div>
 
-      {/* outputs + metrics — fills the full right column */}
-      <div className="flex flex-col gap-3 min-h-0 h-full">
-        <DeliverablesPanel spec={spec} />
-        <div className="grid grid-cols-3 gap-2 shrink-0">
-          {spec.metric.map((m) => (
-            <motion.div
-              key={m.k}
-              whileHover={{ y: -4, scale: 1.04 }}
-              className="rounded-xl px-2 py-2.5 text-center cursor-default"
-              style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e`, boxShadow: `0 0 0 0 transparent` }}
-            >
-              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
-              <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent, textShadow: `0 0 14px ${spec.accent}60` }}>{m.v}</span>
-            </motion.div>
-          ))}
-        </div>
+      {/* full-size growth tree + deliverables (same scale as /forpartners) */}
+      <div className="flex flex-col min-h-0 h-full rounded-2xl overflow-hidden border" style={{ borderColor: `${spec.accent}33` }}>
+        <MVPGrowthPanel spec={spec} />
       </div>
+    </div>
+
+    {/* metric chips — horizontal row below both columns */}
+    <div className="grid grid-cols-3 gap-2 shrink-0 mt-3">
+      {spec.metric.map((m) => (
+        <motion.div
+          key={m.k}
+          whileHover={{ y: -4, scale: 1.04 }}
+          className="rounded-xl px-2 py-2.5 text-center cursor-default"
+          style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e`, boxShadow: `0 0 0 0 transparent` }}
+        >
+          <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
+          <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent, textShadow: `0 0 14px ${spec.accent}60` }}>{m.v}</span>
+        </motion.div>
+      ))}
     </div>
   </PageFrame>
 );
@@ -1045,6 +1199,11 @@ export default function MVPBrochure() {
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
+  const jumpToAgendaWeek = useCallback((weekIndex: number) => {
+    const target = 6 + weekIndex; // agenda pages are 0-indexed 6-9
+    bookRef.current?.pageFlip()?.flip(target);
+  }, []);
+  const currentAgendaIndex = currentPage >= 6 && currentPage <= 9 ? currentPage - 6 : 0;
 
   // Background audio (manual play; no autoplay)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -2114,22 +2273,22 @@ export default function MVPBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[0]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[1]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[2]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[3]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
 
@@ -2483,12 +2642,28 @@ export default function MVPBrochure() {
                       }} />
 
                       <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
-                        Your organization's flagship innovation program is ready to be built — together.
+                        Your MVP is ready to be validated, built, tested and launched — together.
                       </p>
+
+                      {/* program cost lock-up */}
+                      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div
+                          className="rounded-2xl px-6 py-4 text-center"
+                          style={{
+                            background: 'rgba(255,255,255,0.85)',
+                            border: `2px solid ${NEON.cyan}60`,
+                            boxShadow: `0 0 30px ${NEON.cyan}25`,
+                          }}
+                        >
+                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
+                          <div className="font-futuristic font-black text-5xl mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
+                          <div className="text-sm text-slate-600 mt-1">One-time payment · 4-week intensive · 100% remote</div>
+                        </div>
+                      </div>
 
                       <a
                         href="mailto:info@startupfactoryhub.com"
-                        className="mt-10 inline-flex items-center gap-4 px-8 py-5 rounded-2xl transition hover:scale-105"
+                        className="mt-8 inline-flex items-center gap-4 px-8 py-5 rounded-2xl transition hover:scale-105"
                         style={{
                           background: `linear-gradient(135deg, ${NEON.cyan}25, ${NEON.magenta}25)`,
                           border: `1px solid ${NEON.cyan}80`,
@@ -2496,15 +2671,14 @@ export default function MVPBrochure() {
                         }}
                       >
                         <Mail className="h-5 w-5" style={{ color: NEON.cyan }} />
-                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Book a Presentation</span>
+                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Apply to the Batch</span>
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
                       <div className="mt-12 flex items-center gap-8 font-mono text-[16px] uppercase tracking-[0.35em] text-slate-500">
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />ORLANDO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.amber }} />SEVILLE</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />100% Remote</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />Global Cohort</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />Demo Day Ready</div>
                       </div>
                     </div>
 

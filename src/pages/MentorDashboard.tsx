@@ -14,6 +14,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MentorshipRequests from "@/components/MentorshipRequests";
 
 import JobsSection from "@/components/JobsSection";
@@ -39,7 +40,7 @@ import MeetingsHubHeader from "@/components/MeetingsHubHeader";
 import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
-import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp } from "lucide-react";
+import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -123,6 +124,7 @@ const MentorDashboard = () => {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
           />
@@ -318,6 +320,11 @@ const MentorDashboard = () => {
             <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
+
 
 
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{

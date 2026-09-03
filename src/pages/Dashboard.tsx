@@ -8,6 +8,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 
 import MatchingSystem from '@/components/MatchingSystem';
 import EducationalResources from '@/components/EducationalResources';
@@ -379,6 +380,7 @@ const Dashboard = () => {
               { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
               { value: 'resources',    icon: Globe,          label: t('nav.resources') },
               { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network',      icon: Network,        label: 'Net' },
               { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
               { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
@@ -637,7 +639,12 @@ const Dashboard = () => {
               <MVPReferralCard />
               <AIFeaturesHub />
             </TabsContent>
-        }
+          }
+
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
 
           {/* Meetings Tab */}
           {activeTab === "meetings" && (

@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2 } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import LiveRooms from '@/components/LiveRooms';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import { format, parseISO } from 'date-fns';
 
 import StartupProfileDialog from '@/components/StartupProfileDialog';
@@ -624,6 +625,7 @@ export default function InvestorDashboard() {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
           />
@@ -908,6 +910,11 @@ export default function InvestorDashboard() {
             <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
+
 
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
             <div className="absolute inset-0">
