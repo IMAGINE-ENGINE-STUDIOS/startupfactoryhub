@@ -90,6 +90,9 @@ const About = () => {
         </div>
       </section>
 
+      {/* Content */}
+      <section className="relative z-10 py-16 sm:py-24">
+        <div className="container mx-auto px-4 sm:px-6">
           {/* Mission & Vision */}
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             <div className="glass-card p-8 rounded-xl border border-ocean-border hover-scale">
@@ -119,38 +122,23 @@ const About = () => {
               {t('about.whatMakesDifferent')}
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🤖 {t('about.aiMatching')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.aiMatchingDesc')}</p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🌐 {t('about.globalCommunity')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.globalCommunityDesc')}</p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">📚 {t('about.eduResources')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.eduResourcesDesc')}</p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">💼 {t('about.jobBoard')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.jobBoardDesc')}</p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">💰 {t('about.funding')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.fundingDesc')}</p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🎯 {t('about.mentorship')}</h3>
-                <p className="text-sm text-muted-foreground">{t('about.mentorshipDesc')}</p>
-              </div>
+              {offerItems.map(({ icon: Icon, labelKey, descKey }) => (
+                <div key={labelKey} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-primary" />
+                    <h3 className="font-semibold text-foreground">{t(labelKey)}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t(descKey)}</p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* CTA */}
           <div className="text-center mt-16">
-            <Link 
+            <Link
               to="/auth"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               <Rocket className="h-5 w-5" />
               {t('about.joinCommunityToday')}
