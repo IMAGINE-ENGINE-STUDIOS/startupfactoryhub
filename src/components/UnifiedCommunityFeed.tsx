@@ -985,6 +985,11 @@ export default function UnifiedCommunityFeed({
                   <Video className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Video</span>
                 </Button>
+                <Button variant={showUploader ? 'secondary' : 'ghost'} size="sm" onClick={() => setShowUploader(v => !v)}>
+                  <Paperclip className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Files{attachedFiles.length > 0 ? ` (${attachedFiles.length})` : ''}</span>
+                </Button>
+
                 <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
                   <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
                   <span className="hidden sm:inline">Imaginaly</span>
