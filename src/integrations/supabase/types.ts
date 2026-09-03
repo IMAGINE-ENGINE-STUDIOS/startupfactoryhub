@@ -5298,6 +5298,39 @@ export type Database = {
         }
         Relationships: []
       }
+      membership_grants: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          note: string | null
+          revoked_at: string | null
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          note?: string | null
+          revoked_at?: string | null
+          tier?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          note?: string | null
+          revoked_at?: string | null
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentor_availability: {
         Row: {
           created_at: string | null
@@ -9144,6 +9177,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      has_membership_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
