@@ -14,6 +14,10 @@ Unlocked services:
 5. Discounts on SFH services
 6. Access to online and in-person meetings, conferences and pitch events
 7. Contact investors through the platform
+8. Access to internships
+9. Access to volunteering roles
+10. Technology transfer programs
+11. Certified courses
 
 ## What the page does
 
