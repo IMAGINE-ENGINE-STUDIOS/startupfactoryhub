@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap, Zap, Crown, Users, Loader2 } from "lucide-react";
+import {
+  Bot,
+  Check,
+  Rocket,
+  Sparkles,
+  Building2,
+  GraduationCap,
+  Users,
+  Loader2,
+  TrendingUp,
+  Handshake,
+  Lightbulb,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
@@ -12,10 +24,32 @@ import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBroc
 // Editorial imagery reused from the WTC brochure for the Investor Priority ad banner.
 import investorBannerBg from "@/assets/wtc-institutional.jpg";
 import investorBannerTile from "@/assets/wtc-kpi-capital.jpg";
+// Ultra-chromatic imagery, one per membership widget.
+import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
+import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
+import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
+import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
+import imgAccBasic from "@/assets/membership/acc-basic.jpg";
+import imgAccGrowth from "@/assets/membership/acc-growth.jpg";
+import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
+import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
+
+/**
+ * "Built for everyone" — the audiences the platform serves. Rendered as an
+ * animated icon row replacing the previous decorative section icons.
+ */
+const audiences: { icon: typeof Rocket; label: string; blurb: string }[] = [
+  { icon: Rocket, label: "Startups", blurb: "Build, validate and scale" },
+  { icon: Handshake, label: "Mentors", blurb: "Guide founders 1:1" },
+  { icon: TrendingUp, label: "Investors", blurb: "Priority dealflow" },
+  { icon: GraduationCap, label: "Students", blurb: "Internships & courses" },
+  { icon: Building2, label: "Accelerators", blurb: "Run your cohorts" },
+  { icon: Lightbulb, label: "Advisors", blurb: "Advise & earn" },
+];
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
-  icon: typeof Zap;
+  image: string;
   tagline: string;
   bestFor: string;
   features: string[];
@@ -28,7 +62,7 @@ const startupMemberships: {
   {
     key: "basic",
     basic: true,
-    icon: Zap,
+    image: imgPlanBasic,
     tagline: "Full digital access, virtual events, community, and mentor interactions.",
     bestFor: "Remote-first teams or early MVP-stage founders",
     features: [
@@ -38,9 +72,10 @@ const startupMemberships: {
       "Technology transfer & certified courses",
     ],
   },
+
   {
     key: "self_paced_office",
-    icon: Building2,
+    image: imgPlanDesk,
     tagline: "Adds local Startup Factory HUB Desk coworking access all locations.",
     bestFor: "Founders needing flexible workspace + virtual resources",
     features: [
@@ -53,7 +88,7 @@ const startupMemberships: {
   },
   {
     key: "global_access",
-    icon: Crown,
+    image: imgPlanGlobal,
     tagline: "All platform features + unlimited global office access (130+ countries, 5,600+ sites).",
     bestFor: "Globally distributed teams, traveling founders",
     features: [
@@ -66,7 +101,7 @@ const startupMemberships: {
   {
     key: "corporate",
     contactSales: true,
-    icon: Users,
+    image: imgPlanCorporate,
     tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
     bestFor: "Scale-ups or corporate venture units",
     features: [
@@ -87,7 +122,7 @@ const acceleratorMemberships: {
   key: string;
   name: string;
   price: number | null;
-  icon: typeof Zap;
+  image: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
@@ -96,7 +131,7 @@ const acceleratorMemberships: {
     key: "acc_basic",
     name: "Basic Plan",
     price: 500,
-    icon: Zap,
+    image: imgAccBasic,
     bestFor: "Emerging accelerators running their first programs",
     features: [
       "Organization profile & branded presence",
@@ -109,7 +144,7 @@ const acceleratorMemberships: {
     key: "acc_growth",
     name: "Growth",
     price: 1500,
-    icon: Building2,
+    image: imgAccGrowth,
     bestFor: "Accelerators managing recurring batches",
     features: [
       "Everything in Basic Plan",
@@ -123,7 +158,7 @@ const acceleratorMemberships: {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
-    icon: Crown,
+    image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
       "Everything in Growth",
@@ -136,7 +171,7 @@ const acceleratorMemberships: {
     key: "acc_cohorts",
     name: "Cohorts",
     price: null,
-    icon: Users,
+    image: imgAccCohorts,
     bestFor: "Extending platform benefits to all your cohort startups",
     features: [
       "Seats for every startup in your batch",
@@ -222,7 +257,7 @@ const PricingPlansSection = () => {
 
 
   const shell =
-    "group relative flex flex-col overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1.5 sm:aspect-square";
+    "group relative flex flex-col overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1.5 sm:min-h-[27rem]";
 
   const Corners = () => (
     <>
@@ -233,17 +268,14 @@ const PricingPlansSection = () => {
   );
 
   const SectionTitle = ({
-    icon: Icon,
     title,
     subtitle,
   }: {
-    icon: typeof Bot;
     title: string;
     subtitle?: string;
   }) => (
     <div className="mb-7 sm:mb-9 flex flex-col items-center gap-3 text-center">
       <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5">
-        <Icon className="h-4 w-4 text-primary" />
         <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-foreground">
           {title}
         </h3>
@@ -251,6 +283,26 @@ const PricingPlansSection = () => {
       {subtitle && (
         <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
       )}
+    </div>
+  );
+
+  /**
+   * Banner-style media header used by every membership widget. Mirrors the
+   * Investor Priority banner: ultra-chromatic imagery, animated zoom + sheen.
+   */
+  const PlanMedia = ({ src, alt }: { src: string; alt: string }) => (
+    <div className="relative -mx-5 -mt-5 mb-4 h-28 overflow-hidden sm:-mx-6 sm:-mt-6 sm:h-32">
+      <img
+        src={src}
+        alt={alt}
+        width={1024}
+        height={640}
+        loading="lazy"
+        className="h-full w-full object-cover saturate-150 transition-transform duration-[1200ms] ease-out group-hover:scale-110"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent" />
+      <div className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(115deg,transparent_35%,hsl(var(--primary)/0.35)_50%,transparent_65%)]" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
     </div>
   );
 
@@ -278,9 +330,33 @@ const PricingPlansSection = () => {
           </p>
         </div>
 
+        {/* Built for everyone — audiences the platform serves */}
+        <div className="mb-12 sm:mb-16">
+          <SectionTitle
+            title="Built for Everyone"
+            subtitle="One ecosystem, every role — founders, mentors, investors, students, accelerators and advisors."
+          />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
+            {audiences.map(({ icon: Icon, label, blurb }, i) => (
+              <div
+                key={label}
+                style={{ animationDelay: `${i * 70}ms` }}
+                className="group animate-fade-in relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl tech-card border-0 p-4 text-center transition-all duration-500 hover:-translate-y-1"
+              >
+                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.22),transparent_70%)]" />
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 transition-transform duration-500 group-hover:scale-110">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="relative text-xs font-semibold sm:text-sm">{label}</p>
+                <p className="relative text-[10px] leading-snug text-muted-foreground sm:text-[11px]">{blurb}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Genius AI Plans */}
         <div className="mb-14 sm:mb-20">
-          <SectionTitle icon={Bot} title="Genius AI Plans" />
+          <SectionTitle title="Genius AI Plans" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {Object.values(GENIUS_PLANS).map((plan) => {
@@ -337,7 +413,6 @@ const PricingPlansSection = () => {
         {/* Startup Memberships */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            icon={Rocket}
             title="Startup, Student & Advisor Memberships"
             subtitle="Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo."
           />
@@ -365,7 +440,6 @@ const PricingPlansSection = () => {
                 ? billing === "monthly" ? 50 : 480
                 : billing === "monthly" ? tier!.price : tier!.yearly_price;
               const priceId = tier ? (billing === "monthly" ? tier.price_id : tier.yearly_price_id) : null;
-              const Icon = plan.icon;
               return (
                 <div
                   key={plan.key}
@@ -373,13 +447,11 @@ const PricingPlansSection = () => {
                 >
                   <Corners />
                   {plan.highlight && (
-                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                    <Badge className="absolute right-4 top-4 z-10 border border-primary/30 bg-primary/20 text-[10px] text-primary">
                       Popular
                     </Badge>
                   )}
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
+                  <PlanMedia src={plan.image} alt={plan.basic ? "Basic Plan" : tier!.name} />
                   <h4 className="text-sm font-semibold">{plan.basic ? "Basic Plan" : tier!.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.contactSales ? (
@@ -439,23 +511,19 @@ const PricingPlansSection = () => {
         {/* Accelerator Memberships */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            icon={Building2}
             title="Accelerator Memberships"
             subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {acceleratorMemberships.map((plan) => {
-              const Icon = plan.icon;
               return (
                 <div
                   key={plan.key}
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
+                  <PlanMedia src={plan.image} alt={plan.name} />
                   <h4 className="text-sm font-semibold">{plan.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.price === null ? (
@@ -587,7 +655,7 @@ const PricingPlansSection = () => {
 
         {/* Accelerator Programs */}
         <div>
-          <SectionTitle icon={GraduationCap} title="Accelerator Programs" />
+          <SectionTitle title="Accelerator Programs" />
 
           <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {acceleratorPlans.map((plan) => (
@@ -601,9 +669,6 @@ const PricingPlansSection = () => {
                     Open
                   </Badge>
                 )}
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                  <plan.icon className="h-5 w-5 text-primary" />
-                </div>
                 <h4 className="text-base font-semibold">{plan.name}</h4>
                 <p className="mb-2 text-xs text-muted-foreground">{plan.tagline}</p>
                 <div className="mb-3 flex items-end gap-1.5">
