@@ -62,15 +62,35 @@ const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
 
-/** Repairs legacy page data URLs whose base64 was wrapped, URL-safe, or unpadded. */
+/**
+ * Repairs legacy page data URLs whose base64 was wrapped, URL-safe, or
+ * unpadded. Older rows also contain literal `...[truncated]` placeholders;
+ * those are not images and must never be handed to the browser or re-saved.
+ */
 function normalizePageImageSource(source: unknown): string {
   if (typeof source !== "string") return "";
-  const match = /^(data:image\/[^;,]+;base64,)(.*)$/s.exec(source);
-  if (!match) return source;
+  const trimmed = source.trim();
+  if (!trimmed || trimmed.includes("[truncated]")) return "";
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("blob:")) return trimmed;
+  const match = /^(data:image\/[^;,]+;base64,)(.*)$/s.exec(trimmed);
+  if (!match) return "";
   let encoded = match[2].replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
+  if (encoded.length < 32 || !/^[A-Za-z0-9+/]*={0,2}$/.test(encoded)) return "";
   const remainder = encoded.length % 4;
   if (remainder) encoded += "=".repeat(4 - remainder);
+  try {
+    // Decode a small sample now so corrupt legacy rows fall back to their
+    // editable content instead of rendering broken-image icons as pages.
+    atob(encoded.slice(0, Math.min(encoded.length, 4096)).replace(/=+$/, ""));
+  } catch {
+    return "";
+  }
   return `${match[1]}${encoded}`;
+}
+
+function normalizePageImages(images: unknown): string[] {
+  if (!Array.isArray(images)) return [];
+  return images.map(normalizePageImageSource).filter((image): image is string => Boolean(image));
 }
 
 // Page format configurations (dimensions in cm) - All MS Word & Google Docs formats
@@ -420,18 +440,11 @@ export function LightPaperDocument({
       if ((parsed.mode === 'view' || parsed.mode === 'hybrid') && parsed.images && Array.isArray(parsed.images)) {
         console.log(`✓ ${parsed.mode === 'hybrid' ? 'Hybrid' : 'View'} Mode: ${parsed.images.length} pages with images`);
         
-        // Validate that images array contains valid base64 data
-        const validImages = parsed.images.filter((img: string) => {
-          return typeof img === 'string' && 
-                 (img.startsWith('data:image/jpeg;base64,') || 
-                  img.startsWith('data:image/png;base64,'));
-        });
+        // Accept supported data URLs and stored HTTPS page assets, while
+        // removing legacy truncated/corrupt page strings.
+        const validImages = normalizePageImages(parsed.images);
         
-        if (validImages.length === 0) {
-          console.error('✗ No valid images found in data');
-          toast.error('No valid images found in document');
-          throw new Error('No valid images found');
-        }
+        if (validImages.length === 0) throw new Error('No renderable page images found');
         
         console.log(`✓ Validated ${validImages.length} images`);
         
@@ -751,10 +764,11 @@ export function LightPaperDocument({
       try {
         if (draft.projectId) setCurrentProjectId(draft.projectId);
         if (draft.title) setProjectTitle(draft.title);
-        if (content.viewMode && content.viewModeImages?.length > 0) {
+        const restoredImages = normalizePageImages(content.viewModeImages);
+        if (content.viewMode && restoredImages.length > 0) {
           setViewMode(true);
-          setViewModeImages(content.viewModeImages.map(normalizePageImageSource).filter(Boolean));
-          setTotalPages(content.viewModeImages.length);
+          setViewModeImages(restoredImages);
+          setTotalPages(restoredImages.length);
           setCurrentPage(content.currentPage || 1);
           setVisiblePage(content.currentPage || 1);
           if (content.editTextLayers) setEditTextLayers(content.editTextLayers);
@@ -763,9 +777,12 @@ export function LightPaperDocument({
           if (content.pageFormat) setPageFormat(content.pageFormat);
           if (content.orientation) setOrientation(content.orientation);
           if (content.uploadedFileType) setUploadedFileType(content.uploadedFileType);
-        } else if (content.html) {
-          setDocumentContent(content.html);
-          if (editorRef.current) editorRef.current.innerHTML = content.html;
+        } else if (content.html || (Array.isArray(content.pages) && content.pages.length > 0)) {
+          const recoveredHtml = content.html || content.pages[0] || documentContent;
+          setViewMode(false);
+          setViewModeImages([]);
+          setDocumentContent(recoveredHtml);
+          if (editorRef.current) editorRef.current.innerHTML = recoveredHtml;
           if (content.font) setSelectedFont(content.font);
           if (content.size) setSelectedSize(content.size);
           if (content.pages && Array.isArray(content.pages)) setPages(content.pages);
@@ -880,9 +897,9 @@ export function LightPaperDocument({
       
       if (content) {
         // Restore view mode images if saved
-        if (content.viewMode && content.viewModeImages && content.viewModeImages.length > 0) {
+        const restoredImages = normalizePageImages(content.viewModeImages);
+        if (content.viewMode && restoredImages.length > 0) {
           setViewMode(true);
-          const restoredImages = content.viewModeImages.map(normalizePageImageSource).filter(Boolean);
           setViewModeImages(restoredImages);
           setTotalPages(restoredImages.length);
           setCurrentPage(content.currentPage || 1);
@@ -901,11 +918,12 @@ export function LightPaperDocument({
           setViewMode(false);
           setViewModeImages([]);
 
-          if (content.html) {
-            setDocumentContent(content.html);
+          const recoveredHtml = content.html || (Array.isArray(content.pages) ? content.pages[0] : "");
+          if (recoveredHtml) {
+            setDocumentContent(recoveredHtml);
             
             if (editorRef.current) {
-              editorRef.current.innerHTML = content.html;
+              editorRef.current.innerHTML = recoveredHtml;
             }
             
             if (content.font) setSelectedFont(content.font);
@@ -930,7 +948,7 @@ export function LightPaperDocument({
             if (content.pages && Array.isArray(content.pages)) {
               setPages(content.pages);
             } else {
-              setPages([content.html]);
+              setPages([recoveredHtml]);
             }
 
             toast.success("Document loaded successfully");
