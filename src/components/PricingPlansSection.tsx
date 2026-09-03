@@ -29,8 +29,6 @@ import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
 import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
 import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
 import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
-import imgAccBasic from "@/assets/membership/acc-basic.jpg";
-import imgAccGrowth from "@/assets/membership/acc-growth.jpg";
 import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
 import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
 
@@ -114,9 +112,10 @@ const startupMemberships: {
 ];
 
 /**
- * Membership tiers sold to accelerators / incubators running their own programs.
- * Pricing is per organization, per month. "Cohorts" is quote-based so cohort
- * startups of the accelerator can inherit platform benefits and perks.
+ * Accelerator memberships are intentionally limited to one paid organization
+ * plan and a quote-based Cohorts extension. This keeps the buying choice clear:
+ * $5,000/mo for the full accelerator infrastructure, or Contact Sales when the
+ * goal is extending platform benefits to every startup in a cohort.
  */
 const acceleratorMemberships: {
   key: string;
@@ -128,44 +127,18 @@ const acceleratorMemberships: {
   highlight?: boolean;
 }[] = [
   {
-    key: "acc_basic",
-    name: "Basic Plan",
-    price: 500,
-    image: imgAccBasic,
-    bestFor: "Emerging accelerators running their first programs",
-    features: [
-      "Organization profile & branded presence",
-      "Post on the social feed & resource map",
-      "Mentor and advisor directory access",
-      "Event publishing & RSVP management",
-    ],
-  },
-  {
-    key: "acc_growth",
-    name: "Growth",
-    price: 1500,
-    image: imgAccGrowth,
-    bestFor: "Accelerators managing recurring batches",
-    features: [
-      "Everything in Basic Plan",
-      "Application & batch management tools",
-      "Investor network introductions",
-      "Demo day & pitch programming support",
-    ],
-    highlight: true,
-  },
-  {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
     image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
-      "Everything in Growth",
+      "Full accelerator infrastructure",
       "Dedicated partnership manager",
       "Earth Intelligence & data suite access",
       "Global office & coworking network access",
     ],
+    highlight: true,
   },
   {
     key: "acc_cohorts",
@@ -367,11 +340,6 @@ const PricingPlansSection = () => {
                   className={`${shell} ${isPro ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
-                  {isPro && (
-                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
-                      Popular
-                    </Badge>
-                  )}
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     {plan.name}
                   </p>
@@ -515,7 +483,7 @@ const PricingPlansSection = () => {
             subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
           />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {acceleratorMemberships.map((plan) => {
               return (
                 <div
