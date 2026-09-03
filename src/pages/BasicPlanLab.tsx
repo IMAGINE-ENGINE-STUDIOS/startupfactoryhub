@@ -3,7 +3,7 @@
 // product is in development. All membership state shown here is simulated
 // locally; the only real side effect is the optional Stripe test checkout.
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import Navigation from "@/components/Navigation";
 import { useBasicPlan } from "@/features/basic-plan/hooks/useBasicPlan";
 import { useSimulatedMembership } from "@/features/basic-plan/hooks/useSimulatedMembership";
 import BasicPlanHero from "@/features/basic-plan/components/BasicPlanHero";
@@ -25,8 +25,9 @@ export default function BasicPlanLab() {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8 pb-12">
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <main className="container mx-auto px-4 pt-28 space-y-8 pb-12">
         <BasicPlanHero />
 
         <SimulationControls
@@ -57,7 +58,7 @@ export default function BasicPlanLab() {
         </section>
 
         <AdminPricePanel plan={plan} onSave={savePrices} onSaved={refetch} />
-      </div>
-    </DashboardLayout>
+      </main>
+    </div>
   );
 }
