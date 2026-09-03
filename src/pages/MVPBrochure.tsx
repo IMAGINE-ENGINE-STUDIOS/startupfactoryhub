@@ -1052,7 +1052,7 @@ const WeekAgendaSlide = ({
     {/* interactive 4-phase navigator */}
     <PhaseStepper weeks={MVP_WEEKS} current={currentIndex} onJump={onJump} />
 
-    <div className="flex-1 min-h-0 grid grid-cols-[1.35fr_1fr] gap-4">
+    <div className="flex-1 min-h-0 grid grid-cols-[1.1fr_1fr] gap-4">
       {/* day rail — cards stretch to fill the full column height */}
       <div className="relative flex flex-col gap-2 min-h-0 h-full">
         <div
