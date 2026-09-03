@@ -23,6 +23,7 @@ import HTMLFlipBook from 'react-pageflip';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 import GrowthSection from '@/components/brochure/GrowthSection';
+import GrowthTree3D from '@/components/brochure/GrowthTree3D';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -76,13 +77,14 @@ const GROWTH_BENEFITS = [
 
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
-  cyan: '#0ea5b7',             // teal-cyan, readable on white
-  cyanSoft: 'rgba(14,165,183,0.45)',
-  magenta: '#1f2a44',          // soft electric blue
-  magentaSoft: 'rgba(31,42,68,0.4)',
-  lime: '#10b981',             // emerald
+  cyan: '#06b6d4',             // electric cyan — neo futuristic, readable on white
+  cyanSoft: 'rgba(6,182,212,0.45)',
+  magenta: '#c026d3',          // electric fuchsia
+  magentaSoft: 'rgba(192,38,211,0.4)',
+  lime: '#65a30d',             // neo lime
   emerald: '#059669',
-  amber: '#0d9488',            // teal
+  amber: '#d97706',            // neon amber
+  violet: '#7c3aed',           // ultraviolet accent
   ink: '#0f172a',              // slate-900 for text
   inkSoft: 'rgba(15,23,42,0.65)',
 };
@@ -219,7 +221,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 14</div>
     </div>
 
     {/* bottom hud bar */}
@@ -922,6 +924,44 @@ const MVP_WEEKS: WeekSpec[] = [
   },
 ];
 
+/* Deliverables panel — the GrowthTree3D from the partners brochure grows
+   behind the deliverables list, cycling through the 4 growth stages. */
+const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <div
+      className="relative rounded-2xl p-4 flex-1 min-h-0 overflow-hidden flex flex-col"
+      style={{ background: `linear-gradient(150deg, ${spec.accent}14, rgba(255,255,255,0.9))`, border: `1px solid ${spec.accent}33` }}
+    >
+      {/* animated growth tree background (same animation as /forpartners) */}
+      <div className="absolute inset-0 opacity-80 pointer-events-none">
+        <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
+      </div>
+      {/* readability veil */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.72) 45%, rgba(255,255,255,0.25) 100%)' }}
+      />
+      <div className="relative z-10 flex items-center justify-between">
+        <span className="font-mono text-[11px] uppercase tracking-[0.22em] font-bold" style={{ color: spec.accent }}>Deliverables</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">growth · {String(stage + 1).padStart(2, '0')}/04</span>
+      </div>
+      <div className="relative z-10 mt-2 flex flex-col flex-1 justify-evenly gap-2">
+        {spec.outputs.map((o) => (
+          <motion.div key={o} whileHover={{ x: 4 }} className="flex items-start gap-2">
+            <Check className="h-4 w-4 mt-[2px] shrink-0" style={{ color: spec.accent, filter: `drop-shadow(0 0 6px ${spec.accent})` }} />
+            <span className="text-[14px] leading-snug text-slate-800 font-medium">{o}</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
   <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
     <PageTitle
@@ -933,8 +973,8 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
     <p className="text-[15px] leading-relaxed text-slate-600 max-w-3xl -mt-2 mb-3">{spec.lead}</p>
 
     <div className="flex-1 min-h-0 grid grid-cols-[1.55fr_1fr] gap-4">
-      {/* day rail */}
-      <div className="relative flex flex-col gap-2 min-h-0">
+      {/* day rail — cards stretch to fill the full column height */}
+      <div className="relative flex flex-col gap-2 min-h-0 h-full">
         <div
           className="absolute left-[74px] top-2 bottom-2 w-[2px]"
           style={{ background: `linear-gradient(180deg, transparent, ${spec.accent}, transparent)`, boxShadow: `0 0 14px ${spec.accent}80` }}
@@ -944,18 +984,24 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
             key={d.d}
             initial={{ opacity: 0, x: -12 }}
             whileInView={{ opacity: 1, x: 0 }}
+            whileHover={{ x: 6, scale: 1.02 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: i * 0.06 }}
-            className="relative flex items-start gap-3 rounded-xl px-3 py-2.5 flex-1 min-h-0"
+            className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 flex-1 min-h-0 cursor-default"
             style={{ background: 'rgba(255,255,255,0.78)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
           >
+            {/* neon hover edge */}
             <span
-              className="font-mono text-[11px] font-bold tracking-[0.14em] shrink-0 w-[58px] text-right pt-[3px]"
+              className="absolute inset-y-2 left-0 w-[3px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ background: spec.accent, boxShadow: `0 0 12px ${spec.accent}` }}
+            />
+            <span
+              className="font-mono text-[11px] font-bold tracking-[0.14em] shrink-0 w-[58px] text-right"
               style={{ color: spec.accent }}
             >
               {d.d}
             </span>
-            <span className="relative z-10 mt-[6px] h-2.5 w-2.5 rounded-full shrink-0" style={{ background: spec.accent, boxShadow: `0 0 12px ${spec.accent}` }} />
+            <span className="relative z-10 h-2.5 w-2.5 rounded-full shrink-0 transition-transform duration-300 group-hover:scale-125" style={{ background: spec.accent, boxShadow: `0 0 12px ${spec.accent}` }} />
             <span className="min-w-0">
               <span className="block text-[15px] font-bold text-slate-900 leading-tight">{d.t}</span>
               <span className="block text-[13.5px] leading-snug text-slate-600">{d.s}</span>
@@ -964,25 +1010,20 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
         ))}
       </div>
 
-      {/* outputs + metrics */}
-      <div className="flex flex-col gap-3 min-h-0">
-        <div className="rounded-2xl p-4 flex-1 min-h-0" style={{ background: `linear-gradient(150deg, ${spec.accent}14, rgba(255,255,255,0.9))`, border: `1px solid ${spec.accent}33` }}>
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em] font-bold" style={{ color: spec.accent }}>Deliverables</span>
-          <div className="mt-3 flex flex-col gap-2.5">
-            {spec.outputs.map((o) => (
-              <div key={o} className="flex items-start gap-2">
-                <Check className="h-4 w-4 mt-[2px] shrink-0" style={{ color: spec.accent }} />
-                <span className="text-[14px] leading-snug text-slate-700">{o}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* outputs + metrics — fills the full right column */}
+      <div className="flex flex-col gap-3 min-h-0 h-full">
+        <DeliverablesPanel spec={spec} />
         <div className="grid grid-cols-3 gap-2 shrink-0">
           {spec.metric.map((m) => (
-            <div key={m.k} className="rounded-xl px-2 py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e` }}>
+            <motion.div
+              key={m.k}
+              whileHover={{ y: -4, scale: 1.04 }}
+              className="rounded-xl px-2 py-2.5 text-center cursor-default"
+              style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e`, boxShadow: `0 0 0 0 transparent` }}
+            >
               <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
-              <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent }}>{m.v}</span>
-            </div>
+              <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent, textShadow: `0 0 14px ${spec.accent}60` }}>{m.v}</span>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -998,7 +1039,7 @@ export default function MVPBrochure() {
   const bookRef = useRef<any>(null);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
+  const [totalPages, setTotalPages] = useState(14);
   const compact = useCompactBrochure();
 
 
@@ -2179,13 +2220,156 @@ export default function MVPBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
+
               {/* ====================================================
-                   PAGE 12 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
+                   PAGE 12 — VR / IMMERSIVE DEMO DAY
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.magenta} code="12" label="VR · IMMERSIVE" pageNum={12}>
+                    <PageTitle kicker="12 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR Demo Days.</span> No borders.</>} accent={NEON.magenta} />
+
+                    <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
+                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
+                      <MatrixLayer density={0.18} columns={30} tone="magenta" />
+
+                      <div className="absolute inset-0 flex flex-col justify-between p-8">
+                        <div className="flex justify-between items-start gap-6">
+                          <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>VR · LIVE EVENTS</span>
+                            </div>
+                            <div className="text-base text-slate-900 leading-relaxed font-medium">
+                              Your MVP Program Demo Day is also hosted in Virtual Reality: investor rounds, masterclasses and founder showcases on holographic stages with spatial networking. Investors join from their browser or headset — no installs, no travel.
+                            </div>
+                          </GlassCard>
+                          <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
+                            <div>GLOBAL</div>
+                            <div>REMOTE + ON-SITE</div>
+                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
+                            Your product demo,<br /><span style={{ color: '#f9a8d4' }}>an immersive experience.</span>
+                          </h3>
+
+                          {/* AR ROVER VIEWPORT */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.7, ease: 'easeOut' }}
+                            className="relative rounded-2xl overflow-hidden mb-5"
+                            style={{
+                              height: '230px',
+                              border: `1px solid ${NEON.cyan}60`,
+                              boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
+                            }}
+                          >
+                            {/* @ts-ignore */}
+                            <model-viewer
+                              src={ROVER_GLB}
+                              ar
+                              ar-modes="webxr scene-viewer quick-look"
+                              ar-placement="floor"
+                              xr-environment
+                              camera-controls
+                              interaction-prompt="none"
+                              auto-rotate
+                              auto-rotate-delay="0"
+                              rotation-per-second="20deg"
+                              touch-action="none"
+                              exposure="1"
+                              shadow-intensity="1"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
+                            />
+                            <a
+                              href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
+                              style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
+                            >
+                              <Smartphone className="h-4 w-4" /> Launch Google XR
+                            </a>
+                            <div className="absolute inset-0 pointer-events-none" style={{
+                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
+                              zIndex: 11,
+                            }} />
+
+                            {/* AR reticle / HUD */}
+                            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
+                              {[
+                                'top-4 left-4 border-t-2 border-l-2',
+                                'top-4 right-4 border-t-2 border-r-2',
+                                'bottom-4 left-4 border-b-2 border-l-2',
+                                'bottom-4 right-4 border-b-2 border-r-2',
+                              ].map((cls, i) => (
+                                <div key={i} className={`absolute w-8 h-8 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                              ))}
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, inset 0 0 18px ${NEON.cyan}50` }} />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
+                            </div>
+
+                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
+                              background: 'rgba(255,255,255,0.55)',
+                              backdropFilter: 'blur(6px)',
+                              border: `1px solid ${NEON.cyan}70`,
+                              zIndex: 12,
+                            }}>
+                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
+                            </div>
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
+                              <div>OBJ · NASA ROVER</div>
+                              <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
+                            </div>
+                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
+                              <div>
+                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEW</div>
+                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
+                                  Mars Rover · Scanning
+                                </div>
+                              </div>
+                              <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
+                                <div>LAT −4.5°  LON 137.4°</div>
+                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          <div className="grid grid-cols-4 gap-4">
+                            {[
+                              { i: Smartphone, l: 'VR Demo Day', s: '3D stage, no install required' },
+                              { i: Box, l: 'Startup Pavilions', s: 'Navigable virtual booths' },
+                              { i: Globe2, l: 'Global Audience', s: 'Investors joining from anywhere' },
+                              { i: Sparkles, l: 'Holographic Speakers', s: 'Networking with avatars' },
+                            ].map((p, i) => (
+                              <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
+                                <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
+                                <div className="relative">
+                                  <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
+                                  <div className="font-futuristic font-black text-base text-slate-900 leading-tight">{p.l}</div>
+                                  <div className="font-mono text-[16px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
+                                </div>
+                              </GlassCard>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 13 — CTA · APPLY TO THE MVP PROGRAM (QR + FORM)
                   ==================================================== */}
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="12" label="APPLY TO THE MVP PROGRAM" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="13" label="APPLY TO THE MVP PROGRAM" pageNum={13}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
@@ -2243,7 +2427,7 @@ export default function MVPBrochure() {
                 </A4Wrapper>
               </BookPage>
               {/* ====================================================
-                   PAGE 13 — CLOSING
+                   PAGE 14 — CLOSING
                   ==================================================== */}
 
               <BookPage>
