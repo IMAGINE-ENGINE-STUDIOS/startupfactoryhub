@@ -32,7 +32,6 @@ import {
   Presentation,
   Kanban,
   ArrowUpRight,
-  Layers,
   Gift,
   ExternalLink,
   GripVertical,
