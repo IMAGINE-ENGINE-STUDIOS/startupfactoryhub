@@ -1,18 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Bot,
-  Check,
-  Rocket,
-  Sparkles,
-  Building2,
-  GraduationCap,
-  Users,
-  Loader2,
-  TrendingUp,
-  Handshake,
-  Lightbulb,
-} from "lucide-react";
+import { Check, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
@@ -31,19 +19,11 @@ import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
 import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
 import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
 import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
+// Accelerator program imagery — venture studio floor for the MVP Program,
+// institutional campus for the white-label Accelerator-as-a-Service track.
+import imgProgramMvp from "@/assets/membership/venture-studio.jpg";
+import imgProgramAaas from "@/assets/membership/campus-atrium.jpg";
 
-/**
- * "Built for everyone" — the audiences the platform serves. Rendered as an
- * animated icon row replacing the previous decorative section icons.
- */
-const audiences: { icon: typeof Rocket; label: string; blurb: string }[] = [
-  { icon: Rocket, label: "Startups", blurb: "Build, validate and scale" },
-  { icon: Handshake, label: "Mentors", blurb: "Guide founders 1:1" },
-  { icon: TrendingUp, label: "Investors", blurb: "Priority dealflow" },
-  { icon: GraduationCap, label: "Students", blurb: "Internships & courses" },
-  { icon: Building2, label: "Accelerators", blurb: "Run your cohorts" },
-  { icon: Lightbulb, label: "Advisors", blurb: "Advise & earn" },
-];
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
@@ -112,24 +92,34 @@ const startupMemberships: {
 ];
 
 /**
- * Accelerator memberships are intentionally limited to one paid organization
- * plan and a quote-based Cohorts extension. This keeps the buying choice clear:
- * $5,000/mo for the full accelerator infrastructure, or Contact Sales when the
- * goal is extending platform benefits to every startup in a cohort.
+ * Accelerator section — one unified 4-card grid that mixes organization
+ * memberships ($5,000/mo Institutional + quote-based Cohorts) with the two
+ * accelerator programs (MVP Program, Accelerator-as-a-Service) so buyers see
+ * every accelerator-facing offer side by side. Cards with `path` navigate;
+ * the rest fall back to a sales email.
  */
 const acceleratorMemberships: {
   key: string;
   name: string;
+  /** null renders "Contact Sales" / the `priceLabel` instead of a number. */
   price: number | null;
+  /** Suffix shown next to the price (e.g. "/mo" or "per startup · one-time"). */
+  priceUnit: string;
+  /** Exact price label when the card must not show "Contact Sales". */
+  priceLabel?: string;
   image: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
+  cta: string;
+  /** When set, the CTA navigates instead of opening a sales email. */
+  path?: string;
 }[] = [
   {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
+    priceUnit: "/mo",
     image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
@@ -139,40 +129,20 @@ const acceleratorMemberships: {
       "Global office & coworking network access",
     ],
     highlight: true,
+    cta: "Talk to us",
   },
-  {
-    key: "acc_cohorts",
-    name: "Cohorts",
-    price: null,
-    image: imgAccCohorts,
-    bestFor: "Extending platform benefits to all your cohort startups",
-    features: [
-      "Seats for every startup in your batch",
-      "Full member benefits & perks for cohort founders",
-      "Shared cohort dashboard & progress tracking",
-      "Custom volume agreement",
-    ],
-  },
-];
-
-
-
-
-const acceleratorPlans = [
   {
     key: "mvp",
     name: "MVP Program",
     price: 5000,
-    unit: "per startup · one-time payment",
-    icon: Rocket,
-    highlight: true,
-    tagline: "From idea to market-ready product",
+    priceUnit: "per startup · one-time payment",
+    image: imgProgramMvp,
+    bestFor: "From idea to market-ready product in 4 weeks",
     features: [
       "Build your MVP with our studio team",
       "10 hours of 1:1 mentor sessions",
       "Advisory & pitch deck review",
       "Investor ecosystem access",
-      "Open to startups worldwide",
     ],
     cta: "Apply now",
     path: "/auth",
@@ -181,19 +151,33 @@ const acceleratorPlans = [
     key: "aaas",
     name: "Accelerator-as-a-Service",
     price: null,
-    unit: "custom",
-    icon: Building2,
-    highlight: false,
-    tagline: "Launch your own accelerator",
+    priceUnit: "custom",
+    priceLabel: "Custom",
+    image: imgProgramAaas,
+    bestFor: "Launch your own accelerator on our infrastructure",
     features: [
-      "Full white-label accelerator infrastructure",
+      "White-label accelerator infrastructure",
       "Cohort & application management",
       "Mentor network & investor access",
       "Events, demo days & pitch programming",
-      "Dedicated partnership support",
     ],
     cta: "Talk to partnerships",
     path: "/forpartners",
+  },
+  {
+    key: "acc_cohorts",
+    name: "Cohorts",
+    price: null,
+    priceUnit: "",
+    image: imgAccCohorts,
+    bestFor: "Extending platform benefits to all your cohort startups",
+    features: [
+      "Seats for every startup in your batch",
+      "Full member benefits & perks for cohort founders",
+      "Shared cohort dashboard & progress tracking",
+      "Custom volume agreement",
+    ],
+    cta: "Contact Sales",
   },
 ];
 
@@ -301,30 +285,6 @@ const PricingPlansSection = () => {
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
             Genius AI plans to power your workflow, and accelerator programs to take your venture global.
           </p>
-        </div>
-
-        {/* Built for everyone — audiences the platform serves */}
-        <div className="mb-12 sm:mb-16">
-          <SectionTitle
-            title="Built for Everyone"
-            subtitle="One ecosystem, every role — founders, mentors, investors, students, accelerators and advisors."
-          />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
-            {audiences.map(({ icon: Icon, label, blurb }, i) => (
-              <div
-                key={label}
-                style={{ animationDelay: `${i * 70}ms` }}
-                className="group animate-fade-in relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl tech-card border-0 p-4 text-center transition-all duration-500 hover:-translate-y-1"
-              >
-                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.22),transparent_70%)]" />
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 transition-transform duration-500 group-hover:scale-110">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="relative text-xs font-semibold sm:text-sm">{label}</p>
-                <p className="relative text-[10px] leading-snug text-muted-foreground sm:text-[11px]">{blurb}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Genius AI Plans */}
@@ -476,14 +436,14 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
-        {/* Accelerator Memberships */}
+        {/* Accelerator Memberships & Programs */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            title="Accelerator Memberships"
-            subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
+            title="Accelerator Memberships & Programs"
+            subtitle="For accelerators, incubators and innovation programs — memberships plus the MVP Program and Accelerator-as-a-Service."
           />
 
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {acceleratorMemberships.map((plan) => {
               return (
                 <div
@@ -491,17 +451,26 @@ const PricingPlansSection = () => {
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
+                  {plan.highlight && (
+                    <Badge className="absolute right-4 top-4 z-10 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                      Popular
+                    </Badge>
+                  )}
                   <PlanMedia src={plan.image} alt={plan.name} />
                   <h4 className="text-sm font-semibold">{plan.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.price === null ? (
-                      <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                        {plan.priceLabel ?? "Contact Sales"}
+                      </span>
                     ) : (
                       <>
                         <span className="text-2xl sm:text-3xl font-bold text-foreground">
                           ${plan.price.toLocaleString()}
                         </span>
-                        <span className="mb-1 text-xs text-muted-foreground">/mo</span>
+                        {plan.priceUnit && (
+                          <span className="mb-1 text-xs text-muted-foreground">{plan.priceUnit}</span>
+                        )}
                       </>
                     )}
                   </div>
@@ -519,12 +488,13 @@ const PricingPlansSection = () => {
                     variant={plan.highlight ? "hero" : "glass"}
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     onClick={() => {
+                      if (plan.path) return navigate(plan.path);
                       window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
                         `Accelerator Membership — ${plan.name}`,
                       )}`;
                     }}
                   >
-                    {plan.price === null ? "Contact Sales" : "Talk to us"}
+                    {plan.cta}
                   </Button>
                 </div>
               );
@@ -621,56 +591,6 @@ const PricingPlansSection = () => {
         </div>
 
 
-        {/* Accelerator Programs */}
-        <div>
-          <SectionTitle title="Accelerator Programs" />
-
-          <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-            {acceleratorPlans.map((plan) => (
-              <div
-                key={plan.key}
-                className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
-              >
-                <Corners />
-                {plan.highlight && (
-                  <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
-                    Open
-                  </Badge>
-                )}
-                <h4 className="text-base font-semibold">{plan.name}</h4>
-                <p className="mb-2 text-xs text-muted-foreground">{plan.tagline}</p>
-                <div className="mb-3 flex items-end gap-1.5">
-                  {plan.price === null ? (
-                    <span className="text-2xl sm:text-3xl font-bold text-foreground">Custom</span>
-                  ) : (
-                    <>
-                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                        ${plan.price.toLocaleString()}
-                      </span>
-                      <span className="mb-1 text-xs text-muted-foreground">{plan.unit}</span>
-                    </>
-                  )}
-                </div>
-                <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
-                <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-muted-foreground">
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                      <span className="leading-snug">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant={plan.highlight ? "hero" : "glass"}
-                  className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
-                  onClick={() => navigate(plan.path)}
-                >
-                  {plan.cta}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       <PlanBrochureOverlay plan={planOverlay} onClose={() => setPlanOverlay(null)} />

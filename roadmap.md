@@ -34,3 +34,5 @@
 
 - [x] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
 - [x] Remove the requested decorative element from the Genius AI plans section
+- [x] Merge accelerator programs into Accelerator Memberships 4-card grid
+- [x] Delete 'Built for Everyone' section from home page
