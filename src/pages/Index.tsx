@@ -10,7 +10,6 @@ import TeamSection from "@/components/TeamSection";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
-import AppDownloadSection from "@/components/AppDownloadSection";
 
 const Index = () => {
   return (
@@ -20,14 +19,13 @@ const Index = () => {
       <HeroSection />
       {/* Logo carousel sits directly under the hero video */}
       <PartnersCarousel />
+      <NasdaqFeature />
       <AboutHero />
       <ResourceMapSection />
       <PricingPlansSection />
       <FeaturesSection />
       <CommunitySection />
       {/* <TeamSection /> */}
-      <AppDownloadSection />
-      <NasdaqFeature />
       <Footer />
     </div>
   );
