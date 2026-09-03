@@ -80,7 +80,7 @@ const acceleratorPlans = [
     key: "mvp",
     name: "MVP Program",
     price: 5000,
-    unit: "per startup",
+    unit: "per startup · one-time payment",
     icon: Rocket,
     highlight: true,
     tagline: "From idea to market-ready product",
