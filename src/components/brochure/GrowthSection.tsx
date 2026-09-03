@@ -78,7 +78,7 @@ export const GrowthSection = ({
       {/* ---------------- AR overlay panel (left side only) ---------------- */}
       <div className="relative z-10 h-full w-[88%] sm:w-[56%] max-w-[420px] sm:max-w-[560px] flex flex-col gap-2 p-2.5 sm:p-4 min-h-0">
         {intro ?? (
-          <p className="text-[19px] sm:text-[14px] leading-snug text-slate-700">
+          <p className="text-[19px] sm:text-[15px] leading-snug text-slate-700">
             Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
             the roots. Every batch adds a branch — and the canopy your organization stands under keeps widening.
           </p>
