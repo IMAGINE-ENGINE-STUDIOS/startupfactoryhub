@@ -1080,8 +1080,8 @@ const MVPGrowthPanel = ({ spec, phaseIndex }: { spec: WeekSpec; phaseIndex: numb
         {['Founder', 'Problem', 'Market', 'Mentor'].map((r) => (
           <span
             key={r}
-            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
-            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.9)' }}
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap backdrop-blur-md"
+            style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.7)', border: `1px solid ${spec.accent}66`, background: 'rgba(4,10,24,0.5)' }}
           >
             {r}
           </span>
