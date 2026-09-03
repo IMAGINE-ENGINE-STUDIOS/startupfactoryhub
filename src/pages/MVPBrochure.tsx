@@ -2563,6 +2563,24 @@ export default function MVPBrochure() {
                         Bring your idea and leave with functional software: <strong>4 weeks</strong>, a dedicated build squad, <strong>10 hours</strong> of 1:1 mentorship and Demo Day exposure — <strong>$5,000</strong> program cost per startup.
                       </p>
 
+                      {/* program cost lock-up */}
+                      <div
+                        className="mt-4 flex items-center gap-4 rounded-2xl px-5 py-3.5 w-fit"
+                        style={{
+                          background: 'rgba(255,255,255,0.85)',
+                          border: `2px solid ${NEON.cyan}60`,
+                          boxShadow: `0 0 30px ${NEON.cyan}25`,
+                        }}
+                      >
+                        <div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
+                          <div className="font-futuristic font-black text-4xl mt-0.5" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
+                        </div>
+                        <div className="h-10 w-px" style={{ background: `${NEON.cyan}50` }} />
+                        <div className="text-sm text-slate-600 leading-snug">One-time payment<br />4-week intensive · 100% remote</div>
+                      </div>
+
+
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
@@ -2670,21 +2688,8 @@ export default function MVPBrochure() {
                         Your MVP is ready to be validated, built, tested and launched — together.
                       </p>
 
-                      {/* program cost lock-up */}
-                      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <div
-                          className="rounded-2xl px-6 py-4 text-center"
-                          style={{
-                            background: 'rgba(255,255,255,0.85)',
-                            border: `2px solid ${NEON.cyan}60`,
-                            boxShadow: `0 0 30px ${NEON.cyan}25`,
-                          }}
-                        >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
-                          <div className="font-futuristic font-black text-5xl mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
-                          <div className="text-sm text-slate-600 mt-1">One-time payment · 4-week intensive · 100% remote</div>
-                        </div>
-                      </div>
+
+
 
                       <a
                         href="mailto:info@startupfactoryhub.com"
