@@ -1,5 +1,5 @@
 import { Cpu, Zap, Target } from "lucide-react";
-import bannerBg from "@/assets/wtc-institutional.jpg";
+import bannerBg from "@/assets/about-planet-bg.jpg.asset.json";
 
 const AboutHero = () => {
   const items = [
@@ -12,12 +12,14 @@ const AboutHero = () => {
     <section id="about" className="relative overflow-hidden border-y border-primary/20">
       {/* Imagery layer */}
       <div className="absolute inset-0">
-        <img
-          src={bannerBg}
-          alt="Startup Factory Hub deep tech accelerator"
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
+          <img
+            src={bannerBg.url}
+            alt="Startup Factory Hub deep tech accelerator"
+            className="h-full w-full object-cover"
+            loading="lazy"
+            width={1920}
+            height={1080}
+          />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
       </div>
