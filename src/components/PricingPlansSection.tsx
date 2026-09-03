@@ -8,6 +8,7 @@ import { MEMBERSHIP_TIERS, type MembershipTier } from "@/lib/membership-tiers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBrochureOverlay";
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
@@ -119,6 +120,8 @@ const PricingPlansSection = () => {
   const { user } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [checkoutKey, setCheckoutKey] = useState<string | null>(null);
+  /** Which plan brochure flipbook is open as a popup over this page. */
+  const [planOverlay, setPlanOverlay] = useState<PlanOverlayKind | null>(null);
 
   const handleSubscribe = async (key: string, priceId: string) => {
     if (!user) {
@@ -333,7 +336,7 @@ const PricingPlansSection = () => {
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     disabled={checkoutKey === plan.key}
                     onClick={() => {
-                      if (plan.basic) return navigate("/basic-plan");
+                      if (plan.basic) return setPlanOverlay("basic");
                       if (plan.contactSales) {
                         window.location.href = "mailto:info@startupfactoryhub.com?subject=Corporate%20Plan%20Inquiry";
                         return;
@@ -356,6 +359,29 @@ const PricingPlansSection = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Investor Priority — opens the flipbook brochure as a popup */}
+        <div className="mb-14 sm:mb-20 mx-auto max-w-4xl">
+          <div className="group relative overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+              <Crown className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-base font-semibold">Investor Priority</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                For investors: unique dealflow, early opportunities, shared-risk programs and cohort participation — $500/mo or $5,000/yr.
+              </p>
+            </div>
+            <Button
+              variant="glass"
+              className="rounded-xl min-h-[44px] text-xs sm:text-sm shrink-0"
+              onClick={() => setPlanOverlay("investor")}
+            >
+              View Investor Plan
+            </Button>
           </div>
         </div>
 
@@ -413,6 +439,8 @@ const PricingPlansSection = () => {
           </div>
         </div>
       </div>
+
+      <PlanBrochureOverlay plan={planOverlay} onClose={() => setPlanOverlay(null)} />
     </section>
   );
 };
