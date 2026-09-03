@@ -45,6 +45,7 @@ const ALLOWED_MIME = new Set([
 ]);
 
 function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string } | null {
+  if (dataUrl.includes("[truncated]")) return null;
   const match = /^data:([^;,]+);base64,(.*)$/s.exec(dataUrl);
   if (!match) return null;
   const mime = match[1];
@@ -170,7 +171,7 @@ export async function offloadHeavyContent(content: any, userId: string): Promise
           return uploadDataUrl(img, userId);
         })
       );
-      uploaded.push(...results);
+      uploaded.push(...results.filter((image): image is string => Boolean(image)));
     }
     next.viewModeImages = uploaded;
   }
