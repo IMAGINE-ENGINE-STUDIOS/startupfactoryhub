@@ -180,7 +180,6 @@ const FeatureBlock = ({
       whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: (index % 5) * 0.06, ease: "easeOut" }}
-      animate={{ y: [0, -5, 0] }}
       style={{ transformStyle: "preserve-3d" }}
     >
       <motion.div
