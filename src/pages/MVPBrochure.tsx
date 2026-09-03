@@ -2577,9 +2577,25 @@ export default function MVPBrochure() {
                         Your organization's flagship innovation program is ready to be built — together.
                       </p>
 
+                      {/* program cost lock-up */}
+                      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div
+                          className="rounded-2xl px-6 py-4 text-center"
+                          style={{
+                            background: 'rgba(255,255,255,0.85)',
+                            border: `2px solid ${NEON.cyan}60`,
+                            boxShadow: `0 0 30px ${NEON.cyan}25`,
+                          }}
+                        >
+                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
+                          <div className="font-futuristic font-black text-5xl mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
+                          <div className="text-sm text-slate-600 mt-1">One-time payment · 4-week intensive · 100% remote</div>
+                        </div>
+                      </div>
+
                       <a
                         href="mailto:info@startupfactoryhub.com"
-                        className="mt-10 inline-flex items-center gap-4 px-8 py-5 rounded-2xl transition hover:scale-105"
+                        className="mt-8 inline-flex items-center gap-4 px-8 py-5 rounded-2xl transition hover:scale-105"
                         style={{
                           background: `linear-gradient(135deg, ${NEON.cyan}25, ${NEON.magenta}25)`,
                           border: `1px solid ${NEON.cyan}80`,
