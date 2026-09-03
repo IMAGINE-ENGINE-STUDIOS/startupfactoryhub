@@ -1022,19 +1022,14 @@ const MVP_PHASE_ALTS = [
   'Week 4 · Grow & Fund — founder pitching on Demo Day stage',
 ];
 
-const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
-  const [stage, setStage] = useState(0);
-  const [pinned, setPinned] = useState(false);
-
-  useEffect(() => {
-    if (pinned) return;
-    const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
-    return () => window.clearInterval(id);
-  }, [pinned]);
+/* Deliverables panel — each agenda page shows the editorial image of ITS OWN
+   phase (Validate / Build / Test & Launch / Grow & Fund), fixed per page. */
+const MVPGrowthPanel = ({ spec, phaseIndex }: { spec: WeekSpec; phaseIndex: number }) => {
+  const stage = Math.min(Math.max(phaseIndex, 0), MVP_PHASE_IMAGES.length - 1);
 
   return (
     <div className="relative flex-1 min-h-0 h-full overflow-hidden rounded-2xl border" style={{ borderColor: `${spec.accent}33` }}>
-      {/* phase imagery — crossfades with the active stage */}
+      {/* phase imagery — fixed to this page's phase */}
       <div className="absolute inset-0">
         {MVP_PHASE_IMAGES.map((src, i) => (
           <img
@@ -1058,18 +1053,13 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
       </div>
 
 
-      {/* floating week benefit cards (left side only so the tree stays visible) */}
+      {/* floating week benefit cards — this page's phase is highlighted */}
       <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
         {MVP_GROWTH_BENEFITS.map((b) => {
           const on = b.stage === stage;
           return (
-            <button
+            <div
               key={b.id}
-              type="button"
-              data-no-flip
-              onClick={() => { setStage(b.stage); setPinned(true); }}
-              onMouseEnter={() => { setStage(b.stage); setPinned(true); }}
-              onMouseLeave={() => setPinned(false)}
               className="text-left rounded-xl px-3 py-2 transition-all duration-300"
               style={{
                 border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
@@ -1084,33 +1074,11 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
                 {b.label}
               </span>
               <span className="block text-[13px] leading-snug text-slate-700">{b.line}</span>
-            </button>
+            </div>
           );
         })}
       </div>
 
-      {/* stage selector pills — bottom right */}
-      <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5 max-w-[55%] z-10">
-        {MVP_GROWTH_STAGES.map((s, i) => {
-          const active = i === stage;
-          return (
-            <button
-              key={s.label}
-              type="button"
-              data-no-flip
-              onClick={() => { setStage(i); setPinned(true); }}
-              className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono uppercase font-bold transition-all"
-              style={{
-                background: active ? spec.accent : 'rgba(255,255,255,0.92)',
-                color: active ? '#fff' : spec.accent,
-                border: `1px solid ${spec.accent}${active ? '88' : '44'}`,
-              }}
-            >
-              {s.label}
-            </button>
-          );
-        })}
-      </div>
 
       {/* root inputs — bottom left, under the cards */}
       <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[40%] z-10">
