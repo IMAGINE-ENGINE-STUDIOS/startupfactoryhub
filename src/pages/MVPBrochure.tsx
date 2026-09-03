@@ -1131,6 +1131,11 @@ export default function MVPBrochure() {
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
+  const jumpToAgendaWeek = useCallback((weekIndex: number) => {
+    const target = 6 + weekIndex; // agenda pages are 0-indexed 6-9
+    bookRef.current?.pageFlip()?.flip(target);
+  }, []);
+  const currentAgendaIndex = currentPage >= 6 && currentPage <= 9 ? currentPage - 6 : 0;
 
   // Background audio (manual play; no autoplay)
   const audioRef = useRef<HTMLAudioElement | null>(null);
