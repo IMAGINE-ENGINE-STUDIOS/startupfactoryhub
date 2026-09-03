@@ -7,8 +7,6 @@ import {
   Sparkles,
   Building2,
   GraduationCap,
-  Zap,
-  Crown,
   Users,
   Loader2,
   TrendingUp,
@@ -270,17 +268,14 @@ const PricingPlansSection = () => {
   );
 
   const SectionTitle = ({
-    icon: Icon,
     title,
     subtitle,
   }: {
-    icon: typeof Bot;
     title: string;
     subtitle?: string;
   }) => (
     <div className="mb-7 sm:mb-9 flex flex-col items-center gap-3 text-center">
       <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5">
-        <Icon className="h-4 w-4 text-primary" />
         <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-foreground">
           {title}
         </h3>
@@ -288,6 +283,26 @@ const PricingPlansSection = () => {
       {subtitle && (
         <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
       )}
+    </div>
+  );
+
+  /**
+   * Banner-style media header used by every membership widget. Mirrors the
+   * Investor Priority banner: ultra-chromatic imagery, animated zoom + sheen.
+   */
+  const PlanMedia = ({ src, alt }: { src: string; alt: string }) => (
+    <div className="relative -mx-5 -mt-5 mb-4 h-28 overflow-hidden sm:-mx-6 sm:-mt-6 sm:h-32">
+      <img
+        src={src}
+        alt={alt}
+        width={1024}
+        height={640}
+        loading="lazy"
+        className="h-full w-full object-cover saturate-150 transition-transform duration-[1200ms] ease-out group-hover:scale-110"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent" />
+      <div className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(115deg,transparent_35%,hsl(var(--primary)/0.35)_50%,transparent_65%)]" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
     </div>
   );
 
@@ -317,7 +332,7 @@ const PricingPlansSection = () => {
 
         {/* Genius AI Plans */}
         <div className="mb-14 sm:mb-20">
-          <SectionTitle icon={Bot} title="Genius AI Plans" />
+          <SectionTitle title="Genius AI Plans" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {Object.values(GENIUS_PLANS).map((plan) => {
@@ -374,7 +389,6 @@ const PricingPlansSection = () => {
         {/* Startup Memberships */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            icon={Rocket}
             title="Startup, Student & Advisor Memberships"
             subtitle="Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo."
           />
@@ -402,7 +416,6 @@ const PricingPlansSection = () => {
                 ? billing === "monthly" ? 50 : 480
                 : billing === "monthly" ? tier!.price : tier!.yearly_price;
               const priceId = tier ? (billing === "monthly" ? tier.price_id : tier.yearly_price_id) : null;
-              const Icon = plan.icon;
               return (
                 <div
                   key={plan.key}
@@ -410,13 +423,11 @@ const PricingPlansSection = () => {
                 >
                   <Corners />
                   {plan.highlight && (
-                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                    <Badge className="absolute right-4 top-4 z-10 border border-primary/30 bg-primary/20 text-[10px] text-primary">
                       Popular
                     </Badge>
                   )}
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
+                  <PlanMedia src={plan.image} alt={plan.basic ? "Basic Plan" : tier!.name} />
                   <h4 className="text-sm font-semibold">{plan.basic ? "Basic Plan" : tier!.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.contactSales ? (
@@ -476,23 +487,19 @@ const PricingPlansSection = () => {
         {/* Accelerator Memberships */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            icon={Building2}
             title="Accelerator Memberships"
             subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {acceleratorMemberships.map((plan) => {
-              const Icon = plan.icon;
               return (
                 <div
                   key={plan.key}
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </div>
+                  <PlanMedia src={plan.image} alt={plan.name} />
                   <h4 className="text-sm font-semibold">{plan.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.price === null ? (
@@ -624,7 +631,7 @@ const PricingPlansSection = () => {
 
         {/* Accelerator Programs */}
         <div>
-          <SectionTitle icon={GraduationCap} title="Accelerator Programs" />
+          <SectionTitle title="Accelerator Programs" />
 
           <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {acceleratorPlans.map((plan) => (
@@ -638,9 +645,6 @@ const PricingPlansSection = () => {
                     Open
                   </Badge>
                 )}
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                  <plan.icon className="h-5 w-5 text-primary" />
-                </div>
                 <h4 className="text-base font-semibold">{plan.name}</h4>
                 <p className="mb-2 text-xs text-muted-foreground">{plan.tagline}</p>
                 <div className="mb-3 flex items-end gap-1.5">
