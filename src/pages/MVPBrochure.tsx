@@ -1164,7 +1164,7 @@ const WeekAgendaSlide = ({
 
       {/* full-size growth tree + deliverables (same scale as /forpartners) */}
       <div className="flex flex-col min-h-0 h-full rounded-2xl overflow-hidden border" style={{ borderColor: `${spec.accent}33` }}>
-        <DeliverablesPanel spec={spec} />
+        <MVPGrowthPanel spec={spec} />
       </div>
     </div>
 
