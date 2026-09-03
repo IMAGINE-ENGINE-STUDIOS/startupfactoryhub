@@ -1010,25 +1010,96 @@ const MVP_GROWTH_STAGES = [
   { label: 'W04', note: 'Fund' },
 ];
 
-const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
-  const weekIndex = MVP_WEEKS.findIndex((w) => w.code === spec.code);
+const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
+  const [stage, setStage] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  useEffect(() => {
+    if (pinned) return;
+    const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
+    return () => window.clearInterval(id);
+  }, [pinned]);
+
   return (
-    <GrowthSection
-      compact
-      accent={spec.accent}
-      accent2={NEON.violet}
-      benefits={MVP_GROWTH_BENEFITS}
-      rootInputs={['Founder', 'Problem', 'Market', 'Mentor']}
-      monthFocus={MVP_MONTH_FOCUS}
-      stages={MVP_GROWTH_STAGES}
-      focusLabel="Focus"
-      intro={
-        <p className="text-[15px] sm:text-[13px] leading-snug text-slate-700">
-          Your <strong className="font-semibold" style={{ color: spec.accent }}>founder, problem, market and mentor</strong> feed the roots.
-          Every week adds a branch — from validated idea to fundable startup.
-        </p>
-      }
-    />
+    <div className="relative flex-1 min-h-0 h-full overflow-hidden rounded-2xl border" style={{ borderColor: `${spec.accent}33` }}>
+      {/* ambient radial glow */}
+      <div
+        className="absolute inset-0"
+        style={{ background: `radial-gradient(circle at 62% 60%, ${spec.accent}14, transparent 70%)` }}
+      />
+
+      {/* 3D tree — same component used in /forpartners */}
+      <div className="absolute inset-0">
+        <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
+      </div>
+
+      {/* floating week benefit cards (left side only so the tree stays visible) */}
+      <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
+        {MVP_GROWTH_BENEFITS.map((b) => {
+          const on = b.stage === stage;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              data-no-flip
+              onClick={() => { setStage(b.stage); setPinned(true); }}
+              onMouseEnter={() => { setStage(b.stage); setPinned(true); }}
+              onMouseLeave={() => setPinned(false)}
+              className="text-left rounded-xl px-3 py-2 transition-all duration-300"
+              style={{
+                border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
+                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.78)',
+                boxShadow: on ? `0 8px 24px -12px ${spec.accent}` : undefined,
+              }}
+            >
+              <span
+                className="block font-mono text-[12px] uppercase tracking-[0.08em] font-bold leading-tight"
+                style={{ color: on ? spec.accent : 'rgba(15,23,42,0.55)' }}
+              >
+                {b.label}
+              </span>
+              <span className="block text-[13px] leading-snug text-slate-700">{b.line}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* stage selector pills — bottom right */}
+      <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5 max-w-[55%] z-10">
+        {MVP_GROWTH_STAGES.map((s, i) => {
+          const active = i === stage;
+          return (
+            <button
+              key={s.label}
+              type="button"
+              data-no-flip
+              onClick={() => { setStage(i); setPinned(true); }}
+              className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono uppercase font-bold transition-all"
+              style={{
+                background: active ? spec.accent : 'rgba(255,255,255,0.82)',
+                color: active ? '#fff' : spec.accent,
+                border: `1px solid ${spec.accent}${active ? '88' : '44'}`,
+              }}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* root inputs — bottom left, under the cards */}
+      <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[40%] z-10">
+        {['Founder', 'Problem', 'Market', 'Mentor'].map((r) => (
+          <span
+            key={r}
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
+            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.78)' }}
+          >
+            {r}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 };
 
