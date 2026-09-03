@@ -31,6 +31,7 @@ import { UniversalFileUploader, type UploadedFile } from '@/components/upload/Un
 import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
 import { getFileKind } from '@/lib/upload/fileKinds';
 import { Paperclip } from 'lucide-react';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface FeedPost {
   id: string;
@@ -96,6 +97,7 @@ export default function UnifiedCommunityFeed({
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [newPost, setNewPost] = useState('');
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Social feed posting');
   const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
@@ -475,6 +477,7 @@ export default function UnifiedCommunityFeed({
     }
   };
   const createPost = async () => {
+    if (!requireMembership()) return;
     if (!newPost.trim() || !user) {
       if (!user) {
         toast({
