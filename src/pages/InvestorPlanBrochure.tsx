@@ -21,7 +21,7 @@ import HTMLFlipBook from 'react-pageflip';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
-  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2,
+  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
@@ -61,7 +61,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
 };
 
 /** Total pages in the flipbook. */
-const TOTAL = 9;
+const TOTAL = 8;
 
 /**
  * Strategic dealflow channels shown on page 05.
