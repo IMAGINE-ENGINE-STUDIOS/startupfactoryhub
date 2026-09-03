@@ -257,7 +257,7 @@ const PricingPlansSection = () => {
 
 
   const shell =
-    "group relative flex flex-col overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1.5 sm:aspect-square";
+    "group relative flex flex-col overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1.5 sm:min-h-[27rem]";
 
   const Corners = () => (
     <>
@@ -328,6 +328,30 @@ const PricingPlansSection = () => {
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
             Genius AI plans to power your workflow, and accelerator programs to take your venture global.
           </p>
+        </div>
+
+        {/* Built for everyone — audiences the platform serves */}
+        <div className="mb-12 sm:mb-16">
+          <SectionTitle
+            title="Built for Everyone"
+            subtitle="One ecosystem, every role — founders, mentors, investors, students, accelerators and advisors."
+          />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
+            {audiences.map(({ icon: Icon, label, blurb }, i) => (
+              <div
+                key={label}
+                style={{ animationDelay: `${i * 70}ms` }}
+                className="group animate-fade-in relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl tech-card border-0 p-4 text-center transition-all duration-500 hover:-translate-y-1"
+              >
+                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.22),transparent_70%)]" />
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 transition-transform duration-500 group-hover:scale-110">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="relative text-xs font-semibold sm:text-sm">{label}</p>
+                <p className="relative text-[10px] leading-snug text-muted-foreground sm:text-[11px]">{blurb}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Genius AI Plans */}
