@@ -23,7 +23,10 @@ import HTMLFlipBook from 'react-pageflip';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 import GrowthSection from '@/components/brochure/GrowthSection';
-import GrowthTree3D from '@/components/brochure/GrowthTree3D';
+import phaseValidateImg from '@/assets/mvp-phases/phase-validate.jpg';
+import phaseBuildImg from '@/assets/mvp-phases/phase-build.jpg';
+import phaseLaunchImg from '@/assets/mvp-phases/phase-launch.jpg';
+import phaseFundImg from '@/assets/mvp-phases/phase-fund.jpg';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -1003,97 +1006,82 @@ const MVP_MONTH_FOCUS = [
   'Week 4: growth strategy, investor narrative, pitch and Demo Day.',
 ];
 
-const MVP_GROWTH_STAGES = [
-  { label: 'W01', note: 'Validate' },
-  { label: 'W02', note: 'Build' },
-  { label: 'W03', note: 'Launch' },
-  { label: 'W04', note: 'Fund' },
+
+/* Phase imagery per stage — one editorial image per program phase. */
+const MVP_PHASE_IMAGES = [phaseValidateImg, phaseBuildImg, phaseLaunchImg, phaseFundImg];
+const MVP_PHASE_ALTS = [
+  'Week 1 · Validate — founders interviewing customers',
+  'Week 2 · Build — team designing and coding the MVP',
+  'Week 3 · Test & Launch — first users and traction',
+  'Week 4 · Grow & Fund — founder pitching on Demo Day stage',
 ];
 
-const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
-  const [stage, setStage] = useState(0);
-  const [pinned, setPinned] = useState(false);
-
-  useEffect(() => {
-    if (pinned) return;
-    const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
-    return () => window.clearInterval(id);
-  }, [pinned]);
+/* Deliverables panel — each agenda page shows the editorial image of ITS OWN
+   phase (Validate / Build / Test & Launch / Grow & Fund), fixed per page. */
+const MVPGrowthPanel = ({ spec, phaseIndex }: { spec: WeekSpec; phaseIndex: number }) => {
+  const stage = Math.min(Math.max(phaseIndex, 0), MVP_PHASE_IMAGES.length - 1);
 
   return (
     <div className="relative flex-1 min-h-0 h-full overflow-hidden rounded-2xl border" style={{ borderColor: `${spec.accent}33` }}>
-      {/* ambient radial glow */}
-      <div
-        className="absolute inset-0"
-        style={{ background: `radial-gradient(circle at 62% 60%, ${spec.accent}14, transparent 70%)` }}
-      />
-
-      {/* 3D tree — same component used in /forpartners */}
+      {/* phase imagery — fixed to this page's phase */}
       <div className="absolute inset-0">
-        <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
+        {MVP_PHASE_IMAGES.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={MVP_PHASE_ALTS[i]}
+            loading="lazy"
+            width={1104}
+            height={912}
+            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+            style={{ opacity: i === stage ? 1 : 0 }}
+          />
+        ))}
+        {/* readability + accent wash */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(100deg, rgba(4,10,24,0.72) 0%, rgba(4,10,24,0.28) 45%, rgba(4,10,24,0.12) 100%), radial-gradient(circle at 62% 60%, ${spec.accent}22, transparent 70%)`,
+          }}
+        />
       </div>
 
-      {/* floating week benefit cards (left side only so the tree stays visible) */}
+
+      {/* floating week benefit cards — glass + white text over the imagery */}
       <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
         {MVP_GROWTH_BENEFITS.map((b) => {
           const on = b.stage === stage;
           return (
-            <button
+            <div
               key={b.id}
-              type="button"
-              data-no-flip
-              onClick={() => { setStage(b.stage); setPinned(true); }}
-              onMouseEnter={() => { setStage(b.stage); setPinned(true); }}
-              onMouseLeave={() => setPinned(false)}
-              className="text-left rounded-xl px-3 py-2 transition-all duration-300"
+              className="text-left rounded-xl px-3 py-2 transition-all duration-300 backdrop-blur-md"
               style={{
-                border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
-                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.78)',
+                border: `1px solid ${spec.accent}${on ? 'aa' : '44'}`,
+                background: on ? `${spec.accent}30` : 'rgba(4,10,24,0.55)',
                 boxShadow: on ? `0 8px 24px -12px ${spec.accent}` : undefined,
               }}
             >
               <span
                 className="block font-mono text-[12px] uppercase tracking-[0.08em] font-bold leading-tight"
-                style={{ color: on ? spec.accent : 'rgba(15,23,42,0.55)' }}
+                style={{ color: on ? spec.accent : 'rgba(255,255,255,0.85)', textShadow: `0 0 10px rgba(0,0,0,0.6)` }}
               >
                 {b.label}
               </span>
-              <span className="block text-[13px] leading-snug text-slate-700">{b.line}</span>
-            </button>
+              <span className="block text-[13px] leading-snug text-white" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.7)' }}>{b.line}</span>
+            </div>
           );
         })}
       </div>
 
-      {/* stage selector pills — bottom right */}
-      <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5 max-w-[55%] z-10">
-        {MVP_GROWTH_STAGES.map((s, i) => {
-          const active = i === stage;
-          return (
-            <button
-              key={s.label}
-              type="button"
-              data-no-flip
-              onClick={() => { setStage(i); setPinned(true); }}
-              className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono uppercase font-bold transition-all"
-              style={{
-                background: active ? spec.accent : 'rgba(255,255,255,0.82)',
-                color: active ? '#fff' : spec.accent,
-                border: `1px solid ${spec.accent}${active ? '88' : '44'}`,
-              }}
-            >
-              {s.label}
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* root inputs — bottom left, under the cards */}
       <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[40%] z-10">
         {['Founder', 'Problem', 'Market', 'Mentor'].map((r) => (
           <span
             key={r}
-            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
-            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.78)' }}
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap backdrop-blur-md"
+            style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.7)', border: `1px solid ${spec.accent}66`, background: 'rgba(4,10,24,0.5)' }}
           >
             {r}
           </span>
@@ -1107,10 +1095,12 @@ const WeekAgendaSlide = ({
   spec,
   currentIndex,
   onJump,
+  phaseIndex,
 }: {
   spec: WeekSpec;
   currentIndex: number;
   onJump: (index: number) => void;
+  phaseIndex: number;
 }) => (
   <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
     <PageTitle
@@ -1140,7 +1130,7 @@ const WeekAgendaSlide = ({
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: i * 0.06 }}
             className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 flex-1 min-h-0 cursor-default"
-            style={{ background: 'rgba(255,255,255,0.78)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
+            style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
           >
             {/* neon hover edge */}
             <span
@@ -1164,7 +1154,7 @@ const WeekAgendaSlide = ({
 
       {/* full-size growth tree + deliverables (same scale as /forpartners) */}
       <div className="flex flex-col min-h-0 h-full rounded-2xl overflow-hidden border" style={{ borderColor: `${spec.accent}33` }}>
-        <MVPGrowthPanel spec={spec} />
+        <MVPGrowthPanel spec={spec} phaseIndex={phaseIndex} />
       </div>
     </div>
 
@@ -2273,22 +2263,22 @@ export default function MVPBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={0} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={1} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={2} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={3} />
                 </A4Wrapper>
               </BookPage>
 
@@ -2538,6 +2528,24 @@ export default function MVPBrochure() {
                         Bring your idea and leave with functional software: <strong>4 weeks</strong>, a dedicated build squad, <strong>10 hours</strong> of 1:1 mentorship and Demo Day exposure — <strong>$5,000</strong> program cost per startup.
                       </p>
 
+                      {/* program cost lock-up */}
+                      <div
+                        className="mt-4 flex items-center gap-4 rounded-2xl px-5 py-3.5 w-fit"
+                        style={{
+                          background: 'rgba(255,255,255,0.85)',
+                          border: `2px solid ${NEON.cyan}60`,
+                          boxShadow: `0 0 30px ${NEON.cyan}25`,
+                        }}
+                      >
+                        <div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
+                          <div className="font-futuristic font-black text-4xl mt-0.5" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
+                        </div>
+                        <div className="h-10 w-px" style={{ background: `${NEON.cyan}50` }} />
+                        <div className="text-sm text-slate-600 leading-snug">One-time payment<br />4-week intensive · 100% remote</div>
+                      </div>
+
+
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
@@ -2645,21 +2653,8 @@ export default function MVPBrochure() {
                         Your MVP is ready to be validated, built, tested and launched — together.
                       </p>
 
-                      {/* program cost lock-up */}
-                      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <div
-                          className="rounded-2xl px-6 py-4 text-center"
-                          style={{
-                            background: 'rgba(255,255,255,0.85)',
-                            border: `2px solid ${NEON.cyan}60`,
-                            boxShadow: `0 0 30px ${NEON.cyan}25`,
-                          }}
-                        >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500">Program Cost per Startup</div>
-                          <div className="font-futuristic font-black text-5xl mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}60` }}>$5,000</div>
-                          <div className="text-sm text-slate-600 mt-1">One-time payment · 4-week intensive · 100% remote</div>
-                        </div>
-                      </div>
+
+
 
                       <a
                         href="mailto:info@startupfactoryhub.com"

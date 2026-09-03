@@ -21,3 +21,7 @@
 - [x] MVPBrochure: interactive 4-phase step navigator on agenda pages, full-size GrowthSection tree, program cost on closing page
 
 - [x] LightPaper: move icon from DashboardHeader upper bar to main DashboardTabsNav next to Tools, add workspace tab content in every dashboard
+
+## MVP brochure imagery (done)
+- [x] Replace tree animation in agenda deliverables panel with phase-specific imagery (Validate/Build/Test & Launch/Grow & Fund), fixed different image per agenda page
+- [x] Move $5,000 program cost lock-up from closing page to Apply page (page 13)
