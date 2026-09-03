@@ -575,6 +575,131 @@ const JoinButton = ({
   );
 };
 
+/**
+ * Integrated Stripe checkout panel — same structure and format as the Basic
+ * Plan brochure checkout, using Investor Priority pricing ($500 / mo, $5,000 / yr).
+ */
+const InvestorCheckoutPanel = ({
+  monthly, yearly, yearlyPerMonth, savingsPercent,
+}: { monthly: string; yearly: string; yearlyPerMonth: string; savingsPercent: number }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [cycle, setCycle] = useState<InvestorBillingCycle>('yearly');
+  const [busy, setBusy] = useState(false);
+
+  const pay = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Create your account to activate Investor Priority.' });
+      window.location.href = '/auth';
+      return;
+    }
+    setBusy(true);
+    try {
+      const url = await createInvestorPlanCheckout(cycle);
+      window.open(url, '_blank');
+    } catch (e) {
+      toast({
+        title: 'Checkout unavailable',
+        description: e instanceof Error ? e.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const options: { key: InvestorBillingCycle; title: string; price: string; note: string; accent: string }[] = [
+    { key: 'monthly', title: 'Monthly', price: monthly, note: 'Billed every month', accent: '#67e8f9' },
+    { key: 'yearly', title: 'Annual', price: yearly, note: `${yearlyPerMonth} effective / mo · −${savingsPercent}%`, accent: '#6ee7b7' },
+  ];
+
+  return (
+    <div className="rounded-3xl p-6 sm:p-7 w-full max-w-[560px]" style={{
+      background: 'linear-gradient(150deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
+      backdropFilter: 'blur(24px) saturate(140%)',
+      WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+      border: '1px solid rgba(255,255,255,0.28)',
+      boxShadow: '0 40px 90px -35px rgba(0,0,0,0.75)',
+    }}>
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[11px] tracking-[0.34em] uppercase text-white/60">Secure checkout</span>
+        <span className="flex items-center gap-2 font-mono text-[11px] tracking-[0.28em] uppercase" style={{ color: '#6ee7b7' }}>
+          <ShieldCheck className="h-4 w-4" /> Stripe
+        </span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        {options.map(o => {
+          const active = cycle === o.key;
+          return (
+            <button
+              key={o.key}
+              type="button"
+              onClick={() => setCycle(o.key)}
+              className="text-left rounded-2xl px-4 py-4 transition"
+              style={{
+                background: active
+                  ? `linear-gradient(140deg, ${o.accent}30, rgba(255,255,255,0.08))`
+                  : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${active ? `${o.accent}aa` : 'rgba(255,255,255,0.18)'}`,
+                boxShadow: active ? `0 0 0 1px ${o.accent}55, 0 18px 40px -22px ${o.accent}` : 'none',
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-[0.26em] text-white/70">{o.title}</span>
+                <span className="w-3.5 h-3.5 rounded-full border" style={{
+                  borderColor: active ? o.accent : 'rgba(255,255,255,0.4)',
+                  background: active ? o.accent : 'transparent',
+                }} />
+              </div>
+              <div className="text-[34px] font-black text-white leading-none mt-2">{o.price}</div>
+              <div className="text-[12px] text-white/60 mt-1.5 leading-snug">{o.note}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 space-y-2 text-[13px] text-white/75">
+        <div className="flex items-center justify-between">
+          <span>Startup Factory Hub · Investor Priority</span>
+          <span className="font-bold text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Billing cycle</span>
+          <span className="text-white/90">{cycle === 'yearly' ? 'Annual, one payment' : 'Monthly, 12 installments'}</span>
+        </div>
+        <div className="h-px w-full my-2" style={{ background: 'rgba(255,255,255,0.18)' }} />
+        <div className="flex items-center justify-between text-[15px]">
+          <span className="font-mono uppercase tracking-[0.22em] text-white/60">Due today</span>
+          <span className="text-2xl font-black text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+        </div>
+      </div>
+
+      <button
+        onClick={pay}
+        disabled={busy}
+        className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 transition hover:scale-[1.02] disabled:opacity-60"
+        style={{
+          background: 'linear-gradient(135deg, #0ea5b7, #0369a1)',
+          border: '1px solid rgba(255,255,255,0.35)',
+          boxShadow: '0 16px 46px -14px rgba(14,165,183,0.7)',
+        }}
+      >
+        {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <CreditCard className="h-5 w-5 text-white" />}
+        <span className="font-bold tracking-[0.16em] uppercase text-white text-base">
+          Pay {cycle === 'yearly' ? yearly : monthly} · activate
+        </span>
+      </button>
+
+      <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.2em] text-white/45">
+        <span>Cancel anytime</span>
+        <a href="mailto:info@startupfactoryhub.com" className="hover:text-white/80">info@startupfactoryhub.com</a>
+      </div>
+    </div>
+  );
+};
+
+
 /* ============================ PAGE ============================ */
 export default function InvestorPlanBrochure() {
   const { config, yearlySavingsPercent } = useInvestorPlan();
