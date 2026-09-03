@@ -104,6 +104,9 @@ export default function UnifiedCommunityFeed({
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<UploadedFile[]>([]);
+
   const [postHashtags, setPostHashtags] = useState<string[]>([]);
   const [newHashtag, setNewHashtag] = useState('');
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
