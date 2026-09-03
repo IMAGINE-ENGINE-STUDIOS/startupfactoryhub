@@ -17,7 +17,6 @@ import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
-import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -27,6 +26,7 @@ import { useMembershipPrompt } from '@/features/basic-plan/components/Membership
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Job {
   id: string;
