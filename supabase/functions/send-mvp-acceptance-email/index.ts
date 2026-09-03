@@ -20,6 +20,8 @@ const esc = (s: unknown) =>
 const money = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(cents / 100);
 
+const MVP_BROCHURE_URL = "https://startupfactoryhub.com/forstartups";
+
 const buildHtml = (opts: { name: string; startup: string; cohort: string; payUrl: string; amount: string }) => `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +47,16 @@ const buildHtml = (opts: { name: string; startup: string; cohort: string; payUrl
         <div style="margin:6px 0 18px;color:#f3f4f6;font-size:34px;font-weight:900;">${esc(opts.amount)}</div>
         <a href="${opts.payUrl}" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#d946ef 55%,#06b6d4);color:#fff;font-size:15px;font-weight:800;text-decoration:none;padding:15px 38px;border-radius:999px;">Complete Your Payment &rarr;</a>
         <p style="margin:14px 0 0;color:#64748b;font-size:12px;word-break:break-all;">Or copy this link: <a href="${opts.payUrl}" style="color:#22d3ee;text-decoration:none;">${opts.payUrl}</a></p>
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:0 32px 20px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#05201a;border:1px solid rgba(34,211,238,0.16);border-radius:16px;">
+      <tr><td style="padding:22px 24px;">
+        <div style="font-family:'SFMono-Regular',Consolas,monospace;color:#22d3ee;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:10px;">Program Brochure</div>
+        <p style="margin:0 0 14px;color:#94a3b8;font-size:14px;line-height:1.7;">Review the full 4-week agenda, deliverables and what to expect before your batch kickoff.</p>
+        <a href="${MVP_BROCHURE_URL}" style="display:inline-block;background:linear-gradient(135deg,#14b8a6 0%,#22d3ee 55%,#818cf8 100%);color:#05201a;font-size:14px;font-weight:800;text-decoration:none;padding:12px 28px;border-radius:999px;">Open MVP Program Brochure &rarr;</a>
+        <p style="margin:12px 0 0;color:#64748b;font-size:12px;word-break:break-all;">${MVP_BROCHURE_URL}</p>
       </td></tr>
     </table>
   </td></tr>
