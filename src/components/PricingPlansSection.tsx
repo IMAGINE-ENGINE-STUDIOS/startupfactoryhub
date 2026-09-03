@@ -283,9 +283,11 @@ const PricingPlansSection = () => {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {startupMemberships.map((plan) => {
-              const tier = MEMBERSHIP_TIERS[plan.key];
-              const price = billing === "monthly" ? tier.price : tier.yearly_price;
-              const priceId = billing === "monthly" ? tier.price_id : tier.yearly_price_id;
+              const tier = plan.basic ? null : MEMBERSHIP_TIERS[plan.key as Exclude<MembershipTier, "free">];
+              const price = plan.basic
+                ? billing === "monthly" ? 50 : 480
+                : billing === "monthly" ? tier!.price : tier!.yearly_price;
+              const priceId = tier ? (billing === "monthly" ? tier.price_id : tier.yearly_price_id) : null;
               const Icon = plan.icon;
               return (
                 <div
