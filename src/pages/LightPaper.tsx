@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FileSignature } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FileSignature, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-import AIAssistant from "@/components/AIAssistant";
-import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
-import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
 import { LightPaperProject, ProjectType, useLightPaperProjects } from "@/hooks/useLightPaperProjects";
@@ -19,16 +16,24 @@ import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadin
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * /lightpaper — LightPaper workspace (document / spreadsheet / presentation).
+ *
+ * Architecture notes: see src/features/lightpaper/README.md
+ *
+ * - Project rows are listed without their `content` payload; `openProject`
+ *   hydrates the full row through `useLightPaperProjects().loadProject`.
+ * - Sharing/signing is handled by Sign Studio (`/sign/studio`), which owns the
+ *   token routes (`/sign/:token`). LightPaper does not mint its own links.
+ * - Persistence currently exists for `document` projects only; the spreadsheet
+ *   and presentation editors are session-scoped (see README).
+ */
 export default function LightPaper() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<ProjectType>('document');
-  const [showAI, setShowAI] = useState(false);
-  const [showCalculator, setShowCalculator] = useState(false);
   const [showFiles, setShowFiles] = useState(false);
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   const [showQuickNav, setShowQuickNav] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -148,6 +153,15 @@ export default function LightPaper() {
                 <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">My Files</span>
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowUploadDialog(true)}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Import a file into the editor"
+              >
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Import</span>
+              </Button>
               <Button 
                 onClick={() => navigate(selectedProject ? `/sign/studio?project=${selectedProject.id}` : "/sign/studio")} 
                 className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
@@ -235,25 +249,17 @@ export default function LightPaper() {
 
       </div>
 
-      <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
-      <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
-
-      <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
-      void openProject(project);
-    }} onShareProject={async (project) => {
-      // Sharing functionality
-    }} />
-
-
-      <ShareDialog 
-        isOpen={showShareDialog} 
-        onClose={() => {
-          setShowShareDialog(false);
-          setShareData(null);
+      <MyFilesDrawer
+        isOpen={showFiles}
+        onClose={() => setShowFiles(false)}
+        onOpenProject={(project) => {
+          void openProject(project);
         }}
-        shareData={shareData}
-        onSendEmail={async (email, message, accessLevel) => {
-          // Email functionality
+        /* Sharing is delegated to Sign Studio, the single owner of share
+           tokens and recipient emails (view / sign / edit access modes). */
+        onShareProject={async (project) => {
+          setShowFiles(false);
+          navigate(`/sign/studio?project=${project.id}`);
         }}
       />
 

@@ -9,7 +9,7 @@ const FALLBACK: InvestorPlanConfig = {
   key: "investor",
   name: "Investor Priority",
   monthly_price_cents: 50000,
-  yearly_price_cents: 480000,
+  yearly_price_cents: 500000,
   currency: "usd",
   stripe_monthly_price_id: null,
   stripe_yearly_price_id: null,

@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
+import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -55,6 +55,17 @@ export function DashboardHeader() {
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
 
+          {/* LightPaper document workspace */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/lightpaper")}
+            className={iconBtnClass}
+            title="LightPaper"
+          >
+            <FileText className="h-4 w-4" />
+          </Button>
+
           <Button
             variant="ghost"
             size="icon"
@@ -109,6 +120,17 @@ export function DashboardHeader() {
       </Button>
 
       <ThemeToggle />
+
+      {/* LightPaper document workspace */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate("/lightpaper")}
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
+        title="LightPaper"
+      >
+        <FileText className="h-4 w-4" />
+      </Button>
 
       <Button
         variant="ghost"
