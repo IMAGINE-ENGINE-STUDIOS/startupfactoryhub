@@ -2642,7 +2642,7 @@ export default function MVPBrochure() {
                       }} />
 
                       <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
-                        Your organization's flagship innovation program is ready to be built — together.
+                        Your MVP is ready to be validated, built, tested and launched — together.
                       </p>
 
                       {/* program cost lock-up */}
@@ -2671,15 +2671,14 @@ export default function MVPBrochure() {
                         }}
                       >
                         <Mail className="h-5 w-5" style={{ color: NEON.cyan }} />
-                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Book a Presentation</span>
+                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Apply to the Batch</span>
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
                       <div className="mt-12 flex items-center gap-8 font-mono text-[16px] uppercase tracking-[0.35em] text-slate-500">
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />ORLANDO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.amber }} />SEVILLE</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />100% Remote</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />Global Cohort</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />Demo Day Ready</div>
                       </div>
                     </div>
 
