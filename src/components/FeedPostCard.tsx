@@ -398,24 +398,14 @@ export function FeedPostCard({
           {/* Comments */}
           {(commentsCount > 0 || expandedComments || newComment) && (
             <div className="mt-5 pt-5 border-t border-white/5 space-y-4">
+              {/* All comments (and their nested replies) are always visible. */}
               {!expandedComments && commentsCount > 0 && (
                 <div className="space-y-3">
                   {buildCommentTree(post.post_comments || [])
                     .filter((c: any) => !c.parent_comment_id)
-                    .slice(0, 2)
                     .map((comment: any) => (
                       <CommentItem key={comment.id} comment={comment} />
                     ))}
-                  {commentsCount > 2 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-muted-foreground hover:text-primary"
-                      onClick={onComment}
-                    >
-                      View all {commentsCount} comments
-                    </Button>
-                  )}
                 </div>
               )}
 
