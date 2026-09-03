@@ -1039,7 +1039,7 @@ export default function MVPBrochure() {
   const bookRef = useRef<any>(null);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
+  const [totalPages, setTotalPages] = useState(14);
   const compact = useCompactBrochure();
 
 
