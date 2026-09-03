@@ -61,6 +61,7 @@ const startupMemberships: {
   },
   {
     key: "corporate",
+    contactSales: true,
     icon: Users,
     tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
     bestFor: "Scale-ups or corporate venture units",
