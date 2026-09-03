@@ -1006,12 +1006,6 @@ const MVP_MONTH_FOCUS = [
   'Week 4: growth strategy, investor narrative, pitch and Demo Day.',
 ];
 
-const MVP_GROWTH_STAGES = [
-  { label: 'W01', note: 'Validate' },
-  { label: 'W02', note: 'Build' },
-  { label: 'W03', note: 'Launch' },
-  { label: 'W04', note: 'Fund' },
-];
 
 /* Phase imagery per stage — one editorial image per program phase. */
 const MVP_PHASE_IMAGES = [phaseValidateImg, phaseBuildImg, phaseLaunchImg, phaseFundImg];
