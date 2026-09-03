@@ -775,6 +775,30 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     fetchApps();
   }, [cohorts, refreshKey]);
 
+  // Sends the acceptance email with the Stripe payment link for the program cost.
+  const sendAcceptanceEmail = async (app: any) => {
+    const email = (app?.email || '').trim();
+    if (!email) {
+      toast({ title: 'Accepted, but no email on file', description: 'Payment link email was not sent.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
+        body: {
+          email,
+          name: app.founder_name || app.companies?.name || 'Founder',
+          startupName: app.companies?.name || app.startup_name || 'Your startup',
+          cohortName: app.accelerator_cohorts?.name || 'MVP Program',
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: '✅ Acceptance email sent', description: `Payment link delivered to ${email}` });
+    } catch (err: any) {
+      toast({ title: 'Could not send acceptance email', description: err.message, variant: 'destructive' });
+    }
+  };
+
   const updateStatus = async (appId: string, status: string, source: string) => {
     const table = source === 'public' ? 'public_cohort_applications' : 'cohort_applications';
     const { error } = await supabase
@@ -784,8 +808,13 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     if (error) { toast({ title: 'Error updating status', variant: 'destructive' }); return; }
     toast({ title: `Application ${status}` });
     setApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
+    if (status === 'accepted') {
+      const app = applications.find(a => a.id === appId);
+      if (app) await sendAcceptanceEmail(app);
+    }
     onRefresh();
   };
+
 
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>;
