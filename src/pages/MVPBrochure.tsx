@@ -1073,7 +1073,7 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
               className="text-left rounded-xl px-3 py-2 transition-all duration-300"
               style={{
                 border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
-                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.78)',
+                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.9)',
                 boxShadow: on ? `0 8px 24px -12px ${spec.accent}` : undefined,
               }}
             >
@@ -1101,7 +1101,7 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
               onClick={() => { setStage(i); setPinned(true); }}
               className="px-2.5 py-1.5 rounded-lg text-[11px] font-mono uppercase font-bold transition-all"
               style={{
-                background: active ? spec.accent : 'rgba(255,255,255,0.82)',
+                background: active ? spec.accent : 'rgba(255,255,255,0.92)',
                 color: active ? '#fff' : spec.accent,
                 border: `1px solid ${spec.accent}${active ? '88' : '44'}`,
               }}
@@ -1118,7 +1118,7 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
           <span
             key={r}
             className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
-            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.78)' }}
+            style={{ color: spec.accent, border: `1px solid ${spec.accent}33`, background: 'rgba(255,255,255,0.9)' }}
           >
             {r}
           </span>
@@ -1165,7 +1165,7 @@ const WeekAgendaSlide = ({
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: i * 0.06 }}
             className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 flex-1 min-h-0 cursor-default"
-            style={{ background: 'rgba(255,255,255,0.78)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
+            style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
           >
             {/* neon hover edge */}
             <span
