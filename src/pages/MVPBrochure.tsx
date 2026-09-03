@@ -1035,7 +1035,15 @@ const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
   );
 };
 
-const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
+const WeekAgendaSlide = ({
+  spec,
+  currentIndex,
+  onJump,
+}: {
+  spec: WeekSpec;
+  currentIndex: number;
+  onJump: (index: number) => void;
+}) => (
   <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
     <PageTitle
       kicker={`${spec.week} · MVP Program`}
@@ -1045,7 +1053,10 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
 
     <p className="text-[15px] leading-relaxed text-slate-600 max-w-3xl -mt-2 mb-3">{spec.lead}</p>
 
-    <div className="flex-1 min-h-0 grid grid-cols-[1.55fr_1fr] gap-4">
+    {/* interactive 4-phase navigator */}
+    <PhaseStepper weeks={MVP_WEEKS} current={currentIndex} onJump={onJump} />
+
+    <div className="flex-1 min-h-0 grid grid-cols-[1.35fr_1fr] gap-4">
       {/* day rail — cards stretch to fill the full column height */}
       <div className="relative flex flex-col gap-2 min-h-0 h-full">
         <div
@@ -1083,23 +1094,25 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
         ))}
       </div>
 
-      {/* outputs + metrics — fills the full right column */}
-      <div className="flex flex-col gap-3 min-h-0 h-full">
+      {/* full-size growth tree + deliverables (same scale as /forpartners) */}
+      <div className="flex flex-col min-h-0 h-full rounded-2xl overflow-hidden border" style={{ borderColor: `${spec.accent}33` }}>
         <DeliverablesPanel spec={spec} />
-        <div className="grid grid-cols-3 gap-2 shrink-0">
-          {spec.metric.map((m) => (
-            <motion.div
-              key={m.k}
-              whileHover={{ y: -4, scale: 1.04 }}
-              className="rounded-xl px-2 py-2.5 text-center cursor-default"
-              style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e`, boxShadow: `0 0 0 0 transparent` }}
-            >
-              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
-              <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent, textShadow: `0 0 14px ${spec.accent}60` }}>{m.v}</span>
-            </motion.div>
-          ))}
-        </div>
       </div>
+    </div>
+
+    {/* metric chips — horizontal row below both columns */}
+    <div className="grid grid-cols-3 gap-2 shrink-0 mt-3">
+      {spec.metric.map((m) => (
+        <motion.div
+          key={m.k}
+          whileHover={{ y: -4, scale: 1.04 }}
+          className="rounded-xl px-2 py-2.5 text-center cursor-default"
+          style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e`, boxShadow: `0 0 0 0 transparent` }}
+        >
+          <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
+          <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent, textShadow: `0 0 14px ${spec.accent}60` }}>{m.v}</span>
+        </motion.div>
+      ))}
     </div>
   </PageFrame>
 );
