@@ -15,6 +15,7 @@ import { LightPaperProject, ProjectType, useLightPaperProjects } from "@/hooks/u
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import sfhLogo from '@/assets/sfh-logo-emblem.png';
 
 /**
  * /lightpaper — LightPaper workspace (document / spreadsheet / presentation).
@@ -116,8 +117,16 @@ export default function LightPaper() {
         <div className="container mx-auto px-2 sm:px-4 py-1 sm:py-2">
           <div className="flex flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0"
+                onClick={() => navigate('/dashboard?tab=social')}
+                title="Back to Social"
+              >
+                <img src={sfhLogo} alt="Startup Factory Hub" className="h-7 w-7 object-contain" />
+              </Button>
               <div className="flex items-center gap-2 min-w-0">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
                 <h1 className="text-sm sm:text-xl font-bold truncate bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                   LightPaper
                 </h1>

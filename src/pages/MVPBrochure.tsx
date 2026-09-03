@@ -2308,7 +2308,7 @@ export default function MVPBrochure() {
                         backgroundPosition: 'center',
                       }} />
                       <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.2) 0%, rgba(2,4,10,0.52) 48%, rgba(2,4,10,0.98) 100%)`,
                       }} />
                       <div className="absolute inset-0" style={{
                         background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
@@ -2332,13 +2332,13 @@ export default function MVPBrochure() {
                         <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
                         <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
                           fontSize: '44px',
-                          ...PLATINUM_TITLE,
+                          color: '#ffffff',
                           textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
                         }}>
                           Startup Factory Hub<br />
                           <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
                         </h3>
-                        <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
+                        <p className="text-base text-white/90 leading-relaxed max-w-xl mb-6" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.95)' }}>
                           MVP Program startups launch inside a brand already broadcast to Times Square — visibility your product inherits from day one.
                         </p>
 
@@ -2353,14 +2353,14 @@ export default function MVPBrochure() {
                               key={m.l}
                               className="rounded-xl px-4 py-3"
                               style={{
-                                background: 'rgba(255,255,255,0.42)',
+                                background: 'rgba(2,4,10,0.72)',
                                 backdropFilter: 'blur(10px)',
                                 border: `1px solid ${NEON.lime}40`,
                                 boxShadow: `inset 0 0 18px ${NEON.lime}10`,
                               }}
                             >
                               <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/80 mt-0.5">{m.l}</div>
                             </div>
                           ))}
                         </div>

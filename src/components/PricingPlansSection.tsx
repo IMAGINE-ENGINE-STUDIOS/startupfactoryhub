@@ -29,8 +29,6 @@ import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
 import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
 import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
 import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
-import imgAccBasic from "@/assets/membership/acc-basic.jpg";
-import imgAccGrowth from "@/assets/membership/acc-growth.jpg";
 import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
 import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
 
@@ -114,9 +112,8 @@ const startupMemberships: {
 ];
 
 /**
- * Membership tiers sold to accelerators / incubators running their own programs.
- * Pricing is per organization, per month. "Cohorts" is quote-based so cohort
- * startups of the accelerator can inherit platform benefits and perks.
+ * Accelerator access has one institutional membership. Cohort-wide access is
+ * quote-based so every participating startup can inherit platform benefits.
  */
 const acceleratorMemberships: {
   key: string;
@@ -128,44 +125,19 @@ const acceleratorMemberships: {
   highlight?: boolean;
 }[] = [
   {
-    key: "acc_basic",
-    name: "Basic Plan",
-    price: 500,
-    image: imgAccBasic,
-    bestFor: "Emerging accelerators running their first programs",
-    features: [
-      "Organization profile & branded presence",
-      "Post on the social feed & resource map",
-      "Mentor and advisor directory access",
-      "Event publishing & RSVP management",
-    ],
-  },
-  {
-    key: "acc_growth",
-    name: "Growth",
-    price: 1500,
-    image: imgAccGrowth,
-    bestFor: "Accelerators managing recurring batches",
-    features: [
-      "Everything in Basic Plan",
-      "Application & batch management tools",
-      "Investor network introductions",
-      "Demo day & pitch programming support",
-    ],
-    highlight: true,
-  },
-  {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
     image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
-      "Everything in Growth",
+      "Organization profile & branded presence",
+      "Application & batch management tools",
       "Dedicated partnership manager",
       "Earth Intelligence & data suite access",
       "Global office & coworking network access",
     ],
+    highlight: true,
   },
   {
     key: "acc_cohorts",
@@ -358,7 +330,7 @@ const PricingPlansSection = () => {
         <div className="mb-14 sm:mb-20">
           <SectionTitle title="Genius AI Plans" />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {Object.values(GENIUS_PLANS).map((plan) => {
               const isPro = plan.key === "pro";
               return (

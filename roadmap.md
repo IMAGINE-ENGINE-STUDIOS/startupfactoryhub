@@ -27,7 +27,10 @@
 - [x] Move $5,000 program cost lock-up from closing page to Apply page (page 13)
 
 ## Current combined fixes
-- [ ] Repair LightPaper save failures, page rendering glitches, and workspace navigation/back behavior
-- [ ] Add All Community search/filter and exclude incomplete, My Accelerator, and demo profiles from NET
-- [ ] Remove generic rocket/Lovable-style icons from the affected network experience
-- [ ] Improve /forstartups over-image text contrast to clear white text
+- [x] Repair LightPaper save failures, page rendering glitches, and workspace navigation/back behavior
+- [x] Add All Community search/filter and exclude incomplete, My Accelerator, and demo profiles from NET
+- [x] Remove generic rocket/Lovable-style icons from the affected network experience
+- [x] Improve /forstartups over-image text contrast to clear white text
+
+- [x] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
+- [ ] Remove the user-identified item from the section above Genius AI Plans once its exact target is confirmed

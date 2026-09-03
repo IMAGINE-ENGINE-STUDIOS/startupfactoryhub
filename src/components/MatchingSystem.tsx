@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Rocket, DollarSign, Clock, Sparkles, Globe, GraduationCap, Zap, ScanLine } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import NetworkBrowser from './NetworkBrowser';
 import NetworkSearchEngine from './NetworkSearchEngine';
 import InvestorDirectoryList from './InvestorDirectoryList';
 import BusinessCardScannerDialog from './BusinessCardScannerDialog';
+import { isVisibleCommunityName, isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 
 interface Match {
   id: string;
@@ -115,7 +116,7 @@ export default function MatchingSystem() {
     ]);
     const roleMap = new Map((roles || []).map((r: any) => [r.user_id, r.role]));
     const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
-    setAllUsers(profiles.map(p => {
+    setAllUsers(profiles.filter(isVisibleCommunityProfile).map(p => {
       const r = (roleMap.get(p.user_id) || 'user') as string;
       const c = companyMap.get(p.user_id);
       return {
@@ -145,7 +146,7 @@ export default function MatchingSystem() {
         .limit(200),
     ]);
 
-    const companyMatches: Match[] = (companies || []).map(c => ({
+    const companyMatches: Match[] = (companies || []).filter(c => isVisibleCommunityName(c.name)).map(c => ({
       id: c.user_id || `company-${c.id}`,
       name: c.name,
       role: 'startup',
@@ -159,7 +160,7 @@ export default function MatchingSystem() {
 
     // Exclude legacy rows already linked to a company (avoid duplicates)
     const legacyMatches: Match[] = (legacy || [])
-      .filter(l => !l.linked_company_id)
+      .filter(l => !l.linked_company_id && isVisibleCommunityName(l.name))
       .map(l => ({
         id: `legacy-${l.id}`,
         name: l.name,
@@ -1281,11 +1282,11 @@ export default function MatchingSystem() {
   type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
 
   const filterChips: { key: FilterKey; label: string; icon: any; color: string }[] = [
-    { key: 'all', label: 'For You', icon: Sparkles, color: 'from-primary to-accent' },
+    { key: 'all', label: 'All Community', icon: Users, color: 'from-primary to-accent' },
     { key: 'mentor', label: 'Mentors', icon: GraduationCap, color: 'from-blue-500 to-cyan-500' },
     { key: 'investor', label: 'Investors', icon: DollarSign, color: 'from-emerald-500 to-teal-500' },
-    { key: 'startup', label: 'Startups', icon: Rocket, color: 'from-orange-500 to-pink-500' },
-    { key: 'accelerator', label: 'Accelerators', icon: Zap, color: 'from-purple-500 to-fuchsia-500' },
+    { key: 'startup', label: 'Startups', icon: Compass, color: 'from-orange-500 to-pink-500' },
+    { key: 'accelerator', label: 'Accelerators', icon: Landmark, color: 'from-purple-500 to-fuchsia-500' },
     { key: 'network', label: 'My Network', icon: Globe, color: 'from-indigo-500 to-violet-500' },
   ];
 

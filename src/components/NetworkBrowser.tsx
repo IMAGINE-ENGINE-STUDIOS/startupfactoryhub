@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell, Heart } from 'lucide-react';
+import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell, Heart, MapPin } from 'lucide-react';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import OfficialBadge from './OfficialBadge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 
 interface Connection {
   user_id: string;
@@ -35,6 +36,7 @@ export default function NetworkBrowser() {
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
+  const [allCommunity, setAllCommunity] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -131,7 +133,7 @@ export default function NetworkBrowser() {
           .select('user_id, role')
           .in('user_id', connectedUserIds);
 
-        const profilesWithRoles = profiles.map(profile => {
+        const profilesWithRoles = profiles.filter(isVisibleCommunityProfile).map(profile => {
           const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
           return {
             ...profile,
@@ -189,7 +191,7 @@ export default function NetworkBrowser() {
           .select('user_id, role')
           .in('user_id', requesterIds);
 
-        const profilesWithRoles = profiles.map(profile => {
+        const profilesWithRoles = profiles.filter(isVisibleCommunityProfile).map(profile => {
           const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
           const request = requests.find(r => r.requester_id === profile.user_id);
           return {
@@ -242,7 +244,7 @@ export default function NetworkBrowser() {
           .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
           .in('addressee_id', userIds);
 
-        const profilesWithInfo = profiles.map(profile => {
+        const profilesWithInfo = profiles.filter(isVisibleCommunityProfile).map(profile => {
           const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
           const connection = connections?.find(c => 
             c.requester_id === profile.user_id || c.addressee_id === profile.user_id
@@ -413,7 +415,7 @@ export default function NetworkBrowser() {
           .select('user_id, role')
           .in('user_id', userIds);
 
-        const profilesWithRoles = profiles.map(profile => {
+        const profilesWithRoles = profiles.filter(isVisibleCommunityProfile).map(profile => {
           const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
           return {
             ...profile,
@@ -496,8 +498,8 @@ export default function NetworkBrowser() {
         )}
 
         {connection.location && (
-          <p className="text-xs text-muted-foreground mb-4">
-            📍 {connection.location}
+          <p className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
+            <MapPin className="h-3 w-3" /> {connection.location}
           </p>
         )}
 
@@ -553,6 +555,15 @@ export default function NetworkBrowser() {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground mr-1">Filters:</span>
         <Button
+          variant={allCommunity ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setAllCommunity(value => !value)}
+          className="gap-1.5"
+        >
+          <Users className="h-3.5 w-3.5" />
+          All Community
+        </Button>
+        <Button
           variant={vzlaFilter ? 'default' : 'outline'}
           size="sm"
           onClick={() => setVzlaFilter(v => !v)}
@@ -606,8 +617,8 @@ export default function NetworkBrowser() {
                     )}
 
                     {request.location && (
-                      <p className="text-xs text-muted-foreground mb-3">
-                        📍 {request.location}
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                        <MapPin className="h-3 w-3" /> {request.location}
                       </p>
                     )}
 
@@ -679,6 +690,33 @@ export default function NetworkBrowser() {
           )}
         </CardContent>
       </Card>
+
+      {allCommunity && (
+        <Card className="tech-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-primary" />
+              Search All Community
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search verified, completed member profiles"
+              aria-label="Search all community members"
+            />
+            {searchQuery.length > 0 && searchQuery.length < 2 && (
+              <p className="text-xs text-muted-foreground">Enter at least two characters.</p>
+            )}
+            {searchResults.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {applyFilter(searchResults).map((member) => renderUserCard(member, member.status === 'accepted'))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Suggested Connections */}
       {suggestedUsers.length > 0 && (

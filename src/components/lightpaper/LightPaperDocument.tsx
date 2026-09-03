@@ -3143,7 +3143,7 @@ export function LightPaperDocument({
   };
   
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full min-h-0">
       {/* Desktop Toolbar */}
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40" onMouseDown={(e) => { const t = e.target as HTMLElement; if (!t.closest('input, textarea, [contenteditable="true"], [role="combobox"]')) e.preventDefault(); }}>
       <CollapsibleToolbar>
