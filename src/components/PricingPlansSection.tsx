@@ -603,56 +603,6 @@ const PricingPlansSection = () => {
         </div>
 
 
-        {/* Accelerator Programs */}
-        <div>
-          <SectionTitle title="Accelerator Programs" />
-
-          <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-            {acceleratorPlans.map((plan) => (
-              <div
-                key={plan.key}
-                className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
-              >
-                <Corners />
-                {plan.highlight && (
-                  <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
-                    Open
-                  </Badge>
-                )}
-                <h4 className="text-base font-semibold">{plan.name}</h4>
-                <p className="mb-2 text-xs text-muted-foreground">{plan.tagline}</p>
-                <div className="mb-3 flex items-end gap-1.5">
-                  {plan.price === null ? (
-                    <span className="text-2xl sm:text-3xl font-bold text-foreground">Custom</span>
-                  ) : (
-                    <>
-                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                        ${plan.price.toLocaleString()}
-                      </span>
-                      <span className="mb-1 text-xs text-muted-foreground">{plan.unit}</span>
-                    </>
-                  )}
-                </div>
-                <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
-                <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-muted-foreground">
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                      <span className="leading-snug">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant={plan.highlight ? "hero" : "glass"}
-                  className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
-                  onClick={() => navigate(plan.path)}
-                >
-                  {plan.cta}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       <PlanBrochureOverlay plan={planOverlay} onClose={() => setPlanOverlay(null)} />
