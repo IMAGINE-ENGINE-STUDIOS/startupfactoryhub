@@ -1014,6 +1014,7 @@ const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
   const weekIndex = MVP_WEEKS.findIndex((w) => w.code === spec.code);
   return (
     <GrowthSection
+      compact
       accent={spec.accent}
       accent2={NEON.violet}
       benefits={MVP_GROWTH_BENEFITS}
