@@ -990,14 +990,10 @@ const MVP_WEEKS: WeekSpec[] = [
 /* Deliverables panel — full-size GrowthSection (same tree scale as /forpartners)
    with MVP-specific stage benefits and deliverables. */
 const MVP_GROWTH_BENEFITS = [
-  { id: 'w1-validate', stage: 0, label: 'Validate', line: 'Prove the problem, customer and market before building.' },
-  { id: 'w1-deliverables', stage: 0, label: 'Week 1 outputs', line: 'Validated problem + customer, 6–10 interviews, competitor matrix.' },
-  { id: 'w2-build', stage: 1, label: 'Build', line: 'MVP strategy, design, architecture and daily deploys.' },
-  { id: 'w2-deliverables', stage: 1, label: 'Week 2 outputs', line: 'Working MVP deployed, wireframes, peer testing report, waitlist.' },
-  { id: 'w3-launch', stage: 2, label: 'Test & Launch', line: 'First users, pricing tests, traction metrics and GTM plan.' },
-  { id: 'w3-deliverables', stage: 2, label: 'Week 3 outputs', line: '10–20 beta users, TAM/SAM/SOM, pricing offer, retention strategy.' },
-  { id: 'w4-fund', stage: 3, label: 'Grow & Fund', line: 'Growth experiments, investor narrative and Demo Day.' },
-  { id: 'w4-deliverables', stage: 3, label: 'Week 4 outputs', line: 'Pitch deck, financial model, data room, Demo Day stage.' },
+  { id: 'w1-validate', stage: 0, label: 'Week 1 · Validate', line: 'Prove the problem, customer and market before building.' },
+  { id: 'w2-build', stage: 1, label: 'Week 2 · Build', line: 'MVP strategy, design, architecture and daily deploys.' },
+  { id: 'w3-launch', stage: 2, label: 'Week 3 · Test & Launch', line: 'First users, pricing tests, traction metrics and GTM plan.' },
+  { id: 'w4-fund', stage: 3, label: 'Week 4 · Grow & Fund', line: 'Growth experiments, investor narrative and Demo Day.' },
 ];
 
 const MVP_MONTH_FOCUS = [
