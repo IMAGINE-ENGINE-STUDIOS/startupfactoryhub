@@ -62,6 +62,17 @@ const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
 
+/** Repairs legacy page data URLs whose base64 was wrapped, URL-safe, or unpadded. */
+function normalizePageImageSource(source: unknown): string {
+  if (typeof source !== "string") return "";
+  const match = /^(data:image\/[^;,]+;base64,)(.*)$/s.exec(source);
+  if (!match) return source;
+  let encoded = match[2].replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
+  const remainder = encoded.length % 4;
+  if (remainder) encoded += "=".repeat(4 - remainder);
+  return `${match[1]}${encoded}`;
+}
+
 // Page format configurations (dimensions in cm) - All MS Word & Google Docs formats
 const PAGE_FORMATS = {
   // US Standard Formats (Microsoft Word)
@@ -742,7 +753,7 @@ export function LightPaperDocument({
         if (draft.title) setProjectTitle(draft.title);
         if (content.viewMode && content.viewModeImages?.length > 0) {
           setViewMode(true);
-          setViewModeImages(content.viewModeImages);
+          setViewModeImages(content.viewModeImages.map(normalizePageImageSource).filter(Boolean));
           setTotalPages(content.viewModeImages.length);
           setCurrentPage(content.currentPage || 1);
           setVisiblePage(content.currentPage || 1);
@@ -871,8 +882,9 @@ export function LightPaperDocument({
         // Restore view mode images if saved
         if (content.viewMode && content.viewModeImages && content.viewModeImages.length > 0) {
           setViewMode(true);
-          setViewModeImages(content.viewModeImages);
-          setTotalPages(content.viewModeImages.length);
+          const restoredImages = content.viewModeImages.map(normalizePageImageSource).filter(Boolean);
+          setViewModeImages(restoredImages);
+          setTotalPages(restoredImages.length);
           setCurrentPage(content.currentPage || 1);
           setVisiblePage(content.currentPage || 1);
           if (content.editTextLayers) setEditTextLayers(content.editTextLayers);
@@ -2221,7 +2233,8 @@ export function LightPaperDocument({
       try {
         setIsSaving(true);
         const content = buildSaveContent();
-        await saveProject(projectTitle, "document", content, currentProjectId);
+        const saved = await saveProject(projectTitle, "document", content, currentProjectId);
+        if (!saved) throw new Error("The document could not be saved");
         setLastSaved(new Date());
         // Log a manual save version entry
         if (editorRef.current) {
@@ -3626,6 +3639,11 @@ export function LightPaperDocument({
 
       {/* Mobile Toolbar */}
       <div className="md:hidden p-1 border-b bg-background shrink-0 no-print mobile-toolbar">
+        {workspaceTools && (
+          <div className="flex items-center gap-0.5 border-b pb-1 mb-1 overflow-x-auto">
+            {workspaceTools}
+          </div>
+        )}
         <MobileToolbar
           groups={[
             {
@@ -4256,7 +4274,7 @@ export function LightPaperDocument({
                   {/* Page number removed - navigation bar shows current page */}
                   
                   <img 
-                    src={imageSrc}
+                    src={normalizePageImageSource(imageSrc)}
                     alt={`Page ${index + 1}`}
                     onLoad={() => console.log(`✓ Page ${index + 1} loaded`)}
                     onError={(e) => {
