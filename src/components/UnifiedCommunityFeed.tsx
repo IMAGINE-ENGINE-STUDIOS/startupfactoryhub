@@ -27,6 +27,11 @@ import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
+import { UniversalFileUploader, type UploadedFile } from '@/components/upload/UniversalFileUploader';
+import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
+import { getFileKind } from '@/lib/upload/fileKinds';
+import { Paperclip } from 'lucide-react';
+
 interface FeedPost {
   id: string;
   content: string;
@@ -99,6 +104,9 @@ export default function UnifiedCommunityFeed({
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<UploadedFile[]>([]);
+
   const [postHashtags, setPostHashtags] = useState<string[]>([]);
   const [newHashtag, setNewHashtag] = useState('');
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
@@ -484,6 +492,8 @@ export default function UnifiedCommunityFeed({
         const url = await uploadMedia(file);
         if (url) mediaUrls.push(url);
       }
+      // Universal uploader attachments (already uploaded: any file type)
+      attachedFiles.forEach(f => mediaUrls.push(f.url));
       const hashtagString = postHashtags.length > 0 ? '\n\n' + postHashtags.map(tag => `#${tag}`).join(' ') : '';
       const {
         error
@@ -501,8 +511,11 @@ export default function UnifiedCommunityFeed({
       setNewPost('');
       setMediaFiles([]);
       setMediaPreview([]);
+      setAttachedFiles([]);
+      setShowUploader(false);
       setPostHashtags([]);
       setNewHashtag('');
+
       fetchPosts();
     } catch (error: any) {
       toast({
@@ -915,6 +928,19 @@ export default function UnifiedCommunityFeed({
                   </div>)}
               </div>}
 
+            {/* Universal file uploader — any file type (3D/AR, docs, data, media) */}
+            {showUploader && (
+              <UniversalFileUploader
+                folder="feed"
+                maxFiles={10}
+                maxSizeMB={500}
+                compact
+                onUploaded={files => setAttachedFiles(prev => [...prev, ...files])}
+                onRemoved={file => setAttachedFiles(prev => prev.filter(f => f.path !== file.path))}
+              />
+            )}
+
+
             {/* Hashtags Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -959,6 +985,11 @@ export default function UnifiedCommunityFeed({
                   <Video className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Video</span>
                 </Button>
+                <Button variant={showUploader ? 'secondary' : 'ghost'} size="sm" onClick={() => setShowUploader(v => !v)}>
+                  <Paperclip className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Files{attachedFiles.length > 0 ? ` (${attachedFiles.length})` : ''}</span>
+                </Button>
+
                 <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
                   <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
                   <span className="hidden sm:inline">Imaginaly</span>
@@ -1130,10 +1161,12 @@ export default function UnifiedCommunityFeed({
                       
                       {/* Media Display */}
                       {post.media_urls && post.media_urls.length > 0 && (() => {
-                        const imageUrls = post.media_urls!.filter(url => url && !url?.includes('.mp4') && !url?.includes('.webm') && !url?.includes('.mov') && !url?.includes('video'));
-                        const videoUrls = post.media_urls!.filter(url => url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video'));
+                        const urls = post.media_urls!.filter(Boolean);
+                        const imageUrls = urls.filter(url => getFileKind(url) === 'image');
+                        const videoUrls = urls.filter(url => getFileKind(url) === 'video');
+                        const otherUrls = urls.filter(url => !['image', 'video'].includes(getFileKind(url)));
                         return (
-                          <div className={`grid gap-2 mt-3 ${post.media_urls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                          <div className={`grid gap-2 mt-3 ${urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                             {videoUrls.map((url, idx) => (
                               <video key={`v-${idx}`} src={url} controls className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" />
                             ))}
@@ -1152,9 +1185,13 @@ export default function UnifiedCommunityFeed({
                                 )}
                               </div>
                             ))}
+                            {otherUrls.map((url, idx) => (
+                              <FileAttachmentPreview key={`f-${idx}`} url={url} />
+                            ))}
                           </div>
                         );
                       })()}
+
                       
                       <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
                         <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${likedPosts.has(post.id) ? 'text-red-500' : ''}`} onClick={() => toggleLike(post.id)}>
