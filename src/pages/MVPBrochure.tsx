@@ -2206,6 +2206,7 @@ export default function MVPBrochure() {
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
                           <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 WEEKS · $5,000 PROGRAM COST</div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 mt-1.5">KICKOFF SUN OCT 4 · VALIDATE → BUILD → TEST & LAUNCH → GROW & FUND</div>
                         </div>
 
                         {/* FORM */}
