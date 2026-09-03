@@ -2205,22 +2205,22 @@ export default function MVPBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[0]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[1]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[2]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[3]} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
                 </A4Wrapper>
               </BookPage>
 
