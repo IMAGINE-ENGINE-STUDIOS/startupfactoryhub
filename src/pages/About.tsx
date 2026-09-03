@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Target, Rocket } from "lucide-react";
+import { Target, Rocket, Brain, Globe, BookOpen, Briefcase, Banknote } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import bannerBg from "@/assets/wtc-institutional.jpg";
+
+const offerItems = [
+  { icon: Brain, labelKey: "about.aiMatching", descKey: "about.aiMatchingDesc" },
+  { icon: Globe, labelKey: "about.globalCommunity", descKey: "about.globalCommunityDesc" },
+  { icon: BookOpen, labelKey: "about.eduResources", descKey: "about.eduResourcesDesc" },
+  { icon: Briefcase, labelKey: "about.jobBoard", descKey: "about.jobBoardDesc" },
+  { icon: Banknote, labelKey: "about.funding", descKey: "about.fundingDesc" },
+  { icon: Target, labelKey: "about.mentorship", descKey: "about.mentorshipDesc" },
+];
 
 const About = () => {
   const { t } = useLanguage();
