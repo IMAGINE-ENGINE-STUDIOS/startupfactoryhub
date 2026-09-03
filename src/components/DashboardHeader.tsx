@@ -110,17 +110,6 @@ export function DashboardHeader() {
 
       <ThemeToggle />
 
-      {/* LightPaper document workspace */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate("/lightpaper")}
-        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
-        title="LightPaper"
-      >
-        <FileText className="h-4 w-4" />
-      </Button>
-
       <Button
         variant="ghost"
         size="icon"
