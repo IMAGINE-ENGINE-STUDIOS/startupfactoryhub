@@ -987,41 +987,51 @@ const MVP_WEEKS: WeekSpec[] = [
   },
 ];
 
-/* Deliverables panel — the GrowthTree3D from the partners brochure grows
-   behind the deliverables list, cycling through the 4 growth stages. */
+/* Deliverables panel — full-size GrowthSection (same tree scale as /forpartners)
+   with MVP-specific stage benefits and deliverables. */
+const MVP_GROWTH_BENEFITS = [
+  { id: 'w1-validate', stage: 0, label: 'Validate', line: 'Prove the problem, customer and market before building.' },
+  { id: 'w1-deliverables', stage: 0, label: 'Week 1 outputs', line: 'Validated problem + customer, 6–10 interviews, competitor matrix.' },
+  { id: 'w2-build', stage: 1, label: 'Build', line: 'MVP strategy, design, architecture and daily deploys.' },
+  { id: 'w2-deliverables', stage: 1, label: 'Week 2 outputs', line: 'Working MVP deployed, wireframes, peer testing report, waitlist.' },
+  { id: 'w3-launch', stage: 2, label: 'Test & Launch', line: 'First users, pricing tests, traction metrics and GTM plan.' },
+  { id: 'w3-deliverables', stage: 2, label: 'Week 3 outputs', line: '10–20 beta users, TAM/SAM/SOM, pricing offer, retention strategy.' },
+  { id: 'w4-fund', stage: 3, label: 'Grow & Fund', line: 'Growth experiments, investor narrative and Demo Day.' },
+  { id: 'w4-deliverables', stage: 3, label: 'Week 4 outputs', line: 'Pitch deck, financial model, data room, Demo Day stage.' },
+];
+
+const MVP_MONTH_FOCUS = [
+  'Week 1: discovery and problem validation with customer evidence.',
+  'Week 2: MVP strategy, product design, technical development and deploy.',
+  'Week 3: early users, pricing tests, unit economics and GTM planning.',
+  'Week 4: growth strategy, investor narrative, pitch and Demo Day.',
+];
+
+const MVP_GROWTH_STAGES = [
+  { label: 'W01', note: 'Validate' },
+  { label: 'W02', note: 'Build' },
+  { label: 'W03', note: 'Launch' },
+  { label: 'W04', note: 'Fund' },
+];
+
 const DeliverablesPanel = ({ spec }: { spec: WeekSpec }) => {
-  const [stage, setStage] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => setStage((s) => (s >= 3 ? 0 : s + 1)), 3600);
-    return () => window.clearInterval(id);
-  }, []);
+  const weekIndex = MVP_WEEKS.findIndex((w) => w.code === spec.code);
   return (
-    <div
-      className="relative rounded-2xl p-4 flex-1 min-h-0 overflow-hidden flex flex-col"
-      style={{ background: `linear-gradient(150deg, ${spec.accent}14, rgba(255,255,255,0.9))`, border: `1px solid ${spec.accent}33` }}
-    >
-      {/* animated growth tree background (same animation as /forpartners) */}
-      <div className="absolute inset-0 opacity-80 pointer-events-none">
-        <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
-      </div>
-      {/* readability veil */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.72) 45%, rgba(255,255,255,0.25) 100%)' }}
-      />
-      <div className="relative z-10 flex items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.22em] font-bold" style={{ color: spec.accent }}>Deliverables</span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">growth · {String(stage + 1).padStart(2, '0')}/04</span>
-      </div>
-      <div className="relative z-10 mt-2 flex flex-col flex-1 justify-evenly gap-2">
-        {spec.outputs.map((o) => (
-          <motion.div key={o} whileHover={{ x: 4 }} className="flex items-start gap-2">
-            <Check className="h-4 w-4 mt-[2px] shrink-0" style={{ color: spec.accent, filter: `drop-shadow(0 0 6px ${spec.accent})` }} />
-            <span className="text-[14px] leading-snug text-slate-800 font-medium">{o}</span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
+    <GrowthSection
+      accent={spec.accent}
+      accent2={NEON.violet}
+      benefits={MVP_GROWTH_BENEFITS}
+      rootInputs={['Founder', 'Problem', 'Market', 'Mentor']}
+      monthFocus={MVP_MONTH_FOCUS}
+      stages={MVP_GROWTH_STAGES}
+      focusLabel="Focus"
+      intro={
+        <p className="text-[15px] sm:text-[13px] leading-snug text-slate-700">
+          Your <strong className="font-semibold" style={{ color: spec.accent }}>founder, problem, market and mentor</strong> feed the roots.
+          Every week adds a branch — from validated idea to fundable startup.
+        </p>
+      }
+    />
   );
 };
 
