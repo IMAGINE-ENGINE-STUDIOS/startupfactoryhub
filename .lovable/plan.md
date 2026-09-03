@@ -14,14 +14,18 @@ Unlocked services:
 5. Discounts on SFH services
 6. Access to online and in-person meetings, conferences and pitch events
 7. Contact investors through the platform
+8. Access to internships
+9. Access to volunteering roles
+10. Technology transfer programs
+11. Certified courses
 
 ## What the page does
 
 Route `/basic-plan`, reachable only by direct URL.
 
-- **Plan card**: monthly/yearly toggle, live price from the database, savings badge, the 7 entitlements listed with Lucide icons.
+- **Plan card**: monthly/yearly toggle, live price from the database, savings badge, 11 entitlements listed with Lucide icons.
 - **Simulated user panel**: a switch that flips the viewer between "Free user" and "Basic member" without touching real data, so you can see how each unlocked service looks in both states.
-- **Entitlement preview**: each of the 7 services rendered as a gated tile — locked with a "Requires Basic" state for free, unlocked with its action for members.
+- **Entitlement preview**: each of the 11 services rendered as a gated tile — locked with a "Requires Basic" state for free, unlocked with its action for members.
 - **Stripe test checkout**: a "Subscribe (test mode)" button that opens a real Stripe Checkout session against the test price, so the payment path can be validated end to end. Returning from checkout refreshes real status; the simulation switch stays available for previewing.
 - **Admin price editor**: visible only to platform admins on this page — edit monthly price, yearly price and the entitlement list; saved to the database and reflected immediately.
 
@@ -33,7 +37,7 @@ Everything lives in its own folder so it can be lifted into the product later wi
 src/features/basic-plan/
   index.ts                     public exports
   types.ts                     BasicPlanConfig, Entitlement, SimulatedUserState
-  config/entitlements.ts       the 7 services: key, label, description, icon, demo action
+  config/entitlements.ts       the 11 services: key, label, description, icon, demo action
   api/basicPlanApi.ts          plan config read/write + checkout invocation
   hooks/useBasicPlan.ts        loads plan config (price, entitlements)
   hooks/useSimulatedMembership.ts  simulated vs real membership state
