@@ -25,3 +25,9 @@
 ## MVP brochure imagery (done)
 - [x] Replace tree animation in agenda deliverables panel with phase-specific imagery (Validate/Build/Test & Launch/Grow & Fund), fixed different image per agenda page
 - [x] Move $5,000 program cost lock-up from closing page to Apply page (page 13)
+
+## Current combined fixes
+- [ ] Repair LightPaper save failures, page rendering glitches, and workspace navigation/back behavior
+- [ ] Add All Community search/filter and exclude incomplete, My Accelerator, and demo profiles from NET
+- [ ] Remove generic rocket/Lovable-style icons from the affected network experience
+- [ ] Improve /forstartups over-image text contrast to clear white text
