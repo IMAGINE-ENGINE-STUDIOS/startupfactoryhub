@@ -10,23 +10,28 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const startupMemberships: {
-  key: Exclude<MembershipTier, "free">;
+  key: Exclude<MembershipTier, "free"> | "basic";
   icon: typeof Zap;
   tagline: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
+  /** Renders a fixed-price card that deep-links to the Basic Plan brochure checkout. */
+  basic?: boolean;
+  /** Hides the price and routes the CTA to sales instead of checkout. */
+  contactSales?: boolean;
 }[] = [
   {
-    key: "community",
+    key: "basic",
+    basic: true,
     icon: Zap,
     tagline: "Full digital access, virtual events, community, and mentor interactions.",
     bestFor: "Remote-first teams or early MVP-stage founders",
     features: [
-      "Full resource library",
-      "Mentor sessions (virtual)",
-      "Startup physical hub community access",
-      "Local Startup Factory HUB coworking space access all locations (community space access only)",
+      "Post on the social feed & resource map",
+      "Full resource library access",
+      "Internships & volunteering roles",
+      "Technology transfer & certified courses",
     ],
   },
   {
@@ -56,6 +61,7 @@ const startupMemberships: {
   },
   {
     key: "corporate",
+    contactSales: true,
     icon: Users,
     tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
     bestFor: "Scale-ups or corporate venture units",
@@ -74,7 +80,7 @@ const acceleratorPlans = [
     key: "mvp",
     name: "MVP Program",
     price: 5000,
-    unit: "per startup",
+    unit: "per startup · one-time payment",
     icon: Rocket,
     highlight: true,
     tagline: "From idea to market-ready product",
@@ -277,9 +283,11 @@ const PricingPlansSection = () => {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {startupMemberships.map((plan) => {
-              const tier = MEMBERSHIP_TIERS[plan.key];
-              const price = billing === "monthly" ? tier.price : tier.yearly_price;
-              const priceId = billing === "monthly" ? tier.price_id : tier.yearly_price_id;
+              const tier = plan.basic ? null : MEMBERSHIP_TIERS[plan.key as Exclude<MembershipTier, "free">];
+              const price = plan.basic
+                ? billing === "monthly" ? 50 : 480
+                : billing === "monthly" ? tier!.price : tier!.yearly_price;
+              const priceId = tier ? (billing === "monthly" ? tier.price_id : tier.yearly_price_id) : null;
               const Icon = plan.icon;
               return (
                 <div
@@ -295,14 +303,20 @@ const PricingPlansSection = () => {
                   <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <h4 className="text-sm font-semibold">{tier.name}</h4>
+                  <h4 className="text-sm font-semibold">{plan.basic ? "Basic Plan" : tier!.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                      ${price.toLocaleString()}
-                    </span>
-                    <span className="mb-1 text-xs text-muted-foreground">
-                      {billing === "monthly" ? "/mo" : "/yr"}
-                    </span>
+                    {plan.contactSales ? (
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
+                    ) : (
+                      <>
+                        <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                          ${price.toLocaleString()}
+                        </span>
+                        <span className="mb-1 text-xs text-muted-foreground">
+                          {billing === "monthly" ? "/mo" : "/yr"}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <p className="mb-3 text-[11px] leading-snug text-primary/80">{plan.bestFor}</p>
                   <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
@@ -318,10 +332,21 @@ const PricingPlansSection = () => {
                     variant={plan.highlight ? "hero" : "glass"}
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     disabled={checkoutKey === plan.key}
-                    onClick={() => handleSubscribe(plan.key, priceId)}
+                    onClick={() => {
+                      if (plan.basic) return navigate("/basic-plan");
+                      if (plan.contactSales) {
+                        window.location.href = "mailto:info@startupfactoryhub.com?subject=Corporate%20Plan%20Inquiry";
+                        return;
+                      }
+                      if (priceId) handleSubscribe(plan.key, priceId);
+                    }}
                   >
                     {checkoutKey === plan.key ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : plan.basic ? (
+                      "View Basic Plan"
+                    ) : plan.contactSales ? (
+                      "Contact Sales"
                     ) : user ? (
                       "Subscribe"
                     ) : (
