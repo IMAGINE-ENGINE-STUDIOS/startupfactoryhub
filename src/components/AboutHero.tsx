@@ -12,10 +12,6 @@ const AboutHero = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
             {/* Left: Text content */}
             <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
-                <Rocket className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-medium text-primary">Deep Tech Accelerator</span>
-              </div>
 
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
                 <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
