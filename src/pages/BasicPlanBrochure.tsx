@@ -752,7 +752,7 @@ export default function BasicPlanBrochure() {
                   <QRCodeSVG value="https://startupfactoryhub.com/basic-plan" size={112} />
                 </div>
                 <div className="space-y-4">
-                  <JoinButton cycle="yearly" label="Activate membership" size="lg" />
+                  <JoinButton cycle="yearly" label="Activate membership" size="lg" tone="dark" />
                   <a href="mailto:info@startupfactoryhub.com"
                     className="flex items-center gap-2 text-base text-white/70 hover:text-white">
                     <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
