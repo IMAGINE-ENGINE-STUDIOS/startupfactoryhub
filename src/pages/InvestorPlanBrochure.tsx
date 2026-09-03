@@ -35,6 +35,10 @@ import imgCampus from '@/assets/membership/campus-atrium.jpg';
 import imgSummit from '@/assets/membership/investor-summit.jpg';
 import imgLab from '@/assets/membership/research-lab.jpg';
 import imgSkyline from '@/assets/membership/global-skyline.jpg';
+import imgCompute from '@/assets/membership/ai-compute-dealflow.jpg';
+import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
+import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
+import imgStudio from '@/assets/membership/venture-studio.jpg';
 
 /* ============================ DESIGN TOKENS ============================ */
 const NEON = {
@@ -57,7 +61,56 @@ const PLATINUM_TITLE: React.CSSProperties = {
 };
 
 /** Total pages in the flipbook. */
-const TOTAL = 8;
+const TOTAL = 9;
+
+/**
+ * Strategic dealflow channels shown on page 05.
+ * Each channel maps to an ecosystem the Hub sources companies from, with the
+ * concrete artifact an Investor Priority member receives from it.
+ */
+const DEALFLOW_CHANNELS = [
+  {
+    key: 'nvidia',
+    code: 'CH-01',
+    name: 'NVIDIA',
+    lane: 'AI & accelerated computing',
+    image: imgCompute,
+    alt: 'AI supercomputing data center aisle with GPU racks',
+    body:
+      'Deep-tech and AI companies building on accelerated computing: model infrastructure, robotics, simulation and inference-heavy products.',
+    signals: ['GPU-native AI startups', 'Compute-credit backed builds', 'Technical diligence briefs'],
+  },
+  {
+    key: 'nasdaq',
+    code: 'CH-02',
+    name: 'NASDAQ',
+    lane: 'Public-market pathway',
+    image: imgMarkets,
+    alt: 'Exchange tower with market data screens at dusk',
+    body:
+      'Later-stage companies preparing for capital markets readiness — governance, reporting discipline and the listing pathway from private rounds.',
+    signals: ['Market-readiness scoring', 'Bell-ceremony showcases', 'Investor-relations tooling'],
+  },
+  {
+    key: 'nasa',
+    code: 'CH-03',
+    name: 'NASA',
+    lane: 'Space & technology transfer',
+    image: imgSpace,
+    alt: 'Satellite integration cleanroom with engineers',
+    body:
+      'Space, earth-observation and technology-transfer ventures: spun-out research turned into commercial hardware, data and orbital services.',
+    signals: ['Tech-transfer spinouts', 'Earth intelligence data', 'Dual-use hardware'],
+  },
+] as const;
+
+/** Venture studio activities — what the Hub does before a deal reaches you. */
+const STUDIO_ACTIVITIES = [
+  { t: 'Company building', d: 'Ideas validated, incorporated and staffed inside the studio before any round opens.' },
+  { t: 'MVP engineering', d: 'Product built in 4-week sprints with the Hub engineering pool and AI tooling.' },
+  { t: 'Go-to-market', d: 'First customers, pricing and pipeline tested with corporate partners.' },
+  { t: 'Round structuring', d: 'Cap table, data room and terms prepared with the Hub before investor introductions.' },
+] as const;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
