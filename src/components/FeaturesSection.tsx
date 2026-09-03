@@ -133,6 +133,133 @@ const features = [
 /** localStorage flag — the preview auto-opens only once, ever. */
 const AUTO_OPEN_KEY = "sfh_feature_preview_autoopened";
 
+/* ------------------------------------------------------------------ */
+/* Playful 3D block                                                    */
+/* ------------------------------------------------------------------ */
+
+type Feature = (typeof features)[number];
+
+const FeatureBlock = ({
+  feature,
+  index,
+  isActive,
+  onOpen,
+}: {
+  feature: Feature;
+  index: number;
+  isActive: boolean;
+  onOpen: () => void;
+}) => {
+  const Icon = feature.icon;
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    setTilt({ x: -py * 16, y: px * 18 });
+  };
+
+  return (
+    <motion.div
+      className="group relative outline-none cursor-pointer [transform-style:preserve-3d]"
+      tabIndex={0}
+      role="button"
+      aria-label={`${feature.title} — open preview`}
+      aria-haspopup="dialog"
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      onMouseMove={handleMove}
+      onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+      initial={{ opacity: 0, y: 24, rotateX: -12 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay: (index % 5) * 0.06, ease: "easeOut" }}
+      style={{ transformStyle: "preserve-3d" }}
+    >
+      <motion.div
+        className="relative [transform-style:preserve-3d]"
+        animate={{
+          rotateX: isActive ? 0 : tilt.x,
+          rotateY: isActive ? 0 : tilt.y,
+          scale: isActive ? 1.04 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 220, damping: 18 }}
+      >
+        {/* Extruded side faces of the block */}
+        <div
+          className="absolute inset-0 rounded-[1.35rem] bg-gradient-to-br from-primary/40 to-primary/10 blur-[2px]"
+          style={{ transform: "translateZ(-18px)" }}
+          aria-hidden
+        />
+        <div
+          className="absolute inset-x-2 -bottom-2 h-6 rounded-full bg-primary/20 blur-xl"
+          style={{ transform: "translateZ(-30px)" }}
+          aria-hidden
+        />
+
+        {/* Top face */}
+        <div
+          className={`
+            tech-card border-0
+            relative flex flex-col items-center justify-center text-center
+            aspect-square w-full
+            p-3 sm:p-4 lg:p-5
+            rounded-[1.35rem]
+            bg-gradient-to-br from-card/95 via-card/80 to-card/50
+            backdrop-blur-xl
+            border border-border/50
+            overflow-hidden
+            transition-shadow duration-300
+            ${isActive ? "shadow-2xl shadow-primary/25 border-primary/40" : "shadow-xl shadow-black/10"}
+          `}
+        >
+          {/* Glossy sheen sweeping across the face */}
+          <div className="pointer-events-none absolute -inset-y-10 -left-1/3 w-1/2 rotate-12 bg-gradient-to-r from-transparent via-foreground/10 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-[260%] transition-all duration-700 ease-out" />
+
+          {/* Soft glow behind the icon */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[70%] w-20 h-20 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Floating icon cube */}
+          <div
+            className="relative w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/5 border border-primary/20 mb-2 sm:mb-3 shadow-lg shadow-primary/10 transition-transform duration-300 group-hover:scale-110"
+            style={{ transform: "translateZ(38px)" }}
+          >
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary" />
+          </div>
+
+          <h3
+            className="text-[11px] sm:text-sm lg:text-base font-bold text-foreground mb-1 leading-tight"
+            style={{ transform: "translateZ(24px)" }}
+          >
+            {feature.title}
+          </h3>
+
+          <p
+            className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground leading-snug line-clamp-2 lg:line-clamp-3"
+            style={{ transform: "translateZ(14px)" }}
+          >
+            {feature.description}
+          </p>
+
+          <span className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <ArrowUpRight className="w-3 h-3 text-primary" />
+          </span>
+
+          <div
+            className={`absolute inset-0 rounded-[1.35rem] pointer-events-none bg-gradient-to-br from-primary/12 via-transparent to-transparent transition-opacity duration-300 ${isActive ? "opacity-100" : "opacity-0"}`}
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const FeaturesSection = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const active = activeIndex !== null ? features[activeIndex] : null;
@@ -193,73 +320,20 @@ const FeaturesSection = () => {
           </p>
         </div>
 
-        {/* Uniform square wall */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            const isActive = activeIndex === index;
-
-            return (
-              <div
-                key={feature.title}
-                className="group relative outline-none cursor-pointer"
-                tabIndex={0}
-                role="button"
-                aria-label={`${feature.title} — open preview`}
-                aria-haspopup="dialog"
-                onClick={() => setActiveIndex(index)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActiveIndex(index);
-                  }
-                }}
-              >
-                <div
-                  className={`
-                    tech-card border-0
-                    relative flex flex-col items-center justify-center text-center
-                    aspect-square w-full h-full
-                    p-3 sm:p-4 lg:p-5
-                    rounded-2xl
-                    bg-gradient-to-br from-card/95 to-card/60
-                    backdrop-blur-xl
-                    border border-border/50
-                    transition-all duration-300 ease-out
-                    focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background
-                    active:scale-[0.98]
-                    ${isActive ? "scale-[1.03] shadow-xl shadow-primary/20 border-primary/40" : "shadow-lg shadow-black/5"}
-                  `}
-                >
-                  {/* Animated energy ring behind icon */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[70%] w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
-
-                  {/* Icon halo */}
-                  <div className="relative w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary/25 to-primary/5 border border-primary/15 mb-2 sm:mb-3 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:border-primary/40">
-                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary transition-transform duration-300 group-hover:animate-icon-energize" />
-                  </div>
-
-                  <h3 className="text-[11px] sm:text-sm lg:text-base font-bold text-foreground mb-1 leading-tight">
-                    {feature.title}
-                  </h3>
-
-                  <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground leading-snug line-clamp-2 lg:line-clamp-3">
-                    {feature.description}
-                  </p>
-
-                  {/* Expand affordance */}
-                  <span className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ArrowUpRight className="w-3 h-3 text-primary" />
-                  </span>
-
-                  {/* Hover glow overlay */}
-                  <div
-                    className={`absolute inset-0 rounded-2xl pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-transparent transition-opacity duration-300 ${isActive ? "opacity-100" : "opacity-0"}`}
-                  />
-                </div>
-              </div>
-            );
-          })}
+        {/* 3D block wall */}
+        <div
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-7"
+          style={{ perspective: "1400px" }}
+        >
+          {features.map((feature, index) => (
+            <FeatureBlock
+              key={feature.title}
+              feature={feature}
+              index={index}
+              isActive={activeIndex === index}
+              onOpen={() => setActiveIndex(index)}
+            />
+          ))}
         </div>
       </div>
 
