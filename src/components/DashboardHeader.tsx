@@ -55,17 +55,6 @@ export function DashboardHeader() {
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
 
-          {/* LightPaper document workspace */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/lightpaper")}
-            className={iconBtnClass}
-            title="LightPaper"
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
-
           <Button
             variant="ghost"
             size="icon"
