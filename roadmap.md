@@ -18,6 +18,6 @@
 - [x] Removed badge chips: Platform Capabilities, Live Ecosystem Intelligence, Deep Tech Accelerator, hero AI-POWERED badge
 
 - [x] MVPBrochure (/forstartups): full-space agenda cards, dynamic hover, neo colors, tree animation in deliverables, new VR page 12 (apply 13, 14 total)
-- [ ] MVPBrochure: interactive 4-phase step navigator on agenda pages, full-size GrowthSection tree, program cost on closing page
+- [x] MVPBrochure: interactive 4-phase step navigator on agenda pages, full-size GrowthSection tree, program cost on closing page
 
-- [ ] LightPaper: move icon from DashboardHeader upper bar to main DashboardTabsNav next to Tools, add workspace tab content in every dashboard
+- [x] LightPaper: move icon from DashboardHeader upper bar to main DashboardTabsNav next to Tools, add workspace tab content in every dashboard
