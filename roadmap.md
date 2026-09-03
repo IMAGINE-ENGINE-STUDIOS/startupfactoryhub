@@ -13,3 +13,6 @@
 - [ ] Address Supabase security-linter warnings (security-definer execution, leaked-password protection)
 - [x] Investor Priority brochure: FAQ page removed, replaced by integrated Stripe checkout ($500/mo · $5,000/yr)
 - [x] Basic + Investor brochures: imagery-led editorial entitlement tiles
+
+- [x] Features section: replaced stylized mockups with real app screenshots (src/assets/features/) + left/right arrow navigation
+- [x] Removed badge chips: Platform Capabilities, Live Ecosystem Intelligence, Deep Tech Accelerator, hero AI-POWERED badge
