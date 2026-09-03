@@ -102,12 +102,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
     const run = async () => {
       try {
         // Offload base64 page images to Storage so the JSONB payload stays small.
-        let payload = content;
-        try {
-          payload = await offloadHeavyContent(content, user.id);
-        } catch (err) {
-          console.error("Content offload failed, saving raw payload:", err);
-        }
+        const payload = await offloadHeavyContent(content, user.id);
 
         const hashKey = projectId || `new:${title}`;
         const hash = stableHash({ title, payload });
@@ -161,10 +156,13 @@ export function useLightPaperProjects(projectType?: ProjectType) {
         throw lastError;
       } catch (error: any) {
         console.error("Error saving project:", error);
+        const message = typeof error?.message === "string" ? error.message : "";
         notifyFailure(
-          typeof error?.message === "string" && /payload|too large|413/i.test(error.message)
+          /payload|too large|413/i.test(message)
             ? "Document too large to save — try removing large images"
-            : "Failed to save project"
+            : /storage|bucket|row-level|policy|upload/i.test(message)
+              ? "Could not securely upload document pages. Your document is still open; please retry."
+              : "Failed to save project. Your document is still open; please retry."
         );
         return null;
       } finally {

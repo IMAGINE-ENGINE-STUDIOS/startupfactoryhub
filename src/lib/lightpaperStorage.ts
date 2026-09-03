@@ -49,7 +49,10 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   const converted = dataUrlToBlob(dataUrl);
   if (!converted) return dataUrl;
 
-  const path = `lightpaper/${userId}/${hashString(dataUrl)}-${dataUrl.length}.${converted.ext}`;
+  // `feed-media` ownership policies require the authenticated user id to be
+  // the FIRST path segment. The former lightpaper/{userId}/... path was
+  // rejected by Storage RLS, which then caused every image-heavy save to fail.
+  const path = `${userId}/lightpaper/${hashString(dataUrl)}-${dataUrl.length}.${converted.ext}`;
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(path, converted.blob, { upsert: true, contentType: converted.blob.type });
@@ -68,7 +71,9 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
 /**
  * Replaces base64 page images inside a LightPaper save payload with Storage
  * URLs so the JSONB row stays small (a few KB instead of hundreds of MB).
- * Falls back to the original payload if offloading is not possible.
+ * Throws if any upload fails. Saving the original base64 payload would exceed
+ * PostgREST limits and can create rows that reopen blank, so failure must stay
+ * explicit and lossless.
  */
 export async function offloadHeavyContent(content: any, userId: string): Promise<any> {
   if (!content || typeof content !== "object") return content;
@@ -85,20 +90,10 @@ export async function offloadHeavyContent(content: any, userId: string): Promise
     const results = await Promise.all(
       slice.map(async (img) => {
         if (typeof img !== "string" || !img.startsWith("data:")) return img;
-        try {
-          return await uploadDataUrl(img, userId);
-        } catch (err) {
-          console.error("[LightPaper] page image offload failed:", err);
-          return null;
-        }
+        return uploadDataUrl(img, userId);
       })
     );
-    for (const r of results) {
-      // If any page fails to upload we keep the payload lossless by dropping
-      // the offload entirely (caller will still try to save the raw payload).
-      if (r === null) return content;
-      uploaded.push(r);
-    }
+    uploaded.push(...results);
   }
 
   return { ...content, viewModeImages: uploaded };

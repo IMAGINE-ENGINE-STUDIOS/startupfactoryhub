@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FileText, Table, Presentation } from 'lucide-react';
+import { FileText, Table, Presentation, Maximize2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { LightPaperDocument } from './LightPaperDocument';
@@ -12,6 +13,7 @@ import { LightPaperPresentation } from './LightPaperPresentation';
  */
 export function LightPaperWorkspace() {
   const [tab, setTab] = useState('document');
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
@@ -28,7 +30,18 @@ export function LightPaperWorkspace() {
               </p>
             </div>
           </div>
-          <div className="flex border rounded-lg p-1 bg-muted/30 w-fit">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              onClick={() => navigate('/lightpaper')}
+              title="Open file manager and full workspace"
+            >
+              <Maximize2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Full workspace</span>
+            </Button>
+            <div className="flex border rounded-lg p-1 bg-muted/30 w-fit">
             {([
               ['document', FileText, 'Document'],
               ['spreadsheet', Table, 'Spreadsheet'],
@@ -45,11 +58,12 @@ export function LightPaperWorkspace() {
                 <Icon className="h-4 w-4" />
               </Button>
             ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="tech-card border-0 rounded-2xl p-1 overflow-hidden min-h-[60vh]">
+      <div className="tech-card border-0 rounded-2xl p-1 overflow-hidden h-[calc(100vh-12rem)] min-h-[680px]">
         <Tabs value={tab} onValueChange={setTab} className="w-full h-full">
           <TabsContent value="document" className="mt-0 h-full">
             <LightPaperDocument selectedProject={null} />
