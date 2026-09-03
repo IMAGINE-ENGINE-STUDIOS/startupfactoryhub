@@ -11,6 +11,7 @@ import { useCreateResource, ResourceType, LocationType, JOURNEY_STEPS, JourneySt
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImagePlus, Loader2, X } from 'lucide-react';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 const RESOURCE_TYPE_OPTIONS: { value: ResourceType; label: string; emergencyLabel: string }[] = [
   { value: 'office', label: 'Office', emergencyLabel: 'Command Center' },
@@ -61,6 +62,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createResource = useCreateResource();
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Resource map posting');
 
   // Handle logo file selection
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +160,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!emergencyMode && !requireMembership()) return;
     
     if (!title || !resourceType) {
       toast.error('Please fill in all required fields');
@@ -219,6 +222,8 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
   };
 
   return (
+    <>
+    {membershipDialog}
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[80]">
         <DialogHeader>
@@ -441,5 +446,6 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
