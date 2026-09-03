@@ -12,6 +12,9 @@ const TIER_MAP: Record<string, string> = {
   "prod_U1XHGc8mHzhFhJ": "self_paced_office",
   "prod_U1XQ4HPzkYzTHB": "global_access",
   "prod_U1XRb2qaUuoVyH": "corporate",
+  // Basic Plan (monthly + yearly billing of the same tier)
+  "prod_VBmemZuuco0yOB": "basic",
+  "prod_VBmgE3TZ1f0O7F": "basic",
 };
 
 serve(async (req) => {
