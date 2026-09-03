@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Send, Search, MessageSquare, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Message {
   id: string;
@@ -48,6 +49,7 @@ const MessagingInterface = memo(function MessagingInterface() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Direct messaging & investor contact');
   const [searchQuery, setSearchQuery] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -171,6 +173,7 @@ const MessagingInterface = memo(function MessagingInterface() {
   };
 
   const sendMessage = useCallback(async () => {
+    if (!requireMembership()) return;
     if (!newMessage.trim() || !user || !selectedConversation) return;
 
     const { error } = await supabase
@@ -218,6 +221,7 @@ const MessagingInterface = memo(function MessagingInterface() {
 
   return (
     <div className="h-[calc(100vh-200px)] flex flex-col lg:flex-row gap-6 p-4 animate-in fade-in duration-700">
+      {membershipDialog}
       {/* Conversations List */}
       <Card className={`w-full lg:w-80 flex flex-col backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl overflow-hidden ${selectedConversation ? 'hidden lg:flex' : 'flex'}`}>
         <CardHeader className="pb-3 px-6 pt-6 bg-gradient-to-br from-primary/10 via-background to-background">
