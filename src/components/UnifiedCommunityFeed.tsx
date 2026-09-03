@@ -1130,10 +1130,12 @@ export default function UnifiedCommunityFeed({
                       
                       {/* Media Display */}
                       {post.media_urls && post.media_urls.length > 0 && (() => {
-                        const imageUrls = post.media_urls!.filter(url => url && !url?.includes('.mp4') && !url?.includes('.webm') && !url?.includes('.mov') && !url?.includes('video'));
-                        const videoUrls = post.media_urls!.filter(url => url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video'));
+                        const urls = post.media_urls!.filter(Boolean);
+                        const imageUrls = urls.filter(url => getFileKind(url) === 'image');
+                        const videoUrls = urls.filter(url => getFileKind(url) === 'video');
+                        const otherUrls = urls.filter(url => !['image', 'video'].includes(getFileKind(url)));
                         return (
-                          <div className={`grid gap-2 mt-3 ${post.media_urls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                          <div className={`grid gap-2 mt-3 ${urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                             {videoUrls.map((url, idx) => (
                               <video key={`v-${idx}`} src={url} controls className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" />
                             ))}
@@ -1152,9 +1154,13 @@ export default function UnifiedCommunityFeed({
                                 )}
                               </div>
                             ))}
+                            {otherUrls.map((url, idx) => (
+                              <FileAttachmentPreview key={`f-${idx}`} url={url} />
+                            ))}
                           </div>
                         );
                       })()}
+
                       
                       <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
                         <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${likedPosts.has(post.id) ? 'text-red-500' : ''}`} onClick={() => toggleLike(post.id)}>
