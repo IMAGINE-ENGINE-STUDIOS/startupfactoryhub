@@ -15,63 +15,51 @@ export function LightPaperWorkspace() {
   const [tab, setTab] = useState('document');
   const navigate = useNavigate();
 
-  return (
-    <div className="space-y-4">
-      <div className="relative tech-card border-0 rounded-2xl p-4 sm:p-5 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg sm:text-xl font-semibold">LightPaper Workspace</h2>
-              <p className="text-sm text-muted-foreground">
-                Documents, spreadsheets and presentations
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-2"
-              onClick={() => navigate('/lightpaper')}
-              title="Open file manager and full workspace"
-            >
-              <Maximize2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Full workspace</span>
-            </Button>
-            <div className="flex border rounded-lg p-1 bg-muted/30 w-fit">
-            {([
-              ['document', FileText, 'Document'],
-              ['spreadsheet', Table, 'Spreadsheet'],
-              ['presentation', Presentation, 'Presentation'],
-            ] as const).map(([key, Icon, title]) => (
-              <Button
-                key={key}
-                variant={tab === key ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-9 w-9 p-0"
-                onClick={() => setTab(key)}
-                title={title}
-              >
-                <Icon className="h-4 w-4" />
-              </Button>
-            ))}
-            </div>
-          </div>
-        </div>
-      </div>
+  const workspaceTools = (
+    <>
+      {([
+        ['document', FileText, 'Document'],
+        ['spreadsheet', Table, 'Spreadsheet'],
+        ['presentation', Presentation, 'Presentation'],
+      ] as const).map(([key, Icon, title]) => (
+        <Button
+          key={key}
+          variant={tab === key ? 'secondary' : 'ghost'}
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => setTab(key)}
+          title={title}
+          aria-label={title}
+        >
+          <Icon className="h-4 w-4" />
+        </Button>
+      ))}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 w-8 p-0"
+        onClick={() => navigate('/lightpaper')}
+        title="Open full workspace"
+        aria-label="Open full workspace"
+      >
+        <Maximize2 className="h-4 w-4" />
+      </Button>
+    </>
+  );
 
-      <div className="tech-card border-0 rounded-2xl p-1 overflow-hidden h-[calc(100vh-12rem)] min-h-[680px]">
+  return (
+    <div className="h-[calc(100vh-8.5rem)] min-h-[680px]">
+      <div className="tech-card border-0 rounded-lg overflow-hidden h-full">
         <Tabs value={tab} onValueChange={setTab} className="w-full h-full">
           <TabsContent value="document" className="mt-0 h-full">
-            <LightPaperDocument selectedProject={null} />
+            <LightPaperDocument selectedProject={null} workspaceTools={workspaceTools} />
           </TabsContent>
           <TabsContent value="spreadsheet" className="mt-0 h-full">
+            <div className="flex items-center border-b bg-background px-2 py-1">{workspaceTools}</div>
             <LightPaperSpreadsheet />
           </TabsContent>
           <TabsContent value="presentation" className="mt-0 h-full">
+            <div className="flex items-center border-b bg-background px-2 py-1">{workspaceTools}</div>
             <LightPaperPresentation />
           </TabsContent>
         </Tabs>
