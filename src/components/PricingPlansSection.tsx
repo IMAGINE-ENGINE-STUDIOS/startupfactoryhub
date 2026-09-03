@@ -10,23 +10,28 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const startupMemberships: {
-  key: Exclude<MembershipTier, "free">;
+  key: Exclude<MembershipTier, "free"> | "basic";
   icon: typeof Zap;
   tagline: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
+  /** Renders a fixed-price card that deep-links to the Basic Plan brochure checkout. */
+  basic?: boolean;
+  /** Hides the price and routes the CTA to sales instead of checkout. */
+  contactSales?: boolean;
 }[] = [
   {
-    key: "community",
+    key: "basic",
+    basic: true,
     icon: Zap,
     tagline: "Full digital access, virtual events, community, and mentor interactions.",
     bestFor: "Remote-first teams or early MVP-stage founders",
     features: [
-      "Full resource library",
-      "Mentor sessions (virtual)",
-      "Startup physical hub community access",
-      "Local Startup Factory HUB coworking space access all locations (community space access only)",
+      "Post on the social feed & resource map",
+      "Full resource library access",
+      "Internships & volunteering roles",
+      "Technology transfer & certified courses",
     ],
   },
   {
