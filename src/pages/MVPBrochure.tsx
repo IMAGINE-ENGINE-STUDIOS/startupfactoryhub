@@ -1047,31 +1047,32 @@ const MVPGrowthPanel = ({ spec, phaseIndex }: { spec: WeekSpec; phaseIndex: numb
       </div>
 
 
-      {/* floating week benefit cards — this page's phase is highlighted */}
+      {/* floating week benefit cards — glass + white text over the imagery */}
       <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
         {MVP_GROWTH_BENEFITS.map((b) => {
           const on = b.stage === stage;
           return (
             <div
               key={b.id}
-              className="text-left rounded-xl px-3 py-2 transition-all duration-300"
+              className="text-left rounded-xl px-3 py-2 transition-all duration-300 backdrop-blur-md"
               style={{
-                border: `1px solid ${spec.accent}${on ? '66' : '22'}`,
-                background: on ? `${spec.accent}18` : 'rgba(255,255,255,0.9)',
+                border: `1px solid ${spec.accent}${on ? 'aa' : '44'}`,
+                background: on ? `${spec.accent}30` : 'rgba(4,10,24,0.55)',
                 boxShadow: on ? `0 8px 24px -12px ${spec.accent}` : undefined,
               }}
             >
               <span
                 className="block font-mono text-[12px] uppercase tracking-[0.08em] font-bold leading-tight"
-                style={{ color: on ? spec.accent : 'rgba(15,23,42,0.55)' }}
+                style={{ color: on ? spec.accent : 'rgba(255,255,255,0.85)', textShadow: `0 0 10px rgba(0,0,0,0.6)` }}
               >
                 {b.label}
               </span>
-              <span className="block text-[13px] leading-snug text-slate-700">{b.line}</span>
+              <span className="block text-[13px] leading-snug text-white" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.7)' }}>{b.line}</span>
             </div>
           );
         })}
       </div>
+
 
 
       {/* root inputs — bottom left, under the cards */}
