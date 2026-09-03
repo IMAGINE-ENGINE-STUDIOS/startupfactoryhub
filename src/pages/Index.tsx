@@ -10,7 +10,6 @@ import TeamSection from "@/components/TeamSection";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
-import AppDownloadSection from "@/components/AppDownloadSection";
 
 const Index = () => {
   return (
