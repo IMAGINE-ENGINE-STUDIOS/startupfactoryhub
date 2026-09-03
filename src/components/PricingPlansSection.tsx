@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBrochureOverlay";
 // Editorial imagery reused from the WTC brochure for the Investor Priority ad banner.
 import investorBannerBg from "@/assets/wtc-institutional.jpg";
-import investorBannerTile from "@/assets/wtc-kpi-capital.jpg";
+
 // Ultra-chromatic imagery, one per membership widget.
 import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
 import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
