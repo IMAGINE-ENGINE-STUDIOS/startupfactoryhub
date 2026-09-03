@@ -16,3 +16,5 @@
 
 - [x] Features section: replaced stylized mockups with real app screenshots (src/assets/features/) + left/right arrow navigation
 - [x] Removed badge chips: Platform Capabilities, Live Ecosystem Intelligence, Deep Tech Accelerator, hero AI-POWERED badge
+
+- [ ] MVPBrochure (/forstartups): full-space agenda cards, dynamic hover, neo colors, tree animation in deliverables, new VR page 12 (apply becomes 13, 14 total)

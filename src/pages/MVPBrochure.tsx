@@ -76,13 +76,14 @@ const GROWTH_BENEFITS = [
 
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
-  cyan: '#0ea5b7',             // teal-cyan, readable on white
-  cyanSoft: 'rgba(14,165,183,0.45)',
-  magenta: '#1f2a44',          // soft electric blue
-  magentaSoft: 'rgba(31,42,68,0.4)',
-  lime: '#10b981',             // emerald
+  cyan: '#06b6d4',             // electric cyan — neo futuristic, readable on white
+  cyanSoft: 'rgba(6,182,212,0.45)',
+  magenta: '#c026d3',          // electric fuchsia
+  magentaSoft: 'rgba(192,38,211,0.4)',
+  lime: '#65a30d',             // neo lime
   emerald: '#059669',
-  amber: '#0d9488',            // teal
+  amber: '#d97706',            // neon amber
+  violet: '#7c3aed',           // ultraviolet accent
   ink: '#0f172a',              // slate-900 for text
   inkSoft: 'rgba(15,23,42,0.65)',
 };
