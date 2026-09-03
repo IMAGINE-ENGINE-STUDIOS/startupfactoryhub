@@ -701,7 +701,7 @@ const InvestorCheckoutPanel = ({
 
 
 /* ============================ PAGE ============================ */
-export default function InvestorPlanBrochure() {
+export default function InvestorPlanBrochure({ embedded = false }: { embedded?: boolean }) {
   const { config, yearlySavingsPercent } = useInvestorPlan();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
@@ -1136,8 +1136,8 @@ export default function InvestorPlanBrochure() {
         />
       </div>
 
-      <Navigation />
-      <div className="relative pt-24 pb-16 px-2 sm:px-4">
+      {!embedded && <Navigation />}
+      <div className={`relative ${embedded ? 'pt-2' : 'pt-24'} pb-16 px-2 sm:px-4`}>
         {/* status strip */}
         <div className="max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-center gap-3">
           <span className="px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.25em] border border-primary/30 bg-primary/10 text-primary">
@@ -1146,9 +1146,11 @@ export default function InvestorPlanBrochure() {
           <span className="px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.25em] border border-primary/30 bg-background/60">
             {monthly}/mo · {yearly}/yr −{savings}%
           </span>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/">Back to Startup Factory Hub</Link>
-          </Button>
+          {!embedded && (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/">Back to Startup Factory Hub</Link>
+            </Button>
+          )}
         </div>
 
         {flipSupported ? (
