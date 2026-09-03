@@ -247,7 +247,12 @@ const AdminDashboard = () => {
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Invoices</span>
             </TabsTrigger>
+            <TabsTrigger value="membership-grants" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <ShieldCheck className="h-4 w-4" />
+              <span className="hidden lg:inline">Grants</span>
+            </TabsTrigger>
           </TabsList>
+
 
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
