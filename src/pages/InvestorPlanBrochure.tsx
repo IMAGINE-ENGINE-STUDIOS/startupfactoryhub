@@ -347,37 +347,72 @@ const RadialStat = ({
 };
 
 /**
- * Entitlement card — staggered reveal, hover lift and an accent meter so the
- * benefit grids read as a live dashboard rather than a static bullet list.
+ * Rotating editorial imagery pool used by the entitlement tiles so every
+ * benefit gets its own photographic plate instead of a flat glass card.
+ */
+const TILE_IMAGES = [imgLab, imgStudio, imgSummit, imgCompute, imgMarkets, imgSpace, imgCampus, imgSkyline];
+
+/**
+ * Entitlement tile — editorial dark plate with a duotone photograph, an
+ * oversized ghost numeral and a hover sweep. Replaces the previous white
+ * glass + icon-badge card for a more modern, original register.
  */
 const BenefitCard = ({
   n, label, description, accent = NEON.emerald, delay = 0,
-}: { n: number; label: string; description: string; accent?: string; delay?: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 18 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay, ease: 'easeOut' }}
-    whileHover={{ y: -6 }}
-    className="h-full"
-  >
-    <GlassCard accent={accent} padding="p-5" className="h-full overflow-hidden">
-      <div className="flex items-start gap-4">
-        <IndexPlate n={n} color={accent} />
-        <div className="min-w-0">
-          <div className="text-[19px] font-black text-slate-900 leading-tight">{label}</div>
-          <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{description}</p>
-        </div>
-      </div>
-      <motion.span
-        className="absolute bottom-0 left-5 h-[2px] rounded-full"
-        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
-        initial={{ width: 0 }}
-        animate={{ width: '55%' }}
-        transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+}: { n: number; label: string; description: string; accent?: string; delay?: number }) => {
+  const img = TILE_IMAGES[(n - 1) % TILE_IMAGES.length];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+      whileHover={{ y: -6 }}
+      className="h-full group relative overflow-hidden rounded-2xl"
+      style={{
+        border: '1px solid rgba(255,255,255,0.14)',
+        boxShadow: `0 26px 50px -28px rgba(15,23,42,0.55), 0 0 0 1px ${accent}22`,
+      }}
+    >
+      <img
+        src={img}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-[1200ms] group-hover:scale-110"
       />
-    </GlassCard>
-  </motion.div>
-);
+      <div className="absolute inset-0" style={{
+        background: `linear-gradient(135deg, ${NEON.ink}f2 0%, ${NEON.ink}e0 52%, ${accent}55 100%)`,
+      }} />
+      <div className="absolute inset-0 opacity-[0.35]" style={{
+        backgroundImage: `repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 4px)`,
+      }} />
+
+      <span className="absolute -top-3 right-3 font-mono font-black leading-none select-none pointer-events-none"
+        style={{ fontSize: 86, color: 'rgba(255,255,255,0.10)' }}>
+        {String(n).padStart(2, '0')}
+      </span>
+
+      <div className="relative p-5 h-full flex flex-col">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
+          <span className="font-mono text-[11px] uppercase tracking-[0.34em]" style={{ color: accent }}>
+            {String(n).padStart(2, '0')} · Entitlement
+          </span>
+        </div>
+        <div className="text-[19px] font-black text-white leading-tight">{label}</div>
+        <p className="text-[14.5px] text-white/70 leading-snug mt-2">{description}</p>
+        <motion.span
+          className="mt-auto pt-4 block h-[2px] rounded-full"
+          style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+          initial={{ width: 0 }}
+          animate={{ width: '60%' }}
+          transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
 
 /** Strategic dealflow channel card with editorial imagery. */
 const ChannelCard = ({
