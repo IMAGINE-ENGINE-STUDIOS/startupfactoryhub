@@ -266,6 +266,32 @@ export function LightPaperDocument({
   // Derive totalPages from pages array to avoid sync issues
   const effectiveTotalPages = docxEditablePages.length > 0 ? docxEditablePages.length : (viewMode && viewModeImages.length > 0 ? viewModeImages.length : Math.max(pages.length, 1));
 
+  // Repair the currently mounted editor too (including after hot reload). This
+  // prevents a document that was already open with legacy truncated image
+  // placeholders from staying stuck on broken Page 1 / Page 2 thumbnails.
+  useEffect(() => {
+    if (!viewMode || viewModeImages.length === 0) return;
+    const renderableImages = normalizePageImages(viewModeImages);
+    if (renderableImages.length === viewModeImages.length) return;
+
+    if (renderableImages.length > 0) {
+      setViewModeImages(renderableImages);
+      setTotalPages(renderableImages.length);
+      setCurrentPage((page) => Math.min(page, renderableImages.length));
+      setVisiblePage((page) => Math.min(page, renderableImages.length));
+      return;
+    }
+
+    const recoveredHtml = pages.find((page) => typeof page === "string" && page.trim()) || documentContent;
+    setViewMode(false);
+    setViewModeImages([]);
+    setCurrentPage(1);
+    setVisiblePage(1);
+    setTotalPages(Math.max(pages.length, 1));
+    if (recoveredHtml) setDocumentContent(recoveredHtml);
+    toast.warning("The damaged page preview was removed. The editable document page has been restored.");
+  }, [viewMode, viewModeImages, pages, documentContent]);
+
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
     if (!container) return;
