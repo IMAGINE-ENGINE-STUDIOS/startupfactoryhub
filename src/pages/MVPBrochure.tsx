@@ -221,7 +221,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 14</div>
     </div>
 
     {/* bottom hud bar */}
