@@ -869,6 +869,69 @@ type WeekSpec = {
   metric: { k: string; v: string }[];
 };
 
+/* =========================================================================
+   PHASE STEPPER — interactive 4-phase navigator shown on every agenda page
+   ========================================================================= */
+const PhaseStepper = ({
+  weeks,
+  current,
+  onJump,
+}: {
+  weeks: WeekSpec[];
+  current: number;
+  onJump: (index: number) => void;
+}) => (
+  <div className="flex items-stretch gap-2 sm:gap-3 mb-4">
+    {weeks.map((w, i) => {
+      const active = i === current;
+      const past = i < current;
+      return (
+        <button
+          key={w.code}
+          type="button"
+          data-no-flip
+          onClick={() => onJump(i)}
+          className="group flex-1 min-w-0 rounded-xl px-2 py-2.5 text-left transition-all duration-300 hover:scale-[1.02]"
+          style={{
+            background: active
+              ? `linear-gradient(135deg, ${w.accent}22, rgba(255,255,255,0.9))`
+              : 'rgba(255,255,255,0.72)',
+            border: `1px solid ${active ? w.accent : `${w.accent}30`}`,
+            boxShadow: active ? `0 8px 24px -12px ${w.accent}` : undefined,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center justify-center h-6 w-6 rounded-full text-[11px] font-black shrink-0"
+              style={{
+                background: past || active ? w.accent : `${w.accent}14`,
+                color: past || active ? '#fff' : w.accent,
+                border: `1px solid ${past || active ? w.accent : `${w.accent}40`}`,
+              }}
+            >
+              {past ? <Check className="h-3.5 w-3.5" /> : String(i + 1).padStart(2, '0')}
+            </span>
+            <div className="min-w-0">
+              <div
+                className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] font-bold truncate"
+                style={{ color: active ? w.accent : 'rgba(15,23,42,0.55)' }}
+              >
+                {w.week}
+              </div>
+              <div
+                className="text-[12px] sm:text-[14px] font-bold leading-tight truncate"
+                style={{ color: active ? '#0f172a' : 'rgba(15,23,42,0.65)' }}
+              >
+                {w.title}
+              </div>
+            </div>
+          </div>
+        </button>
+      );
+    })}
+  </div>
+);
+
 const MVP_WEEKS: WeekSpec[] = [
   {
     code: '07', week: 'WEEK 01', title: 'Validate', accent: '#10b981',
