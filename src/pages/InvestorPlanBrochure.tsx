@@ -745,10 +745,58 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · PRICING ---------------- */}
+      {/* ---------------- 05 · STRATEGIC DEALFLOW CHANNELS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="COMMERCIAL MODEL" pageNum={5}>
+          <PageFrame code="04" label="DEALFLOW CHANNELS" pageNum={5}>
+            <PageTitle kicker="Where the deals come from" title={<>NVIDIA. NASDAQ.<br />NASA. THE STUDIO.</>} />
+            <p className="text-[17px] text-slate-700 leading-relaxed mb-5">
+              Investor Priority is fed by four sourcing engines. Three connect the Hub to the
+              frontier ecosystems shaping the next decade of value; the fourth is our own venture
+              studio, where companies are built before a round ever opens.
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              {DEALFLOW_CHANNELS.map((c, i) => (
+                <ChannelCard key={c.key} channel={c} delay={i * 0.1} />
+              ))}
+            </div>
+
+            <div className="mt-5 flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="h-px w-10" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald})` }} />
+                <span className="font-mono text-[13px] uppercase tracking-[0.34em]" style={{ color: NEON.emerald }}>
+                  CH-04 · Venture studio activities
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {STUDIO_ACTIVITIES.map((a, i) => (
+                  <motion.div
+                    key={a.t}
+                    initial={{ opacity: 0, x: -14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.45, delay: 0.35 + i * 0.07, ease: 'easeOut' }}
+                  >
+                    <GlassCard accent={NEON.emerald} padding="p-4" className="h-full">
+                      <div className="flex items-start gap-3">
+                        <IndexPlate n={i + 1} color={NEON.emerald} />
+                        <div>
+                          <div className="text-[17px] font-black text-slate-900 leading-tight">{a.t}</div>
+                          <p className="text-[14px] text-slate-600 leading-snug mt-1">{a.d}</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 06 · PRICING ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={6}>
             <PageTitle kicker="Investor membership" title={<>PAY MONTHLY<br />OR SAVE {savings}%</>} />
             <div className="grid grid-cols-2 gap-6">
               <GlassCard accent={NEON.cyan} padding="p-8">
@@ -810,10 +858,10 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 07 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="ONBOARDING" pageNum={6}>
+          <PageFrame code="06" label="ONBOARDING" pageNum={7}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO PRIORITY</>} />
             <ImagePlate src={imgCampus} alt="Investors and founders meeting inside the innovation campus" caption="Founder access · pitch calendars" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
@@ -838,10 +886,10 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · FAQ ---------------- */}
+      {/* ---------------- 08 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="06" label="QUESTIONS" pageNum={7} accent={NEON.blue}>
+          <PageFrame code="07" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
@@ -861,7 +909,7 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · JOIN ---------------- */}
+      {/* ---------------- 09 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
