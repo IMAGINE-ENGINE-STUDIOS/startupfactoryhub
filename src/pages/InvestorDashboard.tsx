@@ -910,6 +910,11 @@ export default function InvestorDashboard() {
             <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
+
 
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
             <div className="absolute inset-0">

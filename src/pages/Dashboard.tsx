@@ -639,6 +639,11 @@ const Dashboard = () => {
               <MVPReferralCard />
               <AIFeaturesHub />
             </TabsContent>
+          {/* LightPaper Tab */}
+          <TabsContent value="lightpaper" className="space-y-4">
+            <LightPaperWorkspace />
+          </TabsContent>
+
         }
 
           {/* Meetings Tab */}
