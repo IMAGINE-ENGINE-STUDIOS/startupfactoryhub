@@ -105,33 +105,73 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   return url;
 }
 
+/** Matches every inline base64 image embedded in an HTML string. */
+const INLINE_DATA_URL = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi;
+
+/**
+ * Inline base64 images inside `content.html` / `content.pages` were never
+ * offloaded, so a single pasted screenshot could push the JSONB row into the
+ * multi-megabyte range — big enough to break the search-index trigger and make
+ * the save fail. We now hoist those to Storage as well.
+ */
+async function offloadHtmlImages(html: string, userId: string): Promise<string> {
+  if (typeof html !== "string" || !html.includes("data:image/")) return html;
+  const matches = Array.from(new Set(html.match(INLINE_DATA_URL) || []));
+  if (matches.length === 0) return html;
+
+  let out = html;
+  for (const dataUrl of matches) {
+    try {
+      const url = await uploadDataUrl(dataUrl, userId);
+      out = out.split(dataUrl).join(url);
+    } catch {
+      // Keep the inline copy rather than losing the image; the row may still
+      // save because the trigger now tolerates oversized content.
+    }
+  }
+  return out;
+}
+
 /**
  * Replaces base64 page images inside a LightPaper save payload with Storage
  * URLs so the JSONB row stays small (a few KB instead of hundreds of MB).
- * Throws if any upload fails. Saving the original base64 payload would exceed
- * PostgREST limits and can create rows that reopen blank, so failure must stay
- * explicit and lossless.
+ * Covers uploaded page renders (`viewModeImages`) AND inline images embedded in
+ * the rich-text HTML (`html`, `pages`).
  */
 export async function offloadHeavyContent(content: any, userId: string): Promise<any> {
   if (!content || typeof content !== "object") return content;
 
-  const images: string[] | undefined = content.viewModeImages;
-  if (!Array.isArray(images) || images.length === 0) return content;
-  if (!images.some((img) => typeof img === "string" && img.startsWith("data:"))) return content;
+  const next: any = { ...content };
 
-  const uploaded: string[] = [];
-  // Upload in small batches to avoid saturating the network on 100+ page files.
-  const BATCH = 4;
-  for (let i = 0; i < images.length; i += BATCH) {
-    const slice = images.slice(i, i + BATCH);
-    const results = await Promise.all(
-      slice.map(async (img) => {
-        if (typeof img !== "string" || !img.startsWith("data:")) return img;
-        return uploadDataUrl(img, userId);
-      })
-    );
-    uploaded.push(...results);
+  const images: string[] | undefined = content.viewModeImages;
+  if (Array.isArray(images) && images.some((img) => typeof img === "string" && img.startsWith("data:"))) {
+    const uploaded: string[] = [];
+    // Upload in small batches to avoid saturating the network on 100+ page files.
+    const BATCH = 4;
+    for (let i = 0; i < images.length; i += BATCH) {
+      const slice = images.slice(i, i + BATCH);
+      const results = await Promise.all(
+        slice.map(async (img) => {
+          if (typeof img !== "string" || !img.startsWith("data:")) return img;
+          return uploadDataUrl(img, userId);
+        })
+      );
+      uploaded.push(...results);
+    }
+    next.viewModeImages = uploaded;
   }
 
-  return { ...content, viewModeImages: uploaded };
+  if (typeof next.html === "string") {
+    next.html = await offloadHtmlImages(next.html, userId);
+  }
+
+  if (Array.isArray(next.pages)) {
+    const pages: string[] = [];
+    for (const page of next.pages) {
+      pages.push(typeof page === "string" ? await offloadHtmlImages(page, userId) : page);
+    }
+    next.pages = pages;
+  }
+
+  return next;
 }
