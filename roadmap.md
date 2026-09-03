@@ -36,3 +36,7 @@
 - [x] Remove the requested decorative element from the Genius AI plans section
 - [x] Merge accelerator programs into Accelerator Memberships 4-card grid
 - [x] Delete 'Built for Everyone' section from home page
+
+## LightPaper save + feed attachments
+- [ ] Fix "Failed to save project" (search-index trigger on large documents, storage grants)
+- [ ] Feed uploads: show attached files as downloadable items with inline preview
