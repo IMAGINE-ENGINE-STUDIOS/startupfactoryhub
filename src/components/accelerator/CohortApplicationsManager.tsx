@@ -140,11 +140,30 @@ export const CohortApplicationsManager = ({
         .eq('id', applicationId);
 
       if (error) throw error;
+
+      // On acceptance, email the founder the program payment link automatically.
+      if (status === 'accepted') {
+        const app = publicApplications.find(a => a.id === applicationId) as any;
+        if (app?.email) {
+          const { error: mailError } = await supabase.functions.invoke('send-mvp-acceptance-email', {
+            body: {
+              email: app.email,
+              name: app.founder_name || 'Founder',
+              startupName: app.startup_name || 'Your startup',
+              cohortName: cohorts.find(c => c.id === app.cohort_id)?.name || 'MVP Program',
+              applicationId,
+            },
+          });
+          if (mailError) console.error('Acceptance email failed:', mailError);
+        }
+      }
+
       await fetchPublicApplications();
     } catch (err) {
       console.error('Error updating public application:', err);
     }
   };
+
 
   const filteredApplications = applications.filter(app => {
     const matchesSearch = !searchQuery || 
