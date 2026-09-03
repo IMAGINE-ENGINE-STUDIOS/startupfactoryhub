@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Users, Target, Rocket, TrendingUp } from "lucide-react";
+import { Target, Rocket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import bannerBg from "@/assets/wtc-institutional.jpg";
 
 const About = () => {
   const { t } = useLanguage();
@@ -10,22 +11,75 @@ const About = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
-      <section className="py-20 sm:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-ocean-dark/20 to-background" />
-        
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          {/* Header */}
-          <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 tracking-wide">
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
+
+      {/* Hero — full-bleed banner with the same glassmorphic overlay used in Investor Priority */}
+      <section className="relative overflow-hidden border-b border-primary/20">
+        {/* Imagery layer */}
+        <div className="absolute inset-0">
+          <img
+            src={bannerBg}
+            alt="Startup Factory Hub ecosystem"
+            className="h-full w-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+        </div>
+
+        {/* Full-bleed animated glassmorphic overlay */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* Slow-spinning transparent conic sheen */}
+          <div className="absolute -inset-1/2 animate-[spin_26s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,hsl(var(--primary)/0.10)_100deg,transparent_200deg,hsl(var(--primary)/0.06)_280deg,transparent_360deg)] opacity-70" />
+          {/* Soft radial glows */}
+          <div className="absolute right-0 top-0 h-full w-3/4 bg-[radial-gradient(circle_at_75%_25%,hsl(var(--primary)/0.18)_0%,transparent_55%)]" />
+          <div className="absolute left-0 bottom-0 h-3/4 w-1/2 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--primary)/0.10)_0%,transparent_50%)]" />
+          {/* Fine grid */}
+          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+          {/* Floating glass orbs */}
+          <div className="absolute right-[12%] top-[18%] h-28 w-28 rounded-full bg-primary/[0.10] blur-3xl animate-pulse" />
+          <div className="absolute right-[28%] bottom-[22%] h-36 w-36 rounded-full bg-primary/[0.08] blur-3xl animate-pulse [animation-delay:1s]" />
+          <div className="absolute right-[6%] bottom-[12%] h-20 w-20 rounded-full bg-primary/[0.12] blur-2xl animate-pulse [animation-delay:2s]" />
+          {/* Orbit rings */}
+          <div className="absolute right-[20%] top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border border-primary/10" />
+          <div className="absolute right-[16%] top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-primary/5" />
+          {/* Rising bars along the right edge */}
+          <div className="absolute inset-x-4 bottom-0 flex items-end justify-end gap-1.5 sm:inset-x-10">
+            {[28, 46, 34, 62, 50, 78, 68, 92, 58, 84].map((h, i) => (
+              <span
+                key={i}
+                className="w-2 sm:w-3 rounded-t-sm bg-gradient-to-t from-primary/50 to-primary/20 opacity-50"
+                style={{ height: `${h * 0.55}px`, animationDelay: `${i * 120}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="container relative z-10 mx-auto px-4 sm:px-6 py-20 sm:py-32">
+          <div className="max-w-3xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-primary">
+              Startup Factory Hub
+            </p>
+            <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
                 {t('about.title')}
               </span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-lg">
               {t('about.subtitle')}
             </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {["AI matching", "Global community", "Mentorship", "Funding"].map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-primary"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
 
           {/* Mission & Vision */}
           <div className="grid md:grid-cols-2 gap-8 mb-16">
