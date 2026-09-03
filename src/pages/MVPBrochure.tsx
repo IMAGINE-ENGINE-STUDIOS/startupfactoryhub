@@ -1100,10 +1100,12 @@ const WeekAgendaSlide = ({
   spec,
   currentIndex,
   onJump,
+  phaseIndex,
 }: {
   spec: WeekSpec;
   currentIndex: number;
   onJump: (index: number) => void;
+  phaseIndex: number;
 }) => (
   <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
     <PageTitle
@@ -1157,7 +1159,7 @@ const WeekAgendaSlide = ({
 
       {/* full-size growth tree + deliverables (same scale as /forpartners) */}
       <div className="flex flex-col min-h-0 h-full rounded-2xl overflow-hidden border" style={{ borderColor: `${spec.accent}33` }}>
-        <MVPGrowthPanel spec={spec} />
+        <MVPGrowthPanel spec={spec} phaseIndex={phaseIndex} />
       </div>
     </div>
 
@@ -2266,22 +2268,9 @@ export default function MVPBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
-                </A4Wrapper>
-              </BookPage>
-              <BookPage>
-                <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
-                </A4Wrapper>
-              </BookPage>
-              <BookPage>
-                <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
-                </A4Wrapper>
-              </BookPage>
-              <BookPage>
-                <A4Wrapper>
-                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} />
+                  <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={0} />
+...
+                  <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={3} />
                 </A4Wrapper>
               </BookPage>
 
