@@ -23,6 +23,7 @@ import HTMLFlipBook from 'react-pageflip';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 import GrowthSection from '@/components/brochure/GrowthSection';
+import GrowthTree3D from '@/components/brochure/GrowthTree3D';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
