@@ -1,18 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Bot,
-  Check,
-  Rocket,
-  Sparkles,
-  Building2,
-  GraduationCap,
-  Users,
-  Loader2,
-  TrendingUp,
-  Handshake,
-  Lightbulb,
-} from "lucide-react";
+import { Check, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
