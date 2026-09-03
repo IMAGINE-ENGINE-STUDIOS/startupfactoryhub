@@ -8131,6 +8131,57 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plan_config: {
+        Row: {
+          created_at: string
+          currency: string
+          entitlements: Json
+          id: string
+          is_active: boolean
+          key: string
+          monthly_price_cents: number
+          name: string
+          stripe_monthly_price_id: string | null
+          stripe_monthly_product_id: string | null
+          stripe_yearly_price_id: string | null
+          stripe_yearly_product_id: string | null
+          updated_at: string
+          yearly_price_cents: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          entitlements?: Json
+          id?: string
+          is_active?: boolean
+          key: string
+          monthly_price_cents?: number
+          name: string
+          stripe_monthly_price_id?: string | null
+          stripe_monthly_product_id?: string | null
+          stripe_yearly_price_id?: string | null
+          stripe_yearly_product_id?: string | null
+          updated_at?: string
+          yearly_price_cents?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          entitlements?: Json
+          id?: string
+          is_active?: boolean
+          key?: string
+          monthly_price_cents?: number
+          name?: string
+          stripe_monthly_price_id?: string | null
+          stripe_monthly_product_id?: string | null
+          stripe_yearly_price_id?: string | null
+          stripe_yearly_product_id?: string | null
+          updated_at?: string
+          yearly_price_cents?: number
+        }
+        Relationships: []
+      }
       user_goals: {
         Row: {
           created_at: string | null
