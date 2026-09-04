@@ -487,7 +487,7 @@ function ARHologram() {
       <div className="pointer-events-none absolute left-0 top-[18%] animate-fade-in">
         <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Focus</p>
-          <p className="font-mono text-xs text-foreground">INVESTOR MATCH</p>
+          <p className="font-mono text-xs text-foreground">SCALE-UP</p>
         </div>
       </div>
       <div className="pointer-events-none absolute right-0 top-[42%] animate-fade-in">
@@ -577,7 +577,7 @@ export default function AcceleratedFundraising() {
   const programName = profile?.organization_name || 'Startup Factory Hub Accelerated Fundraising';
 
   const hud = [
-    { k: 'Duration', v: 'Investor Matching Sprint' },
+    { k: 'Sprint', v: 'Scale-Up Sprint' },
     { k: 'Program Cost', v: 'Free' },
     { k: 'Focus', v: 'Aerospace · Defense · Space' },
     { k: 'Format', v: '100% Remote · Worldwide' },
@@ -684,7 +684,7 @@ export default function AcceleratedFundraising() {
                   background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
                 }}
               >
-                Startup Factory Hub&nbsp; | &nbsp;Investor Matching Sprint
+                Startup Factory Hub&nbsp; | &nbsp;Scale-Up Sprint
               </span>
               {profile?.is_accepting_applications && (
                 <span className="relative inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
@@ -710,7 +710,7 @@ export default function AcceleratedFundraising() {
             </div>
 
             <h1 className="font-black uppercase leading-[0.92] tracking-tight">
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your aerospace startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Scale your aerospace startup</span>
               <span
                 className="block text-[2.6rem] leading-[0.9] sm:text-[3.8rem] lg:text-[4.6rem]"
                 style={{
@@ -723,14 +723,14 @@ export default function AcceleratedFundraising() {
               >
                 Accelerated Fundraising
               </span>
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Hardware startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Scale-up hardware sprint</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(245,158,11,0.9)' }}>
-              Built for hardware founders in aerospace, defense and space — from first prototype to first check.
+              Built for hardware founders in aerospace, defense and space — from working prototype or MVP to scaled production and growth.
             </p>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
-              Get matched with the right investors for your aerospace, defense or space hardware startup. Investor matching, technical diligence, regulatory pathway and a curated Demo Day.
+              Scale the hardware you already have. We match you with deep-tech investors, run technical diligence, open regulatory pathways and curate a Demo Day for your next stage.
             </p>
 
             <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
@@ -757,7 +757,7 @@ export default function AcceleratedFundraising() {
                   boxShadow: '0 0 45px -10px rgba(129,140,248,0.7)',
                 }}
               >
-                Investor Matching Sprint
+                Scale-Up Sprint
               </button>
             </div>
 
@@ -815,7 +815,7 @@ export default function AcceleratedFundraising() {
               Built for hardware capital
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              A fundraising sprint for aerospace, defense and space startups — pitch architecture, technical diligence and investor matching in one high-intensity batch.
+              A scale-up sprint for aerospace, defense and space startups that already have a working prototype or MVP — accelerate capital, production and growth in one high-intensity batch.
             </p>
           </div>
 
