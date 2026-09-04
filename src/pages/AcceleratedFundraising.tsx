@@ -379,23 +379,8 @@ function ARHologram() {
       const R = Math.min(w, h) * 0.3;
       t += 0.0042;
 
-      // gyroscopic ring (amber, tilted, spins)
-      const ring = (tiltA: number, spin: number, rr: number, color: (a: number) => string, alpha: number, lw: number) => {
-        ctx.beginPath();
-        for (let s = 0; s <= 120; s++) {
-          const a = (s / 120) * Math.PI * 2 + spin;
-          let p = [Math.cos(a) * rr, 0, Math.sin(a) * rr];
-          p = rotX(p, tiltA);
-          const pr = project(p[0], p[1], p[2], cx, cy, R);
-          if (s === 0) ctx.moveTo(pr.x, pr.y);
-          else ctx.lineTo(pr.x, pr.y);
-        }
-        ctx.strokeStyle = color(alpha);
-        ctx.lineWidth = lw * dpr;
-        ctx.stroke();
-      };
-      ring(0.9, t * 1.3, 1.5, amber, 0.5, 1.4);
-      ring(-0.5, -t * 0.9, 1.75, cyan, 0.22, 1);
+
+
 
       // icosahedron edges with depth shading + hot vertex glow
       const ry = t * 1.1;
