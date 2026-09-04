@@ -815,7 +815,7 @@ export default function AcceleratedFundraising() {
               Built for hardware capital
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              A fundraising sprint for aerospace, defense and space startups — pitch architecture, technical diligence and investor matching in one high-intensity batch.
+              A scale-up sprint for aerospace, defense and space startups that already have a working prototype or MVP — accelerate capital, production and growth in one high-intensity batch.
             </p>
           </div>
 
