@@ -562,19 +562,24 @@ export const CohortApplicationsManager = ({
                         Interview
                       </Button>
                     )}
-                    {app.status === 'interview_scheduled' && (
-                      <div className="ml-auto flex gap-1">
-                        <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
-                          <MailWarning className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
-                          <CheckCircle className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" variant="destructive" className="text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}>
-                          <XCircle className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="ml-auto flex gap-1">
+                      <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
+                        <MailPlus className="w-3 h-3" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                        <MailWarning className="w-3 h-3" />
+                      </Button>
+                      {app.status === 'interview_scheduled' && (
+                        <>
+                          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
+                            <CheckCircle className="w-3 h-3" />
+                          </Button>
+                          <Button size="sm" variant="destructive" className="text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}>
+                            <XCircle className="w-3 h-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
