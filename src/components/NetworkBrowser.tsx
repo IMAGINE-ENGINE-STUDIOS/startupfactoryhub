@@ -34,6 +34,8 @@ export default function NetworkBrowser() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
+  const [allMembers, setAllMembers] = useState<Connection[]>([]);
+  const [allMembersLoading, setAllMembersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
   const [allCommunity, setAllCommunity] = useState(true);
@@ -49,8 +51,52 @@ export default function NetworkBrowser() {
       fetchCurrentConnections();
       fetchPendingRequests();
       fetchSuggestedUsers();
+      fetchAllMembers();
     }
   }, [user, vzlaFilter]);
+
+  const fetchAllMembers = async () => {
+    if (!user) return;
+    setAllMembersLoading(true);
+    try {
+      // Fetch every registered profile (past the 1000-row default) so All
+      // Community reflects the whole user base, not a slice.
+      const pageSize = 1000;
+      const profiles: any[] = [];
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
+          .neq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        profiles.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+
+      const visible = profiles.filter(isVisibleCommunityProfile);
+      const userIds = visible.map(p => p.user_id);
+
+      const roles: Record<string, string> = {};
+      for (let i = 0; i < userIds.length; i += 200) {
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds.slice(i, i + 200));
+        (userRoles || []).forEach((r: any) => { roles[r.user_id] = r.role; });
+      }
+
+      const seen = new Set<string>();
+      setAllMembers(visible
+        .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
+        .map(p => ({ ...p, role: roles[p.user_id] || null })));
+    } catch (error) {
+      console.error('Error fetching all community members:', error);
+    } finally {
+      setAllMembersLoading(false);
+    }
+  };
 
   // Real-time connection updates
   useEffect(() => {
@@ -227,7 +273,7 @@ export default function NetworkBrowser() {
         .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .ilike('full_name', `%${searchQuery}%`)
-        .limit(10);
+        .limit(1000);
 
       if (profiles && profiles.length > 0) {
         // Get roles
@@ -696,22 +742,36 @@ export default function NetworkBrowser() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5 text-primary" />
-              Search All Community
+              All Community
+              <Badge variant="secondary" className="ml-auto">
+                {allMembers.length} members
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search verified, completed member profiles"
+              placeholder="Search all registered members"
               aria-label="Search all community members"
             />
             {searchQuery.length > 0 && searchQuery.length < 2 && (
               <p className="text-xs text-muted-foreground">Enter at least two characters.</p>
             )}
-            {searchResults.length > 0 && (
+            {searchQuery.length >= 2 ? (
+              searchResults.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {applyFilter(searchResults).map((member) => renderUserCard(member, member.status === 'accepted'))}
+                </div>
+              )
+            ) : allMembersLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading all members...</p>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {applyFilter(searchResults).map((member) => renderUserCard(member, member.status === 'accepted'))}
+                {applyFilter(allMembers).map((member) => renderUserCard(member, false))}
               </div>
             )}
           </CardContent>
