@@ -564,8 +564,8 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 initial={{ width: 0 }} animate={{ width: 360 }} transition={{ duration: 1.2, ease: 'easeOut' }}
               />
               <p className="mt-8 text-[23px] text-white/85 max-w-2xl leading-relaxed">
-                Feed, resource map, open-source technology, acceleration programs, events,
-                investor access, internships, volunteering, technology transfer and certified courses —
+                Feed, resource map, acceleration programs, events,
+                investor access, internships, volunteering and certified courses —
                 unlocked with a single membership.
               </p>
 
@@ -1078,7 +1078,6 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               <div className="grid grid-cols-1 gap-5 flex-1">
                 {[
                   { i: CalendarDays, t: 'Events Platform', b: 'Demo days, summits and hybrid events with registration, ticketing, live streaming and immersive rooms — operated end-to-end from the platform.' },
-                  { i: Cpu, t: 'Open Source Technologies', b: 'A repository of 200+ open source and open code technologies ready for each startup to integrate, adapt and scale without license costs.' },
                   { i: Award, t: 'Credibility & Brand Authority', b: 'Presence on the Nasdaq Tower in Times Square, partnerships with NVIDIA Inception and VC funds that back every program and announcement.' },
                   { i: Building2, t: 'Offices Worldwide', b: 'Access to a global network of hubs and workspaces, enabling startups to land immediately in key markets.' },
                   { i: Handshake, t: 'International Trade Channels', b: 'Established trade routes and corporate relationships that open markets and customers beyond your home market.' },
