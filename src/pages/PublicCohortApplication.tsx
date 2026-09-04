@@ -94,6 +94,11 @@ export default function PublicCohortApplication() {
   const [pitchDeckUrl, setPitchDeckUrl] = useState('');
   const [videoPitchUrl, setVideoPitchUrl] = useState('');
   const [whyApplying, setWhyApplying] = useState('');
+  const [isIncorporated, setIsIncorporated] = useState(false);
+  const [hasWorkingMvp, setHasWorkingMvp] = useState(false);
+  const [hasRevenue, setHasRevenue] = useState<string>('');
+
+  const isAfCohort = cohort?.focus_industries?.some((i) => ['aerospace','hardware','defense','space'].includes(i.toLowerCase())) || cohort?.name.toLowerCase().includes('accelerated fundraising');
 
   useEffect(() => {
     if (cohortId) {
