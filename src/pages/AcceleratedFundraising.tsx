@@ -645,11 +645,10 @@ export default function AcceleratedFundraising() {
           <div className="mb-14 max-w-2xl">
             <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Advantages</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
-              Why join the program
+              Built for hardware capital
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              A structured acceleration experience designed to take a startup from idea to
-              investable MVP in a single, high-intensity batch.
+              A fundraising sprint for aerospace, defense and space startups — pitch architecture, technical diligence and investor matching in one high-intensity batch.
             </p>
           </div>
 
