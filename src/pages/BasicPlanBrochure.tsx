@@ -18,7 +18,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
+  Scan, Smartphone, Box, Globe2, Sparkles, Radio,
 } from 'lucide-react';
+import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
