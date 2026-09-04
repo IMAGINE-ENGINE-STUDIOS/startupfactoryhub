@@ -554,7 +554,7 @@ export default function AcceleratedFundraising() {
             <h1 className="font-black uppercase leading-[0.92] tracking-tight">
               <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your aerospace startup</span>
               <span
-                className="block text-[3.2rem] leading-[0.88] sm:text-[5.5rem]"
+                className="block text-[2.6rem] leading-[0.9] sm:text-[3.8rem] lg:text-[4.6rem]"
                 style={{
                   backgroundImage: 'linear-gradient(90deg,#f59e0b 0%,#22d3ee 45%,#6366f1 100%)',
                   WebkitBackgroundClip: 'text',
