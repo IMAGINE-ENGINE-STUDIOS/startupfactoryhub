@@ -39,6 +39,12 @@ import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
 import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
 import imgStudio from '@/assets/membership/venture-studio.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
+import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
+import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
+import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
+import eventLakeCounty from '@/assets/event-lake-county.jpg';
+import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
+import nasaLogo from '@/assets/nasa-logo.png';
 
 import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
@@ -833,7 +839,165 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 03 · THE NEW STANDARD ---------------- */}
+
+      {/* ---------------- 03 · EVENTS · WHERE THE ECOSYSTEM CONNECTS ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame accent={NEON.magenta} code="03" label="EVENTS & ACTIVATIONS" pageNum={4}>
+            {/* Ghost numeral */}
+            <div
+              className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+              style={{
+                top: '-8%',
+                left: '-6%',
+                fontSize: '780px',
+                color: 'rgba(15,23,42,0.035)',
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              }}
+            >
+              03
+            </div>
+
+            <div className="relative z-10 flex-1 min-h-0 flex flex-col">
+              {/* Editorial header */}
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-start justify-between mb-5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-px w-16" style={{ background: NEON.magenta }} />
+                  <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                    Events &amp; Activations · Vol. 01
+                  </span>
+                </div>
+                <span
+                  className="text-[44px] font-light tracking-tighter italic"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: 'rgba(15,23,42,0.18)',
+                    textDecoration: 'underline',
+                    textDecorationColor: NEON.magenta,
+                    textUnderlineOffset: '8px',
+                  }}
+                >
+                  P/03
+                </span>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.05 }}
+                className="font-extrabold tracking-tight text-slate-900 mb-5"
+                style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+              >
+                Where the{' '}
+                <span
+                  className="font-extrabold"
+                  style={{
+                    background: `linear-gradient(135deg, ${NEON.magenta} 0%, ${NEON.cyan} 60%, ${NEON.lime} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  ecosystem connects.
+                </span>
+              </motion.h1>
+
+              {/* Featured — editorial split */}
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="relative overflow-hidden shrink-0"
+                style={{ height: '33%', boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}
+              >
+                <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.72) 42%, rgba(255,255,255,0.05) 74%, transparent 100%)' }} />
+                <div className="relative z-10 h-full flex gap-6 items-center px-6 max-w-[68%]">
+                  <div className="shrink-0 self-stretch py-4">
+                    <div className="w-[6px] h-full rounded-full" style={{ background: `linear-gradient(180deg, ${NEON.magenta}, ${NEON.cyan}, ${NEON.lime})` }} />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[13px] font-bold tracking-[0.32em] uppercase" style={{ color: NEON.magenta }}>
+                      Official Host · Featured
+                    </span>
+                    <h3
+                      className="font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
+                      style={{ fontSize: '30px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                    >
+                      Artemis 2 Watch Party — AR Experience
+                    </h3>
+                    <p className="text-[16px] leading-[1.5] text-slate-600 font-light mt-2">
+                      Startup Factory Hub is the <span className="font-semibold text-slate-900">Official Host</span> of the Artemis 2
+                      Watch Party, delivering an immersive AR experience celebrating humanity's return to the Moon.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Grid of four — magazine plates */}
+              <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-4 mt-4">
+                {[
+                  { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
+                  { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
+                  { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
+                  { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
+                ].map((e, i) => (
+                  <motion.div
+                    key={e.title}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
+                    className="relative overflow-hidden min-h-0"
+                    style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
+                  >
+                    <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 34%, rgba(255,255,255,0.9) 62%, rgba(255,255,255,0.97) 100%)' }} />
+                    {e.logo && (
+                      <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
+                        <img src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
+                      </div>
+                    )}
+                    <div className="relative z-10 h-full flex flex-col justify-end p-4">
+                      <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
+                      <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                      <h4
+                        className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
+                        style={{ fontSize: '18px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                      >
+                        {e.title}
+                      </h4>
+                      <p className="text-[13px] leading-[1.45] text-slate-600 font-light mt-1">{e.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Upcoming — editorial pull quote strip */}
+              <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.magenta }}>
+                <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.magenta }}>
+                  Upcoming
+                </span>
+                <div className="min-w-0">
+                  <p
+                    className="text-slate-900 italic font-medium leading-snug"
+                    style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}
+                  >
+                    "Space Symposium — Times Square XR Experience: an immersive activation showcasing space technology innovation."
+                  </p>
+                </div>
+                <Smartphone className="h-6 w-6 shrink-0 ml-auto" style={{ color: NEON.magenta }} />
+              </div>
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 04 · THE NEW STANDARD ---------------- */}
       <BookPage>
         <A4Wrapper>
           <PageFrame code="02" label="THE NEW STANDARD" pageNum={3}>
@@ -885,10 +1049,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 04 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
+      {/* ---------------- 05 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
+          <PageFrame code="04" label="ENTITLEMENTS" pageNum={5} accent={NEON.emerald}>
             <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
             <div className="grid grid-cols-3 gap-3.5 flex-1 content-start">
               {entitlements.map((e: Entitlement, i) => (
@@ -899,10 +1063,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · PRICING ---------------- */}
+      {/* ---------------- 06 · PRICING ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="COMMERCIAL MODEL" pageNum={5}>
+          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={6}>
             <PageTitle kicker="Membership" title={<>ONE PRICE.<br />{monthly} / MONTH.</>} />
             <ImagePlate src={imgSummit} alt="Members at a Startup Factory Hub summit" caption="Everything included · one monthly price" height={200} className="mb-6" />
             <GlassCard accent={NEON.cyan} padding="p-9" className="flex-1">
@@ -933,10 +1097,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · NASDAQ TOWER ---------------- */}
+      {/* ---------------- 07 · NASDAQ TOWER ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.lime} code="05" label="GLOBAL VISIBILITY" pageNum={6}>
+          <PageFrame accent={NEON.lime} code="06" label="GLOBAL VISIBILITY" pageNum={7}>
             <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
             <motion.div
@@ -1030,10 +1194,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · AR EVENTS ---------------- */}
+      {/* ---------------- 08 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="06" label="AR · IMMERSIVE" pageNum={7}>
+          <PageFrame accent={NEON.magenta} code="07" label="AR · IMMERSIVE" pageNum={8}>
             <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
             <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -1168,10 +1332,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 08 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 09 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="07" label="ONBOARDING" pageNum={8}>
+          <PageFrame code="08" label="ONBOARDING" pageNum={9}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO FULL ACCESS</>} />
             <ImagePlate src={imgMarkets} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
@@ -1196,10 +1360,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 09 · FAQ ---------------- */}
+      {/* ---------------- 10 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="08" label="QUESTIONS" pageNum={9} accent={NEON.blue}>
+          <PageFrame code="09" label="QUESTIONS" pageNum={10} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
@@ -1219,7 +1383,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 10 · JOIN ---------------- */}
+      {/* ---------------- 11 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
