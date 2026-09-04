@@ -66,6 +66,57 @@ const drawGear = (
   ctx.restore();
 };
 
+/** Hovering drone with spinning rotors — same dynamic element as the program hero. */
+const drawDrone = (ctx: CanvasRenderingContext2D, cx: number, cy: number, t: number, scale = 1) => {
+  ctx.save();
+  ctx.translate(cx, cy + Math.sin(t * 1.25) * 10);
+  ctx.scale(scale, scale);
+
+  // arms + body
+  ctx.strokeStyle = `rgba(${CYAN},0.75)`;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  const arms: [number, number][] = [[-62, -34], [62, -34], [-62, 34], [62, 34]];
+  arms.forEach(([ax, ay]) => {
+    ctx.beginPath();
+    ctx.moveTo(ax > 0 ? 26 : -26, ay > 0 ? 10 : -10);
+    ctx.lineTo(ax, ay);
+    ctx.stroke();
+  });
+
+  ctx.fillStyle = `rgba(${CYAN},0.14)`;
+  ctx.beginPath();
+  ctx.roundRect(-30, -16, 60, 32, 10);
+  ctx.fill();
+  ctx.stroke();
+
+  // rotors
+  arms.forEach(([ax, ay], i) => {
+    const rx = 34 * Math.abs(Math.cos(t * 9 + i * 1.3)) * 0.7 + 12;
+    ctx.fillStyle = `rgba(${CYAN},0.38)`;
+    ctx.beginPath();
+    ctx.ellipse(ax, ay, rx, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(${CYAN},0.5)`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(ax, ay, 34, 8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  // status light
+  const blink = 0.25 + 0.75 * Math.abs(Math.sin(t * 2.6));
+  ctx.fillStyle = `rgba(${AMBER},${blink})`;
+  ctx.shadowColor = `rgba(${AMBER},0.9)`;
+  ctx.shadowBlur = 16 * blink;
+  ctx.beginPath();
+  ctx.arc(0, 0, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  ctx.restore();
+};
+
 const drawFrame = (
   ctx: CanvasRenderingContext2D,
   bg: HTMLImageElement,
@@ -117,7 +168,10 @@ const drawFrame = (
   // ── animated gears (hardware motif) ──
   drawGear(ctx, W - 90, H - 70, 92, 12, t * 0.32, `rgba(${CYAN},0.22)`, 2);
   drawGear(ctx, W - 210, H - 168, 42, 8, -t * 0.62, `rgba(${AMBER},0.28)`, 2);
-  drawGear(ctx, W - 62, 96, 46, 8, -t * 0.5, `rgba(${AMBER},0.22)`, 2);
+  drawGear(ctx, W - 48, H - 330, 46, 8, -t * 0.5, `rgba(${AMBER},0.22)`, 2);
+
+  // ── hovering drone (hero dynamic element) ──
+  drawDrone(ctx, W - 186, 132, t, 1.05);
 
   // ── radar sweep ring ──
   const rcx = W - 300, rcy = 120, rr = 62;
