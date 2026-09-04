@@ -573,6 +573,7 @@ export default function AcceleratedFundraising() {
 
       {/* ── Hero · synced with marketing banner ── */}
       <section className="relative overflow-hidden border-b border-white/10">
+        <HardwareRig />
         {/* banner background plate */}
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40"
