@@ -138,7 +138,7 @@ export const CohortApplicationsManager = ({
   };
 
   const sendAcceptedFollowUp = async (app: PublicApplication) => {
-    setNoShowSending(app.id);
+    setNoShowSending(`${app.id}:followup`);
     try {
       const fn = isAfCohort(app.cohort_id) ? 'send-af-follow-up' : 'send-mvp-payment-reminder';
       const { error } = await supabase.functions.invoke(fn, {
