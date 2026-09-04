@@ -777,7 +777,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
       )}
 
       {/* Suggested Connections */}
-      {suggestedUsers.length > 0 && (
+      {mode === 'network' && suggestedUsers.length > 0 && (
         <Card className="tech-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
