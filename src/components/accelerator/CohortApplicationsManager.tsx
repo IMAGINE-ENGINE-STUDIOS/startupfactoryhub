@@ -160,7 +160,7 @@ export const CohortApplicationsManager = ({
   };
 
   const sendNoShowFollowUp = async (app: PublicApplication) => {
-    setNoShowSending(app.id);
+    setNoShowSending(`${app.id}:noshow`);
     try {
       const fn = isAfCohort(app.cohort_id) ? 'send-af-no-show-email' : 'send-mvp-no-show-email';
       const { error } = await supabase.functions.invoke(fn, {
