@@ -52,6 +52,7 @@ import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
+import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1300,7 +1301,16 @@ const TEMPLATES = [
     edgeFunction: "send-mvp-program",
     trigger: "manual / batched",
   },
+  {
+    id: "mvp-payment-link",
+    label: "MVP Program Payment Link (Accepted)",
+    icon: Rocket,
+    description: "Acceptance email with a live Stripe payment link for the $5,000 program cost + MVP brochure link",
+    edgeFunction: "send-mvp-acceptance-email",
+    trigger: "startup accepted / manual",
+  },
 ] as const;
+
 
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -1462,6 +1472,14 @@ const defaultVars = {
     to: "",
     name: "Founder",
   },
+  "mvp-payment-link": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "MVP Program",
+    amountCents: "500000",
+  },
+
   "investor-update": {
 
     to: "",
@@ -1480,7 +1498,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["mvp-program", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1542,6 +1560,15 @@ export default function EmailTemplates() {
     if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
     if (selected === "product-update") return generateProductUpdateHtml(vars["product-update"].name || "Founder");
     if (selected === "mvp-program") return generateMvpProgramHtml({ name: (vars["mvp-program"] as any).name || "Founder" });
+    if (selected === "mvp-payment-link") {
+      const v = vars["mvp-payment-link"] as any;
+      return generateMvpAcceptanceHtml({
+        name: v.name || "Founder",
+        startupName: v.startupName,
+        cohortName: v.cohortName,
+        amountCents: Number(v.amountCents) || 500000,
+      });
+    }
 
     return "";
   }
@@ -1626,6 +1653,15 @@ export default function EmailTemplates() {
         };
       } else if (selected === "product-update" || selected === "mvp-program") {
         payload = { testEmail: toEmail };
+      } else if (selected === "mvp-payment-link") {
+        const v = vars["mvp-payment-link"] as any;
+        payload = {
+          email: toEmail,
+          name: v.name || "Founder",
+          startupName: v.startupName || "Your Startup",
+          cohortName: v.cohortName || "MVP Program",
+          amountCents: Number(v.amountCents) || 500000,
+        };
       }
 
 
