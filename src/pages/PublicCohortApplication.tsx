@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -22,7 +23,11 @@ import {
   Globe,
   FileText,
   Video,
-  Loader2
+  Loader2,
+  ShieldCheck,
+  Cpu,
+  TrendingUp,
+  Info
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
@@ -89,6 +94,11 @@ export default function PublicCohortApplication() {
   const [pitchDeckUrl, setPitchDeckUrl] = useState('');
   const [videoPitchUrl, setVideoPitchUrl] = useState('');
   const [whyApplying, setWhyApplying] = useState('');
+  const [isIncorporated, setIsIncorporated] = useState(false);
+  const [hasWorkingMvp, setHasWorkingMvp] = useState(false);
+  const [hasRevenue, setHasRevenue] = useState<string>('');
+
+  const isAfCohort = cohort?.focus_industries?.some((i) => ['aerospace','hardware','defense','space'].includes(i.toLowerCase())) || cohort?.name.toLowerCase().includes('accelerated fundraising');
 
   useEffect(() => {
     if (cohortId) {
@@ -152,6 +162,15 @@ export default function PublicCohortApplication() {
       return;
     }
 
+    if (isAfCohort && (!isIncorporated || !hasWorkingMvp || !hasRevenue)) {
+      toast({
+        title: 'Minimum Requirements',
+        description: 'Please confirm all eligibility questions to apply to Accelerated Fundraising.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -169,7 +188,10 @@ export default function PublicCohortApplication() {
           pitch_deck_url: pitchDeckUrl || null,
           video_pitch_url: videoPitchUrl || null,
           why_applying: whyApplying || null,
-          referral_code: referralCode || null
+          referral_code: referralCode || null,
+          is_incorporated: isIncorporated,
+          has_working_mvp: hasWorkingMvp,
+          has_revenue: hasRevenue === 'yes'
         });
 
       if (error) throw error;
@@ -466,6 +488,69 @@ export default function PublicCohortApplication() {
                       />
                     </div>
                   </div>
+
+                  {isAfCohort && (
+                    <div className="space-y-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ShieldCheck className="w-5 h-5 text-amber-500" />
+                        <h3 className="font-semibold text-sm uppercase tracking-wide text-amber-500">
+                          Minimum Eligibility Requirements
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        This program is designed for aerospace, defense and space hardware startups that are ready to scale. Please confirm the following:
+                      </p>
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            id="isIncorporated"
+                            checked={isIncorporated}
+                            onCheckedChange={(checked) => setIsIncorporated(checked === true)}
+                            className="mt-1 border-amber-500/40 bg-background/50 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                          />
+                          <div className="grid gap-1 leading-none">
+                            <Label htmlFor="isIncorporated" className="font-medium text-sm">
+                              Legally incorporated company
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Your startup is registered as a legal entity (LLC, C-Corp, or equivalent).
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            id="hasWorkingMvp"
+                            checked={hasWorkingMvp}
+                            onCheckedChange={(checked) => setHasWorkingMvp(checked === true)}
+                            className="mt-1 border-amber-500/40 bg-background/50 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                          />
+                          <div className="grid gap-1 leading-none">
+                            <Label htmlFor="hasWorkingMvp" className="font-medium text-sm">
+                              Working MVP or functional prototype
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              You already have hardware that has been built and tested, not just a concept.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                        <Label htmlFor="hasRevenue" className="font-medium text-sm flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-amber-500" />
+                          Are you currently generating revenue? *
+                        </Label>
+                          <Select value={hasRevenue} onValueChange={setHasRevenue}>
+                            <SelectTrigger id="hasRevenue" className="w-full sm:w-[200px]">
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="yes">Yes — we have revenue</SelectItem>
+                              <SelectItem value="no">No — pre-revenue is accepted</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <Button 
                     type="submit" 
