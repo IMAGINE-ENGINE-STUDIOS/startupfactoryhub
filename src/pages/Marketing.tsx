@@ -20,6 +20,7 @@ import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanne
 import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
 import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner';
 import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
+import AcceleratedFundraisingBanner from '@/components/marketing/AcceleratedFundraisingBanner';
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 
@@ -3116,6 +3117,9 @@ const Marketing = () => {
 
           {/* Banner 14 - Ignition Program ANIMATED GIF */}
           <IgnitionProgramAnimatedBanner />
+
+          {/* Accelerated Fundraising — hero-styled banner (PNG / JPG / GIF) */}
+          <AcceleratedFundraisingBanner />
 
           {/* Banner 15 - Accelerated Networking Event (July 1, Online) */}
           <NetworkingEventBanner />
