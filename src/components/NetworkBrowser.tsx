@@ -38,7 +38,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
   const [allMembersLoading, setAllMembersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
-  const [allCommunity, setAllCommunity] = useState(true);
+  const allCommunity = mode === 'community';
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
