@@ -997,62 +997,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 04 · THE NEW STANDARD ---------------- */}
+
+      {/* ---------------- 04 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="02" label="THE NEW STANDARD" pageNum={3}>
-            <PageTitle kicker="Access model" title={<>FREE TO EXPLORE.<br />MEMBER TO BUILD.</>} />
-            <ImagePlate src={imgStudio} alt="Members collaborating inside a modern innovation campus" caption="Institutional campus · member workspaces" height={230} className="mb-6" />
-            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
-              Startup Factory Hub is a membership platform. Anyone can create an account and
-              browse the ecosystem — publishing, applying, contacting investors and enrolling
-              are reserved for members.
-            </p>
-            <div className="grid grid-cols-2 gap-5 flex-1">
-              <GlassCard accent="#94a3b8">
-                <div className="flex items-center gap-3 mb-4">
-                  <IndexPlate n="00" color="#94a3b8" />
-                  <div>
-                    <div className="font-mono text-[12px] tracking-[0.3em] uppercase text-slate-500">Tier 00</div>
-                    <div className="text-[24px] font-black text-slate-900 leading-tight">Free account</div>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-[17px] text-slate-600">
-                  {['Browse the community feed', 'View the global resource map', 'Read public program pages', 'Discover events and members'].map(t => (
-                    <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 text-slate-400 shrink-0" />{t}</li>
-                  ))}
-                </ul>
-                <div className="mt-5 pt-4 border-t border-slate-200 text-[15px] text-slate-500">
-                  Read-only. Publishing, applications, investor contact and enrollment are locked.
-                </div>
-              </GlassCard>
-
-              <GlassCard accent={NEON.cyan}>
-                <div className="flex items-center gap-3 mb-4">
-                  <IndexPlate n="01" />
-                  <div>
-                    <div className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Tier 01+</div>
-                    <div className="text-[24px] font-black text-slate-900 leading-tight">Member</div>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-[17px] text-slate-700">
-                  {['Post in the feed and on the resource map', 'Apply to acceleration & MVP programs', 'Contact investors directly', 'Attend meetings, conferences and pitch events', 'Internships, volunteering & technology transfer', 'Certified courses and member pricing'].map(t => (
-                    <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: NEON.emerald }} />{t}</li>
-                  ))}
-                </ul>
-                <div className="mt-5 pt-4 border-t border-slate-200 text-[15px] text-slate-600">
-                  Included in Basic — and in every higher paid membership.
-                </div>
-              </GlassCard>
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
-
-      {/* ---------------- 05 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="04" label="ENTITLEMENTS" pageNum={5} accent={NEON.emerald}>
+          <PageFrame code="04" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
             <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
             <div className="grid grid-cols-3 gap-3.5 flex-1 content-start">
               {entitlements.map((e: Entitlement, i) => (
@@ -1063,10 +1012,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · PRICING ---------------- */}
+      {/* ---------------- 05 · PRICING ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={6}>
+          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={5}>
             <PageTitle kicker="Membership" title={<>ONE PRICE.<br />{monthly} / MONTH.</>} />
             <ImagePlate src={imgSummit} alt="Members at a Startup Factory Hub summit" caption="Everything included · one monthly price" height={200} className="mb-6" />
             <GlassCard accent={NEON.cyan} padding="p-9" className="flex-1">
@@ -1097,10 +1046,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · NASDAQ TOWER ---------------- */}
+      {/* ---------------- 06 · NASDAQ TOWER ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.lime} code="06" label="GLOBAL VISIBILITY" pageNum={7}>
+          <PageFrame accent={NEON.lime} code="06" label="GLOBAL VISIBILITY" pageNum={6}>
             <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
             <motion.div
@@ -1194,10 +1143,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · AR EVENTS ---------------- */}
+      {/* ---------------- 07 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="07" label="AR · IMMERSIVE" pageNum={8}>
+          <PageFrame accent={NEON.magenta} code="07" label="AR · IMMERSIVE" pageNum={7}>
             <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
             <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -1332,10 +1281,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 09 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 08 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="08" label="ONBOARDING" pageNum={9}>
+          <PageFrame code="08" label="ONBOARDING" pageNum={8}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO FULL ACCESS</>} />
             <ImagePlate src={imgMarkets} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
@@ -1360,10 +1309,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 10 · FAQ ---------------- */}
+      {/* ---------------- 09 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="09" label="QUESTIONS" pageNum={10} accent={NEON.blue}>
+          <PageFrame code="09" label="QUESTIONS" pageNum={9} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
@@ -1383,7 +1332,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 11 · JOIN ---------------- */}
+      {/* ---------------- 10 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
