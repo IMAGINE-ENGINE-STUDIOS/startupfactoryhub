@@ -1298,10 +1298,17 @@ export default function MatchingSystem() {
             <X className="h-4 w-4 mr-2" />
             Pass
           </Button>
-          <Button size="sm" onClick={onConnect} className="flex-1 pulse-primary">
-            <Heart className="h-4 w-4 mr-2" />
-            Connect
-          </Button>
+          {requestedIds.has(match.id) ? (
+            <Button size="sm" variant="secondary" className="flex-1" disabled>
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Requested
+            </Button>
+          ) : (
+            <Button size="sm" onClick={onConnect} className="flex-1 pulse-primary">
+              <Heart className="h-4 w-4 mr-2" />
+              Connect
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
