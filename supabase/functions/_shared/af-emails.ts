@@ -5,7 +5,7 @@ export const AF_LOGO_URL =
   "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
 
 export const AF_COHORT_ID = "21bbf578-1347-43f8-bc56-d31fbd4af03d";
-export const AF_APPLY_URL = `https://startupfactoryhub.com/cohorts/${AF_COHORT_ID}/apply`;
+export const AF_APPLY_URL = `https://startupfactoryhub.com/cohorts/${AF_COHORT_ID}/apply?_v=mtneb0jw`;
 export const AF_PROGRAM_URL = "https://startupfactoryhub.com/accelerated-fundraising";
 
 const esc = (s: unknown) =>
