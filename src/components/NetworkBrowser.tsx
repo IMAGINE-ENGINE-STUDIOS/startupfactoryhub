@@ -51,8 +51,52 @@ export default function NetworkBrowser() {
       fetchCurrentConnections();
       fetchPendingRequests();
       fetchSuggestedUsers();
+      fetchAllMembers();
     }
   }, [user, vzlaFilter]);
+
+  const fetchAllMembers = async () => {
+    if (!user) return;
+    setAllMembersLoading(true);
+    try {
+      // Fetch every registered profile (past the 1000-row default) so All
+      // Community reflects the whole user base, not a slice.
+      const pageSize = 1000;
+      const profiles: any[] = [];
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
+          .neq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        profiles.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+
+      const visible = profiles.filter(isVisibleCommunityProfile);
+      const userIds = visible.map(p => p.user_id);
+
+      const roles: Record<string, string> = {};
+      for (let i = 0; i < userIds.length; i += 200) {
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds.slice(i, i + 200));
+        (userRoles || []).forEach((r: any) => { roles[r.user_id] = r.role; });
+      }
+
+      const seen = new Set<string>();
+      setAllMembers(visible
+        .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
+        .map(p => ({ ...p, role: roles[p.user_id] || null })));
+    } catch (error) {
+      console.error('Error fetching all community members:', error);
+    } finally {
+      setAllMembersLoading(false);
+    }
+  };
 
   // Real-time connection updates
   useEffect(() => {
