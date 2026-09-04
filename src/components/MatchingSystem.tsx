@@ -1033,8 +1033,8 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void, targetRole?: string) => {
     if (!user) return;
 
-    // Remove card immediately - no matter what
-    onSuccess();
+    // Mark as requested immediately so the button flips to "Requested"
+    markRequested(targetId);
 
     try {
       // Get current user's name for notification
