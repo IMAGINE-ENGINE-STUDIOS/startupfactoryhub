@@ -19,15 +19,14 @@ A new program page that mirrors the MVP Program page exactly in structure and de
    - Proposed defaults (all editable later in the dashboard):
      - Name: Accelerated Fundraising — Aerospace Hardware Batch 01
      - Focus industries: aerospace, hardware, defense, space
-     - Max startups: 10
+     - Max startups: 20
      - Status: applications open
-     - Program cost: $5,000 per startup
-     - Application deadline / start date: to be confirmed
+     - Program cost: free
+     - Application deadline / start date: no fixed deadline
 
 ## Open questions (defaults used if you don't say otherwise)
 
-- Program cost: $5,000 per startup (same as MVP)?
-- Application deadline and start date for the first batch?
+- Program cost: free (no application fee)?
 - Program length: 4 weeks like the MVP program, or longer for hardware?
 
 ## Technical notes
