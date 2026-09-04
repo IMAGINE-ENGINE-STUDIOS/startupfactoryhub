@@ -18,7 +18,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
+  Scan, Smartphone, Box, Globe2, Sparkles, Radio,
 } from 'lucide-react';
+import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -38,13 +40,31 @@ import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
 import imgStudio from '@/assets/membership/venture-studio.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 
+import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
+import moonBackground from '@/assets/moon-background.jpg.asset.json';
+
+const NASA_BASE = 'https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models';
+const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
+
 /* ============================ DESIGN TOKENS ============================ */
 const NEON = {
   cyan: '#0ea5b7',
   blue: '#1f2a44',
   emerald: '#059669',
   ink: '#0f172a',
+  magenta: '#d946a6',
+  lime: '#65a30d',
+  amber: '#f59e0b',
 };
+
+const DEEP_LIME = '#3f6212';
+
+const Scanlines = () => (
+  <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{
+    backgroundImage: 'repeating-linear-gradient(180deg, rgba(15,23,42,0.09) 0px, rgba(15,23,42,0.09) 1px, transparent 1px, transparent 3px)',
+  }} />
+);
+
 
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
@@ -613,36 +633,205 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 02 · ABOUT · WHERE THE ECOSYSTEM MEETS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="01" label="ABOUT" pageNum={2}>
-            <PageTitle kicker="About" title={<>WHERE THE<br />ECOSYSTEM MEETS</>} />
-            <ImagePlate src={imgCampus} alt="Founders, investors and mentors meeting inside the Startup Factory Hub campus" caption="Founders · investors · mentors · institutions" height={240} className="mb-6" />
-            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
-              Startup Factory Hub is the meeting point of the innovation ecosystem: founders,
-              investors, mentors, corporations, universities and public institutions working on one
-              platform. Everything that usually lives in separate rooms — capital, talent, technology
-              and programs — happens in the same place.
-            </p>
-            <div className="grid grid-cols-2 gap-5 flex-1 content-start">
-              {[
-                { t: 'Founders & startups', d: 'Publish, raise, apply to programs and find the team, tools and technology to build.' },
-                { t: 'Investors & funds', d: 'Curated dealflow, pitch events and direct conversations with the founders behind them.' },
-                { t: 'Mentors & advisors', d: 'Certified programs, sessions and advisory tracks with startups worldwide.' },
-                { t: 'Institutions & corporates', d: 'Technology transfer, acceleration partnerships and access to global innovation talent.' },
-              ].map((c, i) => (
-                <GlassCard key={c.t} accent={i % 2 ? NEON.emerald : NEON.cyan}>
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 1} color={i % 2 ? NEON.emerald : NEON.cyan} />
-                    <div>
-                      <div className="text-[21px] font-black text-slate-900 leading-tight">{c.t}</div>
-                      <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{c.d}</p>
+          <section className="absolute inset-0 overflow-hidden" style={{
+            background: '#ffffff',
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          }}>
+            {/* Giant background "02" */}
+            <div
+              aria-hidden
+              className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+              style={{ top: '-8%', left: '-6%', fontSize: '780px', color: 'rgba(15,23,42,0.035)' }}
+            >
+              02
+            </div>
+
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+              background: `radial-gradient(ellipse at 85% 10%, ${NEON.cyan}10 0%, transparent 55%), radial-gradient(ellipse at 10% 95%, ${NEON.lime}0d 0%, transparent 50%)`,
+            }} />
+
+            {/* Top HUD bar */}
+            <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.32em] uppercase z-20">
+              <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                <span>SEC // 01 · EDITION 01</span>
+              </div>
+              <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
+              <div style={{ color: NEON.cyan }}>P/02 · {TOTAL}</div>
+            </div>
+
+            {/* Bottom HUD bar */}
+            <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] sm:text-[11px] tracking-[0.18em] uppercase z-20">
+              <span className="text-slate-900/35">// STARTUP FACTORY HUB · MEMBERSHIP PROGRAM</span>
+              <span className="text-slate-900/35">GLOBAL · REMOTE + ON-SITE</span>
+            </div>
+
+            {/* MAIN CONTENT */}
+            <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '58px 56px 56px 56px' }}>
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-start justify-between mb-8"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-px w-16" style={{ background: NEON.cyan }} />
+                  <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                    Startup Factory Hub · Vol. 01 · 2026
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span
+                    className="text-[44px] font-light tracking-tighter italic"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: 'rgba(15,23,42,0.18)',
+                      textDecoration: 'underline',
+                      textDecorationColor: NEON.lime,
+                      textUnderlineOffset: '8px',
+                    }}
+                  >
+                    P/02
+                  </span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="flex-1 grid grid-cols-12 gap-0 min-h-0"
+              >
+                {/* LEFT — dramatic copy column */}
+                <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
+                  <span className="text-[16px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
+                    About Startup Factory Hub
+                  </span>
+
+                  <h1 className="font-extrabold tracking-tight text-slate-900 mb-8" style={{ fontSize: '46px', lineHeight: '1.04', maxWidth: '100%' }}>
+                    The Operating System<br />
+                    for the Next{' '}
+                    <span
+                      className="font-extrabold"
+                      style={{
+                        background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}
+                    >
+                      Generation
+                    </span>
+                    <br />
+                    of Founders.
+                  </h1>
+
+                  <div className="flex gap-7">
+                    <div className="shrink-0 self-stretch">
+                      <div className="w-[6px] h-full rounded-full" style={{ background: `linear-gradient(180deg, ${NEON.cyan}, ${NEON.magenta}, ${NEON.lime})` }} />
+                    </div>
+                    <div className="max-w-[540px] py-1">
+                      <p className="text-[19px] leading-[1.55] text-slate-600 font-light mb-6">
+                        Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI era — connecting{' '}
+                        <span className="font-semibold text-slate-900">founders, investors, mentors, advisors, accelerators</span>{' '}
+                        and <span className="font-semibold text-slate-900">students</span> through an integrated
+                        AI-powered acceleration platform, strategic capital and a globally connected innovation network.
+                      </p>
+                      <div className="p-6 bg-slate-50 border-l-4" style={{ borderColor: '#0f172a' }}>
+                        <p className="text-slate-900 italic font-medium leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}>
+                          "Infrastructure is the new intellectual property. The platforms that accompany the founder's journey will define the future of innovation."
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </GlassCard>
-              ))}
+                </div>
+
+                {/* RIGHT — visual + floating stats */}
+                <div className="col-span-5 relative">
+                  <div className="h-full w-full relative overflow-hidden" style={{ boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}>
+                    <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{
+                      background: `linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.55) 70%, rgba(15,23,42,0.92) 100%), radial-gradient(ellipse at 70% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                    }} />
+                    <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
+                      <span className="text-[16px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
+                        Infrastructure First
+                      </span>
+                    </div>
+                    <div className="absolute inset-x-5 bottom-5 p-4 sm:p-5 backdrop-blur-xl border" style={{ background: 'rgba(2,6,23,0.88)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                      <div className="text-[12px] sm:text-[13px] font-bold tracking-[0.25em] uppercase text-slate-400 mb-3">
+                        The Platform by the Numbers
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                        {[
+                          { v: '200+', l: 'Members on the Platform', c: NEON.lime },
+                          { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
+                          { v: '350+', l: 'Network Members', c: NEON.magenta },
+                          { v: '04', l: 'Global Hubs', c: NEON.amber },
+                        ].map((s, i) => (
+                          <div key={i} className="min-w-0">
+                            <div className="text-white font-extrabold mb-1 whitespace-nowrap" style={{ fontSize: '18px', lineHeight: 1 }}>{s.v}</div>
+                            <div className="h-[2px] w-6 mb-1.5" style={{ background: s.c }} />
+                            <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.12em] text-slate-400 font-bold leading-tight">{s.l}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Footer — partner ticker */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.4 }}
+                className="mt-7 pt-5 border-t relative overflow-hidden"
+                style={{ borderColor: 'rgba(15,23,42,0.08)' }}
+              >
+                <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
+                <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
+                <div className="flex items-center" style={{ width: 'max-content', animation: 'partners-scroll 60s linear infinite' }}>
+                  {(() => {
+                    const partners = [
+                      { n: 'NASA', l: '/partners/nasa-logo.png' },
+                      { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
+                      { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
+                      { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
+                      { n: 'GitHub', l: '/github-logo.png' },
+                      { n: 'Nasdaq', l: '/nasdaq-logo.png' },
+                      { n: 'IWG', l: '/partners/iwg-logo.png' },
+                      { n: 'HSBC', l: '/partners/hsbc-logo.png' },
+                      { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
+                      { n: 'MongoDB', l: '/mongodb-logo.webp' },
+                      { n: 'F6S', l: '/partners/f6s-logo.png' },
+                      { n: 'TradingView', l: '/partners/tradingview-logo.png' },
+                      { n: 'Lovable', l: '/partners/lovable-logo.png' },
+                      { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg' },
+                      { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
+                    ];
+                    return [...partners, ...partners].map((p, i) => (
+                      <div key={i} className="partner-logo-card flex-shrink-0 px-10 h-18 flex items-center justify-center">
+                        <img
+                          src={p.l}
+                          alt={p.n}
+                          className="max-h-16 max-w-[200px] object-contain opacity-80 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                          onError={(e) => {
+                            const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
+                            if (card) card.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </motion.div>
             </div>
-          </PageFrame>
+            <style>{`@keyframes partners-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+          </section>
         </A4Wrapper>
       </BookPage>
+
 
       {/* ---------------- 03 · THE NEW STANDARD ---------------- */}
       <BookPage>
@@ -747,39 +936,96 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 06 · NASDAQ TOWER ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="GLOBAL VISIBILITY" pageNum={6}>
-            <PageTitle kicker="Nasdaq Tower · Times Square" title={<>FEATURED ON THE<br />WORLD&apos;S STAGE</>} />
-            <div className="relative flex-1 rounded-3xl overflow-hidden" style={{
-              border: '1px solid rgba(255,255,255,0.7)',
-              boxShadow: `0 30px 70px -30px rgba(15,23,42,0.45), 0 0 0 1px ${NEON.cyan}22`,
-            }}>
-              <img
-                src={nasdaqFeature}
-                alt="Startup Factory Hub featured on the NASDAQ Tower in Times Square, New York City"
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+          <PageFrame accent={NEON.lime} code="05" label="GLOBAL VISIBILITY" pageNum={6}>
+            <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+              className="relative flex-1 rounded-3xl overflow-hidden"
+              style={{
+                border: `1px solid ${NEON.lime}55`,
+                boxShadow: `0 0 60px ${NEON.lime}25, inset 0 0 40px rgba(0,0,0,0.6)`,
+              }}
+            >
               <div className="absolute inset-0" style={{
-                background: 'linear-gradient(180deg, rgba(8,14,26,0.15) 0%, rgba(8,14,26,0.55) 50%, rgba(8,14,26,0.96) 100%)',
+                backgroundImage: `url(${nasdaqFeature})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
               }} />
-              <div className="absolute top-6 left-6 inline-flex items-center gap-2 px-4 py-2 rounded-full z-10" style={{
-                background: 'rgba(8,14,26,0.65)', backdropFilter: 'blur(8px)', border: `1px solid ${NEON.cyan}70`,
-              }}>
-                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#67e8f9', boxShadow: '0 0 10px #67e8f9' }} />
-                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-white">Live · Times Square</span>
+              <div className="absolute inset-0" style={{
+                background: 'linear-gradient(180deg, rgba(2,4,10,0.10) 0%, rgba(255,255,255,0.55) 42%, rgba(255,255,255,0.93) 72%, rgba(255,255,255,0.97) 100%)',
+              }} />
+              <div className="absolute inset-0" style={{
+                background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
+              }} />
+              <Scanlines />
+
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
+                style={{
+                  background: 'rgba(255,255,255,0.92)',
+                  backdropFilter: 'blur(8px)',
+                  border: `1px solid ${DEEP_LIME}55`,
+                  boxShadow: '0 6px 20px rgba(2,4,10,0.35)',
+                }}
+              >
+                <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
+                <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
+              </motion.div>
+
+              <div className="absolute inset-x-0 bottom-0 z-10 px-8 pb-7 pt-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
+                >
+                  <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// FEATURED</div>
+                  <h3 className="font-black leading-[1.05] mb-3" style={{ fontSize: '34px', ...PLATINUM_TITLE, textShadow: 'none' }}>
+                    Startup Factory Hub<br />
+                    <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>on the Nasdaq Tower</span>
+                  </h3>
+                  <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
+                    Live broadcast in Times Square, New York — the ecosystem's brand projected on the Nasdaq Tower screen in front of millions.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.55, duration: 0.6 }}
+                  className="grid grid-cols-4 gap-3"
+                >
+                  {[
+                    { k: '350K+', l: 'Daily viewers' },
+                    { k: 'NYC', l: 'Times Square' },
+                    { k: 'Global', l: 'Media reach' },
+                    { k: '24/7', l: 'Brand presence' },
+                  ].map((m, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
+                      className="rounded-xl px-2.5 py-2.5 min-w-0"
+                      style={{
+                        background: 'rgba(255,255,255,0.9)',
+                        backdropFilter: 'blur(10px)',
+                        border: `1px solid ${DEEP_LIME}35`,
+                        boxShadow: '0 6px 18px rgba(2,4,10,0.18)',
+                      }}
+                    >
+                      <div className="font-black text-base leading-none whitespace-nowrap" style={{ color: DEEP_LIME }}>{m.k}</div>
+                      <div className="font-mono text-[16px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
-              <div className="absolute inset-x-0 bottom-0 z-10 p-9">
-                <div className="font-mono text-[12px] uppercase tracking-[0.4em] mb-3" style={{ color: '#67e8f9' }}>// Featured</div>
-                <h3 className="font-black leading-[1.05] text-white mb-4" style={{ fontSize: 44, textShadow: '0 2px 14px rgba(0,0,0,0.9)' }}>
-                  Startup Factory Hub<br />
-                  <span style={{ color: '#67e8f9' }}>on the Nasdaq Tower</span>
-                </h3>
-                <p className="text-[17px] text-white/85 leading-relaxed max-w-xl">
-                  Members build inside a brand already broadcast to Times Square — global visibility
-                  your startup inherits from the day you join.
-                </p>
-              </div>
-            </div>
+            </motion.div>
           </PageFrame>
         </A4Wrapper>
       </BookPage>
@@ -787,35 +1033,140 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 07 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="06" label="AR EVENTS" pageNum={7} accent={NEON.emerald}>
-            <PageTitle kicker="Augmented reality" title={<>AR EVENTS,<br />NO BORDERS</>} accent={NEON.emerald} />
-            <ImagePlate src={imgSpace} alt="Immersive augmented reality event stage" caption="Immersive stages · spatial networking" accent={NEON.emerald} height={230} className="mb-6" />
-            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
-              Members join Startup Factory Hub events in augmented reality: demo days, masterclasses,
-              investor rounds and exhibitions rendered as 3D scenes you can walk through from a browser
-              or a headset. No installs, no travel.
-            </p>
-            <div className="grid grid-cols-2 gap-5 content-start">
-              {[
-                { t: 'AR demo days', d: 'Present your product as an interactive 3D model investors can inspect from any device.' },
-                { t: 'Immersive conferences', d: 'Keynotes and panels on virtual stages with live audio and spatial networking rooms.' },
-                { t: 'AR resource drops', d: 'Place technology, launches and opportunities on the world map and open them in AR.' },
-                { t: 'Global attendance', d: 'Every session is remote-first and recorded, so members join from any time zone.' },
-              ].map((c, i) => (
-                <GlassCard key={c.t} accent={NEON.emerald}>
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 1} color={NEON.emerald} />
-                    <div>
-                      <div className="text-[20px] font-black text-slate-900 leading-tight">{c.t}</div>
-                      <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{c.d}</p>
+          <PageFrame accent={NEON.magenta} code="06" label="AR · IMMERSIVE" pageNum={7}>
+            <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+
+            <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
+              <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
+
+              <div className="absolute inset-0 flex flex-col justify-between p-8">
+                <div className="flex justify-between items-start gap-6">
+                  <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
+                      <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>VR · LIVE EVENTS</span>
                     </div>
+                    <div className="text-base text-slate-900 leading-relaxed font-medium">
+                      Members join any Startup Factory Hub event in Virtual Reality: Demo Days, investor rounds, masterclasses and talent fairs in 3D venues with avatars, holographic stages and spatial networking. Attendees join from their browser or headset — no installs, no travel.
+                    </div>
+                  </GlassCard>
+                  <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
+                    <div>GLOBAL</div>
+                    <div>REMOTE + ON-SITE</div>
+                    <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
                   </div>
-                </GlassCard>
-              ))}
+                </div>
+
+                <div>
+                  <h3 className="font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
+                    Every membership event,<br /><span style={{ color: '#f9a8d4' }}>an immersive experience.</span>
+                  </h3>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: 'easeOut' }}
+                    className="relative rounded-2xl overflow-hidden mb-5"
+                    style={{
+                      height: '230px',
+                      border: `1px solid ${NEON.cyan}60`,
+                      boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
+                    }}
+                  >
+                    {/* @ts-ignore */}
+                    <model-viewer
+                      src={ROVER_GLB}
+                      ar
+                      ar-modes="webxr scene-viewer quick-look"
+                      ar-placement="floor"
+                      xr-environment
+                      camera-controls
+                      interaction-prompt="none"
+                      auto-rotate
+                      auto-rotate-delay="0"
+                      rotation-per-second="20deg"
+                      touch-action="none"
+                      exposure="1"
+                      shadow-intensity="1"
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
+                    />
+                    <a
+                      href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                      className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
+                      style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
+                    >
+                      <Smartphone className="h-4 w-4" /> Launch Google XR
+                    </a>
+                    <div className="absolute inset-0 pointer-events-none" style={{
+                      background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
+                      zIndex: 11,
+                    }} />
+
+                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
+                      {[
+                        'top-4 left-4 border-t-2 border-l-2',
+                        'top-4 right-4 border-t-2 border-r-2',
+                        'bottom-4 left-4 border-b-2 border-l-2',
+                        'bottom-4 right-4 border-b-2 border-r-2',
+                      ].map((cls, i) => (
+                        <div key={i} className={`absolute w-8 h-8 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                      ))}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, inset 0 0 18px ${NEON.cyan}50` }} />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
+                    </div>
+
+                    <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
+                      background: 'rgba(255,255,255,0.55)',
+                      backdropFilter: 'blur(6px)',
+                      border: `1px solid ${NEON.cyan}70`,
+                      zIndex: 12,
+                    }}>
+                      <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                      <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
+                    </div>
+                    <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
+                      <div>OBJ · NASA ROVER</div>
+                      <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
+                    </div>
+                    <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
+                      <div>
+                        <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEW</div>
+                        <div className="font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
+                          Mars Rover · Scanning
+                        </div>
+                      </div>
+                      <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
+                        <div>LAT −4.5°  LON 137.4°</div>
+                        <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <div className="grid grid-cols-4 gap-4">
+                    {[
+                      { i: Smartphone, l: 'VR Demo Day', s: '3D stage, no install required' },
+                      { i: Box, l: 'Startup Pavilions', s: 'Navigable virtual booths' },
+                      { i: Globe2, l: 'Global Audience', s: 'Investors joining from anywhere' },
+                      { i: Sparkles, l: 'Holographic Speakers', s: 'Networking with avatars' },
+                    ].map((p, i) => (
+                      <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
+                        <div className="relative">
+                          <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
+                          <div className="font-black text-base text-slate-900 leading-tight">{p.l}</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
+                        </div>
+                      </GlassCard>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
       </BookPage>
+
 
       {/* ---------------- 08 · HOW IT WORKS ---------------- */}
       <BookPage>
