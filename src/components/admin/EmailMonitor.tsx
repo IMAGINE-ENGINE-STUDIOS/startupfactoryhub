@@ -168,6 +168,16 @@ const EmailMonitor = () => {
   const [scheduling, setScheduling] = useState(false);
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
 
+  // MVP / AF program email fields
+  const [programEmailName, setProgramEmailName] = useState('Founder');
+  const [programEmailStartup, setProgramEmailStartup] = useState('Your startup');
+  const [programEmailCohort, setProgramEmailCohort] = useState('');
+  const [programEmailInterviewDate, setProgramEmailInterviewDate] = useState('');
+  const [programEmailDeadline, setProgramEmailDeadline] = useState('September 29, 2026');
+  const [programEmailRescheduleUrl, setProgramEmailRescheduleUrl] = useState('');
+  const [programEmailApplyUrl, setProgramEmailApplyUrl] = useState('');
+  const [programEmailAmountCents, setProgramEmailAmountCents] = useState(500000);
+
 
 
   // Fetch all platform users
