@@ -53,6 +53,7 @@ import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
+import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1308,6 +1309,14 @@ const TEMPLATES = [
     description: "Acceptance email with a live Stripe payment link for the $5,000 program cost + MVP brochure link",
     edgeFunction: "send-mvp-acceptance-email",
     trigger: "startup accepted / manual",
+  },
+  {
+    id: "mvp-payment-reminder",
+    label: "MVP Payment Reminder (Not Paid Yet)",
+    icon: Rocket,
+    description: "Follow-up for accepted startups that haven't paid — fresh Stripe payment link + brochure + deadline",
+    edgeFunction: "send-mvp-payment-reminder",
+    trigger: "accepted, unpaid / manual",
   },
 ] as const;
 
