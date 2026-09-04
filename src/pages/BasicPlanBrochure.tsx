@@ -230,42 +230,6 @@ const PageFrame = ({
 );
 
 /* ============================ DATA VISUALS ============================ */
-/** Animated comparison bars: 12 monthly installments vs annual upfront. */
-const SavingsChart = ({
-  monthlyTotal, yearlyTotal, savingsPercent,
-}: { monthlyTotal: number; yearlyTotal: number; savingsPercent: number }) => {
-  const ratio = monthlyTotal > 0 ? yearlyTotal / monthlyTotal : 1;
-  const rows = [
-    { label: '12 monthly installments', value: monthlyTotal, pct: 1, color: NEON.cyan },
-    { label: 'One annual payment', value: yearlyTotal, pct: ratio, color: NEON.emerald },
-  ];
-  return (
-    <div className="space-y-5">
-      {rows.map((r, i) => (
-        <div key={r.label}>
-          <div className="flex items-baseline justify-between mb-2">
-            <span className="font-mono text-[13px] uppercase tracking-[0.26em] text-slate-500">{r.label}</span>
-            <span className="text-2xl font-black text-slate-900">{formatCents(r.value)}</span>
-          </div>
-          <div className="h-6 rounded-full overflow-hidden" style={{ background: 'rgba(15,23,42,0.06)' }}>
-            <motion.div
-              className="h-full rounded-full relative"
-              style={{ background: `linear-gradient(90deg, ${r.color}, ${r.color}88)`, boxShadow: `0 0 24px ${r.color}55` }}
-              initial={{ width: 0 }}
-              animate={{ width: `${r.pct * 100}%` }}
-              transition={{ duration: 1.1, delay: 0.25 + i * 0.2, ease: 'easeOut' }}
-            />
-          </div>
-        </div>
-      ))}
-      <div className="font-mono text-[14px] uppercase tracking-[0.24em]" style={{ color: NEON.emerald }}>
-        You keep {savingsPercent}% · {formatCents(monthlyTotal - yearlyTotal)} saved per year
-      </div>
-    </div>
-  );
-};
-
-/** Animated radial gauge used for value metrics. */
 const RadialStat = ({
   value, suffix = '', label, color = NEON.cyan, pct,
 }: { value: string; suffix?: string; label: string; color?: string; pct: number }) => {
@@ -578,7 +542,7 @@ const CheckoutPanel = ({
 
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure({ embedded = false }: { embedded?: boolean }) {
-  const { plan, entitlements, savingsPercent } = useBasicPlan();
+  const { plan, entitlements } = useBasicPlan();
   const { isMember, tier, refetch } = useMembershipAccess();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
@@ -621,7 +585,6 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
   const yearly = formatCents(plan.yearly_price_cents);
   const yearlyPerMonth = formatCents(Math.round(plan.yearly_price_cents / 12));
   const monthlyTotalCents = plan.monthly_price_cents * 12;
-  const yearlyIfMonthly = formatCents(monthlyTotalCents);
 
   const pages = (
     <>
