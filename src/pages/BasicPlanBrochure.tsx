@@ -930,15 +930,108 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 04 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
+      {/* ---------------- 04 · GLOBAL OFFICE: CONNECT WITH FOUNDERS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
-            <div className="grid grid-cols-3 gap-3.5 flex-1 content-start">
-              {entitlements.map((e: Entitlement, i) => (
-                <EntitlementTile key={e.key} n={i + 1} label={e.label} description={e.description} delay={i * 0.04} />
-              ))}
+          <PageFrame code="04" label="GLOBAL NETWORK" pageNum={4} accent={NEON.cyan}>
+            <PageTitle
+              kicker="Connect with founders everywhere"
+              title={<><span style={{ color: NEON.cyan }}>A global office</span><br />without walls.</>}
+              accent={NEON.cyan}
+            />
+            <div
+              className="relative flex-1 rounded-3xl overflow-hidden"
+              style={{
+                border: `1px solid ${NEON.cyan}55`,
+                boxShadow: `0 0 60px ${NEON.cyan}25, inset 0 0 40px rgba(0,0,0,0.5)`,
+              }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${imgGlobal})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, ${NEON.ink}66 0%, ${NEON.ink}bb 55%, ${NEON.ink}ee 100%)`,
+                }}
+              />
+
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
+                style={{
+                  background: 'rgba(255,255,255,0.92)',
+                  backdropFilter: 'blur(8px)',
+                  border: `1px solid ${NEON.cyan}55`,
+                  boxShadow: '0 6px 20px rgba(2,4,10,0.35)',
+                }}
+              >
+                <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.cyan }} />
+                <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · GLOBAL</span>
+              </motion.div>
+
+              <div className="absolute inset-0 z-10 flex flex-col justify-end p-8">
+                <motion.p
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.55 }}
+                  className="text-white/80 text-lg font-medium max-w-2xl mb-8 leading-relaxed"
+                >
+                  Membership is not a building — it is a network. Join founders, mentors and
+                  operators from 30+ countries through virtual rooms, regional meetups and
+                  always-on async channels.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  className="grid grid-cols-3 gap-4"
+                >
+                  {[
+                    {
+                      icon: <Users className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Founder-first community',
+                      body: 'Permanent rooms, weekly stand-ups and peer-led circles built for builders.',
+                    },
+                    {
+                      icon: <MapPin className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Regional hubs',
+                      body: 'In-person activations where the ecosystem gathers: NYC, Miami, Caracas, Madrid and more.',
+                    },
+                    {
+                      icon: <Wifi className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Always connected',
+                      body: 'Timezone coverage, async channels and 24/7 access to the platform.',
+                    },
+                  ].map((card, i) => (
+                    <motion.div
+                      key={card.title}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.65 + i * 0.08, duration: 0.5 }}
+                      className="rounded-2xl p-5"
+                      style={{
+                        background: 'rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(14px)',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        boxShadow: '0 16px 40px -16px rgba(2,4,10,0.45)',
+                      }}
+                    >
+                      <div className="mb-3">{card.icon}</div>
+                      <h4 className="font-black text-white text-lg leading-tight mb-2">{card.title}</h4>
+                      <p className="text-white/70 text-sm leading-snug">{card.body}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
