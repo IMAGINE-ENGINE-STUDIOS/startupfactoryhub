@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
   Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
+  CalendarDays, Cpu, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -139,6 +140,20 @@ const GlassCard = ({
     {children}
   </div>
 );
+
+const NeonBadge = ({ icon: Icon, color = NEON.cyan, size = 'md' }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color?: string; size?: 'sm' | 'md' | 'lg' }) => {
+  const dims = size === 'lg' ? 'w-14 h-14' : size === 'sm' ? 'w-9 h-9' : 'w-11 h-11';
+  const iconSize = size === 'lg' ? 'h-6 w-6' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5';
+  return (
+    <div className={`${dims} rounded-xl flex items-center justify-center shrink-0`} style={{
+      background: `linear-gradient(135deg, ${color}30, ${color}05)`,
+      border: `1px solid ${color}60`,
+      boxShadow: `0 0 18px ${color}40, inset 0 0 12px ${color}20`,
+    }}>
+      <Icon className={iconSize} style={{ color }} />
+    </div>
+  );
+};
 
 /** Typographic index plate — replaces generic icon badges. */
 const IndexPlate = ({ n, color = NEON.cyan }: { n: number | string; color?: string }) => (
@@ -1041,42 +1056,70 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 05 · SFH CAPABILITIES ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.emerald} code="05" label="SFH CAPABILITIES" pageNum={5}>
-            <PageTitle
-              kicker="One platform, every stage"
-              title={<>SFH <span style={{ color: NEON.emerald }}>capabilities.</span></>}
-              accent={NEON.emerald}
-            />
-            <div className="flex-1 grid grid-cols-3 gap-4 content-start">
-              {[
-                { icon: <Sparkles className="h-5 w-5" />, t: 'Genius AI', b: 'AI copilot for research, decks, documents and market analysis.' },
-                { icon: <Users className="h-5 w-5" />, t: 'Network', b: 'Founders, mentors, advisors and investors in one searchable graph.' },
-                { icon: <Globe2 className="h-5 w-5" />, t: 'Resource Map', b: 'Global map of labs, capital, talent and infrastructure.' },
-                { icon: <Radio className="h-5 w-5" />, t: 'Live Events', b: 'Virtual rooms, watch parties and regional activations.' },
-                { icon: <Box className="h-5 w-5" />, t: 'LightPaper', b: 'Live document studio for pitch decks, memos and data rooms.' },
-                { icon: <ShieldCheck className="h-5 w-5" />, t: 'Sign Live', b: 'Secure co-editing and signature workflows with full audit trail.' },
-                { icon: <Scan className="h-5 w-5" />, t: 'Matching', b: 'Signal-based matching between startups, mentors and capital.' },
-                { icon: <CreditCard className="h-5 w-5" />, t: 'Payments', b: 'Invoicing, checkout and revenue tools built in.' },
-                { icon: <Smartphone className="h-5 w-5" />, t: 'AR / VR', b: 'Immersive showcases and AR objects for products and events.' },
-              ].map((c, i) => (
-                <motion.div
-                  key={c.t}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + i * 0.05, duration: 0.45 }}
-                  className="rounded-2xl p-5"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(14px)',
-                    border: `1px solid ${NEON.emerald}44`,
-                    boxShadow: '0 16px 40px -18px rgba(2,4,10,0.45)',
-                  }}
-                >
-                  <div className="mb-3" style={{ color: NEON.emerald }}>{c.icon}</div>
-                  <h4 className="font-black text-white text-base leading-tight mb-1.5">{c.t}</h4>
-                  <p className="text-white/70 text-sm leading-snug">{c.b}</p>
-                </motion.div>
-              ))}
+          <PageFrame accent={NEON.cyan} code="05" label="SFH CAPABILITIES" pageNum={5}>
+            <PageTitle kicker="05 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+
+            <div className="relative flex-1 pl-16 flex flex-col">
+              <motion.div
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+                className="absolute left-5 top-0 bottom-0 w-[2px] origin-top"
+                style={{ background: `linear-gradient(180deg, transparent, ${NEON.cyan} 15%, ${NEON.cyan} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}, 0 0 40px ${NEON.cyan}80` }}
+              />
+              <motion.div
+                initial={{ top: '0%', opacity: 0 }}
+                animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
+                className="absolute left-[14px] w-3 h-3 rounded-full"
+                style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 60px ${NEON.cyan}` }}
+              />
+
+              <div className="grid grid-cols-1 gap-5 flex-1">
+                {[
+                  { i: CalendarDays, t: 'Events Platform', b: 'Demo days, summits and hybrid events with registration, ticketing, live streaming and immersive rooms — operated end-to-end from the platform.' },
+                  { i: Cpu, t: 'Open Source Technologies', b: 'A repository of 200+ open source and open code technologies ready for each startup to integrate, adapt and scale without license costs.' },
+                  { i: Award, t: 'Credibility & Brand Authority', b: 'Presence on the Nasdaq Tower in Times Square, partnerships with NVIDIA Inception and VC funds that back every program and announcement.' },
+                  { i: Building2, t: 'Offices Worldwide', b: 'Access to a global network of hubs and workspaces, enabling startups to land immediately in key markets.' },
+                  { i: Handshake, t: 'International Trade Channels', b: 'Established trade routes and corporate relationships that open markets and customers beyond your home market.' },
+                ].map((n, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -40, filter: 'blur(8px)' }}
+                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                    transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative flex-1"
+                  >
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
+                      className="absolute -left-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
+                      style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 8px ${NEON.cyan}` }}
+                    />
+                    <span className="absolute -left-[58px] top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 animate-pulse" style={{ borderColor: `${NEON.cyan}60` }} />
+                    <span className="absolute -left-[38px] top-1/2 h-px w-8" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
+
+                    <GlassCard accent={NEON.cyan} padding="p-6" className="flex items-center gap-6 h-full relative overflow-hidden group">
+                      <span className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
+                      <span className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: NEON.cyan }} />
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(110deg, transparent 40%, ${NEON.cyan}25 50%, transparent 60%)` }} />
+
+                      <div className="scale-125 origin-center">
+                        <NeonBadge icon={n.i} color={NEON.cyan} />
+                      </div>
+                      <div className="flex-1 relative z-10">
+                        <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
+                        <div className="text-[17px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 relative z-10">
+                        <span className="font-mono text-[16px] tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
+                        <span className="font-mono text-[17px] tracking-[0.25em] text-slate-500">VECTOR</span>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
@@ -1086,48 +1129,75 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 06 · WHAT WE BRING ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.amber} code="06" label="WHAT WE BRING" pageNum={6}>
-            <PageTitle
-              kicker="Beyond software"
-              title={<>What <span style={{ color: NEON.amber }}>we bring.</span></>}
-              accent={NEON.amber}
-            />
-            <div className="flex-1 flex flex-col gap-4">
-              {[
-                { t: 'Access', b: 'Warm introductions to investors, corporates and institutional partners across our ecosystem.' },
-                { t: 'Guidance', b: 'Mentors and advisors with operating experience, available through structured sessions.' },
-                { t: 'Visibility', b: 'Feature opportunities — from the Nasdaq Tower in Times Square to our global feed and newsletter.' },
-                { t: 'Execution', b: 'Hands-on support to build, launch and iterate: MVP sprints, documents, legal and go-to-market.' },
-              ].map((c, i) => (
-                <motion.div
-                  key={c.t}
-                  initial={{ opacity: 0, x: -18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 + i * 0.08, duration: 0.5 }}
-                  className="flex items-start gap-5 rounded-2xl p-6"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(14px)',
-                    border: `1px solid ${NEON.amber}44`,
-                    boxShadow: '0 16px 40px -18px rgba(2,4,10,0.45)',
-                  }}
-                >
-                  <div
-                    className="font-mono text-2xl font-black shrink-0"
-                    style={{ color: NEON.amber }}
+          <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={6}>
+            <PageTitle kicker="06 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+
+            <div className="relative flex-1 pr-16 flex flex-col">
+              <motion.div
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+                className="absolute right-5 top-0 bottom-0 w-[2px] origin-top"
+                style={{ background: `linear-gradient(180deg, transparent, ${NEON.magenta} 15%, ${NEON.magenta} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.magenta}, 0 0 40px ${NEON.magenta}80` }}
+              />
+              <motion.div
+                initial={{ top: '0%', opacity: 0 }}
+                animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
+                className="absolute right-[14px] w-3 h-3 rounded-full"
+                style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 60px ${NEON.magenta}` }}
+              />
+
+              <div className="grid grid-cols-1 gap-5 flex-1">
+                {[
+                  { i: Rocket, t: 'Accelerator Operations', b: 'End-to-end program design, batch management, founder support and results reporting.' },
+                  { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary operating system for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
+                  { i: GraduationCap, t: 'Mentor & Expert Network', b: '150+ active mentors. 300+ investors. A directory of 1,500+ investors. A relationship-building machine.' },
+                  { i: DollarSign, t: 'Investor & Capital Relationships', b: 'Curated capital pipelines and demo-day infrastructure tuned from Series A through growth stages.' },
+                  { i: Users, t: 'Community Access', b: 'Plug into a curated network of founders, mentors, investors and corporate partners — built for introductions, not impressions.' },
+                ].map((n, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: 40, filter: 'blur(8px)' }}
+                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                    transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative flex-1"
                   >
-                    {String(i + 1).padStart(2, '0')}
-                  </div>
-                  <div>
-                    <h4 className="font-black text-white text-xl leading-tight mb-1.5">{c.t}</h4>
-                    <p className="text-white/75 text-base leading-snug">{c.b}</p>
-                  </div>
-                </motion.div>
-              ))}
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
+                      className="absolute -right-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
+                      style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 8px ${NEON.magenta}` }}
+                    />
+                    <span className="absolute -right-[58px] top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 animate-pulse" style={{ borderColor: `${NEON.magenta}60` }} />
+                    <span className="absolute -right-[38px] top-1/2 h-px w-8" style={{ background: `linear-gradient(270deg, ${NEON.magenta}, transparent)` }} />
+
+                    <GlassCard accent={NEON.magenta} padding="p-6" className="flex items-center gap-6 h-full relative overflow-hidden group">
+                      <span className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
+                      <span className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: NEON.magenta }} />
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(110deg, transparent 40%, ${NEON.magenta}25 50%, transparent 60%)` }} />
+
+                      <div className="flex flex-col items-start gap-1 relative z-10">
+                        <span className="font-mono text-[16px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
+                        <span className="font-mono text-[17px] tracking-[0.25em] text-slate-500">MODULE</span>
+                      </div>
+                      <div className="flex-1 relative z-10">
+                        <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
+                        <div className="text-[17px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                      </div>
+                      <div className="scale-125 origin-center">
+                        <NeonBadge icon={n.i} color={NEON.magenta} />
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
       </BookPage>
+
 
 
       {/* ---------------- 07 · NASDAQ TOWER ---------------- */}
