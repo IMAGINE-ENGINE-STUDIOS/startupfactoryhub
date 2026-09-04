@@ -796,21 +796,21 @@ export default function AcceleratedFundraising() {
 
           {/* kinetic headline */}
           <div className="relative text-center">
-            <h2 className="text-[13vw] font-black uppercase leading-[0.82] tracking-tighter sm:text-[8.5rem]">
+            <h2 className="text-[11vw] font-black uppercase leading-[0.82] tracking-tighter sm:text-[6.5rem]">
               <span className="block bg-gradient-to-b from-white via-white to-white/20 bg-clip-text text-transparent">
                 Ready to
               </span>
               <span className="relative block">
                 <span
                   style={{
-                    backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                    backgroundImage: 'linear-gradient(90deg,#f59e0b 0%,#22d3ee 45%,#6366f1 100%)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     color: 'transparent',
-                    filter: 'drop-shadow(0 0 30px rgba(20,184,166,0.5))',
+                    filter: 'drop-shadow(0 0 30px rgba(245,158,11,0.45))',
                   }}
                 >
-                  build
+                  raise
                 </span>
                 <span
                   aria-hidden
@@ -819,7 +819,7 @@ export default function AcceleratedFundraising() {
                   <span
                     className="absolute inset-y-0 w-1/3"
                     style={{
-                      background: 'linear-gradient(90deg,transparent,rgba(34,211,238,0.22),transparent)',
+                      background: 'linear-gradient(90deg,transparent,rgba(245,158,11,0.22),transparent)',
                       animation: 'mvp-sweep 4.5s ease-in-out infinite',
                     }}
                   />
@@ -827,7 +827,7 @@ export default function AcceleratedFundraising() {
               </span>
             </h2>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] sm:text-sm" style={{ color: '#22d3ee' }}>
-              your&nbsp;&nbsp;m&nbsp;v&nbsp;p
+              aerospace&nbsp;&nbsp;capital
             </p>
           </div>
 
