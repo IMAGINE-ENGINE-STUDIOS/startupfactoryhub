@@ -1471,6 +1471,14 @@ const defaultVars = {
     to: "",
     name: "Founder",
   },
+  "mvp-payment-link": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "MVP Program",
+    amountCents: "500000",
+  },
+
   "investor-update": {
 
     to: "",
