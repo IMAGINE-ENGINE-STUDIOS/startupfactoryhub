@@ -1248,56 +1248,6 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 07 · HOW IT WORKS ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="07" label="ONBOARDING" pageNum={7}>
-            <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO FULL ACCESS</>} />
-            <ImagePlate src={imgMarkets} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
-            <div className="space-y-4 flex-1">
-              {[
-                { t: 'Create your account', d: 'Sign up free and complete your founder, investor, mentor or student profile.' },
-                { t: 'Activate the membership', d: `Pay ${monthly} per month through the secure checkout.` },
-                { t: 'Everything unlocks instantly', d: 'Posting, map publishing, program applications, investor contact and courses go live.' },
-                { t: 'Grow inside the ecosystem', d: 'Join events, apply to programs, hire and get hired, transfer technology and earn certifications.' },
-              ].map((s, i) => (
-                <GlassCard key={s.t} padding="p-5">
-                  <div className="flex items-start gap-5">
-                    <IndexPlate n={i + 1} />
-                    <div>
-                      <div className="text-[21px] font-black text-slate-900">{s.t}</div>
-                      <p className="text-[16px] text-slate-600 leading-snug mt-1">{s.d}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
-
-      {/* ---------------- 08 · FAQ ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="08" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
-            <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { q: 'How much is the membership?', a: `${monthly} per month, billed monthly. You can cancel anytime from your dashboard.` },
-                { q: 'What happens to my free account?', a: 'Nothing is deleted. You keep browsing access; publishing, applying and investor contact stay locked until you activate a membership.' },
-                { q: 'Do higher memberships include this?', a: 'Yes. Every paid membership includes the full list of services in this brochure.' },
-                { q: 'Can my whole team join?', a: 'Yes. Each member holds an individual account; contact us for team onboarding.' },
-                { q: 'How do I pay?', a: 'Secure card checkout through Stripe. Invoices are available on request for organizations.' },
-              ].map(f => (
-                <GlassCard key={f.q} accent={NEON.blue} padding="p-5">
-                  <div className="text-[19px] font-black text-slate-900">{f.q}</div>
-                  <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{f.a}</p>
-                </GlassCard>
-              ))}
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
 
       {/* ---------------- 09 · JOIN ---------------- */}
       <BookPage>
