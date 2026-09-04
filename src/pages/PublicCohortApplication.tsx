@@ -522,7 +522,7 @@ export default function PublicCohortApplication() {
                             id="hasWorkingMvp"
                             checked={hasWorkingMvp}
                             onCheckedChange={(checked) => setHasWorkingMvp(checked === true)}
-                            className="mt-1 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                            className="mt-1 border-amber-500/40 bg-background/50 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
                           />
                           <div className="grid gap-1 leading-none">
                             <Label htmlFor="hasWorkingMvp" className="font-medium text-sm">
