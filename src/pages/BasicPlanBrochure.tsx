@@ -84,7 +84,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
-const TOTAL = 10;
+const TOTAL = 7;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
