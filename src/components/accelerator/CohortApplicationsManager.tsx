@@ -67,6 +67,7 @@ interface PublicApplication {
   status: string;
   applied_at: string;
   reviewer_notes: string | null;
+  interview_date?: string | null;
 }
 
 interface Cohort {
@@ -81,6 +82,8 @@ interface CohortApplicationsManagerProps {
   onAcceptStartup: (application: Application) => Promise<void | { paymentUrl?: string | null }>;
   onSchedulePitch?: (application: Application) => void;
 }
+
+const AF_COHORT_ID = '21bbf578-1347-43f8-bc56-d31fbd4af03d';
 
 const STATUSES = [
   { value: 'pending', label: 'Pending', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
@@ -109,16 +112,61 @@ export const CohortApplicationsManager = ({
   const [noShowSending, setNoShowSending] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const sendNoShowFollowUp = async (app: PublicApplication) => {
+  const isAfCohort = (cohortId: string | null) => {
+    if (!cohortId) return false;
+    if (cohortId === AF_COHORT_ID) return true;
+    const name = cohorts.find(c => c.id === cohortId)?.name || '';
+    return /accelerated fundraising/i.test(name);
+  };
+
+  const saveInterviewDate = async (app: PublicApplication, value: string) => {
+    const iso = value ? new Date(value).toISOString() : null;
+    try {
+      const { error } = await supabase
+        .from('public_cohort_applications')
+        .update({ interview_date: iso, status: iso ? 'interview_scheduled' : app.status })
+        .eq('id', app.id);
+      if (error) throw error;
+      toast({ title: 'Interview date saved', description: iso ? format(new Date(iso), "MMM d, yyyy 'at' h:mm a") : 'Cleared' });
+      await fetchPublicApplications();
+    } catch (err: any) {
+      toast({ title: 'Failed to save date', description: err.message || 'Unknown error', variant: 'destructive' });
+    }
+  };
+
+  const sendAcceptedFollowUp = async (app: PublicApplication) => {
     setNoShowSending(app.id);
     try {
-      const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+      const fn = isAfCohort(app.cohort_id) ? 'send-af-follow-up' : 'send-mvp-payment-reminder';
+      const { error } = await supabase.functions.invoke(fn, {
         body: {
           email: app.email,
           name: app.founder_name || 'Founder',
           startupName: app.startup_name || 'your startup',
           cohortName: getCohortName(app.cohort_id),
-          interviewDate: app.applied_at ? '' : '',
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Follow-up sent', description: `Follow-up email sent to ${app.email}.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setNoShowSending(null);
+    }
+  };
+
+  const sendNoShowFollowUp = async (app: PublicApplication) => {
+    setNoShowSending(app.id);
+    try {
+      const fn = isAfCohort(app.cohort_id) ? 'send-af-no-show-email' : 'send-mvp-no-show-email';
+      const { error } = await supabase.functions.invoke(fn, {
+        body: {
+          email: app.email,
+          name: app.founder_name || 'Founder',
+          startupName: app.startup_name || 'your startup',
+          cohortName: getCohortName(app.cohort_id),
+          interviewDate: app.interview_date ? format(new Date(app.interview_date), "MMM d, yyyy 'at' h:mm a") : '',
         },
       });
       if (error) throw error;
@@ -170,15 +218,19 @@ export const CohortApplicationsManager = ({
       if (status === 'accepted') {
         const app = publicApplications.find(a => a.id === applicationId) as any;
         if (app?.email) {
-          const { error: mailError } = await supabase.functions.invoke('send-mvp-acceptance-email', {
-            body: {
-              email: app.email,
-              name: app.founder_name || 'Founder',
-              startupName: app.startup_name || 'Your startup',
-              cohortName: cohorts.find(c => c.id === app.cohort_id)?.name || 'MVP Program',
-              applicationId,
-            },
-          });
+          const af = isAfCohort(app.cohort_id);
+          const { error: mailError } = await supabase.functions.invoke(
+            af ? 'send-af-acceptance-email' : 'send-mvp-acceptance-email',
+            {
+              body: {
+                email: app.email,
+                name: app.founder_name || 'Founder',
+                startupName: app.startup_name || 'Your startup',
+                cohortName: cohorts.find(c => c.id === app.cohort_id)?.name || (af ? 'Accelerated Fundraising' : 'MVP Program'),
+                interviewDate: app.interview_date ? format(new Date(app.interview_date), "MMM d, yyyy 'at' h:mm a") : '',
+                applicationId,
+              },
+            });
           if (mailError) console.error('Acceptance email failed:', mailError);
         }
       }
@@ -544,6 +596,7 @@ export const CohortApplicationsManager = ({
             <TableHead>Founder</TableHead>
             <TableHead>Cohort</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Interview</TableHead>
             <TableHead>Applied</TableHead>
             <TableHead>Links</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -586,6 +639,14 @@ export const CohortApplicationsManager = ({
                   </TableCell>
                   <TableCell>
                     <Badge className={statusConfig.color}>{statusConfig.label}</Badge>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Input
+                      type="datetime-local"
+                      className="h-8 w-[190px] text-xs"
+                      value={app.interview_date ? format(new Date(app.interview_date), "yyyy-MM-dd'T'HH:mm") : ''}
+                      onChange={(e) => saveInterviewDate(app, e.target.value)}
+                    />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {format(new Date(app.applied_at), 'MMM d, yyyy')}
@@ -652,6 +713,12 @@ export const CohortApplicationsManager = ({
                           </Button>
                         </>
                       )}
+                      {app.status === 'accepted' && (
+                        <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
+                          <MailWarning className="w-3 h-3 mr-1" />
+                          {noShowSending === app.id ? 'Sending…' : 'Follow-up'}
+                        </Button>
+                      )}
                       {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
                         <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
                           Reconsider
@@ -662,7 +729,7 @@ export const CohortApplicationsManager = ({
                 </TableRow>
                 {isExpanded && (
                   <TableRow className="border-border/50 bg-muted/20">
-                    <TableCell colSpan={7} className="p-4">
+                    <TableCell colSpan={8} className="p-4">
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -697,7 +764,7 @@ export const CohortApplicationsManager = ({
           })}
           {filteredPublicApplications.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+              <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                 No external applications found
               </TableCell>
             </TableRow>
