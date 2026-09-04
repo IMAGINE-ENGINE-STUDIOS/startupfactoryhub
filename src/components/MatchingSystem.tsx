@@ -1421,6 +1421,7 @@ export default function MatchingSystem() {
   // Dedupe by id — earlier entries (real matches) win over later fallback entries
   const seen = new Set<string>();
   const dedupedMatches = allMatches
+    .filter(m => !passedIds.has(m.id))
     .filter(m => {
       if (seen.has(m.id)) return false;
       seen.add(m.id);
