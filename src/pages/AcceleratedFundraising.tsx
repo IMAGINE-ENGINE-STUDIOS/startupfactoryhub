@@ -379,23 +379,8 @@ function ARHologram() {
       const R = Math.min(w, h) * 0.3;
       t += 0.0042;
 
-      // gyroscopic ring (amber, tilted, spins)
-      const ring = (tiltA: number, spin: number, rr: number, color: (a: number) => string, alpha: number, lw: number) => {
-        ctx.beginPath();
-        for (let s = 0; s <= 120; s++) {
-          const a = (s / 120) * Math.PI * 2 + spin;
-          let p = [Math.cos(a) * rr, 0, Math.sin(a) * rr];
-          p = rotX(p, tiltA);
-          const pr = project(p[0], p[1], p[2], cx, cy, R);
-          if (s === 0) ctx.moveTo(pr.x, pr.y);
-          else ctx.lineTo(pr.x, pr.y);
-        }
-        ctx.strokeStyle = color(alpha);
-        ctx.lineWidth = lw * dpr;
-        ctx.stroke();
-      };
-      ring(0.9, t * 1.3, 1.5, amber, 0.5, 1.4);
-      ring(-0.5, -t * 0.9, 1.75, cyan, 0.22, 1);
+
+
 
       // icosahedron edges with depth shading + hot vertex glow
       const ry = t * 1.1;
@@ -835,37 +820,103 @@ export default function AcceleratedFundraising() {
           className="pointer-events-none absolute inset-0 opacity-[0.05]"
           style={{
             backgroundImage:
-              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+              'linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)',
             backgroundSize: '64px 64px',
           }}
         />
+        <div
+          className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full blur-[120px]"
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.16), transparent 70%)' }}
+        />
         <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-24">
-          <div className="mb-12 max-w-2xl">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Eligibility</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Minimum Requirements</h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              The batch is built for hardware teams ready to raise. To apply, your startup must meet these baseline criteria.
-            </p>
+          <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span
+                className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.35em]"
+                style={{ borderColor: 'rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#fbbf24' }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
+                Eligibility
+              </span>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl">
+                Minimum{' '}
+                <span
+                  style={{
+                    background: 'linear-gradient(90deg,#fbbf24,#f59e0b 55%,#fde68a)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Requirements
+                </span>
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                The batch is built for hardware teams ready to raise. To apply, your startup must meet these baseline criteria.
+              </p>
+            </div>
+            <div
+              className="shrink-0 rounded-2xl border px-5 py-4 backdrop-blur-md"
+              style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.05)' }}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">Checklist</p>
+              <p className="mt-1 font-mono text-2xl font-bold" style={{ color: '#fbbf24' }}>03 / 03</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {REQUIREMENTS.map((r) => (
-              <Card key={r.code} className="tech-card group relative overflow-hidden border-0">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-                <CardContent className="flex h-full flex-col gap-4 p-7">
-                  <div className="flex items-center justify-between">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
-                      <r.icon className="h-6 w-6 text-primary transition-transform duration-500 group-hover:rotate-180" />
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            {REQUIREMENTS.map((r, i) => (
+              <div
+                key={r.code}
+                className="group relative overflow-hidden rounded-2xl border p-px transition-transform duration-500 hover:-translate-y-1.5"
+                style={{
+                  borderColor: 'rgba(245,158,11,0.22)',
+                  background: 'linear-gradient(160deg, rgba(245,158,11,0.18), rgba(245,158,11,0) 45%)',
+                  animationDelay: `${i * 90}ms`,
+                }}
+              >
+                <div className="relative h-full rounded-2xl bg-background/70 p-7 backdrop-blur-xl">
+                  <div
+                    className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-90"
+                    style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.55), transparent 70%)' }}
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(251,191,36,0.8), transparent)' }}
+                  />
+                  <div className="relative flex items-center justify-between">
+                    <span
+                      className="flex h-14 w-14 items-center justify-center rounded-2xl border transition-shadow duration-500"
+                      style={{
+                        borderColor: 'rgba(245,158,11,0.4)',
+                        background: 'linear-gradient(140deg, rgba(245,158,11,0.22), rgba(245,158,11,0.04))',
+                        boxShadow: '0 0 24px rgba(245,158,11,0.18) inset',
+                      }}
+                    >
+                      <r.icon className="h-6 w-6 transition-transform duration-500 group-hover:scale-110" style={{ color: '#fbbf24' }} />
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">{r.code}</span>
+                    <span
+                      className="font-mono text-3xl font-black leading-none tracking-tight opacity-25"
+                      style={{ color: '#f59e0b' }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold tracking-tight">{r.title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{r.desc}</p>
-                </CardContent>
-              </Card>
+                  <p className="relative mt-6 font-mono text-[10px] uppercase tracking-[0.35em]" style={{ color: 'rgba(251,191,36,0.75)' }}>
+                    {r.code}
+                  </p>
+                  <h3 className="relative mt-2 text-xl font-bold tracking-tight">{r.title}</h3>
+                  <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">{r.desc}</p>
+                  <div
+                    className="relative mt-6 h-px w-full origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                    style={{ background: 'linear-gradient(90deg, rgba(251,191,36,0.9), transparent)' }}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
 
 
       {/* ── Open Batches ── */}
