@@ -319,9 +319,10 @@ function ARHologram() {
 
     let raf = 0;
     let t = 0;
-    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '160 84% 39%';
-    const col = (a: number) => `hsla(${primary} / ${a})`;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const amber = (a: number) => `rgba(245,158,11,${a})`;
+    const amberHot = (a: number) => `rgba(251,191,36,${a})`;
+    const cyan = (a: number) => `rgba(34,211,238,${a})`;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -332,13 +333,42 @@ function ARHologram() {
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    const points: { lat: number; lon: number }[] = [];
-    for (let i = 0; i < 260; i++) {
-      const y = 1 - (i / 259) * 2;
-      const r = Math.sqrt(1 - y * y);
-      const theta = i * 2.399963;
-      points.push({ lat: Math.asin(y), lon: theta % (Math.PI * 2) });
+    // ── Icosahedron geometry ──
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const rawVerts: number[][] = [
+      [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
+      [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
+      [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1],
+    ].map(([x, y, z]) => {
+      const n = Math.sqrt(x * x + y * y + z * z);
+      return [x / n, y / n, z / n];
+    });
+    const edges: [number, number][] = [];
+    for (let i = 0; i < rawVerts.length; i++) {
+      for (let j = i + 1; j < rawVerts.length; j++) {
+        const [ax, ay, az] = rawVerts[i];
+        const [bx, by, bz] = rawVerts[j];
+        const d = Math.hypot(ax - bx, ay - by, az - bz);
+        if (d < 1.1) edges.push([i, j]);
+      }
     }
+
+    // orbiting spark particles
+    const sparks = Array.from({ length: 42 }, (_, i) => ({
+      ang: Math.random() * Math.PI * 2,
+      rad: 0.62 + Math.random() * 0.55,
+      speed: 0.4 + Math.random() * 0.9,
+      tilt: (Math.random() - 0.5) * Math.PI,
+      size: 0.8 + Math.random() * 1.6,
+      hot: i % 3 === 0,
+    }));
+
+    const project = (x: number, y: number, z: number, cx: number, cy: number, R: number) => {
+      const scale = 1 / (2.6 - z);
+      return { x: cx + x * R * scale * 2.6, y: cy + y * R * scale * 2.6, s: scale, z };
+    };
+    const rotY = ([x, y, z]: number[], a: number) => [x * Math.cos(a) + z * Math.sin(a), y, -x * Math.sin(a) + z * Math.cos(a)];
+    const rotX = ([x, y, z]: number[], a: number) => [x, y * Math.cos(a) - z * Math.sin(a), y * Math.sin(a) + z * Math.cos(a)];
 
     const draw = () => {
       const w = canvas.width;
@@ -346,86 +376,93 @@ function ARHologram() {
       ctx.clearRect(0, 0, w, h);
       const cx = w / 2;
       const cy = h / 2;
-      const R = Math.min(w, h) * 0.34;
-      t += 0.0038;
+      const R = Math.min(w, h) * 0.3;
+      t += 0.0042;
 
-      // wireframe meridians
-      ctx.lineWidth = dpr;
-      for (let m = 0; m < 14; m++) {
-        const phase = (m / 14) * Math.PI * 2 + t;
+      // gyroscopic ring (amber, tilted, spins)
+      const ring = (tiltA: number, spin: number, rr: number, color: (a: number) => string, alpha: number, lw: number) => {
         ctx.beginPath();
-        for (let s = 0; s <= 60; s++) {
-          const a = (s / 60) * Math.PI - Math.PI / 2;
-          const x3 = Math.cos(a) * Math.sin(phase);
-          const z3 = Math.cos(a) * Math.cos(phase);
-          const y3 = Math.sin(a);
-          const scale = 1 / (2.4 - z3);
-          const px = cx + x3 * R * scale * 2.4;
-          const py = cy + y3 * R * scale * 2.4;
-          if (s === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
+        for (let s = 0; s <= 120; s++) {
+          const a = (s / 120) * Math.PI * 2 + spin;
+          let p = [Math.cos(a) * rr, 0, Math.sin(a) * rr];
+          p = rotX(p, tiltA);
+          const pr = project(p[0], p[1], p[2], cx, cy, R);
+          if (s === 0) ctx.moveTo(pr.x, pr.y);
+          else ctx.lineTo(pr.x, pr.y);
         }
-        ctx.strokeStyle = col(0.10 + 0.10 * Math.abs(Math.cos(phase)));
+        ctx.strokeStyle = color(alpha);
+        ctx.lineWidth = lw * dpr;
         ctx.stroke();
-      }
+      };
+      ring(0.9, t * 1.3, 1.5, amber, 0.5, 1.4);
+      ring(-0.5, -t * 0.9, 1.75, cyan, 0.22, 1);
 
-      // latitude rings
-      for (let l = 1; l < 7; l++) {
-        const lat = -Math.PI / 2 + (l / 7) * Math.PI;
+      // icosahedron edges with depth shading + hot vertex glow
+      const ry = t * 1.1;
+      const rx = Math.sin(t * 0.6) * 0.35;
+      const verts = rawVerts.map((v) => rotX(rotY(v, ry), rx));
+      const proj = verts.map((v) => project(v[0], v[1], v[2], cx, cy, R));
+
+      edges.forEach(([a, b]) => {
+        const pa = proj[a];
+        const pb = proj[b];
+        const depth = (pa.z + pb.z) / 2;
         ctx.beginPath();
-        for (let s = 0; s <= 72; s++) {
-          const lon = (s / 72) * Math.PI * 2 + t;
-          const x3 = Math.cos(lat) * Math.sin(lon);
-          const z3 = Math.cos(lat) * Math.cos(lon);
-          const y3 = Math.sin(lat);
-          const scale = 1 / (2.4 - z3);
-          const px = cx + x3 * R * scale * 2.4;
-          const py = cy + y3 * R * scale * 2.4;
-          if (s === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.strokeStyle = col(0.10);
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.strokeStyle = amber(0.15 + (depth + 1) * 0.28);
+        ctx.lineWidth = (0.8 + (depth + 1) * 0.7) * dpr;
         ctx.stroke();
-      }
-
-      // data nodes
-      points.forEach((p, i) => {
-        const lon = p.lon + t * 1.6;
-        const x3 = Math.cos(p.lat) * Math.sin(lon);
-        const z3 = Math.cos(p.lat) * Math.cos(lon);
-        const y3 = Math.sin(p.lat);
-        if (z3 < -0.15) return;
-        const scale = 1 / (2.4 - z3);
-        const px = cx + x3 * R * scale * 2.4;
-        const py = cy + y3 * R * scale * 2.4;
-        const pulse = 0.5 + 0.5 * Math.sin(t * 6 + i);
+      });
+      proj.forEach((p, i) => {
+        const pulse = 0.5 + 0.5 * Math.sin(t * 5 + i * 1.3);
         ctx.beginPath();
-        ctx.arc(px, py, (0.9 + pulse * 1.1) * dpr, 0, Math.PI * 2);
-        ctx.fillStyle = col(0.25 + z3 * 0.55);
+        ctx.arc(p.x, p.y, (1.6 + pulse * 1.6) * dpr * (0.6 + p.s), 0, Math.PI * 2);
+        ctx.fillStyle = amberHot(0.35 + (p.z + 1) * 0.3);
+        ctx.shadowColor = 'rgba(251,191,36,0.9)';
+        ctx.shadowBlur = 10 * dpr;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // pulsing energy core
+      const corePulse = 0.5 + 0.5 * Math.sin(t * 3.4);
+      const coreR = R * (0.2 + corePulse * 0.05);
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.6);
+      grad.addColorStop(0, amberHot(0.85));
+      grad.addColorStop(0.35, amber(0.35));
+      grad.addColorStop(1, 'rgba(245,158,11,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreR * 2.6, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreR * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,240,200,0.95)';
+      ctx.fill();
+
+      // sparks
+      sparks.forEach((s) => {
+        s.ang += 0.01 * s.speed;
+        let p = [Math.cos(s.ang) * s.rad, 0, Math.sin(s.ang) * s.rad];
+        p = rotX(p, s.tilt);
+        p = rotY(p, t * 0.5);
+        const pr = project(p[0], p[1], p[2], cx, cy, R);
+        const tw = 0.4 + 0.6 * Math.sin(t * 7 * s.speed + s.ang * 3);
+        ctx.beginPath();
+        ctx.arc(pr.x, pr.y, s.size * dpr * pr.s, 0, Math.PI * 2);
+        ctx.fillStyle = s.hot ? amberHot(0.9 * tw) : cyan(0.55 * tw);
         ctx.fill();
       });
 
-      // orbit ellipse
-      ctx.beginPath();
-      for (let s = 0; s <= 120; s++) {
-        const a = (s / 120) * Math.PI * 2;
-        const px = cx + Math.cos(a) * R * 1.55;
-        const py = cy + Math.sin(a) * R * 0.42;
-        if (s === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.strokeStyle = col(0.28);
-      ctx.lineWidth = dpr;
-      ctx.stroke();
-
-      // orbiting satellite
-      const oa = t * 3.2;
-      const sx = cx + Math.cos(oa) * R * 1.55;
-      const sy = cy + Math.sin(oa) * R * 0.42;
-      ctx.beginPath();
-      ctx.arc(sx, sy, 3.2 * dpr, 0, Math.PI * 2);
-      ctx.fillStyle = col(1);
-      ctx.fill();
+      // scan sweep line
+      const sy = cy + Math.sin(t * 1.7) * R * 1.3;
+      const sweep = ctx.createLinearGradient(cx - R * 1.6, sy, cx + R * 1.6, sy);
+      sweep.addColorStop(0, 'rgba(251,191,36,0)');
+      sweep.addColorStop(0.5, amberHot(0.28));
+      sweep.addColorStop(1, 'rgba(251,191,36,0)');
+      ctx.fillStyle = sweep;
+      ctx.fillRect(cx - R * 1.6, sy - dpr, R * 3.2, 2 * dpr);
 
       raf = requestAnimationFrame(draw);
     };
