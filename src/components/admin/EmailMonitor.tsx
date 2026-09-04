@@ -493,6 +493,175 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `MVP Interview Invite → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ MVP Interview Invite sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-acceptance') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              amountCents: programEmailAmountCents,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP acceptance failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Acceptance → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Acceptance sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-payment-reminder') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-payment-reminder', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              deadline: programEmailDeadline,
+              amountCents: programEmailAmountCents,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP payment reminder failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Payment Reminder → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Payment Reminder sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-no-show') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              interviewDate: programEmailInterviewDate,
+              rescheduleUrl: programEmailRescheduleUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP no-show failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-welcome') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-welcome', {
+            body: {
+              email: to,
+              name: programEmailName,
+              applyUrl: programEmailApplyUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF welcome failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Welcome → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Welcome sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-acceptance') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-acceptance-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              interviewDate: programEmailInterviewDate,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF acceptance failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Acceptance → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Acceptance sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-follow-up') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-follow-up', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              deadline: programEmailDeadline,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF follow-up failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Follow-Up → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Follow-Up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-no-show') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-no-show-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              interviewDate: programEmailInterviewDate,
+              rescheduleUrl: programEmailRescheduleUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF no-show failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
