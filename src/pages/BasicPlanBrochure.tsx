@@ -18,7 +18,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
-  Scan, Smartphone, Box, Globe2, Sparkles, Radio,
+  Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -28,16 +28,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBasicPlan, formatCents } from '@/features/basic-plan/hooks/useBasicPlan';
 import { useMembershipAccess } from '@/features/basic-plan/hooks/useMembershipAccess';
 import { createBasicPlanCheckout } from '@/features/basic-plan/api/basicPlanApi';
-import type { BillingCycle, Entitlement } from '@/features/basic-plan/types';
+import type { BillingCycle } from '@/features/basic-plan/types';
 
 import imgCampus from '@/assets/membership/campus-atrium.jpg';
-import imgSummit from '@/assets/membership/investor-summit.jpg';
-import imgLab from '@/assets/membership/research-lab.jpg';
 import imgSkyline from '@/assets/membership/global-skyline.jpg';
-import imgCompute from '@/assets/membership/ai-compute-dealflow.jpg';
-import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
-import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
-import imgStudio from '@/assets/membership/venture-studio.jpg';
+import imgGlobal from '@/assets/membership/plan-global.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
 import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
@@ -375,69 +370,6 @@ const JoinButton = ({
  * Final page checkout: billing-cycle selector + live order summary + Stripe
  * redirect. Mirrors the dark editorial styling of the closing spread.
  */
-/**
- * Rotating editorial imagery pool used by the entitlement tiles so every
- * service gets its own photographic plate instead of a flat glass card.
- */
-const TILE_IMAGES = [imgLab, imgStudio, imgSummit, imgCompute, imgMarkets, imgSpace, imgCampus, imgSkyline];
-
-/**
- * Entitlement tile — editorial dark plate with a duotone photograph, an
- * oversized ghost numeral and a hover sweep (modern, imagery-led register).
- */
-const EntitlementTile = ({
-  n, label, description, accent = NEON.emerald, delay = 0,
-}: { n: number; label: string; description: string; accent?: string; delay?: number }) => {
-  const img = TILE_IMAGES[(n - 1) % TILE_IMAGES.length];
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
-      whileHover={{ y: -6 }}
-      className="h-full group relative overflow-hidden rounded-2xl"
-      style={{
-        border: '1px solid rgba(255,255,255,0.14)',
-        boxShadow: `0 26px 50px -28px rgba(15,23,42,0.55), 0 0 0 1px ${accent}22`,
-      }}
-    >
-      <img
-        src={img}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-[1200ms] group-hover:scale-110"
-      />
-      <div className="absolute inset-0" style={{
-        background: `linear-gradient(135deg, ${NEON.ink}f2 0%, ${NEON.ink}e0 52%, ${accent}55 100%)`,
-      }} />
-      <div className="absolute inset-0 opacity-[0.35]" style={{
-        backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 4px)',
-      }} />
-      <span className="absolute -top-3 right-3 font-mono font-black leading-none select-none pointer-events-none"
-        style={{ fontSize: 86, color: 'rgba(255,255,255,0.10)' }}>
-        {String(n).padStart(2, '0')}
-      </span>
-      <div className="relative p-5 h-full flex flex-col">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
-          <span className="font-mono text-[11px] uppercase tracking-[0.34em]" style={{ color: accent }}>
-            {String(n).padStart(2, '0')} · Service
-          </span>
-        </div>
-        <div className="text-[19px] font-black text-white leading-tight">{label}</div>
-        <p className="text-[14.5px] text-white/70 leading-snug mt-2">{description}</p>
-        <motion.span
-          className="mt-auto pt-4 block h-[2px] rounded-full"
-          style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
-          initial={{ width: 0 }}
-          animate={{ width: '60%' }}
-          transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
-        />
-      </div>
-    </motion.div>
-  );
-};
 
 const CheckoutPanel = ({
   monthly, isMember,
@@ -541,7 +473,7 @@ const CheckoutPanel = ({
 
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure({ embedded = false }: { embedded?: boolean }) {
-  const { plan, entitlements } = useBasicPlan();
+  const { plan } = useBasicPlan();
   const { isMember, tier, refetch } = useMembershipAccess();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
@@ -998,15 +930,108 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 04 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
+      {/* ---------------- 04 · GLOBAL OFFICE: CONNECT WITH FOUNDERS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
-            <div className="grid grid-cols-3 gap-3.5 flex-1 content-start">
-              {entitlements.map((e: Entitlement, i) => (
-                <EntitlementTile key={e.key} n={i + 1} label={e.label} description={e.description} delay={i * 0.04} />
-              ))}
+          <PageFrame code="04" label="GLOBAL NETWORK" pageNum={4} accent={NEON.cyan}>
+            <PageTitle
+              kicker="Connect with founders everywhere"
+              title={<><span style={{ color: NEON.cyan }}>A global office</span><br />without walls.</>}
+              accent={NEON.cyan}
+            />
+            <div
+              className="relative flex-1 rounded-3xl overflow-hidden"
+              style={{
+                border: `1px solid ${NEON.cyan}55`,
+                boxShadow: `0 0 60px ${NEON.cyan}25, inset 0 0 40px rgba(0,0,0,0.5)`,
+              }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${imgGlobal})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, ${NEON.ink}66 0%, ${NEON.ink}bb 55%, ${NEON.ink}ee 100%)`,
+                }}
+              />
+
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
+                style={{
+                  background: 'rgba(255,255,255,0.92)',
+                  backdropFilter: 'blur(8px)',
+                  border: `1px solid ${NEON.cyan}55`,
+                  boxShadow: '0 6px 20px rgba(2,4,10,0.35)',
+                }}
+              >
+                <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.cyan }} />
+                <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · GLOBAL</span>
+              </motion.div>
+
+              <div className="absolute inset-0 z-10 flex flex-col justify-end p-8">
+                <motion.p
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.55 }}
+                  className="text-white/80 text-lg font-medium max-w-2xl mb-8 leading-relaxed"
+                >
+                  Membership is not a building — it is a network. Join founders, mentors and
+                  operators from 30+ countries through virtual rooms, regional meetups and
+                  always-on async channels.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  className="grid grid-cols-3 gap-4"
+                >
+                  {[
+                    {
+                      icon: <Users className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Founder-first community',
+                      body: 'Permanent rooms, weekly stand-ups and peer-led circles built for builders.',
+                    },
+                    {
+                      icon: <MapPin className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Regional hubs',
+                      body: 'In-person activations where the ecosystem gathers: NYC, Miami, Caracas, Madrid and more.',
+                    },
+                    {
+                      icon: <Wifi className="h-6 w-6" style={{ color: NEON.cyan }} />,
+                      title: 'Always connected',
+                      body: 'Timezone coverage, async channels and 24/7 access to the platform.',
+                    },
+                  ].map((card, i) => (
+                    <motion.div
+                      key={card.title}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.65 + i * 0.08, duration: 0.5 }}
+                      className="rounded-2xl p-5"
+                      style={{
+                        background: 'rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(14px)',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        boxShadow: '0 16px 40px -16px rgba(2,4,10,0.45)',
+                      }}
+                    >
+                      <div className="mb-3">{card.icon}</div>
+                      <h4 className="font-black text-white text-lg leading-tight mb-2">{card.title}</h4>
+                      <p className="text-white/70 text-sm leading-snug">{card.body}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
