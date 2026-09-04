@@ -709,10 +709,6 @@ export const CohortApplicationsManager = ({
                       )}
                       {app.status === 'interview_scheduled' && (
                         <>
-                          <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
-                            <MailWarning className="w-3 h-3 mr-1" />
-                            {noShowSending === app.id ? 'Sending…' : 'No-Show'}
-                          </Button>
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Accept
@@ -722,12 +718,14 @@ export const CohortApplicationsManager = ({
                           </Button>
                         </>
                       )}
-                      {app.status === 'accepted' && (
-                        <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
-                          <MailWarning className="w-3 h-3 mr-1" />
-                          {noShowSending === app.id ? 'Sending…' : 'Follow-up'}
-                        </Button>
-                      )}
+                      <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
+                        <MailPlus className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:followup` ? 'Sending…' : 'Follow-up'}
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                        <MailWarning className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:noshow` ? 'Sending…' : 'No-Show'}
+                      </Button>
                       {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
                         <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
                           Reconsider
