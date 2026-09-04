@@ -606,15 +606,6 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground mr-1">Filters:</span>
         <Button
-          variant={allCommunity ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setAllCommunity(value => !value)}
-          className="gap-1.5"
-        >
-          <Users className="h-3.5 w-3.5" />
-          All Community
-        </Button>
-        <Button
           variant={vzlaFilter ? 'default' : 'outline'}
           size="sm"
           onClick={() => setVzlaFilter(v => !v)}
