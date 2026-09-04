@@ -273,7 +273,7 @@ export default function NetworkBrowser() {
         .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .ilike('full_name', `%${searchQuery}%`)
-        .limit(10);
+        .limit(1000);
 
       if (profiles && profiles.length > 0) {
         // Get roles
