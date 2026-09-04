@@ -1049,6 +1049,31 @@ export default function MatchingSystem() {
     }
   };
 
+  // Hydrate persisted requested/passed sets once the user is known, and also
+  // pick up any pending requests already in the database.
+  useEffect(() => {
+    if (!user) return;
+    try {
+      setRequestedIds(new Set(JSON.parse(localStorage.getItem(`sfh_requested_${user.id}`) || '[]')));
+      setPassedIds(new Set(JSON.parse(localStorage.getItem(`sfh_passed_${user.id}`) || '[]')));
+    } catch { /* ignore corrupted storage */ }
+
+    supabase
+      .from('connections')
+      .select('addressee_id')
+      .eq('requester_id', user.id)
+      .in('status', ['pending', 'accepted'])
+      .then(({ data }) => {
+        if (data?.length) {
+          setRequestedIds(prev => {
+            const next = new Set(prev);
+            data.forEach(c => next.add(c.addressee_id));
+            return next;
+          });
+        }
+      });
+  }, [user]);
+
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void, targetRole?: string) => {
     if (!user) return;
 
