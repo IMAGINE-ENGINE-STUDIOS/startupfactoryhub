@@ -29,7 +29,7 @@ interface PendingRequest extends Connection {
   connection_id: string;
 }
 
-export default function NetworkBrowser() {
+export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' | 'community' } = {}) {
   const [currentConnections, setCurrentConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
@@ -38,7 +38,7 @@ export default function NetworkBrowser() {
   const [allMembersLoading, setAllMembersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
-  const [allCommunity, setAllCommunity] = useState(true);
+  const allCommunity = mode === 'community';
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -606,15 +606,6 @@ export default function NetworkBrowser() {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground mr-1">Filters:</span>
         <Button
-          variant={allCommunity ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setAllCommunity(value => !value)}
-          className="gap-1.5"
-        >
-          <Users className="h-3.5 w-3.5" />
-          All Community
-        </Button>
-        <Button
           variant={vzlaFilter ? 'default' : 'outline'}
           size="sm"
           onClick={() => setVzlaFilter(v => !v)}
@@ -629,7 +620,7 @@ export default function NetworkBrowser() {
       </div>
 
       {/* Connection Requests Section */}
-      {pendingRequests.length > 0 && (
+      {mode === 'network' && pendingRequests.length > 0 && (
         <Card className="tech-card border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -712,6 +703,7 @@ export default function NetworkBrowser() {
 
 
       {/* Current Connections */}
+      {mode === 'network' && (
       <Card className="tech-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -741,6 +733,7 @@ export default function NetworkBrowser() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {allCommunity && (
         <Card className="tech-card">
@@ -784,7 +777,7 @@ export default function NetworkBrowser() {
       )}
 
       {/* Suggested Connections */}
-      {suggestedUsers.length > 0 && (
+      {mode === 'network' && suggestedUsers.length > 0 && (
         <Card className="tech-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

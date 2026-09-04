@@ -1503,6 +1503,8 @@ export default function MatchingSystem() {
 
       {activeTab === 'network' ? (
         <NetworkBrowser />
+      ) : activeTab === 'all' ? (
+        <NetworkBrowser mode="community" />
       ) : (
         <Card className="tech-card border-0 overflow-hidden">
           <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
