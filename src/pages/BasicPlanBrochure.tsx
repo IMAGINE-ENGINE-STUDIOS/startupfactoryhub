@@ -633,36 +633,205 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 02 · ABOUT · WHERE THE ECOSYSTEM MEETS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="01" label="ABOUT" pageNum={2}>
-            <PageTitle kicker="About" title={<>WHERE THE<br />ECOSYSTEM MEETS</>} />
-            <ImagePlate src={imgCampus} alt="Founders, investors and mentors meeting inside the Startup Factory Hub campus" caption="Founders · investors · mentors · institutions" height={240} className="mb-6" />
-            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
-              Startup Factory Hub is the meeting point of the innovation ecosystem: founders,
-              investors, mentors, corporations, universities and public institutions working on one
-              platform. Everything that usually lives in separate rooms — capital, talent, technology
-              and programs — happens in the same place.
-            </p>
-            <div className="grid grid-cols-2 gap-5 flex-1 content-start">
-              {[
-                { t: 'Founders & startups', d: 'Publish, raise, apply to programs and find the team, tools and technology to build.' },
-                { t: 'Investors & funds', d: 'Curated dealflow, pitch events and direct conversations with the founders behind them.' },
-                { t: 'Mentors & advisors', d: 'Certified programs, sessions and advisory tracks with startups worldwide.' },
-                { t: 'Institutions & corporates', d: 'Technology transfer, acceleration partnerships and access to global innovation talent.' },
-              ].map((c, i) => (
-                <GlassCard key={c.t} accent={i % 2 ? NEON.emerald : NEON.cyan}>
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 1} color={i % 2 ? NEON.emerald : NEON.cyan} />
-                    <div>
-                      <div className="text-[21px] font-black text-slate-900 leading-tight">{c.t}</div>
-                      <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{c.d}</p>
+          <section className="absolute inset-0 overflow-hidden" style={{
+            background: '#ffffff',
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          }}>
+            {/* Giant background "02" */}
+            <div
+              aria-hidden
+              className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+              style={{ top: '-8%', left: '-6%', fontSize: '780px', color: 'rgba(15,23,42,0.035)' }}
+            >
+              02
+            </div>
+
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+              background: `radial-gradient(ellipse at 85% 10%, ${NEON.cyan}10 0%, transparent 55%), radial-gradient(ellipse at 10% 95%, ${NEON.lime}0d 0%, transparent 50%)`,
+            }} />
+
+            {/* Top HUD bar */}
+            <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.32em] uppercase z-20">
+              <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                <span>SEC // 01 · EDITION 01</span>
+              </div>
+              <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
+              <div style={{ color: NEON.cyan }}>P/02 · {TOTAL}</div>
+            </div>
+
+            {/* Bottom HUD bar */}
+            <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] sm:text-[11px] tracking-[0.18em] uppercase z-20">
+              <span className="text-slate-900/35">// STARTUP FACTORY HUB · MEMBERSHIP PROGRAM</span>
+              <span className="text-slate-900/35">GLOBAL · REMOTE + ON-SITE</span>
+            </div>
+
+            {/* MAIN CONTENT */}
+            <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '58px 56px 56px 56px' }}>
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-start justify-between mb-8"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-px w-16" style={{ background: NEON.cyan }} />
+                  <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                    Startup Factory Hub · Vol. 01 · 2026
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span
+                    className="text-[44px] font-light tracking-tighter italic"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: 'rgba(15,23,42,0.18)',
+                      textDecoration: 'underline',
+                      textDecorationColor: NEON.lime,
+                      textUnderlineOffset: '8px',
+                    }}
+                  >
+                    P/02
+                  </span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="flex-1 grid grid-cols-12 gap-0 min-h-0"
+              >
+                {/* LEFT — dramatic copy column */}
+                <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
+                  <span className="text-[16px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
+                    About Startup Factory Hub
+                  </span>
+
+                  <h1 className="font-extrabold tracking-tight text-slate-900 mb-8" style={{ fontSize: '46px', lineHeight: '1.04', maxWidth: '100%' }}>
+                    The Operating System<br />
+                    for the Next{' '}
+                    <span
+                      className="font-extrabold"
+                      style={{
+                        background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}
+                    >
+                      Generation
+                    </span>
+                    <br />
+                    of Founders.
+                  </h1>
+
+                  <div className="flex gap-7">
+                    <div className="shrink-0 self-stretch">
+                      <div className="w-[6px] h-full rounded-full" style={{ background: `linear-gradient(180deg, ${NEON.cyan}, ${NEON.magenta}, ${NEON.lime})` }} />
+                    </div>
+                    <div className="max-w-[540px] py-1">
+                      <p className="text-[19px] leading-[1.55] text-slate-600 font-light mb-6">
+                        Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI era — connecting{' '}
+                        <span className="font-semibold text-slate-900">founders, investors, mentors, advisors, accelerators</span>{' '}
+                        and <span className="font-semibold text-slate-900">students</span> through an integrated
+                        AI-powered acceleration platform, strategic capital and a globally connected innovation network.
+                      </p>
+                      <div className="p-6 bg-slate-50 border-l-4" style={{ borderColor: '#0f172a' }}>
+                        <p className="text-slate-900 italic font-medium leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}>
+                          "Infrastructure is the new intellectual property. The platforms that accompany the founder's journey will define the future of innovation."
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </GlassCard>
-              ))}
+                </div>
+
+                {/* RIGHT — visual + floating stats */}
+                <div className="col-span-5 relative">
+                  <div className="h-full w-full relative overflow-hidden" style={{ boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}>
+                    <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{
+                      background: `linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.55) 70%, rgba(15,23,42,0.92) 100%), radial-gradient(ellipse at 70% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                    }} />
+                    <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
+                      <span className="text-[16px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
+                        Infrastructure First
+                      </span>
+                    </div>
+                    <div className="absolute inset-x-5 bottom-5 p-4 sm:p-5 backdrop-blur-xl border" style={{ background: 'rgba(2,6,23,0.88)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                      <div className="text-[12px] sm:text-[13px] font-bold tracking-[0.25em] uppercase text-slate-400 mb-3">
+                        The Platform by the Numbers
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                        {[
+                          { v: '200+', l: 'Members on the Platform', c: NEON.lime },
+                          { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
+                          { v: '350+', l: 'Network Members', c: NEON.magenta },
+                          { v: '04', l: 'Global Hubs', c: NEON.amber },
+                        ].map((s, i) => (
+                          <div key={i} className="min-w-0">
+                            <div className="text-white font-extrabold mb-1 whitespace-nowrap" style={{ fontSize: '18px', lineHeight: 1 }}>{s.v}</div>
+                            <div className="h-[2px] w-6 mb-1.5" style={{ background: s.c }} />
+                            <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.12em] text-slate-400 font-bold leading-tight">{s.l}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Footer — partner ticker */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.4 }}
+                className="mt-7 pt-5 border-t relative overflow-hidden"
+                style={{ borderColor: 'rgba(15,23,42,0.08)' }}
+              >
+                <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
+                <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
+                <div className="flex items-center" style={{ width: 'max-content', animation: 'partners-scroll 60s linear infinite' }}>
+                  {(() => {
+                    const partners = [
+                      { n: 'NASA', l: '/partners/nasa-logo.png' },
+                      { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
+                      { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
+                      { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
+                      { n: 'GitHub', l: '/github-logo.png' },
+                      { n: 'Nasdaq', l: '/nasdaq-logo.png' },
+                      { n: 'IWG', l: '/partners/iwg-logo.png' },
+                      { n: 'HSBC', l: '/partners/hsbc-logo.png' },
+                      { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
+                      { n: 'MongoDB', l: '/mongodb-logo.webp' },
+                      { n: 'F6S', l: '/partners/f6s-logo.png' },
+                      { n: 'TradingView', l: '/partners/tradingview-logo.png' },
+                      { n: 'Lovable', l: '/partners/lovable-logo.png' },
+                      { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg' },
+                      { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
+                    ];
+                    return [...partners, ...partners].map((p, i) => (
+                      <div key={i} className="partner-logo-card flex-shrink-0 px-10 h-18 flex items-center justify-center">
+                        <img
+                          src={p.l}
+                          alt={p.n}
+                          className="max-h-16 max-w-[200px] object-contain opacity-80 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                          onError={(e) => {
+                            const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
+                            if (card) card.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </motion.div>
             </div>
-          </PageFrame>
+            <style>{`@keyframes partners-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+          </section>
         </A4Wrapper>
       </BookPage>
+
 
       {/* ---------------- 03 · THE NEW STANDARD ---------------- */}
       <BookPage>
