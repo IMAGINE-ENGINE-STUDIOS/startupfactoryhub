@@ -296,7 +296,18 @@ const drawFrame = (
   ctx.arc(logoCX, logoCY, logoR, 0, Math.PI * 2);
   ctx.closePath();
   ctx.clip();
-  ctx.drawImage(logo, logoCX - logoR, logoCY - logoR, logoR * 2, logoR * 2);
+  // draw "cover"-style: preserve aspect ratio, center-crop to the square box
+  const lw = logo.naturalWidth || logo.width;
+  const lh = logo.naturalHeight || logo.height;
+  const box = logoR * 2;
+  const scale = Math.max(box / lw, box / lh);
+  const cropW = box / scale;
+  const cropH = box / scale;
+  const cropX = (lw - cropW) / 2;
+  const cropY = (lh - cropH) / 2;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(logo, cropX, cropY, cropW, cropH, logoCX - logoR, logoCY - logoR, box, box);
   ctx.restore();
   ctx.strokeStyle = `rgba(${TEAL},0.7)`;
   ctx.lineWidth = 2;
