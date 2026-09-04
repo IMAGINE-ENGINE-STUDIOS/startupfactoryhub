@@ -1300,7 +1300,16 @@ const TEMPLATES = [
     edgeFunction: "send-mvp-program",
     trigger: "manual / batched",
   },
+  {
+    id: "mvp-payment-link",
+    label: "MVP Program Payment Link (Accepted)",
+    icon: Rocket,
+    description: "Acceptance email with a live Stripe payment link for the $5,000 program cost + MVP brochure link",
+    edgeFunction: "send-mvp-acceptance-email",
+    trigger: "startup accepted / manual",
+  },
 ] as const;
+
 
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
