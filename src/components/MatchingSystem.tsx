@@ -86,21 +86,13 @@ export default function MatchingSystem() {
   const [allUsers, setAllUsers] = useState<Match[]>([]);
   const [allStartups, setAllStartups] = useState<Match[]>([]);
   // Track requests already sent (persisted) and contacts the user passed on
-  const requestedKey = user ? `sfh_requested_${user.id}` : '';
-  const passedKey = user ? `sfh_passed_${user.id}` : '';
-  const [requestedIds, setRequestedIds] = useState<Set<string>>(() => {
-    if (!requestedKey) return new Set();
-    try { return new Set(JSON.parse(localStorage.getItem(requestedKey) || '[]')); } catch { return new Set(); }
-  });
-  const [passedIds, setPassedIds] = useState<Set<string>>(() => {
-    if (!passedKey) return new Set();
-    try { return new Set(JSON.parse(localStorage.getItem(passedKey) || '[]')); } catch { return new Set(); }
-  });
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set());
+  const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
 
   const markRequested = (id: string) => {
     setRequestedIds(prev => {
       const next = new Set(prev).add(id);
-      if (requestedKey) try { localStorage.setItem(requestedKey, JSON.stringify([...next])); } catch {}
+      if (user) try { localStorage.setItem(`sfh_requested_${user.id}`, JSON.stringify([...next])); } catch {}
       return next;
     });
   };
@@ -108,7 +100,7 @@ export default function MatchingSystem() {
   const markPassed = (id: string) => {
     setPassedIds(prev => {
       const next = new Set(prev).add(id);
-      if (passedKey) try { localStorage.setItem(passedKey, JSON.stringify([...next])); } catch {}
+      if (user) try { localStorage.setItem(`sfh_passed_${user.id}`, JSON.stringify([...next])); } catch {}
       return next;
     });
   };
