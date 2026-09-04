@@ -266,3 +266,6 @@ verify_jwt = true
 
 [functions.send-signed-document]
 verify_jwt = false
+
+[functions.send-mvp-no-show-email]
+verify_jwt = true

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
+  MailWarning,
   Search, 
   FileText, 
   Video, 
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Application {
   id: string;
@@ -104,6 +106,29 @@ export const CohortApplicationsManager = ({
   const [publicApplications, setPublicApplications] = useState<PublicApplication[]>([]);
   const [loadingPublic, setLoadingPublic] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [noShowSending, setNoShowSending] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const sendNoShowFollowUp = async (app: PublicApplication) => {
+    setNoShowSending(app.id);
+    try {
+      const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+        body: {
+          email: app.email,
+          name: app.founder_name || 'Founder',
+          startupName: app.startup_name || 'your startup',
+          cohortName: getCohortName(app.cohort_id),
+          interviewDate: app.applied_at ? '' : '',
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Follow-up sent', description: `"Sorry we missed you" email sent to ${app.email}.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setNoShowSending(null);
+    }
+  };
 
   useEffect(() => {
     if (cohorts.length > 0) {
@@ -484,6 +509,9 @@ export const CohortApplicationsManager = ({
                     )}
                     {app.status === 'interview_scheduled' && (
                       <div className="ml-auto flex gap-1">
+                        <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                          <MailWarning className="w-3 h-3" />
+                        </Button>
                         <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
                           <CheckCircle className="w-3 h-3" />
                         </Button>
@@ -611,6 +639,10 @@ export const CohortApplicationsManager = ({
                       )}
                       {app.status === 'interview_scheduled' && (
                         <>
+                          <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                            <MailWarning className="w-3 h-3 mr-1" />
+                            {noShowSending === app.id ? 'Sending…' : 'No-Show'}
+                          </Button>
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Accept
