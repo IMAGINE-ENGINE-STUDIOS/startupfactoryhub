@@ -752,18 +752,18 @@ export default function AcceleratedFundraising() {
         />
         <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/40 animate-[mvp-scan_9s_linear_infinite]" />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-28">
-          <div className="mb-14 max-w-2xl">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Advantages</p>
+        <div className="relative w-full px-4 py-20 sm:px-8 lg:px-14 lg:py-28">
+          <div className="mb-14 max-w-3xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">End to End</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
               Built for hardware capital
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              A scale-up sprint for aerospace, defense and space startups that already have a working prototype or MVP — accelerate capital, production and growth in one high-intensity batch.
+              Not a service menu — one end-to-end capital engine for aerospace, defense and space hardware: investor sprints, strategic introductions and technology access, from first meeting to a funded round.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-3">
             {WHY_JOIN.map((b) => (
               <BenefitTile key={b.id} benefit={b} />
             ))}
