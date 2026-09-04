@@ -565,6 +565,10 @@ export default function AcceleratedFundraising() {
         @keyframes mvp-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
         @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
+        @keyframes af-gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes af-gear-spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes af-drone-hover { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes af-rotor { from { transform: scaleX(1); } 50% { transform: scaleX(0.3); } to { transform: scaleX(1); } }
       `}</style>
 
       {/* ── Hero · synced with marketing banner ── */}
