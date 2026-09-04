@@ -763,6 +763,55 @@ const EmailMonitor = () => {
         return { function_name: 'send-mvp-welcome', mode: 'per_recipient', recipient_field: 'email', body: {} };
       case 'mvp-interview-invite':
         return { function_name: 'send-mvp-interview-invite', mode: 'per_recipient', recipient_field: 'email', body: {} };
+      case 'mvp-acceptance':
+        return {
+          function_name: 'send-mvp-acceptance-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', amountCents: programEmailAmountCents },
+        };
+      case 'mvp-payment-reminder':
+        return {
+          function_name: 'send-mvp-payment-reminder',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', deadline: programEmailDeadline, amountCents: programEmailAmountCents },
+        };
+      case 'mvp-no-show':
+        return {
+          function_name: 'send-mvp-no-show-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', interviewDate: programEmailInterviewDate, rescheduleUrl: programEmailRescheduleUrl || undefined },
+        };
+      case 'af-welcome':
+        return {
+          function_name: 'send-af-welcome',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, applyUrl: programEmailApplyUrl || undefined },
+        };
+      case 'af-acceptance':
+        return {
+          function_name: 'send-af-acceptance-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', interviewDate: programEmailInterviewDate },
+        };
+      case 'af-follow-up':
+        return {
+          function_name: 'send-af-follow-up',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', deadline: programEmailDeadline },
+        };
+      case 'af-no-show':
+        return {
+          function_name: 'send-af-no-show-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', interviewDate: programEmailInterviewDate, rescheduleUrl: programEmailRescheduleUrl || undefined },
+        };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
