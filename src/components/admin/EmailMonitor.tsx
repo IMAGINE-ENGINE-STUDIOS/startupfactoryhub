@@ -98,6 +98,48 @@ const EMAIL_TYPES = [
     desc: '"We reviewed your application" — 1:1 interview invitation with Calendly link',
   },
   {
+    id: 'mvp-acceptance',
+    label: 'MVP Acceptance + Payment',
+    icon: <CheckCircle className="h-4 w-4" />,
+    desc: 'Send acceptance email with a Stripe payment link for the MVP program fee',
+  },
+  {
+    id: 'mvp-payment-reminder',
+    label: 'MVP Payment Reminder',
+    icon: <RefreshCw className="h-4 w-4" />,
+    desc: 'Follow-up email for accepted MVP startups that have not paid yet',
+  },
+  {
+    id: 'mvp-no-show',
+    label: 'MVP No-Show Follow-Up',
+    icon: <AlertCircle className="h-4 w-4" />,
+    desc: '"Sorry we missed you" email for startups that missed their MVP interview',
+  },
+  {
+    id: 'af-welcome',
+    label: 'AF Welcome',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Welcome email after email verification with direct Accelerated Fundraising application link',
+  },
+  {
+    id: 'af-acceptance',
+    label: 'AF Acceptance',
+    icon: <CheckCircle className="h-4 w-4" />,
+    desc: 'Acceptance email for the Accelerated Fundraising investor-matching batch',
+  },
+  {
+    id: 'af-follow-up',
+    label: 'AF Follow-Up',
+    icon: <RefreshCw className="h-4 w-4" />,
+    desc: 'Reminder for accepted AF startups that have not completed onboarding',
+  },
+  {
+    id: 'af-no-show',
+    label: 'AF No-Show Follow-Up',
+    icon: <AlertCircle className="h-4 w-4" />,
+    desc: '"Sorry we missed you" email for AF interview no-shows',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
