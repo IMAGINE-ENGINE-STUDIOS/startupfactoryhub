@@ -1038,10 +1038,102 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 05 · NASDAQ TOWER ---------------- */}
+      {/* ---------------- 05 · SFH CAPABILITIES ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.lime} code="05" label="GLOBAL VISIBILITY" pageNum={5}>
+          <PageFrame accent={NEON.emerald} code="05" label="SFH CAPABILITIES" pageNum={5}>
+            <PageTitle
+              kicker="One platform, every stage"
+              title={<>SFH <span style={{ color: NEON.emerald }}>capabilities.</span></>}
+              accent={NEON.emerald}
+            />
+            <div className="flex-1 grid grid-cols-3 gap-4 content-start">
+              {[
+                { icon: <Sparkles className="h-5 w-5" />, t: 'Genius AI', b: 'AI copilot for research, decks, documents and market analysis.' },
+                { icon: <Users className="h-5 w-5" />, t: 'Network', b: 'Founders, mentors, advisors and investors in one searchable graph.' },
+                { icon: <Globe2 className="h-5 w-5" />, t: 'Resource Map', b: 'Global map of labs, capital, talent and infrastructure.' },
+                { icon: <Radio className="h-5 w-5" />, t: 'Live Events', b: 'Virtual rooms, watch parties and regional activations.' },
+                { icon: <Box className="h-5 w-5" />, t: 'LightPaper', b: 'Live document studio for pitch decks, memos and data rooms.' },
+                { icon: <ShieldCheck className="h-5 w-5" />, t: 'Sign Live', b: 'Secure co-editing and signature workflows with full audit trail.' },
+                { icon: <Scan className="h-5 w-5" />, t: 'Matching', b: 'Signal-based matching between startups, mentors and capital.' },
+                { icon: <CreditCard className="h-5 w-5" />, t: 'Payments', b: 'Invoicing, checkout and revenue tools built in.' },
+                { icon: <Smartphone className="h-5 w-5" />, t: 'AR / VR', b: 'Immersive showcases and AR objects for products and events.' },
+              ].map((c, i) => (
+                <motion.div
+                  key={c.t}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 + i * 0.05, duration: 0.45 }}
+                  className="rounded-2xl p-5"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    backdropFilter: 'blur(14px)',
+                    border: `1px solid ${NEON.emerald}44`,
+                    boxShadow: '0 16px 40px -18px rgba(2,4,10,0.45)',
+                  }}
+                >
+                  <div className="mb-3" style={{ color: NEON.emerald }}>{c.icon}</div>
+                  <h4 className="font-black text-white text-base leading-tight mb-1.5">{c.t}</h4>
+                  <p className="text-white/70 text-sm leading-snug">{c.b}</p>
+                </motion.div>
+              ))}
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+
+      {/* ---------------- 06 · WHAT WE BRING ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame accent={NEON.amber} code="06" label="WHAT WE BRING" pageNum={6}>
+            <PageTitle
+              kicker="Beyond software"
+              title={<>What <span style={{ color: NEON.amber }}>we bring.</span></>}
+              accent={NEON.amber}
+            />
+            <div className="flex-1 flex flex-col gap-4">
+              {[
+                { t: 'Access', b: 'Warm introductions to investors, corporates and institutional partners across our ecosystem.' },
+                { t: 'Guidance', b: 'Mentors and advisors with operating experience, available through structured sessions.' },
+                { t: 'Visibility', b: 'Feature opportunities — from the Nasdaq Tower in Times Square to our global feed and newsletter.' },
+                { t: 'Execution', b: 'Hands-on support to build, launch and iterate: MVP sprints, documents, legal and go-to-market.' },
+              ].map((c, i) => (
+                <motion.div
+                  key={c.t}
+                  initial={{ opacity: 0, x: -18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 + i * 0.08, duration: 0.5 }}
+                  className="flex items-start gap-5 rounded-2xl p-6"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    backdropFilter: 'blur(14px)',
+                    border: `1px solid ${NEON.amber}44`,
+                    boxShadow: '0 16px 40px -18px rgba(2,4,10,0.45)',
+                  }}
+                >
+                  <div
+                    className="font-mono text-2xl font-black shrink-0"
+                    style={{ color: NEON.amber }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white text-xl leading-tight mb-1.5">{c.t}</h4>
+                    <p className="text-white/75 text-base leading-snug">{c.b}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+
+      {/* ---------------- 07 · NASDAQ TOWER ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame accent={NEON.lime} code="07" label="GLOBAL VISIBILITY" pageNum={7}>
             <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
             <motion.div
