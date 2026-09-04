@@ -3117,6 +3117,9 @@ const Marketing = () => {
           {/* Banner 14 - Ignition Program ANIMATED GIF */}
           <IgnitionProgramAnimatedBanner />
 
+          {/* Accelerated Fundraising — hero-styled banner (PNG / JPG / GIF) */}
+          <AcceleratedFundraisingBanner />
+
           {/* Banner 15 - Accelerated Networking Event (July 1, Online) */}
           <NetworkingEventBanner />
 
