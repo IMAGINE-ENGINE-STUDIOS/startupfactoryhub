@@ -742,22 +742,36 @@ export default function NetworkBrowser() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5 text-primary" />
-              Search All Community
+              All Community
+              <Badge variant="secondary" className="ml-auto">
+                {allMembers.length} members
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search verified, completed member profiles"
+              placeholder="Search all registered members"
               aria-label="Search all community members"
             />
             {searchQuery.length > 0 && searchQuery.length < 2 && (
               <p className="text-xs text-muted-foreground">Enter at least two characters.</p>
             )}
-            {searchResults.length > 0 && (
+            {searchQuery.length >= 2 ? (
+              searchResults.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {applyFilter(searchResults).map((member) => renderUserCard(member, member.status === 'accepted'))}
+                </div>
+              )
+            ) : allMembersLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading all members...</p>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {applyFilter(searchResults).map((member) => renderUserCard(member, member.status === 'accepted'))}
+                {applyFilter(allMembers).map((member) => renderUserCard(member, false))}
               </div>
             )}
           </CardContent>
