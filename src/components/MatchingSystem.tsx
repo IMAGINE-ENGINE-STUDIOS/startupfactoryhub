@@ -1537,10 +1537,10 @@ export default function MatchingSystem() {
                     onConnect={() => sendConnectionRequest(
                       match.id,
                       match.name,
-                      () => handleRemoveMatch(match.id),
+                      () => markRequested(match.id),
                       normalizeRole(match.role) === 'accelerator' ? 'Accelerator' : undefined
                     )}
-                    onPass={() => handleRemoveMatch(match.id)}
+                    onPass={() => { markPassed(match.id); handleRemoveMatch(match.id); }}
                   />
                 ))}
               </div>
