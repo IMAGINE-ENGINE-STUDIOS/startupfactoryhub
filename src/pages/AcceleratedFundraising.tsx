@@ -727,10 +727,10 @@ export default function AcceleratedFundraising() {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(245,158,11,0.9)' }}>
-              Built for hardware founders in aerospace, defense and space — from first prototype to first check.
+              Built for hardware founders in aerospace, defense and space — from working prototype or MVP to scaled production and growth.
             </p>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
-              Get matched with the right investors for your aerospace, defense or space hardware startup. Investor matching, technical diligence, regulatory pathway and a curated Demo Day.
+              Scale the hardware you already have. We match you with deep-tech investors, run technical diligence, open regulatory pathways and curate a Demo Day for your next stage.
             </p>
 
             <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
