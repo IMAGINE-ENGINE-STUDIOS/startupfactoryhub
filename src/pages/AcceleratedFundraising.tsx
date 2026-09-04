@@ -388,10 +388,21 @@ export default function AcceleratedFundraising() {
           .select('id,name,description,start_date,end_date,application_deadline,max_startups,current_startups,funding_per_startup,equity_percentage,focus_industries,enrollment_fee,status')
           .eq('accelerator_id', SFH_ACCELERATOR_ID)
           .in('status', ['upcoming', 'applications_open'])
+          .or('name.ilike.%Accelerated Fundraising%,name.ilike.%Aerospace%')
           .order('start_date', { ascending: true }),
       ]);
       if (profileData) setProfile(profileData as ProgramProfile);
-      if (cohortsData) setCohorts(cohortsData as OpenCohort[]);
+      if (cohortsData) {
+        setCohorts(
+          (cohortsData as OpenCohort[]).filter(
+            (c) =>
+              c.name.toLowerCase().includes('accelerated fundraising') ||
+              (c.focus_industries || []).some((i) =>
+                ['aerospace', 'defense', 'space', 'hardware'].some((kw) => i.toLowerCase().includes(kw))
+              )
+          )
+        );
+      }
       setLoading(false);
     };
     fetchData();
