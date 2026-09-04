@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
   Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
+  CalendarDays, Cpu, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -139,6 +140,20 @@ const GlassCard = ({
     {children}
   </div>
 );
+
+const NeonBadge = ({ icon: Icon, color = NEON.cyan, size = 'md' }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color?: string; size?: 'sm' | 'md' | 'lg' }) => {
+  const dims = size === 'lg' ? 'w-14 h-14' : size === 'sm' ? 'w-9 h-9' : 'w-11 h-11';
+  const iconSize = size === 'lg' ? 'h-6 w-6' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5';
+  return (
+    <div className={`${dims} rounded-xl flex items-center justify-center shrink-0`} style={{
+      background: `linear-gradient(135deg, ${color}30, ${color}05)`,
+      border: `1px solid ${color}60`,
+      boxShadow: `0 0 18px ${color}40, inset 0 0 12px ${color}20`,
+    }}>
+      <Icon className={iconSize} style={{ color }} />
+    </div>
+  );
+};
 
 /** Typographic index plate — replaces generic icon badges. */
 const IndexPlate = ({ n, color = NEON.cyan }: { n: number | string; color?: string }) => (
