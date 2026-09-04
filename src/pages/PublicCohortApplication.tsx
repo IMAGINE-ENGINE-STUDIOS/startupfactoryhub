@@ -188,7 +188,10 @@ export default function PublicCohortApplication() {
           pitch_deck_url: pitchDeckUrl || null,
           video_pitch_url: videoPitchUrl || null,
           why_applying: whyApplying || null,
-          referral_code: referralCode || null
+          referral_code: referralCode || null,
+          is_incorporated: isIncorporated,
+          has_working_mvp: hasWorkingMvp,
+          has_revenue: hasRevenue === 'yes'
         });
 
       if (error) throw error;
