@@ -116,9 +116,9 @@ function ActiveCohorts() {
         org_name: lookup.get(c.accelerator_id)?.organization_name || 'Startup Factory Hub',
         logo_url: lookup.get(c.accelerator_id)?.logo_url || null,
       }));
-      // Feature the MVP Development program first
-      const isMvp = (n: string) => /mvp/i.test(n || '');
-      mapped.sort((a: any, b: any) => Number(isMvp(b.name)) - Number(isMvp(a.name)));
+      // Feature the MVP Development and Accelerated Fundraising programs first
+      const rank = (n: string) => (/mvp/i.test(n || '') ? 2 : /accelerated fundraising/i.test(n || '') ? 1 : 0);
+      mapped.sort((a: any, b: any) => rank(b.name) - rank(a.name));
       setCohorts(mapped);
     })();
     return () => { cancelled = true; };
@@ -135,52 +135,91 @@ function ActiveCohorts() {
         {cohorts.map(c => {
           const spots = (c.max_startups || 0) - (c.current_startups || 0);
           const isMvp = /mvp/i.test(c.name || '');
+          const isAf = /accelerated fundraising/i.test(c.name || '');
+          const featured = isMvp || isAf;
+          const t = isAf
+            ? {
+                ring: 'from-amber-500 via-orange-500 to-cyan-500',
+                border: 'border-amber-400/80',
+                badgeA: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
+                badgeB: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30',
+                title: 'from-amber-300 via-orange-200 to-cyan-300',
+                panel: 'border-amber-500/20',
+                ribbon: 'from-amber-500 to-orange-500',
+                ribbonText: 'Aerospace Batch',
+                icon: 'text-amber-400',
+                accentA: 'text-cyan-400',
+                accentB: 'text-amber-400',
+                accentC: 'text-orange-400',
+                warn: 'text-amber-300',
+                cta: 'Apply to Accelerated Fundraising',
+                shadow: 'shadow-amber-500/25',
+                feeLabel: 'Focus',
+              }
+            : {
+                ring: 'from-violet-500 via-fuchsia-500 to-cyan-500',
+                border: 'border-fuchsia-400/80',
+                badgeA: 'bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30',
+                badgeB: 'bg-violet-500/15 text-violet-300 border border-violet-500/30',
+                title: 'from-fuchsia-300 via-violet-300 to-cyan-300',
+                panel: 'border-fuchsia-500/20',
+                ribbon: 'from-violet-500 to-fuchsia-500',
+                ribbonText: 'MVP Batch',
+                icon: 'text-fuchsia-500',
+                accentA: 'text-cyan-400',
+                accentB: 'text-fuchsia-400',
+                accentC: 'text-violet-400',
+                warn: 'text-fuchsia-300',
+                cta: 'Apply to MVP Batch',
+                shadow: 'shadow-fuchsia-500/25',
+                feeLabel: 'Program fee',
+              };
           return (
             <div
               key={c.id}
-              className={isMvp
+              className={featured
                 ? 'relative w-[85vw] min-w-0 sm:min-w-[320px] md:min-w-[720px] lg:min-w-[920px] max-w-[95vw] flex-shrink-0 snap-center group'
                 : 'relative w-[78vw] min-w-0 sm:min-w-[300px] sm:max-w-[340px] flex-shrink-0 snap-start group'
               }
             >
-              {isMvp && (
+              {featured && (
                 <>
-                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 opacity-75 blur animate-pulse pointer-events-none" />
-                  <div className="absolute -inset-1 rounded-[20px] bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-lg pointer-events-none" />
+                  <div className={`absolute -inset-0.5 rounded-2xl bg-gradient-to-r ${t.ring} opacity-75 blur animate-pulse pointer-events-none`} />
+                  <div className={`absolute -inset-1 rounded-[20px] bg-gradient-to-r ${t.ring} opacity-20 blur-lg pointer-events-none`} />
                 </>
               )}
               <Card
-                className={isMvp
-                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full flex flex-col md:grid md:grid-cols-2'
+                className={featured
+                  ? `relative overflow-hidden tech-card border-2 ${t.border} transition-all duration-500 hover:-translate-y-1 h-full flex flex-col md:grid md:grid-cols-2`
                   : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full flex flex-col'
                 }
               >
-                <div className={isMvp
-                  ? 'absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500'
+                <div className={featured
+                  ? `absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${t.ring}`
                   : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-70'
                 } />
 
-                {isMvp && (
-                  <div className="absolute top-2 -right-10 md:top-3 md:-right-12 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-10 md:px-12 py-1 shadow-lg z-20">
-                    MVP Batch
+                {featured && (
+                  <div className={`absolute top-2 -right-10 md:top-3 md:-right-12 rotate-45 bg-gradient-to-r ${t.ribbon} text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-10 md:px-12 py-1 shadow-lg z-20`}>
+                    {t.ribbonText}
                   </div>
                 )}
 
-                {isMvp ? (
+                {featured ? (
                   <>
                     <CardHeader className="pb-2 pt-4 px-4 md:pt-5 md:px-5 relative flex flex-col justify-center">
                       <div className="flex items-start gap-3">
-                        <div className="relative h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500 p-[2px] shrink-0">
+                        <div className={`relative h-12 w-12 rounded-2xl bg-gradient-to-br ${t.ring} p-[2px] shrink-0`}>
                           <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center overflow-hidden">
                             {c.logo_url ? (
                               <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[14px] object-contain bg-background p-1" />
                             ) : (
-                              <Rocket className="h-6 w-6 text-fuchsia-500" />
+                              <Rocket className={`h-6 w-6 ${t.icon}`} />
                             )}
                           </div>
                         </div>
                         <div className="min-w-0 flex-1 pr-6">
-                          <CardTitle className="text-lg md:text-xl font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300">
+                          <CardTitle className="text-lg md:text-xl font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${t.title}`}>
                             {c.name}
                           </CardTitle>
                           <p className="text-xs text-muted-foreground">{c.org_name}</p>
@@ -190,10 +229,10 @@ function ActiveCohorts() {
                         <p className="text-sm text-muted-foreground mt-3 line-clamp-3">{c.description}</p>
                       )}
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge className="text-[10px] px-2 py-0 h-5 bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30 shrink-0">
+                        <Badge className={`text-[10px] px-2 py-0 h-5 shrink-0 ${t.badgeA}`}>
                           {statusLabel(c.status)}
                         </Badge>
-                        <Badge className="text-[10px] px-2 py-0 h-5 bg-violet-500/15 text-violet-300 border border-violet-500/30 shrink-0">
+                        <Badge className={`text-[10px] px-2 py-0 h-5 shrink-0 ${t.badgeB}`}>
                           <Zap className="h-3 w-3 mr-1" />
                           High Priority
                         </Badge>
@@ -201,31 +240,31 @@ function ActiveCohorts() {
                     </CardHeader>
 
                     <CardContent className="px-5 pb-5 pt-1 relative flex flex-col justify-center h-full">
-                      <div className="rounded-xl border border-fuchsia-500/20 bg-background/40 backdrop-blur-sm p-3 md:p-4 space-y-3 md:space-y-4">
+                      <div className={`rounded-xl border ${t.panel} bg-background/40 backdrop-blur-sm p-3 md:p-4 space-y-3 md:space-y-4`}>
                         <div className="grid grid-cols-2 gap-3">
                           <MvpStat
                             icon={CalendarClock}
                             label="Deadline"
                             value={c.application_deadline ? new Date(c.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-                            accent="text-cyan-400"
+                            accent={t.accentA}
                           />
                           <MvpStat
                             icon={Users}
                             label="Spots left"
                             value={c.max_startups ? `${spots} / ${c.max_startups}` : '—'}
-                            accent="text-fuchsia-400"
+                            accent={t.accentB}
                           />
                           <MvpStat
                             icon={DollarSign}
-                            label="Program fee"
-                            value={c.enrollment_fee ? `$${(c.enrollment_fee / 100).toLocaleString()}` : '—'}
-                            accent="text-violet-400"
+                            label={t.feeLabel}
+                            value={isAf ? 'Investor Matching' : c.enrollment_fee ? `$${(c.enrollment_fee / 100).toLocaleString()}` : '—'}
+                            accent={t.accentC}
                             className="col-span-2"
                           />
                         </div>
 
                         {spots > 0 && spots <= 5 && (
-                          <p className="text-xs font-semibold text-fuchsia-300 flex items-center gap-1.5">
+                          <p className={`text-xs font-semibold ${t.warn} flex`.replace('flex','flex') + " items-center gap-1.5"} style={{}}> items-center gap-1.5">
                             <Zap className="h-3.5 w-3.5" />
                             Only {spots} spot{spots === 1 ? '' : 's'} left — apply soon
                           </p>
