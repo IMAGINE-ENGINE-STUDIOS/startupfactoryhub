@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import NeonBillboardCarousel from '@/components/mvp/NeonBillboardCarousel';
-import { Building2, Rocket, TrendingUp, Cog } from 'lucide-react';
+import { Building2, Rocket, TrendingUp, Cog, Globe2 } from 'lucide-react';
 
 /** Animated hardware decoration: rotating gears + hovering drone silhouette. */
 const HardwareRig = () => (
@@ -123,6 +123,12 @@ const REQUIREMENTS = [
     code: 'REV',
     title: 'Revenue Optional',
     desc: 'Generating revenue or not — pre-revenue hardware startups are welcome to apply.',
+  },
+  {
+    icon: Globe2,
+    code: 'REG',
+    title: 'US · Japan · LatAm · Europe',
+    desc: 'Open to startups headquartered in the United States, Japan, Latin America and Europe only.',
   },
 ];
 
@@ -524,7 +530,7 @@ export default function AcceleratedFundraising() {
     { k: 'Sprint', v: 'Scale-Up Sprint' },
     { k: 'Program Cost', v: 'Free' },
     { k: 'Focus', v: 'Aerospace · Defense · Space' },
-    { k: 'Format', v: '100% Remote · Worldwide' },
+    { k: 'Format', v: '100% Remote · US · Japan · LatAm · Europe' },
     profile?.total_startups_supported ? { k: 'Startups', v: `${profile.total_startups_supported}` } : null,
     profile?.total_cohorts ? { k: 'Batches', v: `${profile.total_cohorts}` } : null,
   ].filter(Boolean) as { k: string; v: string }[];
@@ -818,11 +824,11 @@ export default function AcceleratedFundraising() {
               style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.05)' }}
             >
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">Checklist</p>
-              <p className="mt-1 font-mono text-2xl font-bold" style={{ color: '#fbbf24' }}>03 / 03</p>
-            </div>
-          </div>
+               <p className="mt-1 font-mono text-2xl font-bold" style={{ color: '#fbbf24' }}>04 / 04</p>
+             </div>
+           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {REQUIREMENTS.map((r, i) => (
               <div
                 key={r.code}
