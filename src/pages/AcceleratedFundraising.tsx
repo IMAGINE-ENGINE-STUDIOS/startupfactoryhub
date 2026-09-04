@@ -449,8 +449,8 @@ function ARHologram() {
       {/* floating AR labels */}
       <div className="pointer-events-none absolute left-0 top-[18%] animate-fade-in">
         <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Build Cycle</p>
-          <p className="font-mono text-xs text-foreground">04 WEEKS</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Focus</p>
+          <p className="font-mono text-xs text-foreground">INVESTOR MATCH</p>
         </div>
       </div>
       <div className="pointer-events-none absolute right-0 top-[42%] animate-fade-in">
@@ -647,7 +647,7 @@ export default function AcceleratedFundraising() {
                   background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
                 }}
               >
-                Startup Factory Hub&nbsp; | &nbsp;{profile?.program_duration || '4-Week Program'}
+                Startup Factory Hub&nbsp; | &nbsp;Investor Matching Sprint
               </span>
               {profile?.is_accepting_applications && (
                 <span className="relative inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
@@ -693,8 +693,7 @@ export default function AcceleratedFundraising() {
               Built for hardware founders in aerospace, defense and space — from first prototype to first check.
             </p>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
-              {profile?.description ||
-                'An intensive fundraising sprint for deep-tech hardware: investor matching, technical diligence, regulatory pathway and a curated demo day in front of deep-tech capital.'}
+              Get matched with the right investors for your aerospace, defense or space hardware startup. Investor matching, technical diligence, regulatory pathway and a curated Demo Day.
             </p>
 
             <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
@@ -721,7 +720,7 @@ export default function AcceleratedFundraising() {
                   boxShadow: '0 0 45px -10px rgba(129,140,248,0.7)',
                 }}
               >
-                {profile?.program_duration || '4-Week Program'}
+                Investor Matching Sprint
               </button>
             </div>
 
