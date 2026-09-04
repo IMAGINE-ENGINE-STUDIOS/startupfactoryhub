@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   MailWarning,
+  MailPlus,
   Search, 
   FileText, 
   Video, 
@@ -138,7 +139,7 @@ export const CohortApplicationsManager = ({
   };
 
   const sendAcceptedFollowUp = async (app: PublicApplication) => {
-    setNoShowSending(app.id);
+    setNoShowSending(`${app.id}:followup`);
     try {
       const fn = isAfCohort(app.cohort_id) ? 'send-af-follow-up' : 'send-mvp-payment-reminder';
       const { error } = await supabase.functions.invoke(fn, {
@@ -160,7 +161,7 @@ export const CohortApplicationsManager = ({
   };
 
   const sendNoShowFollowUp = async (app: PublicApplication) => {
-    setNoShowSending(app.id);
+    setNoShowSending(`${app.id}:noshow`);
     try {
       const fn = isAfCohort(app.cohort_id) ? 'send-af-no-show-email' : 'send-mvp-no-show-email';
       const { error } = await supabase.functions.invoke(fn, {
@@ -562,19 +563,24 @@ export const CohortApplicationsManager = ({
                         Interview
                       </Button>
                     )}
-                    {app.status === 'interview_scheduled' && (
-                      <div className="ml-auto flex gap-1">
-                        <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
-                          <MailWarning className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
-                          <CheckCircle className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" variant="destructive" className="text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}>
-                          <XCircle className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="ml-auto flex gap-1">
+                      <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
+                        <MailPlus className="w-3 h-3" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                        <MailWarning className="w-3 h-3" />
+                      </Button>
+                      {app.status === 'interview_scheduled' && (
+                        <>
+                          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
+                            <CheckCircle className="w-3 h-3" />
+                          </Button>
+                          <Button size="sm" variant="destructive" className="text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}>
+                            <XCircle className="w-3 h-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -703,10 +709,6 @@ export const CohortApplicationsManager = ({
                       )}
                       {app.status === 'interview_scheduled' && (
                         <>
-                          <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
-                            <MailWarning className="w-3 h-3 mr-1" />
-                            {noShowSending === app.id ? 'Sending…' : 'No-Show'}
-                          </Button>
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Accept
@@ -716,12 +718,14 @@ export const CohortApplicationsManager = ({
                           </Button>
                         </>
                       )}
-                      {app.status === 'accepted' && (
-                        <Button size="sm" variant="outline" disabled={noShowSending === app.id} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
-                          <MailWarning className="w-3 h-3 mr-1" />
-                          {noShowSending === app.id ? 'Sending…' : 'Follow-up'}
-                        </Button>
-                      )}
+                      <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
+                        <MailPlus className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:followup` ? 'Sending…' : 'Follow-up'}
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
+                        <MailWarning className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:noshow` ? 'Sending…' : 'No-Show'}
+                      </Button>
                       {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
                         <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
                           Reconsider
@@ -856,19 +860,6 @@ export const CohortApplicationsManager = ({
             className="pl-10"
           />
         </div>
-        <Select value={selectedCohort} onValueChange={setSelectedCohort}>
-          <SelectTrigger className="w-full sm:w-[150px]">
-            <SelectValue placeholder="All Cohorts" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cohorts</SelectItem>
-            {cohorts.map((cohort) => (
-              <SelectItem key={cohort.id} value={cohort.id}>
-                {cohort.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
           <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="All Status" />
@@ -883,6 +874,36 @@ export const CohortApplicationsManager = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* One tab per cohort */}
+      <ScrollArea className="w-full">
+        <div className="flex items-center gap-2 pb-3 min-w-max">
+          <Button
+            size="sm"
+            variant={selectedCohort === 'all' ? 'default' : 'outline'}
+            onClick={() => setSelectedCohort('all')}
+          >
+            All Cohorts ({applications.length + publicApplications.length})
+          </Button>
+          {cohorts.map((cohort) => {
+            const count =
+              applications.filter(a => a.cohort_id === cohort.id).length +
+              publicApplications.filter(a => a.cohort_id === cohort.id).length;
+            return (
+              <Button
+                key={cohort.id}
+                size="sm"
+                variant={selectedCohort === cohort.id ? 'default' : 'outline'}
+                onClick={() => setSelectedCohort(cohort.id)}
+              >
+                {cohort.name} ({count})
+              </Button>
+            );
+          })}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
 
       {/* Tabs for Platform vs External Applications */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
