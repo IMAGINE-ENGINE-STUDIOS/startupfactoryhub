@@ -18,42 +18,107 @@ interface MembershipStatus {
   cancel_at_period_end?: boolean;
 }
 
-const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: string; description: string; bestFor: string; features: string[] }> = {
-  community: {
+/**
+ * Current subscription line-up (matches the public pricing section):
+ *  • Basic Plan — $50/mo · $480/yr (startups & students; advisors $250/mo)
+ *  • Self-Paced + Desk, Global Access + Office — legacy Stripe tiers
+ *  • Corporate — contact sales
+ *  • Investor Priority — $500/mo · $5,000/yr
+ * The retired $350 Community tier is no longer offered.
+ */
+type PlanCard = {
+  key: string;
+  name: string;
+  icon: typeof Zap;
+  gradient: string;
+  glow: string;
+  description: string;
+  bestFor: string;
+  features: string[];
+  monthly: number | null;
+  yearly: number | null;
+  priceLabel?: string;
+  /** How the CTA behaves. */
+  action: 'legacy' | 'basic' | 'investor' | 'sales';
+  tier?: Exclude<MembershipTier, 'free' | 'community'>;
+};
+
+const PLANS: PlanCard[] = [
+  {
+    key: 'basic',
+    name: 'Basic Plan',
     icon: Zap,
     gradient: 'from-blue-500 to-cyan-500',
     glow: 'shadow-blue-500/20',
-    description: 'Full digital access, virtual events, community, and mentor interactions.',
-    bestFor: 'Remote-first teams or early MVP-stage founders',
-    features: ['Full resource library', 'Mentor sessions (virtual)', 'Startup physical hub community access', 'Local Startup Factory HUB coworking space access all locations (community space access only)'],
+    description: 'Unlocks the platform: post on the feed and resource map, messaging, resources and mentor interactions.',
+    bestFor: 'Startups, students and advisors (advisors $250/mo)',
+    features: [
+      'Post on the social feed & resource map',
+      'Full resource library access',
+      'Internships, volunteering & certified courses',
+      'Mentor sessions and community events',
+    ],
+    monthly: 50,
+    yearly: 480,
+    action: 'basic',
   },
-  self_paced_office: {
+  {
+    key: 'self_paced_office',
+    name: MEMBERSHIP_TIERS.self_paced_office.name,
     icon: Building,
     gradient: 'from-primary to-teal-400',
     glow: 'shadow-primary/20',
-    description: 'Adds local Startup Factory HUB Desk coworking access all locations to the community plan.',
+    description: 'Adds local Startup Factory HUB Desk coworking access across all locations.',
     bestFor: 'Founders needing flexible workspace + virtual resources',
-    features: ['All community features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    features: ['All Basic Plan features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    monthly: MEMBERSHIP_TIERS.self_paced_office.price,
+    yearly: MEMBERSHIP_TIERS.self_paced_office.yearly_price,
+    action: 'legacy',
+    tier: 'self_paced_office',
   },
-  global_access: {
+  {
+    key: 'global_access',
+    name: MEMBERSHIP_TIERS.global_access.name,
     icon: Crown,
     gradient: 'from-purple-500 to-pink-500',
     glow: 'shadow-purple-500/20',
-    description: 'All platform features + unlimited Global office access across Startup Factory Hub network (130+ countries, 5,600+ sites).',
+    description: 'All platform features + unlimited global office access (130+ countries, 5,600+ sites).',
     bestFor: 'Globally distributed teams, traveling founders',
-    features: ['All features + Global office access across Startup Factory Hub network', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    features: ['All features + Global office access across the Startup Factory Hub network', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    monthly: MEMBERSHIP_TIERS.global_access.price,
+    yearly: MEMBERSHIP_TIERS.global_access.yearly_price,
+    action: 'legacy',
+    tier: 'global_access',
   },
-  corporate: {
+  {
+    key: 'investor',
+    name: 'Investor Priority',
+    icon: TrendingUp,
+    gradient: 'from-amber-400 to-orange-500',
+    glow: 'shadow-amber-500/20',
+    description: 'Priority deal flow and investor-only tooling across the ecosystem.',
+    bestFor: 'Angels, funds and family offices',
+    features: ['Priority access to new startup deal flow', 'Investor-only filters & matching', 'Direct intros to founders', 'Data room & pitch access'],
+    monthly: 500,
+    yearly: 5000,
+    action: 'investor',
+  },
+  {
+    key: 'corporate',
+    name: MEMBERSHIP_TIERS.corporate.name,
     icon: Users,
     gradient: 'from-orange-500 to-red-500',
     glow: 'shadow-orange-500/20',
-    description: 'Designed for corporate innovation teams and growth-stage startups with teams across regions.',
+    description: 'For corporate innovation teams and growth-stage startups with teams across regions.',
     bestFor: 'Scale-ups or corporate venture units',
-    features: ['All features + team dashboard', 'Security — live CCTV surveillance feeds on the global map', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Accelerated Tier if eligible'],
+    features: ['All features + team dashboard', 'Security — live CCTV surveillance feeds on the global map', 'Global coworking access', 'Soft Landing discount ($5,000) for global expansion'],
+    monthly: null,
+    yearly: null,
+    priceLabel: 'Contact Sales',
+    action: 'sales',
   },
-};
+];
 
-const tierOrder: MembershipTier[] = ['free', 'community', 'self_paced_office', 'global_access', 'corporate'];
 
 export default function ProfileSubscriptionTab() {
   const { user } = useAuth();
