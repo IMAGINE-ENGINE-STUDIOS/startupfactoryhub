@@ -301,13 +301,13 @@ const drawFrame = (
   const lh = logo.naturalHeight || logo.height;
   const box = logoR * 2;
   const scale = Math.max(box / lw, box / lh);
-  const sw = box / scale;
-  const sh = box / scale;
-  const sx = (lw - sw) / 2;
-  const sy = (lh - sh) / 2;
+  const cropW = box / scale;
+  const cropH = box / scale;
+  const cropX = (lw - cropW) / 2;
+  const cropY = (lh - cropH) / 2;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(logo, sx, sy, sw, sh, logoCX - logoR, logoCY - logoR, box, box);
+  ctx.drawImage(logo, cropX, cropY, cropW, cropH, logoCX - logoR, logoCY - logoR, box, box);
   ctx.restore();
   ctx.strokeStyle = `rgba(${TEAL},0.7)`;
   ctx.lineWidth = 2;
