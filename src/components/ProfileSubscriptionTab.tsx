@@ -6,7 +6,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MEMBERSHIP_TIERS, type MembershipTier } from '@/lib/membership-tiers';
-import { CreditCard, RefreshCw, Crown, Zap, Building, Users, ArrowUp, ArrowDown, Check, Loader2 } from 'lucide-react';
+import { CreditCard, RefreshCw, Crown, Zap, Building, Users, TrendingUp, ArrowUp, Check, Loader2 } from 'lucide-react';
+import { createBasicPlanCheckout } from '@/features/basic-plan/api/basicPlanApi';
+import { createInvestorPlanCheckout } from '@/features/investor-plan/api/investorPlanApi';
 import GeniusAIPlans from '@/components/GeniusAIPlans';
 
 
@@ -127,6 +129,7 @@ export default function ProfileSubscriptionTab() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
 
   const checkMembership = async () => {
     if (!user) return;
