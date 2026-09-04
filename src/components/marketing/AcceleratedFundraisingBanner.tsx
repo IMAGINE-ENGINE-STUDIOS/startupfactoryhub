@@ -194,16 +194,11 @@ const drawFrame = (
     ctx.fill();
   }
 
-  // ── animated gears (hardware motif) ──
-  drawGear(ctx, W - 90, H - 70, 92, 12, t * 0.32, `rgba(${CYAN},0.22)`, 2);
-  drawGear(ctx, W - 210, H - 168, 42, 8, -t * 0.62, `rgba(${AMBER},0.28)`, 2);
-  drawGear(ctx, W - 48, H - 330, 46, 8, -t * 0.5, `rgba(${AMBER},0.22)`, 2);
-
-  // ── hovering drone (hero dynamic element) ──
-  drawDrone(ctx, W - 186, 132, t, 1.05);
+  // ── rotating icosahedron (same dynamic element as the program hero) ──
+  drawIcosahedron(ctx, W - 230, H / 2 + 50, 148, t);
 
   // ── radar sweep ring ──
-  const rcx = W - 300, rcy = 120, rr = 62;
+  const rcx = 128, rcy = H - 112, rr = 62;
   ctx.save();
   ctx.beginPath();
   ctx.arc(rcx, rcy, rr, 0, Math.PI * 2);
