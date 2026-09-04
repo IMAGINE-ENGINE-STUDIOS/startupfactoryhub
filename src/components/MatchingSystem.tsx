@@ -85,6 +85,25 @@ export default function MatchingSystem() {
   const [potentialAccelerators, setPotentialAccelerators] = useState<Match[]>([]);
   const [allUsers, setAllUsers] = useState<Match[]>([]);
   const [allStartups, setAllStartups] = useState<Match[]>([]);
+  // Track requests already sent (persisted) and contacts the user passed on
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(new Set());
+  const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
+
+  const markRequested = (id: string) => {
+    setRequestedIds(prev => {
+      const next = new Set(prev).add(id);
+      if (user) try { localStorage.setItem(`sfh_requested_${user.id}`, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
+
+  const markPassed = (id: string) => {
+    setPassedIds(prev => {
+      const next = new Set(prev).add(id);
+      if (user) try { localStorage.setItem(`sfh_passed_${user.id}`, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection, createNotification } = useNotifications();
@@ -1030,11 +1049,36 @@ export default function MatchingSystem() {
     }
   };
 
+  // Hydrate persisted requested/passed sets once the user is known, and also
+  // pick up any pending requests already in the database.
+  useEffect(() => {
+    if (!user) return;
+    try {
+      setRequestedIds(new Set(JSON.parse(localStorage.getItem(`sfh_requested_${user.id}`) || '[]')));
+      setPassedIds(new Set(JSON.parse(localStorage.getItem(`sfh_passed_${user.id}`) || '[]')));
+    } catch { /* ignore corrupted storage */ }
+
+    supabase
+      .from('connections')
+      .select('addressee_id')
+      .eq('requester_id', user.id)
+      .in('status', ['pending', 'accepted'])
+      .then(({ data }) => {
+        if (data?.length) {
+          setRequestedIds(prev => {
+            const next = new Set(prev);
+            data.forEach(c => next.add(c.addressee_id));
+            return next;
+          });
+        }
+      });
+  }, [user]);
+
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void, targetRole?: string) => {
     if (!user) return;
 
-    // Remove card immediately - no matter what
-    onSuccess();
+    // Mark as requested immediately so the button flips to "Requested"
+    markRequested(targetId);
 
     try {
       // Get current user's name for notification
@@ -1254,10 +1298,17 @@ export default function MatchingSystem() {
             <X className="h-4 w-4 mr-2" />
             Pass
           </Button>
-          <Button size="sm" onClick={onConnect} className="flex-1 pulse-primary">
-            <Heart className="h-4 w-4 mr-2" />
-            Connect
-          </Button>
+          {requestedIds.has(match.id) ? (
+            <Button size="sm" variant="secondary" className="flex-1" disabled>
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Requested
+            </Button>
+          ) : (
+            <Button size="sm" onClick={onConnect} className="flex-1 pulse-primary">
+              <Heart className="h-4 w-4 mr-2" />
+              Connect
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -1370,6 +1421,7 @@ export default function MatchingSystem() {
   // Dedupe by id — earlier entries (real matches) win over later fallback entries
   const seen = new Set<string>();
   const dedupedMatches = allMatches
+    .filter(m => !passedIds.has(m.id))
     .filter(m => {
       if (seen.has(m.id)) return false;
       seen.add(m.id);
@@ -1485,10 +1537,10 @@ export default function MatchingSystem() {
                     onConnect={() => sendConnectionRequest(
                       match.id,
                       match.name,
-                      () => handleRemoveMatch(match.id),
+                      () => markRequested(match.id),
                       normalizeRole(match.role) === 'accelerator' ? 'Accelerator' : undefined
                     )}
-                    onPass={() => handleRemoveMatch(match.id)}
+                    onPass={() => { markPassed(match.id); handleRemoveMatch(match.id); }}
                   />
                 ))}
               </div>

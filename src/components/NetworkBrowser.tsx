@@ -348,7 +348,12 @@ export default function NetworkBrowser() {
       description: `Your request to connect with ${connectionName} has been sent.`,
     });
 
-    searchUsers(); // Refresh search results
+    // Flip every card for this user to the "Pending" state immediately
+    const markPending = (list: Connection[]) =>
+      list.map(c => c.user_id === connectionUserId ? { ...c, status: 'pending' as const } : c);
+    setAllMembers(prev => markPending(prev));
+    setSuggestedUsers(prev => markPending(prev));
+    setSearchResults(prev => markPending(prev));
   };
 
   const handleAcceptRequest = async (connectionId: string, requesterName: string, requesterId: string) => {
