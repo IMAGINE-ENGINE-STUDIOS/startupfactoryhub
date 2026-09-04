@@ -757,7 +757,7 @@ export default function AcceleratedFundraising() {
                   boxShadow: '0 0 45px -10px rgba(129,140,248,0.7)',
                 }}
               >
-                Investor Matching Sprint
+                Scale-Up Sprint
               </button>
             </div>
 
