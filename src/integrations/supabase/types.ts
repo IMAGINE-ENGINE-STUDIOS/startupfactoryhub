@@ -6546,9 +6546,12 @@ export type Database = {
           created_at: string | null
           email: string
           founder_name: string
+          has_revenue: boolean | null
+          has_working_mvp: boolean | null
           id: string
           industry: string | null
           interview_date: string | null
+          is_incorporated: boolean | null
           phone: string | null
           pitch_deck_url: string | null
           referral_code: string | null
@@ -6567,9 +6570,12 @@ export type Database = {
           created_at?: string | null
           email: string
           founder_name: string
+          has_revenue?: boolean | null
+          has_working_mvp?: boolean | null
           id?: string
           industry?: string | null
           interview_date?: string | null
+          is_incorporated?: boolean | null
           phone?: string | null
           pitch_deck_url?: string | null
           referral_code?: string | null
@@ -6588,9 +6594,12 @@ export type Database = {
           created_at?: string | null
           email?: string
           founder_name?: string
+          has_revenue?: boolean | null
+          has_working_mvp?: boolean | null
           id?: string
           industry?: string | null
           interview_date?: string | null
+          is_incorporated?: boolean | null
           phone?: string | null
           pitch_deck_url?: string | null
           referral_code?: string | null
