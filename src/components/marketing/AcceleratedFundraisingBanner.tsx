@@ -454,34 +454,6 @@ const drawFrame = (
   ctx.fillRect(shineX - 40, ctaY, 80, 44);
   ctx.restore();
 
-  // ── right HUD panel ──
-  const hudX = W - 372;
-  const hudY = 250;
-  const hudW = 300;
-  const rows = ['SCALE-UP SPRINT', 'AEROSPACE HARDWARE', 'HARDWARE SCALE-UP'];
-  const hudH = rows.length * 40 + 18;
-  ctx.fillStyle = 'rgba(4,14,26,0.82)';
-  ctx.beginPath();
-  ctx.roundRect(hudX, hudY, hudW, hudH, 12);
-  ctx.fill();
-  ctx.strokeStyle = `rgba(${TEAL},0.3)`;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  rows.forEach((v, i) => {
-    const ry = hudY + 12 + i * 40;
-    ctx.font = '700 17px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(v, hudX + 18, ry + 20);
-    if (i < rows.length - 1) {
-      ctx.strokeStyle = `rgba(${TEAL},0.16)`;
-      ctx.beginPath();
-      ctx.moveTo(hudX + 14, ry + 38);
-      ctx.lineTo(hudX + hudW - 14, ry + 38);
-      ctx.stroke();
-    }
-  });
-
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
 };
