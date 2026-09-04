@@ -684,7 +684,7 @@ export default function AcceleratedFundraising() {
                   background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
                 }}
               >
-                Startup Factory Hub&nbsp; | &nbsp;Investor Matching Sprint
+                Startup Factory Hub&nbsp; | &nbsp;Scale-Up Sprint
               </span>
               {profile?.is_accepting_applications && (
                 <span className="relative inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
