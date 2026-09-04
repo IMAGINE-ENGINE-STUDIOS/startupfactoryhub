@@ -824,11 +824,11 @@ export default function AcceleratedFundraising() {
               style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.05)' }}
             >
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">Checklist</p>
-              <p className="mt-1 font-mono text-2xl font-bold" style={{ color: '#fbbf24' }}>03 / 03</p>
-            </div>
-          </div>
+               <p className="mt-1 font-mono text-2xl font-bold" style={{ color: '#fbbf24' }}>04 / 04</p>
+             </div>
+           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {REQUIREMENTS.map((r, i) => (
               <div
                 key={r.code}
