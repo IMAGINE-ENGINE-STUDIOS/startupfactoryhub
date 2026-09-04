@@ -1012,44 +1012,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · PRICING ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={5}>
-            <PageTitle kicker="Membership" title={<>ONE PRICE.<br />{monthly} / MONTH.</>} />
-            <ImagePlate src={imgSummit} alt="Members at a Startup Factory Hub summit" caption="Everything included · one monthly price" height={200} className="mb-6" />
-            <GlassCard accent={NEON.cyan} padding="p-9" className="flex-1">
-              <div className="font-mono text-[13px] tracking-[0.32em] uppercase text-slate-500 mb-4">
-                Startup Factory Hub · Membership
-              </div>
-              <div className="flex items-end gap-3">
-                <span className="font-black text-slate-900" style={{ fontSize: 120, lineHeight: 0.85 }}>{monthly}</span>
-                <span className="text-slate-500 mb-4 text-2xl">/ month</span>
-              </div>
-              <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3.5 text-[17px] text-slate-700">
-                {[
-                  'All member services unlocked',
-                  'Billed monthly · cancel anytime',
-                  'Full access from day one',
-                  'Secure card payment with Stripe',
-                  'Events, programs and courses included',
-                  'Same price worldwide',
-                ].map(t => (
-                  <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />{t}</li>
-                ))}
-              </ul>
-              <div className="mt-9">
-                <JoinButton cycle="monthly" label={`Join for ${monthly} / month`} size="lg" />
-              </div>
-            </GlassCard>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
 
-      {/* ---------------- 06 · NASDAQ TOWER ---------------- */}
+      {/* ---------------- 05 · NASDAQ TOWER ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.lime} code="06" label="GLOBAL VISIBILITY" pageNum={6}>
+          <PageFrame accent={NEON.lime} code="05" label="GLOBAL VISIBILITY" pageNum={5}>
             <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
             <motion.div
@@ -1143,10 +1110,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · AR EVENTS ---------------- */}
+      {/* ---------------- 06 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="07" label="AR · IMMERSIVE" pageNum={7}>
+          <PageFrame accent={NEON.magenta} code="06" label="AR · IMMERSIVE" pageNum={6}>
             <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
             <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -1281,10 +1248,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 08 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 07 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="08" label="ONBOARDING" pageNum={8}>
+          <PageFrame code="07" label="ONBOARDING" pageNum={7}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO FULL ACCESS</>} />
             <ImagePlate src={imgMarkets} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
@@ -1309,10 +1276,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 09 · FAQ ---------------- */}
+      {/* ---------------- 08 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="09" label="QUESTIONS" pageNum={9} accent={NEON.blue}>
+          <PageFrame code="08" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
@@ -1332,7 +1299,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 10 · JOIN ---------------- */}
+      {/* ---------------- 09 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
