@@ -540,7 +540,7 @@ export default function AcceleratedFundraising() {
   const programName = profile?.organization_name || 'Startup Factory Hub Accelerated Fundraising';
 
   const hud = [
-    profile?.program_duration ? { k: 'Duration', v: profile.program_duration } : null,
+    { k: 'Duration', v: 'Investor Matching Sprint' },
     { k: 'Program Cost', v: 'Free' },
     { k: 'Focus', v: 'Aerospace · Defense · Space' },
     { k: 'Format', v: '100% Remote · Worldwide' },
