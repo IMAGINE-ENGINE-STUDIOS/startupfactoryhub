@@ -149,9 +149,9 @@ export default function ProfileSubscriptionTab() {
 
   useEffect(() => { checkMembership(); }, [user]);
 
-  const handleSubscribe = async (priceId: string) => {
+  const handleSubscribe = async (planKey: string, priceId: string) => {
     if (!user) return;
-    setCheckoutLoading(priceId);
+    setCheckoutLoading(planKey);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
@@ -167,6 +167,30 @@ export default function ProfileSubscriptionTab() {
       setCheckoutLoading(null);
     }
   };
+
+  /** Routes each card's CTA to the right checkout flow. */
+  const handlePlanCta = async (plan: PlanCard, legacyPriceId: string | null) => {
+    if (plan.action === 'sales') {
+      window.location.href = 'mailto:info@startupfactoryhub.com?subject=Corporate%20membership';
+      return;
+    }
+    if (plan.action === 'legacy') {
+      if (legacyPriceId) handleSubscribe(plan.key, legacyPriceId);
+      return;
+    }
+    setCheckoutLoading(plan.key);
+    try {
+      const url = plan.action === 'basic'
+        ? await createBasicPlanCheckout(billing)
+        : await createInvestorPlanCheckout(billing);
+      window.open(url, '_blank');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
 
   const handleManageSubscription = async () => {
     if (!user) return;
