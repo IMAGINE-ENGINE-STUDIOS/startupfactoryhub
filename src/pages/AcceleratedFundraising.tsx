@@ -163,69 +163,28 @@ interface OpenCohort {
 const WHY_JOIN = [
   {
     id: '01',
-    code: 'PCH',
-    title: 'Pitch Architecture',
-    desc: 'Turn complex aerospace hardware into a compelling investment narrative: problem, traction, unit economics and defensible moat.',
-    detail: ['Narrative coaching', 'Financial model review', 'Cap table hygiene'],
-    glow: 'hsl(160 84% 45% / 0.55)',
+    code: 'SPR',
+    title: 'Investor Sprints',
+    desc: 'High-intensity capital sprints that put your hardware in front of active deep-tech, aerospace and defense investors — fast, focused and built around your raise.',
+    detail: ['Curated investor longlists', 'Rolling capital sprints', 'Direct path to term sheets'],
+    glow: 'hsl(45 96% 55% / 0.55)',
   },
   {
     id: '02',
-    code: 'TRM',
-    title: 'Technical Diligence',
-    desc: 'Work with domain engineers to package your architecture, testing roadmap and risk-mitigation plan for institutional review.',
-    detail: ['Engineering teardown', 'Testing & qualification plan', 'IP & export strategy'],
-    glow: 'hsl(200 90% 55% / 0.5)',
-  },
-  {
-    id: '03',
-    code: 'INV',
-    title: 'Active Investor Matching',
-    desc: 'Get introduced to active deep-tech, aerospace and defense investors who understand long-cycle hardware and capital intensity.',
-    detail: ['Curated investor longlist', 'Warm introductions', 'Term sheet coaching'],
-    glow: 'hsl(275 80% 62% / 0.5)',
-  },
-  {
-    id: '04',
-    code: 'PMF',
-    title: 'Market Validation',
-    desc: 'Translate engineering wins into purchase intent, LOIs and pilot contracts that de-risk the round for investors.',
-    detail: ['Customer discovery', 'LOI / pilot pipeline', 'Competitive mapping'],
-    glow: 'hsl(28 92% 58% / 0.5)',
-  },
-  {
-    id: '05',
-    code: 'SUP',
-    title: 'Supply & Manufacturing',
-    desc: 'Map suppliers, build-vs-buy decisions and manufacturing partners that keep hardware roadmaps credible and fundable.',
-    detail: ['Supplier screening', 'Make-vs-buy analysis', 'Cost roadmap'],
-    glow: 'hsl(142 76% 45% / 0.5)',
-  },
-  {
-    id: '06',
-    code: 'REG',
-    title: 'Regulatory Pathway',
-    desc: 'Navigate ITAR, EAR, FAA, FCC and export-control considerations before they become deal blockers.',
-    detail: ['Compliance audit', 'Licensing roadmap', 'Advisory introductions'],
-    glow: 'hsl(340 82% 60% / 0.5)',
-  },
-  {
-    id: '07',
-    code: 'DMO',
-    title: 'Demo Day',
-    desc: 'Pitch live to an invite-only room of deep-tech investors, corporate venture arms and government fund managers.',
-    detail: ['Curated investor room', 'Live product demo', 'Media & press support'],
+    code: 'INT',
+    title: 'Strategic Introductions',
+    desc: 'Warm, double-opt-in introductions to the people who move hardware rounds: fund managers, corporate venture arms, primes and government capital.',
+    detail: ['Deep-tech & defense funds', 'Corporate venture & primes', 'Government capital programs'],
     glow: 'hsl(190 85% 50% / 0.5)',
   },
   {
-    id: '08',
-    code: 'NET',
-    title: 'Global Network',
-    desc: 'Plug into a worldwide mesh of aerospace labs, defense primes, spaceports and government innovation offices.',
-    detail: ['Lab & test-facility access', 'Prime contractor intros', 'Government programs'],
-    glow: 'hsl(52 95% 55% / 0.5)',
+    id: '03',
+    code: 'TEC',
+    title: 'Technology Access',
+    desc: 'Unlock the platform technology layer: labs, test facilities and advanced tooling that make your hardware roadmap credible to institutional capital.',
+    detail: ['Lab & test-facility network', 'Advanced platform tooling', 'Aerospace-grade infrastructure'],
+    glow: 'hsl(275 80% 62% / 0.5)',
   },
-
 ];
 
 /* ── Benefit tile: tools-tab style bento card with AR overlays ── */
@@ -238,7 +197,7 @@ function BenefitTile({ benefit }: { benefit: (typeof WHY_JOIN)[number] }) {
       style={{ ['--tile-glow' as never]: benefit.glow }}
       className={`group relative tech-card border-0 rounded-2xl p-5 overflow-hidden text-left transition-all duration-300
         hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--tile-glow)]
-        ${expanded ? 'sm:col-span-2 min-h-[260px]' : 'min-h-[212px]'}`}
+        ${expanded ? 'lg:col-span-3 min-h-[280px]' : 'min-h-[300px]'}`}
     >
       <span
         aria-hidden
@@ -793,18 +752,18 @@ export default function AcceleratedFundraising() {
         />
         <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/40 animate-[mvp-scan_9s_linear_infinite]" />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-28">
-          <div className="mb-14 max-w-2xl">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Advantages</p>
+        <div className="relative w-full px-4 py-20 sm:px-8 lg:px-14 lg:py-28">
+          <div className="mb-14 max-w-3xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">End to End</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
               Built for hardware capital
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              A scale-up sprint for aerospace, defense and space startups that already have a working prototype or MVP — accelerate capital, production and growth in one high-intensity batch.
+              Not a service menu — one end-to-end capital engine for aerospace, defense and space hardware: investor sprints, strategic introductions and technology access, from first meeting to a funded round.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-3">
             {WHY_JOIN.map((b) => (
               <BenefitTile key={b.id} benefit={b} />
             ))}
