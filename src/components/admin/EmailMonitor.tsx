@@ -98,6 +98,48 @@ const EMAIL_TYPES = [
     desc: '"We reviewed your application" — 1:1 interview invitation with Calendly link',
   },
   {
+    id: 'mvp-acceptance',
+    label: 'MVP Acceptance + Payment',
+    icon: <CheckCircle className="h-4 w-4" />,
+    desc: 'Send acceptance email with a Stripe payment link for the MVP program fee',
+  },
+  {
+    id: 'mvp-payment-reminder',
+    label: 'MVP Payment Reminder',
+    icon: <RefreshCw className="h-4 w-4" />,
+    desc: 'Follow-up email for accepted MVP startups that have not paid yet',
+  },
+  {
+    id: 'mvp-no-show',
+    label: 'MVP No-Show Follow-Up',
+    icon: <AlertCircle className="h-4 w-4" />,
+    desc: '"Sorry we missed you" email for startups that missed their MVP interview',
+  },
+  {
+    id: 'af-welcome',
+    label: 'AF Welcome',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Welcome email after email verification with direct Accelerated Fundraising application link',
+  },
+  {
+    id: 'af-acceptance',
+    label: 'AF Acceptance',
+    icon: <CheckCircle className="h-4 w-4" />,
+    desc: 'Acceptance email for the Accelerated Fundraising investor-matching batch',
+  },
+  {
+    id: 'af-follow-up',
+    label: 'AF Follow-Up',
+    icon: <RefreshCw className="h-4 w-4" />,
+    desc: 'Reminder for accepted AF startups that have not completed onboarding',
+  },
+  {
+    id: 'af-no-show',
+    label: 'AF No-Show Follow-Up',
+    icon: <AlertCircle className="h-4 w-4" />,
+    desc: '"Sorry we missed you" email for AF interview no-shows',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
@@ -167,6 +209,16 @@ const EmailMonitor = () => {
   const [scheduleAt, setScheduleAt] = useState('');
   const [scheduling, setScheduling] = useState(false);
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
+
+  // MVP / AF program email fields
+  const [programEmailName, setProgramEmailName] = useState('Founder');
+  const [programEmailStartup, setProgramEmailStartup] = useState('Your startup');
+  const [programEmailCohort, setProgramEmailCohort] = useState('');
+  const [programEmailInterviewDate, setProgramEmailInterviewDate] = useState('');
+  const [programEmailDeadline, setProgramEmailDeadline] = useState('September 29, 2026');
+  const [programEmailRescheduleUrl, setProgramEmailRescheduleUrl] = useState('');
+  const [programEmailApplyUrl, setProgramEmailApplyUrl] = useState('');
+  const [programEmailAmountCents, setProgramEmailAmountCents] = useState(500000);
 
 
 
@@ -441,6 +493,175 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `MVP Interview Invite → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ MVP Interview Invite sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-acceptance') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              amountCents: programEmailAmountCents,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP acceptance failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Acceptance → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Acceptance sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-payment-reminder') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-payment-reminder', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              deadline: programEmailDeadline,
+              amountCents: programEmailAmountCents,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP payment reminder failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Payment Reminder → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Payment Reminder sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'mvp-no-show') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'MVP Program',
+              interviewDate: programEmailInterviewDate,
+              rescheduleUrl: programEmailRescheduleUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP no-show failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-welcome') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-welcome', {
+            body: {
+              email: to,
+              name: programEmailName,
+              applyUrl: programEmailApplyUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF welcome failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Welcome → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Welcome sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-acceptance') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-acceptance-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              interviewDate: programEmailInterviewDate,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF acceptance failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Acceptance → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Acceptance sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-follow-up') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-follow-up', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              deadline: programEmailDeadline,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF follow-up failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF Follow-Up → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF Follow-Up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'af-no-show') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-af-no-show-email', {
+            body: {
+              email: to,
+              name: programEmailName,
+              startupName: programEmailStartup,
+              cohortName: programEmailCohort || 'Accelerated Fundraising',
+              interviewDate: programEmailInterviewDate,
+              rescheduleUrl: programEmailRescheduleUrl || undefined,
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('AF no-show failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `AF No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ AF No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
@@ -542,6 +763,55 @@ const EmailMonitor = () => {
         return { function_name: 'send-mvp-welcome', mode: 'per_recipient', recipient_field: 'email', body: {} };
       case 'mvp-interview-invite':
         return { function_name: 'send-mvp-interview-invite', mode: 'per_recipient', recipient_field: 'email', body: {} };
+      case 'mvp-acceptance':
+        return {
+          function_name: 'send-mvp-acceptance-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', amountCents: programEmailAmountCents },
+        };
+      case 'mvp-payment-reminder':
+        return {
+          function_name: 'send-mvp-payment-reminder',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', deadline: programEmailDeadline, amountCents: programEmailAmountCents },
+        };
+      case 'mvp-no-show':
+        return {
+          function_name: 'send-mvp-no-show-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'MVP Program', interviewDate: programEmailInterviewDate, rescheduleUrl: programEmailRescheduleUrl || undefined },
+        };
+      case 'af-welcome':
+        return {
+          function_name: 'send-af-welcome',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, applyUrl: programEmailApplyUrl || undefined },
+        };
+      case 'af-acceptance':
+        return {
+          function_name: 'send-af-acceptance-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', interviewDate: programEmailInterviewDate },
+        };
+      case 'af-follow-up':
+        return {
+          function_name: 'send-af-follow-up',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', deadline: programEmailDeadline },
+        };
+      case 'af-no-show':
+        return {
+          function_name: 'send-af-no-show-email',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, startupName: programEmailStartup, cohortName: programEmailCohort || 'Accelerated Fundraising', interviewDate: programEmailInterviewDate, rescheduleUrl: programEmailRescheduleUrl || undefined },
+        };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
@@ -911,7 +1181,59 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
-
+                {/* MVP / AF program email fields */}
+                {['mvp-acceptance', 'mvp-payment-reminder', 'mvp-no-show', 'af-welcome', 'af-acceptance', 'af-follow-up', 'af-no-show'].includes(activeType) && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Mail className="h-4 w-4" />
+                      Program Email Details
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Founder / Recipient Name</Label>
+                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="tech-card border-0" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Startup Name</Label>
+                        <Input value={programEmailStartup} onChange={e => setProgramEmailStartup(e.target.value)} placeholder="Your startup" className="tech-card border-0" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Cohort / Program Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                      <Input value={programEmailCohort} onChange={e => setProgramEmailCohort(e.target.value)} placeholder="MVP Program or Accelerated Fundraising" className="tech-card border-0" />
+                    </div>
+                    {['mvp-acceptance', 'mvp-payment-reminder'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Amount (cents) <span className="text-muted-foreground text-xs">500000 = $5,000 USD</span></Label>
+                        <Input type="number" value={programEmailAmountCents} onChange={e => setProgramEmailAmountCents(Number(e.target.value))} className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-payment-reminder', 'af-follow-up'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Deadline / Due Date</Label>
+                        <Input value={programEmailDeadline} onChange={e => setProgramEmailDeadline(e.target.value)} placeholder="September 29, 2026" className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-no-show', 'af-acceptance', 'af-no-show'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Interview Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="September 15, 2026" className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-no-show', 'af-no-show'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Reschedule URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailRescheduleUrl} onChange={e => setProgramEmailRescheduleUrl(e.target.value)} placeholder="https://calendly.com/..." className="tech-card border-0" />
+                      </div>
+                    )}
+                    {activeType === 'af-welcome' && (
+                      <div className="space-y-1">
+                        <Label>Direct Application URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailApplyUrl} onChange={e => setProgramEmailApplyUrl(e.target.value)} placeholder="https://startupfactoryhub.com/cohorts/.../apply" className="tech-card border-0" />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {activeType === 'hot-deals-feedback' && (
 
