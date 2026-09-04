@@ -1,0 +1,1 @@
+ALTER TABLE public.public_cohort_applications ADD COLUMN IF NOT EXISTS interview_date timestamptz;

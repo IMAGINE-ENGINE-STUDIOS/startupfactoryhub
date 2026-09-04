@@ -42,6 +42,7 @@ export default function Auth() {
   const [role, setRole] = useState(prefilledRole);
   const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
   const [mvpProgram, setMvpProgram] = useState(false);
+  const [acceleratedFundraising, setAcceleratedFundraising] = useState(false);
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
@@ -247,7 +248,7 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild, mvpProgram);
+    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild, mvpProgram, acceleratedFundraising);
     
     if (error) {
       if (error.message?.includes('already registered')) {
@@ -277,7 +278,7 @@ export default function Auth() {
     // depends on the built-in auth mailer rate limits.
     try {
       await supabase.functions.invoke('send-verification-email', {
-        body: { email, name: fullName || email, mvpProgram: mvpProgram },
+        body: { email, name: fullName || email, mvpProgram: mvpProgram, acceleratedFundraising },
       });
     } catch (err: any) {
       console.error('Failed to send verification email:', err);
@@ -291,6 +292,17 @@ export default function Auth() {
         });
       } catch (err: any) {
         console.error('Failed to send MVP welcome email:', err);
+      }
+    }
+
+    // If the user signed up for the Accelerated Fundraising program, send the thank-you + apply link email
+    if (acceleratedFundraising) {
+      try {
+        await supabase.functions.invoke('send-af-welcome', {
+          body: { email, name: fullName || email },
+        });
+      } catch (err: any) {
+        console.error('Failed to send Accelerated Fundraising welcome email:', err);
       }
     }
 
@@ -382,6 +394,25 @@ export default function Auth() {
                       />
                     </div>
                   </div>
+
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                    <label htmlFor="accelerated-fundraising" className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        id="accelerated-fundraising"
+                        type="checkbox"
+                        checked={acceleratedFundraising}
+                        onChange={(e) => setAcceleratedFundraising(e.target.checked)}
+                        className="mt-1 h-4 w-4 rounded border-amber-500/50 accent-amber-500"
+                      />
+                      <div className="text-sm">
+                        <div className="font-semibold text-foreground">Join the Accelerated Fundraising Program</div>
+                        <div className="text-xs text-muted-foreground">
+                          Are you joining for the Accelerated Fundraising program for aerospace hardware startups? We'll email you the application link right after you verify your email.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
                   
                   <Button 
                     type="submit" 

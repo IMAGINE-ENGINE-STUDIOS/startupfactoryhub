@@ -6548,6 +6548,7 @@ export type Database = {
           founder_name: string
           id: string
           industry: string | null
+          interview_date: string | null
           phone: string | null
           pitch_deck_url: string | null
           referral_code: string | null
@@ -6568,6 +6569,7 @@ export type Database = {
           founder_name: string
           id?: string
           industry?: string | null
+          interview_date?: string | null
           phone?: string | null
           pitch_deck_url?: string | null
           referral_code?: string | null
@@ -6588,6 +6590,7 @@ export type Database = {
           founder_name?: string
           id?: string
           industry?: string | null
+          interview_date?: string | null
           phone?: string | null
           pitch_deck_url?: string | null
           referral_code?: string | null
