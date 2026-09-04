@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   MailWarning,
+  MailPlus,
   Search, 
   FileText, 
   Video, 
