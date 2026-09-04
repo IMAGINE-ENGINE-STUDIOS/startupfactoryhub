@@ -446,7 +446,7 @@ export default function AcceleratedFundraising() {
         {/* banner background plate */}
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40"
-          style={{ backgroundImage: `url(${mvpBg})` }}
+          style={{ backgroundImage: `url(${accelBg})` }}
         />
         <div
           className="pointer-events-none absolute inset-0"
