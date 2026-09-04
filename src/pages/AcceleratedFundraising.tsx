@@ -9,6 +9,122 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import NeonBillboardCarousel from '@/components/mvp/NeonBillboardCarousel';
+import { Building2, Rocket, TrendingUp, Cog } from 'lucide-react';
+
+/** Animated hardware decoration: rotating gears + hovering drone silhouette. */
+const HardwareRig = () => (
+  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+    {/* large gear — bottom right */}
+    <svg
+      className="absolute -bottom-16 -right-16 h-72 w-72 opacity-20"
+      viewBox="0 0 100 100"
+      style={{ animation: 'af-gear-spin 26s linear infinite' }}
+    >
+      <g fill="none" stroke="#22d3ee" strokeWidth="2">
+        <circle cx="50" cy="50" r="30" />
+        <circle cx="50" cy="50" r="12" />
+        {Array.from({ length: 12 }).map((_, i) => {
+          const a = (i * Math.PI) / 6;
+          return (
+            <line
+              key={i}
+              x1={50 + Math.cos(a) * 30}
+              y1={50 + Math.sin(a) * 30}
+              x2={50 + Math.cos(a) * 42}
+              y2={50 + Math.sin(a) * 42}
+              strokeWidth="6"
+            />
+          );
+        })}
+      </g>
+    </svg>
+    {/* small gear — top right */}
+    <svg
+      className="absolute right-24 top-8 h-28 w-28 opacity-25"
+      viewBox="0 0 100 100"
+      style={{ animation: 'af-gear-spin-rev 14s linear infinite' }}
+    >
+      <g fill="none" stroke="#f59e0b" strokeWidth="2">
+        <circle cx="50" cy="50" r="28" />
+        <circle cx="50" cy="50" r="10" />
+        {Array.from({ length: 8 }).map((_, i) => {
+          const a = (i * Math.PI) / 4;
+          return (
+            <line
+              key={i}
+              x1={50 + Math.cos(a) * 28}
+              y1={50 + Math.sin(a) * 28}
+              x2={50 + Math.cos(a) * 40}
+              y2={50 + Math.sin(a) * 40}
+              strokeWidth="7"
+            />
+          );
+        })}
+      </g>
+    </svg>
+    {/* drone silhouette */}
+    <svg
+      className="absolute right-[38%] top-14 hidden h-20 w-28 opacity-40 lg:block"
+      viewBox="0 0 120 70"
+      style={{ animation: 'af-drone-hover 5s ease-in-out infinite' }}
+    >
+      <g stroke="#22d3ee" strokeWidth="2.5" fill="none" strokeLinecap="round">
+        <rect x="45" y="28" width="30" height="14" rx="5" fill="rgba(34,211,238,0.12)" />
+        <line x1="45" y1="30" x2="18" y2="12" />
+        <line x1="75" y1="30" x2="102" y2="12" />
+        <line x1="45" y1="40" x2="18" y2="58" />
+        <line x1="75" y1="40" x2="102" y2="58" />
+      </g>
+      {[[18, 12], [102, 12], [18, 58], [102, 58]].map(([cx, cy], i) => (
+        <ellipse
+          key={i}
+          cx={cx}
+          cy={cy}
+          rx="16"
+          ry="3.5"
+          fill="rgba(34,211,238,0.35)"
+          style={{ animation: `af-rotor 0.35s linear infinite`, transformOrigin: `${cx}px ${cy}px` }}
+        />
+      ))}
+      <circle cx="60" cy="35" r="3" fill="#f59e0b">
+        <animate attributeName="opacity" values="1;0.2;1" dur="1.2s" repeatCount="indefinite" />
+      </circle>
+    </svg>
+    {/* radar sweep ring */}
+    <div
+      className="absolute left-[8%] top-[12%] hidden h-40 w-40 rounded-full border opacity-30 lg:block"
+      style={{
+        borderColor: 'rgba(20,184,166,0.5)',
+        background:
+          'conic-gradient(from 0deg, rgba(34,211,238,0.5), transparent 60deg, transparent 360deg)',
+        animation: 'af-gear-spin 6s linear infinite',
+        maskImage: 'radial-gradient(circle, transparent 30%, black 32%)',
+        WebkitMaskImage: 'radial-gradient(circle, transparent 30%, black 32%)',
+      }}
+    />
+  </div>
+);
+
+const REQUIREMENTS = [
+  {
+    icon: Building2,
+    code: 'INC',
+    title: 'Incorporated',
+    desc: 'Your startup must be a legally incorporated company (C-Corp, LLC or local equivalent).',
+  },
+  {
+    icon: Cog,
+    code: 'MVP',
+    title: 'Working MVP',
+    desc: 'A functional prototype or minimum viable product — hardware that can be demonstrated.',
+  },
+  {
+    icon: TrendingUp,
+    code: 'REV',
+    title: 'Revenue Optional',
+    desc: 'Generating revenue or not — pre-revenue hardware startups are welcome to apply.',
+  },
+];
 
 
 const SFH_ACCELERATOR_ID = 'abd41d15-f707-4e36-b2f5-3a08d7b7b13a';
@@ -449,10 +565,15 @@ export default function AcceleratedFundraising() {
         @keyframes mvp-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
         @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
+        @keyframes af-gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes af-gear-spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes af-drone-hover { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes af-rotor { from { transform: scaleX(1); } 50% { transform: scaleX(0.3); } to { transform: scaleX(1); } }
       `}</style>
 
       {/* ── Hero · synced with marketing banner ── */}
       <section className="relative overflow-hidden border-b border-white/10">
+        <HardwareRig />
         {/* banner background plate */}
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40"
@@ -668,6 +789,45 @@ export default function AcceleratedFundraising() {
             ))}
           </div>
 
+        </div>
+      </section>
+
+
+      {/* ── Minimum Requirements ── */}
+      <section className="relative overflow-hidden border-b border-border/50">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-24">
+          <div className="mb-12 max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Eligibility</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Minimum Requirements</h2>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              The batch is built for hardware teams ready to raise. To apply, your startup must meet these baseline criteria.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {REQUIREMENTS.map((r) => (
+              <Card key={r.code} className="tech-card group relative overflow-hidden border-0">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+                <CardContent className="flex h-full flex-col gap-4 p-7">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
+                      <r.icon className="h-6 w-6 text-primary transition-transform duration-500 group-hover:rotate-180" />
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">{r.code}</span>
+                  </div>
+                  <h3 className="text-lg font-bold tracking-tight">{r.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{r.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
