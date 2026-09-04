@@ -230,33 +230,6 @@ const PageFrame = ({
 );
 
 /* ============================ DATA VISUALS ============================ */
-const RadialStat = ({
-  value, suffix = '', label, color = NEON.cyan, pct,
-}: { value: string; suffix?: string; label: string; color?: string; pct: number }) => {
-  const R = 46;
-  const C = 2 * Math.PI * R;
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative w-[120px] h-[120px]">
-        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-          <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(15,23,42,0.08)" strokeWidth="10" />
-          <motion.circle
-            cx="60" cy="60" r={R} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
-            strokeDasharray={C}
-            initial={{ strokeDashoffset: C }}
-            animate={{ strokeDashoffset: C * (1 - pct) }}
-            transition={{ duration: 1.4, ease: 'easeOut' }}
-            style={{ filter: `drop-shadow(0 0 8px ${color}80)` }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[26px] font-black text-slate-900">{value}<span className="text-[16px]">{suffix}</span></span>
-        </div>
-      </div>
-      <div className="mt-2 font-mono text-[12px] uppercase tracking-[0.24em] text-slate-500">{label}</div>
-    </div>
-  );
-};
 
 /* ============================ LAYOUT SUPPORT ============================ */
 const BASE_W = 842;
@@ -582,9 +555,6 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
   const pageH = Math.round(pageW * (BASE_H / BASE_W));
 
   const monthly = formatCents(plan.monthly_price_cents);
-  const yearly = formatCents(plan.yearly_price_cents);
-  const yearlyPerMonth = formatCents(Math.round(plan.yearly_price_cents / 12));
-  const monthlyTotalCents = plan.monthly_price_cents * 12;
 
   const pages = (
     <>
