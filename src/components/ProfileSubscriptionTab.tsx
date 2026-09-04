@@ -243,34 +243,49 @@ export default function ProfileSubscriptionTab() {
         </div>
       </Card>
 
-      {/* Tier Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {tierOrder.filter(t => t !== 'free').map((tierKey) => {
-          const tier = MEMBERSHIP_TIERS[tierKey];
-          const config = TIER_CONFIG[tierKey];
-          const Icon = config.icon;
-          const isCurrentPlan = currentTier === tierKey;
-          const currentIndex = tierOrder.indexOf(currentTier as MembershipTier);
-          const tierIndex = tierOrder.indexOf(tierKey);
-          const isUpgrade = tierIndex > currentIndex;
-          const isDowngrade = tierIndex < currentIndex;
+      {/* Billing cycle toggle */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/40 p-1">
+          {(['monthly', 'yearly'] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setBilling(mode)}
+              className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                billing === mode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {mode === 'monthly' ? 'Monthly' : 'Yearly · save 10%'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Plan Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {PLANS.map((plan) => {
+          const Icon = plan.icon;
+          const isCurrentPlan = currentTier === plan.key || (plan.tier && currentTier === plan.tier);
+          const amount = billing === 'monthly' ? plan.monthly : plan.yearly;
+          const legacyPriceId = plan.tier
+            ? (billing === 'monthly'
+                ? MEMBERSHIP_TIERS[plan.tier].price_id
+                : MEMBERSHIP_TIERS[plan.tier].yearly_price_id)
+            : null;
+          const busy = checkoutLoading === plan.key;
 
           return (
-            <div key={tierKey} className="relative group">
-              {/* Active glow */}
+            <div key={plan.key} className="relative group">
               {isCurrentPlan && (
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-teal-400 rounded-2xl opacity-40 blur-sm animate-pulse" />
               )}
-              {/* Hover glow */}
-              <div className={`absolute -inset-0.5 bg-gradient-to-r ${config.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur-sm transition-all duration-500`} />
+              <div className={`absolute -inset-0.5 bg-gradient-to-r ${plan.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur-sm transition-all duration-500`} />
 
               <Card className={`relative tech-card border-0 h-full transition-all duration-300 ${
                 isCurrentPlan ? 'ring-2 ring-primary/50' : 'hover:scale-[1.02]'
               }`}>
                 <CardContent className="p-5 flex flex-col h-full">
-                  {/* Icon & Badge */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg ${config.glow}`}>
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center shadow-lg ${plan.glow}`}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     {isCurrentPlan && (
@@ -280,25 +295,27 @@ export default function ProfileSubscriptionTab() {
                     )}
                   </div>
 
-                  {/* Name & Price */}
-                  <h4 className="text-base font-bold text-foreground mb-1">{tier.name}</h4>
+                  <h4 className="text-base font-bold text-foreground mb-1">{plan.name}</h4>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-2xl font-bold text-foreground">${tier.price}</span>
-                    <span className="text-xs text-muted-foreground">/mo</span>
+                    {amount === null ? (
+                      <span className="text-2xl font-bold text-foreground">{plan.priceLabel || 'Custom'}</span>
+                    ) : (
+                      <>
+                        <span className="text-2xl font-bold text-foreground">${amount.toLocaleString()}</span>
+                        <span className="text-xs text-muted-foreground">{billing === 'monthly' ? '/mo' : '/yr'}</span>
+                      </>
+                    )}
                   </div>
 
-                  {/* Description */}
-                  <p className="text-xs text-muted-foreground mb-3">{config.description}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{plan.description}</p>
 
-                  {/* Best For */}
                   <p className="text-xs mb-3">
                     <span className="font-semibold text-foreground">Best for: </span>
-                    <span className="text-muted-foreground">{config.bestFor}</span>
+                    <span className="text-muted-foreground">{plan.bestFor}</span>
                   </p>
 
-                  {/* Features */}
                   <ul className="space-y-1.5 mb-4">
-                    {config.features.map((feature, i) => (
+                    {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                         <Check className="h-3 w-3 mt-0.5 text-primary shrink-0" />
                         <span>{feature}</span>
@@ -306,10 +323,8 @@ export default function ProfileSubscriptionTab() {
                     ))}
                   </ul>
 
-                  {/* Spacer */}
                   <div className="flex-1" />
 
-                  {/* Action Button */}
                   {isCurrentPlan ? (
                     <Button
                       className="w-full mt-3"
@@ -323,26 +338,17 @@ export default function ProfileSubscriptionTab() {
                     </Button>
                   ) : (
                     <Button
-                      className={`w-full mt-3 ${isUpgrade ? `bg-gradient-to-r ${config.gradient} hover:opacity-90 text-white border-0` : ''}`}
-                      variant={isUpgrade ? 'default' : 'outline'}
+                      className={`w-full mt-3 bg-gradient-to-r ${plan.gradient} hover:opacity-90 text-white border-0`}
                       size="sm"
-                      onClick={() => tier.price_id && handleSubscribe(tier.price_id)}
-                      disabled={checkoutLoading === tier.price_id || !tier.price_id}
+                      onClick={() => handlePlanCta(plan, legacyPriceId)}
+                      disabled={busy || (plan.action === 'legacy' && !legacyPriceId)}
                     >
-                      {checkoutLoading === tier.price_id ? (
+                      {busy ? (
                         <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                      ) : isUpgrade ? (
+                      ) : plan.action === 'sales' ? null : (
                         <ArrowUp className="h-3.5 w-3.5 mr-2" />
-                      ) : isDowngrade ? (
-                        <ArrowDown className="h-3.5 w-3.5 mr-2" />
-                      ) : null}
-                      {checkoutLoading === tier.price_id
-                        ? 'Loading...'
-                        : isUpgrade
-                          ? 'Upgrade'
-                          : isDowngrade
-                            ? 'Downgrade'
-                            : 'Get Started'}
+                      )}
+                      {busy ? 'Loading...' : plan.action === 'sales' ? 'Contact Sales' : 'Get Started'}
                     </Button>
                   )}
                 </CardContent>
@@ -351,6 +357,7 @@ export default function ProfileSubscriptionTab() {
           );
         })}
       </div>
+
 
       {/* Genius AI plans */}
       <div className="pt-2">
