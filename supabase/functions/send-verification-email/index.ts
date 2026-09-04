@@ -9,13 +9,14 @@ const corsHeaders = {
 
 const APP_URL = "https://startupfactoryhub.com";
 const MVP_APPLICATION_URL = `${APP_URL}/cohorts/1b95239b-622b-4838-9b63-cfff2c54269e/apply`;
+const AF_APPLICATION_URL = `${APP_URL}/cohorts/21bbf578-1347-43f8-bc56-d31fbd4af03d/apply`;
 const LOGO_URL =
   "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
 
 const esc = (s: unknown) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const buildHtml = (name: string, link: string, mvp: boolean) => `<!DOCTYPE html>
+const buildHtml = (name: string, link: string, mvp: boolean, af = false) => `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Verify your email</title></head>
 <body style="margin:0;padding:0;background:#0b0f19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
@@ -46,6 +47,16 @@ const buildHtml = (name: string, link: string, mvp: boolean) => `<!DOCTYPE html>
       </p>
     </div>
   </td></tr>` : ""}
+  ${af ? `
+  <tr><td style="padding:0 32px 30px;">
+    <div style="background:#0b1220;border:1px solid rgba(245,158,11,0.2);border-radius:16px;padding:22px 24px;">
+      <div style="color:#fbbf24;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:10px;">Accelerated Fundraising</div>
+      <p style="margin:0;color:#94a3b8;font-size:14px;line-height:1.7;">You signed up interested in the Accelerated Fundraising program for aerospace hardware startups. After verifying your email, complete your application here:</p>
+      <p style="margin:14px 0 0;text-align:center;">
+        <a href="${AF_APPLICATION_URL}" style="display:inline-block;color:#1a1200;font-size:13px;font-weight:800;text-decoration:none;padding:12px 28px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#fbbf24 55%,#fde68a);">Apply to Accelerated Fundraising</a>
+      </p>
+    </div>
+  </td></tr>` : ""}
   <tr><td style="background:#0b0f19;padding:24px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
     <p style="margin:0;color:#64748b;font-size:12px;">If you did not create this account, you can safely ignore this email.</p>
   </td></tr>
@@ -65,6 +76,7 @@ async function sendFor(
   email: string,
   name: string,
   mvp: boolean,
+  af = false,
 ): Promise<void> {
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
@@ -78,7 +90,7 @@ async function sendFor(
   await sendCompliantEmail({
     to: email,
     subject: "Verify your email — Startup Factory Hub",
-    html: buildHtml(name, link, mvp),
+    html: buildHtml(name, link, mvp, af),
     source: "email-verification",
     skipSuppression: true, // transactional auth email
   });
@@ -107,7 +119,7 @@ serve(async (req) => {
       const dryRun = body.dryRun === true;
 
       // Collect unverified users across pages
-      const unverified: { email: string; name: string; mvp: boolean }[] = [];
+      const unverified: { email: string; name: string; mvp: boolean; af: boolean }[] = [];
       for (let page = 1; page <= 20 && unverified.length < limit; page++) {
         const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
         if (error) throw error;
@@ -119,6 +131,7 @@ serve(async (req) => {
             email: u.email,
             name: (u.user_metadata?.full_name as string) || u.email.split("@")[0],
             mvp: String(u.user_metadata?.mvp_program ?? "") === "true",
+            af: String(u.user_metadata?.accelerated_fundraising ?? "") === "true",
           });
           if (unverified.length >= limit) break;
         }
@@ -133,8 +146,11 @@ serve(async (req) => {
 
       for (const u of unverified) {
         try {
-          await sendFor(admin, u.email, u.name, u.mvp);
+          await sendFor(admin, u.email, u.name, u.mvp, u.af);
           sent++;
+          if (u.af) {
+            await admin.functions.invoke("send-af-welcome", { body: { email: u.email, name: u.name } });
+          }
           if (u.mvp) {
             const { error: mvpErr } = await admin.functions.invoke("send-mvp-welcome", {
               body: { email: u.email, name: u.name },
@@ -157,8 +173,9 @@ serve(async (req) => {
 
     const name = String(body.name || body.full_name || email.split("@")[0]);
     const mvp = body.mvpProgram === true || String(body.mvpProgram ?? "") === "true";
+    const af = body.acceleratedFundraising === true || String(body.acceleratedFundraising ?? "") === "true";
 
-    await sendFor(admin, email, name, mvp);
+    await sendFor(admin, email, name, mvp, af);
     return json({ success: true });
   } catch (error: any) {
     console.error("send-verification-email error:", error);
