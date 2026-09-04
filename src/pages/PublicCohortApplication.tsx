@@ -528,7 +528,11 @@ export default function PublicCohortApplication() {
                   <CardTitle className="text-lg">About {cohort.accelerator.organization_name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{cohort.accelerator.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {cohort.focus_industries?.some((i) => ['aerospace','hardware','defense','space'].includes(i.toLowerCase())) || cohort.name.toLowerCase().includes('accelerated fundraising')
+                      ? 'Get matched with the right investors for your aerospace, defense or space hardware startup. Investor matching, technical diligence, regulatory pathway and a curated Demo Day.'
+                      : cohort.accelerator.description}
+                  </p>
                   {cohort.accelerator.website && (
                     <Button 
                       variant="link" 
