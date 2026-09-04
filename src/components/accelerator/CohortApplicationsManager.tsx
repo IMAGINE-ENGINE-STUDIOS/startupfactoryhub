@@ -68,6 +68,9 @@ interface PublicApplication {
   applied_at: string;
   reviewer_notes: string | null;
   interview_date?: string | null;
+  is_incorporated?: boolean | null;
+  has_working_mvp?: boolean | null;
+  has_revenue?: boolean | null;
 }
 
 interface Cohort {
