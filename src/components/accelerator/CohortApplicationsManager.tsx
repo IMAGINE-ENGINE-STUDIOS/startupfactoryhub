@@ -860,19 +860,6 @@ export const CohortApplicationsManager = ({
             className="pl-10"
           />
         </div>
-        <Select value={selectedCohort} onValueChange={setSelectedCohort}>
-          <SelectTrigger className="w-full sm:w-[150px]">
-            <SelectValue placeholder="All Cohorts" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cohorts</SelectItem>
-            {cohorts.map((cohort) => (
-              <SelectItem key={cohort.id} value={cohort.id}>
-                {cohort.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
           <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="All Status" />
@@ -887,6 +874,36 @@ export const CohortApplicationsManager = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* One tab per cohort */}
+      <ScrollArea className="w-full">
+        <div className="flex items-center gap-2 pb-3 min-w-max">
+          <Button
+            size="sm"
+            variant={selectedCohort === 'all' ? 'default' : 'outline'}
+            onClick={() => setSelectedCohort('all')}
+          >
+            All Cohorts ({applications.length + publicApplications.length})
+          </Button>
+          {cohorts.map((cohort) => {
+            const count =
+              applications.filter(a => a.cohort_id === cohort.id).length +
+              publicApplications.filter(a => a.cohort_id === cohort.id).length;
+            return (
+              <Button
+                key={cohort.id}
+                size="sm"
+                variant={selectedCohort === cohort.id ? 'default' : 'outline'}
+                onClick={() => setSelectedCohort(cohort.id)}
+              >
+                {cohort.name} ({count})
+              </Button>
+            );
+          })}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
 
       {/* Tabs for Platform vs External Applications */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
