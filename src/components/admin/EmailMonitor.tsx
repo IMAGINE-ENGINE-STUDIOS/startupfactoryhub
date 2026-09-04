@@ -1181,7 +1181,59 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
-
+                {/* MVP / AF program email fields */}
+                {['mvp-acceptance', 'mvp-payment-reminder', 'mvp-no-show', 'af-welcome', 'af-acceptance', 'af-follow-up', 'af-no-show'].includes(activeType) && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Mail className="h-4 w-4" />
+                      Program Email Details
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Founder / Recipient Name</Label>
+                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="tech-card border-0" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Startup Name</Label>
+                        <Input value={programEmailStartup} onChange={e => setProgramEmailStartup(e.target.value)} placeholder="Your startup" className="tech-card border-0" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Cohort / Program Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                      <Input value={programEmailCohort} onChange={e => setProgramEmailCohort(e.target.value)} placeholder="MVP Program or Accelerated Fundraising" className="tech-card border-0" />
+                    </div>
+                    {['mvp-acceptance', 'mvp-payment-reminder'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Amount (cents) <span className="text-muted-foreground text-xs">500000 = $5,000 USD</span></Label>
+                        <Input type="number" value={programEmailAmountCents} onChange={e => setProgramEmailAmountCents(Number(e.target.value))} className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-payment-reminder', 'af-follow-up'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Deadline / Due Date</Label>
+                        <Input value={programEmailDeadline} onChange={e => setProgramEmailDeadline(e.target.value)} placeholder="September 29, 2026" className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-no-show', 'af-acceptance', 'af-no-show'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Interview Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="September 15, 2026" className="tech-card border-0" />
+                      </div>
+                    )}
+                    {['mvp-no-show', 'af-no-show'].includes(activeType) && (
+                      <div className="space-y-1">
+                        <Label>Reschedule URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailRescheduleUrl} onChange={e => setProgramEmailRescheduleUrl(e.target.value)} placeholder="https://calendly.com/..." className="tech-card border-0" />
+                      </div>
+                    )}
+                    {activeType === 'af-welcome' && (
+                      <div className="space-y-1">
+                        <Label>Direct Application URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={programEmailApplyUrl} onChange={e => setProgramEmailApplyUrl(e.target.value)} placeholder="https://startupfactoryhub.com/cohorts/.../apply" className="tech-card border-0" />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {activeType === 'hot-deals-feedback' && (
 
