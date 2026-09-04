@@ -29,7 +29,7 @@ interface PendingRequest extends Connection {
   connection_id: string;
 }
 
-export default function NetworkBrowser() {
+export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' | 'community' } = {}) {
   const [currentConnections, setCurrentConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
