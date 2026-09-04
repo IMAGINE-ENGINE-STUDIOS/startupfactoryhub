@@ -758,6 +758,28 @@ export const CohortApplicationsManager = ({
                             <Badge variant="outline" className="text-xs">{app.stage}</Badge>
                           </div>
                         )}
+                        {(app.is_incorporated !== null || app.has_working_mvp !== null || app.has_revenue !== null) && (
+                          <div className="col-span-full">
+                            <span className="text-xs text-muted-foreground">Eligibility:</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {app.is_incorporated !== null && (
+                                <Badge variant="outline" className={`text-xs ${app.is_incorporated ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
+                                  {app.is_incorporated ? 'Incorporated' : 'Not incorporated'}
+                                </Badge>
+                              )}
+                              {app.has_working_mvp !== null && (
+                                <Badge variant="outline" className={`text-xs ${app.has_working_mvp ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
+                                  {app.has_working_mvp ? 'Has MVP/prototype' : 'No MVP/prototype'}
+                                </Badge>
+                              )}
+                              {app.has_revenue !== null && (
+                                <Badge variant="outline" className={`text-xs ${app.has_revenue ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                                  {app.has_revenue ? 'Generating revenue' : 'Pre-revenue'}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
