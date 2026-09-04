@@ -264,7 +264,7 @@ function ActiveCohorts() {
                         </div>
 
                         {spots > 0 && spots <= 5 && (
-                          <p className={`text-xs font-semibold ${t.warn} flex`.replace('flex','flex') + " items-center gap-1.5"} style={{}}> items-center gap-1.5">
+                          <p className={`text-xs font-semibold ${t.warn} flex items-center gap-1.5`}>
                             <Zap className="h-3.5 w-3.5" />
                             Only {spots} spot{spots === 1 ? '' : 's'} left — apply soon
                           </p>
@@ -272,11 +272,11 @@ function ActiveCohorts() {
 
                         <Button
                           size="default"
-                          className="w-full h-10 text-sm font-bold gap-2 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 border-0 text-white hover:opacity-90 animate-pulse shadow-lg shadow-fuchsia-500/25"
+                          className={`w-full h-10 text-sm font-bold gap-2 bg-gradient-to-r ${t.ring} border-0 text-white hover:opacity-90 animate-pulse shadow-lg ${t.shadow}`}
                           onClick={() => navigate(`/cohorts/${c.id}/apply`)}
                         >
                           <Rocket className="h-4 w-4" />
-                          Apply to MVP Batch
+                          {t.cta}
                         </Button>
                       </div>
                     </CardContent>
