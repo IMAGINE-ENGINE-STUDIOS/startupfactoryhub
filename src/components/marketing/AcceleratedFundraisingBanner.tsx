@@ -458,12 +458,8 @@ const drawFrame = (
   const hudX = W - 372;
   const hudY = 250;
   const hudW = 300;
-  const rows = [
-    ['PROGRAM', 'SCALE-UP SPRINT'],
-    ['FOCUS', 'AEROSPACE HARDWARE'],
-    ['STAGE', 'HARDWARE SCALE-UP'],
-  ];
-  const hudH = rows.length * 46 + 16;
+  const rows = ['SCALE-UP SPRINT', 'AEROSPACE HARDWARE', 'HARDWARE SCALE-UP'];
+  const hudH = rows.length * 40 + 18;
   ctx.fillStyle = 'rgba(4,14,26,0.82)';
   ctx.beginPath();
   ctx.roundRect(hudX, hudY, hudW, hudH, 12);
@@ -471,20 +467,17 @@ const drawFrame = (
   ctx.strokeStyle = `rgba(${TEAL},0.3)`;
   ctx.lineWidth = 1;
   ctx.stroke();
-  rows.forEach(([k, v], i) => {
-    const ry = hudY + 14 + i * 46;
-    ctx.font = '600 9.5px "Courier New", monospace';
-    ctx.fillStyle = `rgba(${CYAN},0.72)`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(k, hudX + 18, ry + 4);
-    ctx.font = '600 15px "Helvetica Neue", Arial, sans-serif';
+  rows.forEach((v, i) => {
+    const ry = hudY + 12 + i * 40;
+    ctx.font = '700 17px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(v, hudX + 18, ry + 19);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(v, hudX + 18, ry + 20);
     if (i < rows.length - 1) {
       ctx.strokeStyle = `rgba(${TEAL},0.16)`;
       ctx.beginPath();
-      ctx.moveTo(hudX + 14, ry + 42);
-      ctx.lineTo(hudX + hudW - 14, ry + 42);
+      ctx.moveTo(hudX + 14, ry + 38);
+      ctx.lineTo(hudX + hudW - 14, ry + 38);
       ctx.stroke();
     }
   });
