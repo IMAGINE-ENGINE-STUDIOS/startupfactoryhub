@@ -162,6 +162,15 @@ export default function PublicCohortApplication() {
       return;
     }
 
+    if (isAfCohort && (!isIncorporated || !hasWorkingMvp || !hasRevenue)) {
+      toast({
+        title: 'Minimum Requirements',
+        description: 'Please confirm all eligibility questions to apply to Accelerated Fundraising.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
