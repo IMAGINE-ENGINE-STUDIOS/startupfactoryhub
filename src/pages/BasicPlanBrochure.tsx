@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
   Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
-  CalendarDays, Cpu, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
+  CalendarDays, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
