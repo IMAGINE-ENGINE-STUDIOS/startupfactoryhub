@@ -534,10 +534,10 @@ export default function PublicCohortApplication() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="hasRevenue" className="font-medium text-sm flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-amber-500" />
-                            Are you currently generating revenue?
-                          </Label>
+                        <Label htmlFor="hasRevenue" className="font-medium text-sm flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-amber-500" />
+                          Are you currently generating revenue? *
+                        </Label>
                           <Select value={hasRevenue} onValueChange={setHasRevenue}>
                             <SelectTrigger id="hasRevenue" className="w-full sm:w-[200px]">
                               <SelectValue placeholder="Select an option" />
