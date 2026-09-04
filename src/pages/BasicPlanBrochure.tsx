@@ -36,6 +36,7 @@ import imgCompute from '@/assets/membership/ai-compute-dealflow.jpg';
 import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
 import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
 import imgStudio from '@/assets/membership/venture-studio.jpg';
+import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 
 /* ============================ DESIGN TOKENS ============================ */
 const NEON = {
@@ -57,7 +58,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
-const TOTAL = 8;
+const TOTAL = 10;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
@@ -210,7 +211,7 @@ const PageFrame = ({
       <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
       <div className="flex items-center justify-between gap-6 font-mono text-[11px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
         <span className="text-slate-500 truncate">Startup Factory Hub · Membership Program</span>
-        <span className="shrink-0" style={{ color: accent }}>ANNUAL · MONTHLY OR UPFRONT</span>
+        <span className="shrink-0" style={{ color: accent }}>MEMBERSHIP · MONTHLY</span>
       </div>
     </div>
 
@@ -1012,7 +1013,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
             {isMember ? `Active membership · ${tier}` : 'Free account · limited access'}
           </span>
           <span className="px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-[0.25em] border border-primary/30 bg-background/60">
-            {monthly}/mo · {yearly}/yr −{savingsPercent}%
+            {monthly} / month
           </span>
           {!embedded && (
             <Button asChild variant="outline" size="sm">
