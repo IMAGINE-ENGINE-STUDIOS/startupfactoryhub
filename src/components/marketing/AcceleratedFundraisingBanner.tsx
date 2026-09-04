@@ -34,87 +34,116 @@ const stepParticles = (ps: Particle[], dt: number) => {
   }
 };
 
-const drawGear = (
+// ── Icosahedron geometry (same dynamic element as the program hero) ──
+const PHI = (1 + Math.sqrt(5)) / 2;
+const RAW_VERTS: number[][] = [
+  [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
+  [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
+  [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1],
+].map(([x, y, z]) => {
+  const n = Math.sqrt(x * x + y * y + z * z);
+  return [x / n, y / n, z / n];
+});
+const EDGES: [number, number][] = [];
+for (let i = 0; i < RAW_VERTS.length; i++) {
+  for (let j = i + 1; j < RAW_VERTS.length; j++) {
+    const [ax, ay, az] = RAW_VERTS[i];
+    const [bx, by, bz] = RAW_VERTS[j];
+    if (Math.hypot(ax - bx, ay - by, az - bz) < 1.1) EDGES.push([i, j]);
+  }
+}
+const SPARKS = Array.from({ length: 42 }, (_, i) => ({
+  ang: Math.random() * Math.PI * 2,
+  rad: 0.62 + Math.random() * 0.55,
+  speed: 0.4 + Math.random() * 0.9,
+  tilt: (Math.random() - 0.5) * Math.PI,
+  size: 0.8 + Math.random() * 1.6,
+  hot: i % 3 === 0,
+}));
+const rotYv = ([x, y, z]: number[], a: number) => [x * Math.cos(a) + z * Math.sin(a), y, -x * Math.sin(a) + z * Math.cos(a)];
+const rotXv = ([x, y, z]: number[], a: number) => [x, y * Math.cos(a) - z * Math.sin(a), y * Math.sin(a) + z * Math.cos(a)];
+
+/** Rotating amber icosahedron with pulsing energy core — same dynamic element as the program hero. */
+const drawIcosahedron = (
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
-  r: number,
-  teeth: number,
-  rot: number,
-  color: string,
-  lw: number,
+  R: number,
+  t: number,
 ) => {
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(rot);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lw;
-  ctx.beginPath();
-  ctx.arc(0, 0, r, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(0, 0, r * 0.38, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.lineWidth = lw * 3;
-  for (let i = 0; i < teeth; i++) {
-    const a = (i * Math.PI * 2) / teeth;
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-    ctx.lineTo(Math.cos(a) * r * 1.38, Math.sin(a) * r * 1.38);
-    ctx.stroke();
-  }
-  ctx.restore();
-};
+  const amber = (a: number) => `rgba(${AMBER},${a})`;
+  const amberHot = (a: number) => `rgba(251,191,36,${a})`;
+  const cyan = (a: number) => `rgba(${CYAN},${a})`;
+  const project = (x: number, y: number, z: number) => {
+    const s = 1 / (2.6 - z);
+    return { x: cx + x * R * s * 2.6, y: cy + y * R * s * 2.6, s, z };
+  };
 
-/** Hovering drone with spinning rotors — same dynamic element as the program hero. */
-const drawDrone = (ctx: CanvasRenderingContext2D, cx: number, cy: number, t: number, scale = 1) => {
-  ctx.save();
-  ctx.translate(cx, cy + Math.sin(t * 1.25) * 10);
-  ctx.scale(scale, scale);
+  const verts = RAW_VERTS.map((v) => rotXv(rotYv(v, t * 1.1), Math.sin(t * 0.6) * 0.35));
+  const proj = verts.map((v) => project(v[0], v[1], v[2]));
 
-  // arms + body
-  ctx.strokeStyle = `rgba(${CYAN},0.75)`;
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  const arms: [number, number][] = [[-62, -34], [62, -34], [-62, 34], [62, 34]];
-  arms.forEach(([ax, ay]) => {
+  // edges with depth shading
+  EDGES.forEach(([a, b]) => {
+    const pa = proj[a];
+    const pb = proj[b];
+    const depth = (pa.z + pb.z) / 2;
     ctx.beginPath();
-    ctx.moveTo(ax > 0 ? 26 : -26, ay > 0 ? 10 : -10);
-    ctx.lineTo(ax, ay);
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+    ctx.strokeStyle = amber(0.15 + (depth + 1) * 0.28);
+    ctx.lineWidth = 0.8 + (depth + 1) * 0.7;
     ctx.stroke();
   });
-
-  ctx.fillStyle = `rgba(${CYAN},0.14)`;
-  ctx.beginPath();
-  ctx.roundRect(-30, -16, 60, 32, 10);
-  ctx.fill();
-  ctx.stroke();
-
-  // rotors
-  arms.forEach(([ax, ay], i) => {
-    const rx = 34 * Math.abs(Math.cos(t * 9 + i * 1.3)) * 0.7 + 12;
-    ctx.fillStyle = `rgba(${CYAN},0.38)`;
+  // hot vertex glow
+  proj.forEach((p, i) => {
+    const pulse = 0.5 + 0.5 * Math.sin(t * 5 + i * 1.3);
     ctx.beginPath();
-    ctx.ellipse(ax, ay, rx, 5, 0, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, (1.6 + pulse * 1.6) * (0.6 + p.s), 0, Math.PI * 2);
+    ctx.fillStyle = amberHot(0.35 + (p.z + 1) * 0.3);
+    ctx.shadowColor = 'rgba(251,191,36,0.9)';
+    ctx.shadowBlur = 10;
     ctx.fill();
-    ctx.strokeStyle = `rgba(${CYAN},0.5)`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(ax, ay, 34, 8, 0, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.shadowBlur = 0;
   });
 
-  // status light
-  const blink = 0.25 + 0.75 * Math.abs(Math.sin(t * 2.6));
-  ctx.fillStyle = `rgba(${AMBER},${blink})`;
-  ctx.shadowColor = `rgba(${AMBER},0.9)`;
-  ctx.shadowBlur = 16 * blink;
+  // pulsing energy core
+  const corePulse = 0.5 + 0.5 * Math.sin(t * 3.4);
+  const coreR = R * (0.2 + corePulse * 0.05);
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.6);
+  grad.addColorStop(0, amberHot(0.85));
+  grad.addColorStop(0.35, amber(0.35));
+  grad.addColorStop(1, 'rgba(245,158,11,0)');
   ctx.beginPath();
-  ctx.arc(0, 0, 5, 0, Math.PI * 2);
+  ctx.arc(cx, cy, coreR * 2.6, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
   ctx.fill();
-  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR * 0.5, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,240,200,0.95)';
+  ctx.fill();
 
-  ctx.restore();
+  // orbiting sparks
+  SPARKS.forEach((s) => {
+    s.ang += 0.01 * s.speed;
+    let p = [Math.cos(s.ang) * s.rad, 0, Math.sin(s.ang) * s.rad];
+    p = rotXv(p, s.tilt);
+    p = rotYv(p, t * 0.5);
+    const pr = project(p[0], p[1], p[2]);
+    const tw = 0.4 + 0.6 * Math.sin(t * 7 * s.speed + s.ang * 3);
+    ctx.beginPath();
+    ctx.arc(pr.x, pr.y, s.size * pr.s, 0, Math.PI * 2);
+    ctx.fillStyle = s.hot ? amberHot(0.9 * tw) : cyan(0.55 * tw);
+    ctx.fill();
+  });
+
+  // scan sweep line
+  const sy = cy + Math.sin(t * 1.7) * R * 1.3;
+  const sweep = ctx.createLinearGradient(cx - R * 1.6, sy, cx + R * 1.6, sy);
+  sweep.addColorStop(0, 'rgba(251,191,36,0)');
+  sweep.addColorStop(0.5, amberHot(0.28));
+  sweep.addColorStop(1, 'rgba(251,191,36,0)');
+  ctx.fillStyle = sweep;
+  ctx.fillRect(cx - R * 1.6, sy - 1, R * 3.2, 2);
 };
 
 const drawFrame = (
@@ -165,16 +194,11 @@ const drawFrame = (
     ctx.fill();
   }
 
-  // ── animated gears (hardware motif) ──
-  drawGear(ctx, W - 90, H - 70, 92, 12, t * 0.32, `rgba(${CYAN},0.22)`, 2);
-  drawGear(ctx, W - 210, H - 168, 42, 8, -t * 0.62, `rgba(${AMBER},0.28)`, 2);
-  drawGear(ctx, W - 48, H - 330, 46, 8, -t * 0.5, `rgba(${AMBER},0.22)`, 2);
-
-  // ── hovering drone (hero dynamic element) ──
-  drawDrone(ctx, W - 186, 132, t, 1.05);
+  // ── rotating icosahedron (same dynamic element as the program hero) ──
+  drawIcosahedron(ctx, W - 230, H / 2 + 50, 148, t);
 
   // ── radar sweep ring ──
-  const rcx = W - 300, rcy = 120, rr = 62;
+  const rcx = 128, rcy = H - 112, rr = 62;
   ctx.save();
   ctx.beginPath();
   ctx.arc(rcx, rcy, rr, 0, Math.PI * 2);
@@ -626,7 +650,7 @@ const AcceleratedFundraisingBanner = () => {
             Accelerated Fundraising — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Same design as the program hero · animated gears, radar sweep, particles and CTA shine
+            Same design as the program hero · rotating icosahedron, radar sweep, particles and CTA shine
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
