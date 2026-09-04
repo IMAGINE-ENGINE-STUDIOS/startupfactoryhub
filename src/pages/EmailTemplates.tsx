@@ -54,6 +54,7 @@ import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
 import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtml";
+import { generateMvpNoShowHtml } from "@/lib/mvpNoShowEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1318,6 +1319,14 @@ const TEMPLATES = [
     edgeFunction: "send-mvp-payment-reminder",
     trigger: "accepted, unpaid / manual",
   },
+  {
+    id: "mvp-no-show",
+    label: "Sorry We Missed You (Interview No-Show)",
+    icon: Rocket,
+    description: "Follow-up for startups that scheduled an interview and didn't show up — reschedule link + brochure",
+    edgeFunction: "send-mvp-no-show-email",
+    trigger: "interview no-show / manual",
+  },
 ] as const;
 
 
@@ -1496,6 +1505,13 @@ const defaultVars = {
     amountCents: "500000",
     deadline: "September 29, 2026",
   },
+  "mvp-no-show": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "MVP Program",
+    interviewDate: "",
+  },
 
 
   "investor-update": {
@@ -1516,7 +1532,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1595,6 +1611,15 @@ export default function EmailTemplates() {
         cohortName: v.cohortName,
         deadline: v.deadline,
         amountCents: Number(v.amountCents) || 500000,
+      });
+    }
+    if (selected === "mvp-no-show") {
+      const v = vars["mvp-no-show"] as any;
+      return generateMvpNoShowHtml({
+        name: v.name || "Founder",
+        startupName: v.startupName,
+        cohortName: v.cohortName,
+        interviewDate: v.interviewDate,
       });
     }
 
@@ -1690,6 +1715,15 @@ export default function EmailTemplates() {
           startupName: v.startupName || "Your Startup",
           cohortName: v.cohortName || "MVP Program",
           amountCents: Number(v.amountCents) || 500000,
+        };
+      } else if (selected === "mvp-no-show") {
+        const v = vars["mvp-no-show"] as any;
+        payload = {
+          email: toEmail,
+          name: v.name || "Founder",
+          startupName: v.startupName || "Your Startup",
+          cohortName: v.cohortName || "MVP Program",
+          interviewDate: v.interviewDate || "",
         };
       } else if (selected === "mvp-payment-reminder") {
         const v = vars["mvp-payment-reminder"] as any;
