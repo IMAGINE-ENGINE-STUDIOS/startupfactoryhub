@@ -650,7 +650,7 @@ const AcceleratedFundraisingBanner = () => {
             Accelerated Fundraising — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Same design as the program hero · animated gears, radar sweep, particles and CTA shine
+            Same design as the program hero · rotating icosahedron, radar sweep, particles and CTA shine
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
