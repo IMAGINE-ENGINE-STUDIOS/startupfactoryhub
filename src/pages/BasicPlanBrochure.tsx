@@ -79,7 +79,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
-const TOTAL = 7;
+const TOTAL = 9;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
@@ -1230,7 +1230,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 06 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="06" label="AR · IMMERSIVE" pageNum={6}>
+          <PageFrame accent={NEON.magenta} code="08" label="AR · IMMERSIVE" pageNum={8}>
             <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
             <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
