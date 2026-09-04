@@ -197,7 +197,7 @@ function BenefitTile({ benefit }: { benefit: (typeof WHY_JOIN)[number] }) {
       style={{ ['--tile-glow' as never]: benefit.glow }}
       className={`group relative tech-card border-0 rounded-2xl p-5 overflow-hidden text-left transition-all duration-300
         hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--tile-glow)]
-        ${expanded ? 'sm:col-span-2 min-h-[260px]' : 'min-h-[212px]'}`}
+        ${expanded ? 'lg:col-span-3 min-h-[280px]' : 'min-h-[300px]'}`}
     >
       <span
         aria-hidden
