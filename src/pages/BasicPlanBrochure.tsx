@@ -473,7 +473,7 @@ const CheckoutPanel = ({
 
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure({ embedded = false }: { embedded?: boolean }) {
-  const { plan, entitlements } = useBasicPlan();
+  const { plan } = useBasicPlan();
   const { isMember, tier, refetch } = useMembershipAccess();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
