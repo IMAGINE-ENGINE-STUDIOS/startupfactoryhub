@@ -34,6 +34,8 @@ export default function NetworkBrowser() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
+  const [allMembers, setAllMembers] = useState<Connection[]>([]);
+  const [allMembersLoading, setAllMembersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
   const [allCommunity, setAllCommunity] = useState(true);
