@@ -710,7 +710,7 @@ export default function AcceleratedFundraising() {
             </div>
 
             <h1 className="font-black uppercase leading-[0.92] tracking-tight">
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your aerospace startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Scale your aerospace startup</span>
               <span
                 className="block text-[2.6rem] leading-[0.9] sm:text-[3.8rem] lg:text-[4.6rem]"
                 style={{
@@ -723,7 +723,7 @@ export default function AcceleratedFundraising() {
               >
                 Accelerated Fundraising
               </span>
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Hardware startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Scale-up hardware sprint</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(245,158,11,0.9)' }}>
