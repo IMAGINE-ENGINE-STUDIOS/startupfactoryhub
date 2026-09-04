@@ -40,13 +40,31 @@ import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
 import imgStudio from '@/assets/membership/venture-studio.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 
+import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
+import moonBackground from '@/assets/moon-background.jpg.asset.json';
+
+const NASA_BASE = 'https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models';
+const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
+
 /* ============================ DESIGN TOKENS ============================ */
 const NEON = {
   cyan: '#0ea5b7',
   blue: '#1f2a44',
   emerald: '#059669',
   ink: '#0f172a',
+  magenta: '#d946a6',
+  lime: '#65a30d',
+  amber: '#f59e0b',
 };
+
+const DEEP_LIME = '#3f6212';
+
+const Scanlines = () => (
+  <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{
+    backgroundImage: 'repeating-linear-gradient(180deg, rgba(15,23,42,0.09) 0px, rgba(15,23,42,0.09) 1px, transparent 1px, transparent 3px)',
+  }} />
+);
+
 
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
