@@ -6,7 +6,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MEMBERSHIP_TIERS, type MembershipTier } from '@/lib/membership-tiers';
-import { CreditCard, RefreshCw, Crown, Zap, Building, Users, ArrowUp, ArrowDown, Check, Loader2 } from 'lucide-react';
+import { CreditCard, RefreshCw, Crown, Zap, Building, Users, TrendingUp, ArrowUp, Check, Loader2 } from 'lucide-react';
+import { createBasicPlanCheckout } from '@/features/basic-plan/api/basicPlanApi';
+import { createInvestorPlanCheckout } from '@/features/investor-plan/api/investorPlanApi';
 import GeniusAIPlans from '@/components/GeniusAIPlans';
 
 
@@ -18,42 +20,107 @@ interface MembershipStatus {
   cancel_at_period_end?: boolean;
 }
 
-const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: string; description: string; bestFor: string; features: string[] }> = {
-  community: {
+/**
+ * Current subscription line-up (matches the public pricing section):
+ *  • Basic Plan — $50/mo · $480/yr (startups & students; advisors $250/mo)
+ *  • Self-Paced + Desk, Global Access + Office — legacy Stripe tiers
+ *  • Corporate — contact sales
+ *  • Investor Priority — $500/mo · $5,000/yr
+ * The retired $350 Community tier is no longer offered.
+ */
+type PlanCard = {
+  key: string;
+  name: string;
+  icon: typeof Zap;
+  gradient: string;
+  glow: string;
+  description: string;
+  bestFor: string;
+  features: string[];
+  monthly: number | null;
+  yearly: number | null;
+  priceLabel?: string;
+  /** How the CTA behaves. */
+  action: 'legacy' | 'basic' | 'investor' | 'sales';
+  tier?: Exclude<MembershipTier, 'free' | 'community'>;
+};
+
+const PLANS: PlanCard[] = [
+  {
+    key: 'basic',
+    name: 'Basic Plan',
     icon: Zap,
     gradient: 'from-blue-500 to-cyan-500',
     glow: 'shadow-blue-500/20',
-    description: 'Full digital access, virtual events, community, and mentor interactions.',
-    bestFor: 'Remote-first teams or early MVP-stage founders',
-    features: ['Full resource library', 'Mentor sessions (virtual)', 'Startup physical hub community access', 'Local Startup Factory HUB coworking space access all locations (community space access only)'],
+    description: 'Unlocks the platform: post on the feed and resource map, messaging, resources and mentor interactions.',
+    bestFor: 'Startups, students and advisors (advisors $250/mo)',
+    features: [
+      'Post on the social feed & resource map',
+      'Full resource library access',
+      'Internships, volunteering & certified courses',
+      'Mentor sessions and community events',
+    ],
+    monthly: 50,
+    yearly: 480,
+    action: 'basic',
   },
-  self_paced_office: {
+  {
+    key: 'self_paced_office',
+    name: MEMBERSHIP_TIERS.self_paced_office.name,
     icon: Building,
     gradient: 'from-primary to-teal-400',
     glow: 'shadow-primary/20',
-    description: 'Adds local Startup Factory HUB Desk coworking access all locations to the community plan.',
+    description: 'Adds local Startup Factory HUB Desk coworking access across all locations.',
     bestFor: 'Founders needing flexible workspace + virtual resources',
-    features: ['All community features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    features: ['All Basic Plan features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    monthly: MEMBERSHIP_TIERS.self_paced_office.price,
+    yearly: MEMBERSHIP_TIERS.self_paced_office.yearly_price,
+    action: 'legacy',
+    tier: 'self_paced_office',
   },
-  global_access: {
+  {
+    key: 'global_access',
+    name: MEMBERSHIP_TIERS.global_access.name,
     icon: Crown,
     gradient: 'from-purple-500 to-pink-500',
     glow: 'shadow-purple-500/20',
-    description: 'All platform features + unlimited Global office access across Startup Factory Hub network (130+ countries, 5,600+ sites).',
+    description: 'All platform features + unlimited global office access (130+ countries, 5,600+ sites).',
     bestFor: 'Globally distributed teams, traveling founders',
-    features: ['All features + Global office access across Startup Factory Hub network', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    features: ['All features + Global office access across the Startup Factory Hub network', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    monthly: MEMBERSHIP_TIERS.global_access.price,
+    yearly: MEMBERSHIP_TIERS.global_access.yearly_price,
+    action: 'legacy',
+    tier: 'global_access',
   },
-  corporate: {
+  {
+    key: 'investor',
+    name: 'Investor Priority',
+    icon: TrendingUp,
+    gradient: 'from-amber-400 to-orange-500',
+    glow: 'shadow-amber-500/20',
+    description: 'Priority deal flow and investor-only tooling across the ecosystem.',
+    bestFor: 'Angels, funds and family offices',
+    features: ['Priority access to new startup deal flow', 'Investor-only filters & matching', 'Direct intros to founders', 'Data room & pitch access'],
+    monthly: 500,
+    yearly: 5000,
+    action: 'investor',
+  },
+  {
+    key: 'corporate',
+    name: MEMBERSHIP_TIERS.corporate.name,
     icon: Users,
     gradient: 'from-orange-500 to-red-500',
     glow: 'shadow-orange-500/20',
-    description: 'Designed for corporate innovation teams and growth-stage startups with teams across regions.',
+    description: 'For corporate innovation teams and growth-stage startups with teams across regions.',
     bestFor: 'Scale-ups or corporate venture units',
-    features: ['All features + team dashboard', 'Security — live CCTV surveillance feeds on the global map', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Accelerated Tier if eligible'],
+    features: ['All features + team dashboard', 'Security — live CCTV surveillance feeds on the global map', 'Global coworking access', 'Soft Landing discount ($5,000) for global expansion'],
+    monthly: null,
+    yearly: null,
+    priceLabel: 'Contact Sales',
+    action: 'sales',
   },
-};
+];
 
-const tierOrder: MembershipTier[] = ['free', 'community', 'self_paced_office', 'global_access', 'corporate'];
 
 export default function ProfileSubscriptionTab() {
   const { user } = useAuth();
@@ -62,6 +129,7 @@ export default function ProfileSubscriptionTab() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
 
   const checkMembership = async () => {
     if (!user) return;
@@ -84,9 +152,9 @@ export default function ProfileSubscriptionTab() {
 
   useEffect(() => { checkMembership(); }, [user]);
 
-  const handleSubscribe = async (priceId: string) => {
+  const handleSubscribe = async (planKey: string, priceId: string) => {
     if (!user) return;
-    setCheckoutLoading(priceId);
+    setCheckoutLoading(planKey);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
@@ -102,6 +170,30 @@ export default function ProfileSubscriptionTab() {
       setCheckoutLoading(null);
     }
   };
+
+  /** Routes each card's CTA to the right checkout flow. */
+  const handlePlanCta = async (plan: PlanCard, legacyPriceId: string | null) => {
+    if (plan.action === 'sales') {
+      window.location.href = 'mailto:info@startupfactoryhub.com?subject=Corporate%20membership';
+      return;
+    }
+    if (plan.action === 'legacy') {
+      if (legacyPriceId) handleSubscribe(plan.key, legacyPriceId);
+      return;
+    }
+    setCheckoutLoading(plan.key);
+    try {
+      const url = plan.action === 'basic'
+        ? await createBasicPlanCheckout(billing)
+        : await createInvestorPlanCheckout(billing);
+      window.open(url, '_blank');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
 
   const handleManageSubscription = async () => {
     if (!user) return;
@@ -178,34 +270,49 @@ export default function ProfileSubscriptionTab() {
         </div>
       </Card>
 
-      {/* Tier Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {tierOrder.filter(t => t !== 'free').map((tierKey) => {
-          const tier = MEMBERSHIP_TIERS[tierKey];
-          const config = TIER_CONFIG[tierKey];
-          const Icon = config.icon;
-          const isCurrentPlan = currentTier === tierKey;
-          const currentIndex = tierOrder.indexOf(currentTier as MembershipTier);
-          const tierIndex = tierOrder.indexOf(tierKey);
-          const isUpgrade = tierIndex > currentIndex;
-          const isDowngrade = tierIndex < currentIndex;
+      {/* Billing cycle toggle */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/40 p-1">
+          {(['monthly', 'yearly'] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setBilling(mode)}
+              className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                billing === mode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {mode === 'monthly' ? 'Monthly' : 'Yearly · save 10%'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Plan Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {PLANS.map((plan) => {
+          const Icon = plan.icon;
+          const isCurrentPlan = currentTier === plan.key || (plan.tier && currentTier === plan.tier);
+          const amount = billing === 'monthly' ? plan.monthly : plan.yearly;
+          const legacyPriceId = plan.tier
+            ? (billing === 'monthly'
+                ? MEMBERSHIP_TIERS[plan.tier].price_id
+                : MEMBERSHIP_TIERS[plan.tier].yearly_price_id)
+            : null;
+          const busy = checkoutLoading === plan.key;
 
           return (
-            <div key={tierKey} className="relative group">
-              {/* Active glow */}
+            <div key={plan.key} className="relative group">
               {isCurrentPlan && (
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-teal-400 rounded-2xl opacity-40 blur-sm animate-pulse" />
               )}
-              {/* Hover glow */}
-              <div className={`absolute -inset-0.5 bg-gradient-to-r ${config.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur-sm transition-all duration-500`} />
+              <div className={`absolute -inset-0.5 bg-gradient-to-r ${plan.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur-sm transition-all duration-500`} />
 
               <Card className={`relative tech-card border-0 h-full transition-all duration-300 ${
                 isCurrentPlan ? 'ring-2 ring-primary/50' : 'hover:scale-[1.02]'
               }`}>
                 <CardContent className="p-5 flex flex-col h-full">
-                  {/* Icon & Badge */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg ${config.glow}`}>
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center shadow-lg ${plan.glow}`}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     {isCurrentPlan && (
@@ -215,25 +322,27 @@ export default function ProfileSubscriptionTab() {
                     )}
                   </div>
 
-                  {/* Name & Price */}
-                  <h4 className="text-base font-bold text-foreground mb-1">{tier.name}</h4>
+                  <h4 className="text-base font-bold text-foreground mb-1">{plan.name}</h4>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-2xl font-bold text-foreground">${tier.price}</span>
-                    <span className="text-xs text-muted-foreground">/mo</span>
+                    {amount === null ? (
+                      <span className="text-2xl font-bold text-foreground">{plan.priceLabel || 'Custom'}</span>
+                    ) : (
+                      <>
+                        <span className="text-2xl font-bold text-foreground">${amount.toLocaleString()}</span>
+                        <span className="text-xs text-muted-foreground">{billing === 'monthly' ? '/mo' : '/yr'}</span>
+                      </>
+                    )}
                   </div>
 
-                  {/* Description */}
-                  <p className="text-xs text-muted-foreground mb-3">{config.description}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{plan.description}</p>
 
-                  {/* Best For */}
                   <p className="text-xs mb-3">
                     <span className="font-semibold text-foreground">Best for: </span>
-                    <span className="text-muted-foreground">{config.bestFor}</span>
+                    <span className="text-muted-foreground">{plan.bestFor}</span>
                   </p>
 
-                  {/* Features */}
                   <ul className="space-y-1.5 mb-4">
-                    {config.features.map((feature, i) => (
+                    {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                         <Check className="h-3 w-3 mt-0.5 text-primary shrink-0" />
                         <span>{feature}</span>
@@ -241,10 +350,8 @@ export default function ProfileSubscriptionTab() {
                     ))}
                   </ul>
 
-                  {/* Spacer */}
                   <div className="flex-1" />
 
-                  {/* Action Button */}
                   {isCurrentPlan ? (
                     <Button
                       className="w-full mt-3"
@@ -258,26 +365,17 @@ export default function ProfileSubscriptionTab() {
                     </Button>
                   ) : (
                     <Button
-                      className={`w-full mt-3 ${isUpgrade ? `bg-gradient-to-r ${config.gradient} hover:opacity-90 text-white border-0` : ''}`}
-                      variant={isUpgrade ? 'default' : 'outline'}
+                      className={`w-full mt-3 bg-gradient-to-r ${plan.gradient} hover:opacity-90 text-white border-0`}
                       size="sm"
-                      onClick={() => tier.price_id && handleSubscribe(tier.price_id)}
-                      disabled={checkoutLoading === tier.price_id || !tier.price_id}
+                      onClick={() => handlePlanCta(plan, legacyPriceId)}
+                      disabled={busy || (plan.action === 'legacy' && !legacyPriceId)}
                     >
-                      {checkoutLoading === tier.price_id ? (
+                      {busy ? (
                         <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                      ) : isUpgrade ? (
+                      ) : plan.action === 'sales' ? null : (
                         <ArrowUp className="h-3.5 w-3.5 mr-2" />
-                      ) : isDowngrade ? (
-                        <ArrowDown className="h-3.5 w-3.5 mr-2" />
-                      ) : null}
-                      {checkoutLoading === tier.price_id
-                        ? 'Loading...'
-                        : isUpgrade
-                          ? 'Upgrade'
-                          : isDowngrade
-                            ? 'Downgrade'
-                            : 'Get Started'}
+                      )}
+                      {busy ? 'Loading...' : plan.action === 'sales' ? 'Contact Sales' : 'Get Started'}
                     </Button>
                   )}
                 </CardContent>
@@ -286,6 +384,7 @@ export default function ProfileSubscriptionTab() {
           );
         })}
       </div>
+
 
       {/* Genius AI plans */}
       <div className="pt-2">
