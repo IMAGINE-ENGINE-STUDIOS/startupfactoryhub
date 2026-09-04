@@ -269,3 +269,15 @@ verify_jwt = false
 
 [functions.send-mvp-no-show-email]
 verify_jwt = true
+
+[functions.send-af-welcome]
+verify_jwt = false
+
+[functions.send-af-acceptance-email]
+verify_jwt = false
+
+[functions.send-af-follow-up]
+verify_jwt = true
+
+[functions.send-af-no-show-email]
+verify_jwt = true
