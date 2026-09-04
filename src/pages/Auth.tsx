@@ -561,6 +561,26 @@ export default function Auth() {
                     </label>
                   </div>
 
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                    <label htmlFor="accelerated-fundraising" className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        id="accelerated-fundraising"
+                        type="checkbox"
+                        checked={acceleratedFundraising}
+                        onChange={(e) => setAcceleratedFundraising(e.target.checked)}
+                        className="mt-1 h-4 w-4 rounded border-amber-500/50 accent-amber-500"
+                      />
+                      <div className="text-sm">
+                        <div className="font-semibold text-foreground">Join the Accelerated Fundraising Program</div>
+                        <div className="text-xs text-muted-foreground">
+                          Are you joining for the Accelerated Fundraising program for aerospace hardware startups? We'll email you the application link right after you verify your email.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
+                  
+
                   
                   <Button 
                     type="submit" 
