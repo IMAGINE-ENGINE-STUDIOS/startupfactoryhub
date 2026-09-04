@@ -843,7 +843,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       {/* ---------------- 03 · EVENTS · WHERE THE ECOSYSTEM CONNECTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="03" label="EVENTS & ACTIVATIONS" pageNum={4}>
+          <PageFrame accent={NEON.magenta} code="03" label="EVENTS & ACTIVATIONS" pageNum={3}>
             {/* Ghost numeral */}
             <div
               className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
