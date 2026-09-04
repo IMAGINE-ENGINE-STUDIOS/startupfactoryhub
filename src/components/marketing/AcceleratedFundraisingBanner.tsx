@@ -461,8 +461,7 @@ const drawFrame = (
   const rows = [
     ['PROGRAM', 'SCALE-UP SPRINT'],
     ['FOCUS', 'AEROSPACE HARDWARE'],
-    ['REQUIREMENT', 'INCORPORATED + MVP'],
-    ['REVENUE', 'OPTIONAL'],
+    ['STAGE', 'HARDWARE SCALE-UP'],
   ];
   const hudH = rows.length * 46 + 16;
   ctx.fillStyle = 'rgba(4,14,26,0.82)';
