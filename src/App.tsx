@@ -180,6 +180,7 @@ const App = () => (
                     <Route path="/hubs-lab" element={<HubsLab />} />
                     <Route path="/hubs/apply" element={<PublicHubApplication />} />
                     <Route path="/mvp-program" element={<MVPProgram />} />
+                    <Route path="/accelerated-fundraising" element={<AcceleratedFundraising />} />
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
                     <Route path="/emails" element={<EmailTemplates />} />
                     <Route path="/district/:districtId" element={<DistrictDashboard />} />
