@@ -53,6 +53,7 @@ import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
+import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1309,6 +1310,14 @@ const TEMPLATES = [
     edgeFunction: "send-mvp-acceptance-email",
     trigger: "startup accepted / manual",
   },
+  {
+    id: "mvp-payment-reminder",
+    label: "MVP Payment Reminder (Not Paid Yet)",
+    icon: Rocket,
+    description: "Follow-up for accepted startups that haven't paid — fresh Stripe payment link + brochure + deadline",
+    edgeFunction: "send-mvp-payment-reminder",
+    trigger: "accepted, unpaid / manual",
+  },
 ] as const;
 
 
@@ -1479,6 +1488,15 @@ const defaultVars = {
     cohortName: "MVP Program",
     amountCents: "500000",
   },
+  "mvp-payment-reminder": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "MVP Program",
+    amountCents: "500000",
+    deadline: "September 29, 2026",
+  },
+
 
   "investor-update": {
 
@@ -1498,7 +1516,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1569,6 +1587,17 @@ export default function EmailTemplates() {
         amountCents: Number(v.amountCents) || 500000,
       });
     }
+    if (selected === "mvp-payment-reminder") {
+      const v = vars["mvp-payment-reminder"] as any;
+      return generateMvpPaymentReminderHtml({
+        name: v.name || "Founder",
+        startupName: v.startupName,
+        cohortName: v.cohortName,
+        deadline: v.deadline,
+        amountCents: Number(v.amountCents) || 500000,
+      });
+    }
+
 
     return "";
   }
@@ -1662,7 +1691,18 @@ export default function EmailTemplates() {
           cohortName: v.cohortName || "MVP Program",
           amountCents: Number(v.amountCents) || 500000,
         };
+      } else if (selected === "mvp-payment-reminder") {
+        const v = vars["mvp-payment-reminder"] as any;
+        payload = {
+          email: toEmail,
+          name: v.name || "Founder",
+          startupName: v.startupName || "Your Startup",
+          cohortName: v.cohortName || "MVP Program",
+          deadline: v.deadline || "September 29, 2026",
+          amountCents: Number(v.amountCents) || 500000,
+        };
       }
+
 
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
