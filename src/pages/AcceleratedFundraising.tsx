@@ -542,28 +542,28 @@ export default function AcceleratedFundraising() {
             </div>
 
             <h1 className="font-black uppercase leading-[0.92] tracking-tight">
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your aerospace startup</span>
               <span
-                className="block text-[4.5rem] leading-[0.85] sm:text-[7rem]"
+                className="block text-[3.2rem] leading-[0.88] sm:text-[5.5rem]"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                  backgroundImage: 'linear-gradient(90deg,#f59e0b 0%,#22d3ee 45%,#6366f1 100%)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   color: 'transparent',
-                  filter: 'drop-shadow(0 0 28px rgba(20,184,166,0.55))',
+                  filter: 'drop-shadow(0 0 28px rgba(245,158,11,0.45))',
                 }}
               >
-                MVP
+                Accelerated Fundraising
               </span>
-              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Software startup</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Hardware startup</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(20,184,166,0.9)' }}>
-              Functionally complete MVP software — built, validated and launched in {profile?.program_duration || '4 weeks'}.
+            <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(245,158,11,0.9)' }}>
+              Built for hardware founders in aerospace, defense and space — from first prototype to first check.
             </p>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
               {profile?.description ||
-                'An intensive build sprint that converts a raw idea into a market-ready product — capital, engineering, mentorship and a global distribution mesh, deployed around your team.'}
+                'An intensive fundraising sprint for deep-tech hardware: investor matching, technical diligence, regulatory pathway and a curated demo day in front of deep-tech capital.'}
             </p>
 
             <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
