@@ -219,7 +219,7 @@ function ActiveCohorts() {
                           </div>
                         </div>
                         <div className="min-w-0 flex-1 pr-6">
-                          <CardTitle className="text-lg md:text-xl font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${t.title}`}>
+                          <CardTitle className={`text-lg md:text-xl font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${t.title}`}>
                             {c.name}
                           </CardTitle>
                           <p className="text-xs text-muted-foreground">{c.org_name}</p>
