@@ -620,7 +620,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
       </div>
 
       {/* Connection Requests Section */}
-      {pendingRequests.length > 0 && (
+      {mode === 'network' && pendingRequests.length > 0 && (
         <Card className="tech-card border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -703,6 +703,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
 
 
       {/* Current Connections */}
+      {mode === 'network' && (
       <Card className="tech-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -732,6 +733,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
           )}
         </CardContent>
       </Card>
+      )}
 
       {allCommunity && (
         <Card className="tech-card">
