@@ -659,45 +659,63 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               <p className="mt-8 text-[23px] text-white/85 max-w-2xl leading-relaxed">
                 Feed, resource map, open-source technology, acceleration programs, events,
                 investor access, internships, volunteering, technology transfer and certified courses —
-                unlocked with a single annual membership.
+                unlocked with a single membership.
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-5">
-                <div className="rounded-2xl px-8 py-6" style={{
+              <div className="mt-10">
+                <div className="inline-block rounded-2xl px-10 py-7" style={{
                   background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(16px)',
                 }}>
-                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Monthly</div>
-                  <div className="text-[56px] leading-none font-black text-white mt-1">{monthly}</div>
-                  <div className="text-white/60 text-base mt-2">per month · annual term</div>
+                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Membership</div>
+                  <div className="text-[72px] leading-none font-black text-white mt-1">{monthly}</div>
+                  <div className="text-white/60 text-base mt-2">per month · cancel anytime</div>
                 </div>
-                <div className="rounded-2xl px-8 py-6" style={{
-                  background: `linear-gradient(140deg, ${NEON.emerald}33, rgba(255,255,255,0.06))`,
-                  border: `1px solid ${NEON.emerald}88`, backdropFilter: 'blur(16px)',
-                }}>
-                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase" style={{ color: '#6ee7b7' }}>
-                    Yearly · save {savingsPercent}%
-                  </div>
-                  <div className="text-[56px] leading-none font-black text-white mt-1">{yearly}</div>
-                  <div className="text-white/60 text-base mt-2">{yearlyPerMonth} effective / month</div>
-                </div>
-              </div>
-
-              <div className="mt-10 flex items-center gap-10 font-mono text-[14px] uppercase tracking-[0.35em] text-white/60">
-                <span>GLOBAL</span>
-                <span>200+ MEMBERS</span>
-                <span>11 SERVICES</span>
               </div>
             </div>
           </section>
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 02 · THE NEW STANDARD ---------------- */}
+      {/* ---------------- 02 · ABOUT · WHERE THE ECOSYSTEM MEETS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="01" label="THE NEW STANDARD" pageNum={2}>
+          <PageFrame code="01" label="ABOUT" pageNum={2}>
+            <PageTitle kicker="About" title={<>WHERE THE<br />ECOSYSTEM MEETS</>} />
+            <ImagePlate src={imgCampus} alt="Founders, investors and mentors meeting inside the Startup Factory Hub campus" caption="Founders · investors · mentors · institutions" height={240} className="mb-6" />
+            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
+              Startup Factory Hub is the meeting point of the innovation ecosystem: founders,
+              investors, mentors, corporations, universities and public institutions working on one
+              platform. Everything that usually lives in separate rooms — capital, talent, technology
+              and programs — happens in the same place.
+            </p>
+            <div className="grid grid-cols-2 gap-5 flex-1 content-start">
+              {[
+                { t: 'Founders & startups', d: 'Publish, raise, apply to programs and find the team, tools and technology to build.' },
+                { t: 'Investors & funds', d: 'Curated dealflow, pitch events and direct conversations with the founders behind them.' },
+                { t: 'Mentors & advisors', d: 'Certified programs, sessions and advisory tracks with startups worldwide.' },
+                { t: 'Institutions & corporates', d: 'Technology transfer, acceleration partnerships and access to global innovation talent.' },
+              ].map((c, i) => (
+                <GlassCard key={c.t} accent={i % 2 ? NEON.emerald : NEON.cyan}>
+                  <div className="flex items-start gap-4">
+                    <IndexPlate n={i + 1} color={i % 2 ? NEON.emerald : NEON.cyan} />
+                    <div>
+                      <div className="text-[21px] font-black text-slate-900 leading-tight">{c.t}</div>
+                      <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{c.d}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 03 · THE NEW STANDARD ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="02" label="THE NEW STANDARD" pageNum={3}>
             <PageTitle kicker="Access model" title={<>FREE TO EXPLORE.<br />MEMBER TO BUILD.</>} />
-            <ImagePlate src={imgCampus} alt="Members collaborating inside a modern innovation campus" caption="Institutional campus · member workspaces" height={230} className="mb-6" />
+            <ImagePlate src={imgStudio} alt="Members collaborating inside a modern innovation campus" caption="Institutional campus · member workspaces" height={230} className="mb-6" />
             <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
               Startup Factory Hub is a membership platform. Anyone can create an account and
               browse the ecosystem — publishing, applying, contacting investors and enrolling
@@ -744,35 +762,15 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 03 · WHAT YOU UNLOCK (1/2) ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="02" label="ENTITLEMENTS" pageNum={3} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
-            <ImagePlate src={imgLab} alt="Engineers working in an advanced research laboratory" caption="Open-source technology · engineering resources" accent={NEON.emerald} height={200} className="mb-5" />
-            <div className="grid grid-cols-2 gap-4 flex-1 content-start">
-              {entitlements.slice(0, 6).map((e: Entitlement, i) => (
-                <EntitlementTile key={e.key} n={i + 1} label={e.label} description={e.description} delay={i * 0.06} />
-              ))}
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
-
-      {/* ---------------- 04 · WHAT YOU UNLOCK (2/2) ---------------- */}
+      {/* ---------------- 04 · WHAT YOU UNLOCK (ALL SERVICES) ---------------- */}
       <BookPage>
         <A4Wrapper>
           <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>CAREER, CAMPUS<br />& TECHNOLOGY</>} accent={NEON.emerald} />
-            <div className="grid grid-cols-2 gap-4 content-start">
-              {entitlements.slice(6).map((e: Entitlement, i) => (
-                <EntitlementTile key={e.key} n={i + 7} label={e.label} description={e.description} delay={i * 0.06} />
+            <PageTitle kicker="What you unlock" title={<>{entitlements.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
+            <div className="grid grid-cols-3 gap-3.5 flex-1 content-start">
+              {entitlements.map((e: Entitlement, i) => (
+                <EntitlementTile key={e.key} n={i + 1} label={e.label} description={e.description} delay={i * 0.04} />
               ))}
-            </div>
-            <div className="grid grid-cols-3 gap-4 mt-7">
-              <RadialStat value="11" label="Services unlocked" pct={1} color={NEON.emerald} />
-              <RadialStat value="200" suffix="+" label="Active members" pct={0.82} color={NEON.cyan} />
-              <RadialStat value="24" suffix="/7" label="Global access" pct={0.95} color={NEON.blue} />
             </div>
           </PageFrame>
         </A4Wrapper>
@@ -782,77 +780,119 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       <BookPage>
         <A4Wrapper>
           <PageFrame code="04" label="COMMERCIAL MODEL" pageNum={5}>
-            <PageTitle kicker="Annual membership" title={<>PAY MONTHLY<br />OR SAVE {savingsPercent}%</>} />
-            <div className="grid grid-cols-2 gap-6">
-              <GlassCard accent={NEON.cyan} padding="p-8">
-                <div className="font-mono text-[13px] tracking-[0.32em] uppercase text-slate-500 mb-4">
-                  Option A · Monthly
-                </div>
-                <div className="flex items-end gap-3">
-                  <span className="font-black text-slate-900" style={{ fontSize: 96, lineHeight: 0.85 }}>{monthly}</span>
-                  <span className="text-slate-500 mb-3 text-xl">/ mo</span>
-                </div>
-                <div className="mt-4 text-[17px] text-slate-600">{yearlyIfMonthly} per year · 12 installments</div>
-                <ul className="mt-6 space-y-3 text-[17px] text-slate-700">
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.cyan }} />Annual term, billed monthly</li>
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.cyan }} />Full access from day one</li>
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.cyan }} />Secure card payment</li>
-                </ul>
-              </GlassCard>
-
-              <GlassCard accent={NEON.emerald} padding="p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="font-mono text-[13px] tracking-[0.32em] uppercase text-slate-500">
-                    Option B · Annual
-                  </div>
-                  <span className="px-3 py-1.5 rounded-full text-[13px] font-black tracking-[0.18em]" style={{
-                    background: `${NEON.emerald}18`, color: NEON.emerald, border: `1px solid ${NEON.emerald}55`,
-                  }}>−{savingsPercent}%</span>
-                </div>
-                <div className="flex items-end gap-3">
-                  <span className="font-black text-slate-900" style={{ fontSize: 96, lineHeight: 0.85 }}>{yearly}</span>
-                  <span className="text-slate-500 mb-3 text-xl">/ yr</span>
-                </div>
-                <div className="mt-4 text-[17px] text-slate-600">
-                  {yearlyPerMonth} effective per month
-                </div>
-                <ul className="mt-6 space-y-3 text-[17px] text-slate-700">
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.emerald }} />One payment, full year of access</li>
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.emerald }} />Best value for founders and teams</li>
-                  <li className="flex gap-2"><Check className="h-5 w-5 mt-0.5" style={{ color: NEON.emerald }} />Priority onboarding</li>
-                </ul>
-              </GlassCard>
-            </div>
-
-            <GlassCard className="mt-6" padding="p-7">
-              <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-slate-500 mb-5">
-                Cost comparison · one year
+            <PageTitle kicker="Membership" title={<>ONE PRICE.<br />{monthly} / MONTH.</>} />
+            <ImagePlate src={imgSummit} alt="Members at a Startup Factory Hub summit" caption="Everything included · one monthly price" height={200} className="mb-6" />
+            <GlassCard accent={NEON.cyan} padding="p-9" className="flex-1">
+              <div className="font-mono text-[13px] tracking-[0.32em] uppercase text-slate-500 mb-4">
+                Startup Factory Hub · Membership
               </div>
-              <SavingsChart
-                monthlyTotal={monthlyTotalCents}
-                yearlyTotal={plan.yearly_price_cents}
-                savingsPercent={savingsPercent}
-              />
+              <div className="flex items-end gap-3">
+                <span className="font-black text-slate-900" style={{ fontSize: 120, lineHeight: 0.85 }}>{monthly}</span>
+                <span className="text-slate-500 mb-4 text-2xl">/ month</span>
+              </div>
+              <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3.5 text-[17px] text-slate-700">
+                {[
+                  'All member services unlocked',
+                  'Billed monthly · cancel anytime',
+                  'Full access from day one',
+                  'Secure card payment with Stripe',
+                  'Events, programs and courses included',
+                  'Same price worldwide',
+                ].map(t => (
+                  <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />{t}</li>
+                ))}
+              </ul>
+              <div className="mt-9">
+                <JoinButton cycle="monthly" label={`Join for ${monthly} / month`} size="lg" />
+              </div>
             </GlassCard>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
 
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              <JoinButton cycle="monthly" label="Join monthly" size="lg" />
-              <JoinButton cycle="yearly" label={`Join yearly · −${savingsPercent}%`} size="lg" />
+      {/* ---------------- 06 · NASDAQ TOWER ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="05" label="GLOBAL VISIBILITY" pageNum={6}>
+            <PageTitle kicker="Nasdaq Tower · Times Square" title={<>FEATURED ON THE<br />WORLD&apos;S STAGE</>} />
+            <div className="relative flex-1 rounded-3xl overflow-hidden" style={{
+              border: '1px solid rgba(255,255,255,0.7)',
+              boxShadow: `0 30px 70px -30px rgba(15,23,42,0.45), 0 0 0 1px ${NEON.cyan}22`,
+            }}>
+              <img
+                src={nasdaqFeature}
+                alt="Startup Factory Hub featured on the NASDAQ Tower in Times Square, New York City"
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0" style={{
+                background: 'linear-gradient(180deg, rgba(8,14,26,0.15) 0%, rgba(8,14,26,0.55) 50%, rgba(8,14,26,0.96) 100%)',
+              }} />
+              <div className="absolute top-6 left-6 inline-flex items-center gap-2 px-4 py-2 rounded-full z-10" style={{
+                background: 'rgba(8,14,26,0.65)', backdropFilter: 'blur(8px)', border: `1px solid ${NEON.cyan}70`,
+              }}>
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#67e8f9', boxShadow: '0 0 10px #67e8f9' }} />
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-white">Live · Times Square</span>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 z-10 p-9">
+                <div className="font-mono text-[12px] uppercase tracking-[0.4em] mb-3" style={{ color: '#67e8f9' }}>// Featured</div>
+                <h3 className="font-black leading-[1.05] text-white mb-4" style={{ fontSize: 44, textShadow: '0 2px 14px rgba(0,0,0,0.9)' }}>
+                  Startup Factory Hub<br />
+                  <span style={{ color: '#67e8f9' }}>on the Nasdaq Tower</span>
+                </h3>
+                <p className="text-[17px] text-white/85 leading-relaxed max-w-xl">
+                  Members build inside a brand already broadcast to Times Square — global visibility
+                  your startup inherits from the day you join.
+                </p>
+              </div>
             </div>
           </PageFrame>
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 07 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="ONBOARDING" pageNum={6}>
+          <PageFrame code="06" label="AR EVENTS" pageNum={7} accent={NEON.emerald}>
+            <PageTitle kicker="Augmented reality" title={<>AR EVENTS,<br />NO BORDERS</>} accent={NEON.emerald} />
+            <ImagePlate src={imgSpace} alt="Immersive augmented reality event stage" caption="Immersive stages · spatial networking" accent={NEON.emerald} height={230} className="mb-6" />
+            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
+              Members join Startup Factory Hub events in augmented reality: demo days, masterclasses,
+              investor rounds and exhibitions rendered as 3D scenes you can walk through from a browser
+              or a headset. No installs, no travel.
+            </p>
+            <div className="grid grid-cols-2 gap-5 content-start">
+              {[
+                { t: 'AR demo days', d: 'Present your product as an interactive 3D model investors can inspect from any device.' },
+                { t: 'Immersive conferences', d: 'Keynotes and panels on virtual stages with live audio and spatial networking rooms.' },
+                { t: 'AR resource drops', d: 'Place technology, launches and opportunities on the world map and open them in AR.' },
+                { t: 'Global attendance', d: 'Every session is remote-first and recorded, so members join from any time zone.' },
+              ].map((c, i) => (
+                <GlassCard key={c.t} accent={NEON.emerald}>
+                  <div className="flex items-start gap-4">
+                    <IndexPlate n={i + 1} color={NEON.emerald} />
+                    <div>
+                      <div className="text-[20px] font-black text-slate-900 leading-tight">{c.t}</div>
+                      <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{c.d}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 08 · HOW IT WORKS ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="07" label="ONBOARDING" pageNum={8}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO FULL ACCESS</>} />
-            <ImagePlate src={imgSummit} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
+            <ImagePlate src={imgMarkets} alt="Founder presenting at an investor summit" caption="Pitch events · investor access" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
               {[
                 { t: 'Create your account', d: 'Sign up free and complete your founder, investor, mentor or student profile.' },
-                { t: 'Activate the membership', d: 'Choose monthly or annual billing and complete the secure checkout.' },
+                { t: 'Activate the membership', d: `Pay ${monthly} per month through the secure checkout.` },
                 { t: 'Everything unlocks instantly', d: 'Posting, map publishing, program applications, investor contact and courses go live.' },
                 { t: 'Grow inside the ecosystem', d: 'Join events, apply to programs, hire and get hired, transfer technology and earn certifications.' },
               ].map((s, i) => (
@@ -871,14 +911,14 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · FAQ ---------------- */}
+      {/* ---------------- 09 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="06" label="QUESTIONS" pageNum={7} accent={NEON.blue}>
+          <PageFrame code="08" label="QUESTIONS" pageNum={9} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
-                { q: 'Is the membership annual?', a: `Yes. The membership runs for a full year. You can pay it monthly (${monthly}/mo) or upfront (${yearly}) with a ${savingsPercent}% discount.` },
+                { q: 'How much is the membership?', a: `${monthly} per month, billed monthly. You can cancel anytime from your dashboard.` },
                 { q: 'What happens to my free account?', a: 'Nothing is deleted. You keep browsing access; publishing, applying and investor contact stay locked until you activate a membership.' },
                 { q: 'Do higher memberships include this?', a: 'Yes. Every paid membership includes the full list of services in this brochure.' },
                 { q: 'Can my whole team join?', a: 'Yes. Each member holds an individual account; contact us for team onboarding.' },
@@ -894,7 +934,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · JOIN ---------------- */}
+      {/* ---------------- 10 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
@@ -911,48 +951,32 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
             }} />
             <AmbientField />
             <Frame />
-            <div className="absolute inset-0 z-10 flex flex-col justify-center px-10">
+            <div className="absolute inset-0 z-10 flex flex-col px-10 py-12">
               <div className="font-mono text-[13px] tracking-[0.42em] uppercase mb-3" style={{ color: '#67e8f9' }}>
                 Checkout · activate access
               </div>
-              <div className="grid grid-cols-2 gap-8 items-center">
-                <div>
-                  <h1 className="font-black tracking-tight text-white" style={{
-                    fontSize: 'clamp(40px, 5.4vw, 62px)', lineHeight: 0.95,
-                    textShadow: `0 0 60px ${NEON.cyan}55`,
-                  }}>
-                    BECOME<br /><span style={{ color: '#67e8f9' }}>A MEMBER</span>
-                  </h1>
-                  <ul className="mt-6 space-y-2.5 text-[15px] text-white/80">
-                    {['All 11 member services unlock instantly', 'Cancel anytime from your dashboard', 'Card payment secured by Stripe'].map(t => (
-                      <li key={t} className="flex gap-2">
-                        <Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: '#6ee7b7' }} />{t}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-7 flex items-center gap-4">
-                    <div className="p-2.5 rounded-2xl bg-white shadow-lg">
-                      <QRCodeSVG value="https://startupfactoryhub.com/basic-plan" size={86} />
-                    </div>
-                    <a href="mailto:info@startupfactoryhub.com"
-                      className="flex items-center gap-2 text-[15px] text-white/70 hover:text-white">
-                      <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
-                      info@startupfactoryhub.com
-                    </a>
-                  </div>
-                </div>
-                <CheckoutPanel
-                  monthly={monthly}
-                  yearly={yearly}
-                  yearlyPerMonth={yearlyPerMonth}
-                  savingsPercent={savingsPercent}
-                  isMember={isMember}
-                />
+              <h1 className="font-black tracking-tight text-white" style={{
+                fontSize: 56, lineHeight: 0.95, textShadow: `0 0 60px ${NEON.cyan}55`,
+              }}>
+                BECOME <span style={{ color: '#67e8f9' }}>A MEMBER</span>
+              </h1>
+
+              <div className="mt-6 flex-1 min-h-0">
+                <CheckoutPanel monthly={monthly} isMember={isMember} />
               </div>
-              <div className="mt-8 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
-              <div className="mt-3 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.3em]">
-                <span className="text-white/50">// startupfactoryhub.com</span>
-                <span style={{ color: '#67e8f9' }}>END · TRANSMISSION</span>
+
+              <div className="mt-6 flex items-center gap-5">
+                <div className="p-2.5 rounded-2xl bg-white shadow-lg">
+                  <QRCodeSVG value="https://startupfactoryhub.com/basic-plan" size={78} />
+                </div>
+                <a href="mailto:info@startupfactoryhub.com"
+                  className="flex items-center gap-2 text-[15px] text-white/70 hover:text-white">
+                  <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
+                  info@startupfactoryhub.com
+                </a>
+                <span className="ml-auto font-mono text-[12px] uppercase tracking-[0.3em]" style={{ color: '#67e8f9' }}>
+                  END · TRANSMISSION
+                </span>
               </div>
             </div>
           </section>
@@ -960,6 +984,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
     </>
   );
+
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
