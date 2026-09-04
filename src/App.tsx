@@ -55,6 +55,7 @@ const Hubs = lazy(() => import("./pages/Hubs"));
 const HubsLab = lazy(() => import("./pages/HubsLab"));
 const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
+const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
 const InvestorPlanBrochure = lazy(() => import("./pages/InvestorPlanBrochure"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
@@ -179,6 +180,7 @@ const App = () => (
                     <Route path="/hubs-lab" element={<HubsLab />} />
                     <Route path="/hubs/apply" element={<PublicHubApplication />} />
                     <Route path="/mvp-program" element={<MVPProgram />} />
+                    <Route path="/accelerated-fundraising" element={<AcceleratedFundraising />} />
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
                     <Route path="/emails" element={<EmailTemplates />} />
                     <Route path="/district/:districtId" element={<DistrictDashboard />} />
