@@ -476,14 +476,12 @@ const EntitlementTile = ({
 };
 
 const CheckoutPanel = ({
-  monthly, yearly, yearlyPerMonth, savingsPercent, isMember,
+  monthly, isMember,
 }: {
-  monthly: string; yearly: string; yearlyPerMonth: string;
-  savingsPercent: number; isMember: boolean;
+  monthly: string; isMember: boolean;
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [cycle, setCycle] = useState<BillingCycle>('yearly');
   const [busy, setBusy] = useState(false);
 
   const pay = async () => {
@@ -494,7 +492,7 @@ const CheckoutPanel = ({
     }
     setBusy(true);
     try {
-      const url = await createBasicPlanCheckout(cycle);
+      const url = await createBasicPlanCheckout('monthly');
       window.open(url, '_blank');
     } catch (e) {
       toast({
@@ -507,13 +505,8 @@ const CheckoutPanel = ({
     }
   };
 
-  const options: { key: BillingCycle; title: string; price: string; note: string; accent: string }[] = [
-    { key: 'monthly', title: 'Monthly', price: monthly, note: 'Billed every month', accent: '#67e8f9' },
-    { key: 'yearly', title: 'Annual', price: yearly, note: `${yearlyPerMonth} effective / mo · −${savingsPercent}%`, accent: '#6ee7b7' },
-  ];
-
   return (
-    <div className="rounded-3xl p-6 sm:p-7 w-full max-w-[560px]" style={{
+    <div className="rounded-3xl p-8 w-full h-full flex flex-col" style={{
       background: 'linear-gradient(150deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
       backdropFilter: 'blur(24px) saturate(140%)',
       WebkitBackdropFilter: 'blur(24px) saturate(140%)',
@@ -521,63 +514,44 @@ const CheckoutPanel = ({
       boxShadow: '0 40px 90px -35px rgba(0,0,0,0.75)',
     }}>
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] tracking-[0.34em] uppercase text-white/60">Secure checkout</span>
-        <span className="flex items-center gap-2 font-mono text-[11px] tracking-[0.28em] uppercase" style={{ color: '#6ee7b7' }}>
+        <span className="font-mono text-[12px] tracking-[0.34em] uppercase text-white/60">Secure checkout</span>
+        <span className="flex items-center gap-2 font-mono text-[12px] tracking-[0.28em] uppercase" style={{ color: '#6ee7b7' }}>
           <ShieldCheck className="h-4 w-4" /> Stripe
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        {options.map(o => {
-          const active = cycle === o.key;
-          return (
-            <button
-              key={o.key}
-              type="button"
-              onClick={() => setCycle(o.key)}
-              className="text-left rounded-2xl px-4 py-4 transition"
-              style={{
-                background: active
-                  ? `linear-gradient(140deg, ${o.accent}30, rgba(255,255,255,0.08))`
-                  : 'rgba(255,255,255,0.06)',
-                border: `1px solid ${active ? `${o.accent}aa` : 'rgba(255,255,255,0.18)'}`,
-                boxShadow: active ? `0 0 0 1px ${o.accent}55, 0 18px 40px -22px ${o.accent}` : 'none',
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-[0.26em] text-white/70">{o.title}</span>
-                <span className="w-3.5 h-3.5 rounded-full border" style={{
-                  borderColor: active ? o.accent : 'rgba(255,255,255,0.4)',
-                  background: active ? o.accent : 'transparent',
-                }} />
-              </div>
-              <div className="text-[34px] font-black text-white leading-none mt-2">{o.price}</div>
-              <div className="text-[12px] text-white/60 mt-1.5 leading-snug">{o.note}</div>
-            </button>
-          );
-        })}
+      <div className="mt-6 rounded-2xl px-6 py-7" style={{
+        background: 'linear-gradient(140deg, rgba(103,232,249,0.22), rgba(255,255,255,0.06))',
+        border: '1px solid rgba(103,232,249,0.55)',
+      }}>
+        <div className="font-mono text-[12px] uppercase tracking-[0.3em] text-white/70">Membership · monthly</div>
+        <div className="flex items-end gap-3 mt-2">
+          <span className="text-[72px] leading-none font-black text-white">{monthly}</span>
+          <span className="text-white/60 mb-3 text-lg">/ month</span>
+        </div>
+        <div className="text-[14px] text-white/65 mt-2">Billed every month · cancel anytime</div>
       </div>
 
-      <div className="mt-5 space-y-2 text-[13px] text-white/75">
+      <div className="mt-6 space-y-3 text-[15px] text-white/75">
         <div className="flex items-center justify-between">
           <span>Startup Factory Hub · Membership</span>
-          <span className="font-bold text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+          <span className="font-bold text-white">{monthly}</span>
         </div>
         <div className="flex items-center justify-between">
           <span>Billing cycle</span>
-          <span className="text-white/90">{cycle === 'yearly' ? 'Annual, one payment' : 'Monthly, 12 installments'}</span>
+          <span className="text-white/90">Monthly</span>
         </div>
         <div className="h-px w-full my-2" style={{ background: 'rgba(255,255,255,0.18)' }} />
-        <div className="flex items-center justify-between text-[15px]">
+        <div className="flex items-center justify-between text-[16px]">
           <span className="font-mono uppercase tracking-[0.22em] text-white/60">Due today</span>
-          <span className="text-2xl font-black text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+          <span className="text-3xl font-black text-white">{monthly}</span>
         </div>
       </div>
 
       <button
         onClick={pay}
         disabled={busy || isMember}
-        className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 transition hover:scale-[1.02] disabled:opacity-60"
+        className="mt-auto w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-5 transition hover:scale-[1.02] disabled:opacity-60"
         style={{
           background: 'linear-gradient(135deg, #0ea5b7, #0369a1)',
           border: '1px solid rgba(255,255,255,0.35)',
@@ -585,18 +559,19 @@ const CheckoutPanel = ({
         }}
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <CreditCard className="h-5 w-5 text-white" />}
-        <span className="font-bold tracking-[0.16em] uppercase text-white text-base">
-          {isMember ? 'Membership active' : `Pay ${cycle === 'yearly' ? yearly : monthly} · activate`}
+        <span className="font-bold tracking-[0.16em] uppercase text-white text-lg">
+          {isMember ? 'Membership active' : `Pay ${monthly} · activate`}
         </span>
       </button>
 
-      <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.2em] text-white/45">
+      <div className="mt-3 flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.2em] text-white/45">
         <span>Cancel anytime</span>
         <a href="mailto:info@startupfactoryhub.com" className="hover:text-white/80">info@startupfactoryhub.com</a>
       </div>
     </div>
   );
 };
+
 
 
 
