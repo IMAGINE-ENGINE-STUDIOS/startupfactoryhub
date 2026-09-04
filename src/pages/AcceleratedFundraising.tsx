@@ -487,7 +487,7 @@ function ARHologram() {
       <div className="pointer-events-none absolute left-0 top-[18%] animate-fade-in">
         <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Focus</p>
-          <p className="font-mono text-xs text-foreground">INVESTOR MATCH</p>
+          <p className="font-mono text-xs text-foreground">SCALE-UP</p>
         </div>
       </div>
       <div className="pointer-events-none absolute right-0 top-[42%] animate-fade-in">
