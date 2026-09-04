@@ -793,6 +793,45 @@ export default function AcceleratedFundraising() {
       </section>
 
 
+      {/* ── Minimum Requirements ── */}
+      <section className="relative overflow-hidden border-b border-border/50">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-24">
+          <div className="mb-12 max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Eligibility</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Minimum Requirements</h2>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              The batch is built for hardware teams ready to raise. To apply, your startup must meet these baseline criteria.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {REQUIREMENTS.map((r) => (
+              <Card key={r.code} className="tech-card group relative overflow-hidden border-0">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+                <CardContent className="flex h-full flex-col gap-4 p-7">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
+                      <r.icon className="h-6 w-6 text-primary transition-transform duration-500 group-hover:rotate-180" />
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">{r.code}</span>
+                  </div>
+                  <h3 className="text-lg font-bold tracking-tight">{r.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{r.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
       {/* ── Open Batches ── */}
       {cohorts.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pb-20">
