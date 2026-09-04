@@ -55,6 +55,7 @@ import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
 import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtml";
 import { generateMvpNoShowHtml } from "@/lib/mvpNoShowEmailHtml";
+import { buildAfWelcomeHtml, buildAfAcceptanceHtml, buildAfFollowUpHtml, buildAfNoShowHtml } from "@/lib/afEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1327,6 +1328,38 @@ const TEMPLATES = [
     edgeFunction: "send-mvp-no-show-email",
     trigger: "interview no-show / manual",
   },
+  {
+    id: "af-welcome",
+    label: "Accelerated Fundraising — Thanks for Your Interest",
+    icon: Rocket,
+    description: "Sent after signup + email verification: thank you note with the direct application link",
+    edgeFunction: "send-af-welcome",
+    trigger: "signup (Accelerated Fundraising) / manual",
+  },
+  {
+    id: "af-acceptance",
+    label: "Accelerated Fundraising — Accepted",
+    icon: Rocket,
+    description: "Acceptance email for the aerospace hardware batch with onboarding next steps",
+    edgeFunction: "send-af-acceptance-email",
+    trigger: "startup accepted / manual",
+  },
+  {
+    id: "af-follow-up",
+    label: "Accelerated Fundraising — Follow-Up",
+    icon: Rocket,
+    description: "Follow-up for accepted startups that haven't completed onboarding yet",
+    edgeFunction: "send-af-follow-up",
+    trigger: "accepted, not onboarded / manual",
+  },
+  {
+    id: "af-no-show",
+    label: "Accelerated Fundraising — Sorry We Missed You",
+    icon: Rocket,
+    description: "Reschedule email for founders who missed their Accelerated Fundraising interview",
+    edgeFunction: "send-af-no-show-email",
+    trigger: "interview no-show / manual",
+  },
 ] as const;
 
 
@@ -1512,6 +1545,31 @@ const defaultVars = {
     cohortName: "MVP Program",
     interviewDate: "",
   },
+  "af-welcome": {
+    to: "",
+    name: "Founder",
+  },
+  "af-acceptance": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "Accelerated Fundraising",
+    interviewDate: "",
+  },
+  "af-follow-up": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "Accelerated Fundraising",
+    deadline: "",
+  },
+  "af-no-show": {
+    to: "",
+    name: "Founder",
+    startupName: "Your Startup",
+    cohortName: "Accelerated Fundraising",
+    interviewDate: "",
+  },
 
 
   "investor-update": {
@@ -1532,7 +1590,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["af-welcome", "af-acceptance", "af-follow-up", "af-no-show", "mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1619,6 +1677,37 @@ export default function EmailTemplates() {
         name: v.name || "Founder",
         startupName: v.startupName,
         cohortName: v.cohortName,
+        interviewDate: v.interviewDate,
+      });
+    }
+    if (selected === "af-welcome") {
+      const v = vars["af-welcome"] as any;
+      return buildAfWelcomeHtml({ name: v.name || "Founder" });
+    }
+    if (selected === "af-acceptance") {
+      const v = vars["af-acceptance"] as any;
+      return buildAfAcceptanceHtml({
+        name: v.name || "Founder",
+        startup: v.startupName,
+        cohort: v.cohortName,
+        interviewDate: v.interviewDate,
+      });
+    }
+    if (selected === "af-follow-up") {
+      const v = vars["af-follow-up"] as any;
+      return buildAfFollowUpHtml({
+        name: v.name || "Founder",
+        startup: v.startupName,
+        cohort: v.cohortName,
+        deadline: v.deadline,
+      });
+    }
+    if (selected === "af-no-show") {
+      const v = vars["af-no-show"] as any;
+      return buildAfNoShowHtml({
+        name: v.name || "Founder",
+        startup: v.startupName,
+        cohort: v.cohortName,
         interviewDate: v.interviewDate,
       });
     }
@@ -1735,9 +1824,17 @@ export default function EmailTemplates() {
           deadline: v.deadline || "September 29, 2026",
           amountCents: Number(v.amountCents) || 500000,
         };
+      } else if (selected.startsWith("af-")) {
+        const v = vars[selected] as any;
+        payload = {
+          email: toEmail,
+          name: v.name || "Founder",
+          startupName: v.startupName || "Your Startup",
+          cohortName: v.cohortName || "Accelerated Fundraising",
+          interviewDate: v.interviewDate || "",
+          deadline: v.deadline || "",
+        };
       }
-
-
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
         body: payload,
