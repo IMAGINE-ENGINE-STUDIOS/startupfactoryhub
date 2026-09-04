@@ -18,7 +18,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
-  Scan, Smartphone, Box, Globe2, Sparkles, Radio,
+  Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -28,16 +28,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBasicPlan, formatCents } from '@/features/basic-plan/hooks/useBasicPlan';
 import { useMembershipAccess } from '@/features/basic-plan/hooks/useMembershipAccess';
 import { createBasicPlanCheckout } from '@/features/basic-plan/api/basicPlanApi';
-import type { BillingCycle, Entitlement } from '@/features/basic-plan/types';
+import type { BillingCycle } from '@/features/basic-plan/types';
 
 import imgCampus from '@/assets/membership/campus-atrium.jpg';
-import imgSummit from '@/assets/membership/investor-summit.jpg';
-import imgLab from '@/assets/membership/research-lab.jpg';
 import imgSkyline from '@/assets/membership/global-skyline.jpg';
-import imgCompute from '@/assets/membership/ai-compute-dealflow.jpg';
-import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
-import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
-import imgStudio from '@/assets/membership/venture-studio.jpg';
+import imgGlobal from '@/assets/membership/plan-global.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
 import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
