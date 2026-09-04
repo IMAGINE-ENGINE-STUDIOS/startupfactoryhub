@@ -616,13 +616,13 @@ export default function AcceleratedFundraising() {
 
       <Ticker
         items={[
-          'Product Engineering',
-          'Seed Capital',
+          'Aerospace Hardware',
+          'Defense Tech',
+          'Space Systems',
+          'Deep Tech Capital',
           'Investor Mesh',
-          'AI Tooling',
-          'Go To Market',
-          'Global Offices',
-          'Business Intelligence',
+          'Supply Chain',
+          'Regulatory Pathway',
         ]}
       />
 
