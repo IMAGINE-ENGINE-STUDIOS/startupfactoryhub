@@ -36,7 +36,7 @@ export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
 export const SFH_FOUNDERS = [
   { name: "Khalia Padilla", role: "Managing Partner & Founder" },
   { name: "Ricardo Font", role: "Managing Partner & Founder" },
-  { name: "Pablo Duenas", role: "Managing Partner" },
+  
 ];
 
 export const PARTNERS_URL = "https://startupfactoryhub.com/forpartners";

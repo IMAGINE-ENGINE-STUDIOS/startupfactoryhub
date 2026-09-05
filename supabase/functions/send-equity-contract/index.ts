@@ -68,8 +68,8 @@ serve(async (req) => {
               <p style="margin:0 0 8px;color:#0ea270;font-size:11px;letter-spacing:1.4px;font-weight:700">STARTUP FACTORY HUB FOUNDERS</p>
               <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.7">
                 Khalia Padilla — Managing Partner &amp; Founder<br/>
-                Ricardo Font — Managing Partner &amp; Founder<br/>
-                Pablo Duenas — Managing Partner
+                Ricardo Font — Managing Partner &amp; Founder
+
               </p>
               <p style="margin:12px 0 0;color:#9ca3af;font-size:13px">
                 <a href="${partnersUrl}" style="color:#0ea270;text-decoration:none">Learn more about us →</a>
