@@ -532,8 +532,14 @@ export default function SignDocument() {
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <AccessBadge mode={doc.access_mode} />
+          {!doc.file_url && !canEdit && pageCount > 0 && (
+            <span className="rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]">
+              {pageCount} {pageCount === 1 ? "page" : "pages"}
+            </span>
+          )}
           <p className="text-xs text-muted-foreground">{ACCESS_LABEL[doc.access_mode].help}</p>
         </div>
+
 
         {liveNotice && <LiveNotice message={liveNotice} />}
 
