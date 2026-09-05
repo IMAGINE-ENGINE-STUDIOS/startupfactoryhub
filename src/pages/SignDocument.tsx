@@ -355,7 +355,7 @@ export default function SignDocument() {
       _signer_name: name.trim(),
       _signer_email: email.trim(),
       _signature_data: signature,
-      _note: note.trim() || null,
+      _note: null,
     });
     setSubmitting(false);
 
