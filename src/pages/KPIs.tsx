@@ -77,9 +77,6 @@ const startupGrowth = [
   { m: "Jul", v: 38 }, { m: "Aug", v: 43 }, { m: "Sep", v: 47 },
   { m: "Oct", v: 50 }, { m: "Nov", v: 50 }, { m: "Dec", v: 50 },
 ];
-const capitalRaised = [
-  { m: "Q1", v: 0.8 }, { m: "Q2", v: 1.6 }, { m: "Q3", v: 3.2 }, { m: "Q4", v: 5.0 },
-];
 const membership = [
   { m: "Jan", sf: 40, wtc: 25 }, { m: "Feb", sf: 75, wtc: 48 },
   { m: "Mar", sf: 110, wtc: 70 }, { m: "Apr", sf: 140, wtc: 95 },
@@ -93,9 +90,9 @@ const categories = [
     title: "Startup & Innovation", icon: Rocket, glow: NEON.cyan,
     items: [
       "Number of startups accelerated", "Startup survival rate",
-      "Capital raised by participating companies", "Jobs created",
-      "Revenue growth of startups", "Patents or IP generated",
-      "Number of founders served", "Graduation rate",
+      "Revenue growth of startups", "Jobs created",
+      "Patents or IP generated", "Number of founders served",
+      "Graduation rate",
     ],
   },
   {
@@ -153,7 +150,6 @@ const yearOneTargets = [
   { label: "Investor Organizations", value: 25, icon: DollarSign, glow: NEON.rose },
   { label: "Events Hosted", value: 60, icon: Calendar, glow: NEON.cyan },
   { label: "Annual Attendees", value: 3000, icon: Sparkles, glow: NEON.magenta },
-  { label: "Capital Raised", value: 5, prefix: "$", suffix: "M", icon: TrendingUp, glow: NEON.lime },
   { label: "Jobs Created", value: 150, icon: Briefcase, glow: NEON.amber },
   { label: "Intl. Delegations", value: 10, icon: MapPin, glow: NEON.violet },
   { label: "Member Satisfaction", value: 90, suffix: "%", icon: Heart, glow: NEON.rose },
@@ -341,32 +337,6 @@ export default function KPIs() {
             </Glass>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.1 }}
-          >
-            <Glass glow={NEON.amber} className="p-6">
-              <div className="text-[11px] tracking-[0.25em] uppercase text-white/50">Capital</div>
-              <div className="text-xl font-semibold mt-1 mb-4">Capital Raised by Cohorts ($M)</div>
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={capitalRaised}>
-                    <defs>
-                      <linearGradient id="bar1" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={NEON.amber} stopOpacity={1} />
-                        <stop offset="100%" stopColor={NEON.rose} stopOpacity={0.4} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="m" stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                    <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                    <Tooltip contentStyle={{ background: "rgba(10,12,20,0.9)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12 }} />
-                    <Bar dataKey="v" fill="url(#bar1)" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Glass>
-          </motion.div>
         </div>
 
         {/* KPI categories grid */}
