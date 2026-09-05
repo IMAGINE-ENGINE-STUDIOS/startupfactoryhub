@@ -145,6 +145,19 @@ export default function SignDocument() {
   const [recipients, setRecipients] = useState("");
   const [emailNote, setEmailNote] = useState("");
   const [sending, setSending] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+
+  /** Owners can erase any signature already collected on the document. */
+  const deleteSignature = async (signatureId: string) => {
+    const { error } = await supabase.from("sign_signatures").delete().eq("id", signatureId);
+    if (error) {
+      toast.error("Could not erase that signature");
+      return;
+    }
+    toast.success("Signature erased");
+    await refresh();
+  };
+
 
   const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
   const canSign = doc?.access_mode !== "view";
@@ -519,8 +532,14 @@ export default function SignDocument() {
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <AccessBadge mode={doc.access_mode} />
+          {!doc.file_url && !canEdit && pageCount > 0 && (
+            <span className="rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]">
+              {pageCount} {pageCount === 1 ? "page" : "pages"}
+            </span>
+          )}
           <p className="text-xs text-muted-foreground">{ACCESS_LABEL[doc.access_mode].help}</p>
         </div>
+
 
         {liveNotice && <LiveNotice message={liveNotice} />}
 
@@ -558,6 +577,18 @@ export default function SignDocument() {
               title={doc.title}
               className="w-full h-[60vh] sm:h-[70vh] rounded-xl border border-border/50"
             />
+          ) : !canEdit ? (
+            /* Read / sign mode renders the file exactly like LightPaper: real
+               sheets in the document format, with every page shown and counted. */
+            <div className="rounded-xl bg-muted/40 p-3 sm:p-6 overflow-auto max-h-[80vh]">
+              <PaperDocumentView
+                html={html}
+                onPageCount={setPageCount}
+                contentRef={(el) => {
+                  (viewRef as any).current = el;
+                }}
+              />
+            </div>
           ) : (
             <div className="sign-doc-view overflow-x-auto max-w-full rounded-xl p-4 sm:p-10 shadow-lg">
               <style>{`
@@ -576,40 +607,35 @@ export default function SignDocument() {
                 .sign-doc-view [style*="width"] { width: auto !important; }
                 .sign-doc-view p, .sign-doc-view h1, .sign-doc-view h2, .sign-doc-view h3, .sign-doc-view li, .sign-doc-view span, .sign-doc-view div { overflow-wrap: anywhere; word-break: break-word; }
               `}</style>
-              {canEdit ? (
-                <div
-                  ref={editorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={() => {
-                    if (!dirty) setDirty(true);
-                    setSuspended(true);
-                    if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
-                    draftBroadcastTimerRef.current = setTimeout(() => {
-                      const contentHtml = editorRef.current?.innerHTML;
-                      if (contentHtml) void broadcastDraft(contentHtml, name);
-                    }, 180);
-                    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
-                    autosaveTimerRef.current = setTimeout(() => {
-                      void autosaveLiveEdit();
-                    }, 2500);
-                  }}
-                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
-                />
-              ) : (
-                <PaperDocumentView
-                  html={html}
-                  contentRef={(el) => {
-                    (viewRef as any).current = el;
-                  }}
-                />
-              )}
-
+              <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={() => {
+                  if (!dirty) setDirty(true);
+                  setSuspended(true);
+                  if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+                  draftBroadcastTimerRef.current = setTimeout(() => {
+                    const contentHtml = editorRef.current?.innerHTML;
+                    if (contentHtml) void broadcastDraft(contentHtml, name);
+                  }, 180);
+                  if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+                  autosaveTimerRef.current = setTimeout(() => {
+                    void autosaveLiveEdit();
+                  }, 2500);
+                }}
+                className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
+              />
             </div>
           )}
+
         </article>
 
-        <SignatureStrip signatures={signatures} />
+        <SignatureStrip
+          signatures={signatures}
+          onDelete={isOwner ? (s) => void deleteSignature(s.id) : undefined}
+        />
+
         <ActivityLedger entries={ledger} />
 
         {/* Off-screen printable rendition used to build the signed PDF */}

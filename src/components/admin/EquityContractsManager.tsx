@@ -31,6 +31,8 @@ import {
   PARTNERS_URL,
   SFH_FOUNDERS,
 } from "@/lib/equityContractTemplate";
+import PaperDocumentView from "@/components/sign/PaperDocumentView";
+
 
 interface ProfileRow {
   user_id: string;
@@ -51,7 +53,16 @@ interface ContractRow {
   signatureCount: number;
 }
 
+interface SignatureRow {
+  id: string;
+  signer_name: string;
+  signer_email: string | null;
+  signature_data: string;
+  signed_at: string;
+}
+
 const CONTRACT_SOURCE = "equity_contract";
+
 const VALUES_MARKER = "SFH_CONTRACT_VALUES:";
 
 const embedValues = (html: string, values: EquityContractValues) =>
@@ -81,6 +92,12 @@ export default function EquityContractsManager() {
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewPages, setPreviewPages] = useState(0);
+  const [openSignatures, setOpenSignatures] = useState<string | null>(null);
+  const [signatureRows, setSignatureRows] = useState<SignatureRow[]>([]);
+  const [loadingSignatures, setLoadingSignatures] = useState(false);
+
+
 
   const html = useMemo(() => buildEquityContractHtml(values), [values]);
 
@@ -535,11 +552,16 @@ export default function EquityContractsManager() {
           </p>
 
           {showPreview && (
-            <div
-              className="max-h-[600px] overflow-auto rounded-xl bg-white p-8 text-black"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                LightPaper view · {previewPages} {previewPages === 1 ? "page" : "pages"}
+              </p>
+              <div className="max-h-[700px] overflow-auto rounded-xl bg-muted/40 p-4">
+                <PaperDocumentView html={html} onPageCount={setPreviewPages} />
+              </div>
+            </div>
           )}
+
         </CardContent>
       </Card>
 

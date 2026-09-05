@@ -1,4 +1,4 @@
-import { History, PenLine, Radio, ShieldCheck, Users } from "lucide-react";
+import { History, PenLine, Radio, ShieldCheck, Trash2, Users } from "lucide-react";
 import type { LedgerEntry, LiveSignature, SignAccessMode } from "@/hooks/useLiveSignDocument";
 
 const relative = (iso: string) => {
@@ -49,7 +49,14 @@ export function LiveNotice({ message }: { message: string }) {
   );
 }
 
-export function SignatureStrip({ signatures }: { signatures: LiveSignature[] }) {
+export function SignatureStrip({
+  signatures,
+  onDelete,
+}: {
+  signatures: LiveSignature[];
+  /** When provided (document owner), each signature can be erased. */
+  onDelete?: (signature: LiveSignature) => void;
+}) {
   if (signatures.length === 0) return null;
   return (
     <section className="tech-card border-0 rounded-2xl p-4 sm:p-6 mt-6">
@@ -61,7 +68,18 @@ export function SignatureStrip({ signatures }: { signatures: LiveSignature[] }) 
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {signatures.map((s) => (
-          <div key={s.id} className="rounded-xl border border-border/50 bg-background/60 p-3">
+          <div key={s.id} className="relative rounded-xl border border-border/50 bg-background/60 p-3">
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(s)}
+                title={`Erase the signature of ${s.signer_name}`}
+                aria-label={`Erase the signature of ${s.signer_name}`}
+                className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
             <img
               src={s.signature_data}
               alt={`Signature of ${s.signer_name}`}
@@ -77,6 +95,7 @@ export function SignatureStrip({ signatures }: { signatures: LiveSignature[] }) 
           </div>
         ))}
       </div>
+
     </section>
   );
 }
