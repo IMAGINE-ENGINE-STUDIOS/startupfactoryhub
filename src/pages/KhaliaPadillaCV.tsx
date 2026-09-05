@@ -108,7 +108,6 @@ const experiences = [
     desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Architected a proprietary deep-tech predictive analytics platform that reads TRL (Technology Readiness Levels 1–9) on every startup, scores investment readiness and surfaces strategic insight so investors can make better-informed capital decisions — combining investor criteria with startup readiness signals through a machine-learning matching algorithm that lifted investor–startup match accuracy by 75%. Also run the demo-day, investor and ecosystem cadence end to end.",
     icon: Rocket,
     metrics: [
-      { k: "Capital Raised for Portfolio", v: "$200M+" },
       { k: "Ventures Graduated", v: "40+" },
       { k: "Institutional Partnerships", v: "50+" },
       { k: "ML Matching Lift", v: "+75%" },
@@ -123,7 +122,6 @@ const experiences = [
     desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award — Innovation Category — for advancing optical communications.",
     icon: Zap,
     metrics: [
-      { k: "Throughput Validated", v: "80 Tbps" },
       { k: "Network Domains", v: "Terrestrial · Data Center · Orbital" },
       { k: "Recognition", v: "Global Innovation Award" },
     ],
@@ -1138,7 +1136,7 @@ export default function KhaliaPadillaCV() {
                   Decahedron is actively engaged in discussions with institutional limited partners, family offices and strategic capital sources, supporting investment-pipeline development and advancing strategic partnerships across cross-border corridors. The platform is developing investment frameworks anchored in a proprietary portfolio-construction methodology rooted in Golden Ratio (φ) allocation — a quantitative discipline for sizing positions, stage exposure and risk weighting across venture, growth and infrastructure stages.
                 </p>
                 <p>
-                  Beyond capital, Ms. Padilla directs <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong>, a private space agency and venture studio with active NASA research contracts, and serves as CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, a NASA-backed photonics venture that has validated 80&nbsp;Tbps of optical transmission across terrestrial, data-center and orbital networks. Her institutional reach extends to a working network of space agencies, ministries and innovation councils across four continents — including service as <strong style={{ color: "var(--ink)", fontWeight: 500 }}>U.S. Delegate to the US–Japan 2024 Fast Track Dialogue</strong>.
+                  Beyond capital, Ms. Padilla directs <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong>, a private space agency and venture studio with active NASA research contracts, and serves as CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, a NASA-backed photonics venture. Her institutional reach extends to a working network of space agencies, ministries and innovation councils across four continents — including service as <strong style={{ color: "var(--ink)", fontWeight: 500 }}>U.S. Delegate to the US–Japan 2024 Fast Track Dialogue</strong>.
                 </p>
                 <p>
                   She is positioned to chair institutional investment vehicles, sovereign councils and frontier-technology boards — bringing fiduciary discipline, governance literacy and a globally credible operating posture suited to the standards of public-market, sovereign-wealth and pension-grade institutional environments.
@@ -1156,7 +1154,7 @@ export default function KhaliaPadillaCV() {
                 I am writing to express my interest in advancing strategic, capital and governance mandates at the intersection of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>institutional investment, sovereign partnership and frontier-technology commercialization</strong>. My operating history spans venture formation, board governance, federal R&amp;D engagement and cross-border capital structuring across four continents — with active relationships spanning NASA, space agencies, ministries of economy and trade, and institutional limited partners.
               </p>
               <p>
-                As Co-Founder &amp; Managing Partner of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Decahedron Ventures</strong>, I am building an emerging investment platform anchored in a proprietary φ-based portfolio construction methodology, targeting aerospace, quantum computing, energy, smart cities and sustainable infrastructure. As CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong> and <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, I hold active NASA research contracts and have validated 80 Tbps optical transmission across terrestrial, data-center and orbital networks — positioning these ventures as sovereign-grade partners for defense, space and institutional infrastructure programs.
+                As Co-Founder &amp; Managing Partner of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Decahedron Ventures</strong>, I am building an emerging investment platform anchored in a proprietary φ-based portfolio construction methodology, targeting aerospace, quantum computing, energy, smart cities and sustainable infrastructure. As CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong> and <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, I hold active NASA research contracts and lead photonics and space-technology programs — positioning these ventures as sovereign-grade partners for defense, space and institutional infrastructure programs.
               </p>
               <p>
                 My governance footprint includes advisory and board mandates with Nobel-laureate-founded ventures, women-led aerospace organizations and national space consortia. I have served as <strong style={{ color: "var(--ink)", fontWeight: 500 }}>U.S. Delegate to the US–Japan 2024 Fast Track Dialogue</strong>, and maintain active bilateral relationships across Latin America, Asia-Pacific and Europe — including collaborations with 900 ecosystem partners in Venezuela focused on energy and investment mobilization.
@@ -1181,11 +1179,6 @@ export default function KhaliaPadillaCV() {
           <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
             {[
               {
-                v: "$200M+",
-                k: "Capital Raised for Portfolio",
-                d: "Aggregate capital facilitated across 40+ ventures from pre-seed through Series C.",
-              },
-              {
                 v: "40+",
                 k: "Ventures Graduated",
                 d: "Startups accelerated through the Startup Factory Hub across software, robotics, IoT, aerospace and deep tech.",
@@ -1194,11 +1187,6 @@ export default function KhaliaPadillaCV() {
                 v: "$1.56M",
                 k: "Revenue Generated (Portfolio)",
                 d: "Combined first-year and multi-year revenue across portfolio companies including Wonderlands World and Deltafood.",
-              },
-              {
-                v: "80 Tbps",
-                k: "Optical Throughput Validated",
-                d: "End-to-end optical network capacity validated across terrestrial telecom, AI data centers and orbital links.",
               },
               {
                 v: "6",
