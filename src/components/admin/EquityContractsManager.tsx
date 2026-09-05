@@ -594,9 +594,22 @@ export default function EquityContractsManager() {
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
+                <Button
+                  variant={editingId === c.id ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => startEditing(c)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" /> Edit
+                </Button>
+                {c.signatureCount === 0 && (
+                  <Button variant="ghost" size="sm" onClick={() => deleteContract(c)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={() => resend(c)}>
                   <Send className="h-4 w-4 mr-1" /> Resend
                 </Button>
+
               </div>
             </div>
           ))}
