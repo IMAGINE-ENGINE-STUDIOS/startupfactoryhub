@@ -603,16 +603,12 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
   return (
     <div className="space-y-6">
       {mode === 'network' && (
-        <div className="tech-card border-0 p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-primary" />
+        <div className="tech-card border-0 p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="h-4 w-4 text-primary" />
             </div>
-            <div>
-              <div className="text-[11px] font-medium tracking-[0.18em] uppercase text-muted-foreground">My Network</div>
-              <h2 className="text-xl font-semibold tracking-tight mt-1">Partners &amp; Collaborators</h2>
-              <p className="text-sm text-muted-foreground mt-1">Institutional, agency &amp; research alliances</p>
-            </div>
+            <h2 className="text-lg font-semibold tracking-tight">My Network</h2>
           </div>
         </div>
       )}
