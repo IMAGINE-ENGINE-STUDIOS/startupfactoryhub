@@ -19,6 +19,10 @@ import {
   Loader2,
   CheckCircle2,
   RefreshCw,
+  Plus,
+  Trash2,
+  Pencil,
+  X,
 } from "lucide-react";
 import {
   buildEquityContractHtml,
@@ -42,10 +46,27 @@ interface ContractRow {
   created_at: string;
   recipient_name: string | null;
   recipient_email: string | null;
+  content_html: string | null;
+  signer_message: string | null;
   signatureCount: number;
 }
 
 const CONTRACT_SOURCE = "equity_contract";
+const VALUES_MARKER = "SFH_CONTRACT_VALUES:";
+
+const embedValues = (html: string, values: EquityContractValues) =>
+  `${html}\n<!--${VALUES_MARKER}${encodeURIComponent(JSON.stringify(values))}-->`;
+
+const extractValues = (html: string | null): EquityContractValues | null => {
+  if (!html) return null;
+  const m = html.match(new RegExp(`<!--${VALUES_MARKER}([^>]*)-->`));
+  if (!m) return null;
+  try {
+    return { ...DEFAULT_EQUITY_CONTRACT, ...JSON.parse(decodeURIComponent(m[1])) };
+  } catch {
+    return null;
+  }
+};
 
 export default function EquityContractsManager() {
   const [values, setValues] = useState<EquityContractValues>(DEFAULT_EQUITY_CONTRACT);
@@ -59,8 +80,28 @@ export default function EquityContractsManager() {
   const [loadingList, setLoadingList] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const html = useMemo(() => buildEquityContractHtml(values), [values]);
+
+  const clauses = values.customClauses || [];
+  const setClause = (i: number, field: "title" | "body", v: string) =>
+    setValues((prev) => {
+      const next = [...(prev.customClauses || [])];
+      next[i] = { ...next[i], [field]: v };
+      return { ...prev, customClauses: next };
+    });
+  const addClause = () =>
+    setValues((prev) => ({
+      ...prev,
+      customClauses: [...(prev.customClauses || []), { title: "", body: "" }],
+    }));
+  const removeClause = (i: number) =>
+    setValues((prev) => ({
+      ...prev,
+      customClauses: (prev.customClauses || []).filter((_, idx) => idx !== i),
+    }));
+
 
   const set = (k: keyof EquityContractValues) => (v: string) =>
     setValues((prev) => ({ ...prev, [k]: v }));
