@@ -595,12 +595,14 @@ export default function SignDocument() {
                   className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
               ) : (
-                <div
-                  ref={viewRef}
-                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words"
-                  dangerouslySetInnerHTML={{ __html: html }}
+                <PaperDocumentView
+                  html={html}
+                  contentRef={(el) => {
+                    (viewRef as any).current = el;
+                  }}
                 />
               )}
+
             </div>
           )}
         </article>
