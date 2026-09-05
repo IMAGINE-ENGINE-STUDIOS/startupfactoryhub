@@ -145,6 +145,19 @@ export default function SignDocument() {
   const [recipients, setRecipients] = useState("");
   const [emailNote, setEmailNote] = useState("");
   const [sending, setSending] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+
+  /** Owners can erase any signature already collected on the document. */
+  const deleteSignature = async (signatureId: string) => {
+    const { error } = await supabase.from("sign_signatures").delete().eq("id", signatureId);
+    if (error) {
+      toast.error("Could not erase that signature");
+      return;
+    }
+    toast.success("Signature erased");
+    await refresh();
+  };
+
 
   const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
   const canSign = doc?.access_mode !== "view";
