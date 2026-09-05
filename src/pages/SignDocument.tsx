@@ -734,10 +734,6 @@ export default function SignDocument() {
               <Label>Signature</Label>
               <SignaturePad onChange={setSignature} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Note (optional)</Label>
-              <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
-            </div>
             <Button onClick={submit} disabled={submitting || !signature} className="w-full">
               {submitting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
