@@ -119,10 +119,10 @@ const experiences = [
     role: "CEO & Co-Founder",
     org: "Lightware Technologies",
     location: "Orlando, FL",
-    desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award — Innovation Category — for advancing optical communications.",
+    desc: "Lead a NASA-backed photonics venture advancing light-speed data and optical energy transfer across modular networks. The Lightband Network replaces electronic bottlenecks with photonic infrastructure; NASA backing positions the platform as institutional, defense and space-grade technology. Recipient of the Global Recognition Award — Innovation Category — for advancing optical communications.",
     icon: Zap,
     metrics: [
-      { k: "Network Domains", v: "Terrestrial · Data Center · Orbital" },
+      { k: "Focus", v: "Photonics · Energy · Space" },
       { k: "Recognition", v: "Global Innovation Award" },
     ],
   },
