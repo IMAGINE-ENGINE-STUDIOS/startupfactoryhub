@@ -25,6 +25,7 @@ import {
   Mail,
   Crown,
   CreditCard,
+  FileSignature,
   ShieldCheck,
   Gift,
   Building,
@@ -68,6 +69,7 @@ import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import LegacyStartupsImport from '@/components/admin/LegacyStartupsImport';
 import InternsManagement from '@/components/admin/InternsManagement';
 import InvoiceBilling from '@/components/admin/InvoiceBilling';
+import EquityContractsManager from '@/components/admin/EquityContractsManager';
 import MembershipGrants from '@/components/admin/MembershipGrants';
 import Invoice from '@/pages/Invoice';
 
@@ -296,6 +298,7 @@ const AdminDashboard = () => {
           <TabsContent value="legacy-startups"><LegacyStartupsImport /></TabsContent>
           <TabsContent value="interns"><InternsManagement /></TabsContent>
           <TabsContent value="invoices"><InvoiceBilling /></TabsContent>
+          <TabsContent value="equity-contracts"><EquityContractsManager /></TabsContent>
           <TabsContent value="membership-grants"><MembershipGrants /></TabsContent>
         </Tabs>
       </main>
