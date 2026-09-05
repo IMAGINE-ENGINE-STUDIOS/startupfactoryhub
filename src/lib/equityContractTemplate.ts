@@ -37,6 +37,7 @@ export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
   companySignerTitle: "",
   acceleratorSignerName: "Khalia Padilla",
   acceleratorSignerTitle: "Managing Partner",
+  customClauses: [],
 };
 
 export const SFH_FOUNDERS = [
