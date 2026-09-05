@@ -47,6 +47,8 @@ import {
   LiveNotice,
   SignatureStrip,
 } from "@/components/sign/LiveCollaboration";
+import PaperDocumentView from "@/components/sign/PaperDocumentView";
+
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
 
