@@ -456,6 +456,43 @@ export default function EquityContractsManager() {
             </div>
           </div>
 
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Additional clauses / plans</Label>
+              <Button variant="outline" size="sm" onClick={addClause}>
+                <Plus className="h-4 w-4 mr-1" /> Add clause
+              </Button>
+            </div>
+            {clauses.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Add extra sections (payment plans, milestones, special terms). They appear numbered
+                right before the signatures.
+              </p>
+            )}
+            {clauses.map((c, i) => (
+              <div key={i} className="space-y-2 rounded-xl border border-border/50 p-3">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={c.title}
+                    onChange={(e) => setClause(i, "title", e.target.value)}
+                    placeholder={`Clause ${17 + i} title (e.g. PAYMENT PLAN)`}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => removeClause(i)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  rows={4}
+                  value={c.body}
+                  onChange={(e) => setClause(i, "body", e.target.value)}
+                  placeholder="Clause text. Each line becomes a paragraph."
+                />
+              </div>
+            ))}
+          </div>
+
           <div className="space-y-2">
             <Label>Message for the recipient</Label>
             <Textarea
@@ -472,8 +509,13 @@ export default function EquityContractsManager() {
               Send for signature
             </Button>
             <Button variant="outline" onClick={() => createAndSend(false)} disabled={saving}>
-              Save as draft
+              {editingId ? "Update draft" : "Save as draft"}
             </Button>
+            {editingId && (
+              <Button variant="ghost" onClick={resetForm} disabled={saving}>
+                <X className="h-4 w-4 mr-2" /> Cancel editing
+              </Button>
+            )}
             <Button variant="ghost" onClick={() => setShowPreview((v) => !v)}>
               <Eye className="h-4 w-4 mr-2" />
               {showPreview ? "Hide preview" : "Preview contract"}
@@ -485,6 +527,7 @@ export default function EquityContractsManager() {
               </a>
             </Button>
           </div>
+
 
           <p className="text-xs text-muted-foreground">
             Signed by {SFH_FOUNDERS.map((f) => f.name).join(" · ")} on behalf of Imagine Engine
