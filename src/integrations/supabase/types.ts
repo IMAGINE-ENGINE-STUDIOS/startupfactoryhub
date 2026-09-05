@@ -7472,6 +7472,9 @@ export type Database = {
           id: string
           owner_id: string
           project_id: string | null
+          recipient_email: string | null
+          recipient_name: string | null
+          recipient_user_id: string | null
           share_token: string
           signer_message: string | null
           source_type: string
@@ -7487,6 +7490,9 @@ export type Database = {
           id?: string
           owner_id: string
           project_id?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_user_id?: string | null
           share_token?: string
           signer_message?: string | null
           source_type?: string
@@ -7502,6 +7508,9 @@ export type Database = {
           id?: string
           owner_id?: string
           project_id?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_user_id?: string | null
           share_token?: string
           signer_message?: string | null
           source_type?: string
