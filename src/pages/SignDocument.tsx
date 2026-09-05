@@ -622,7 +622,11 @@ export default function SignDocument() {
           )}
         </article>
 
-        <SignatureStrip signatures={signatures} />
+        <SignatureStrip
+          signatures={signatures}
+          onDelete={isOwner ? (s) => void deleteSignature(s.id) : undefined}
+        />
+
         <ActivityLedger entries={ledger} />
 
         {/* Off-screen printable rendition used to build the signed PDF */}
