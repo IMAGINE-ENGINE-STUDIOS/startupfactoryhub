@@ -47,6 +47,8 @@ import {
   LiveNotice,
   SignatureStrip,
 } from "@/components/sign/LiveCollaboration";
+import PaperDocumentView from "@/components/sign/PaperDocumentView";
+
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
 
@@ -130,7 +132,7 @@ export default function SignDocument() {
   const { t } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [note, setNote] = useState("");
+  
   const [signature, setSignature] = useState<string | null>(null);
 
   const docRef = useRef<HTMLElement | null>(null);
@@ -353,7 +355,7 @@ export default function SignDocument() {
       _signer_name: name.trim(),
       _signer_email: email.trim(),
       _signature_data: signature,
-      _note: note.trim() || null,
+      _note: null,
     });
     setSubmitting(false);
 
@@ -595,12 +597,14 @@ export default function SignDocument() {
                   className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
               ) : (
-                <div
-                  ref={viewRef}
-                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words"
-                  dangerouslySetInnerHTML={{ __html: html }}
+                <PaperDocumentView
+                  html={html}
+                  contentRef={(el) => {
+                    (viewRef as any).current = el;
+                  }}
                 />
               )}
+
             </div>
           )}
         </article>
@@ -729,10 +733,6 @@ export default function SignDocument() {
             <div className="space-y-1.5">
               <Label>Signature</Label>
               <SignaturePad onChange={setSignature} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Note (optional)</Label>
-              <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
             </div>
             <Button onClick={submit} disabled={submitting || !signature} className="w-full">
               {submitting ? (
