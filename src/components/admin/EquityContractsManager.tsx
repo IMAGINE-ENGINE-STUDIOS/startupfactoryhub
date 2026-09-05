@@ -545,7 +545,7 @@ export default function EquityContractsManager() {
 
       <Card className="tech-card border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Sent contracts</CardTitle>
+          <CardTitle className="text-lg">Drafts & sent contracts</CardTitle>
           <Button variant="ghost" size="sm" onClick={loadContracts} disabled={loadingList}>
             <RefreshCw className={`h-4 w-4 ${loadingList ? "animate-spin" : ""}`} />
           </Button>
