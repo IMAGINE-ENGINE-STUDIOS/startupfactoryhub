@@ -132,7 +132,7 @@ export default function SignDocument() {
   const { t } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [note, setNote] = useState("");
+  
   const [signature, setSignature] = useState<string | null>(null);
 
   const docRef = useRef<HTMLElement | null>(null);
