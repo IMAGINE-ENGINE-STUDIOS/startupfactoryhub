@@ -180,6 +180,43 @@ export default function EquityContractsManager() {
 
   const shareUrl = (token: string) => `${window.location.origin}/sign/${token}`;
 
+  const resetForm = () => {
+    setValues(DEFAULT_EQUITY_CONTRACT);
+    setMessage("");
+    setSelectedMember(null);
+    setMemberQuery("");
+    setExternalEmail("");
+    setExternalName("");
+    setEditingId(null);
+  };
+
+  const startEditing = (row: ContractRow) => {
+    const parsed = extractValues(row.content_html);
+    if (!parsed) {
+      toast.error("This contract was created before editing was available");
+      return;
+    }
+    setValues(parsed);
+    setMessage(row.signer_message || "");
+    setSelectedMember(null);
+    setMemberQuery("");
+    setExternalName(row.recipient_name || "");
+    setExternalEmail(row.recipient_email || "");
+    setEditingId(row.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const deleteContract = async (row: ContractRow) => {
+    const { error } = await supabase.from("sign_documents").delete().eq("id", row.id);
+    if (error) {
+      toast.error("Could not delete the contract");
+      return;
+    }
+    if (editingId === row.id) resetForm();
+    toast.success("Draft deleted");
+    void loadContracts();
+  };
+
   const createAndSend = async (send: boolean) => {
     if (!values.companyName.trim()) {
       toast.error("Add the company name first");
@@ -194,27 +231,39 @@ export default function EquityContractsManager() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       const title = `Accelerator Agreement — ${values.companyName.trim()}`;
+      const payload = {
+        title,
+        content_html: embedValues(html, values),
+        signer_message:
+          message.trim() ||
+          "Please review and sign the Startup Factory Hub Accelerator Agreement.",
+        access_mode: "sign",
+        status: send ? "sent" : "draft",
+        recipient_name: recipient.name || null,
+        recipient_email: recipient.email || null,
+        recipient_user_id: recipient.userId,
+      };
 
-      const { data, error } = await supabase
-        .from("sign_documents")
-        .insert({
-          owner_id: auth.user?.id,
-          title,
-          source_type: CONTRACT_SOURCE,
-          content_html: html,
-          signer_message:
-            message.trim() ||
-            "Please review and sign the Startup Factory Hub Accelerator Agreement.",
-          access_mode: "sign",
-          status: send ? "sent" : "draft",
-          recipient_name: recipient.name || null,
-          recipient_email: recipient.email || null,
-          recipient_user_id: recipient.userId,
-        })
-        .select("id, share_token")
-        .single();
+      let record: { id: string; share_token: string };
 
-      if (error) throw error;
+      if (editingId) {
+        const { data, error } = await supabase
+          .from("sign_documents")
+          .update(payload)
+          .eq("id", editingId)
+          .select("id, share_token")
+          .single();
+        if (error) throw error;
+        record = data;
+      } else {
+        const { data, error } = await supabase
+          .from("sign_documents")
+          .insert({ ...payload, owner_id: auth.user?.id, source_type: CONTRACT_SOURCE })
+          .select("id, share_token")
+          .single();
+        if (error) throw error;
+        record = data;
+      }
 
       if (send) {
         const { error: mailError } = await supabase.functions.invoke("send-equity-contract", {
@@ -223,28 +272,25 @@ export default function EquityContractsManager() {
             recipientName: recipient.name,
             companyName: values.companyName.trim(),
             documentTitle: title,
-            shareToken: data.share_token,
+            shareToken: record.share_token,
             message: message.trim() || undefined,
           },
         });
         if (mailError) throw mailError;
         toast.success(`Contract sent to ${recipient.email}`);
       } else {
-        toast.success("Contract saved");
+        toast.success(editingId ? "Draft updated" : "Contract saved");
       }
 
       await loadContracts();
-      setMessage("");
-      setSelectedMember(null);
-      setMemberQuery("");
-      setExternalEmail("");
-      setExternalName("");
+      resetForm();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save the contract");
     } finally {
       setSaving(false);
     }
   };
+
 
   const resend = async (row: ContractRow) => {
     if (!row.recipient_email) {
