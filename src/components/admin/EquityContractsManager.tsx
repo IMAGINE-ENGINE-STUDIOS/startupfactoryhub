@@ -19,6 +19,10 @@ import {
   Loader2,
   CheckCircle2,
   RefreshCw,
+  Plus,
+  Trash2,
+  Pencil,
+  X,
 } from "lucide-react";
 import {
   buildEquityContractHtml,
@@ -42,10 +46,27 @@ interface ContractRow {
   created_at: string;
   recipient_name: string | null;
   recipient_email: string | null;
+  content_html: string | null;
+  signer_message: string | null;
   signatureCount: number;
 }
 
 const CONTRACT_SOURCE = "equity_contract";
+const VALUES_MARKER = "SFH_CONTRACT_VALUES:";
+
+const embedValues = (html: string, values: EquityContractValues) =>
+  `${html}\n<!--${VALUES_MARKER}${encodeURIComponent(JSON.stringify(values))}-->`;
+
+const extractValues = (html: string | null): EquityContractValues | null => {
+  if (!html) return null;
+  const m = html.match(new RegExp(`<!--${VALUES_MARKER}([^>]*)-->`));
+  if (!m) return null;
+  try {
+    return { ...DEFAULT_EQUITY_CONTRACT, ...JSON.parse(decodeURIComponent(m[1])) };
+  } catch {
+    return null;
+  }
+};
 
 export default function EquityContractsManager() {
   const [values, setValues] = useState<EquityContractValues>(DEFAULT_EQUITY_CONTRACT);
@@ -59,8 +80,28 @@ export default function EquityContractsManager() {
   const [loadingList, setLoadingList] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const html = useMemo(() => buildEquityContractHtml(values), [values]);
+
+  const clauses = values.customClauses || [];
+  const setClause = (i: number, field: "title" | "body", v: string) =>
+    setValues((prev) => {
+      const next = [...(prev.customClauses || [])];
+      next[i] = { ...next[i], [field]: v };
+      return { ...prev, customClauses: next };
+    });
+  const addClause = () =>
+    setValues((prev) => ({
+      ...prev,
+      customClauses: [...(prev.customClauses || []), { title: "", body: "" }],
+    }));
+  const removeClause = (i: number) =>
+    setValues((prev) => ({
+      ...prev,
+      customClauses: (prev.customClauses || []).filter((_, idx) => idx !== i),
+    }));
+
 
   const set = (k: keyof EquityContractValues) => (v: string) =>
     setValues((prev) => ({ ...prev, [k]: v }));
@@ -88,7 +129,9 @@ export default function EquityContractsManager() {
     setLoadingList(true);
     const { data, error } = await supabase
       .from("sign_documents")
-      .select("id, title, status, share_token, created_at, recipient_name, recipient_email")
+      .select(
+        "id, title, status, share_token, created_at, recipient_name, recipient_email, content_html, signer_message"
+      )
       .eq("source_type", CONTRACT_SOURCE)
       .order("created_at", { ascending: false })
       .limit(100);
@@ -137,6 +180,43 @@ export default function EquityContractsManager() {
 
   const shareUrl = (token: string) => `${window.location.origin}/sign/${token}`;
 
+  const resetForm = () => {
+    setValues(DEFAULT_EQUITY_CONTRACT);
+    setMessage("");
+    setSelectedMember(null);
+    setMemberQuery("");
+    setExternalEmail("");
+    setExternalName("");
+    setEditingId(null);
+  };
+
+  const startEditing = (row: ContractRow) => {
+    const parsed = extractValues(row.content_html);
+    if (!parsed) {
+      toast.error("This contract was created before editing was available");
+      return;
+    }
+    setValues(parsed);
+    setMessage(row.signer_message || "");
+    setSelectedMember(null);
+    setMemberQuery("");
+    setExternalName(row.recipient_name || "");
+    setExternalEmail(row.recipient_email || "");
+    setEditingId(row.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const deleteContract = async (row: ContractRow) => {
+    const { error } = await supabase.from("sign_documents").delete().eq("id", row.id);
+    if (error) {
+      toast.error("Could not delete the contract");
+      return;
+    }
+    if (editingId === row.id) resetForm();
+    toast.success("Draft deleted");
+    void loadContracts();
+  };
+
   const createAndSend = async (send: boolean) => {
     if (!values.companyName.trim()) {
       toast.error("Add the company name first");
@@ -151,27 +231,39 @@ export default function EquityContractsManager() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       const title = `Accelerator Agreement — ${values.companyName.trim()}`;
+      const payload = {
+        title,
+        content_html: embedValues(html, values),
+        signer_message:
+          message.trim() ||
+          "Please review and sign the Startup Factory Hub Accelerator Agreement.",
+        access_mode: "sign",
+        status: send ? "sent" : "draft",
+        recipient_name: recipient.name || null,
+        recipient_email: recipient.email || null,
+        recipient_user_id: recipient.userId,
+      };
 
-      const { data, error } = await supabase
-        .from("sign_documents")
-        .insert({
-          owner_id: auth.user?.id,
-          title,
-          source_type: CONTRACT_SOURCE,
-          content_html: html,
-          signer_message:
-            message.trim() ||
-            "Please review and sign the Startup Factory Hub Accelerator Agreement.",
-          access_mode: "sign",
-          status: send ? "sent" : "draft",
-          recipient_name: recipient.name || null,
-          recipient_email: recipient.email || null,
-          recipient_user_id: recipient.userId,
-        })
-        .select("id, share_token")
-        .single();
+      let record: { id: string; share_token: string };
 
-      if (error) throw error;
+      if (editingId) {
+        const { data, error } = await supabase
+          .from("sign_documents")
+          .update(payload)
+          .eq("id", editingId)
+          .select("id, share_token")
+          .single();
+        if (error) throw error;
+        record = data;
+      } else {
+        const { data, error } = await supabase
+          .from("sign_documents")
+          .insert({ ...payload, owner_id: auth.user?.id, source_type: CONTRACT_SOURCE })
+          .select("id, share_token")
+          .single();
+        if (error) throw error;
+        record = data;
+      }
 
       if (send) {
         const { error: mailError } = await supabase.functions.invoke("send-equity-contract", {
@@ -180,28 +272,25 @@ export default function EquityContractsManager() {
             recipientName: recipient.name,
             companyName: values.companyName.trim(),
             documentTitle: title,
-            shareToken: data.share_token,
+            shareToken: record.share_token,
             message: message.trim() || undefined,
           },
         });
         if (mailError) throw mailError;
         toast.success(`Contract sent to ${recipient.email}`);
       } else {
-        toast.success("Contract saved");
+        toast.success(editingId ? "Draft updated" : "Contract saved");
       }
 
       await loadContracts();
-      setMessage("");
-      setSelectedMember(null);
-      setMemberQuery("");
-      setExternalEmail("");
-      setExternalName("");
+      resetForm();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save the contract");
     } finally {
       setSaving(false);
     }
   };
+
 
   const resend = async (row: ContractRow) => {
     if (!row.recipient_email) {
@@ -367,6 +456,43 @@ export default function EquityContractsManager() {
             </div>
           </div>
 
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Additional clauses / plans</Label>
+              <Button variant="outline" size="sm" onClick={addClause}>
+                <Plus className="h-4 w-4 mr-1" /> Add clause
+              </Button>
+            </div>
+            {clauses.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Add extra sections (payment plans, milestones, special terms). They appear numbered
+                right before the signatures.
+              </p>
+            )}
+            {clauses.map((c, i) => (
+              <div key={i} className="space-y-2 rounded-xl border border-border/50 p-3">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={c.title}
+                    onChange={(e) => setClause(i, "title", e.target.value)}
+                    placeholder={`Clause ${17 + i} title (e.g. PAYMENT PLAN)`}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => removeClause(i)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  rows={4}
+                  value={c.body}
+                  onChange={(e) => setClause(i, "body", e.target.value)}
+                  placeholder="Clause text. Each line becomes a paragraph."
+                />
+              </div>
+            ))}
+          </div>
+
           <div className="space-y-2">
             <Label>Message for the recipient</Label>
             <Textarea
@@ -383,8 +509,13 @@ export default function EquityContractsManager() {
               Send for signature
             </Button>
             <Button variant="outline" onClick={() => createAndSend(false)} disabled={saving}>
-              Save as draft
+              {editingId ? "Update draft" : "Save as draft"}
             </Button>
+            {editingId && (
+              <Button variant="ghost" onClick={resetForm} disabled={saving}>
+                <X className="h-4 w-4 mr-2" /> Cancel editing
+              </Button>
+            )}
             <Button variant="ghost" onClick={() => setShowPreview((v) => !v)}>
               <Eye className="h-4 w-4 mr-2" />
               {showPreview ? "Hide preview" : "Preview contract"}
@@ -396,6 +527,7 @@ export default function EquityContractsManager() {
               </a>
             </Button>
           </div>
+
 
           <p className="text-xs text-muted-foreground">
             Signed by {SFH_FOUNDERS.map((f) => f.name).join(" · ")} on behalf of Imagine Engine
@@ -413,7 +545,7 @@ export default function EquityContractsManager() {
 
       <Card className="tech-card border-0">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Sent contracts</CardTitle>
+          <CardTitle className="text-lg">Drafts & sent contracts</CardTitle>
           <Button variant="ghost" size="sm" onClick={loadContracts} disabled={loadingList}>
             <RefreshCw className={`h-4 w-4 ${loadingList ? "animate-spin" : ""}`} />
           </Button>
@@ -462,9 +594,22 @@ export default function EquityContractsManager() {
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
+                <Button
+                  variant={editingId === c.id ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => startEditing(c)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" /> Edit
+                </Button>
+                {c.signatureCount === 0 && (
+                  <Button variant="ghost" size="sm" onClick={() => deleteContract(c)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={() => resend(c)}>
                   <Send className="h-4 w-4 mr-1" /> Resend
                 </Button>
+
               </div>
             </div>
           ))}
