@@ -83,6 +83,12 @@ export default function EquityContractsManager() {
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewPages, setPreviewPages] = useState(0);
+  const [openSignatures, setOpenSignatures] = useState<string | null>(null);
+  const [signatureRows, setSignatureRows] = useState<SignatureRow[]>([]);
+  const [loadingSignatures, setLoadingSignatures] = useState(false);
+
+
 
   const html = useMemo(() => buildEquityContractHtml(values), [values]);
 
