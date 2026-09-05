@@ -535,11 +535,16 @@ export default function EquityContractsManager() {
           </p>
 
           {showPreview && (
-            <div
-              className="max-h-[600px] overflow-auto rounded-xl bg-white p-8 text-black"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                LightPaper view · {previewPages} {previewPages === 1 ? "page" : "pages"}
+              </p>
+              <div className="max-h-[700px] overflow-auto rounded-xl bg-muted/40 p-4">
+                <PaperDocumentView html={html} onPageCount={setPreviewPages} />
+              </div>
+            </div>
           )}
+
         </CardContent>
       </Card>
 
