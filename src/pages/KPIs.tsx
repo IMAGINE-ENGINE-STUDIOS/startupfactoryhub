@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
-  Rocket, Users, Building2, TrendingUp, Globe2, Calendar,
+  Rocket, Users, Building2, Globe2, Calendar,
   Briefcase, Target, Award, DollarSign, Sparkles, Activity,
   BarChart3, Zap, Heart, MapPin
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, LineChart, Line,
-  RadialBarChart, RadialBar, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
+  RadialBarChart, RadialBar, XAxis, YAxis, Tooltip, CartesianGrid
 } from "recharts";
 
 /* ---------- Design tokens ---------- */
@@ -141,7 +141,16 @@ const categories = [
   },
 ];
 
-const yearOneTargets = [
+interface YearOneTarget {
+  label: string;
+  value: number;
+  icon: React.ElementType;
+  glow: string;
+  prefix?: string;
+  suffix?: string;
+}
+
+const yearOneTargets: YearOneTarget[] = [
   { label: "Startups Supported", value: 50, icon: Rocket, glow: NEON.cyan },
   { label: "Startup Factory Members", value: 200, icon: Users, glow: NEON.magenta },
   { label: "WTC Members", value: 150, icon: Globe2, glow: NEON.lime },
