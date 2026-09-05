@@ -1,4 +1,4 @@
-import { History, PenLine, Radio, ShieldCheck, Users } from "lucide-react";
+import { History, PenLine, Radio, ShieldCheck, Trash2, Users } from "lucide-react";
 import type { LedgerEntry, LiveSignature, SignAccessMode } from "@/hooks/useLiveSignDocument";
 
 const relative = (iso: string) => {
