@@ -5,6 +5,11 @@
  * fields automatically (see `src/lib/signatureFields.ts`).
  */
 
+export interface EquityContractClause {
+  title: string;
+  body: string;
+}
+
 export interface EquityContractValues {
   effectiveDate: string;
   companyName: string;
@@ -17,6 +22,7 @@ export interface EquityContractValues {
   companySignerTitle: string;
   acceleratorSignerName: string;
   acceleratorSignerTitle: string;
+  customClauses?: EquityContractClause[];
 }
 
 export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
