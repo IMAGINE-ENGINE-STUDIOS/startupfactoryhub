@@ -301,8 +301,20 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
   ${p("No amendment shall be effective unless in writing and signed by both Parties.")}
   ${p("If any provision is held invalid, the remaining provisions shall remain enforceable.")}
   ${p("Electronic signatures shall have the same force and effect as original signatures.")}
+  ${(v.customClauses || [])
+    .filter((c) => (c.title || "").trim() || (c.body || "").trim())
+    .map(
+      (c, i) =>
+        `${h(String(17 + i), (c.title || "ADDITIONAL TERMS").toUpperCase())}${(c.body || "")
+          .split(/\n{1,}/)
+          .filter((line) => line.trim())
+          .map((line) => p(esc(line.trim())))
+          .join("")}`
+    )
+    .join("")}
 
   <h3 style="font-size:15px;margin:32px 0 12px">SIGNATURES</h3>
+
 
   <p style="margin:0 0 6px;font-weight:600">Imagine Engine Studios Corp</p>
   ${p(`By: ______________________________`)}
