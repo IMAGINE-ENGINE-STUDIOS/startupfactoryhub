@@ -129,7 +129,9 @@ export default function EquityContractsManager() {
     setLoadingList(true);
     const { data, error } = await supabase
       .from("sign_documents")
-      .select("id, title, status, share_token, created_at, recipient_name, recipient_email")
+      .select(
+        "id, title, status, share_token, created_at, recipient_name, recipient_email, content_html, signer_message"
+      )
       .eq("source_type", CONTRACT_SOURCE)
       .order("created_at", { ascending: false })
       .limit(100);
