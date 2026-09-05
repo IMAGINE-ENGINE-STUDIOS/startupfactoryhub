@@ -281,3 +281,6 @@ verify_jwt = true
 
 [functions.send-af-no-show-email]
 verify_jwt = true
+
+[functions.send-equity-contract]
+verify_jwt = true
