@@ -53,7 +53,16 @@ interface ContractRow {
   signatureCount: number;
 }
 
+interface SignatureRow {
+  id: string;
+  signer_name: string;
+  signer_email: string | null;
+  signature_data: string;
+  signed_at: string;
+}
+
 const CONTRACT_SOURCE = "equity_contract";
+
 const VALUES_MARKER = "SFH_CONTRACT_VALUES:";
 
 const embedValues = (html: string, values: EquityContractValues) =>
