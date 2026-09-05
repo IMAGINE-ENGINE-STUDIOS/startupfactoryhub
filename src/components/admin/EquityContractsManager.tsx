@@ -31,6 +31,8 @@ import {
   PARTNERS_URL,
   SFH_FOUNDERS,
 } from "@/lib/equityContractTemplate";
+import PaperDocumentView from "@/components/sign/PaperDocumentView";
+
 
 interface ProfileRow {
   user_id: string;
