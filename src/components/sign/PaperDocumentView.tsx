@@ -45,7 +45,11 @@ const BASE_STYLE = `
   .sfh-paper h2 { font-size:15pt; margin:16pt 0 8pt; }
   .sfh-paper h3 { font-size:13pt; margin:14pt 0 6pt; }
   .sfh-paper p { margin:0 0 10pt; }
-  .sfh-paper ul, .sfh-paper ol { margin:0 0 10pt 20pt; }
+  .sfh-paper ul, .sfh-paper ol { margin:0 0 10pt 20pt; padding-left:18pt; }
+  .sfh-paper ul { list-style: disc outside; }
+  .sfh-paper ol { list-style: decimal outside; }
+  .sfh-paper li { display:list-item; }
+
   .sfh-paper img, .sfh-paper svg { max-width:100%; height:auto; }
   .sfh-paper table { width:100%; border-collapse:collapse; }
   .sfh-paper .sfh-sign-field { color:#1d4ed8 !important; }
