@@ -591,6 +591,9 @@ export const CohortApplicationsManager = ({
                       </Button>
                     )}
                     <div className="ml-auto flex gap-1">
+                      <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:accept`} onClick={() => sendAcceptanceEmail(app)} title="Send acceptance email">
+                        <MailCheck className="w-3 h-3" />
+                      </Button>
                       <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
                         <MailPlus className="w-3 h-3" />
                       </Button>
@@ -745,6 +748,10 @@ export const CohortApplicationsManager = ({
                           </Button>
                         </>
                       )}
+                      <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:accept`} onClick={() => sendAcceptanceEmail(app)} title="Send acceptance email">
+                        <MailCheck className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:accept` ? 'Sending…' : 'Acceptance'}
+                      </Button>
                       <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:followup`} onClick={() => sendAcceptedFollowUp(app)} title="Send follow-up email">
                         <MailPlus className="w-3 h-3 mr-1" />
                         {noShowSending === `${app.id}:followup` ? 'Sending…' : 'Follow-up'}
