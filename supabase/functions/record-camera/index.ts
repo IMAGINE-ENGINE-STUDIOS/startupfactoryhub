@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { camera_id, image_url, user_id, session_id } = await req.json();
+    const { camera_id, image_url, session_id } = await req.json();
 
-    if (!camera_id || !image_url || !user_id || !session_id) {
+    if (!camera_id || !image_url || !session_id) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -24,6 +24,43 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // ---- AuthZ: caller must be the trusted scheduler (service role) or the session owner ----
+    const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Load the session server-side; user attribution always comes from the DB, never the request body.
+    const { data: session, error: sessionErr } = await supabase
+      .from('recording_sessions')
+      .select('id, user_id')
+      .eq('id', session_id)
+      .maybeSingle();
+
+    if (sessionErr || !session) {
+      return new Response(JSON.stringify({ error: 'Recording session not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const isServiceRole = token === serviceKey;
+    if (!isServiceRole) {
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData?.user || userData.user.id !== session.user_id) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    const user_id = session.user_id;
+
 
     // Fetch image via proxy-camera-image function
     const proxyUrl = `${supabaseUrl}/functions/v1/proxy-camera-image?url=${encodeURIComponent(image_url)}&_t=${Date.now()}`;
