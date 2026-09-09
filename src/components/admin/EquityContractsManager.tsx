@@ -615,63 +615,110 @@ export default function EquityContractsManager() {
             <p className="text-sm text-muted-foreground">No equity contracts yet.</p>
           )}
           {contracts.map((c) => (
-            <div
-              key={c.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 p-4"
-            >
-              <div className="min-w-0">
-                <p className="font-medium truncate">{c.title}</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {c.recipient_name || "No recipient"}
-                  {c.recipient_email ? ` · ${c.recipient_email}` : ""} ·{" "}
-                  {new Date(c.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={c.signatureCount > 0 ? "default" : "secondary"}>
-                  {c.signatureCount > 0 ? (
-                    <span className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {c.signatureCount} signature{c.signatureCount === 1 ? "" : "s"}
-                    </span>
-                  ) : (
-                    c.status
-                  )}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(shareUrl(c.share_token));
-                    toast.success("Signing link copied");
-                  }}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <a href={shareUrl(c.share_token)} target="_blank" rel="noreferrer">
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </Button>
-                <Button
-                  variant={editingId === c.id ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => startEditing(c)}
-                >
-                  <Pencil className="h-4 w-4 mr-1" /> Edit
-                </Button>
-                {c.signatureCount === 0 && (
-                  <Button variant="ghost" size="sm" onClick={() => deleteContract(c)}>
-                    <Trash2 className="h-4 w-4" />
+            <div key={c.id} className="rounded-xl border border-border/50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{c.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {c.recipient_name || "No recipient"}
+                    {c.recipient_email ? ` · ${c.recipient_email}` : ""} ·{" "}
+                    {new Date(c.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={c.signatureCount > 0 ? "default" : "secondary"}>
+                    {c.signatureCount > 0 ? (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {c.signatureCount} signature{c.signatureCount === 1 ? "" : "s"}
+                      </span>
+                    ) : (
+                      c.status
+                    )}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(shareUrl(c.share_token));
+                      toast.success("Signing link copied");
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
                   </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={() => resend(c)}>
-                  <Send className="h-4 w-4 mr-1" /> Resend
-                </Button>
-
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href={shareUrl(c.share_token)} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  <Button
+                    variant={editingId === c.id ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => startEditing(c)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => void toggleSignatures(c)}>
+                    <PenLine className="h-4 w-4 mr-1" />
+                    {openSignatures === c.id ? "Hide signatures" : "Signatures"}
+                  </Button>
+                  {c.signatureCount === 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => deleteContract(c)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => resend(c)}>
+                    <Send className="h-4 w-4 mr-1" /> Resend
+                  </Button>
+                </div>
               </div>
+
+              {openSignatures === c.id && (
+                <div className="mt-4 border-t border-border/50 pt-4">
+                  {loadingSignatures && (
+                    <p className="text-sm text-muted-foreground">Loading signatures…</p>
+                  )}
+                  {!loadingSignatures && signatureRows.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Nobody has signed this contract yet.
+                    </p>
+                  )}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {!loadingSignatures &&
+                      signatureRows.map((s) => (
+                        <div
+                          key={s.id}
+                          className="relative rounded-lg border border-border/50 bg-background/60 p-3"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-1 top-1 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                            title={`Erase the signature of ${s.signer_name}`}
+                            onClick={() => void eraseSignature(s.id, c.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <img
+                            src={s.signature_data}
+                            alt={`Signature of ${s.signer_name}`}
+                            className="h-14 w-full object-contain"
+                          />
+                          <p className="mt-2 border-t border-border/50 pt-2 text-sm font-medium truncate">
+                            {s.signer_name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {s.signer_email || "No email"} ·{" "}
+                            {new Date(s.signed_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
+
         </CardContent>
       </Card>
     </div>
