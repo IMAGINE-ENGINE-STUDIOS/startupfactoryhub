@@ -11,6 +11,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   MailWarning,
   MailPlus,
+  MailCheck,
   Search, 
   FileText, 
   Video, 
@@ -153,6 +154,32 @@ export const CohortApplicationsManager = ({
       });
       if (error) throw error;
       toast({ title: 'Follow-up sent', description: `Follow-up email sent to ${app.email}.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setNoShowSending(null);
+    }
+  };
+
+  /** Manually (re)send the acceptance email for MVP or Accelerated Fundraising. */
+  const sendAcceptanceEmail = async (app: PublicApplication) => {
+    setNoShowSending(`${app.id}:accept`);
+    try {
+      const af = isAfCohort(app.cohort_id);
+      const { error } = await supabase.functions.invoke(
+        af ? 'send-af-acceptance-email' : 'send-mvp-acceptance-email',
+        {
+          body: {
+            email: app.email,
+            name: app.founder_name || 'Founder',
+            startupName: app.startup_name || 'Your startup',
+            cohortName: getCohortName(app.cohort_id),
+            interviewDate: app.interview_date ? format(new Date(app.interview_date), "MMM d, yyyy 'at' h:mm a") : '',
+            applicationId: app.id,
+          },
+        });
+      if (error) throw error;
+      toast({ title: 'Acceptance email sent', description: `Acceptance email sent to ${app.email}.` });
     } catch (err: any) {
       toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
     } finally {
