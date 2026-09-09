@@ -326,6 +326,43 @@ export default function EquityContractsManager() {
     else toast.success(`Resent to ${row.recipient_email}`);
   };
 
+  /** Show and manage the signatures already collected on a contract. */
+  const toggleSignatures = async (row: ContractRow) => {
+    if (openSignatures === row.id) {
+      setOpenSignatures(null);
+      return;
+    }
+    setOpenSignatures(row.id);
+    setLoadingSignatures(true);
+    const { data, error } = await supabase
+      .from("sign_signatures")
+      .select("id, signer_name, signer_email, signature_data, signed_at")
+      .eq("document_id", row.id)
+      .order("signed_at", { ascending: true });
+    setLoadingSignatures(false);
+    if (error) {
+      toast.error("Could not load the signatures");
+      return;
+    }
+    setSignatureRows((data || []) as SignatureRow[]);
+  };
+
+  const eraseSignature = async (signatureId: string, contractId: string) => {
+    const { error } = await supabase.from("sign_signatures").delete().eq("id", signatureId);
+    if (error) {
+      toast.error("Could not erase that signature");
+      return;
+    }
+    setSignatureRows((rows) => rows.filter((r) => r.id !== signatureId));
+    setContracts((rows) =>
+      rows.map((r) =>
+        r.id === contractId ? { ...r, signatureCount: Math.max(0, r.signatureCount - 1) } : r
+      )
+    );
+    toast.success("Signature erased");
+  };
+
+
   return (
     <div className="space-y-6">
       <Card className="tech-card border-0">
