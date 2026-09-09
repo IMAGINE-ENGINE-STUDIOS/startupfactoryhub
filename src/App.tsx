@@ -1,4 +1,3 @@
-import PaperCheckTmp from "@/pages/__PaperCheck";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -228,7 +227,6 @@ const App = () => (
                     <Route path="/emergency" element={<Emergency />} />
                     <Route path="/financials" element={<Financials />} />
                     <Route path="/sign" element={<SignHub />} />
-                    <Route path="/__papercheck" element={<PaperCheckTmp />} />
 
                     <Route path="/sign/studio" element={<SignStudio />} />
                     <Route path="/sign/:token" element={<SignDocument />} />
