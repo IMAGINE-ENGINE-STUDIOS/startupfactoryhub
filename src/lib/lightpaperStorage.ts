@@ -180,10 +180,17 @@ export async function offloadHeavyContent(content: any, userId: string): Promise
       const results = await Promise.all(
         slice.map(async (img) => {
           if (typeof img !== "string" || !img.startsWith("data:")) return img;
-          return uploadDataUrl(img, userId);
+          try {
+            const url = await uploadDataUrl(img, userId);
+            // Never drop a page — fall back to the inline copy.
+            return url || img;
+          } catch (error) {
+            console.warn("Keeping inline LightPaper page image", error);
+            return img;
+          }
         })
       );
-      uploaded.push(...results.filter((image): image is string => Boolean(image)));
+      uploaded.push(...results);
     }
     next.viewModeImages = uploaded;
   }
