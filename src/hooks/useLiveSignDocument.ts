@@ -22,6 +22,8 @@ export interface LiveSignature {
   signature_data: string;
   note: string | null;
   signed_at: string;
+  /** Which signature line this signature belongs to (null for legacy rows). */
+  field_index?: number | null;
 }
 
 export interface LedgerEntry {
