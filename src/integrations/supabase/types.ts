@@ -7523,6 +7523,7 @@ export type Database = {
       sign_signatures: {
         Row: {
           document_id: string
+          field_index: number | null
           id: string
           note: string | null
           signature_data: string
@@ -7532,6 +7533,7 @@ export type Database = {
         }
         Insert: {
           document_id: string
+          field_index?: number | null
           id?: string
           note?: string | null
           signature_data: string
@@ -7541,6 +7543,7 @@ export type Database = {
         }
         Update: {
           document_id?: string
+          field_index?: number | null
           id?: string
           note?: string | null
           signature_data?: string
@@ -9206,6 +9209,7 @@ export type Database = {
       get_sign_signatures_by_token: {
         Args: { _token: string }
         Returns: {
+          field_index: number
           id: string
           note: string
           signature_data: string
@@ -9285,16 +9289,28 @@ export type Database = {
         }
         Returns: undefined
       }
-      submit_sign_signature: {
-        Args: {
-          _note?: string
-          _signature_data: string
-          _signer_email: string
-          _signer_name: string
-          _token: string
-        }
-        Returns: string
-      }
+      submit_sign_signature:
+        | {
+            Args: {
+              _note?: string
+              _signature_data: string
+              _signer_email: string
+              _signer_name: string
+              _token: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _field_index?: number
+              _note?: string
+              _signature_data: string
+              _signer_email: string
+              _signer_name: string
+              _token: string
+            }
+            Returns: string
+          }
       toggle_guest_blog_like: {
         Args: { _guest_identifier: string; _post_id: string }
         Returns: boolean
