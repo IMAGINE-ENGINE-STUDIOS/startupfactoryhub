@@ -73,6 +73,8 @@ export function markSignatureFields(root: HTMLElement | null): number {
       span.className = SIGN_FIELD_CLASS;
       span.setAttribute("title", "Click to sign here");
       span.textContent = match[0];
+      // Remember the blank line so an erased signature can be restored exactly.
+      ORIGINAL_LINE.set(span, match[0]);
       fragment.appendChild(span);
       lastIndex = match.index + match[0].length;
       created++;
