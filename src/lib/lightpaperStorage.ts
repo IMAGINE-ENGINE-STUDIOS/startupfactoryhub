@@ -89,30 +89,42 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   if (cached) return cached;
 
   const converted = dataUrlToBlob(dataUrl);
-  // Do not let a corrupt inline image poison the complete JSON save payload.
-  // An empty source is preferable to repeatedly rejecting every save.
-  if (!converted) return "";
+  // Never lose a page: if the inline image cannot be decoded, keep the
+  // original inline copy in the payload instead of dropping it.
+  if (!converted) return dataUrl;
 
   let blob = converted.blob;
   let ext = converted.ext;
   if (!ALLOWED_MIME.has(blob.type)) {
-    blob = await toPngBlob(blob);
-    ext = "png";
+    try {
+      blob = await toPngBlob(blob);
+      ext = "png";
+    } catch (error) {
+      console.warn("Keeping inline LightPaper image (conversion failed)", error);
+      return dataUrl;
+    }
   }
 
   // `feed-media` ownership policies require the authenticated user id to be
   // the FIRST path segment. The former lightpaper/{userId}/... path was
   // rejected by Storage RLS, which then caused every image-heavy save to fail.
   const path = `${userId}/lightpaper/${hashString(dataUrl)}-${dataUrl.length}.${ext}`;
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, blob, { upsert: true, contentType: blob.type });
-
+  let uploadError: { message: string } | null = null;
+  try {
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, blob, { upsert: true, contentType: blob.type });
+    uploadError = error;
+  } catch (error: any) {
+    uploadError = { message: error?.message || "upload failed" };
+  }
 
   // "already exists" is fine — we key the path by content hash.
-  if (error && !/exists/i.test(error.message)) {
-    throw error;
+  if (uploadError && !/exists/i.test(uploadError.message)) {
+    console.warn("Keeping inline LightPaper image (upload failed)", uploadError);
+    return dataUrl;
   }
+
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   const url = data.publicUrl;
@@ -168,10 +180,17 @@ export async function offloadHeavyContent(content: any, userId: string): Promise
       const results = await Promise.all(
         slice.map(async (img) => {
           if (typeof img !== "string" || !img.startsWith("data:")) return img;
-          return uploadDataUrl(img, userId);
+          try {
+            const url = await uploadDataUrl(img, userId);
+            // Never drop a page — fall back to the inline copy.
+            return url || img;
+          } catch (error) {
+            console.warn("Keeping inline LightPaper page image", error);
+            return img;
+          }
         })
       );
-      uploaded.push(...results.filter((image): image is string => Boolean(image)));
+      uploaded.push(...results);
     }
     next.viewModeImages = uploaded;
   }

@@ -102,7 +102,14 @@ export function useLightPaperProjects(projectType?: ProjectType) {
     const run = async () => {
       try {
         // Offload base64 page images to Storage so the JSONB payload stays small.
-        const payload = await offloadHeavyContent(content, user.id);
+        // If offloading fails for any reason, save the raw (lossless) content.
+        let payload: any = content;
+        try {
+          payload = await offloadHeavyContent(content, user.id);
+        } catch (offloadError) {
+          console.warn("Saving LightPaper without image offloading", offloadError);
+          payload = content;
+        }
 
         const hashKey = projectId || `new:${title}`;
         const hash = stableHash({ title, payload });
