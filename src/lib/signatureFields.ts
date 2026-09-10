@@ -18,6 +18,9 @@ const UNDERSCORE_RUN = /_{6,}/g;
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "CODE", "PRE"]);
 
+/** Blank underscore line each field started as, so it can be restored on erase. */
+const ORIGINAL_LINE = new WeakMap<HTMLElement, string>();
+
 function shouldSkip(node: Node): boolean {
   let el: HTMLElement | null =
     node.nodeType === Node.ELEMENT_NODE
