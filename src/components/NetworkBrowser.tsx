@@ -791,7 +791,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {applyFilter(allMembers).map((member) => renderUserCard(member, false))}
+                {applyFilter(allMembers).map((member) => renderUserCard(member, member.status === 'accepted'))}
               </div>
             )}
           </CardContent>
