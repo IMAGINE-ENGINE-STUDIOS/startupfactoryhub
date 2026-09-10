@@ -87,10 +87,22 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
         (userRoles || []).forEach((r: any) => { roles[r.user_id] = r.role; });
       }
 
+      // Existing relationships, so already-connected / pending people don't
+      // show a "Connect" button that would fail.
+      const statuses: Record<string, 'accepted' | 'pending'> = {};
+      const { data: connections } = await supabase
+        .from('connections')
+        .select('requester_id, addressee_id, status')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+      (connections || []).forEach((c: any) => {
+        const other = c.requester_id === user.id ? c.addressee_id : c.requester_id;
+        if (c.status === 'accepted' || c.status === 'pending') statuses[other] = c.status;
+      });
+
       const seen = new Set<string>();
       setAllMembers(visible
         .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
-        .map(p => ({ ...p, role: roles[p.user_id] || null })));
+        .map(p => ({ ...p, role: roles[p.user_id] || null, status: statuses[p.user_id] })));
     } catch (error) {
       console.error('Error fetching all community members:', error);
     } finally {
