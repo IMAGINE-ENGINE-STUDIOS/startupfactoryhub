@@ -223,15 +223,21 @@ export default function SignDocument() {
   );
 
   // Auto signature lines: mark the original document, then deterministically
-  // render stored signatures into those fields without replacing the document.
+  // render stored signatures onto the exact line each one was signed on.
   useEffect(() => {
     if (doc?.file_url || !canSign) return;
     const timer = window.setTimeout(() => {
-      const target = canEdit ? editorRef.current : viewRef.current;
-      if (document.activeElement !== target) {
-        markSignatureFields(target);
-        const fields = Array.from(target?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []);
-        signatures.forEach((storedSignature, index) => {
+      const place = (root: HTMLElement | null) => {
+        if (!root) return;
+        markSignatureFields(root);
+        // Rebuild from the stored signatures so erased ones disappear.
+        clearAllSignatureFields(root);
+        const fields = Array.from(root.querySelectorAll(`.${SIGN_FIELD_CLASS}`));
+        signatures.forEach((storedSignature, order) => {
+          const index =
+            typeof storedSignature.field_index === "number" && storedSignature.field_index >= 0
+              ? storedSignature.field_index
+              : order;
           const field = fields[index] as HTMLElement | undefined;
           if (field && !field.classList.contains("sfh-sign-field--signed")) {
             fillSignatureField(field, {
@@ -241,21 +247,11 @@ export default function SignDocument() {
             });
           }
         });
-      }
-      markSignatureFields(docRef.current as HTMLElement | null);
-      const printFields = Array.from(
-        docRef.current?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []
-      );
-      signatures.forEach((storedSignature, index) => {
-        const field = printFields[index] as HTMLElement | undefined;
-        if (field && !field.classList.contains("sfh-sign-field--signed")) {
-          fillSignatureField(field, {
-            type: "draw",
-            data: storedSignature.signature_data,
-            name: storedSignature.signer_name,
-          });
-        }
-      });
+      };
+
+      const target = canEdit ? editorRef.current : viewRef.current;
+      if (document.activeElement !== target) place(target);
+      place(docRef.current as HTMLElement | null);
     }, 400);
     return () => window.clearTimeout(timer);
   }, [html, canEdit, canSign, doc?.file_url, done, signatures]);
