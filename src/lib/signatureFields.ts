@@ -145,6 +145,29 @@ export function fillSignatureField(field: HTMLElement, fill: SignatureFill): voi
   }
 }
 
+/** Undo a signature drop: restores the blank line so nothing stale remains. */
+export function clearSignatureField(field: HTMLElement): void {
+  const line = ORIGINAL_LINE.get(field) || "__________";
+  field.innerHTML = "";
+  field.textContent = line;
+  field.classList.remove(SIGN_FIELD_SIGNED_CLASS);
+  field.setAttribute("title", "Click to sign here");
+  field.removeAttribute("contenteditable");
+  field.style.display = "";
+  field.style.minWidth = "";
+  field.style.textAlign = "";
+  field.style.verticalAlign = "";
+}
+
+/** Reset every signed field inside `root`. */
+export function clearAllSignatureFields(root: HTMLElement | null): void {
+  if (!root) return;
+  root
+    .querySelectorAll<HTMLElement>(`.${SIGN_FIELD_CLASS}.${SIGN_FIELD_SIGNED_CLASS}`)
+    .forEach((field) => clearSignatureField(field));
+}
+
+
 /** Count of fields still waiting for a signature. */
 export function countOpenSignatureFields(root: HTMLElement | null): number {
   if (!root) return 0;
