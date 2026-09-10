@@ -18,6 +18,9 @@ const UNDERSCORE_RUN = /_{6,}/g;
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "CODE", "PRE"]);
 
+/** Blank underscore line each field started as, so it can be restored on erase. */
+const ORIGINAL_LINE = new WeakMap<HTMLElement, string>();
+
 function shouldSkip(node: Node): boolean {
   let el: HTMLElement | null =
     node.nodeType === Node.ELEMENT_NODE
@@ -73,6 +76,8 @@ export function markSignatureFields(root: HTMLElement | null): number {
       span.className = SIGN_FIELD_CLASS;
       span.setAttribute("title", "Click to sign here");
       span.textContent = match[0];
+      // Remember the blank line so an erased signature can be restored exactly.
+      ORIGINAL_LINE.set(span, match[0]);
       fragment.appendChild(span);
       lastIndex = match.index + match[0].length;
       created++;
@@ -139,6 +144,29 @@ export function fillSignatureField(field: HTMLElement, fill: SignatureFill): voi
     field.appendChild(caption);
   }
 }
+
+/** Undo a signature drop: restores the blank line so nothing stale remains. */
+export function clearSignatureField(field: HTMLElement): void {
+  const line = ORIGINAL_LINE.get(field) || "__________";
+  field.innerHTML = "";
+  field.textContent = line;
+  field.classList.remove(SIGN_FIELD_SIGNED_CLASS);
+  field.setAttribute("title", "Click to sign here");
+  field.removeAttribute("contenteditable");
+  field.style.display = "";
+  field.style.minWidth = "";
+  field.style.textAlign = "";
+  field.style.verticalAlign = "";
+}
+
+/** Reset every signed field inside `root`. */
+export function clearAllSignatureFields(root: HTMLElement | null): void {
+  if (!root) return;
+  root
+    .querySelectorAll<HTMLElement>(`.${SIGN_FIELD_CLASS}.${SIGN_FIELD_SIGNED_CLASS}`)
+    .forEach((field) => clearSignatureField(field));
+}
+
 
 /** Count of fields still waiting for a signature. */
 export function countOpenSignatureFields(root: HTMLElement | null): number {
