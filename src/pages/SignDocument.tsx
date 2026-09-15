@@ -366,13 +366,17 @@ export default function SignDocument() {
     if (!signature) return toast.error("Draw your signature");
 
     setSubmitting(true);
+    const signedFieldIndex = pendingFieldIndexRef.current;
     const { error } = await supabase.rpc("submit_sign_signature", {
       _token: token,
       _signer_name: name.trim(),
       _signer_email: email.trim(),
       _signature_data: signature,
       _note: null,
-    });
+      ...(typeof signedFieldIndex === "number" && signedFieldIndex >= 0
+        ? { _field_index: signedFieldIndex }
+        : {}),
+    } as any);
     setSubmitting(false);
 
     if (error) {
