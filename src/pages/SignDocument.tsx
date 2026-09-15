@@ -155,6 +155,12 @@ export default function SignDocument() {
       toast.error("Could not erase that signature");
       return;
     }
+    // Wipe the rendered signatures now and invalidate the cached PDF; the
+    // placement effect redraws whatever is left on its own line.
+    clearAllSignatureFields(viewRef.current);
+    clearAllSignatureFields(editorRef.current);
+    clearAllSignatureFields(docRef.current as HTMLElement | null);
+    pdfRef.current = null;
     toast.success("Signature erased");
     await refresh();
   };
