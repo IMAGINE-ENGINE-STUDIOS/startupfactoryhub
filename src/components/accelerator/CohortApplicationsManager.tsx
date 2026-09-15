@@ -624,6 +624,9 @@ export const CohortApplicationsManager = ({
                       <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
                         <MailWarning className="w-3 h-3" />
                       </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-7 border-red-500/40 text-red-400" disabled={noShowSending === `${app.id}:final`} onClick={() => sendFinalNotice(app)} title="Send urgent final notice (seat about to be released)">
+                        <AlertTriangle className="w-3 h-3" />
+                      </Button>
                       {app.status === 'interview_scheduled' && (
                         <>
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
@@ -783,6 +786,10 @@ export const CohortApplicationsManager = ({
                       <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
                         <MailWarning className="w-3 h-3 mr-1" />
                         {noShowSending === `${app.id}:noshow` ? 'Sending…' : 'No-Show'}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-red-500/40 text-red-400" disabled={noShowSending === `${app.id}:final`} onClick={() => sendFinalNotice(app)} title="Send urgent final notice (seat about to be released)">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:final` ? 'Sending…' : 'Final Notice'}
                       </Button>
                       {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
                         <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
