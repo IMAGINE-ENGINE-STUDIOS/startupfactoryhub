@@ -284,3 +284,6 @@ verify_jwt = true
 
 [functions.send-equity-contract]
 verify_jwt = true
+
+[functions.send-mvp-final-notice]
+verify_jwt = true
