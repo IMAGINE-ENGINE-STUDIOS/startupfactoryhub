@@ -32,6 +32,7 @@ import {
 import DocumentLanguageBar from "@/components/sign/DocumentLanguageBar";
 import {
   SIGN_FIELD_CLASS,
+  clearAllSignatureFields,
   fillSignatureField,
   markSignatureFields,
   signatureFieldFromEvent,
