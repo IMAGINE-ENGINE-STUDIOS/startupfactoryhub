@@ -187,6 +187,30 @@ export const CohortApplicationsManager = ({
     }
   };
 
+  /** Urgent final notice: accepted startup never signed up, seat about to be released. */
+  const sendFinalNotice = async (app: PublicApplication) => {
+    setNoShowSending(`${app.id}:final`);
+    try {
+      const deadline = format(new Date(Date.now() + 72 * 60 * 60 * 1000), 'MMM d, yyyy');
+      const { error } = await supabase.functions.invoke('send-mvp-final-notice', {
+        body: {
+          email: app.email,
+          name: app.founder_name || 'Founder',
+          startupName: app.startup_name || 'Your startup',
+          cohortName: getCohortName(app.cohort_id),
+          deadline,
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Final notice sent', description: `Urgency follow-up sent to ${app.email}.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setNoShowSending(null);
+    }
+  };
+
   const sendNoShowFollowUp = async (app: PublicApplication) => {
     setNoShowSending(`${app.id}:noshow`);
     try {
