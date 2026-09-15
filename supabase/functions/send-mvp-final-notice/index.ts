@@ -17,7 +17,7 @@ const SUPPORT_EMAIL = "info@startupfactoryhub.com";
 const esc = (s: unknown) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-export const buildMvpFinalNoticeHtml = (opts: {
+const buildMvpFinalNoticeHtml = (opts: {
   name: string;
   startup: string;
   cohort: string;
