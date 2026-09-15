@@ -32,6 +32,7 @@ import {
 import DocumentLanguageBar from "@/components/sign/DocumentLanguageBar";
 import {
   SIGN_FIELD_CLASS,
+  clearAllSignatureFields,
   fillSignatureField,
   markSignatureFields,
   signatureFieldFromEvent,
@@ -154,6 +155,12 @@ export default function SignDocument() {
       toast.error("Could not erase that signature");
       return;
     }
+    // Wipe the rendered signatures now and invalidate the cached PDF; the
+    // placement effect redraws whatever is left on its own line.
+    clearAllSignatureFields(viewRef.current);
+    clearAllSignatureFields(editorRef.current);
+    clearAllSignatureFields(docRef.current as HTMLElement | null);
+    pdfRef.current = null;
     toast.success("Signature erased");
     await refresh();
   };
@@ -359,13 +366,17 @@ export default function SignDocument() {
     if (!signature) return toast.error("Draw your signature");
 
     setSubmitting(true);
+    const signedFieldIndex = pendingFieldIndexRef.current;
     const { error } = await supabase.rpc("submit_sign_signature", {
       _token: token,
       _signer_name: name.trim(),
       _signer_email: email.trim(),
       _signature_data: signature,
       _note: null,
-    });
+      ...(typeof signedFieldIndex === "number" && signedFieldIndex >= 0
+        ? { _field_index: signedFieldIndex }
+        : {}),
+    } as any);
     setSubmitting(false);
 
     if (error) {

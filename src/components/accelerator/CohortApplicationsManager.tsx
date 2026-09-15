@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   MailWarning,
+  AlertTriangle,
   MailPlus,
   MailCheck,
   Search, 
@@ -180,6 +181,30 @@ export const CohortApplicationsManager = ({
         });
       if (error) throw error;
       toast({ title: 'Acceptance email sent', description: `Acceptance email sent to ${app.email}.` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setNoShowSending(null);
+    }
+  };
+
+  /** Urgent final notice: accepted startup never signed up, seat about to be released. */
+  const sendFinalNotice = async (app: PublicApplication) => {
+    setNoShowSending(`${app.id}:final`);
+    try {
+      const deadline = format(new Date(Date.now() + 72 * 60 * 60 * 1000), 'MMM d, yyyy');
+      const { error } = await supabase.functions.invoke('send-mvp-final-notice', {
+        body: {
+          email: app.email,
+          name: app.founder_name || 'Founder',
+          startupName: app.startup_name || 'Your startup',
+          cohortName: getCohortName(app.cohort_id),
+          deadline,
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Final notice sent', description: `Urgency follow-up sent to ${app.email}.` });
     } catch (err: any) {
       toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
     } finally {
@@ -600,6 +625,9 @@ export const CohortApplicationsManager = ({
                       <Button size="sm" variant="outline" className="text-xs h-7" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
                         <MailWarning className="w-3 h-3" />
                       </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-7 border-red-500/40 text-red-400" disabled={noShowSending === `${app.id}:final`} onClick={() => sendFinalNotice(app)} title="Send urgent final notice (seat about to be released)">
+                        <AlertTriangle className="w-3 h-3" />
+                      </Button>
                       {app.status === 'interview_scheduled' && (
                         <>
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-xs h-7" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
@@ -759,6 +787,10 @@ export const CohortApplicationsManager = ({
                       <Button size="sm" variant="outline" disabled={noShowSending === `${app.id}:noshow`} onClick={() => sendNoShowFollowUp(app)} title="Send 'Sorry we missed you' email">
                         <MailWarning className="w-3 h-3 mr-1" />
                         {noShowSending === `${app.id}:noshow` ? 'Sending…' : 'No-Show'}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-red-500/40 text-red-400" disabled={noShowSending === `${app.id}:final`} onClick={() => sendFinalNotice(app)} title="Send urgent final notice (seat about to be released)">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {noShowSending === `${app.id}:final` ? 'Sending…' : 'Final Notice'}
                       </Button>
                       {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
                         <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
