@@ -26,6 +26,7 @@ import {
   Calendar,
   UserPlus,
   Mail,
+  AlertTriangle,
   Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -733,6 +734,37 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     }
   };
 
+  const [sendingFinalNoticeFor, setSendingFinalNoticeFor] = useState<string | null>(null);
+
+  const sendFinalNotice = async (app: any) => {
+    const email = (app.email || '').trim();
+    if (!email) {
+      toast({ title: 'No email on this application', description: 'Cannot send the final notice.', variant: 'destructive' });
+      return;
+    }
+    setSendingFinalNoticeFor(app.id);
+    try {
+      const deadline = new Date(Date.now() + 72 * 60 * 60 * 1000)
+        .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const { error } = await supabase.functions.invoke('send-mvp-final-notice', {
+        body: {
+          email,
+          name: app.founder_name || app.companies?.name || 'Founder',
+          startupName: app.companies?.name || app.startup_name || 'your startup',
+          cohortName: app.accelerator_cohorts?.name || 'MVP Program',
+          deadline,
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: '⚠️ Final notice sent', description: `Delivered to ${email}` });
+    } catch (err: any) {
+      toast({ title: 'Could not send final notice', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingFinalNoticeFor(null);
+    }
+  };
+
   useEffect(() => {
     const fetchApps = async () => {
       setLoading(true);
@@ -894,6 +926,19 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                   : <Mail className="h-3 w-3 mr-1" />}
                 Interview Invite
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs border-red-500/40 text-red-400 hover:bg-red-500/10"
+                disabled={sendingFinalNoticeFor === app.id || !app.email}
+                title={app.email ? `Send final notice — spot expires in 72h — to ${app.email}` : 'No email on this application'}
+                onClick={() => sendFinalNotice(app)}
+              >
+                {sendingFinalNoticeFor === app.id
+                  ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  : <AlertTriangle className="h-3 w-3 mr-1" />}
+                Final Notice
+              </Button>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
@@ -965,6 +1010,18 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                     ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                     : <Mail className="h-4 w-4 mr-1" />}
                   Send Interview Invite
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  disabled={sendingFinalNoticeFor === selected.id || !selected.email}
+                  onClick={() => sendFinalNotice(selected)}
+                >
+                  {sendingFinalNoticeFor === selected.id
+                    ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    : <AlertTriangle className="h-4 w-4 mr-1" />}
+                  Final Notice
                 </Button>
                 <Button size="sm" onClick={() => { updateStatus(selected.id, 'accepted', selected.source); setSelected(null); }}>
                   <CheckCircle className="h-4 w-4 mr-1" /> Accept
