@@ -926,6 +926,19 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                   : <Mail className="h-3 w-3 mr-1" />}
                 Interview Invite
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs border-red-500/40 text-red-400 hover:bg-red-500/10"
+                disabled={sendingFinalNoticeFor === app.id || !app.email}
+                title={app.email ? `Send final notice — spot expires in 72h — to ${app.email}` : 'No email on this application'}
+                onClick={() => sendFinalNotice(app)}
+              >
+                {sendingFinalNoticeFor === app.id
+                  ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  : <AlertTriangle className="h-3 w-3 mr-1" />}
+                Final Notice
+              </Button>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
