@@ -1011,6 +1011,18 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                     : <Mail className="h-4 w-4 mr-1" />}
                   Send Interview Invite
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  disabled={sendingFinalNoticeFor === selected.id || !selected.email}
+                  onClick={() => sendFinalNotice(selected)}
+                >
+                  {sendingFinalNoticeFor === selected.id
+                    ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    : <AlertTriangle className="h-4 w-4 mr-1" />}
+                  Final Notice
+                </Button>
                 <Button size="sm" onClick={() => { updateStatus(selected.id, 'accepted', selected.source); setSelected(null); }}>
                   <CheckCircle className="h-4 w-4 mr-1" /> Accept
                 </Button>
