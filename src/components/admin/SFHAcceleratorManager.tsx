@@ -734,6 +734,37 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     }
   };
 
+  const [sendingFinalNoticeFor, setSendingFinalNoticeFor] = useState<string | null>(null);
+
+  const sendFinalNotice = async (app: any) => {
+    const email = (app.email || '').trim();
+    if (!email) {
+      toast({ title: 'No email on this application', description: 'Cannot send the final notice.', variant: 'destructive' });
+      return;
+    }
+    setSendingFinalNoticeFor(app.id);
+    try {
+      const deadline = new Date(Date.now() + 72 * 60 * 60 * 1000)
+        .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const { error } = await supabase.functions.invoke('send-mvp-final-notice', {
+        body: {
+          email,
+          name: app.founder_name || app.companies?.name || 'Founder',
+          startupName: app.companies?.name || app.startup_name || 'your startup',
+          cohortName: app.accelerator_cohorts?.name || 'MVP Program',
+          deadline,
+          applicationId: app.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: '⚠️ Final notice sent', description: `Delivered to ${email}` });
+    } catch (err: any) {
+      toast({ title: 'Could not send final notice', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingFinalNoticeFor(null);
+    }
+  };
+
   useEffect(() => {
     const fetchApps = async () => {
       setLoading(true);
