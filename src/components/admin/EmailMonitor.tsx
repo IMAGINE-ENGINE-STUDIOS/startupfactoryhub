@@ -116,6 +116,12 @@ const EMAIL_TYPES = [
     desc: '"Sorry we missed you" email for startups that missed their MVP interview',
   },
   {
+    id: 'af-invitation',
+    label: 'AF General Invitation',
+    icon: <Send className="h-4 w-4" />,
+    desc: 'General invitation for startup members, with animated banner and direct application link',
+  },
+  {
     id: 'af-welcome',
     label: 'AF Welcome',
     icon: <Rocket className="h-4 w-4" />,
@@ -567,7 +573,7 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `MVP No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ MVP No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
-    } else if (activeType === 'af-welcome') {
+    } else if (activeType === 'af-invitation' || activeType === 'af-welcome') {
       let successCount = 0;
       let failCount = 0;
       for (const to of recipients) {
@@ -577,6 +583,7 @@ const EmailMonitor = () => {
               email: to,
               name: programEmailName,
               applyUrl: programEmailApplyUrl || undefined,
+              ...(activeType === 'af-invitation' && { variant: 'invitation' }),
             },
           });
           if (error) throw error;
@@ -587,8 +594,9 @@ const EmailMonitor = () => {
         }
         await new Promise((r) => setTimeout(r, 250));
       }
-      addResult(failCount === 0, `AF Welcome → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
-      toast({ title: `✅ AF Welcome sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+       const emailLabel = activeType === 'af-invitation' ? 'AF Invitation' : 'AF Welcome';
+       addResult(failCount === 0, `${emailLabel} → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+       toast({ title: `✅ ${emailLabel} sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'af-acceptance') {
       let successCount = 0;
       let failCount = 0;
@@ -790,6 +798,13 @@ const EmailMonitor = () => {
           mode: 'per_recipient',
           recipient_field: 'email',
           body: { name: programEmailName, applyUrl: programEmailApplyUrl || undefined },
+        };
+      case 'af-invitation':
+        return {
+          function_name: 'send-af-welcome',
+          mode: 'per_recipient',
+          recipient_field: 'email',
+          body: { name: programEmailName, applyUrl: programEmailApplyUrl || undefined, variant: 'invitation' },
         };
       case 'af-acceptance':
         return {
@@ -1182,7 +1197,7 @@ const EmailMonitor = () => {
                 )}
 
                 {/* MVP / AF program email fields */}
-                {['mvp-acceptance', 'mvp-payment-reminder', 'mvp-no-show', 'af-welcome', 'af-acceptance', 'af-follow-up', 'af-no-show'].includes(activeType) && (
+                {['mvp-acceptance', 'mvp-payment-reminder', 'mvp-no-show', 'af-invitation', 'af-welcome', 'af-acceptance', 'af-follow-up', 'af-no-show'].includes(activeType) && (
                   <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
                     <div className="flex items-center gap-2 text-primary font-semibold">
                       <Mail className="h-4 w-4" />
@@ -1226,7 +1241,7 @@ const EmailMonitor = () => {
                         <Input value={programEmailRescheduleUrl} onChange={e => setProgramEmailRescheduleUrl(e.target.value)} placeholder="https://calendly.com/..." className="tech-card border-0" />
                       </div>
                     )}
-                    {activeType === 'af-welcome' && (
+                    {['af-invitation', 'af-welcome'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Direct Application URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
                         <Input value={programEmailApplyUrl} onChange={e => setProgramEmailApplyUrl(e.target.value)} placeholder="https://startupfactoryhub.com/cohorts/.../apply" className="tech-card border-0" />

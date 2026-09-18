@@ -45,4 +45,5 @@
 - [x] Home page edit mode: drag & drop section reorder + delete/hide sections, saved to publish (admin only)
 - [x] Replace About hero planet background with black deep-space starfield
 
-- [ ] MVP follow-up email for accepted-but-unregistered startups: urgency (they lose their spot), low-cost build + network, financing support via info@startupfactoryhub.com; button next to reject/interview invite in cohort application review.
+- [x] MVP follow-up email for accepted-but-unregistered startups: urgency (they lose their spot), low-cost build + network, financing support via info@startupfactoryhub.com; button next to reject/interview invite in cohort application review.
+- [x] General Accelerated Fundraising invitation email with animated banner and direct application link in Email Command Center.
