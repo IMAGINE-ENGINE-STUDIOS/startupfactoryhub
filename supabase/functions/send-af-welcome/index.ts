@@ -1,7 +1,7 @@
 // "Thanks for your interest" email + direct application link for Accelerated Fundraising signups.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { sendCompliantEmail } from "../_shared/email-compliance.ts";
-import { buildAfWelcomeHtml, AF_APPLY_URL } from "../_shared/af-emails.ts";
+import { buildAfInvitationHtml, buildAfWelcomeHtml, AF_APPLY_URL } from "../_shared/af-emails.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +16,7 @@ serve(async (req) => {
     const email = body.email || body.to;
     const name = body.name || "Founder";
     const applyUrl = body.applyUrl || AF_APPLY_URL;
+    const isInvitation = body.variant === "invitation";
 
     if (!email || !String(email).includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
@@ -26,9 +27,13 @@ serve(async (req) => {
 
     await sendCompliantEmail({
       to: email,
-      subject: "Thank you for your interest in Accelerated Fundraising — apply here",
-      html: buildAfWelcomeHtml({ name, applyUrl }),
-      source: "af-welcome",
+      subject: isInvitation
+        ? "You're invited to Accelerated Fundraising — applications are open"
+        : "Thank you for your interest in Accelerated Fundraising — apply here",
+      html: isInvitation
+        ? buildAfInvitationHtml({ name, applyUrl })
+        : buildAfWelcomeHtml({ name, applyUrl }),
+      source: isInvitation ? "af-invitation" : "af-welcome",
     });
 
     return new Response(JSON.stringify({ success: true }), {

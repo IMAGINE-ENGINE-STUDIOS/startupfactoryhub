@@ -8,6 +8,8 @@ export const AF_LOGO_URL =
 export const AF_COHORT_ID = "21bbf578-1347-43f8-bc56-d31fbd4af03d";
 export const AF_APPLY_URL = `https://startupfactoryhub.com/cohorts/${AF_COHORT_ID}/apply?_v=mtneb0jw`;
 export const AF_PROGRAM_URL = "https://startupfactoryhub.com/accelerated-fundraising";
+export const AF_BANNER_GIF_URL =
+  "https://startupfactoryhub.com/__l5e/assets-v1/a2887fc7-2d4b-4241-983e-48a1271993b1/accelerated-fundraising-banner.gif";
 
 const esc = (s: unknown) =>
   String(s ?? "")
@@ -46,6 +48,13 @@ const shell = (opts: { title: string; kicker: string; heading: string; body: str
 
 const paragraph = (html: string) =>
   `<tr><td style="padding:12px 32px 0;"><p style="margin:0;color:#94a3b8;font-size:14px;line-height:1.7;">${html}</p></td></tr>`;
+
+const banner = () => `
+  <tr><td style="padding:24px 0 4px;">
+    <a href="${AF_APPLY_URL}" style="display:block;text-decoration:none;">
+      <img src="${AF_BANNER_GIF_URL}" alt="Accelerated Fundraising — scale your aerospace startup" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;" />
+    </a>
+  </td></tr>`;
 
 const cta = (label: string, url: string, sub?: string) => `
   <tr><td style="padding:24px 32px 6px;">
@@ -93,6 +102,25 @@ const requirements = () => `
       </td></tr>
     </table>
   </td></tr>`;
+
+/** General invitation for selected startup founders and platform members. */
+export function buildAfInvitationHtml(opts: { name?: string; applyUrl?: string } = {}) {
+  const applyUrl = opts.applyUrl || AF_APPLY_URL;
+  return shell({
+    title: "You're invited — Accelerated Fundraising",
+    kicker: "Exclusive Invitation · Accelerated Fundraising",
+    heading: `${opts.name || "Founder"}, scale your hardware startup with the right capital partners`,
+    body: `
+      ${banner()}
+      ${paragraph("You are invited to apply to <strong style=\"color:#f8fafc;\">Accelerated Fundraising</strong>, Startup Factory Hub's investor-matching program for aerospace, defense and space hardware startups.")}
+      ${paragraph("This is not a traditional accelerator. We connect qualified founders with aligned deep-tech investors through focused investor sprints, strategic introductions and technology access designed around your fundraising goals.")}
+      ${stats()}
+      ${cta("Apply to Accelerated Fundraising", applyUrl, "Applications are open")}
+      ${requirements()}
+      ${paragraph(`Explore the complete program at <a href="${AF_PROGRAM_URL}" style="color:#fbbf24;text-decoration:none;">startupfactoryhub.com/accelerated-fundraising</a>. Questions? Reply to this invitation or email <a href="mailto:info@startupfactoryhub.com" style="color:#fbbf24;text-decoration:none;">info@startupfactoryhub.com</a>.`)}
+    `,
+  });
+}
 
 /** Sent right after signup when the founder says they're joining Accelerated Fundraising. */
 export function buildAfWelcomeHtml(opts: { name?: string; applyUrl?: string } = {}) {
