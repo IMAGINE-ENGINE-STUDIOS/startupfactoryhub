@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { sendCompliantEmail } from "../_shared/email-compliance.ts";
+import { buildMvpFinalNoticeHtml, MVP_APPLY_URL } from "../_shared/mvp-final-notice.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,6 +90,20 @@ serve(async (req) => {
     if (!email || !email.includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (body.template === "final-notice") {
+      const deadline = String(body.deadline || "in 72 hours");
+      const confirmUrl = String(body.confirmUrl || MVP_APPLY_URL);
+      await sendCompliantEmail({
+        to: email,
+        subject: `Final notice: ${startup} loses its MVP Program seat on ${deadline}`,
+        html: buildMvpFinalNoticeHtml({ name, startup, cohort, deadline, confirmUrl }),
+        source: "mvp-final-notice",
+      });
+      return new Response(JSON.stringify({ success: true, template: "final-notice" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
