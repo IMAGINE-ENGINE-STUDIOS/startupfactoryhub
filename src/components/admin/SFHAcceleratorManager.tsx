@@ -746,8 +746,9 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     try {
       const deadline = new Date(Date.now() + 72 * 60 * 60 * 1000)
         .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const { data, error } = await supabase.functions.invoke('send-mvp-final-notice', {
+      const { data, error } = await supabase.functions.invoke('send-mvp-no-show-email', {
         body: {
+          template: 'final-notice',
           email,
           name: app.founder_name || app.companies?.name || 'Founder',
           startupName: app.companies?.name || app.startup_name || 'your startup',

@@ -135,7 +135,9 @@ serve(async (req) => {
     const interviewDate = body.interviewDate || "";
     const origin = req.headers.get("origin") || "https://startupfactoryhub.com";
     const rescheduleUrl = body.rescheduleUrl || `${origin}/mvp-program?reschedule=1`;
-    const isFinalNotice = body.variant === "final-notice";
+    const requestedTemplate = String(body.template || body.variant || "").trim().toLowerCase();
+    const isNoShow = requestedTemplate === "no-show";
+    const isFinalNotice = !isNoShow;
 
     if (!email || !String(email).includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
@@ -162,7 +164,7 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, template: isFinalNotice ? "final-notice" : "no-show" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
