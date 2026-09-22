@@ -139,6 +139,12 @@ serve(async (req) => {
     const isNoShow = requestedTemplate === "no-show";
     const isFinalNotice = !isNoShow;
 
+    if (body.validateTemplate === true) {
+      return new Response(JSON.stringify({ success: true, template: isFinalNotice ? "final-notice" : "no-show" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!email || !String(email).includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
         status: 400,
