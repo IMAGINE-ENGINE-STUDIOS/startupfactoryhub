@@ -270,6 +270,9 @@ verify_jwt = false
 [functions.send-mvp-no-show-email]
 verify_jwt = true
 
+[functions.send-mvp-final-notice]
+verify_jwt = true
+
 [functions.send-af-welcome]
 verify_jwt = false
 
