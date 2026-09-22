@@ -746,9 +746,9 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     try {
       const deadline = new Date(Date.now() + 72 * 60 * 60 * 1000)
         .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+      const { data, error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
         body: {
-          variant: 'final-notice',
+          template: 'final-notice',
           email,
           name: app.founder_name || app.companies?.name || 'Founder',
           startupName: app.companies?.name || app.startup_name || 'your startup',
@@ -758,6 +758,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
         },
       });
       if (error) throw error;
+      if (data?.template !== 'final-notice') throw new Error('Final Notice template was not confirmed. Email was not sent.');
       toast({ title: '⚠️ Final notice sent', description: `Delivered to ${email}` });
     } catch (err: any) {
       toast({ title: 'Could not send final notice', description: err.message, variant: 'destructive' });

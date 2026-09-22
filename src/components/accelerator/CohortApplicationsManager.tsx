@@ -193,9 +193,9 @@ export const CohortApplicationsManager = ({
     setNoShowSending(`${app.id}:final`);
     try {
       const deadline = format(new Date(Date.now() + 72 * 60 * 60 * 1000), 'MMM d, yyyy');
-      const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
+      const { data, error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
         body: {
-          variant: 'final-notice',
+          template: 'final-notice',
           email: app.email,
           name: app.founder_name || 'Founder',
           startupName: app.startup_name || 'Your startup',
@@ -205,6 +205,7 @@ export const CohortApplicationsManager = ({
         },
       });
       if (error) throw error;
+      if (data?.template !== 'final-notice') throw new Error('Final Notice template was not confirmed. Email was not sent.');
       toast({ title: 'Final notice sent', description: `Urgency follow-up sent to ${app.email}.` });
     } catch (err: any) {
       toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });
@@ -219,6 +220,7 @@ export const CohortApplicationsManager = ({
       const fn = isAfCohort(app.cohort_id) ? 'send-af-no-show-email' : 'send-mvp-no-show-email';
       const { error } = await supabase.functions.invoke(fn, {
         body: {
+          template: 'no-show',
           email: app.email,
           name: app.founder_name || 'Founder',
           startupName: app.startup_name || 'your startup',

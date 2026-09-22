@@ -555,6 +555,7 @@ const EmailMonitor = () => {
         try {
           const { error } = await supabase.functions.invoke('send-mvp-no-show-email', {
             body: {
+              template: 'no-show',
               email: to,
               name: programEmailName,
               startupName: programEmailStartup,
