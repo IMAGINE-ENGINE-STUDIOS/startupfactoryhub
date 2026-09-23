@@ -193,7 +193,7 @@ export const CohortApplicationsManager = ({
     setNoShowSending(`${app.id}:final`);
     try {
       const deadline = format(new Date(Date.now() + 72 * 60 * 60 * 1000), 'MMM d, yyyy');
-      const { data, error } = await supabase.functions.invoke('send-mvp-acceptance-email', {
+      const { data, error } = await supabase.functions.invoke('send-af-no-show-email', {
         body: {
           template: 'final-notice',
           email: app.email,
