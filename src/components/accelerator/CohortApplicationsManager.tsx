@@ -193,19 +193,16 @@ export const CohortApplicationsManager = ({
     setNoShowSending(`${app.id}:final`);
     try {
       const deadline = format(new Date(Date.now() + 72 * 60 * 60 * 1000), 'MMM d, yyyy');
-      const { data, error } = await supabase.functions.invoke('send-mvp-final-notice', {
+      const { error } = await supabase.functions.invoke('send-notification-email', {
         body: {
-          template: 'final-notice',
-          email: app.email,
-          name: app.founder_name || 'Founder',
-          startupName: app.startup_name || 'Your startup',
-          cohortName: getCohortName(app.cohort_id),
-          deadline,
-          applicationId: app.id,
+          to: app.email,
+          title: `Final notice: ${app.startup_name || 'Your startup'} — confirm your MVP Program seat`,
+          recipientName: app.founder_name || 'Founder',
+          type: 'final-notice',
+          message: `Your startup was accepted into ${getCohortName(app.cohort_id)}, but we still have no record of your registration. Confirm by ${deadline} or your place will be released to the next startup on the waitlist. Build your product at a fraction of the usual cost with an engineering and design team, mentorship, and our global network. Confirm your seat: https://startupfactoryhub.com/mvp-program. If cost is holding you back, contact info@startupfactoryhub.com about financial support.`,
         },
       });
       if (error) throw error;
-      if (data?.template !== 'final-notice') throw new Error('Final Notice template was not confirmed. Email was not sent.');
       toast({ title: 'Final notice sent', description: `Urgency follow-up sent to ${app.email}.` });
     } catch (err: any) {
       toast({ title: 'Failed to send', description: err.message || 'Unknown error', variant: 'destructive' });

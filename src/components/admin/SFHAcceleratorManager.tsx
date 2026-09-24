@@ -746,19 +746,16 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     try {
       const deadline = new Date(Date.now() + 72 * 60 * 60 * 1000)
         .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const { data, error } = await supabase.functions.invoke('send-mvp-final-notice', {
+      const { error } = await supabase.functions.invoke('send-notification-email', {
         body: {
-          template: 'final-notice',
-          email,
-          name: app.founder_name || app.companies?.name || 'Founder',
-          startupName: app.companies?.name || app.startup_name || 'your startup',
-          cohortName: app.accelerator_cohorts?.name || 'MVP Program',
-          deadline,
-          applicationId: app.id,
+          to: email,
+          title: `Final notice: ${app.companies?.name || app.startup_name || 'Your startup'} — confirm your MVP Program seat`,
+          recipientName: app.founder_name || app.companies?.name || 'Founder',
+          type: 'final-notice',
+          message: `Your startup was accepted into ${app.accelerator_cohorts?.name || 'the MVP Program'}, but we still have no record of your registration. Confirm by ${deadline} or your place will be released to the next startup on the waitlist. Build your product at a fraction of the usual cost with an engineering and design team, mentorship, and our global network. Confirm your seat: https://startupfactoryhub.com/mvp-program. If cost is holding you back, contact info@startupfactoryhub.com about financial support.`,
         },
       });
       if (error) throw error;
-      if (data?.template !== 'final-notice') throw new Error('Final Notice template was not confirmed. Email was not sent.');
       toast({ title: '⚠️ Final notice sent', description: `Delivered to ${email}` });
     } catch (err: any) {
       toast({ title: 'Could not send final notice', description: err.message, variant: 'destructive' });
