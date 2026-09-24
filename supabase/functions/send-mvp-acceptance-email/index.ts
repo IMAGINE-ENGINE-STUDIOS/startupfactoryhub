@@ -87,15 +87,6 @@ serve(async (req) => {
       ? Math.round(Number(body.amountCents))
       : DEFAULT_FEE_CENTS;
 
-    if (body.validateTemplate === true) {
-      return new Response(JSON.stringify({
-        success: true,
-        template: body.template === "final-notice" ? "final-notice" : "acceptance",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     if (!email || !email.includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
