@@ -394,8 +394,9 @@ export default function UnifiedCommunityFeed({
     setMediaFiles(prev => prev.filter((_, i) => i !== index));
     setMediaPreview(prev => prev.filter((_, i) => i !== index));
   };
-  const uploadMedia = async (file: File, retries = 3): Promise<string | null> => {
+  const uploadMedia = async (rawFile: File, retries = 3): Promise<string | null> => {
     try {
+      const file = await prepareImageForUpload(rawFile);
       // Check file size before upload
       if (file.size > 500 * 1024 * 1024) {
         toast({
