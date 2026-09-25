@@ -1,3 +1,4 @@
+import { prepareImageForUpload, isImageFile } from '@/lib/upload/prepareImage';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -174,7 +175,7 @@ export default function CompanyLogoUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+        accept="image/*,.heic,.heif"
         onChange={uploadLogo}
         disabled={uploading}
         className="hidden"

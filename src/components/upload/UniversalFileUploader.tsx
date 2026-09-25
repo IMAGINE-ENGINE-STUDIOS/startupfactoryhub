@@ -1,3 +1,4 @@
+import { prepareImageForUpload } from '@/lib/upload/prepareImage';
 import { useCallback, useRef, useState } from 'react';
 import { Upload, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';

@@ -1,3 +1,4 @@
+import { prepareImageForUpload, isImageFile } from '@/lib/upload/prepareImage';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -171,7 +172,7 @@ export default function AvatarUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         onChange={uploadAvatar}
         disabled={uploading}
         className="hidden"
