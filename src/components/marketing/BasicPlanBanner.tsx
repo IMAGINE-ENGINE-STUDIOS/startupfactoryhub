@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import GIF from 'gif.js';
 import planBg from '@/assets/basic-plan-banner-bg.jpg';
 import sfhEmblem from '@/assets/sfh-logo-emblem.png';
+import foxtailLogoAsset from '@/assets/foxtail-coffee-logo.png.asset.json';
 
 const W = 1200;
 const H = 630;
@@ -137,6 +138,7 @@ const drawFrame = (
   ctx: CanvasRenderingContext2D,
   bg: HTMLImageElement,
   logo: HTMLImageElement,
+  foxtailLogo: HTMLImageElement,
   ps: Particle[],
   t: number,
 ) => {
@@ -281,7 +283,7 @@ const drawFrame = (
   // eyebrow pills
   const pillY = 140;
   ctx.font = '700 10.5px "Helvetica Neue", Arial, sans-serif';
-  const p1 = 'MEMBERSHIP  |  BASIC PLAN';
+  const p1 = 'STARTUP FACTORY HUB  |  MEMBERS CLUB';
   const p1w = ctx.measureText(p1).width + 30;
   const pg = ctx.createLinearGradient(x0, 0, x0 + p1w, 0);
   pg.addColorStop(0, `rgba(${TEAL},0.28)`);
@@ -296,7 +298,7 @@ const drawFrame = (
   ctx.fillStyle = '#5eead4';
   ctx.fillText(p1, x0 + 15, pillY);
 
-  const p2 = 'JOIN ANYTIME';
+  const p2 = 'ORLANDO · MEMBERS ONLY';
   const p2x = x0 + p1w + 12;
   const p2w = ctx.measureText(p2).width + 38;
   ctx.fillStyle = `rgba(${CYAN},0.09)`;
@@ -317,43 +319,26 @@ const drawFrame = (
   ctx.textBaseline = 'alphabetic';
   ctx.font = '300 27px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.fillText('FULL ACCESS TO THE ECOSYSTEM', x0, 208);
+  ctx.fillText('YOUR EXCLUSIVE PLACE TO BUILD & CONNECT', x0, 208);
 
   const titleGrad = ctx.createLinearGradient(x0, 0, x0 + 640, 0);
   titleGrad.addColorStop(0, '#5eead4');
   titleGrad.addColorStop(0.5, '#22d3ee');
   titleGrad.addColorStop(1, '#818cf8');
-  ctx.font = '900 66px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = '900 62px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = titleGrad;
   ctx.shadowColor = `rgba(${CYAN},${0.32 + 0.2 * Math.sin(t * 2)})`;
   ctx.shadowBlur = 26 + 12 * Math.sin(t * 2);
-  ctx.fillText('BASIC PLAN', x0, 282);
+  ctx.fillText('MEMBERS CLUB', x0, 282);
   ctx.shadowBlur = 0;
 
-  // price block
-  ctx.font = '900 52px "Helvetica Neue", Arial, sans-serif';
+  // exclusive location
+  ctx.font = '800 18px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('$50', x0, 348);
-  const priceW = ctx.measureText('$50').width;
-  ctx.font = '400 20px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.62)';
-  ctx.fillText('/ month', x0 + priceW + 10, 348);
-  const permW = ctx.measureText('/ month').width;
-  ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
-  const saveTxt = 'OR $480 / YEAR — SAVE 20%';
-  const saveX = x0 + priceW + permW + 26;
-  const saveW = ctx.measureText(saveTxt).width + 24;
-  ctx.fillStyle = `rgba(${INDIGO},0.14)`;
-  ctx.beginPath();
-  ctx.roundRect(saveX, 330, saveW, 24, 12);
-  ctx.fill();
-  ctx.strokeStyle = `rgba(${INDIGO},0.5)`;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.fillStyle = '#c7d2fe';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(saveTxt, saveX + 12, 342);
-  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('EXCLUSIVE MEMBER LOCATION', x0, 330);
+  ctx.font = '500 15px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.fillText('7813 S Orange Ave, Suite 132 · Orlando, FL 32809', x0, 354);
 
   // divider
   const dg = ctx.createLinearGradient(x0, 0, x0 + 470, 0);
@@ -369,18 +354,18 @@ const drawFrame = (
   // copy
   ctx.font = '500 15px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = `rgba(94,234,212,0.95)`;
-  ctx.fillText('Everything founders, students and advisors need in one membership.', x0, 400);
+  ctx.fillText('A private home base for founders, students, advisors and innovators.', x0, 400);
   ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.58)';
-  ctx.fillText('Cancel anytime · Instant access · Global community', x0, 422);
+  ctx.fillText('Connect locally · Build globally · Coffee included for members', x0, 422);
 
   // benefit chips
   const chips = [
-    'POST ON THE FEED & RESOURCE MAP',
-    'GENIUS AI TOOLS',
-    'INVESTOR & MENTOR NETWORK',
-    'EVENTS · AR · COURSES',
-    'FULL RESOURCE LIBRARY',
+    'EXCLUSIVE ORLANDO ACCESS',
+    'COFFEE INCLUDED',
+    'FOUNDER COMMUNITY',
+    'INVESTORS & MENTORS',
+    'EVENTS · AI · RESOURCES',
   ];
   let cx2 = x0;
   let rowY = 452;
@@ -406,7 +391,7 @@ const drawFrame = (
 
   // CTA
   const ctaY = 540;
-  const ctaText = 'JOIN FOR $50 / MONTH →';
+  const ctaText = 'REQUEST MEMBERSHIP →';
   ctx.font = '800 13px "Helvetica Neue", Arial, sans-serif';
   const ctaW = ctx.measureText(ctaText).width + 56;
   const cg = ctx.createLinearGradient(x0, 0, x0 + ctaW, 0);
@@ -426,6 +411,35 @@ const drawFrame = (
   ctx.fillStyle = '#ffffff';
   ctx.textBaseline = 'middle';
   ctx.fillText(ctaText, x0 + 28, ctaY + 22);
+
+  // Foxtail Coffee Co. — supporting location partner logo
+  const partnerX = W - 370;
+  const partnerY = H - 112;
+  const partnerW = 196;
+  const partnerH = 66;
+  ctx.fillStyle = 'rgba(255,255,255,0.94)';
+  ctx.beginPath();
+  ctx.roundRect(partnerX, partnerY, partnerW, partnerH, 8);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${TEAL},0.42)`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  const fw = foxtailLogo.naturalWidth || foxtailLogo.width;
+  const fh = foxtailLogo.naturalHeight || foxtailLogo.height;
+  const fit = Math.min((partnerW - 34) / fw, (partnerH - 22) / fh);
+  const drawW = fw * fit;
+  const drawH = fh * fit;
+  ctx.drawImage(
+    foxtailLogo,
+    partnerX + (partnerW - drawW) / 2,
+    partnerY + (partnerH - drawH) / 2,
+    drawW,
+    drawH,
+  );
+  ctx.font = '700 8px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.48)';
+  ctx.textAlign = 'center';
+  ctx.fillText('COFFEE INCLUDED AT THE MEMBERS CLUB', partnerX + partnerW / 2, partnerY - 10);
 
   // shine sweep across CTA
   ctx.save();
@@ -449,6 +463,7 @@ const BasicPlanBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bgRef = useRef<HTMLImageElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
+  const foxtailLogoRef = useRef<HTMLImageElement | null>(null);
   const partsRef = useRef<Particle[]>(initParticles());
   const rafRef = useRef<number | null>(null);
   const lastTRef = useRef<number>(performance.now());
@@ -460,19 +475,23 @@ const BasicPlanBanner = () => {
   useEffect(() => {
     const bg = new window.Image();
     const logo = new window.Image();
+    const foxtailLogo = new window.Image();
     let loaded = 0;
     const done = () => {
       loaded++;
-      if (loaded === 2) {
+      if (loaded === 3) {
         bgRef.current = bg;
         logoRef.current = logo;
+        foxtailLogoRef.current = foxtailLogo;
         setReady(true);
       }
     };
     bg.onload = done;
     logo.onload = done;
+    foxtailLogo.onload = done;
     bg.src = planBg;
     logo.src = sfhEmblem;
+    foxtailLogo.src = foxtailLogoAsset.url;
   }, []);
 
   useEffect(() => {
@@ -494,7 +513,11 @@ const BasicPlanBanner = () => {
       lastTRef.current = now;
       tSecRef.current += dt;
       stepParticles(partsRef.current, dt);
-      drawFrame(ctx, bgRef.current!, logoRef.current!, partsRef.current, tSecRef.current);
+      const bg = bgRef.current;
+      const logo = logoRef.current;
+      const foxtailLogo = foxtailLogoRef.current;
+      if (!bg || !logo || !foxtailLogo) return;
+      drawFrame(ctx, bg, logo, foxtailLogo, partsRef.current, tSecRef.current);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -507,22 +530,30 @@ const BasicPlanBanner = () => {
     const still = document.createElement('canvas');
     still.width = W;
     still.height = H;
-    const sCtx = still.getContext('2d')!;
-    drawFrame(sCtx, bgRef.current!, logoRef.current!, initParticles(), 1.2);
+    const sCtx = still.getContext('2d');
+    const bg = bgRef.current;
+    const logo = logoRef.current;
+    const foxtailLogo = foxtailLogoRef.current;
+    if (!sCtx || !bg || !logo || !foxtailLogo) return null;
+    drawFrame(sCtx, bg, logo, foxtailLogo, initParticles(), 1.2);
     return still;
   }, []);
 
   const downloadStill = useCallback(
     (type: 'image/png' | 'image/jpeg') => {
-      if (!ready || !bgRef.current || !logoRef.current) {
+      if (!ready || !bgRef.current || !logoRef.current || !foxtailLogoRef.current) {
         toast.error('Assets not loaded yet');
         return;
       }
       const still = renderStill();
+      if (!still) {
+        toast.error('Unable to render banner');
+        return;
+      }
       const url = still.toDataURL(type, type === 'image/jpeg' ? 0.94 : undefined);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `basic-plan-banner.${type === 'image/jpeg' ? 'jpg' : 'png'}`;
+      a.download = `members-club-banner.${type === 'image/jpeg' ? 'jpg' : 'png'}`;
       a.click();
       toast.success(`${type === 'image/jpeg' ? 'JPG' : 'PNG'} downloaded`);
     },
@@ -530,7 +561,7 @@ const BasicPlanBanner = () => {
   );
 
   const handleDownloadGif = useCallback(async () => {
-    if (!ready || !bgRef.current || !logoRef.current) {
+    if (!ready || !bgRef.current || !logoRef.current || !foxtailLogoRef.current) {
       toast.error('Assets not loaded yet');
       return;
     }
@@ -549,12 +580,18 @@ const BasicPlanBanner = () => {
       const exportCanvas = document.createElement('canvas');
       exportCanvas.width = EXPORT_W;
       exportCanvas.height = EXPORT_H;
-      const exCtx = exportCanvas.getContext('2d')!;
+      const exCtx = exportCanvas.getContext('2d');
 
       const work = document.createElement('canvas');
       work.width = W;
       work.height = H;
-      const wCtx = work.getContext('2d')!;
+      const wCtx = work.getContext('2d');
+      const bg = bgRef.current;
+      const logo = logoRef.current;
+      const foxtailLogo = foxtailLogoRef.current;
+      if (!exCtx || !wCtx || !bg || !logo || !foxtailLogo) {
+        throw new Error('Unable to initialize banner renderer');
+      }
 
       const exportParts = initParticles();
 
@@ -570,7 +607,7 @@ const BasicPlanBanner = () => {
       for (let f = 0; f < FRAMES; f++) {
         const t = (f / FRAMES) * DURATION;
         stepParticles(exportParts, 1 / FPS);
-        drawFrame(wCtx, bgRef.current!, logoRef.current!, exportParts, t);
+        drawFrame(wCtx, bg, logo, foxtailLogo, exportParts, t);
         exCtx.clearRect(0, 0, EXPORT_W, EXPORT_H);
         exCtx.imageSmoothingEnabled = true;
         exCtx.imageSmoothingQuality = 'high';
@@ -586,7 +623,7 @@ const BasicPlanBanner = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'basic-plan-banner.gif';
+        a.download = 'members-club-banner.gif';
         a.click();
         URL.revokeObjectURL(url);
         setIsGenerating(false);
@@ -608,11 +645,11 @@ const BasicPlanBanner = () => {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-teal-400" />
-            Basic Plan — Marketing Banner
+            <Sparkles className="w-5 h-5 text-primary" />
+            Members Club — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            $50/mo membership · rotating network sphere, particles and CTA shine · 1200×630 social format
+            Exclusive Orlando member location · coffee included · 1200×630 social format
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -640,10 +677,10 @@ const BasicPlanBanner = () => {
         </div>
       </div>
 
-      <div className="relative rounded-lg overflow-hidden border border-border bg-black">
+      <div className="relative rounded-lg overflow-hidden border border-border bg-background">
         {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
-            <div className="flex items-center gap-2 text-white text-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/70 z-10">
+            <div className="flex items-center gap-2 text-foreground text-sm">
               <Loader2 className="w-4 h-4 animate-spin" />
               Loading assets…
             </div>
