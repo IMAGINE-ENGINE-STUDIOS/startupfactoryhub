@@ -1,3 +1,4 @@
+import { prepareImageForUpload, isImageFile } from '@/lib/upload/prepareImage';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,20 +71,9 @@ export default function AvatarUpload({
       }
 
       setUploading(true);
-      const file = event.target.files[0];
-      
-      // Validate file size (5MB)
-      if (file.size > 5242880) {
-        toast({
-          title: "File too large",
-          description: "Avatar must be less than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
+      const rawFile = event.target.files[0];
 
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
+      if (!isImageFile(rawFile)) {
         toast({
           title: "Invalid file type",
           description: "Please upload an image file",
@@ -92,7 +82,19 @@ export default function AvatarUpload({
         return;
       }
 
-      const fileExt = file.name.split('.').pop();
+      const file = await prepareImageForUpload(rawFile);
+
+      // Validate file size (20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Avatar must be less than 20MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const fileExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const filePath = `${user.id}/avatar.${fileExt}`;
 
       // Upload to storage
@@ -170,7 +172,7 @@ export default function AvatarUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         onChange={uploadAvatar}
         disabled={uploading}
         className="hidden"

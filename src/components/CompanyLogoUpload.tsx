@@ -1,3 +1,4 @@
+import { prepareImageForUpload, isImageFile } from '@/lib/upload/prepareImage';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,8 +35,19 @@ export default function CompanyLogoUpload({
       }
 
       setUploading(true);
-      const file = event.target.files[0];
-      
+      const rawFile = event.target.files[0];
+
+      if (!isImageFile(rawFile) && rawFile.type !== 'image/svg+xml') {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a JPG, PNG, WEBP, or SVG image",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const file = await prepareImageForUpload(rawFile);
+
       // Validate file size (5MB)
       if (file.size > 5242880) {
         toast({
@@ -46,18 +58,7 @@ export default function CompanyLogoUpload({
         return;
       }
 
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
-      if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload a JPG, PNG, WEBP, or SVG image",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const fileExt = file.name.split('.').pop();
+      const fileExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const filePath = `${user.id}/logo.${fileExt}`;
 
       // Upload to storage
@@ -174,7 +175,7 @@ export default function CompanyLogoUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+        accept="image/*,.heic,.heif"
         onChange={uploadLogo}
         disabled={uploading}
         className="hidden"

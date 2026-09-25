@@ -1,3 +1,4 @@
+import { prepareImageForUpload } from '@/lib/upload/prepareImage';
 import { useCallback, useRef, useState } from 'react';
 import { Upload, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,6 +76,7 @@ export function UniversalFileUploader({
       );
 
       try {
+        item = { ...item, file: await prepareImageForUpload(item.file) };
         const safeName = item.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         const path = [userId, folder, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`]
           .filter(Boolean)
