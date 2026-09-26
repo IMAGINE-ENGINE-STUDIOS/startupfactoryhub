@@ -46,7 +46,7 @@ export default function PayoutEventEarnings({ earnings }: PayoutEventEarningsPro
                 <TableHead className="text-right">Ticket Price</TableHead>
                 <TableHead className="text-right">Sold</TableHead>
                 <TableHead className="text-right">Gross</TableHead>
-                <TableHead className="text-right">Fee (10%)</TableHead>
+                <TableHead className="text-right">Fee (5%)</TableHead>
                 <TableHead className="text-right">Net Payout</TableHead>
               </TableRow>
             </TableHeader>

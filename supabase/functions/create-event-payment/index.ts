@@ -68,8 +68,8 @@ serve(async (req) => {
     }
 
     const basePriceCents = event.ticket_price_cents;
-    const platformFeeCents = Math.round(basePriceCents * 0.10);
-    const totalCents = basePriceCents + platformFeeCents;
+    const platformFeeCents = Math.round(basePriceCents * 0.05);
+    const totalCents = basePriceCents;
 
     logStep("Price calculated", { basePriceCents, platformFeeCents, totalCents });
 
@@ -90,7 +90,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: {
               name: `Ticket: ${event.title}`,
-              description: `Event ticket ($${(basePriceCents / 100).toFixed(2)}) + 10% platform fee ($${(platformFeeCents / 100).toFixed(2)})`,
+              description: `Event ticket: $${(basePriceCents / 100).toFixed(2)}`,
             },
             unit_amount: totalCents,
           },

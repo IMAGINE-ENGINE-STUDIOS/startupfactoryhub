@@ -564,18 +564,12 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
           )}
 
           {/* Paid Event Ticket Section */}
-          {event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 && user && !isOrganizer && !hasPaidTicket && (
+          {!event.external_registration_url && event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 && user && !isOrganizer && !hasPaidTicket && (
             <div className="pt-4 border-t space-y-3">
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm font-medium mb-1">Ticket Price</p>
                 <p className="text-lg font-bold">
                   ${(event.ticket_price_cents / 100).toFixed(2)}
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    + ${(Math.round(event.ticket_price_cents * 0.10) / 100).toFixed(2)} platform fee
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Total: ${((event.ticket_price_cents + Math.round(event.ticket_price_cents * 0.10)) / 100).toFixed(2)}
                 </p>
               </div>
               <Button
@@ -592,7 +586,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 ) : isFull ? (
                   'Event Full'
                 ) : (
-                  `Buy Ticket — $${((event.ticket_price_cents + Math.round(event.ticket_price_cents * 0.10)) / 100).toFixed(2)}`
+                  `Buy Ticket — $${(event.ticket_price_cents / 100).toFixed(2)}`
                 )}
               </Button>
             </div>

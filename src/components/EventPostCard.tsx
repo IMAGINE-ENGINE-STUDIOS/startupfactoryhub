@@ -339,9 +339,9 @@ export const EventPostCard = ({
             </div>
 
             {/* Ticket Price Badge for paid events */}
-            {eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && (
+            {!eventData.external_registration_url && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && (
               <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 w-fit text-sm py-1 px-3">
-                <Ticket className="inline h-4 w-4 mr-1" /> Ticket: ${(eventData.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(eventData.ticket_price_cents * 0.10) / 100).toFixed(2)} fee
+                <Ticket className="inline h-4 w-4 mr-1" /> Ticket: ${(eventData.ticket_price_cents / 100).toFixed(2)}
               </Badge>
             )}
 
@@ -373,7 +373,7 @@ export const EventPostCard = ({
             )}
 
             {/* Buy Ticket Button for paid events (not yet paid) */}
-            {!isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !hasPaidTicket && user && (
+            {!eventData.external_registration_url && !isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !hasPaidTicket && user && (
               <Button
                 onClick={handleBuyTicket}
                 disabled={buyingTicket}
@@ -386,13 +386,13 @@ export const EventPostCard = ({
                     Processing...
                   </>
                 ) : (
-                  `Buy Ticket — $${((eventData.ticket_price_cents + Math.round(eventData.ticket_price_cents * 0.10)) / 100).toFixed(2)}`
+                  `Buy Ticket — $${(eventData.ticket_price_cents / 100).toFixed(2)}`
                 )}
               </Button>
             )}
 
             {/* Login prompt for paid events when not logged in */}
-            {!isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !user && (
+            {!eventData.external_registration_url && !isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !user && (
               <p className="text-sm text-muted-foreground text-center mt-2">
                 Log in to purchase a ticket for this event.
               </p>
