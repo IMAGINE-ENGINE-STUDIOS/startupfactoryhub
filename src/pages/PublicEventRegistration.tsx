@@ -278,7 +278,7 @@ const PublicEventRegistration = () => {
             <CardTitle className="text-2xl">{event.title}</CardTitle>
             {event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 && (
               <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 w-fit">
-                Ticket: ${(event.ticket_price_cents / 100).toFixed(2)} + 10% fee
+                Ticket: ${(event.ticket_price_cents / 100).toFixed(2)}
               </Badge>
             )}
             {event.description && (
@@ -447,7 +447,7 @@ const PublicEventRegistration = () => {
             <CardContent className="py-8 text-center space-y-4">
               <p className="text-lg font-semibold">This is a paid event</p>
               <p className="text-muted-foreground">
-                Ticket price: ${(event.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(event.ticket_price_cents * 0.10) / 100).toFixed(2)} platform fee
+                Ticket price: ${(event.ticket_price_cents / 100).toFixed(2)}
               </p>
               <p className="text-sm text-muted-foreground">
                 Please log in to purchase a ticket.

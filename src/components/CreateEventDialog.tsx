@@ -649,7 +649,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialD
               placeholder="0.00 (free)"
             />
             <p className="text-xs text-muted-foreground">
-              Leave at $0 for free events. A 10% platform fee will be charged to attendees on paid events.
+              Leave at $0 for free events. A 5% platform fee is deducted from the organizer payout for tickets sold here. External registration links are handled by their provider.
             </p>
           </div>
 
