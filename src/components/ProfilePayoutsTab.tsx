@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -167,7 +167,6 @@ export default function ProfilePayoutsTab() {
   const totalGross = eventGross + donationGross + referralEarnings;
   const totalFees = eventFees + donationFees;
   const totalNet = eventNet + donationNet + referralEarnings;
-  const availableBalance = totalNet - totalWithdrawn;
 
   if (loading) {
     return (
@@ -178,60 +177,48 @@ export default function ProfilePayoutsTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Balance + Stripe account */}
       <PayoutAccountSetup />
 
+      {/* Earnings at a glance */}
       <PayoutEarningsOverview
         totalGross={totalGross}
         totalFees={totalFees}
         totalNet={totalNet}
         totalWithdrawn={totalWithdrawn}
-        availableBalance={availableBalance}
+        availableBalance={0}
       />
 
-      {/* Referral Earnings Quick Link */}
-      <Card className="tech-card border-0">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Gift className="h-6 w-6 text-primary" />
-              <div>
-                <p className="font-medium">Referral Program</p>
-                <p className="text-sm text-muted-foreground">
+      {/* Unified activity: referral, events, donations, withdrawals */}
+      <Card className="tech-card border-0 overflow-hidden">
+        <div className="divide-y divide-border">
+          {/* Referral Program */}
+          <div className="px-6 py-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Gift className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold">Referral Program</h3>
+                <p className="text-sm text-muted-foreground truncate">
                   {referralAccount
                     ? `${referralAccount.total_referrals || 0} referrals · ${formatCents(referralAccount.total_earned_cents || 0)} earned`
                     : 'Earn 20% commission on referred subscriptions'}
                 </p>
               </div>
             </div>
-            <Link to="/referral">
+            <Link to="/referral" className="shrink-0">
               <Button variant="outline" size="sm">
                 {referralAccount ? 'View Dashboard' : 'Join Program'}
               </Button>
             </Link>
           </div>
-        </CardContent>
-      </Card>
 
-      <PayoutEventEarnings earnings={earnings} />
+          <PayoutEventEarnings earnings={earnings} />
 
-      <PayoutDonationEarnings donations={donations} />
+          <PayoutDonationEarnings donations={donations} />
 
-      <PayoutWithdrawalHistory />
-
-      {/* District Earnings Placeholder */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle>District Earnings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No district payouts yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              District creation fees are paid to the platform. Payout features coming soon.
-            </p>
-          </div>
-        </CardContent>
+          <PayoutWithdrawalHistory />
+        </div>
       </Card>
     </div>
   );

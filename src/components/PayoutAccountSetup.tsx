@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Banknote, CheckCircle2, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Banknote, Loader2, RefreshCw } from "lucide-react";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import {
   ConnectComponentsProvider,
@@ -86,7 +86,6 @@ export default function PayoutAccountSetup() {
   const handleOnboardingExit = () => {
     setShowOnboarding(false);
     setStripeConnectInstance(null);
-    // Refresh payout info after exiting
     setLoading(true);
     fetchPayoutInfo();
     toast({ title: "Onboarding updated", description: "Your payout account status has been refreshed." });
@@ -115,122 +114,101 @@ export default function PayoutAccountSetup() {
     return (
       <Card className="tech-card border-0">
         <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );
   }
 
+  const isActive = payoutInfo?.has_payout_account && payoutInfo.account_status === "active";
+  const isPending = payoutInfo?.has_payout_account && payoutInfo.account_status !== "active";
+
   return (
-    <div className="space-y-4">
-      {/* Payout Account Status */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Banknote className="h-5 w-5" />
-            Payout Account
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {payoutInfo?.has_payout_account && payoutInfo.account_status === "active" ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="font-medium">Stripe Connect</p>
-                  <p className="text-sm text-muted-foreground">
-                    Status: <Badge variant="default">Active</Badge>
-                  </p>
-                </div>
+    <Card className="tech-card border-0">
+      <CardContent className="p-6 space-y-5">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Banknote className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold">Payout Account</h3>
+          </div>
+          {payoutInfo?.has_payout_account && (
+            <Badge variant={isActive ? "default" : "secondary"} className="capitalize">
+              {payoutInfo.account_status || "pending"}
+            </Badge>
+          )}
+        </div>
+
+        {/* Connect CTA when no account */}
+        {!payoutInfo?.has_payout_account && !showOnboarding && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl bg-muted/30 p-4">
+            <p className="text-sm text-muted-foreground sm:max-w-md">
+              Connect a Stripe account to receive payouts from events, donations, and referrals.
+            </p>
+            <Button size="sm" onClick={handleStartOnboarding} disabled={connectLoading}>
+              {connectLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Connect Stripe
+            </Button>
+          </div>
+        )}
+
+        {/* Pending account */}
+        {isPending && !showOnboarding && (
+          <div className="flex items-center justify-between rounded-xl bg-muted/30 p-4">
+            <p className="text-sm text-muted-foreground">
+              Your Stripe account needs a few more details before payouts can be sent.
+            </p>
+            <Button size="sm" variant="outline" onClick={handleStartOnboarding} disabled={connectLoading}>
+              Complete Setup
+            </Button>
+          </div>
+        )}
+
+        {/* Active account */}
+        {isActive && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Stripe Connect is linked and active.</p>
+            <Button size="sm" variant="ghost" onClick={handleStartOnboarding} disabled={connectLoading}>
+              {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Update Info
+            </Button>
+          </div>
+        )}
+
+        {/* Balance */}
+        {payoutInfo && (
+          <div className="space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Available Balance</p>
+                <p className="text-3xl font-bold mt-1">{formatCents(payoutInfo.available_balance_cents)}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={handleStartOnboarding} disabled={connectLoading}>
-                {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                Update Info
-              </Button>
-            </div>
-          ) : payoutInfo?.has_payout_account ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                  <div>
-                    <p className="font-medium">Stripe Connect</p>
-                    <p className="text-sm text-muted-foreground">
-                      Status: <Badge variant="secondary">{payoutInfo.account_status}</Badge>
-                    </p>
-                  </div>
-                </div>
-                {!showOnboarding && (
-                  <Button variant="outline" size="sm" onClick={handleStartOnboarding} disabled={connectLoading}>
-                    {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Complete Setup
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <Banknote className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-40" />
-              <p className="text-muted-foreground mb-3">Connect a Stripe account to receive payouts from events, districts, and referrals.</p>
-              {!showOnboarding && (
-                <Button onClick={handleStartOnboarding} disabled={connectLoading}>
-                  {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Connect Stripe Account
+              {isActive && payoutInfo.available_balance_cents > 0 && (
+                <Button onClick={handleWithdraw} disabled={withdrawing}>
+                  {withdrawing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  Withdraw {formatCents(payoutInfo.available_balance_cents)}
                 </Button>
               )}
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">
+              Referral {formatCents(payoutInfo.referral_earnings_cents)}
+              {" · "}Events {formatCents(payoutInfo.event_earnings_cents)}
+              {" · "}Withdrawn {formatCents(payoutInfo.total_withdrawn_cents)}
+            </p>
+          </div>
+        )}
 
-          {/* Embedded Onboarding */}
-          {showOnboarding && stripeConnectInstance && (
-            <div className="mt-4 border rounded-xl overflow-hidden bg-background">
-              <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-                <ConnectAccountOnboarding
-                  onExit={handleOnboardingExit}
-                />
-              </ConnectComponentsProvider>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Balance & Withdraw */}
-      {payoutInfo && (
-        <Card className="tech-card border-0">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Available Balance</span>
-              <span className="text-2xl text-primary">{formatCents(payoutInfo.available_balance_cents)}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground">Referral Earnings</p>
-                <p className="font-semibold">{formatCents(payoutInfo.referral_earnings_cents)}</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground">Event Earnings</p>
-                <p className="font-semibold">{formatCents(payoutInfo.event_earnings_cents)}</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground">Total Withdrawn</p>
-                <p className="font-semibold">{formatCents(payoutInfo.total_withdrawn_cents)}</p>
-              </div>
-            </div>
-            {payoutInfo.available_balance_cents > 0 && payoutInfo.account_status === "active" && (
-              <Button
-                className="w-full"
-                onClick={handleWithdraw}
-                disabled={withdrawing}
-              >
-                {withdrawing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Withdraw {formatCents(payoutInfo.available_balance_cents)}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        {/* Embedded Onboarding */}
+        {showOnboarding && stripeConnectInstance && (
+          <div className="border rounded-xl overflow-hidden bg-background">
+            <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+              <ConnectAccountOnboarding
+                onExit={handleOnboardingExit}
+              />
+            </ConnectComponentsProvider>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

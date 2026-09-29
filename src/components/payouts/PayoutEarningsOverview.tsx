@@ -14,47 +14,31 @@ export default function PayoutEarningsOverview({
   totalFees,
   totalNet,
   totalWithdrawn,
-  availableBalance,
 }: PayoutEarningsOverviewProps) {
   const formatCents = (c: number) => `$${(c / 100).toFixed(2)}`;
 
   const stats = [
-    { label: "Gross Revenue", value: formatCents(totalGross), icon: DollarSign, color: "text-green-500" },
-    { label: "Platform Fees (10%)", value: formatCents(totalFees), icon: Percent, color: "text-orange-500" },
-    { label: "Net Earnings", value: formatCents(totalNet), icon: TrendingUp, color: "text-primary" },
-    { label: "Total Withdrawn", value: formatCents(totalWithdrawn), icon: ArrowDownToLine, color: "text-blue-500" },
+    { label: "Gross Revenue", value: formatCents(totalGross), icon: DollarSign },
+    { label: "Platform Fees", value: formatCents(totalFees), icon: Percent },
+    { label: "Net Earnings", value: formatCents(totalNet), icon: TrendingUp },
+    { label: "Total Withdrawn", value: formatCents(totalWithdrawn), icon: ArrowDownToLine },
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Available Balance Hero */}
-      <Card className="tech-card border-0 bg-gradient-to-br from-primary/10 to-primary/5">
-        <CardContent className="p-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Available Balance</p>
-            <p className="text-4xl font-bold text-primary">{formatCents(availableBalance)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Ready to withdraw</p>
-          </div>
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <DollarSign className="h-8 w-8 text-primary" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="tech-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+    <Card className="tech-card border-0 overflow-hidden">
+      <CardContent className="p-0">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-border">
+          {stats.map((stat) => (
+            <div key={stat.label} className="p-5">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <stat.icon className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium uppercase tracking-wide">{stat.label}</span>
               </div>
-              <p className="text-lg font-bold">{stat.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+              <p className="text-xl font-semibold mt-1.5">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

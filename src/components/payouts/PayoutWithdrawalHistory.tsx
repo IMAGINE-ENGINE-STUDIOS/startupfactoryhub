@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { History, Loader2 } from "lucide-react";
@@ -53,74 +52,64 @@ export default function PayoutWithdrawalHistory() {
     }
   };
 
-  if (loading) {
-    return (
-      <Card className="tech-card border-0">
-        <CardContent className="p-6 flex justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="tech-card border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" />
-          Withdrawal History
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {withdrawals.length === 0 ? (
-          <div className="text-center py-8">
-            <History className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
-            <p className="text-muted-foreground">No withdrawals yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your withdrawal history will appear here
-            </p>
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Completed</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {withdrawals.map((w) => (
-                <TableRow key={w.id}>
-                  <TableCell className="text-sm">
-                    {format(new Date(w.created_at), "MMM d, yyyy")}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="capitalize text-xs">
-                      {w.source}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCents(w.amount_cents)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariant(w.status)} className="capitalize">
-                      {w.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {w.completed_at
-                      ? format(new Date(w.completed_at), "MMM d, yyyy")
-                      : "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+    <section className="px-6 py-5">
+      <div className="flex items-center gap-2 mb-4">
+        <History className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-sm font-semibold">Withdrawal History</h3>
+        {withdrawals.length > 0 && (
+          <span className="text-xs text-muted-foreground">· {withdrawals.length}</span>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : withdrawals.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Your withdrawal history will appear here.
+        </p>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead className="hidden md:table-cell">Source</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden lg:table-cell">Completed</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {withdrawals.map((w) => (
+              <TableRow key={w.id}>
+                <TableCell className="text-sm">
+                  {format(new Date(w.created_at), "MMM d, yyyy")}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Badge variant="outline" className="capitalize text-xs">
+                    {w.source}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right font-medium">
+                  {formatCents(w.amount_cents)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={statusVariant(w.status)} className="capitalize">
+                    {w.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground hidden lg:table-cell">
+                  {w.completed_at
+                    ? format(new Date(w.completed_at), "MMM d, yyyy")
+                    : "—"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </section>
   );
 }
