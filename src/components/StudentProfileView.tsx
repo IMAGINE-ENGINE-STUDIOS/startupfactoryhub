@@ -212,7 +212,7 @@ export default function StudentProfileView() {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="profile-modern space-y-6 pb-8">
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
           <TabsList className="bg-transparent p-0 h-auto gap-2 flex">

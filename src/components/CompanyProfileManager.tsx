@@ -518,7 +518,7 @@ export default function CompanyProfileManager() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="profile-modern space-y-6">
       {/* Hero header — cover + overlapping identity */}
       <div className="relative overflow-hidden rounded-3xl tech-card border-0">
         {/* Cover gradient + ambient orbs */}
