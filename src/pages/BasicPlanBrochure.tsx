@@ -20,7 +20,7 @@ import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
   Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
   CalendarDays, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
-  Coffee, BadgeCheck,
+  Coffee, BadgeCheck, Code2,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -1543,7 +1543,31 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 BECOME <span style={{ color: '#67e8f9' }}>A MEMBER</span>
               </h1>
 
-              <div className="mt-6 flex-1 min-h-0">
+              <div
+                className="mt-5 inline-flex items-center gap-4 self-start rounded-2xl px-5 py-3.5"
+                style={{
+                  background: 'linear-gradient(140deg, rgba(103,232,249,0.16), rgba(255,255,255,0.05))',
+                  border: '1px solid rgba(103,232,249,0.45)',
+                  boxShadow: `0 12px 34px -14px rgba(14,165,183,0.55), inset 0 0 18px rgba(103,232,249,0.08)`,
+                }}
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{
+                  background: 'linear-gradient(135deg, rgba(103,232,249,0.25), rgba(103,232,249,0.05))',
+                  border: '1px solid rgba(103,232,249,0.5)',
+                }}>
+                  <Code2 className="h-5 w-5" style={{ color: '#67e8f9' }} />
+                </div>
+                <div className="leading-tight">
+                  <div className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/55">
+                    Included with membership
+                  </div>
+                  <div className="text-white font-bold text-[17px] mt-0.5">
+                    Access to our open source technologies
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex-1 min-h-0">
                 <CheckoutPanel monthly={monthly} isMember={isMember} />
               </div>
 
