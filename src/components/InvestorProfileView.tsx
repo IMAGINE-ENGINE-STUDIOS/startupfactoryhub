@@ -219,7 +219,7 @@ export default function InvestorProfileView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="profile-modern space-y-6">
       {/* Header */}
       <Card className="tech-card border-0">
         <CardContent className="p-8">

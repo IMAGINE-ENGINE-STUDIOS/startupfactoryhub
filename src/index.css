@@ -541,3 +541,50 @@ All colors MUST be HSL.
 .min-h-\[100svh\].bg-background {
   background-color: hsl(var(--background) / 0.86);
 }
+
+/* Simplified, modern profile surfaces (all user types) */
+@layer components {
+  .profile-modern .tech-card {
+    background: hsl(var(--card) / 0.35);
+    border: 1px solid hsl(var(--border) / 0.35);
+    box-shadow: none;
+    border-radius: 1.25rem;
+  }
+  .profile-modern .tech-card:hover {
+    box-shadow: none;
+    border-color: hsl(var(--border) / 0.6);
+  }
+  .profile-modern .tech-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  /* Nested boxes become plain sections */
+  .profile-modern .tech-card .tech-card {
+    background: transparent;
+    border: 0;
+    border-top: 1px solid hsl(var(--border) / 0.3);
+    border-radius: 0;
+  }
+  /* Stat tiles merge into one slim strip */
+  .profile-modern .grid.md\:grid-cols-4:has(> .tech-card) {
+    gap: 1px;
+    background: hsl(var(--border) / 0.35);
+    border: 1px solid hsl(var(--border) / 0.35);
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+  .profile-modern .grid.md\:grid-cols-4 > .tech-card {
+    background: hsl(var(--card));
+    border: 0;
+    border-radius: 0;
+  }
+  .profile-modern .grid.md\:grid-cols-4 > .tech-card > div {
+    padding: 1rem 1.25rem;
+  }
+  .profile-modern .grid.md\:grid-cols-4 > .tech-card svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0.6;
+  }
+}
