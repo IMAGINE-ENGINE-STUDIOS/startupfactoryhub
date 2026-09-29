@@ -39,6 +39,8 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
 
     let map: mapboxgl.Map;
     let frame = 0;
+    let resizeFrame = 0;
+    let visible = false;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -51,9 +53,12 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
         pitch: 0,
         bearing: 0,
         attributionControl: false,
-        antialias: true,
+        antialias: false,
         interactive: false,
-      });
+        maxPixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+        fadeDuration: 0,
+        trackResize: false,
+      } as never);
     } catch {
       setFailed(true);
       return;
@@ -61,6 +66,54 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
 
     mapRef.current = map;
     map.on('error', () => setFailed(true));
+
+    // Flipbook pages are transformed and initially hidden. Mapbox otherwise
+    // reads the transformed bounds and creates a blank or undersized canvas.
+    const container = containerRef.current;
+    const internals = map as unknown as {
+      _containerWidth: number;
+      _containerHeight: number;
+      _updateContainerDimensions: () => void;
+    };
+    internals._updateContainerDimensions = () => {
+      internals._containerWidth = container.clientWidth || 1;
+      internals._containerHeight = container.clientHeight || 1;
+    };
+
+    let lastW = 0;
+    let lastH = 0;
+    const sync = () => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (width < 2 || height < 2) return;
+      if (width === lastW && height === lastH) return;
+      lastW = width;
+      lastH = height;
+      map.resize();
+    };
+    const scheduleSync = () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        sync();
+      });
+    };
+    const resizeObserver = new ResizeObserver(scheduleSync);
+    resizeObserver.observe(container);
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) {
+        lastW = 0;
+        lastH = 0;
+        scheduleSync();
+      }
+    }, { threshold: 0.01 });
+    intersectionObserver.observe(container);
+    const timers = [120, 400, 900, 1800, 3000].map((delay) => window.setTimeout(() => {
+      lastW = 0;
+      lastH = 0;
+      scheduleSync();
+    }, delay));
 
     map.on('style.load', () => {
       map.setFog({
@@ -82,9 +135,11 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
       });
 
       const spin = () => {
-        const c = map.getCenter();
-        c.lng -= 0.08;
-        map.setCenter(c);
+        if (visible) {
+          const c = map.getCenter();
+          c.lng -= 0.08;
+          map.jumpTo({ center: c });
+        }
         frame = requestAnimationFrame(spin);
       };
       frame = requestAnimationFrame(spin);
@@ -92,6 +147,10 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
 
     return () => {
       cancelAnimationFrame(frame);
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      timers.forEach(window.clearTimeout);
       map.remove();
       mapRef.current = null;
     };
@@ -107,13 +166,18 @@ const SFHNetworkGlobe = ({ accent = '#0ea5b7', fallbackImage, className = '' }: 
   }
 
   return (
-    <div className={`absolute inset-0 flex items-center justify-center ${className}`}>
+    <div className={`sfh-network-globe absolute inset-0 flex items-center justify-center ${className}`}>
       <div ref={containerRef} className="absolute inset-0" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: `radial-gradient(circle at 50% 50%, transparent 45%, rgba(3,12,22,0.72) 100%)` }}
       />
-      <style>{`@keyframes sfh-globe-ping { 75%,100% { transform: scale(2); opacity: 0 } }`}</style>
+      <style>{`
+        @keyframes sfh-globe-ping { 75%,100% { transform: scale(2); opacity: 0 } }
+        .sfh-network-globe .mapboxgl-map,
+        .sfh-network-globe .mapboxgl-canvas-container,
+        .sfh-network-globe .mapboxgl-canvas { width: 100% !important; height: 100% !important; }
+      `}</style>
     </div>
   );
 };
