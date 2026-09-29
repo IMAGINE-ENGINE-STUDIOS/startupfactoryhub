@@ -20,6 +20,7 @@ import {
   Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
   Scan, Smartphone, Box, Globe2, Sparkles, Radio, Users, MapPin, Wifi,
   CalendarDays, Award, Building2, Handshake, Rocket, Brain, GraduationCap, DollarSign,
+  Coffee, BadgeCheck,
 } from 'lucide-react';
 import '@google/model-viewer';
 import { Button } from '@/components/ui/button';
@@ -41,9 +42,12 @@ import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
 import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
 import nasaLogo from '@/assets/nasa-logo.png';
+import innovationCoffeeTable from '@/assets/membership/innovation-coffee-table.jpg';
+import foxtailLogo from '@/assets/foxtail-coffee-logo.png.asset.json';
 
 import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
+import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
 
 const NASA_BASE = 'https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models';
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
@@ -80,7 +84,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
-const TOTAL = 9;
+const TOTAL = 10;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
@@ -945,10 +949,94 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 04 · GLOBAL OFFICE: CONNECT WITH FOUNDERS ---------------- */}
+      {/* ---------------- 04 · CENTRAL FLORIDA MEMBERS CLUB ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="GLOBAL NETWORK" pageNum={4} accent={NEON.cyan}>
+          <PageFrame code="04" label="CENTRAL FLORIDA MEMBERS" pageNum={4} accent={NEON.amber}>
+            <div className="absolute inset-0 overflow-hidden">
+              <img
+                src={innovationCoffeeTable}
+                alt="Central Florida founders meeting over coffee"
+                width={1200}
+                height={1600}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(7,18,22,0.94) 0%, rgba(7,18,22,0.58) 40%, rgba(7,18,22,0.22) 67%, rgba(7,18,22,0.94) 100%)',
+                }}
+              />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(120deg, ${NEON.cyan}25, transparent 52%, ${NEON.amber}16)` }} />
+
+              <div className="relative z-10 flex h-full flex-col px-12 pb-14 pt-16">
+                <motion.div
+                  initial={{ opacity: 0, y: -14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="flex items-start justify-between gap-5"
+                >
+                  <div className="max-w-[580px]">
+                    <div className="mb-4 flex items-center gap-3 font-mono text-[14px] uppercase tracking-[0.34em]" style={{ color: '#fcd34d' }}>
+                      <span className="h-px w-12" style={{ background: '#fcd34d' }} />
+                      Exclusive Central Florida Members
+                    </div>
+                    <h2 className="text-[52px] font-black leading-[0.98] tracking-tight text-white" style={{ textShadow: '0 8px 35px rgba(0,0,0,0.55)' }}>
+                      Your meeting point:<br />
+                      <span style={{ color: '#fcd34d' }}>Innovation Coffee Table.</span>
+                    </h2>
+                  </div>
+
+                  <div className="shrink-0 rounded-xl border border-white/25 bg-white/95 p-3 shadow-2xl">
+                    <img src={foxtailLogo.url} alt="Foxtail Coffee Co." className="h-10 w-auto object-contain" />
+                  </div>
+                </motion.div>
+
+                <div className="mt-auto grid grid-cols-[1.35fr_0.65fr] items-end gap-5">
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25, duration: 0.65 }}
+                    className="rounded-2xl border border-white/20 bg-slate-950/75 p-6 backdrop-blur-xl"
+                    style={{ boxShadow: '0 22px 55px rgba(0,0,0,0.42)' }}
+                  >
+                    <p className="text-[19px] font-medium leading-relaxed text-white/90">
+                      A dedicated place for Central Florida members to connect, exchange ideas and build relationships over coffee at Foxtail Coffee Co. · Belle Isle.
+                    </p>
+                    <div className="mt-5 flex items-center gap-4 border-t border-white/15 pt-5">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: `${NEON.amber}25`, border: `1px solid ${NEON.amber}70` }}>
+                        <Coffee className="h-6 w-6" style={{ color: '#fcd34d' }} />
+                      </div>
+                      <div>
+                        <div className="text-[24px] font-black leading-none text-white">Two coffees included</div>
+                        <div className="mt-1 font-mono text-[12px] uppercase tracking-[0.25em] text-white/55">with your Members Club experience</div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.45, duration: 0.55 }}
+                    className="rounded-2xl border border-white/20 bg-white/95 p-5 text-slate-900 shadow-2xl"
+                  >
+                    <BadgeCheck className="mb-4 h-8 w-8" style={{ color: NEON.cyan }} />
+                    <div className="font-mono text-[12px] uppercase tracking-[0.28em]" style={{ color: NEON.cyan }}>Members Only</div>
+                    <div className="mt-2 text-[22px] font-black leading-tight">A local table for a global community.</div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+
+      {/* ---------------- 05 · GLOBAL OFFICE: CONNECT WITH FOUNDERS ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="05" label="GLOBAL NETWORK" pageNum={5} accent={NEON.cyan}>
             <PageTitle
               kicker="Connect with founders everywhere"
               title={<><span style={{ color: NEON.cyan }}>A global office</span><br />without walls.</>}
@@ -961,18 +1049,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 boxShadow: `0 0 60px ${NEON.cyan}25, inset 0 0 40px rgba(0,0,0,0.5)`,
               }}
             >
+              <SFHNetworkGlobe accent={NEON.cyan} />
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                  backgroundImage: `url(${imgGlobal})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(180deg, ${NEON.ink}66 0%, ${NEON.ink}bb 55%, ${NEON.ink}ee 100%)`,
+                  background: `linear-gradient(180deg, ${NEON.ink}10 0%, ${NEON.ink}44 48%, ${NEON.ink}f2 100%)`,
                 }}
               />
 
@@ -1053,11 +1134,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 05 · SFH CAPABILITIES ---------------- */}
+      {/* ---------------- 06 · SFH CAPABILITIES ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.cyan} code="05" label="SFH CAPABILITIES" pageNum={5}>
-            <PageTitle kicker="05 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+          <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
+            <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
 
             <div className="relative flex-1 pl-16 flex flex-col">
               <motion.div
@@ -1125,11 +1206,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
       </BookPage>
 
 
-      {/* ---------------- 06 · WHAT WE BRING ---------------- */}
+      {/* ---------------- 07 · WHAT WE BRING ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={6}>
-            <PageTitle kicker="06 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+          <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
+            <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
             <div className="relative flex-1 pr-16 flex flex-col">
               <motion.div
@@ -1199,10 +1280,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
 
 
 
-      {/* ---------------- 07 · NASDAQ TOWER ---------------- */}
+      {/* ---------------- 08 · NASDAQ TOWER ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.lime} code="07" label="GLOBAL VISIBILITY" pageNum={7}>
+          <PageFrame accent={NEON.lime} code="08" label="GLOBAL VISIBILITY" pageNum={8}>
             <PageTitle kicker="Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
             <motion.div
@@ -1296,10 +1377,10 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · AR EVENTS ---------------- */}
+      {/* ---------------- 09 · AR EVENTS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame accent={NEON.magenta} code="08" label="AR · IMMERSIVE" pageNum={8}>
+          <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={9}>
             <PageTitle kicker="Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
             <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -1435,7 +1516,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
 
 
 
-      {/* ---------------- 09 · JOIN ---------------- */}
+      {/* ---------------- 10 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
