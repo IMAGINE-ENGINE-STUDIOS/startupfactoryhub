@@ -41,7 +41,7 @@ serve(async (req) => {
     const cycle = body?.billingCycle === "yearly" ? "yearly" : "monthly";
     // Supported membership plans. Anything else falls back to `basic`.
     const planKey = body?.planKey === "investor" ? "investor" : "basic";
-    const returnPath = planKey === "investor" ? "/investor-plan" : "/basic-plan";
+    const returnPath = planKey === "investor" ? "/investor-plan" : "/members-club";
 
     // Resolve price server-side from the plan configuration
     const { data: plan, error: planError } = await supabaseClient
@@ -73,7 +73,7 @@ serve(async (req) => {
       mode: "subscription",
       allow_promotion_codes: true,
       success_url: `${origin}${returnPath}?checkout=success`,
-      cancel_url: `${origin}${returnPath}?checkout=cancelled`,
+      cancel_url: `${origin}${planKey === "investor" ? "/investor-plan" : "/membership"}?checkout=cancelled`,
       metadata: { user_id: user.id, plan: planKey, billing_cycle: cycle },
     });
     logStep("Checkout session created", { sessionId: session.id });
