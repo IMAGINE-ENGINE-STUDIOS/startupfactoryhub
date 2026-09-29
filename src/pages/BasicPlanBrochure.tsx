@@ -1162,6 +1162,8 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                   { i: Award, t: 'Credibility & Brand Authority', b: 'Presence on the Nasdaq Tower in Times Square, partnerships with NVIDIA Inception and VC funds that back every program and announcement.' },
                   { i: Building2, t: 'Offices Worldwide', b: 'Access to a global network of hubs and workspaces, enabling startups to land immediately in key markets.' },
                   { i: Handshake, t: 'International Trade Channels', b: 'Established trade routes and corporate relationships that open markets and customers beyond your home market.' },
+                  { i: Code2, t: 'Open Source Technologies', b: 'Access to our open source technologies — a growing library of tools and frameworks your team can build on from day one.' },
+
                 ].map((n, idx) => (
                   <motion.div
                     key={idx}
@@ -1543,29 +1545,6 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 BECOME <span style={{ color: '#67e8f9' }}>A MEMBER</span>
               </h1>
 
-              <div
-                className="mt-5 inline-flex items-center gap-4 self-start rounded-2xl px-5 py-3.5"
-                style={{
-                  background: 'linear-gradient(140deg, rgba(103,232,249,0.16), rgba(255,255,255,0.05))',
-                  border: '1px solid rgba(103,232,249,0.45)',
-                  boxShadow: `0 12px 34px -14px rgba(14,165,183,0.55), inset 0 0 18px rgba(103,232,249,0.08)`,
-                }}
-              >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{
-                  background: 'linear-gradient(135deg, rgba(103,232,249,0.25), rgba(103,232,249,0.05))',
-                  border: '1px solid rgba(103,232,249,0.5)',
-                }}>
-                  <Code2 className="h-5 w-5" style={{ color: '#67e8f9' }} />
-                </div>
-                <div className="leading-tight">
-                  <div className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/55">
-                    Included with membership
-                  </div>
-                  <div className="text-white font-bold text-[17px] mt-0.5">
-                    Access to our open source technologies
-                  </div>
-                </div>
-              </div>
 
               <div className="mt-5 flex-1 min-h-0">
                 <CheckoutPanel monthly={monthly} isMember={isMember} />
