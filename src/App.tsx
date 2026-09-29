@@ -57,6 +57,7 @@ const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
 const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
+const MembersClub = lazy(() => import("./pages/MembersClub"));
 const InvestorPlanBrochure = lazy(() => import("./pages/InvestorPlanBrochure"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
@@ -217,6 +218,7 @@ const App = () => (
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
                      <Route path="/basic-plan" element={<BasicPlanBrochure />} />
                      <Route path="/membership" element={<BasicPlanBrochure />} />
+                     <Route path="/members-club" element={<MembersClub />} />
                      <Route path="/investor-plan" element={<InvestorPlanBrochure />} />
                      <Route path="/investor-priority" element={<InvestorPlanBrochure />} />
                     <Route path="/parasocios" element={<SociosBrochure />} />
