@@ -31,6 +31,7 @@ import teamKhalia from '@/assets/team-khalia.jpg';
 import teamRicardo from '@/assets/team-ricardo.jpg';
 import teamSteven from '@/assets/team-steven.png';
 import teamGary from '@/assets/team-gary.png';
+import { PARTNERS } from '@/config/partners';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -1052,83 +1053,38 @@ export default function Deck() {
         </SlideWrapper>
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${jupiterBg})` }} />
-            <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
-            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full mx-auto px-[2%]">
-          <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Strategic Network</span>
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Our Partners & Network</h2>
-            <p className="text-lg md:text-xl text-slate-300 text-center mb-6 print:text-gray-600">
-              Backed by industry leaders and innovators shaping the future
-            </p>
-            
-            {/* Partners Grid - 6 columns enlarged */}
-            <div className="grid grid-cols-4 md:grid-cols-6 gap-4 w-full">
-              {[
-                { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
-                { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
-                { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png" },
-                { name: "Nasdaq", logo: "/nasdaq-logo.png" },
-                { name: "GitHub", logo: "/github-logo.png" },
-                { name: "TradingView", logo: "/partners/tradingview-logo.png" },
-                { name: "MongoDB", logo: "/mongodb-logo.webp" },
-                { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png" },
-                { name: "F6S", logo: "/partners/f6s-logo.png" },
-                { name: "Flippa", logo: "/partners/flippa-logo.png" },
-                { name: "IWG", logo: "/partners/iwg-logo.png" },
-                { name: "Startup Factory Hub", logo: "/partners/regus-logo.png" },
-                { name: "Advantary Capital", logo: "/partners/advantary-logo.jpg" },
-                { name: "Lovable", logo: "/partners/lovable-logo.png" },
-                { name: "Lehigh University", logo: "/lehigh-university-logo.png" },
-                { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png" },
-                { name: "Datadog", logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png" },
-                { name: "LivePlan", logo: "/partners/liveplan-logo.png" },
-                { name: "Decahedron Ventures", logo: "/partners/decahedron-ventures-logo.jpg" },
-                { name: "Flusso Capital", logo: "/partners/flusso-capital-logo.png" },
-                { name: "UK Venture Partners", logo: "/partners/uk-venture-logo.jpg" },
-                { name: "Ducere University", logo: "/partners/ducere-logo.png" },
-                { name: "HackerEarth", logo: "/partners/hackerearth-logo.png" },
-                { name: "Orlandopreneur", logo: "/partners/orlandopreneur-logo.png" },
-                { name: "Grupo Incostas", logo: "/partners/incostas-logo.png" },
-                { name: "LOT Network", logo: "/partners/lotnetwork-logo.png" },
-                { name: "Nouel Consult", logo: "/partners/nouel-logo.png" },
-                { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png" },
-                { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
-              ].map((partner, i) => (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-3 flex items-center justify-center h-20 hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
-                  <img 
-                    src={partner.logo} 
-                    alt={partner.name}
-                    className="max-h-12 max-w-[100px] object-contain filter brightness-90 hover:brightness-110 transition-all print:filter-none"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_90%_90%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[320px] opacity-30 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
+            <div className="relative z-10 h-full flex flex-col px-[110px] py-[70px]">
+              <div className="flex items-end justify-between gap-12">
+                <div>
+                  <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Strategic Network</span>
+                  <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">Partners & Network</h2>
                 </div>
-              ))}
+                <div className="flex items-center gap-6">
+                  {PARTNERS.filter(p => p.name.startsWith('NASA')).map(p => (
+                    <div key={p.name} className="flex flex-col items-center gap-3">
+                      <div className="w-[230px] h-[130px] rounded-3xl bg-white flex items-center justify-center p-5 shadow-[0_0_50px_rgba(45,212,191,0.35)] ring-1 ring-teal-300/40">
+                        <img src={p.logo} alt={p.name} className="max-h-full max-w-full object-contain" />
+                      </div>
+                      <span className="text-[18px] text-slate-300 uppercase tracking-[0.15em]">{p.name.includes('Transfer') ? 'NASA Technology Transfer' : 'NASA'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-12 grid grid-cols-8 gap-5 flex-1 content-start">
+                {PARTNERS.filter(p => !p.name.startsWith('NASA')).map((p) => (
+                  <div key={p.name} className="group h-[140px] rounded-2xl bg-white/95 flex items-center justify-center px-5 py-4 ring-1 ring-white/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_36px_rgba(103,232,249,0.5)]" title={p.name}>
+                    <img src={p.logo} alt={p.name} className="max-h-[84px] max-w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).replaceWith(Object.assign(document.createElement('span'), { textContent: p.name, className: 'text-[18px] font-semibold text-slate-800 text-center' })); }} />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex items-center gap-4 text-[20px] text-slate-400 uppercase tracking-[0.25em]">
+                <span className="h-px w-16 bg-teal-400/60" />
+                {PARTNERS.length} partners · Space · Technology · Investment · Academic · Workspace · Legal · Community
+              </div>
             </div>
-            
-            {/* Partner categories */}
-            <div className="flex flex-wrap justify-center gap-3 mt-5">
-              {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((category, i) => (
-                <span key={i} className="px-4 py-1.5 text-sm font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80 print:bg-gray-100 print:border-gray-300 print:text-gray-600">
-                  {category}
-                </span>
-              ))}
-            </div>
-          </div>
-           </div>
           </section>
         </SlideWrapper>
 
