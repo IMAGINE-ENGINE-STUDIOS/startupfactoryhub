@@ -945,10 +945,10 @@ export default function Deck() {
               <div className="flex-[1.35] flex flex-col">
                 <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">5-Year Financial Projections</span>
                 <div className="mt-4 flex items-end gap-6">
-                  <h2 className="text-[150px] leading-[0.9] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">$55.9M</h2>
+                  <h2 className="text-[150px] leading-[0.9] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">$56.7M</h2>
                   <div className="pb-4">
                     <p className="text-[24px] text-slate-400 uppercase tracking-[0.2em]">Year 5 Revenue</p>
-                    <p className="text-[30px] font-semibold text-teal-300 flex items-center gap-2"><TrendingUp className="h-8 w-8" />10x from $5.59M</p>
+                    <p className="text-[30px] font-semibold text-teal-300 flex items-center gap-2"><TrendingUp className="h-8 w-8" />10x from $5.67M</p>
                   </div>
                 </div>
 
@@ -967,7 +967,7 @@ export default function Deck() {
                       <filter id="finGlow"><feGaussianBlur stdDeviation="6" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
                     </defs>
                     {(() => {
-                      const vals = [5.59, 9.94, 17.68, 31.44, 55.9];
+                      const vals = [5.67, 10.08, 17.93, 31.89, 56.7];
                       const pts = vals.map((v, i) => [80 + i * 210, 400 - (v / 60) * 380]);
                       const line = pts.map((p, i) => `${i ? 'L' : 'M'} ${p[0]} ${p[1]}`).join(' ');
                       return (
@@ -1001,14 +1001,14 @@ export default function Deck() {
               {/* RIGHT: Y1 engine + raise */}
               <div className="flex-1 flex flex-col justify-center">
                 <p className="text-[20px] text-slate-400 uppercase tracking-[0.3em]">Year 1 Revenue Engine</p>
-                <p className="text-[64px] font-bold text-white leading-none mt-2">$5.59M<span className="text-[26px] text-slate-400 font-medium"> + AI credits</span></p>
+                <p className="text-[64px] font-bold text-white leading-none mt-2">$5.67M</p>
                 <div className="mt-8 space-y-5">
                   {[
-                    { icon: Briefcase, t: "500 Global Desk", s: "$550 / month", v: "$3.3M", w: 59.0 },
-                    { icon: Building2, t: "100 Global Office", s: "$950 / month", v: "$1.14M", w: 20.4 },
-                    { icon: Users, t: "1,000 Members", s: "$50 / month", v: "$600K", w: 10.7 },
-                    { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", w: 9.8 },
-                    { icon: Cpu, t: "AI Credits", s: "Usage-based AI credits", v: "[TBD]", w: 0 },
+                    { icon: Briefcase, t: "500 Global Desk", s: "$550 / month", v: "$3.3M", w: 58.2 },
+                    { icon: Building2, t: "100 Global Office", s: "$950 / month", v: "$1.14M", w: 20.1 },
+                    { icon: Users, t: "1,000 Members", s: "$50 / month", v: "$600K", w: 10.6 },
+                    { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", w: 9.7 },
+                    { icon: Cpu, t: "340 AI Credit Plans", s: "20% of 1,700 users · $19 avg / month", v: "$77.5K", w: 1.4 },
                   ].map((r, i) => (
                     <div key={i} className="group">
                       <div className="flex items-center gap-4">
