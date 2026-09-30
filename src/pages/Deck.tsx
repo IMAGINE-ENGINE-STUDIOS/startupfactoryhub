@@ -531,15 +531,18 @@ export default function Deck() {
 
               <div className="mt-12 flex flex-col border-t border-white/10">
                 {[
-                  "Fragmented Support",
-                  "Short-Term Programs",
-                  "Limited Operator Access",
-                  "Capital Is Not Enough",
-                  "Learning Doesn't Equal Traction",
-                ].map((t, i) => (
-                  <div key={t} className="group flex items-center gap-8 py-5 border-b border-white/10 transition-colors hover:bg-white/[0.03]">
+                  ["No continuous guidance", "Most programs have a fixed start and end."],
+                  ["No single execution layer", "Founders stitch tools, mentors, and programs together alone."],
+                  ["No personalized pathway", "The next step depends on tech, stage, market, and goals."],
+                  ["Resources disconnected from action", "Knowing a resource exists isn't the same as accessing it."],
+                  ["Capital isn't the real work", "Funding doesn't close product, market, or execution gaps."],
+                ].map(([t, d], i) => (
+                  <div key={t} className="group flex items-center gap-8 py-4 border-b border-white/10 transition-colors hover:bg-white/[0.03]">
                     <span className="text-[15px] font-mono text-rose-300/80 w-8">0{i + 1}</span>
-                    <h4 className="text-[30px] font-light text-white">{t}</h4>
+                    <div>
+                      <h4 className="text-[28px] font-light text-white leading-tight">{t}</h4>
+                      <p className="mt-1 text-[19px] text-slate-400 leading-snug">{d}</p>
+                    </div>
                   </div>
                 ))}
               </div>
