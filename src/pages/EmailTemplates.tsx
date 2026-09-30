@@ -57,6 +57,7 @@ import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtm
 import { generateMvpNoShowHtml } from "@/lib/mvpNoShowEmailHtml";
 import { buildAfWelcomeHtml, buildAfAcceptanceHtml, buildAfFollowUpHtml, buildAfNoShowHtml } from "@/lib/afEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
+import { generateNotionPartnershipHtml } from "@/lib/notionEmailHtml";
 
 
 
@@ -1225,6 +1226,14 @@ const TEMPLATES = [
     trigger: "manual broadcast",
   },
   {
+    id: "notion-partnership",
+    label: "Partnership — Notion for Startups",
+    icon: Handshake,
+    description: "Startup members only: 6 months free Notion Business plan with Notion AI",
+    edgeFunction: "send-notion-partnership",
+    trigger: "manual broadcast",
+  },
+  {
     id: "weekly-welcome",
     label: "Weekly Welcome — IWG & HSBC",
     icon: Building2,
@@ -1487,6 +1496,10 @@ const defaultVars = {
     to: "",
     recipientName: "Founder",
   },
+  "notion-partnership": {
+    to: "",
+    recipientName: "Founder",
+  },
   "daily-digest": {
     to: "",
   },
@@ -1590,7 +1603,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["af-welcome", "af-acceptance", "af-follow-up", "af-no-show", "mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["af-welcome", "af-acceptance", "af-follow-up", "af-no-show", "mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "notion-partnership", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1643,6 +1656,8 @@ export default function EmailTemplates() {
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
+    if (selected === "notion-partnership")
+      return generateNotionPartnershipHtml((vars["notion-partnership"] as any).recipientName || "Founder");
     if (selected === "moonshotnx-partnership")
       return generateMoonshotNXHtml((vars["moonshotnx-partnership"] as any).recipientName || "Founder");
     if (selected === "daily-digest") return generateDailyDigestHtml();
@@ -1772,7 +1787,7 @@ export default function EmailTemplates() {
         };
       } else if (selected === "weekly-welcome") {
         payload = { targetEmails: [toEmail] };
-      } else if (selected === "moonshotnx-partnership") {
+      } else if (selected === "moonshotnx-partnership" || selected === "notion-partnership") {
         payload = { targetEmails: [toEmail] };
       } else if (selected === "daily-digest") {
         payload = { targetEmails: [toEmail] };
