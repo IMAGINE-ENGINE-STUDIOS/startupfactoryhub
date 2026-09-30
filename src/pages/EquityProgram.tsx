@@ -79,7 +79,10 @@ export default function EquityProgram() {
   const apply = () => navigate('/auth?mode=signup');
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+    <div
+      className="relative min-h-screen overflow-x-hidden text-foreground"
+      style={{ background: 'linear-gradient(160deg,#030712 0%,#040b1c 45%,#02040c 100%)' }}
+    >
       <style>{`
         [data-reveal]{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
         [data-reveal].eq-in{opacity:1;transform:none}
@@ -87,61 +90,62 @@ export default function EquityProgram() {
         @keyframes eq-scan{0%{top:0}100%{top:100%}}
         @keyframes eq-pulse{0%,100%{opacity:.35}50%{opacity:1}}
         @keyframes eq-star{from{transform:translateY(0)}to{transform:translateY(-2000px)}}
+        @keyframes eq-trace{0%{stroke-dashoffset:400}100%{stroke-dashoffset:0}}
+        @keyframes eq-node{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+        @keyframes eq-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        @keyframes eq-sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
       `}</style>
 
-      {/* Starfield */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 opacity-60">
-        <div className="absolute inset-0 [background-image:radial-gradient(1px_1px_at_20px_30px,hsl(var(--foreground)/0.7),transparent),radial-gradient(1px_1px_at_140px_90px,hsl(var(--foreground)/0.5),transparent),radial-gradient(1.5px_1.5px_at_260px_160px,hsl(var(--primary)/0.8),transparent),radial-gradient(1px_1px_at_380px_50px,hsl(var(--foreground)/0.6),transparent)] [background-size:420px_220px] h-[4000px] animate-[eq-star_120s_linear_infinite]" />
+      {/* Deep-space starfield */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 opacity-70">
+        <div className="absolute inset-0 h-[4000px] animate-[eq-star_140s_linear_infinite]" style={{
+          backgroundImage: 'radial-gradient(1px 1px at 20px 30px,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 140px 90px,rgba(255,255,255,.5),transparent),radial-gradient(1.5px 1.5px at 260px 160px,rgba(34,211,238,.9),transparent),radial-gradient(1px 1px at 380px 50px,rgba(255,255,255,.6),transparent),radial-gradient(1.2px 1.2px at 320px 200px,rgba(129,140,248,.8),transparent)',
+          backgroundSize: '420px 220px',
+        }} />
       </div>
 
-      {/* HERO */}
-      <section className="relative min-h-screen flex items-center">
-        <div aria-hidden className="absolute left-1/2 top-1/2 w-[900px] h-[900px] rounded-full bg-primary/10 blur-[160px] -translate-x-1/2 -translate-y-1/2" />
-        {[560, 760, 960].map((s, i) => (
-          <div key={s} aria-hidden className="pointer-events-none absolute left-[70%] top-1/2 rounded-full border border-primary/15"
-            style={{ width: s, height: s, animation: `eq-orbit ${40 + i * 20}s linear infinite${i % 2 ? ' reverse' : ''}` }}>
-            <span className="absolute -top-1.5 left-1/2 w-3 h-3 rounded-full bg-primary shadow-[0_0_20px_hsl(var(--primary))]" />
+      {/* HERO · same design as MVP / Accelerated Fundraising, rover on the left */}
+      <section className="relative overflow-hidden border-b border-white/10">
+        {/* nebula glows */}
+        <div className="pointer-events-none absolute -left-40 top-0 h-[600px] w-[600px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(99,102,241,0.28),transparent 70%)' }} />
+        <div className="pointer-events-none absolute right-0 -bottom-40 h-[520px] w-[520px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.25),transparent 70%)' }} />
+        <div className="pointer-events-none absolute left-1/3 top-1/4 h-72 w-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(236,72,153,0.12),transparent 70%)' }} />
+        {/* tech grid + intersection dots */}
+        <div className="pointer-events-none absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(rgba(20,184,166,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.07) 1px, transparent 1px), radial-gradient(rgba(20,184,166,0.28) 1.4px, transparent 1.5px)',
+          backgroundSize: '50px 50px, 50px 50px, 50px 50px',
+        }} />
+        {/* orbital rings behind rover */}
+        {[520, 720, 920].map((s, i) => (
+          <div key={s} aria-hidden className="pointer-events-none absolute left-[28%] top-1/2 rounded-full border"
+            style={{ width: s, height: s, borderColor: 'rgba(34,211,238,0.14)', animation: `eq-orbit ${40 + i * 20}s linear infinite${i % 2 ? ' reverse' : ''}` }}>
+            <span className="absolute -top-1.5 left-1/2 h-3 w-3 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 20px #22d3ee' }} />
           </div>
         ))}
+        {/* circuit traces */}
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 630" aria-hidden>
+          {['M0,180 L440,620', 'M60,0 L560,500', 'M660,0 L1200,540', 'M456,630 L1200,126', 'M0,346 L360,0'].map((d, i) => (
+            <path key={d} d={d} stroke="rgba(34,211,238,0.18)" strokeWidth="1.2" fill="none" strokeDasharray="6 14"
+              style={{ animation: `eq-trace ${14 + i * 3}s linear infinite` }} />
+          ))}
+          {[[245, 165], [460, 390], [130, 420], [880, 180], [1040, 470]].map(([cx, cy], i) => (
+            <circle key={cx} cx={cx} cy={cy} r="4" fill={i % 2 ? '#22d3ee' : '#14b8a6'}
+              style={{ animation: `eq-node ${3 + i * 0.6}s ease-in-out infinite` }} />
+          ))}
+        </svg>
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px" style={{ background: 'linear-gradient(90deg,#14b8a6,#22d3ee,#818cf8)' }} />
+        {['left-5 top-5 border-l-2 border-t-2', 'right-5 top-5 border-r-2 border-t-2', 'bottom-5 left-5 border-b-2 border-l-2', 'bottom-5 right-5 border-b-2 border-r-2'].map((c) => (
+          <span key={c} aria-hidden className={`pointer-events-none absolute h-8 w-8 ${c}`} style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+        ))}
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-6 py-24 lg:grid-cols-2 lg:items-center">
-          <div style={{ transform: `translateY(${scrollY * 0.15}px)` }}>
-            <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <Orbit className="h-3.5 w-3.5" /> Equity Program
-            </p>
-            <h1 className="mt-6 text-5xl font-bold leading-[0.95] tracking-tight sm:text-7xl">
-              Launch with the
-              <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">whole network</span>
-              behind you.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              For just <span className="font-semibold text-foreground">1% equity</span>, your startup gets the full Startup Factory Hub
-              accelerator: build, validate, raise and scale, with 130 countries and 5,800 locations at your side.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button size="lg" onClick={apply} className="gap-2 shadow-[0_0_40px_hsl(var(--primary)/0.45)]">
-                Apply Now <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => document.getElementById('terms')?.scrollIntoView({ behavior: 'smooth' })}>
-                See the Terms
-              </Button>
-            </div>
-            <div className="mt-12 grid max-w-md grid-cols-3 gap-6">
-              {[['1%', 'Equity'], ['130', 'Countries'], ['5,800', 'Locations']].map(([v, l]) => (
-                <div key={l}>
-                  <p className="text-3xl font-bold text-primary">{v}</p>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">{l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Interactive 3D rover */}
-          <div className="relative h-[520px] sm:h-[620px]">
-            <div className="absolute inset-0 rounded-3xl border border-primary/20 bg-card/30 backdrop-blur-sm overflow-hidden">
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-[eq-scan_4s_linear_infinite]" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
+          {/* Interactive 3D rover (left) */}
+          <div className="relative h-[460px] sm:h-[580px]" style={{ animation: 'eq-float 8s ease-in-out infinite' }}>
+            <div className="absolute inset-0 overflow-hidden rounded-3xl backdrop-blur-sm"
+              style={{ border: '1px solid rgba(34,211,238,0.3)', background: 'radial-gradient(circle at 50% 60%,rgba(20,184,166,0.12),rgba(4,10,24,0.6) 70%)', boxShadow: '0 0 60px -20px rgba(34,211,238,0.5)' }}>
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 h-px animate-[eq-scan_4s_linear_infinite]" style={{ background: 'linear-gradient(90deg,transparent,#22d3ee,transparent)' }} />
               {['left-3 top-3 border-l border-t', 'right-3 top-3 border-r border-t', 'left-3 bottom-3 border-l border-b', 'right-3 bottom-3 border-r border-b'].map((c) => (
-                <span key={c} aria-hidden className={`pointer-events-none absolute h-6 w-6 border-primary/60 ${c}`} />
+                <span key={c} aria-hidden className={`pointer-events-none absolute h-6 w-6 ${c}`} style={{ borderColor: 'rgba(34,211,238,0.7)' }} />
               ))}
               <model-viewer
                 ref={mvRef as never}
@@ -162,26 +166,86 @@ export default function EquityProgram() {
                 interaction-prompt="auto"
                 style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
               >
-                <button slot="ar-button" className="absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full border border-primary/50 bg-background/80 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-primary backdrop-blur hover:bg-primary hover:text-primary-foreground transition-colors">
+                <button slot="ar-button" className="absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
+                  style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6)', border: '1px solid rgba(34,211,238,0.6)' }}>
                   <View className="h-4 w-4" /> View in AR
                 </button>
               </model-viewer>
               {!loaded && (
-                <div className="absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] text-primary animate-[eq-pulse_1.6s_ease-in-out_infinite]">
+                <div className="absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] animate-[eq-pulse_1.6s_ease-in-out_infinite]" style={{ color: '#22d3ee' }}>
                   Loading rover…
                 </div>
               )}
-              <div className="pointer-events-none absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                <p className="text-primary">Perseverance · NASA</p>
+              <div className="pointer-events-none absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
+                <p style={{ color: '#22d3ee' }}>Perseverance · NASA</p>
                 <p>Drag to rotate · Pinch to zoom</p>
               </div>
-              <div className="pointer-events-none absolute bottom-5 left-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-primary">
-                <span className="h-2 w-2 rounded-full bg-primary animate-[eq-pulse_1.2s_ease-in-out_infinite]" /> Live 3D · AR ready
+              <div className="pointer-events-none absolute bottom-5 left-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#22d3ee' }}>
+                <span className="h-2 w-2 rounded-full animate-[eq-pulse_1.2s_ease-in-out_infinite]" style={{ background: '#22d3ee' }} /> Live 3D · AR ready
               </div>
             </div>
           </div>
+
+          {/* Copy (right) */}
+          <div>
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em]"
+                style={{ color: '#14b8a6', border: '1px solid rgba(20,184,166,0.5)', background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))' }}>
+                <Orbit className="h-3.5 w-3.5" /> Startup Factory Hub&nbsp; | &nbsp;Equity Program
+              </span>
+              <span className="relative inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
+                style={{ borderColor: 'rgba(34,211,238,0.45)', color: '#22d3ee', background: 'rgba(34,211,238,0.08)' }}>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: '#22d3ee' }} />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: '#22d3ee' }} />
+                </span>
+                Applications Open
+              </span>
+            </div>
+
+            <h1 className="font-black uppercase leading-[0.92] tracking-tight">
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch with the whole network</span>
+              <span className="block text-[2.6rem] leading-[0.9] sm:text-[3.8rem] lg:text-[4.6rem]"
+                style={{ backgroundImage: 'linear-gradient(90deg,#f59e0b 0%,#22d3ee 45%,#6366f1 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 28px rgba(34,211,238,0.4))' }}>
+                Equity Program
+              </span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">For just 1% equity</span>
+            </h1>
+
+            <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(34,211,238,0.9)' }}>
+              The full Startup Factory Hub accelerator: build, validate, raise and scale.
+            </p>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
+              With 130 countries and 5,800 locations at your side, from day one.
+            </p>
+
+            <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button onClick={apply}
+                className="group relative overflow-hidden rounded-full px-9 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03]"
+                style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6,#0d9488)', border: '1.5px solid rgba(34,211,238,0.55)', boxShadow: '0 0 45px -8px rgba(20,184,166,0.75)' }}>
+                <span className="relative z-10">Apply now →</span>
+                <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              </button>
+              <button onClick={() => document.getElementById('terms')?.scrollIntoView({ behavior: 'smooth' })}
+                className="rounded-full px-9 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03]"
+                style={{ background: 'linear-gradient(90deg,#4f46e5,#818cf8,#4f46e5)', border: '1.5px solid rgba(167,139,250,0.7)', boxShadow: '0 0 45px -10px rgba(129,140,248,0.7)' }}>
+                See the Terms
+              </button>
+            </div>
+
+            <div className="mt-12 grid grid-cols-3 gap-px overflow-hidden rounded-xl"
+              style={{ background: 'rgba(20,184,166,0.18)', border: '1px solid rgba(20,184,166,0.25)' }}>
+              {[['Equity', '1%'], ['Countries', '130'], ['Locations', '5,800']].map(([k, v]) => (
+                <div key={k} className="px-4 py-4 backdrop-blur-sm" style={{ background: 'rgba(4,14,26,0.85)' }}>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.24em]" style={{ color: 'rgba(34,211,238,0.75)' }}>{k}</p>
+                  <p className="mt-1 font-mono text-lg font-semibold text-white">{v}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <ChevronDown className="absolute bottom-6 left-1/2 h-6 w-6 -translate-x-1/2 text-primary animate-bounce" />
       </section>
 
       {/* TERMS */}
