@@ -45,4 +45,5 @@ export const PARTNERS: Partner[] = [
   { name: "Moonshot.nx", logo: "/partners/moonshot-nx-logo.png", tier: "Innovation" },
   { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
   { name: "Deep Checks", logo: "/partners/deepchecks-logo.png", tier: "Technology" },
+  { name: "Chase", logo: "/partners/chase-logo.png", tier: "Banking" },
 ];
