@@ -620,7 +620,19 @@ export default function Deck() {
                 ))}
               </div>
 
-              <div className="mt-12">
+              <div className="mt-10 flex items-center gap-10 py-5 px-8 rounded-2xl bg-emerald-400/5 ring-1 ring-emerald-300/25">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-[56px] font-bold leading-none text-emerald-300">130</span>
+                  <span className="text-[22px] uppercase tracking-[0.2em] text-slate-300">Hubs in the Network</span>
+                </div>
+                <span className="w-px h-12 bg-white/15" />
+                <div className="flex items-baseline gap-3">
+                  <span className="text-[56px] font-bold leading-none text-emerald-300">5,800</span>
+                  <span className="text-[22px] uppercase tracking-[0.2em] text-slate-300">Locations</span>
+                </div>
+              </div>
+
+              <div className="mt-10">
                 <p className="text-[22px] tracking-[0.3em] uppercase text-slate-400">One Accelerator. Every Stage.</p>
                 <div className="mt-4 flex items-center gap-3 text-[24px] font-semibold tracking-[0.15em] uppercase">
                   {["Idea", "Build", "Validate", "Launch", "Fund", "Scale"].map((s, i) => (
