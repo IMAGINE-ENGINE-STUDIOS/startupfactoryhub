@@ -1098,13 +1098,13 @@ export default function Deck() {
               <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Leadership</span>
               <h2 className="mt-4 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">The Team</h2>
               <p className="mt-5 text-[26px] text-slate-300">Operators, founders and advisors building the next generation of startups.</p>
-              <div className="mt-20 grid grid-cols-5 gap-10 w-full">
+              <div className="mt-14 grid grid-cols-5 gap-10 w-full items-start">
                 {[
-                  { name: "Khalia Padilla", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: "https://www.linkedin.com/in/khaliapadilla/" },
-                  { name: "Ricardo Font", role: "Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: "https://www.linkedin.com/in/ricardo-font-952034248/" },
-                  { name: "James Stuber", role: "Legal", loc: null, img: teamStuberAsset.url, linkedin: "https://www.linkedin.com/in/jamesstuber" },
-                  { name: "Dominic Catrambone", role: "CFO", loc: null, img: teamCatramboneAsset.url, linkedin: "https://www.linkedin.com/in/dom-catrambone/" },
-                  { name: "N. MacDonnell Ulsch", role: "Senior Advisor", loc: null, img: teamUlschAsset.url, linkedin: "https://www.linkedin.com/in/n-macdonnell-ulsch-38abb21" },
+                  { name: "Khalia Padilla", bio: "Founder & CEO, Imagine Engine venture studio. CEO & Co-Founder, Lightware Technologies (photonic networks). VC investor building AI-powered accelerators; former advisor, USF Muma Design Thinking Program.", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: "https://www.linkedin.com/in/khaliapadilla/" },
+                  { name: "Ricardo Font", bio: "Chairman of the Board, Startup Factory Hub. Managing Partner, Decahedron Ventures. Business Advisor, Startupbootcamp. Physicist and inventor in photonics, aerospace and fintech.", role: "Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: "https://www.linkedin.com/in/ricardo-font-952034248/" },
+                  { name: "James Stuber", bio: "Attorney and entrepreneur, 40+ years. Founding Managing Partner, Security Capital Partners. Legislative Counsel, Coalition for a Prosperous America. Former Hogan & Hartson; Georgetown J.D.", role: "Legal", loc: null, img: teamStuberAsset.url, linkedin: "https://www.linkedin.com/in/jamesstuber" },
+                  { name: "Dominic Catrambone", bio: "40+ years of executive leadership in financial services, banking and investment management. Former CEO and President; founded an NYSE-listed ETF organization. Senior Strategy Consultant, Pathfinder.", role: "CFO", loc: null, img: teamCatramboneAsset.url, linkedin: "https://www.linkedin.com/in/dom-catrambone/" },
+                  { name: "N. MacDonnell Ulsch", bio: "Cybersecurity and national security expert, 30+ years. Former Senior Managing Director, PwC; founder & CEO, ZeroPoint Risk Research. Guest Lecturer, West Point; Research Fellow, Boston College.", role: "Senior Advisor", loc: null, img: teamUlschAsset.url, linkedin: "https://www.linkedin.com/in/n-macdonnell-ulsch-38abb21" },
                 ].map((m) => (
                   <div key={m.name} className="group flex flex-col items-center text-center">
                     <div className="relative">
@@ -1115,6 +1115,7 @@ export default function Deck() {
                     </div>
                     <p className="mt-8 text-[28px] font-bold text-white whitespace-nowrap">{m.name}</p>
                     <p className="mt-2 text-[18px] tracking-[0.2em] uppercase text-teal-300">{m.role}</p>
+                    <p className="mt-4 text-[15px] leading-snug text-slate-300 max-w-[260px]">{m.bio}</p>
                     {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="mt-2 text-[16px] text-slate-400 hover:text-teal-300">LinkedIn</a>}
                   </div>
                 ))}
