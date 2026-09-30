@@ -954,7 +954,7 @@ export default function Deck() {
 
                 {/* Growth curve */}
                 <div className="relative mt-10 flex-1">
-                  <svg viewBox="0 0 1000 440" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                  <svg viewBox="0 0 1000 440" className="w-full h-full overflow-visible">
                     <defs>
                       <linearGradient id="finArea" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.45" />
