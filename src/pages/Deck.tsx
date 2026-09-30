@@ -1008,7 +1008,7 @@ export default function Deck() {
                     { icon: Building2, t: "100 Global Office", s: "$950 / month", v: "$1.14M", w: 18.7 },
                     { icon: Users, t: "1,000 Members", s: "$50 / month", v: "$600K", w: 9.9 },
                     { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", w: 9.0 },
-                    { icon: Cpu, t: "AI Credits", s: "20% of users · plans + usage packs", v: "$500K", w: 8.2 },
+                    { icon: Cpu, t: "2,200 AI Credit Plans", s: "20% of 11,000 users (incl. free) · $19 avg / mo", v: "$500K", w: 8.2 },
                   ].map((r, i) => (
                     <div key={i} className="group">
                       <div className="flex items-center gap-4">
