@@ -380,6 +380,7 @@ export default function Deck() {
           [data-slide] { transform: none !important; left: 0 !important; top: 0 !important; margin: 0 !important; }
           [data-slide] button, [data-slide] .fixed, [data-slide] .sticky { display: revert !important; }
           [data-slide] * { animation-play-state: paused !important; }
+          [data-slide] .bg-clip-text { background: none !important; color: #d9fbf5 !important; -webkit-text-fill-color: #d9fbf5 !important; }
         }
       `}</style>
       {/* Navigation Bar - Hidden in Print */}
