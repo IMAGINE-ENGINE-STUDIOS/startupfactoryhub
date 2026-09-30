@@ -373,81 +373,56 @@ export default function Deck() {
       {/* Scrollable Content */}
       <div className="pt-16 print:pt-0">
         {/* SLIDE 1: Cover */}
-        <CoverSlideContainer>
-          <div className="flex flex-col items-center text-center w-full">
-            {/* Logo with glow */}
-            <div className="relative mb-5">
-              <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full print:hidden" />
-              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-36 h-36 md:w-44 md:h-44 object-contain" />
-              {/* Orbit ring */}
-              <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin print:hidden" style={{
-              animationDuration: '20s'
-            }} />
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-3 tracking-tight print:text-black">
-              Startup Factory Hub
-            </h1>
-            
-            <p className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
-              The AI-Powered Hybrid Accelerator for Building Startups from Idea to Scale
-            </p>
-            
-            {/* Key Value Proposition */}
-            <div className="w-full mb-4">
-              <p className="text-lg md:text-xl text-slate-300 leading-relaxed print:text-gray-700">
-                Startup Factory Hub is a <span className="text-teal-400 font-semibold">hybrid digital-physical accelerator</span> that combines <span className="text-cyan-400 font-semibold">AI-powered technology</span>, expert mentorship, strategic resources, and a global network to help founders build, validate, launch, and scale companies.
-              </p>
-              <p className="mt-2 text-base md:text-lg font-semibold text-teal-400 print:text-teal-700">
-                From idea to MVP. From MVP to market. From market to scale.
-              </p>
-            </div>
-            
-            {/* Global Presence Highlight */}
-            <div className="flex items-center gap-3 mb-4">
-              <Globe className="h-6 w-6 text-cyan-400" />
-              <span className="text-base font-medium text-cyan-400">4 Global Hubs</span>
-              <span className="text-slate-500 mx-2">•</span>
-              <MapPin className="h-5 w-5 text-slate-400" />
-              <span className="text-sm text-slate-400">Orlando • Santiago • Tokyo • Sevilla</span>
-            </div>
-            
-            <SectionDivider title="Built for Everyone" />
-            
-            {/* User Types Grid - 5 columns */}
-            <div className="grid grid-cols-5 gap-4 w-full mb-5">
-              {[
-                { icon: Rocket, label: "Startups", color: "teal" },
-                { icon: Users, label: "Mentors", color: "cyan" },
-                { icon: Diamond, label: "Investors", color: "purple" },
-                { icon: GraduationCap, label: "Students", color: "rose" },
-                { icon: Building2, label: "Accelerators", color: "emerald" },
-              ].map((item, i) => (
-                <div key={i} className="relative group">
-                  <div className={`absolute inset-0 bg-${item.color}-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden`} />
-                  <div className={`relative flex flex-col items-center p-5 bg-slate-900/80 border border-${item.color}-500/40 rounded-xl hover:border-${item.color}-500/80 transition-all print:bg-gray-50 print:border-gray-300`}>
-                    <div className="w-14 h-14 mb-3 flex items-center justify-center" style={{
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }}>
-                      <div className={`absolute w-14 h-14 bg-gradient-to-br from-${item.color}-500/30 to-${item.color}-600/30 border border-${item.color}-500/60`} style={{
-                      clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                    }} />
-                      <item.icon className={`h-6 w-6 text-${item.color}-400 z-10 print:text-${item.color}-700`} />
-                    </div>
-                    <span className={`text-base font-semibold text-slate-200 print:text-gray-700`}>{item.label}</span>
-                  </div>
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
+            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 print:hidden" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(45,212,191,0.28),transparent_40%),radial-gradient(ellipse_at_50%_110%,rgba(34,211,238,0.18),transparent_50%),linear-gradient(180deg,rgba(2,6,23,0.8),rgba(2,6,23,0.97))] print:hidden" />
+            {/* Perspective floor grid */}
+            <div className="absolute left-[-20%] right-[-20%] bottom-[-10%] h-[45%] print:hidden" style={{ transform: 'perspective(700px) rotateX(62deg)', backgroundImage: 'linear-gradient(rgba(45,212,191,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.18) 1px, transparent 1px)', backgroundSize: '80px 80px', maskImage: 'linear-gradient(to top, black, transparent)', WebkitMaskImage: 'linear-gradient(to top, black, transparent)' }} />
+
+            <div className="relative z-10 h-full flex flex-col items-center text-center px-[140px] pt-[70px] pb-[60px]">
+              {/* Logo core with orbits */}
+              <div className="relative w-[300px] h-[300px] flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full bg-teal-400/25 blur-[70px] print:hidden" />
+                <div className="absolute inset-0 rounded-full border border-teal-300/25 animate-[spin_24s_linear_infinite] print:hidden">
+                  <span className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-200 shadow-[0_0_20px_6px_rgba(94,234,212,0.7)]" />
                 </div>
-              ))}
-            </div>
-            
-            {/* Differentiator - Hybrid Model */}
-            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-xl px-8 py-4 w-full print:bg-gray-50 print:border-gray-300">
-              <p className="text-base text-slate-300 print:text-gray-700">
-                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-cyan-400">intelligent operating system</span> that merges AI automation, physical workspaces, global resources, and human expertise into one continuous execution engine across global locations.
+                <div className="absolute inset-[-50px] rounded-full border border-cyan-300/15 animate-[spin_40s_linear_infinite_reverse] print:hidden">
+                  <span className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_16px_4px_rgba(103,232,249,0.7)]" />
+                </div>
+                <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[210px] h-[210px] object-contain drop-shadow-[0_0_40px_rgba(45,212,191,0.5)]" />
+              </div>
+
+              <h1 className="mt-10 text-[128px] leading-[0.95] font-black tracking-[-0.04em] bg-gradient-to-b from-white via-white to-teal-200/70 bg-clip-text text-transparent print:text-black">
+                Startup Factory Hub
+              </h1>
+              <p className="mt-6 text-[40px] font-semibold leading-tight bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent print:text-teal-700">
+                The AI-Powered Hybrid Accelerator for Building Startups from Idea to Scale
               </p>
+              <p className="mt-7 max-w-[1350px] text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
+                Startup Factory Hub is a <span className="text-white font-semibold">hybrid digital-physical accelerator</span> that combines <span className="text-white font-semibold">AI-powered technology</span>, expert mentorship, strategic resources, and a global network to help founders build, validate, launch, and scale companies.
+              </p>
+              <p className="mt-5 text-[24px] tracking-[0.25em] uppercase text-teal-300 print:text-teal-700">
+                From idea to MVP <span className="text-slate-500">/</span> From MVP to market <span className="text-slate-500">/</span> From market to scale
+              </p>
+
+              <div className="mt-auto w-full">
+                <p className="max-w-[1350px] mx-auto text-[22px] leading-[1.5] text-slate-400 print:text-gray-700">
+                  <span className="text-teal-300 font-semibold">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-white">intelligent operating system</span> that merges AI automation, physical workspaces, global resources, and human expertise into one continuous execution engine across global locations.
+                </p>
+                <div className="mt-8 h-px w-full bg-gradient-to-r from-transparent via-teal-400/50 to-transparent" />
+                <div className="mt-6 flex items-center justify-between text-[20px] tracking-[0.2em] uppercase">
+                  <div className="flex items-center gap-8 text-slate-300">
+                    {[{ icon: Rocket, l: "Startups" }, { icon: Users, l: "Mentors" }, { icon: Diamond, l: "Investors" }, { icon: GraduationCap, l: "Students" }, { icon: Building2, l: "Accelerators" }].map((u) => (
+                      <span key={u.l} className="flex items-center gap-2"><u.icon className="h-5 w-5 text-teal-300" />{u.l}</span>
+                    ))}
+                  </div>
+                  <span className="flex items-center gap-2 text-cyan-300"><Globe className="h-5 w-5" />Orlando · Santiago · Tokyo · Sevilla</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </CoverSlideContainer>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 2: End-to-End Startup Execution */}
         <SlideWrapper>
