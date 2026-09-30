@@ -521,21 +521,21 @@ export default function Deck() {
             <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             {/* Live platform interface */}
-            <div className="absolute left-[70px] top-1/2 -translate-y-1/2 w-[46%] h-[760px] print:hidden" style={{ perspective: 1800 }}>
-              <div className="absolute left-0 top-[70px] w-[760px] rounded-2xl overflow-hidden bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_0_80px_rgba(45,212,191,0.35),0_40px_80px_rgba(0,0,0,0.6)] transition-transform duration-700 hover:[transform:rotateY(0deg)_rotateX(0deg)]" style={{ transform: 'rotateY(14deg) rotateX(4deg)' }}>
+            <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[36%] aspect-[4/3] print:hidden" style={{ perspective: 1800 }}>
+              <div className="absolute left-0 top-[10%] w-[88%] rounded-2xl overflow-hidden bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_0_80px_rgba(45,212,191,0.35),0_40px_80px_rgba(0,0,0,0.6)] transition-transform duration-700 hover:[transform:rotateY(0deg)_rotateX(0deg)]" style={{ transform: 'rotateY(14deg) rotateX(4deg)' }}>
                 <div className="flex items-center gap-2 px-4 h-9 bg-slate-950/90 border-b border-white/5">
                   <span className="w-3 h-3 rounded-full bg-rose-400/70" /><span className="w-3 h-3 rounded-full bg-amber-300/70" /><span className="w-3 h-3 rounded-full bg-emerald-400/70" />
                   <span className="ml-4 text-[14px] text-slate-400 tracking-wide">startupfactoryhub.com / journey</span>
                 </div>
                 <img src={shotJourney} alt="Startup Factory Hub Journey interface" className="w-full block" crossOrigin="anonymous" />
               </div>
-              <div className="absolute right-[10px] top-0 w-[340px] rounded-xl overflow-hidden ring-1 ring-teal-300/40 shadow-[0_0_50px_rgba(45,212,191,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_6s_ease-in-out_infinite]" style={{ transform: 'rotateY(14deg)' }}>
+              <div className="absolute right-0 top-0 w-[38%] rounded-xl overflow-hidden ring-1 ring-teal-300/40 shadow-[0_0_50px_rgba(45,212,191,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_6s_ease-in-out_infinite]" style={{ transform: 'rotateY(14deg)' }}>
                 <img src={shotMatching} alt="AI matching interface" className="w-full block" crossOrigin="anonymous" />
               </div>
-              <div className="absolute right-[40px] bottom-[20px] w-[360px] rounded-xl overflow-hidden ring-1 ring-emerald-300/40 shadow-[0_0_50px_rgba(52,211,153,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_7s_ease-in-out_infinite_1s]" style={{ transform: 'rotateY(14deg)' }}>
+              <div className="absolute right-0 bottom-0 w-[42%] rounded-xl overflow-hidden ring-1 ring-emerald-300/40 shadow-[0_0_50px_rgba(52,211,153,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_7s_ease-in-out_infinite_1s]" style={{ transform: 'rotateY(14deg)' }}>
                 <img src={shotAITools} alt="AI tools interface" className="w-full block" crossOrigin="anonymous" />
               </div>
-              <div className="absolute left-[40px] bottom-[40px] flex items-center gap-3 px-5 py-3 rounded-full bg-slate-950/80 backdrop-blur ring-1 ring-emerald-300/30">
+              <div className="absolute left-[4%] bottom-[2%] flex items-center gap-3 px-5 py-3 rounded-full bg-slate-950/80 backdrop-blur ring-1 ring-emerald-300/30">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
                 <span className="text-[16px] tracking-[0.25em] uppercase text-emerald-200">Live Platform</span>
               </div>
