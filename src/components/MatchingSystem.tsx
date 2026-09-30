@@ -1205,25 +1205,25 @@ export default function MatchingSystem() {
   };
 
   const MatchCard = ({ match, onConnect, onPass }: { match: Match; onConnect: () => void; onPass: () => void }) => (
-    <Card className="tech-card border-0 hover:scale-[1.02] transition-transform">
-      <CardContent className="p-6">
-        <div className="flex items-start space-x-4 mb-4">
-          <Avatar className="h-16 w-16">
+    <Card className="tech-card border-0">
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <Avatar className="h-12 w-12">
             <AvatarImage src={match.avatar} alt={match.name} />
             <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
               {match.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">{match.name}</h3>
-            <p className="text-sm text-muted-foreground mb-2">{match.role}</p>
-            <div className="flex items-center space-x-2 mb-2">
+            <h3 className="font-semibold text-foreground">{match.name}</h3>
+            <p className="text-xs text-muted-foreground mb-1.5">{match.role}</p>
+            <div className="flex items-center gap-1.5">
               <Star className={`h-4 w-4 ${getCompatibilityColor(match.compatibility_score)}`} />
               <span className={`text-sm font-medium ${getCompatibilityColor(match.compatibility_score)}`}>
                 {match.compatibility_score}% • {getCompatibilityLabel(match.compatibility_score)} Match
               </span>
             </div>
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="flex flex-wrap gap-1 mt-2">
               <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
               {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
             </div>
@@ -1264,7 +1264,7 @@ export default function MatchingSystem() {
 
         {/* Match Reasons */}
         {match.match_reasons && match.match_reasons.length > 0 && (
-          <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
+          <div className="mb-4 pt-3 border-t border-border/40">
             <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-primary" />
               Why this match:
@@ -1332,13 +1332,13 @@ export default function MatchingSystem() {
   // ---- Unified relevance-sorted list ----
   type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
 
-  const filterChips: { key: FilterKey; label: string; icon: any; color: string }[] = [
-    { key: 'all', label: 'All Community', icon: Users, color: 'from-primary to-accent' },
-    { key: 'mentor', label: 'Mentors', icon: GraduationCap, color: 'from-blue-500 to-cyan-500' },
-    { key: 'investor', label: 'Investors', icon: DollarSign, color: 'from-emerald-500 to-teal-500' },
-    { key: 'startup', label: 'Startups', icon: Compass, color: 'from-orange-500 to-pink-500' },
-    { key: 'accelerator', label: 'Accelerators', icon: Landmark, color: 'from-purple-500 to-fuchsia-500' },
-    { key: 'network', label: 'My Network', icon: Globe, color: 'from-indigo-500 to-violet-500' },
+  const filterChips: { key: FilterKey; label: string; icon: any }[] = [
+    { key: 'all', label: 'All Community', icon: Users },
+    { key: 'mentor', label: 'Mentors', icon: GraduationCap },
+    { key: 'investor', label: 'Investors', icon: DollarSign },
+    { key: 'startup', label: 'Startups', icon: Compass },
+    { key: 'accelerator', label: 'Accelerators', icon: Landmark },
+    { key: 'network', label: 'My Network', icon: Globe },
   ];
 
   const normalizeRole = (r: string): FilterKey => {
@@ -1468,35 +1468,33 @@ export default function MatchingSystem() {
       {/* Compact search */}
       <NetworkSearchEngine />
 
-      {/* Next-gen filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+      {/* Compact role filters */}
+      <div className="flex gap-1 overflow-x-auto rounded-lg border border-border/50 bg-muted/20 p-1 scrollbar-hide">
         {filterChips.map(chip => {
           const Icon = chip.icon;
           const active = activeTab === chip.key;
           const count = countFor(chip.key);
           return (
-            <button
+            <Button
               key={chip.key}
+              type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setActiveTab(chip.key)}
-              className={`group relative shrink-0 inline-flex items-center gap-2 h-10 pl-3 pr-2 rounded-2xl border transition-all duration-300 ${
+              className={`shrink-0 gap-2 rounded-md px-3 ${
                 active
-                  ? 'border-transparent text-white shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] scale-[1.02]'
-                  : 'border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40'
+                  ? 'bg-background text-foreground shadow-sm hover:bg-background'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {active && (
-                <span className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${chip.color} opacity-100`} />
-              )}
-              <span className="relative flex items-center gap-2">
-                <Icon className={`h-4 w-4 ${active ? '' : 'text-primary'}`} />
-                <span className="text-xs font-semibold tracking-wide">{chip.label}</span>
-                <span className={`ml-1 inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-[10px] font-bold ${
-                  active ? 'bg-white/25 text-white' : 'bg-primary/10 text-primary'
-                }`}>
+              <Icon className="h-4 w-4" />
+              <span className="text-xs font-medium">{chip.label}</span>
+              <span className={`inline-flex min-w-5 h-5 items-center justify-center rounded px-1 text-[10px] font-medium ${
+                active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+              }`}>
                   {count}
-                </span>
               </span>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -1507,15 +1505,13 @@ export default function MatchingSystem() {
         <NetworkBrowser mode="community" />
       ) : (
         <Card className="tech-card border-0 overflow-hidden">
-          <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
+          <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="flex items-center gap-2 text-base">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Users className="h-4 w-4 text-primary" />
-              </div>
-              <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span>
                 {activeTab === 'all' ? 'Recommended for you' : `${filterChips.find(c => c.key === activeTab)?.label}`}
               </span>
-              <Badge variant="secondary" className="ml-auto text-[10px] bg-primary/10 text-primary border-primary/20">
+              <Badge variant="secondary" className="ml-auto text-[10px]">
                 {sorted.length} matches
               </Badge>
             </CardTitle>
