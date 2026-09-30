@@ -941,7 +941,7 @@ export default function Deck() {
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">5-Year Financial Projections</h2>
             <p className="text-base md:text-lg text-slate-300 text-center mb-4 print:text-gray-600">
-              Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
+              Membership-led growth delivers <span className="text-emerald-400 font-semibold">7.7x revenue increase</span> over 5 years
             </p>
             
             {/* Charts Row: Bar Chart + Funding Allocation */}
@@ -952,11 +952,11 @@ export default function Deck() {
                   <div className="flex">
                     {/* Y-axis */}
                     <div className="flex flex-col justify-between h-56 pr-3 text-right shrink-0">
-                      <span className="text-xs text-slate-500">$50M</span>
-                      <span className="text-xs text-slate-500">$40M</span>
-                      <span className="text-xs text-slate-500">$30M</span>
-                      <span className="text-xs text-slate-500">$20M</span>
-                      <span className="text-xs text-slate-500">$10M</span>
+                      <span className="text-xs text-slate-500">$60M</span>
+                      <span className="text-xs text-slate-500">$48M</span>
+                      <span className="text-xs text-slate-500">$36M</span>
+                      <span className="text-xs text-slate-500">$24M</span>
+                      <span className="text-xs text-slate-500">$12M</span>
                       <span className="text-xs text-slate-500">$0</span>
                     </div>
                     {/* Chart area */}
@@ -966,17 +966,17 @@ export default function Deck() {
                       ))}
                       <div className="absolute inset-0 flex items-end px-4 gap-3">
                         {[
-                          { revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
-                          { revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
-                          { revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
-                          { revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
-                          { revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
+                          { revenue: "$6.73M", value: 6.73, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
+                          { revenue: "$13.46M", value: 13.46, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
+                          { revenue: "$23.19M", value: 23.19, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
+                          { revenue: "$35.92M", value: 35.92, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
+                          { revenue: "$51.65M", value: 51.65, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
                         ].map((item, i) => (
                           <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
                             <span className="text-xs font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
                             <div
                               className={`w-full max-w-[60px] ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
-                              style={{ height: `${(item.value / 50) * 224}px` }}
+                              style={{ height: `${(item.value / 60) * 224}px` }}
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
                             </div>
@@ -988,10 +988,10 @@ export default function Deck() {
                   <div className="flex pl-10">
                     {[
                       { year: "Year 1", pct: "" },
-                      { year: "Year 2", pct: "+81%" },
-                      { year: "Year 3", pct: "+71%" },
-                      { year: "Year 4", pct: "+65%" },
-                      { year: "Year 5", pct: "+68%" },
+                      { year: "Year 2", pct: "+100%" },
+                      { year: "Year 3", pct: "+72%" },
+                      { year: "Year 4", pct: "+55%" },
+                      { year: "Year 5", pct: "+44%" },
                     ].map((item, i) => (
                       <div key={i} className="flex-1 text-center pt-2">
                         <span className="text-xs text-slate-400 font-medium block">{item.year}</span>
@@ -1002,7 +1002,7 @@ export default function Deck() {
                   <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
                     <TrendingUp className="h-4 w-4 text-emerald-400" />
                     <span className="text-sm text-slate-300">
-                      <span className="text-emerald-400 font-semibold">+762%</span> growth • 10% MoM • $5.34M → $46M
+                      <span className="text-emerald-400 font-semibold">+667%</span> growth • 10,000 members Y1 • $6.73M → $51.65M
                     </span>
                   </div>
                 </TechCard>
@@ -1078,71 +1078,58 @@ export default function Deck() {
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
             <div className="w-full mb-4">
               <TechCard glowColor="teal" className="p-4">
-                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M · driven by SaaS + platform fees (10% marketplace / 20% donations)</h4>
+                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $51.65M · Memberships + Office Plans + Accelerator-as-a-Service</h4>
                 <div className="flex items-center h-9 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '68%' }}>
-                    <span className="text-xs font-medium text-white">Subscriptions $31.3M</span>
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '88%' }}>
+                    <span className="text-xs font-medium text-white">Memberships $50/mo · $48.0M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center relative" style={{ width: '14%' }}>
-                    <span className="text-xs font-medium text-white">Fees $6.4M</span>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center relative" style={{ width: '8%' }}>
+                    <span className="text-xs font-medium text-white">AaaS</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '11%' }}>
-                    <span className="text-xs font-medium text-white">Edu $5.1M</span>
-                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
-                  </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '7%' }}>
-                    <span className="text-xs font-medium text-white">Ent $3.2M</span>
-                  </div>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center" style={{ width: '4%' }} />
                 </div>
                 <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                  <span>Subscriptions 68%</span>
-                  <span>Platform Fees 14%</span>
-                  <span>Education 11%</span>
-                  <span>Enterprise 7%</span>
+                  <span>Memberships $48.0M (93%)</span>
+                  <span>Accelerator-as-a-Service $2.75M (5%)</span>
+                  <span>$550 + $950 Office Plans $0.90M (2%)</span>
                 </div>
-
               </TechCard>
             </div>
             
             {/* Revenue Streams Summary - Compact Grid */}
             <div className="grid grid-cols-6 gap-3 w-full mb-3">
               {[{
-              label: "Startups Y5",
-              value: "~12,650",
-              icon: Rocket,
+              label: "Members Y1",
+              value: "10,000",
+              icon: Users,
               color: "teal"
             }, {
-              label: "ARPU",
-              value: "$750/mo",
+              label: "Membership",
+              value: "$50/mo",
               icon: DollarSign,
               color: "emerald"
             }, {
-              label: "Corporate",
-              value: "$100K/yr",
+              label: "Self-Paced + Desk",
+              value: "$550/mo",
+              icon: Briefcase,
+              color: "cyan"
+            }, {
+              label: "Global Access + Office",
+              value: "$950/mo",
               icon: Building2,
               color: "purple"
             }, {
-              label: "Pilots",
-              value: "$200K ea",
-              icon: Target,
+              label: "AaaS Software",
+              value: "$5K",
+              icon: Cpu,
               color: "amber"
             }, {
-              label: "Marketplace Fee",
-              value: "10%",
-              icon: Percent,
-              color: "emerald"
-            }, {
-              label: "Donation Fee",
-              value: "20%",
-              icon: Heart,
+              label: "Managed / Startup (min 10)",
+              value: "$5K",
+              icon: Rocket,
               color: "rose"
-            }, {
-              label: "Education",
-              value: "2x/yr",
-              icon: GraduationCap,
-              color: "cyan"
             }].map((item, i) => <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 text-center">
                   <item.icon className={`h-5 w-5 mx-auto mb-2 text-${item.color}-400`} />
                   <p className={`text-sm font-bold text-${item.color}-400`}>{item.value}</p>
@@ -1154,7 +1141,7 @@ export default function Deck() {
             <div className="w-full">
               <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-4 py-3">
                 <p className="text-sm text-center text-slate-400">
-                  <span className="text-emerald-400 font-medium">Model:</span> $1.5M seed → 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + 10% marketplace fees + 20% donation fees + enterprise = $46M Year 5
+                  <span className="text-emerald-400 font-medium">Model:</span> Y1: 10,000 members × $50/mo ($6.0M) + 10 × $550 ($66K) + 10 × $950 ($114K) + 10 AaaS partners × ($5K software + 10 managed startups × $5K) ($550K) = $6.73M · Members grow to 80K and each plan/AaaS adds 10 per year = $51.65M Year 5
                 </p>
               </div>
             </div>
