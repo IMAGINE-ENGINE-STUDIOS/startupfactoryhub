@@ -1043,43 +1043,45 @@ export default function Deck() {
 
         {/* SLIDE 10: Contact */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
-            {/* Full background image */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full mx-auto px-[3%]">
-          <div className="flex flex-col items-center text-center w-full">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Get Involved</span>
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-            </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-3 print:text-black">Join Our Mission</h2>
-            <p className="text-2xl md:text-3xl text-slate-300 mb-6 print:text-gray-600">Let's Build the Future Together</p>
-            
-            <p className="text-xl text-slate-400 max-w-4xl mb-10 leading-relaxed print:text-gray-600">
-              We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success.
-            </p>
-            
-            <div className="flex flex-wrap gap-6 justify-center mb-10">
-              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-4 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-10 py-5 hover:border-teal-500/60 transition-colors print:bg-white print:border-gray-300">
-                <Mail className="h-7 w-7 text-teal-400 print:text-gray-700" />
-                <span className="text-xl text-slate-200 font-medium print:text-gray-700">contact@startupfactoryhub.com</span>
+          <section className="absolute inset-0 overflow-hidden bg-[#020b0a] print:relative print:break-after-avoid">
+            <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,11,10,0.55)_0%,rgba(2,11,10,0.95)_70%)]" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-teal-400/10" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-teal-400/15 animate-[spin_60s_linear_infinite]" style={{ borderStyle: 'dashed' }} />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-teal-500/10 blur-[120px]" />
+
+            <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-[6%]">
+              <div className="relative mb-10">
+                <div className="absolute inset-0 bg-teal-400/40 blur-3xl rounded-full scale-150" />
+                <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-40 h-40 object-contain drop-shadow-[0_0_40px_rgba(45,212,191,0.6)]" />
+              </div>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-px bg-gradient-to-r from-transparent to-teal-300" />
+                <span className="text-[20px] tracking-[0.4em] uppercase text-teal-300">Get Involved</span>
+                <div className="w-16 h-px bg-gradient-to-l from-transparent to-teal-300" />
+              </div>
+
+              <h2 className="text-[120px] leading-none font-black tracking-tight bg-gradient-to-r from-white via-teal-100 to-teal-300 bg-clip-text text-transparent">
+                Join Our Mission
+              </h2>
+              <p className="mt-6 text-[34px] font-light text-slate-300">Let's build the future together.</p>
+
+              <div className="mt-10 flex items-center gap-8 text-[20px] tracking-[0.3em] uppercase text-slate-400">
+                <span>Partners</span>
+                <span className="w-2 h-2 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,1)]" />
+                <span>Investors</span>
+                <span className="w-2 h-2 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,1)]" />
+                <span>Innovators</span>
+              </div>
+
+              <a href="mailto:info@startupfactoryhub.com" className="mt-14 inline-flex items-center gap-5 rounded-full px-12 py-6 bg-gradient-to-r from-teal-400 via-cyan-300 to-emerald-300 text-[#02110f] shadow-[0_0_60px_rgba(45,212,191,0.55)] hover:shadow-[0_0_90px_rgba(45,212,191,0.8)] transition-shadow">
+                <Mail className="h-8 w-8" />
+                <span className="text-[30px] font-bold">info@startupfactoryhub.com</span>
               </a>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full scale-150 print:hidden" />
-              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-36 h-36 object-contain" />
-            </div>
-            
-            <p className="text-base text-slate-500 mt-10 print:text-gray-400">© 2025 Startup Factory Hub. All rights reserved.</p>
-          </div>
+              <p className="mt-6 text-[20px] text-slate-400">startupfactoryhub.com</p>
+
+              <p className="absolute bottom-10 text-[16px] text-slate-600">© 2026 Startup Factory Hub. All rights reserved.</p>
             </div>
           </section>
         </SlideWrapper>
