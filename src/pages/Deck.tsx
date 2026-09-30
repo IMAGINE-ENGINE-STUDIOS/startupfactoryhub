@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
-import slide2Img from '@/assets/deck-slide2-hybrid.jpg';
-import slide3Img from '@/assets/deck-slide3-gap.jpg';
+import slide2Img from '@/assets/deck-slide2-exec.jpg';
+import slide3Img from '@/assets/deck-slide3-exec.jpg';
 import shotJourney from '@/assets/features/journey.jpg';
 import shotMatching from '@/assets/features/matching.jpg';
 import shotAITools from '@/assets/features/ai-tools.jpg';
@@ -460,8 +460,8 @@ export default function Deck() {
 
             <div className="relative z-10 h-full ml-auto w-[46%] flex flex-col justify-center pr-[110px]">
               <span className="text-[18px] tracking-[0.4em] uppercase text-teal-300">End-to-End Startup Execution</span>
-              <h2 className="mt-6 text-[88px] leading-[0.95] font-extralight tracking-tight text-white">
-                The AI-Powered<br /><span className="font-semibold bg-gradient-to-r from-teal-200 to-cyan-300 bg-clip-text text-transparent">Hybrid Accelerator</span>
+              <h2 className="mt-6 text-[84px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">
+                The AI-Powered Hybrid Accelerator
               </h2>
               <div className="mt-8 w-24 h-[2px] bg-gradient-to-r from-teal-300 to-transparent" />
               <p className="mt-8 text-[26px] leading-[1.5] font-light text-slate-300">
@@ -504,8 +504,8 @@ export default function Deck() {
 
             <div className="relative z-10 h-full w-[50%] flex flex-col justify-center pl-[110px]">
               <span className="text-[18px] tracking-[0.4em] uppercase text-rose-300">The Problem</span>
-              <h2 className="mt-6 text-[104px] leading-[0.95] font-extralight tracking-tight text-white">
-                The Execution<br /><span className="font-semibold bg-gradient-to-r from-rose-200 to-rose-400 bg-clip-text text-transparent">Gap</span>
+              <h2 className="mt-6 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent">
+                The Execution Gap
               </h2>
               <div className="mt-8 w-24 h-[2px] bg-gradient-to-r from-rose-300 to-transparent" />
               <p className="mt-8 text-[26px] leading-[1.5] font-light text-slate-300">
@@ -1081,6 +1081,41 @@ export default function Deck() {
 
 
 
+
+        {/* SLIDE: Leadership Team */}
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(20,184,166,0.18),transparent_60%)]" />
+            <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2 w-[1500px] h-[1500px] rounded-full border border-teal-400/10 animate-[spin_120s_linear_infinite]">
+              <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_6px_rgba(45,212,191,0.6)]" />
+            </div>
+            <div className="relative z-10 h-full flex flex-col items-center justify-center px-[110px]">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Leadership</span>
+              <h2 className="mt-4 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">The Team</h2>
+              <p className="mt-5 text-[26px] text-slate-300">Operators, founders and advisors building the next generation of startups.</p>
+              <div className="mt-20 grid grid-cols-4 gap-16 w-full">
+                {[
+                  { name: "Khalia Padilla", role: "Managing Partner & Founder", loc: null, img: teamKhalia },
+                  { name: "Ricardo Font", role: "Managing Partner & Founder", loc: null, img: teamRicardo },
+                  { name: "Steven Lidgreen", role: "Managing Partner", loc: "SFH Tokyo", img: teamSteven },
+                  { name: "Gary Jinks", role: "Strategic Advisor", loc: null, img: teamGary },
+                ].map((m) => (
+                  <div key={m.name} className="group flex flex-col items-center text-center">
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-full bg-teal-400/30 blur-2xl scale-110 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative w-[260px] h-[260px] rounded-full p-[3px] bg-gradient-to-br from-teal-300 via-cyan-400/40 to-transparent">
+                        <img src={m.img} alt={m.name} className="w-full h-full rounded-full object-cover bg-slate-900" crossOrigin="anonymous" />
+                      </div>
+                    </div>
+                    <p className="mt-8 text-[32px] font-bold text-white">{m.name}</p>
+                    <p className="mt-2 text-[20px] tracking-[0.2em] uppercase text-teal-300">{m.role}</p>
+                    {m.loc && <p className="mt-2 text-[18px] text-slate-400">{m.loc}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 10: Contact */}
         <SlideWrapper>
