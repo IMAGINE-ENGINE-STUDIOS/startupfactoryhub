@@ -32,6 +32,8 @@ import teamRicardo from '@/assets/team-ricardo.jpg';
 import teamSteven from '@/assets/team-steven.png';
 import teamGary from '@/assets/team-gary.png';
 import { PARTNERS } from '@/config/partners';
+import { supabase } from '@/integrations/supabase/client';
+import nasdaqTower from '@/assets/nasdaq-feature.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -261,6 +263,10 @@ const IconBadge = ({
 export default function Deck() {
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  useEffect(() => {
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).then(({ count }) => { if (typeof count === 'number' && count > 0) setTotalUsers(count); });
+  }, []);
   const deckRef = useRef<HTMLDivElement>(null);
 
   const handleExportPDF = useCallback(async () => {
@@ -1051,6 +1057,52 @@ export default function Deck() {
             </div>
           </section>
         </SlideWrapper>
+        {/* SLIDE: Traction */}
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-y-0 left-0 w-[52%] print:hidden">
+              <img src={nasdaqTower} alt="Startup Factory Hub featured on the Nasdaq Tower in Times Square" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-950/30 to-slate-950" />
+              <div className="absolute left-[60px] bottom-[60px] flex items-center gap-3 px-6 py-3 rounded-full bg-slate-950/80 backdrop-blur ring-1 ring-cyan-300/40">
+                <span className="w-3 h-3 rounded-full bg-cyan-300 animate-pulse shadow-[0_0_14px_rgba(103,232,249,0.9)]" />
+                <span className="text-[20px] text-white uppercase tracking-[0.2em]">Nasdaq Tower · Times Square, NYC</span>
+              </div>
+            </div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(20,184,166,0.18),transparent_55%)] print:hidden" />
+            <div className="relative z-10 h-full ml-[50%] flex flex-col justify-center pr-[110px] pl-[40px]">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Traction</span>
+              <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">Real Momentum</h2>
+              <div className="mt-12 flex items-end gap-6">
+                <span className="text-[170px] leading-[0.85] font-bold text-white drop-shadow-[0_0_40px_rgba(45,212,191,0.45)] print:text-black">{totalUsers !== null ? totalUsers.toLocaleString() : '—'}</span>
+                <div className="pb-4">
+                  <p className="text-[30px] font-semibold text-teal-300">Total Users</p>
+                  <p className="text-[20px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />Live on platform</p>
+                </div>
+              </div>
+              <div className="mt-14 space-y-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-[190px] h-[96px] shrink-0 rounded-2xl bg-white flex items-center justify-center p-4 shadow-[0_0_36px_rgba(45,212,191,0.3)]">
+                    <img src="/nasdaq-logo.png" alt="Nasdaq" className="max-h-full max-w-full object-contain" />
+                  </div>
+                  <div>
+                    <p className="text-[34px] font-semibold text-white leading-tight">Featured on the Nasdaq Tower</p>
+                    <p className="text-[24px] text-slate-400">Times Square, with Nasdaq Entrepreneurial Center and Lehigh University</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="w-[190px] h-[96px] shrink-0 rounded-2xl bg-white flex items-center justify-center p-4 shadow-[0_0_36px_rgba(45,212,191,0.3)]">
+                    <img src="/partners/apex-accelerators-logo.png" alt="APEX Accelerators" className="max-h-full max-w-full object-contain" />
+                  </div>
+                  <div>
+                    <p className="text-[34px] font-semibold text-white leading-tight">Used by APEX Accelerators</p>
+                    <p className="text-[24px] text-slate-400">Powering startup support for APEX Accelerators</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </SlideWrapper>
+
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
