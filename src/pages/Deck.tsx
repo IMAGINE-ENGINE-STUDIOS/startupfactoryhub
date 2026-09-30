@@ -42,7 +42,7 @@ import nasdaqTower from '@/assets/nasdaq-feature.jpg';
 import earthPlanet from '@/assets/earth-intelligence-pass.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
-const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none">
     {/* Horizontal lines */}
     {[...Array(25)].map((_, i) => <div key={`h-${i}`} className="absolute w-full h-px bg-gradient-to-r from-transparent via-teal-500/8 to-transparent" style={{
     top: `${(i + 1) * 4}%`
@@ -57,7 +57,7 @@ const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-
     left: `${(j + 1) * 16}%`
   }} />))}
   </div>;
-const FloatingHexagons = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+const FloatingHexagons = () => <div className="absolute inset-0 overflow-hidden pointer-events-none">
     {/* Large hexagon top right */}
     <div className="absolute top-[10%] right-[5%] w-40 h-40 border-2 border-teal-500/15 rotate-12" style={{
     clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
@@ -82,7 +82,7 @@ const FloatingHexagons = () => <div className="absolute inset-0 overflow-hidden 
     clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
   }} />
   </div>;
-const EnergyLines = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+const EnergyLines = () => <div className="absolute inset-0 overflow-hidden pointer-events-none">
     {/* Left sweeping arc */}
     <div className="absolute top-1/4 -left-32 w-96 h-96 border-2 border-teal-500/10 rounded-full" />
     <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] border border-teal-500/5 rounded-full" />
@@ -100,7 +100,7 @@ const EnergyLines = () => <div className="absolute inset-0 overflow-hidden point
     <div className="absolute top-[22%] left-[11%] w-16 h-px bg-gradient-to-r from-teal-500/30 to-transparent rotate-45" />
     <div className="absolute top-[27%] right-[10%] w-20 h-px bg-gradient-to-l from-cyan-500/30 to-transparent -rotate-30" />
   </div>;
-const CornerAccents = () => <div className="absolute inset-0 pointer-events-none print:hidden">
+const CornerAccents = () => <div className="absolute inset-0 pointer-events-none">
     {/* Top left */}
     <div className="absolute top-6 left-6">
       <div className="w-16 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
@@ -170,11 +170,11 @@ const CoverSlideContainer = ({
 }) => <SlideWrapper>
     <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden">
       {/* Background image */}
-      <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover print:hidden" crossOrigin="anonymous" />
+      <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
       {/* Dark cinematic overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90" />
       {/* Scan lines effect */}
-      <div className="absolute inset-0 print:hidden" style={{
+      <div className="absolute inset-0" style={{
       backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)'
     }} />
       {/* Border frame */}
@@ -241,7 +241,7 @@ const TechCard = ({
   };
   return <div className={`relative bg-slate-900/80 border-2 rounded-lg p-6 backdrop-blur-sm shadow-lg ${glowClasses[glowColor as keyof typeof glowClasses] || glowClasses.teal} ${className}`}>
       {/* Top glow line */}
-      <div className={`absolute top-0 left-8 right-8 h-0.5 bg-gradient-to-r from-transparent via-${glowColor}-500/60 to-transparent print:hidden`} />
+      <div className={`absolute top-0 left-8 right-8 h-0.5 bg-gradient-to-r from-transparent via-${glowColor}-500/60 to-transparent`} />
       {children}
     </div>;
 };
@@ -393,19 +393,19 @@ export default function Deck() {
         {/* SLIDE 1: Cover */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 print:hidden" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(45,212,191,0.28),transparent_40%),radial-gradient(ellipse_at_50%_110%,rgba(34,211,238,0.18),transparent_50%),linear-gradient(180deg,rgba(2,6,23,0.8),rgba(2,6,23,0.97))] print:hidden" />
+            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(45,212,191,0.28),transparent_40%),radial-gradient(ellipse_at_50%_110%,rgba(34,211,238,0.18),transparent_50%),linear-gradient(180deg,rgba(2,6,23,0.8),rgba(2,6,23,0.97))]" />
             {/* Perspective floor grid */}
-            <div className="absolute left-[-20%] right-[-20%] bottom-[-10%] h-[45%] print:hidden" style={{ transform: 'perspective(700px) rotateX(62deg)', backgroundImage: 'linear-gradient(rgba(45,212,191,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.18) 1px, transparent 1px)', backgroundSize: '80px 80px', maskImage: 'linear-gradient(to top, black, transparent)', WebkitMaskImage: 'linear-gradient(to top, black, transparent)' }} />
+            <div className="absolute left-[-20%] right-[-20%] bottom-[-10%] h-[45%]" style={{ transform: 'perspective(700px) rotateX(62deg)', backgroundImage: 'linear-gradient(rgba(45,212,191,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.18) 1px, transparent 1px)', backgroundSize: '80px 80px', maskImage: 'linear-gradient(to top, black, transparent)', WebkitMaskImage: 'linear-gradient(to top, black, transparent)' }} />
 
             <div className="relative z-10 h-full flex flex-col items-center text-center px-[140px] pt-[70px] pb-[60px]">
               {/* Logo core with orbits */}
               <div className="relative w-[300px] h-[300px] flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full bg-teal-400/25 blur-[70px] print:hidden" />
-                <div className="absolute inset-0 rounded-full border border-teal-300/25 animate-[spin_24s_linear_infinite] print:hidden">
+                <div className="absolute inset-0 rounded-full bg-teal-400/25 blur-[70px]" />
+                <div className="absolute inset-0 rounded-full border border-teal-300/25 animate-[spin_24s_linear_infinite]">
                   <span className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-200 shadow-[0_0_20px_6px_rgba(94,234,212,0.7)]" />
                 </div>
-                <div className="absolute inset-[-50px] rounded-full border border-cyan-300/15 animate-[spin_40s_linear_infinite_reverse] print:hidden">
+                <div className="absolute inset-[-50px] rounded-full border border-cyan-300/15 animate-[spin_40s_linear_infinite_reverse]">
                   <span className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_16px_4px_rgba(103,232,249,0.7)]" />
                 </div>
                 <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[210px] h-[210px] object-contain drop-shadow-[0_0_40px_rgba(45,212,191,0.5)]" />
@@ -548,16 +548,16 @@ export default function Deck() {
         {/* SLIDE 4: Solution - Unified Execution */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
-            <div className="absolute left-[120px] top-[200px] w-[700px] h-[700px] rounded-full bg-teal-400/15 blur-[140px] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px]" />
+            <div className="absolute left-[120px] top-[200px] w-[700px] h-[700px] rounded-full bg-teal-400/15 blur-[140px]" />
+            <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             {/* Planet behind the platform screens */}
-            <img src={earthPlanet} alt="" aria-hidden className="absolute left-[-6%] bottom-[-38%] w-[58%] mix-blend-screen opacity-90 print:hidden" crossOrigin="anonymous" />
-            <div className="absolute left-[2%] bottom-[-10%] w-[46%] h-[40%] rounded-full bg-sky-400/20 blur-[100px] print:hidden" />
+            <img src={earthPlanet} alt="" aria-hidden className="absolute left-[-6%] bottom-[-38%] w-[58%] mix-blend-screen opacity-90" crossOrigin="anonymous" />
+            <div className="absolute left-[2%] bottom-[-10%] w-[46%] h-[40%] rounded-full bg-sky-400/20 blur-[100px]" />
 
             {/* Live platform interface */}
-            <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[36%] aspect-[4/3] print:hidden" style={{ perspective: 1800 }}>
+            <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[36%] aspect-[4/3]" style={{ perspective: 1800 }}>
               <div className="absolute left-0 top-[10%] w-[88%] rounded-2xl overflow-hidden bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_0_80px_rgba(45,212,191,0.35),0_40px_80px_rgba(0,0,0,0.6)] transition-transform duration-700 hover:[transform:rotateY(0deg)_rotateX(0deg)]" style={{ transform: 'rotateY(14deg) rotateX(4deg)' }}>
                 <div className="flex items-center gap-2 px-4 h-9 bg-slate-950/90 border-b border-white/5">
                   <span className="w-3 h-3 rounded-full bg-rose-400/70" /><span className="w-3 h-3 rounded-full bg-amber-300/70" /><span className="w-3 h-3 rounded-full bg-emerald-400/70" />
@@ -623,17 +623,17 @@ export default function Deck() {
         {/* SLIDE 5: Ecosystem Overview - Orbital ecosystem + journey */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute left-[-150px] top-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
-            <div className="absolute right-[-200px] bottom-[-200px] w-[700px] h-[700px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[35%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+            <div className="absolute left-[-150px] top-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full bg-teal-400/10 blur-[140px]" />
+            <div className="absolute right-[-200px] bottom-[-200px] w-[700px] h-[700px] rounded-full bg-emerald-400/10 blur-[120px]" />
+            <div className="absolute inset-x-0 bottom-0 h-[35%] opacity-25 [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             {/* Orbital ecosystem */}
             <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-[720px] h-[720px]">
               <div className="absolute inset-0 rounded-full border border-teal-300/20" />
-              <div className="absolute inset-[90px] rounded-full border border-dashed border-teal-300/25 animate-[spin_60s_linear_infinite] print:hidden" />
+              <div className="absolute inset-[90px] rounded-full border border-dashed border-teal-300/25 animate-[spin_60s_linear_infinite]" />
               <div className="absolute inset-[190px] rounded-full border border-emerald-300/20" />
-              <div className="absolute inset-[260px] rounded-full bg-teal-400/20 blur-3xl print:hidden" />
-              <div className="absolute inset-0 animate-[spin_40s_linear_infinite] print:hidden">
+              <div className="absolute inset-[260px] rounded-full bg-teal-400/20 blur-3xl" />
+              <div className="absolute inset-0 animate-[spin_40s_linear_infinite]">
                 <span className="absolute left-1/2 top-[-6px] w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_20px_rgba(94,234,212,1)]" />
               </div>
               <img src={sfhLogo} alt="Startup Factory Hub" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] object-contain drop-shadow-[0_0_60px_rgba(45,212,191,0.6)]" crossOrigin="anonymous" />
@@ -673,7 +673,7 @@ export default function Deck() {
               <span className="mt-14 text-[18px] tracking-[0.35em] uppercase text-slate-400">Startup Journey Roadmap</span>
               <div className="relative mt-8">
                 <div className="absolute left-[34px] right-[34px] top-[34px] h-[2px] bg-gradient-to-r from-teal-300/10 via-teal-300/70 to-emerald-300/10" />
-                <div className="absolute left-[34px] right-[34px] top-[34px] h-[6px] -translate-y-[2px] bg-teal-300/30 blur-md print:hidden" />
+                <div className="absolute left-[34px] right-[34px] top-[34px] h-[6px] -translate-y-[2px] bg-teal-300/30 blur-md" />
                 <div className="relative grid grid-cols-6">
                   {[
                     { icon: Lightbulb, label: "Idea" },
@@ -699,10 +699,10 @@ export default function Deck() {
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25 print:hidden" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/60 print:hidden" />
-            <div className="absolute right-[-120px] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/60" />
+            <div className="absolute right-[-120px] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-teal-400/10 blur-[140px]" />
+            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             <div className="relative z-10 h-full flex">
               {/* Left: headline + segments */}
@@ -753,10 +753,10 @@ export default function Deck() {
               <div className="w-[48%] relative flex items-center justify-center">
                 <div className="relative w-[720px] h-[720px]">
                   <div className="absolute inset-0 rounded-full border border-teal-300/30 bg-teal-400/[0.03]" />
-                  <div className="absolute inset-0 animate-[spin_50s_linear_infinite] print:hidden">
+                  <div className="absolute inset-0 animate-[spin_50s_linear_infinite]">
                     <span className="absolute left-1/2 top-[-6px] w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_20px_rgba(94,234,212,1)]" />
                   </div>
-                  <div className="absolute inset-[130px] rounded-full border border-dashed border-teal-300/40 bg-teal-400/[0.05] animate-[spin_80s_linear_infinite] print:hidden" />
+                  <div className="absolute inset-[130px] rounded-full border border-dashed border-teal-300/40 bg-teal-400/[0.05] animate-[spin_80s_linear_infinite]" />
                   <div className="absolute inset-[130px] rounded-full border border-teal-300/20" />
                   <div className="absolute inset-[250px] rounded-full bg-emerald-400/15 ring-1 ring-emerald-300/60 shadow-[0_0_80px_rgba(52,211,153,0.45)]" />
 
@@ -785,8 +785,8 @@ export default function Deck() {
         {/* SLIDE 7: Business Model & Revenue Streams */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_80%,rgba(52,211,153,0.12),transparent_50%)] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_80%,rgba(52,211,153,0.12),transparent_50%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
             <div className="relative z-10 h-full flex flex-col px-[100px] py-[80px]">
               <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Monetization</span>
               <h2 className="mt-3 text-[80px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent">Business Model</h2>
@@ -850,9 +850,9 @@ export default function Deck() {
         {/* SLIDE 8: Financial Projections */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_20%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[380px] opacity-40 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
-            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full border border-cyan-400/10 animate-[spin_90s_linear_infinite] print:hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_20%,rgba(34,211,238,0.12),transparent_50%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-[380px] opacity-40" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
+            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full border border-cyan-400/10 animate-[spin_90s_linear_infinite]">
               <div className="absolute top-1/2 left-0 w-3 h-3 -translate-x-1/2 rounded-full bg-cyan-300 shadow-[0_0_24px_6px_rgba(103,232,249,0.6)]" />
             </div>
 
@@ -986,7 +986,7 @@ export default function Deck() {
         {/* SLIDE: Traction */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute inset-y-0 left-0 w-[52%] print:hidden">
+            <div className="absolute inset-y-0 left-0 w-[52%]">
               <img src={nasdaqTower} alt="Startup Factory Hub featured on the Nasdaq Tower in Times Square" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-950/30 to-slate-950" />
               <div className="absolute left-[60px] bottom-[60px] flex items-center gap-3 px-6 py-3 rounded-full bg-slate-950/80 backdrop-blur ring-1 ring-cyan-300/40">
@@ -994,7 +994,7 @@ export default function Deck() {
                 <span className="text-[20px] text-white uppercase tracking-[0.2em]">Nasdaq Tower · Times Square, NYC</span>
               </div>
             </div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(20,184,166,0.18),transparent_55%)] print:hidden" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(20,184,166,0.18),transparent_55%)]" />
             <div className="relative z-10 h-full ml-[50%] flex flex-col justify-center pr-[110px] pl-[40px]">
               <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Traction</span>
               <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">Real Momentum</h2>
@@ -1059,8 +1059,8 @@ export default function Deck() {
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_90%_90%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
-            <div className="absolute inset-x-0 bottom-0 h-[320px] opacity-30 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_90%_90%,rgba(34,211,238,0.12),transparent_50%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-[320px] opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
             <div className="relative z-10 h-full flex flex-col px-[110px] py-[70px]">
               <div className="flex items-end justify-between gap-12">
                 <div>
