@@ -379,7 +379,8 @@ export default function Deck() {
           [data-slide-frame]:last-child { break-after: auto; page-break-after: auto; }
           [data-slide] { transform: none !important; left: 0 !important; top: 0 !important; margin: 0 !important; }
           [data-slide] button, [data-slide] .fixed, [data-slide] .sticky { display: revert !important; }
-          [data-slide] * { animation-play-state: paused !important; }
+          [data-slide] * { animation-play-state: paused !important; break-inside: avoid !important; }
+          [data-slide-frame] { overflow: hidden !important; position: relative !important; contain: layout paint; }
           [data-slide] .bg-clip-text { background: none !important; color: #d9fbf5 !important; -webkit-text-fill-color: #d9fbf5 !important; }
         }
       `}</style>
@@ -639,7 +640,7 @@ export default function Deck() {
             <div className="absolute inset-x-0 bottom-0 h-[35%] opacity-25 [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             {/* Orbital ecosystem */}
-            <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-[720px] h-[720px]">
+            <div className="absolute left-[5%] top-[180px] w-[720px] h-[720px]">
               <div className="absolute inset-0 rounded-full border border-teal-300/20" />
               <div className="absolute inset-[90px] rounded-full border border-dashed border-teal-300/25 animate-[spin_60s_linear_infinite]" />
               <div className="absolute inset-[190px] rounded-full border border-emerald-300/20" />
