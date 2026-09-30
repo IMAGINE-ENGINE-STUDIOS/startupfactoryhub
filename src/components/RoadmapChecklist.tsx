@@ -109,19 +109,10 @@ export default function RoadmapChecklist({
   const C = 2 * Math.PI * R;
 
   return (
-    <div className="relative tech-card border-0 rounded-2xl p-4 sm:p-5 overflow-hidden">
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full opacity-25 blur-3xl"
-        style={{
-          background: 'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
-        }}
-      />
-
+    <div className="border-t border-border/50 pt-5">
       {/* ── Header: ring + stats + filters ──────────────────────────── */}
       <div className="relative flex items-center gap-4">
-        <div className="relative w-16 h-16 shrink-0">
+        <div className="relative w-12 h-12 shrink-0">
           <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
             <defs>
               <linearGradient id="taskRing" x1="0" y1="0" x2="1" y2="1">
@@ -129,13 +120,13 @@ export default function RoadmapChecklist({
                 <stop offset="100%" stopColor="hsl(160 80% 45%)" />
               </linearGradient>
             </defs>
-            <circle cx="32" cy="32" r={R} stroke="hsl(var(--muted))" strokeWidth="5" fill="none" opacity="0.3" />
+            <circle cx="32" cy="32" r={R} stroke="hsl(var(--muted))" strokeWidth="4" fill="none" opacity="0.3" />
             <circle
               cx="32"
               cy="32"
               r={R}
-              stroke="url(#taskRing)"
-              strokeWidth="5"
+              stroke="hsl(var(--primary))"
+              strokeWidth="4"
               fill="none"
               strokeLinecap="round"
               strokeDasharray={C}
@@ -147,7 +138,7 @@ export default function RoadmapChecklist({
             {allDone ? (
               <Trophy className="w-6 h-6 text-emerald-400" />
             ) : (
-              <span className="text-sm font-bold tabular-nums bg-gradient-to-br from-primary to-emerald-400 bg-clip-text text-transparent">
+              <span className="text-xs font-semibold tabular-nums text-primary">
                 {pct}%
               </span>
             )}
@@ -174,15 +165,15 @@ export default function RoadmapChecklist({
 
         {/* Filter chips */}
         {totalCount > 0 && (
-          <div className="hidden sm:flex items-center gap-1 p-1 rounded-full bg-muted/40 border border-border/40">
+          <div className="hidden sm:flex items-center gap-1 border-b border-border/50">
             {(['all', 'active', 'done'] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  'px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider rounded-full transition-all',
+                  'px-2.5 py-1.5 text-[11px] font-medium transition-colors',
                   filter === f
-                    ? 'bg-gradient-to-r from-primary to-emerald-500 text-white shadow-[0_0_12px_hsl(var(--primary)/0.4)]'
+                    ? 'border-b-2 border-primary text-foreground'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -195,15 +186,15 @@ export default function RoadmapChecklist({
 
       {/* Mobile filters */}
       {totalCount > 0 && (
-        <div className="sm:hidden mt-3 flex items-center gap-1 p-1 rounded-full bg-muted/40 border border-border/40 w-fit">
+        <div className="sm:hidden mt-3 flex items-center gap-1 border-b border-border/50 w-fit">
           {(['all', 'active', 'done'] as Filter[]).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                'px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider rounded-full transition-all',
+                'px-2.5 py-1.5 text-[11px] font-medium transition-colors',
                 filter === f
-                  ? 'bg-gradient-to-r from-primary to-emerald-500 text-white'
+                  ? 'border-b-2 border-primary text-foreground'
                   : 'text-muted-foreground',
               )}
             >
@@ -233,10 +224,10 @@ export default function RoadmapChecklist({
                 handleDrop(item.id);
               }}
               className={cn(
-                'group relative flex items-center gap-2.5 p-2 pr-2.5 rounded-xl border transition-all duration-200',
+                'group relative flex items-center gap-2.5 px-1 py-2.5 border-b transition-colors',
                 item.completed
-                  ? 'bg-emerald-500/[0.04] border-emerald-500/20'
-                  : 'bg-background/40 border-border/40 hover:border-primary/40 hover:bg-primary/[0.03]',
+                  ? 'border-border/40'
+                  : 'border-border/40 hover:bg-muted/20',
                 isOver && 'ring-2 ring-primary/50 -translate-y-0.5',
               )}
             >
@@ -254,7 +245,7 @@ export default function RoadmapChecklist({
                 className={cn(
                   'relative w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all',
                   item.completed
-                    ? 'bg-gradient-to-br from-primary to-emerald-500 border-transparent shadow-[0_0_12px_hsl(var(--primary)/0.5)]'
+                    ? 'bg-primary border-primary'
                     : 'border-muted-foreground/40 hover:border-primary hover:bg-primary/10',
                 )}
               >

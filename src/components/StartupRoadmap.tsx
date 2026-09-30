@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2, Building2, GraduationCap, Calendar, MapPin, Target } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, Plus, RotateCcw, ChevronDown, Trophy, Trash2, Building2, MapPin, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -914,66 +913,16 @@ export default function StartupRoadmap() {
   const isJourneyComplete = completedCount === standardSteps.length && standardSteps.length > 0;
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6 animate-fade-in">
-      {/* ── Hero: progress ring + headline ───────────────────────────── */}
-      <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
-        {/* Ambient gradient glow */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full opacity-30 blur-3xl"
-          style={{
-            background:
-              'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full opacity-20 blur-3xl"
-          style={{
-            background:
-              'radial-gradient(circle, hsl(160 80% 45%) 0%, transparent 70%)',
-          }}
-        />
-
-        <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          {/* Ring */}
-          <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
-            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-              <defs>
-                <linearGradient id="journeyRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(160 80% 45%)" />
-                </linearGradient>
-              </defs>
-              <circle cx="50" cy="50" r="42" stroke="hsl(var(--muted))" strokeWidth="6" fill="none" opacity="0.3" />
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                stroke="url(#journeyRing)"
-                strokeWidth="6"
-                fill="none"
-                strokeLinecap="round"
-                strokeDasharray={2 * Math.PI * 42}
-                strokeDashoffset={2 * Math.PI * 42 * (1 - roadmapProgress.percentage / 100)}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl font-bold tabular-nums bg-gradient-to-br from-primary to-emerald-400 bg-clip-text text-transparent">
-                {roadmapProgress.percentage}%
-              </span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">complete</span>
-            </div>
-          </div>
-
-          {/* Headline */}
-          <div className="flex-1 min-w-0 space-y-1.5">
+    <div className="pb-20 md:pb-6 animate-fade-in">
+      <div className="tech-card border-0 overflow-hidden">
+        <div className="flex flex-col gap-5 border-b border-border/50 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
-              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Startup Journey</span>
+              <span className="text-xs font-medium text-muted-foreground">Startup Journey</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-semibold leading-tight">
+            <h2 className="text-xl sm:text-2xl font-semibold leading-tight tracking-normal">
               {isJourneyComplete
                 ? 'Journey complete — what is next?'
                 : activeStep
@@ -986,13 +935,16 @@ export default function StartupRoadmap() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="mr-auto sm:mr-2 text-right">
+              <p className="text-xl font-semibold tabular-nums">{roadmapProgress.percentage}%</p>
+              <p className="text-xs text-muted-foreground">complete</p>
+            </div>
             {isJourneyComplete && (
               <Button
                 size="sm"
                 onClick={() => setShowCompletionDialog(true)}
-                className="gap-1.5 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90 border-0"
+                className="gap-1.5"
               >
                 <Trophy className="h-3.5 w-3.5" />
                 Share
@@ -1038,89 +990,49 @@ export default function StartupRoadmap() {
             </Dialog>
           </div>
         </div>
-      </div>
-
-      {/* ── Horizontal step rail ─────────────────────────────────────── */}
-      <div className="relative tech-card border-0 rounded-2xl p-4 sm:p-5">
-        <div className="flex items-stretch w-full">
+          <Progress value={roadmapProgress.percentage} className="h-1" />
+          <div className="flex gap-1 overflow-x-auto pb-1">
           {allSteps.map((step, idx) => {
             const Icon = step.icon;
             const isActive = step.id === activeStepId;
-            const isFirst = idx === 0;
             return (
-              <div key={step.id} className="flex items-center flex-1 min-w-0 first:flex-initial">
-                {!isFirst && (
-                  <div
-                    className={cn(
-                      'h-0.5 flex-1 min-w-[8px] transition-colors duration-500',
-                      step.completed || allSteps[idx - 1]?.completed
-                        ? 'bg-gradient-to-r from-primary to-emerald-500'
-                        : 'bg-muted',
-                    )}
-                  />
-                )}
-                <button
+                <Button
+                  key={step.id}
+                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => !step.locked && setActiveStepId(step.id)}
                   disabled={step.locked}
                   className={cn(
-                    'group relative flex flex-col items-center gap-1.5 px-1 py-1 transition-all shrink-0',
+                    'h-9 shrink-0 gap-2 rounded-md px-3 text-xs',
+                    isActive && 'bg-primary/10 text-primary',
+                    step.completed && !isActive && 'text-foreground',
                     step.locked && 'opacity-40 cursor-not-allowed',
                   )}
                 >
-                  <div
-                    className={cn(
-                      'relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all duration-300',
-                      step.completed
-                        ? 'bg-gradient-to-br from-primary to-emerald-500 text-white shadow-[0_0_20px_hsl(var(--primary)/0.4)]'
-                        : isActive
-                          ? 'bg-primary/10 ring-2 ring-primary text-primary shadow-[0_0_24px_hsl(var(--primary)/0.5)]'
-                          : step.locked
-                            ? 'bg-muted/40 text-muted-foreground'
-                            : 'bg-muted/60 text-foreground hover:bg-primary/10 hover:text-primary',
-                    )}
-                  >
-                    {isActive && !step.completed && (
-                      <span className="absolute inset-0 rounded-xl bg-primary/20 animate-ping" />
-                    )}
-                    {step.completed ? (
-                      <CheckCircle className="w-5 h-5 relative" />
-                    ) : step.locked ? (
-                      <Lock className="w-4 h-4 relative" />
-                    ) : (
-                      <Icon className="w-5 h-5 relative" />
-                    )}
-                  </div>
-                  <span
-                    className={cn(
-                      'text-[10px] font-medium uppercase tracking-wider whitespace-nowrap',
-                      isActive ? 'text-foreground' : 'text-muted-foreground',
-                    )}
-                  >
-                    {idx + 1}
-                  </span>
-                </button>
-              </div>
+                  {step.completed ? <CheckCircle className="h-4 w-4" /> : step.locked ? <Lock className="h-3.5 w-3.5" /> : <Icon className="h-4 w-4" />}
+                  <span>{idx + 1}. {step.title}</span>
+                </Button>
             );
           })}
+          </div>
         </div>
-      </div>
 
-      {/* ── Focused active-step panel ────────────────────────────────── */}
       {activeStep && (
         <div
           key={activeStep.id}
-          className="tech-card border-0 rounded-2xl p-5 sm:p-6 space-y-5 animate-fade-in"
+          className="p-4 sm:p-6 space-y-5 animate-fade-in"
         >
           <div className="flex items-start gap-4">
             <div
               className={cn(
-                'w-12 h-12 rounded-xl flex items-center justify-center shrink-0',
+                'w-10 h-10 rounded-md flex items-center justify-center shrink-0',
                 activeStep.completed
-                  ? 'bg-gradient-to-br from-primary to-emerald-500 text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'bg-primary/10 text-primary',
               )}
             >
-              {activeStep.completed ? <CheckCircle className="w-6 h-6" /> : <ActiveIcon className="w-6 h-6" />}
+              {activeStep.completed ? <CheckCircle className="w-5 h-5" /> : <ActiveIcon className="w-5 h-5" />}
             </div>
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
@@ -1128,7 +1040,7 @@ export default function StartupRoadmap() {
                   {activeStep.stage.charAt(0).toUpperCase() + activeStep.stage.slice(1)}
                 </Badge>
                 {activeStep.completed && (
-                  <Badge className="bg-gradient-to-r from-primary to-emerald-500 text-white border-0 text-xs gap-1">
+                  <Badge className="bg-primary text-primary-foreground border-0 text-xs gap-1">
                     <CheckCircle className="w-3 h-3" />
                     Done
                   </Badge>
@@ -1190,7 +1102,7 @@ export default function StartupRoadmap() {
               <Button
                 size="sm"
                 onClick={() => completeStep(activeStep.id)}
-                className="gap-1.5 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90 border-0"
+                className="gap-1.5"
               >
                 <CheckCircle className="w-3.5 h-3.5" />
                 Mark Complete
@@ -1245,15 +1157,17 @@ export default function StartupRoadmap() {
         </div>
       )}
 
+      </div>
+
       {/* ── Accelerator Program Journeys ─────────────────────────────── */}
       {acceleratorPrograms.length > 0 && (
-        <Collapsible open={acceleratorExpanded} onOpenChange={setAcceleratorExpanded}>
-          <div className="tech-card border-0 rounded-2xl p-4 sm:p-5">
+        <Collapsible open={acceleratorExpanded} onOpenChange={setAcceleratorExpanded} className="mt-4">
+          <div className="border-t border-border/50 px-1 py-4">
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between cursor-pointer group">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/20 flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-emerald-500" />
+                  <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold">Accelerator Programs</h3>
@@ -1271,11 +1185,11 @@ export default function StartupRoadmap() {
               </div>
             </CollapsibleTrigger>
 
-            <CollapsibleContent className="mt-5 space-y-4">
+            <CollapsibleContent className="mt-4 divide-y divide-border/50 border-y border-border/50">
               {acceleratorPrograms.map((program) => (
                 <div
                   key={program.id}
-                  className="p-4 rounded-xl bg-background/40 border border-border/40 space-y-3"
+                  className="py-4 space-y-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">

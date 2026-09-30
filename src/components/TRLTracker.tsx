@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle, Circle } from 'lucide-react';
@@ -34,16 +32,16 @@ export default function TRLTracker({ currentLevel, onLevelUpdate, disabled = fal
   };
 
   return (
-    <Card className="tech-card border-primary/20">
-      <CardHeader className="pb-3">
+    <section className="border-t border-border/50 pt-5">
+      <div className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm sm:text-base">Technology Readiness Level (TRL)</CardTitle>
+          <h4 className="text-sm font-medium">Technology Readiness Level (TRL)</h4>
           <Badge variant="secondary" className="text-xs">
             Level {currentLevel}/10
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="px-4 sm:px-6">
+      </div>
+      <div>
         {/* Desktop view - Horizontal */}
         <div className="hidden md:block">
           <div className="flex items-center gap-2 mb-4">
@@ -60,7 +58,7 @@ export default function TRLTracker({ currentLevel, onLevelUpdate, disabled = fal
                         onMouseEnter={() => setHoveredLevel(trl.level)}
                         onMouseLeave={() => setHoveredLevel(null)}
                         disabled={disabled}
-                        className={`flex-1 h-12 rounded-lg border-2 transition-all ${
+                        className={`flex-1 h-10 rounded-md border transition-all ${
                           isCompleted
                             ? 'bg-primary border-primary text-primary-foreground'
                             : isHovered
@@ -100,7 +98,7 @@ export default function TRLTracker({ currentLevel, onLevelUpdate, disabled = fal
                   key={trl.level}
                   onClick={() => handleLevelClick(trl.level)}
                   disabled={disabled}
-                  className={`w-16 h-16 rounded-lg border-2 transition-all flex-shrink-0 ${
+                className={`w-12 h-12 rounded-md border transition-all flex-shrink-0 ${
                     isCompleted
                       ? 'bg-primary border-primary text-primary-foreground'
                       : 'bg-muted border-muted-foreground/20'
@@ -137,7 +135,7 @@ export default function TRLTracker({ currentLevel, onLevelUpdate, disabled = fal
             Click on a level to mark your current technology readiness
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
