@@ -392,7 +392,7 @@ export default function Deck() {
           <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
           <span className="text-sm text-teal-400 font-medium tracking-wide">STARTUP FACTORY HUB // PITCH DECK</span>
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
+        <Button variant="outline" size="sm" onClick={() => window.print()} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
           <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export PDF'}</span>
         </Button>
