@@ -548,7 +548,7 @@ export default function Deck() {
             <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
             {/* Planet behind the platform screens */}
-            <img src={earthPlanet} alt="" aria-hidden className="absolute left-[-6%] bottom-[-38%] w-[58%] mix-blend-screen opacity-90 animate-[spin_240s_linear_infinite] print:hidden" style={{ transformOrigin: '50% 62%' }} crossOrigin="anonymous" />
+            <img src={earthPlanet} alt="" aria-hidden className="absolute left-[-6%] bottom-[-38%] w-[58%] mix-blend-screen opacity-90 print:hidden" crossOrigin="anonymous" />
             <div className="absolute left-[2%] bottom-[-10%] w-[46%] h-[40%] rounded-full bg-sky-400/20 blur-[100px] print:hidden" />
 
             {/* Live platform interface */}
