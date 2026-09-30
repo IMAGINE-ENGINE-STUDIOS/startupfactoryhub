@@ -390,13 +390,16 @@ export default function Deck() {
             </h1>
             
             <p className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
-              The Online Hybrid Accelerator Platform Powered by A.I.
+              The AI-Powered Hybrid Accelerator for Building Startups from Idea to Scale
             </p>
             
             {/* Key Value Proposition */}
             <div className="w-full mb-4">
               <p className="text-lg md:text-xl text-slate-300 leading-relaxed print:text-gray-700">
-                A <span className="text-teal-400 font-semibold">hybrid digital-physical</span> execution platform with global locations, <span className="text-cyan-400 font-semibold">AI-driven workflows</span>, and human expertise—enabling founders to build consistently from <span className="text-teal-400 font-semibold">idea to scale</span>.
+                Startup Factory Hub is a <span className="text-teal-400 font-semibold">hybrid digital-physical accelerator</span> that combines <span className="text-cyan-400 font-semibold">AI-powered technology</span>, expert mentorship, strategic resources, and a global network to help founders build, validate, launch, and scale companies.
+              </p>
+              <p className="mt-2 text-base md:text-lg font-semibold text-teal-400 print:text-teal-700">
+                From idea to MVP. From MVP to market. From market to scale.
               </p>
             </div>
             
