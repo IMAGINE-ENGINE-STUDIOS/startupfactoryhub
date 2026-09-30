@@ -371,6 +371,16 @@ export default function Deck() {
         [data-slide] .md\\:text-xl { font-size: 30px !important; }
         [data-slide] .md\\:text-2xl { font-size: 36px !important; }
         [data-slide] .md\\:text-lg { font-size: 26px !important; }
+        @media print {
+          @page { size: 1920px 1080px; margin: 0; }
+          html, body, #root { background: #020617 !important; margin: 0 !important; padding: 0 !important; max-width: none !important; overflow: visible !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          [data-slide-frame] { width: 1920px !important; height: 1080px !important; aspect-ratio: auto !important; break-after: page; page-break-after: always; break-inside: avoid; }
+          [data-slide-frame]:last-child { break-after: auto; page-break-after: auto; }
+          [data-slide] { transform: none !important; left: 0 !important; top: 0 !important; margin: 0 !important; }
+          [data-slide] button, [data-slide] .fixed, [data-slide] .sticky { display: revert !important; }
+          [data-slide] * { animation-play-state: paused !important; }
+        }
       `}</style>
       {/* Navigation Bar - Hidden in Print */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/95 backdrop-blur-sm border-b border-teal-500/30 print:hidden">
