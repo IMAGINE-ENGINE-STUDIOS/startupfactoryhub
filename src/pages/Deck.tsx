@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
+import slide2Img from '@/assets/deck-slide2-hybrid.jpg';
+import slide3Img from '@/assets/deck-slide3-gap.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
@@ -426,51 +428,39 @@ export default function Deck() {
 
         {/* SLIDE 2: End-to-End Startup Execution */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
-            <div className="absolute inset-0 bg-cover bg-center opacity-40 print:hidden" style={{ backgroundImage: `url(${astronautBg})` }} />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(20,184,166,0.18),transparent_55%),linear-gradient(180deg,rgba(2,6,23,0.85),rgba(2,6,23,0.97))] print:hidden" />
-            {/* Orbital rings */}
-            <div className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 w-[1300px] h-[1300px] rounded-full border border-teal-400/10 animate-[spin_90s_linear_infinite] print:hidden">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <img src={slide2Img} alt="Founders around a holographic AI globe" className="absolute left-0 top-0 h-full w-[58%] object-cover print:hidden" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.1)_0%,rgba(2,6,23,0.35)_35%,rgba(2,6,23,0.95)_55%,rgb(2,6,23)_65%)] print:hidden" />
+            <div className="absolute left-[46%] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-teal-400/10 animate-[spin_80s_linear_infinite] print:hidden">
               <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_6px_rgba(45,212,191,0.6)]" />
             </div>
-            <div className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-cyan-400/10 animate-[spin_60s_linear_infinite_reverse] print:hidden">
-              <div className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-cyan-300 shadow-[0_0_18px_4px_rgba(103,232,249,0.6)]" />
-            </div>
 
-            <div className="relative z-10 h-full flex flex-col items-center px-[110px] pt-[80px] pb-[70px]">
-              <div className="flex items-center gap-4 mb-5">
-                <span className="h-px w-16 bg-gradient-to-r from-transparent to-teal-400" />
-                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">End-to-End Startup Execution</span>
-                <span className="h-px w-16 bg-gradient-to-l from-transparent to-teal-400" />
-              </div>
-              <h2 className="text-[84px] leading-none font-bold tracking-tight text-center bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">
+            <div className="relative z-10 h-full ml-auto w-[48%] flex flex-col justify-center pr-[110px]">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">End-to-End Startup Execution</span>
+              <h2 className="mt-5 text-[80px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">
                 The AI-Powered Hybrid Accelerator
               </h2>
-              <p className="mt-6 text-[26px] tracking-[0.2em] text-slate-300 uppercase print:text-gray-600">
+              <p className="mt-6 text-[24px] tracking-[0.2em] text-slate-300 uppercase print:text-gray-600">
                 AI-Powered <span className="text-teal-400">•</span> Human-Led <span className="text-teal-400">•</span> Hybrid <span className="text-teal-400">•</span> Global
               </p>
-              <p className="mt-8 max-w-[1350px] text-center text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
-                Startup Factory Hub is a <span className="text-white font-semibold">continuous accelerator</span> built for founders who need more than a fixed-term program. We combine AI-powered technology, expert mentors, strategic partners, capital access, and a global network to help startups move from <span className="text-teal-300">idea to MVP, MVP to market, and market to scale.</span>
+              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
+                A <span className="text-white font-semibold">continuous accelerator</span> taking startups from <span className="text-teal-300">idea to MVP, MVP to market, and market to scale.</span>
               </p>
 
-              <div className="mt-auto grid grid-cols-3 gap-x-16 gap-y-12 w-full">
+              <div className="mt-12 grid grid-cols-2 gap-x-10 gap-y-8">
                 {[
-                  { icon: Cpu, title: "AI-Powered Execution", desc: "AI supports founders throughout the journey—from startup roadmaps and intelligent matching to market intelligence, resources, and continuous progress tracking." },
-                  { icon: Globe, title: "Digital + Physical Acceleration", desc: "Our digital platform alongside physical innovation hubs and a global network of partner locations, connecting online execution with real-world communities, resources, and opportunities." },
-                  { icon: Users, title: "Human Expertise", desc: "AI does not replace the accelerator experience. Mentors, advisors, operators, and industry experts provide the relationships, expertise, and strategic guidance founders need." },
-                  { icon: Network, title: "Strategic Ecosystem", desc: "A connected ecosystem of technology providers, corporations, universities, government organizations, investors, and strategic partners." },
-                  { icon: DollarSign, title: "Capital & Market Access", desc: "We help founders prepare for fundraising and connect with investors, strategic partners, customers, and market opportunities as they become ready to scale." },
-                  { icon: Zap, title: "Continuous Acceleration", desc: "Designed to stay with the founder beyond a traditional cohort—platform, people, programs, and ecosystem working as one execution engine to build, validate, launch, fund, and scale." },
+                  { icon: Cpu, title: "AI-Powered Execution" },
+                  { icon: Globe, title: "Digital + Physical" },
+                  { icon: Users, title: "Human Expertise" },
+                  { icon: Network, title: "Strategic Ecosystem" },
+                  { icon: DollarSign, title: "Capital & Market Access" },
+                  { icon: Zap, title: "Continuous Acceleration" },
                 ].map((p, i) => (
-                  <div key={i} className="group relative pl-7 transition-transform duration-500 hover:-translate-y-1">
-                    <span className="absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-teal-300 via-cyan-500/40 to-transparent group-hover:from-cyan-200 print:bg-gray-300" />
-                    <div className="flex items-center gap-4 mb-3">
-                      <span className="relative flex items-center justify-center w-12 h-12 rounded-full bg-teal-400/10 shadow-[0_0_30px_rgba(45,212,191,0.25)] group-hover:shadow-[0_0_40px_rgba(103,232,249,0.5)] transition-shadow">
-                        <p.icon className="h-6 w-6 text-teal-300 print:text-teal-700" />
-                      </span>
-                      <h4 className="text-[28px] font-semibold text-white print:text-black">{p.title}</h4>
-                    </div>
-                    <p className="text-[20px] leading-[1.5] text-slate-400 print:text-gray-600">{p.desc}</p>
+                  <div key={i} className="group flex items-center gap-4 transition-transform duration-500 hover:translate-x-1">
+                    <span className="flex items-center justify-center w-14 h-14 rounded-full bg-teal-400/10 shadow-[0_0_30px_rgba(45,212,191,0.25)] group-hover:shadow-[0_0_40px_rgba(103,232,249,0.55)] transition-shadow">
+                      <p.icon className="h-7 w-7 text-teal-300 print:text-teal-700" />
+                    </span>
+                    <h4 className="text-[27px] font-semibold text-white print:text-black">{p.title}</h4>
                   </div>
                 ))}
               </div>
@@ -480,59 +470,39 @@ export default function Deck() {
 
         {/* SLIDE 3: The Problem - The Execution Gap */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
-            <div className="absolute inset-0 bg-cover bg-center opacity-40 print:hidden" style={{ backgroundImage: `url(${moonEarthBg})` }} />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(244,63,94,0.10),transparent_55%),linear-gradient(180deg,rgba(2,6,23,0.85),rgba(2,6,23,0.97))] print:hidden" />
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <img src={slide3Img} alt="Founder facing a broken path" className="absolute right-0 top-0 h-full w-[58%] object-cover print:hidden" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[linear-gradient(270deg,rgba(2,6,23,0.05)_0%,rgba(2,6,23,0.35)_35%,rgba(2,6,23,0.95)_55%,rgb(2,6,23)_65%)] print:hidden" />
 
-            <div className="relative z-10 h-full flex flex-col items-center px-[110px] pt-[70px] pb-[60px]">
-              <div className="flex items-center gap-4 mb-5">
-                <span className="h-px w-16 bg-gradient-to-r from-transparent to-rose-400" />
-                <span className="text-[22px] font-medium text-rose-300 tracking-[0.35em] uppercase print:text-gray-600">The Problem</span>
-                <span className="h-px w-16 bg-gradient-to-l from-transparent to-rose-400" />
-              </div>
-              <h2 className="text-[84px] leading-none font-bold tracking-tight text-center bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent print:text-black">
+            <div className="relative z-10 h-full w-[52%] flex flex-col justify-center pl-[110px]">
+              <span className="text-[22px] font-medium text-rose-300 tracking-[0.35em] uppercase print:text-gray-600">The Problem</span>
+              <h2 className="mt-5 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent print:text-black">
                 The Execution Gap
               </h2>
-              <p className="mt-7 max-w-[1350px] text-center text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
-                Startups have access to more resources than ever—but those resources are <span className="text-white font-semibold">fragmented across disconnected programs, tools, mentors, investors, and communities.</span> Founders are often supported at one stage, then left to navigate the next stage on their own.
+              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
+                Resources are <span className="text-white font-semibold">fragmented</span>. Founders get support at one stage—then navigate the next alone.
               </p>
 
-              {/* Where the journey breaks */}
-              <p className="mt-12 text-[20px] tracking-[0.3em] uppercase text-slate-400">Where the Journey Breaks</p>
-              <div className="mt-8 relative w-full flex items-start justify-between">
-                <div className="absolute left-[6%] right-[6%] top-[22px] h-px bg-[repeating-linear-gradient(90deg,rgba(45,212,191,0.6)_0_18px,transparent_18px_34px)] print:hidden" />
-                {[
-                  { t: "Education", d: "Learn what to do" },
-                  { t: "Product", d: "Build the product" },
-                  { t: "Market", d: "Find customers" },
-                  { t: "Revenue", d: "Build a sustainable business" },
-                  { t: "Scale", d: "Access capital, talent, markets, and strategic partners" },
-                ].map((s, i) => (
-                  <div key={i} className="relative flex-1 flex flex-col items-center text-center px-4">
-                    <span className="relative w-11 h-11 rounded-full bg-slate-950 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.35)]">
-                      <span className="w-3 h-3 rounded-full bg-teal-300" />
-                    </span>
-                    {i < 4 && <span className="absolute top-[12px] left-[calc(100%-10px)] text-[20px] text-rose-400 font-bold print:hidden">×</span>}
-                    <h4 className="mt-4 text-[26px] font-semibold tracking-[0.15em] uppercase text-white print:text-black">{s.t}</h4>
-                    <p className="mt-1 text-[19px] leading-snug text-slate-400 max-w-[280px] print:text-gray-600">{s.d}</p>
-                  </div>
+              <div className="mt-10 flex items-center gap-3 text-[20px] tracking-[0.18em] uppercase">
+                {["Education", "Product", "Market", "Revenue", "Scale"].map((s, i) => (
+                  <span key={s} className="flex items-center gap-3">
+                    <span className="text-white font-semibold">{s}</span>
+                    {i < 4 && <span className="text-rose-400 font-bold">×</span>}
+                  </span>
                 ))}
               </div>
 
-              {/* Core gaps */}
-              <div className="mt-auto grid grid-cols-5 gap-10 w-full">
+              <div className="mt-12 flex flex-col gap-5">
                 {[
-                  { n: "01", t: "Fragmented Support", d: "Founders jump between programs, platforms, tools, mentors, and service providers." },
-                  { n: "02", t: "Short-Term Programs", d: "Traditional programs often end before the company reaches meaningful traction." },
-                  { n: "03", t: "Limited Operator Access", d: "Founders need people who can help them execute—not only teach them." },
-                  { n: "04", t: "Capital Is Not Enough", d: "Funding can accelerate a company, but it does not replace product, customers, talent, or execution." },
-                  { n: "05", t: "Learning Doesn't Equal Traction", d: "Education and mentorship only create value when founders turn them into products, customers, revenue, and growth." },
-                ].map((g) => (
-                  <div key={g.n} className="group relative pl-6 transition-transform duration-500 hover:-translate-y-1">
-                    <span className="absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-rose-300 via-rose-500/40 to-transparent print:bg-gray-300" />
-                    <span className="text-[40px] font-bold leading-none bg-gradient-to-b from-rose-200 to-rose-500/40 bg-clip-text text-transparent">{g.n}</span>
-                    <h4 className="mt-3 text-[24px] font-semibold text-white leading-tight print:text-black">{g.t}</h4>
-                    <p className="mt-2 text-[18px] leading-[1.5] text-slate-400 print:text-gray-600">{g.d}</p>
+                  "Fragmented Support",
+                  "Short-Term Programs",
+                  "Limited Operator Access",
+                  "Capital Is Not Enough",
+                  "Learning Doesn't Equal Traction",
+                ].map((t, i) => (
+                  <div key={t} className="group flex items-baseline gap-6 transition-transform duration-500 hover:translate-x-1">
+                    <span className="text-[30px] font-bold w-12 bg-gradient-to-b from-rose-200 to-rose-500/50 bg-clip-text text-transparent">0{i + 1}</span>
+                    <h4 className="text-[32px] font-semibold text-white print:text-black">{t}</h4>
                   </div>
                 ))}
               </div>
