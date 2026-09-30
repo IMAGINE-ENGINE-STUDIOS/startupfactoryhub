@@ -443,7 +443,7 @@ export default function Deck() {
             {/* Differentiator - Hybrid Model */}
             <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-xl px-8 py-4 w-full print:bg-gray-50 print:border-gray-300">
               <p className="text-base text-slate-300 print:text-gray-700">
-                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-cyan-400">intelligent operating system</span> that merges AI automation, physical workspaces, and human expertise into one continuous execution engine across global locations.
+                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-cyan-400">intelligent operating system</span> that merges AI automation, physical workspaces, global resources, and human expertise into one continuous execution engine across global locations.
               </p>
             </div>
           </div>
