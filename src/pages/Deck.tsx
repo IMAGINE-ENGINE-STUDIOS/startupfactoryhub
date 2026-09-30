@@ -438,26 +438,36 @@ export default function Deck() {
 
         {/* SLIDE 2: End-to-End Startup Execution */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
-            <img src={slide2Img} alt="Founders around a holographic AI globe" className="absolute left-0 top-0 h-full w-[58%] object-cover print:hidden" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.1)_0%,rgba(2,6,23,0.35)_35%,rgba(2,6,23,0.95)_55%,rgb(2,6,23)_65%)] print:hidden" />
-            <div className="absolute left-[46%] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-teal-400/10 animate-[spin_80s_linear_infinite] print:hidden">
-              <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_6px_rgba(45,212,191,0.6)]" />
+          <section className="absolute inset-0 overflow-hidden bg-[#03080a] print:relative print:break-after-page">
+            <img src={slide2Img} alt="Startup team working together" className="absolute inset-0 h-full w-full object-cover opacity-60 scale-105" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,10,0.2)_0%,rgba(3,8,10,0.75)_45%,rgba(3,8,10,0.97)_62%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(3,8,10,0.9)_0%,transparent_35%)]" />
+            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-teal-400/10 blur-[140px]" />
+
+            {/* Top editorial bar */}
+            <div className="absolute top-[70px] left-[110px] right-[110px] flex items-center justify-between text-[16px] tracking-[0.4em] uppercase text-slate-400 z-10">
+              <span>Startup Factory Hub</span>
+              <span className="flex-1 mx-10 h-px bg-white/15" />
+              <span className="text-teal-300">02</span>
             </div>
 
-            <div className="relative z-10 h-full ml-auto w-[48%] flex flex-col justify-center pr-[110px]">
-              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">End-to-End Startup Execution</span>
-              <h2 className="mt-5 text-[80px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">
-                The AI-Powered Hybrid Accelerator
+            {/* Left caption over photo */}
+            <div className="absolute left-[110px] bottom-[90px] z-10 max-w-[560px]">
+              <p className="text-[18px] tracking-[0.35em] uppercase text-teal-300">AI-Powered · Human-Led</p>
+              <p className="mt-3 text-[18px] tracking-[0.35em] uppercase text-slate-300">Hybrid · Global</p>
+            </div>
+
+            <div className="relative z-10 h-full ml-auto w-[46%] flex flex-col justify-center pr-[110px]">
+              <span className="text-[18px] tracking-[0.4em] uppercase text-teal-300">End-to-End Startup Execution</span>
+              <h2 className="mt-6 text-[88px] leading-[0.95] font-extralight tracking-tight text-white">
+                The AI-Powered<br /><span className="font-semibold bg-gradient-to-r from-teal-200 to-cyan-300 bg-clip-text text-transparent">Hybrid Accelerator</span>
               </h2>
-              <p className="mt-6 text-[24px] tracking-[0.2em] text-slate-300 uppercase print:text-gray-600">
-                AI-Powered <span className="text-teal-400">•</span> Human-Led <span className="text-teal-400">•</span> Hybrid <span className="text-teal-400">•</span> Global
-              </p>
-              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
-                A <span className="text-white font-semibold">continuous accelerator</span> taking startups from <span className="text-teal-300">idea to MVP, MVP to market, and market to scale.</span>
+              <div className="mt-8 w-24 h-[2px] bg-gradient-to-r from-teal-300 to-transparent" />
+              <p className="mt-8 text-[26px] leading-[1.5] font-light text-slate-300">
+                A continuous accelerator taking startups from <span className="text-white font-normal">idea to MVP, MVP to market, and market to scale.</span>
               </p>
 
-              <div className="mt-12 grid grid-cols-2 gap-x-10 gap-y-8">
+              <div className="mt-14 grid grid-cols-2 border-t border-white/10">
                 {[
                   { icon: Cpu, title: "AI-Powered Execution" },
                   { icon: Globe, title: "Digital + Physical" },
@@ -466,11 +476,10 @@ export default function Deck() {
                   { icon: DollarSign, title: "Capital & Market Access" },
                   { icon: Zap, title: "Continuous Acceleration" },
                 ].map((p, i) => (
-                  <div key={i} className="group flex items-center gap-4 transition-transform duration-500 hover:translate-x-1">
-                    <span className="flex items-center justify-center w-14 h-14 rounded-full bg-teal-400/10 shadow-[0_0_30px_rgba(45,212,191,0.25)] group-hover:shadow-[0_0_40px_rgba(103,232,249,0.55)] transition-shadow">
-                      <p.icon className="h-7 w-7 text-teal-300 print:text-teal-700" />
-                    </span>
-                    <h4 className="text-[27px] font-semibold text-white print:text-black">{p.title}</h4>
+                  <div key={i} className={`group flex items-center gap-5 py-7 border-b border-white/10 ${i % 2 === 0 ? 'pr-8 border-r' : 'pl-8'} transition-colors hover:bg-white/[0.03]`}>
+                    <span className="text-[15px] font-mono text-teal-300/70">0{i + 1}</span>
+                    <p.icon className="h-7 w-7 text-teal-300 shrink-0" strokeWidth={1.4} />
+                    <h4 className="text-[24px] font-normal text-white">{p.title}</h4>
                   </div>
                 ))}
               </div>
@@ -480,29 +489,29 @@ export default function Deck() {
 
         {/* SLIDE 3: The Problem - The Execution Gap */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
-            <img src={slide3Img} alt="Founder facing a broken path" className="absolute right-0 top-0 h-full w-[58%] object-cover print:hidden" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-[linear-gradient(270deg,rgba(2,6,23,0.05)_0%,rgba(2,6,23,0.35)_35%,rgba(2,6,23,0.95)_55%,rgb(2,6,23)_65%)] print:hidden" />
+          <section className="absolute inset-0 overflow-hidden bg-[#0a0406] print:relative print:break-after-page">
+            <img src={slide3Img} alt="Founder under pressure" className="absolute inset-0 h-full w-full object-cover opacity-55 grayscale-[40%]" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[linear-gradient(270deg,rgba(10,4,6,0.15)_0%,rgba(10,4,6,0.75)_42%,rgba(10,4,6,0.97)_60%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(10,4,6,0.9)_0%,transparent_35%)]" />
+            <div className="absolute left-[-200px] bottom-[-250px] w-[800px] h-[800px] rounded-full bg-rose-500/10 blur-[140px]" />
 
-            <div className="relative z-10 h-full w-[52%] flex flex-col justify-center pl-[110px]">
-              <span className="text-[22px] font-medium text-rose-300 tracking-[0.35em] uppercase print:text-gray-600">The Problem</span>
-              <h2 className="mt-5 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent print:text-black">
-                The Execution Gap
+            <div className="absolute top-[70px] left-[110px] right-[110px] flex items-center justify-between text-[16px] tracking-[0.4em] uppercase text-slate-400 z-10">
+              <span className="text-rose-300">03</span>
+              <span className="flex-1 mx-10 h-px bg-white/15" />
+              <span>The Problem</span>
+            </div>
+
+            <div className="relative z-10 h-full w-[50%] flex flex-col justify-center pl-[110px]">
+              <span className="text-[18px] tracking-[0.4em] uppercase text-rose-300">The Problem</span>
+              <h2 className="mt-6 text-[104px] leading-[0.95] font-extralight tracking-tight text-white">
+                The Execution<br /><span className="font-semibold bg-gradient-to-r from-rose-200 to-rose-400 bg-clip-text text-transparent">Gap</span>
               </h2>
-              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
-                Resources are <span className="text-white font-semibold">fragmented</span>. Founders get support at one stage—then navigate the next alone.
+              <div className="mt-8 w-24 h-[2px] bg-gradient-to-r from-rose-300 to-transparent" />
+              <p className="mt-8 text-[26px] leading-[1.5] font-light text-slate-300">
+                Resources are <span className="text-white font-normal">fragmented</span>. Founders get support at one stage, then navigate the next alone.
               </p>
 
-              <div className="mt-10 flex items-center gap-3 text-[20px] tracking-[0.18em] uppercase">
-                {["Education", "Product", "Market", "Revenue", "Scale"].map((s, i) => (
-                  <span key={s} className="flex items-center gap-3">
-                    <span className="text-white font-semibold">{s}</span>
-                    {i < 4 && <span className="text-rose-400 font-bold">×</span>}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-12 flex flex-col gap-5">
+              <div className="mt-12 flex flex-col border-t border-white/10">
                 {[
                   "Fragmented Support",
                   "Short-Term Programs",
@@ -510,12 +519,22 @@ export default function Deck() {
                   "Capital Is Not Enough",
                   "Learning Doesn't Equal Traction",
                 ].map((t, i) => (
-                  <div key={t} className="group flex items-baseline gap-6 transition-transform duration-500 hover:translate-x-1">
-                    <span className="text-[30px] font-bold w-12 bg-gradient-to-b from-rose-200 to-rose-500/50 bg-clip-text text-transparent">0{i + 1}</span>
-                    <h4 className="text-[32px] font-semibold text-white print:text-black">{t}</h4>
+                  <div key={t} className="group flex items-center gap-8 py-5 border-b border-white/10 transition-colors hover:bg-white/[0.03]">
+                    <span className="text-[15px] font-mono text-rose-300/80 w-8">0{i + 1}</span>
+                    <h4 className="text-[30px] font-light text-white">{t}</h4>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Broken journey caption over photo */}
+            <div className="absolute right-[110px] bottom-[90px] z-10 flex items-center gap-4 text-[17px] tracking-[0.3em] uppercase">
+              {["Education", "Product", "Market", "Revenue", "Scale"].map((s, i) => (
+                <span key={s} className="flex items-center gap-4">
+                  <span className="text-white/90">{s}</span>
+                  {i < 4 && <span className="w-8 h-px bg-gradient-to-r from-rose-400 to-transparent" />}
+                </span>
+              ))}
             </div>
           </section>
         </SlideWrapper>
