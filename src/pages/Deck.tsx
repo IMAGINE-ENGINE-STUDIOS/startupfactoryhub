@@ -10,7 +10,9 @@ import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
 import slide2Img from '@/assets/deck-slide2-hybrid.jpg';
 import slide3Img from '@/assets/deck-slide3-gap.jpg';
-import slide4Img from '@/assets/deck-slide4-solution.jpg';
+import shotJourney from '@/assets/features/journey.jpg';
+import shotMatching from '@/assets/features/matching.jpg';
+import shotAITools from '@/assets/features/ai-tools.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
@@ -514,9 +516,30 @@ export default function Deck() {
         {/* SLIDE 4: Solution - Unified Execution */}
         <SlideWrapper>
           <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
-            <img src={slide4Img} alt="Founders planning together" className="absolute left-0 top-0 h-full w-[50%] object-cover print:hidden" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.1)_0%,rgba(2,6,23,0.4)_30%,rgba(2,6,23,0.95)_48%,rgb(2,6,23)_56%)] print:hidden" />
             <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
+            <div className="absolute left-[120px] top-[200px] w-[700px] h-[700px] rounded-full bg-teal-400/15 blur-[140px] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+
+            {/* Live platform interface */}
+            <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[36%] aspect-[4/3] print:hidden" style={{ perspective: 1800 }}>
+              <div className="absolute left-0 top-[10%] w-[88%] rounded-2xl overflow-hidden bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_0_80px_rgba(45,212,191,0.35),0_40px_80px_rgba(0,0,0,0.6)] transition-transform duration-700 hover:[transform:rotateY(0deg)_rotateX(0deg)]" style={{ transform: 'rotateY(14deg) rotateX(4deg)' }}>
+                <div className="flex items-center gap-2 px-4 h-9 bg-slate-950/90 border-b border-white/5">
+                  <span className="w-3 h-3 rounded-full bg-rose-400/70" /><span className="w-3 h-3 rounded-full bg-amber-300/70" /><span className="w-3 h-3 rounded-full bg-emerald-400/70" />
+                  <span className="ml-4 text-[14px] text-slate-400 tracking-wide">startupfactoryhub.com / journey</span>
+                </div>
+                <img src={shotJourney} alt="Startup Factory Hub Journey interface" className="w-full block" crossOrigin="anonymous" />
+              </div>
+              <div className="absolute right-0 top-0 w-[38%] rounded-xl overflow-hidden ring-1 ring-teal-300/40 shadow-[0_0_50px_rgba(45,212,191,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_6s_ease-in-out_infinite]" style={{ transform: 'rotateY(14deg)' }}>
+                <img src={shotMatching} alt="AI matching interface" className="w-full block" crossOrigin="anonymous" />
+              </div>
+              <div className="absolute right-0 bottom-0 w-[42%] rounded-xl overflow-hidden ring-1 ring-emerald-300/40 shadow-[0_0_50px_rgba(52,211,153,0.4),0_30px_60px_rgba(0,0,0,0.6)] animate-[float_7s_ease-in-out_infinite_1s]" style={{ transform: 'rotateY(14deg)' }}>
+                <img src={shotAITools} alt="AI tools interface" className="w-full block" crossOrigin="anonymous" />
+              </div>
+              <div className="absolute left-[4%] bottom-[2%] flex items-center gap-3 px-5 py-3 rounded-full bg-slate-950/80 backdrop-blur ring-1 ring-emerald-300/30">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+                <span className="text-[16px] tracking-[0.25em] uppercase text-emerald-200">Live Platform</span>
+              </div>
+            </div>
 
             <div className="relative z-10 h-full ml-auto w-[58%] flex flex-col justify-center pr-[100px]">
               <span className="text-[22px] font-medium text-emerald-300 tracking-[0.35em] uppercase print:text-gray-600">Solution</span>
