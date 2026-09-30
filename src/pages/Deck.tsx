@@ -669,141 +669,87 @@ export default function Deck() {
         </SlideWrapper>
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
-            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full mx-auto px-[2%]">
-          <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Growth Landscape</span>
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Market Opportunity</h2>
-            <p className="text-xl md:text-2xl text-slate-300 text-center mb-5 print:text-gray-600">$25B+ Global Accelerator & Startup Services Market</p>
-            
-            {/* TAM / SAM / SOM Concentric Rings */}
-            <div className="flex flex-col md:flex-row items-center gap-10 w-full mb-6">
-              {/* Animated Concentric Circles */}
-              <div className="relative shrink-0 mx-auto" style={{ width: 320, height: 320 }}>
-                {/* TAM - Outer */}
-                <div className="absolute inset-0 rounded-full border-2 border-teal-500/30 animate-[pulse_3s_ease-in-out_infinite] flex items-center justify-center">
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-teal-500/20 border border-teal-500/40 rounded text-sm font-bold text-teal-400 whitespace-nowrap">TAM $25B+</div>
-                </div>
-                {/* SAM - Middle */}
-                <div className="absolute inset-[18%] rounded-full border-2 border-cyan-500/40 bg-cyan-500/5 animate-[pulse_3s_ease-in-out_infinite_0.5s] flex items-center justify-center">
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded text-sm font-bold text-cyan-400 whitespace-nowrap">SAM $8.5B</div>
-                </div>
-                {/* SOM - Inner */}
-                <div className="absolute inset-[38%] rounded-full border-2 border-emerald-500/60 bg-emerald-500/10 animate-[pulse_3s_ease-in-out_infinite_1s] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-emerald-400">$250M</div>
-                    <div className="text-xs text-emerald-400/80 font-medium">SOM Y5</div>
-                  </div>
-                </div>
-              </div>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25 print:hidden" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/60 print:hidden" />
+            <div className="absolute right-[-120px] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
 
-              {/* Market Segments - Animated Bars */}
-              <div className="flex-1 w-full space-y-4">
-                <h3 className="text-base font-bold text-teal-400 mb-3 flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" /> Industry Growth by Segment
-                </h3>
-                {[
-                  { label: "Startup Accelerators", value: 78, amount: "$9.2B", color: "from-teal-500 to-teal-400", delay: "0.2s" },
-                  { label: "AI/ML Startup Tools", value: 92, amount: "$6.8B", color: "from-cyan-500 to-cyan-400", delay: "0.4s" },
-                  { label: "Coworking & Innovation Hubs", value: 65, amount: "$4.1B", color: "from-purple-500 to-purple-400", delay: "0.6s" },
-                  { label: "Venture Services Platforms", value: 55, amount: "$3.2B", color: "from-emerald-500 to-emerald-400", delay: "0.8s" },
-                  { label: "EdTech for Entrepreneurs", value: 45, amount: "$1.9B", color: "from-amber-500 to-amber-400", delay: "1s" },
-                ].map((segment, i) => (
-                  <div key={i} className="group">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm text-slate-300 font-medium">{segment.label}</span>
-                      <span className="text-sm text-slate-400 font-bold">{segment.amount}</span>
-                    </div>
-                    <div className="w-full h-6 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
-                      <div 
-                        className={`h-full bg-gradient-to-r ${segment.color} rounded-full relative`}
-                        style={{ 
-                          width: `${segment.value}%`, 
-                          animation: `slideInWidth 1.5s ease-out ${segment.delay} both`
-                        }}
-                      >
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white/90">{segment.value}%</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <div className="relative z-10 h-full flex">
+              {/* Left: headline + segments */}
+              <div className="w-[52%] flex flex-col justify-center pl-[100px] pr-[40px]">
+                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Growth Landscape</span>
+                <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">Market Opportunity</h2>
+                <p className="mt-6 text-[28px] text-slate-300 print:text-gray-700">
+                  <span className="text-white font-semibold">$25B+</span> global accelerator & startup services market.
+                </p>
 
-            {/* Growth Drivers + Regions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-              <TechCard glowColor="teal" className="p-5">
-                <h3 className="font-semibold text-base mb-3 text-teal-400 flex items-center gap-2 print:text-teal-700">
-                  <TrendingUp className="h-5 w-5" /> Growth Drivers
-                </h3>
-                <div className="space-y-3">
+                <span className="mt-14 text-[18px] tracking-[0.35em] uppercase text-slate-400">Market by segment</span>
+                <div className="mt-6 space-y-5">
                   {[
-                    { icon: TrendingUp, text: "15% CAGR in startup ecosystem growth", color: "emerald", stat: "15%" },
-                    { icon: Cpu, text: "AI adoption in business services accelerating", color: "cyan", stat: "3.2x" },
-                    { icon: Globe, text: "Global entrepreneurship at record levels", color: "purple", stat: "582M" },
-                    { icon: Building2, text: "Hybrid work driving coworking demand", color: "amber", stat: "+40%" },
-                  ].map((driver, i) => (
-                    <div key={i} className="flex items-center gap-3 group" style={{ animation: `fade-in 0.5s ease-out ${0.3 + i * 0.15}s both` }}>
-                      <div className={`w-12 h-12 rounded-lg bg-${driver.color}-500/20 border border-${driver.color}-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                        <span className={`text-sm font-black text-${driver.color}-400`}>{driver.stat}</span>
+                    { label: "Startup Accelerators", amount: "$9.2B", v: 9.2 },
+                    { label: "AI/ML Startup Tools", amount: "$6.8B", v: 6.8 },
+                    { label: "Coworking & Innovation Hubs", amount: "$4.1B", v: 4.1 },
+                    { label: "Venture Services Platforms", amount: "$3.2B", v: 3.2 },
+                    { label: "EdTech for Entrepreneurs", amount: "$1.9B", v: 1.9 },
+                  ].map((s, i) => (
+                    <div key={s.label} className="group">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[21px] text-white font-medium">{s.label}</span>
+                        <span className="text-[24px] font-bold bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">{s.amount}</span>
                       </div>
-                      <span className="text-sm text-slate-300 leading-relaxed">{driver.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </TechCard>
-
-              <TechCard glowColor="cyan" className="p-5">
-                <h3 className="font-semibold text-base mb-3 text-cyan-400 flex items-center gap-2 print:text-cyan-700">
-                  <Globe className="h-5 w-5" /> Target Regions
-                </h3>
-                <div className="space-y-3">
-                  {[
-                    { region: "North America", share: 35, color: "from-teal-500 to-teal-400" },
-                    { region: "Europe", share: 28, color: "from-cyan-500 to-cyan-400" },
-                    { region: "Asia-Pacific", share: 22, color: "from-purple-500 to-purple-400" },
-                    { region: "Latin America", share: 10, color: "from-amber-500 to-amber-400" },
-                    { region: "Middle East & Africa", share: 5, color: "from-rose-500 to-rose-400" },
-                  ].map((r, i) => (
-                    <div key={i}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-slate-300">{r.region}</span>
-                        <span className="text-sm text-slate-400 font-bold">{r.share}%</span>
-                      </div>
-                      <div className="w-full h-4 bg-slate-800/80 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-gradient-to-r ${r.color} rounded-full`}
-                          style={{ 
-                            width: `${r.share}%`, 
-                            animation: `slideInWidth 1.2s ease-out ${0.5 + i * 0.15}s both`
-                          }}
-                        />
+                      <div className="mt-2 h-[3px] w-full bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-teal-300 to-emerald-300 shadow-[0_0_14px_rgba(94,234,212,0.9)]" style={{ width: `${(s.v / 9.2) * 100}%`, animation: `slideInWidth 1.4s ease-out ${0.2 + i * 0.15}s both` }} />
                       </div>
                     </div>
                   ))}
                 </div>
-              </TechCard>
-            </div>
 
-            {/* Inline keyframes style */}
-            <style>{`
-              @keyframes slideInWidth {
-                from { width: 0%; }
-              }
-            `}</style>
-          </div>
+                <div className="mt-12 flex gap-12">
+                  {[
+                    { stat: "15%", t: "Ecosystem CAGR" },
+                    { stat: "3.2x", t: "AI adoption" },
+                    { stat: "582M", t: "Entrepreneurs" },
+                    { stat: "+40%", t: "Hybrid demand" },
+                  ].map((d) => (
+                    <div key={d.t}>
+                      <p className="text-[40px] font-bold leading-none text-white">{d.stat}</p>
+                      <p className="mt-2 text-[16px] tracking-[0.2em] uppercase text-teal-300/80">{d.t}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: TAM / SAM / SOM orbit */}
+              <div className="w-[48%] relative flex items-center justify-center">
+                <div className="relative w-[720px] h-[720px]">
+                  <div className="absolute inset-0 rounded-full border border-teal-300/30 bg-teal-400/[0.03]" />
+                  <div className="absolute inset-0 animate-[spin_50s_linear_infinite] print:hidden">
+                    <span className="absolute left-1/2 top-[-6px] w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_20px_rgba(94,234,212,1)]" />
+                  </div>
+                  <div className="absolute inset-[130px] rounded-full border border-dashed border-teal-300/40 bg-teal-400/[0.05] animate-[spin_80s_linear_infinite] print:hidden" />
+                  <div className="absolute inset-[130px] rounded-full border border-teal-300/20" />
+                  <div className="absolute inset-[250px] rounded-full bg-emerald-400/15 ring-1 ring-emerald-300/60 shadow-[0_0_80px_rgba(52,211,153,0.45)]" />
+
+                  <div className="absolute left-1/2 top-[40px] -translate-x-1/2 text-center">
+                    <p className="text-[18px] tracking-[0.35em] text-teal-300/80">TAM</p>
+                    <p className="text-[52px] font-bold text-white leading-none">$25B+</p>
+                  </div>
+                  <div className="absolute left-1/2 top-[160px] -translate-x-1/2 text-center">
+                    <p className="text-[18px] tracking-[0.35em] text-teal-300/80">SAM</p>
+                    <p className="text-[44px] font-bold text-white leading-none">$8.5B</p>
+                  </div>
+                  <div className="absolute inset-[250px] flex flex-col items-center justify-center text-center">
+                    <p className="text-[18px] tracking-[0.35em] text-emerald-300">SOM · Y5</p>
+                    <p className="text-[52px] font-bold leading-none bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">$250M</p>
+                  </div>
+                </div>
+                <p className="absolute bottom-[80px] text-[18px] tracking-[0.3em] uppercase text-slate-400">
+                  North America 35% · Europe 28% · APAC 22% · LatAm 10% · MEA 5%
+                </p>
+              </div>
             </div>
+            <style>{`@keyframes slideInWidth { from { width: 0%; } }`}</style>
           </section>
         </SlideWrapper>
 
