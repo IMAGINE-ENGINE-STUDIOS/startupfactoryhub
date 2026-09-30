@@ -1098,7 +1098,7 @@ export default function Deck() {
               <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Leadership</span>
               <h2 className="mt-4 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">The Team</h2>
               <p className="mt-5 text-[26px] text-slate-300">Operators, founders and advisors building the next generation of startups.</p>
-              <div className="mt-14 grid grid-cols-5 gap-10 w-full items-start">
+              <div className="mt-14 grid grid-cols-5 gap-8 w-full items-start">
                 {[
                   { name: "Khalia Padilla", bio: "Founder & CEO, Imagine Engine venture studio. CEO & Co-Founder, Lightware Technologies (photonic networks). VC investor building AI-powered accelerators; former advisor, USF Muma Design Thinking Program.", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: "https://www.linkedin.com/in/khaliapadilla/" },
                   { name: "Ricardo Font", bio: "Chairman of the Board, Startup Factory Hub. Managing Partner, Decahedron Ventures. Business Advisor, Startupbootcamp. Physicist and inventor in photonics, aerospace and fintech.", role: "COO & Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: "https://www.linkedin.com/in/ricardo-font-952034248/" },
@@ -1109,14 +1109,14 @@ export default function Deck() {
                   <div key={m.name} className="group flex flex-col items-center text-center">
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full bg-teal-400/30 blur-2xl scale-110 opacity-60 group-hover:opacity-100 transition-opacity" />
-                      <div className="relative w-[230px] h-[230px] rounded-full p-[3px] bg-gradient-to-br from-teal-300 via-cyan-400/40 to-transparent">
+                      <div className="relative w-[200px] h-[200px] rounded-full p-[3px] bg-gradient-to-br from-teal-300 via-cyan-400/40 to-transparent">
                         <img src={m.img} alt={m.name} className="w-full h-full rounded-full object-cover bg-slate-900" crossOrigin="anonymous" />
                       </div>
                     </div>
-                    <p className="mt-8 text-[28px] font-bold text-white whitespace-nowrap">{m.name}</p>
-                    <p className="mt-2 text-[18px] tracking-[0.2em] uppercase text-teal-300">{m.role}</p>
-                    <p className="mt-4 text-[15px] leading-snug text-slate-300 max-w-[260px]">{m.bio}</p>
-                    {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="mt-2 text-[16px] text-slate-400 hover:text-teal-300">LinkedIn</a>}
+                    <p className="mt-6 text-[34px] leading-tight font-bold text-white">{m.name}</p>
+                    <p className="mt-2 text-[22px] font-semibold tracking-[0.15em] uppercase text-teal-300">{m.role}</p>
+                    <p className="mt-4 text-[21px] leading-snug text-slate-200 max-w-[320px]">{m.bio}</p>
+                    {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="mt-3 text-[20px] text-slate-300 hover:text-teal-300">LinkedIn</a>}
                   </div>
                 ))}
               </div>
