@@ -1075,8 +1075,8 @@ export default function Deck() {
               </div>
               <div className="mt-12 grid grid-cols-8 gap-5 flex-1 content-start">
                 {PARTNERS.filter(p => !p.name.startsWith('NASA')).map((p) => (
-                  <div key={p.name} className="group h-[108px] rounded-2xl bg-white/95 flex items-center justify-center px-5 py-4 ring-1 ring-white/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_36px_rgba(103,232,249,0.5)]" title={p.name}>
-                    <img src={p.logo} alt={p.name} className="max-h-[64px] max-w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).replaceWith(Object.assign(document.createElement('span'), { textContent: p.name, className: 'text-[18px] font-semibold text-slate-800 text-center' })); }} />
+                  <div key={p.name} className="group h-[140px] rounded-2xl bg-white/95 flex items-center justify-center px-5 py-4 ring-1 ring-white/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_36px_rgba(103,232,249,0.5)]" title={p.name}>
+                    <img src={p.logo} alt={p.name} className="max-h-[84px] max-w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).replaceWith(Object.assign(document.createElement('span'), { textContent: p.name, className: 'text-[18px] font-semibold text-slate-800 text-center' })); }} />
                   </div>
                 ))}
               </div>
