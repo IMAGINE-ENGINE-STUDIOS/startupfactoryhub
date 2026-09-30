@@ -1042,6 +1042,15 @@ export default function Deck() {
                     <p className="text-[24px] text-slate-400">UKSA</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-6">
+                  <div className="w-[190px] h-[96px] shrink-0 rounded-2xl bg-teal-400/10 border border-teal-300/40 flex items-center justify-center shadow-[0_0_36px_rgba(45,212,191,0.3)]">
+                    <span className="text-[48px] font-bold text-teal-300 leading-none">6</span>
+                  </div>
+                  <div>
+                    <p className="text-[34px] font-semibold text-white leading-tight">Equity Portfolio</p>
+                    <p className="text-[24px] text-slate-400">Equity held in 4 startups and 2 non-profits</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
