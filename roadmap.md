@@ -27,6 +27,7 @@
 - [x] Move $5,000 program cost lock-up from closing page to Apply page (page 13)
 
 ## Current combined fixes
+- [ ] Simplify the shared NET tab across all profile types without flattening result or connection sections
 - [x] Repair LightPaper save failures, page rendering glitches, and workspace navigation/back behavior
 - [x] Add All Community search/filter and exclude incomplete, My Accelerator, and demo profiles from NET
 - [x] Remove generic rocket/Lovable-style icons from the affected network experience
