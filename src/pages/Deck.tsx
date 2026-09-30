@@ -932,222 +932,123 @@ export default function Deck() {
         </SlideContainer>
 
         {/* SLIDE 8: Financial Projections */}
-        <SlideContainer>
-          <div className="flex flex-col items-center h-full w-full">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
-              <span className="text-base font-semibold text-emerald-400 tracking-[0.3em] uppercase print:text-gray-600">Projections</span>
-              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_20%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[380px] opacity-40 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
+            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full border border-cyan-400/10 animate-[spin_90s_linear_infinite] print:hidden">
+              <div className="absolute top-1/2 left-0 w-3 h-3 -translate-x-1/2 rounded-full bg-cyan-300 shadow-[0_0_24px_6px_rgba(103,232,249,0.6)]" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">5-Year Financial Projections</h2>
-            <p className="text-base md:text-lg text-slate-300 text-center mb-4 print:text-gray-600">
-              Membership-led growth delivers <span className="text-emerald-400 font-semibold">7.7x revenue increase</span> over 5 years
-            </p>
-            
-            {/* Charts Row: Bar Chart + Funding Allocation */}
-            <div className="flex gap-5 w-full mb-4">
-              {/* Revenue Bar Chart */}
-              <div className="flex-[3]">
-                <TechCard glowColor="emerald" className="p-5 h-full">
-                  <div className="flex">
-                    {/* Y-axis */}
-                    <div className="flex flex-col justify-between h-56 pr-3 text-right shrink-0">
-                      <span className="text-xs text-slate-500">$60M</span>
-                      <span className="text-xs text-slate-500">$48M</span>
-                      <span className="text-xs text-slate-500">$36M</span>
-                      <span className="text-xs text-slate-500">$24M</span>
-                      <span className="text-xs text-slate-500">$12M</span>
-                      <span className="text-xs text-slate-500">$0</span>
-                    </div>
-                    {/* Chart area */}
-                    <div className="flex-1 relative h-56 border-b border-l border-slate-700/40">
-                      {[20, 40, 60, 80].map((p) => (
-                        <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
-                      ))}
-                      <div className="absolute inset-0 flex items-end px-4 gap-3">
-                        {[
-                          { revenue: "$6.73M", value: 6.73, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
-                          { revenue: "$13.46M", value: 13.46, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
-                          { revenue: "$23.19M", value: 23.19, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
-                          { revenue: "$35.92M", value: 35.92, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
-                          { revenue: "$51.65M", value: 51.65, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
-                        ].map((item, i) => (
-                          <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                            <span className="text-xs font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
-                            <div
-                              className={`w-full max-w-[60px] ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
-                              style={{ height: `${(item.value / 60) * 224}px` }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex pl-10">
-                    {[
-                      { year: "Year 1", pct: "" },
-                      { year: "Year 2", pct: "+100%" },
-                      { year: "Year 3", pct: "+72%" },
-                      { year: "Year 4", pct: "+55%" },
-                      { year: "Year 5", pct: "+44%" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex-1 text-center pt-2">
-                        <span className="text-xs text-slate-400 font-medium block">{item.year}</span>
-                        {item.pct && <span className="text-xs text-emerald-400/80 font-semibold">{item.pct}</span>}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
-                    <TrendingUp className="h-4 w-4 text-emerald-400" />
-                    <span className="text-sm text-slate-300">
-                      <span className="text-emerald-400 font-semibold">+667%</span> growth • 10,000 members Y1 • $6.73M → $51.65M
-                    </span>
-                  </div>
-                </TechCard>
-              </div>
 
-              {/* Funding Allocation */}
-              <div className="flex-[2]">
-                <TechCard glowColor="cyan" className="p-5 h-full flex flex-col items-center justify-center">
-                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $1.5M</h4>
-                  <p className="text-xs text-slate-500 mb-3 text-center">Seed Round · 18-Month Runway</p>
-                  
-                  {/* Pie SVG Chart */}
-                  <div className="relative w-[240px] h-[240px] mx-auto mb-4">
-                    <svg viewBox="0 0 200 200" className="w-full h-full">
-                      {(() => {
-                        const cx = 100, cy = 100, r = 85;
-                        const segments = [
-                          { pct: 55, color: '#14b8a6', label: '55%' },
-                          { pct: 25, color: '#06b6d4', label: '25%' },
-                          { pct: 12, color: '#a855f7', label: '12%' },
-                          { pct: 8, color: '#f59e0b', label: '8%' },
-                        ];
-                        let startAngle = -90;
-                        return segments.map((seg, i) => {
-                          const sweep = (seg.pct / 100) * 360;
-                          const endAngle = startAngle + sweep;
-                          const midAngle = startAngle + sweep / 2;
-                          const startRad = (startAngle * Math.PI) / 180;
-                          const endRad = (endAngle * Math.PI) / 180;
-                          const midRad = (midAngle * Math.PI) / 180;
-                          const x1 = cx + r * Math.cos(startRad);
-                          const y1 = cy + r * Math.sin(startRad);
-                          const x2 = cx + r * Math.cos(endRad);
-                          const y2 = cy + r * Math.sin(endRad);
-                          const largeArc = sweep > 180 ? 1 : 0;
-                          const path = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-                          const labelR = r * 0.6;
-                          const lx = cx + labelR * Math.cos(midRad);
-                          const ly = cy + labelR * Math.sin(midRad);
-                          startAngle = endAngle;
-                          return (
+            <div className="relative z-10 h-full flex px-[110px] py-[80px] gap-[90px]">
+              {/* LEFT: hero + growth curve */}
+              <div className="flex-[1.35] flex flex-col">
+                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">5-Year Financial Projections</span>
+                <div className="mt-4 flex items-end gap-6">
+                  <h2 className="text-[150px] leading-[0.9] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">$51.65M</h2>
+                  <div className="pb-4">
+                    <p className="text-[24px] text-slate-400 uppercase tracking-[0.2em]">Year 5 Revenue</p>
+                    <p className="text-[30px] font-semibold text-teal-300 flex items-center gap-2"><TrendingUp className="h-8 w-8" />7.7x from $6.73M</p>
+                  </div>
+                </div>
+
+                {/* Growth curve */}
+                <div className="relative mt-10 flex-1">
+                  <svg viewBox="0 0 1000 440" preserveAspectRatio="xMidYMax meet" className="w-full h-full overflow-visible">
+                    <defs>
+                      <linearGradient id="finArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id="finLine" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#14b8a6" />
+                        <stop offset="100%" stopColor="#67e8f9" />
+                      </linearGradient>
+                      <filter id="finGlow"><feGaussianBlur stdDeviation="6" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                    </defs>
+                    {(() => {
+                      const vals = [6.73, 13.46, 23.19, 35.92, 51.65];
+                      const pts = vals.map((v, i) => [80 + i * 210, 400 - (v / 56) * 380]);
+                      const line = pts.map((p, i) => `${i ? 'L' : 'M'} ${p[0]} ${p[1]}`).join(' ');
+                      return (
+                        <>
+                          {[0, 1, 2, 3].map(g => <line key={g} x1="0" x2="1000" y1={40 + g * 120} y2={40 + g * 120} stroke="rgba(148,163,184,0.12)" strokeDasharray="4 8" />)}
+                          <path d={`${line} L ${pts[4][0]} 400 L ${pts[0][0]} 400 Z`} fill="url(#finArea)" />
+                          <path d={line} fill="none" stroke="url(#finLine)" strokeWidth="5" filter="url(#finGlow)" strokeLinecap="round" />
+                          {pts.map((p, i) => (
                             <g key={i}>
-                              <path d={path} fill={seg.color} stroke="rgba(15,23,42,0.8)" strokeWidth="2" opacity="0.85" />
-                              <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="13" fontWeight="bold">{seg.label}</text>
+                              <line x1={p[0]} x2={p[0]} y1={p[1]} y2={400} stroke="rgba(45,212,191,0.25)" strokeDasharray="3 6" />
+                              <circle cx={p[0]} cy={p[1]} r="16" fill="rgba(45,212,191,0.15)" className="animate-pulse" />
+                              <circle cx={p[0]} cy={p[1]} r="7" fill="#a5f3fc" filter="url(#finGlow)" />
+                              <text x={p[0]} y={p[1] - 30} textAnchor="middle" fill="#fff" fontSize="30" fontWeight="700">${vals[i]}M</text>
                             </g>
-                          );
-                        });
-                      })()}
-                    </svg>
-                  </div>
-
-                  {/* Legend */}
-                  <div className="grid grid-cols-1 gap-2 w-full">
-                    {[
-                      { label: 'Growth & Distribution', pct: '55%', amount: '$825K', color: 'bg-teal-500' },
-                      { label: 'Product & Technology', pct: '25%', amount: '$375K', color: 'bg-cyan-500' },
-                      { label: 'Operations & Legal', pct: '12%', amount: '$180K', color: 'bg-purple-500' },
-                      { label: 'Strategic Reserve', pct: '8%', amount: '$120K', color: 'bg-amber-500' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-sm ${item.color} shrink-0`} />
-                        <span className="text-sm text-slate-300 flex-1">{item.label}</span>
-                        <span className="text-sm font-bold text-white">{item.pct}</span>
-                        <span className="text-xs text-slate-500">{item.amount}</span>
+                          ))}
+                        </>
+                      );
+                    })()}
+                  </svg>
+                  <div className="absolute left-0 right-0 -bottom-2 flex" style={{ paddingLeft: '3%', paddingRight: '7%' }}>
+                    {['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'].map((y, i) => (
+                      <div key={y} className="flex-1 text-center">
+                        <span className="text-[20px] text-slate-400 uppercase tracking-[0.2em]">{y}</span>
+                        {i > 0 && <span className="block text-[18px] text-teal-300">{['+100%', '+72%', '+55%', '+44%'][i - 1]}</span>}
                       </div>
                     ))}
                   </div>
-                </TechCard>
+                </div>
+              </div>
 
+              {/* RIGHT: Y1 engine + raise */}
+              <div className="flex-1 flex flex-col justify-center">
+                <p className="text-[20px] text-slate-400 uppercase tracking-[0.3em]">Year 1 Revenue Engine</p>
+                <p className="text-[64px] font-bold text-white leading-none mt-2">$6.73M</p>
+                <div className="mt-8 space-y-6">
+                  {[
+                    { icon: Users, t: "10,000 Members", s: "$50 / month", v: "$6.0M", w: 89 },
+                    { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", w: 8.2 },
+                    { icon: Building2, t: "10 Global Access + Office", s: "$950 / month", v: "$114K", w: 1.7 },
+                    { icon: Briefcase, t: "10 Self-Paced + Desk", s: "$550 / month", v: "$66K", w: 1 },
+                  ].map((r, i) => (
+                    <div key={i} className="group">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-teal-400/10 shadow-[0_0_24px_rgba(45,212,191,0.25)] group-hover:shadow-[0_0_36px_rgba(103,232,249,0.6)] transition-shadow">
+                          <r.icon className="h-6 w-6 text-teal-300" />
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-[25px] font-semibold text-white leading-tight">{r.t}</p>
+                          <p className="text-[18px] text-slate-400">{r.s}</p>
+                        </div>
+                        <span className="text-[28px] font-bold text-teal-300">{r.v}</span>
+                      </div>
+                      <div className="mt-2 ml-16 h-[3px] rounded-full bg-slate-800 overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.8)]" style={{ width: `${Math.max(r.w, 3)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-12 pt-8 border-t border-teal-400/15">
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-[34px] font-bold text-cyan-300">Raising $1.5M</p>
+                    <p className="text-[18px] text-slate-400 uppercase tracking-[0.2em]">Seed · 18-Month Runway</p>
+                  </div>
+                  <div className="mt-4 flex h-[10px] rounded-full overflow-hidden gap-1">
+                    <div className="bg-teal-400 shadow-[0_0_14px_rgba(45,212,191,0.8)]" style={{ width: '55%' }} />
+                    <div className="bg-cyan-400" style={{ width: '25%' }} />
+                    <div className="bg-sky-500" style={{ width: '12%' }} />
+                    <div className="bg-slate-500" style={{ width: '8%' }} />
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2 text-[19px] text-slate-300">
+                    <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-teal-400 mr-2" />Growth & Distribution <b className="text-white">55%</b></span>
+                    <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 mr-2" />Product & Tech <b className="text-white">25%</b></span>
+                    <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-500 mr-2" />Operations & Legal <b className="text-white">12%</b></span>
+                    <span><span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-500 mr-2" />Strategic Reserve <b className="text-white">8%</b></span>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
-            <div className="w-full mb-4">
-              <TechCard glowColor="teal" className="p-4">
-                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $51.65M · Memberships + Office Plans + Accelerator-as-a-Service</h4>
-                <div className="flex items-center h-9 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '88%' }}>
-                    <span className="text-xs font-medium text-white">Memberships $50/mo · $48.0M</span>
-                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
-                  </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center relative" style={{ width: '8%' }}>
-                    <span className="text-xs font-medium text-white">AaaS</span>
-                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
-                  </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center" style={{ width: '4%' }} />
-                </div>
-                <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                  <span>Memberships $48.0M (93%)</span>
-                  <span>Accelerator-as-a-Service $2.75M (5%)</span>
-                  <span>$550 + $950 Office Plans $0.90M (2%)</span>
-                </div>
-              </TechCard>
-            </div>
-            
-            {/* Revenue Streams Summary - Compact Grid */}
-            <div className="grid grid-cols-6 gap-3 w-full mb-3">
-              {[{
-              label: "Members Y1",
-              value: "10,000",
-              icon: Users,
-              color: "teal"
-            }, {
-              label: "Membership",
-              value: "$50/mo",
-              icon: DollarSign,
-              color: "emerald"
-            }, {
-              label: "Self-Paced + Desk",
-              value: "$550/mo",
-              icon: Briefcase,
-              color: "cyan"
-            }, {
-              label: "Global Access + Office",
-              value: "$950/mo",
-              icon: Building2,
-              color: "purple"
-            }, {
-              label: "AaaS Software",
-              value: "$5K",
-              icon: Cpu,
-              color: "amber"
-            }, {
-              label: "Managed / Startup (min 10)",
-              value: "$5K",
-              icon: Rocket,
-              color: "rose"
-            }].map((item, i) => <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 text-center">
-                  <item.icon className={`h-5 w-5 mx-auto mb-2 text-${item.color}-400`} />
-                  <p className={`text-sm font-bold text-${item.color}-400`}>{item.value}</p>
-                  <p className="text-xs text-slate-500">{item.label}</p>
-                </div>)}
-            </div>
-            
-            {/* Model Summary */}
-            <div className="w-full">
-              <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-4 py-3">
-                <p className="text-sm text-center text-slate-400">
-                  <span className="text-emerald-400 font-medium">Model:</span> Y1: 10,000 members × $50/mo ($6.0M) + 10 × $550 ($66K) + 10 × $950 ($114K) + 10 AaaS partners × ($5K software + 10 managed startups × $5K) ($550K) = $6.73M · Members grow to 80K and each plan/AaaS adds 10 per year = $51.65M Year 5
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </SlideContainer>
+          </section>
+        </SlideWrapper>
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
