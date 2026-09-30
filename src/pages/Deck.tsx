@@ -1107,6 +1107,15 @@ export default function Deck() {
                     <p className="text-[24px] text-slate-400">Kennedy Space Center (KSC)</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-6">
+                  <div className="w-[190px] h-[96px] shrink-0 rounded-2xl bg-white flex items-center justify-center p-4 shadow-[0_0_36px_rgba(45,212,191,0.3)]">
+                    <img src="/partners/uksa-logo.png" alt="UK Space Agency" className="max-h-full max-w-full object-contain" />
+                  </div>
+                  <div>
+                    <p className="text-[34px] font-semibold text-white leading-tight">Used by UK Space Agency</p>
+                    <p className="text-[24px] text-slate-400">UKSA</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
