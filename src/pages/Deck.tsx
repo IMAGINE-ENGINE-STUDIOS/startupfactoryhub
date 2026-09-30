@@ -449,109 +449,56 @@ export default function Deck() {
           </div>
         </CoverSlideContainer>
 
-        {/* SLIDE 2: Company Summary - Mechanism Journey */}
+        {/* SLIDE 2: End-to-End Startup Execution */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Background image */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
-            backgroundImage: `url(${astronautBg})`
-          }} />
-            {/* Dark overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            {/* Border frame */}
-             <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
-            <div className="flex flex-col items-center w-full">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">End-to-End Execution</span>
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
+          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-cover bg-center opacity-40 print:hidden" style={{ backgroundImage: `url(${astronautBg})` }} />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(20,184,166,0.18),transparent_55%),linear-gradient(180deg,rgba(2,6,23,0.85),rgba(2,6,23,0.97))] print:hidden" />
+            {/* Orbital rings */}
+            <div className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 w-[1300px] h-[1300px] rounded-full border border-teal-400/10 animate-[spin_90s_linear_infinite] print:hidden">
+              <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_6px_rgba(45,212,191,0.6)]" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">The Online Hybrid Accelerator</h2>
-            <p className="text-xl text-slate-400 text-center mb-5 print:text-gray-600">AI-Powered • Hybrid Execution • Global Scale</p>
-            
-            {/* Core Philosophy - Big Statement */}
-            <div className="w-full mb-5">
-              <div className="bg-slate-900/60 border-2 border-teal-500/40 rounded-xl p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <p className="text-lg text-center text-slate-200 leading-relaxed print:text-gray-700">
-                  <span className="text-teal-400 font-bold print:text-teal-700">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span>—a permanent operating system that combines intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine for founders worldwide.
-                </p>
-              </div>
-            </div>
-            
-            {/* What Makes Us Different - 3 Pillars */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-5">
-              <div className="bg-slate-900/60 border border-teal-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap className="h-6 w-6 text-teal-400 print:text-teal-700" />
-                  <span className="text-base font-bold text-teal-400 print:text-teal-700">AI-Driven Workflows</span>
-                </div>
-                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
-                  Intelligent automation powers every stage—from <span className="text-white">AI matching and roadmaps</span> to real-time analytics. No manual gaps, just continuous execution.
-                </p>
-              </div>
-              <div className="bg-slate-900/60 border border-cyan-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <div className="flex items-center gap-2 mb-3">
-                  <Globe className="h-6 w-6 text-cyan-400 print:text-cyan-700" />
-                  <span className="text-base font-bold text-cyan-400 print:text-cyan-700">Digital + Physical Hybrid</span>
-                </div>
-                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
-                  <span className="text-white">Online platform + 4 flagship hubs</span> + 5,800 partner locations. Build anywhere with local community and global reach.
-                </p>
-              </div>
-              <div className="bg-slate-900/60 border border-purple-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <div className="flex items-center gap-2 mb-3">
-                  <Network className="h-6 w-6 text-purple-400 print:text-purple-700" />
-                  <span className="text-base font-bold text-purple-400 print:text-purple-700">Integrated Ecosystem</span>
-                </div>
-                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
-                  <span className="text-white">AI + Mentors + Corporates + Capital</span> in one platform. No fragmented tools—one consistent workflow.
-                </p>
-              </div>
+            <div className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-cyan-400/10 animate-[spin_60s_linear_infinite_reverse] print:hidden">
+              <div className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-cyan-300 shadow-[0_0_18px_4px_rgba(103,232,249,0.6)]" />
             </div>
 
-            {/* Mechanism Flow - 4 Pillars */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 w-full mb-5">
-              {[
-                { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & automation", color: "teal" },
-                { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & network", color: "cyan" },
-                { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & deals", color: "purple" },
-                { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding", color: "emerald" },
-              ].map((pillar, i) => (
-                <div key={i} className="relative group">
-                  <div className={`absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-${pillar.color}-500/60 to-${pillar.color}-500/20 print:hidden`} />
-                  <div className={`bg-slate-900/80 border border-${pillar.color}-500/40 rounded-xl p-5 backdrop-blur-sm hover:border-${pillar.color}-500/80 transition-all print:bg-gray-50 print:border-gray-300`}>
-                    <div className={`w-12 h-12 rounded-lg bg-${pillar.color}-500/20 border border-${pillar.color}-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100`}>
-                      <pillar.icon className={`h-6 w-6 text-${pillar.color}-400 print:text-${pillar.color}-700`} />
+            <div className="relative z-10 h-full flex flex-col items-center px-[110px] pt-[80px] pb-[70px]">
+              <div className="flex items-center gap-4 mb-5">
+                <span className="h-px w-16 bg-gradient-to-r from-transparent to-teal-400" />
+                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">End-to-End Startup Execution</span>
+                <span className="h-px w-16 bg-gradient-to-l from-transparent to-teal-400" />
+              </div>
+              <h2 className="text-[84px] leading-none font-bold tracking-tight text-center bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">
+                The AI-Powered Hybrid Accelerator
+              </h2>
+              <p className="mt-6 text-[26px] tracking-[0.2em] text-slate-300 uppercase print:text-gray-600">
+                AI-Powered <span className="text-teal-400">•</span> Human-Led <span className="text-teal-400">•</span> Hybrid <span className="text-teal-400">•</span> Global
+              </p>
+              <p className="mt-8 max-w-[1350px] text-center text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
+                Startup Factory Hub is a <span className="text-white font-semibold">continuous accelerator</span> built for founders who need more than a fixed-term program. We combine AI-powered technology, expert mentors, strategic partners, capital access, and a global network to help startups move from <span className="text-teal-300">idea to MVP, MVP to market, and market to scale.</span>
+              </p>
+
+              <div className="mt-auto grid grid-cols-3 gap-x-16 gap-y-12 w-full">
+                {[
+                  { icon: Cpu, title: "AI-Powered Execution", desc: "AI supports founders throughout the journey—from startup roadmaps and intelligent matching to market intelligence, resources, and continuous progress tracking." },
+                  { icon: Globe, title: "Digital + Physical Acceleration", desc: "Our digital platform alongside physical innovation hubs and a global network of partner locations, connecting online execution with real-world communities, resources, and opportunities." },
+                  { icon: Users, title: "Human Expertise", desc: "AI does not replace the accelerator experience. Mentors, advisors, operators, and industry experts provide the relationships, expertise, and strategic guidance founders need." },
+                  { icon: Network, title: "Strategic Ecosystem", desc: "A connected ecosystem of technology providers, corporations, universities, government organizations, investors, and strategic partners." },
+                  { icon: DollarSign, title: "Capital & Market Access", desc: "We help founders prepare for fundraising and connect with investors, strategic partners, customers, and market opportunities as they become ready to scale." },
+                  { icon: Zap, title: "Continuous Acceleration", desc: "Designed to stay with the founder beyond a traditional cohort—platform, people, programs, and ecosystem working as one execution engine to build, validate, launch, fund, and scale." },
+                ].map((p, i) => (
+                  <div key={i} className="group relative pl-7 transition-transform duration-500 hover:-translate-y-1">
+                    <span className="absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-teal-300 via-cyan-500/40 to-transparent group-hover:from-cyan-200 print:bg-gray-300" />
+                    <div className="flex items-center gap-4 mb-3">
+                      <span className="relative flex items-center justify-center w-12 h-12 rounded-full bg-teal-400/10 shadow-[0_0_30px_rgba(45,212,191,0.25)] group-hover:shadow-[0_0_40px_rgba(103,232,249,0.5)] transition-shadow">
+                        <p.icon className="h-6 w-6 text-teal-300 print:text-teal-700" />
+                      </span>
+                      <h4 className="text-[28px] font-semibold text-white print:text-black">{p.title}</h4>
                     </div>
-                    <h4 className={`text-base font-bold text-${pillar.color}-400 text-center mb-2 print:text-${pillar.color}-700`}>{pillar.label}</h4>
-                    <p className="text-sm text-slate-400 text-center leading-relaxed print:text-gray-600">{pillar.desc}</p>
+                    <p className="text-[20px] leading-[1.5] text-slate-400 print:text-gray-600">{p.desc}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="relative w-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-teal-500/5 rounded-xl print:hidden" />
-              <div className="relative border border-teal-500/30 rounded-xl p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse print:animate-none" />
-                    <span className="text-sm font-bold text-teal-400 tracking-widest uppercase print:text-teal-700">Continuous Execution</span>
-                  </div>
-                  <div className="flex-1 h-px bg-gradient-to-r from-teal-500/40 to-transparent print:bg-gray-300" />
-                </div>
-                <p className="text-base text-slate-300 leading-relaxed print:text-gray-600">
-                  <span className="text-teal-400 font-semibold print:text-teal-700">The first online hybrid accelerator:</span> AI handles the heavy lifting—matching, analytics, roadmaps—while human mentors and physical hubs deliver <span className="text-cyan-400 font-medium print:text-cyan-700">real-world execution support</span>. No graduation, no time limits—just a permanent growth engine that scales with your startup.
-                </p>
+                ))}
               </div>
-            </div>
-            </div>
             </div>
           </section>
         </SlideWrapper>
