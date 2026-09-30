@@ -144,7 +144,7 @@ const SlideWrapper = ({
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full aspect-video bg-slate-950 print:aspect-auto print:min-h-0 print:p-0 print:bg-white" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div ref={containerRef} className="w-full aspect-video bg-slate-950" style={{ position: 'relative', overflow: 'hidden' }}>
       <div data-slide style={{
         width: 1920,
         height: 1080,
@@ -168,7 +168,7 @@ const CoverSlideContainer = ({
 }: {
   children: React.ReactNode;
 }) => <SlideWrapper>
-    <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+    <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden">
       {/* Background image */}
       <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover print:hidden" crossOrigin="anonymous" />
       {/* Dark cinematic overlay */}
@@ -178,7 +178,7 @@ const CoverSlideContainer = ({
       backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)'
     }} />
       {/* Border frame */}
-      <div className="absolute inset-[1%] border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
+      <div className="absolute inset-[1%] border-2 border-teal-500/40 rounded-lg" />
       <TechGrid />
       <FloatingHexagons />
       <EnergyLines />
@@ -197,9 +197,9 @@ const SlideContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => <SlideWrapper>
-    <section className={`absolute inset-0 flex flex-col items-center justify-center p-[1.5%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:relative print:p-8 print:break-after-page print:bg-white ${className}`}>
+    <section className={`absolute inset-0 flex flex-col items-center justify-center p-[1.5%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 ${className}`}>
       {/* Border frame */}
-      <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+      <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg" />
       <TechGrid />
       <FloatingHexagons />
       <EnergyLines />
@@ -217,7 +217,7 @@ const SectionDivider = ({
     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-teal-500" />
     <div className="flex items-center gap-2">
       <div className="w-2 h-2 bg-teal-500 rotate-45" />
-      <span className="text-sm font-semibold text-teal-400 tracking-widest uppercase print:text-gray-700">{title}</span>
+      <span className="text-sm font-semibold text-teal-400 tracking-widest uppercase">{title}</span>
       <div className="w-2 h-2 bg-teal-500 rotate-45" />
     </div>
     <div className="flex-1 h-px bg-gradient-to-l from-transparent via-teal-500/50 to-teal-500" />
@@ -239,7 +239,7 @@ const TechCard = ({
     amber: "border-amber-500/40 hover:border-amber-500/60 shadow-amber-500/10",
     rose: "border-rose-500/40 hover:border-rose-500/60 shadow-rose-500/10"
   };
-  return <div className={`relative bg-slate-900/80 border-2 rounded-lg p-6 backdrop-blur-sm shadow-lg print:bg-white print:border-gray-300 print:shadow-none ${glowClasses[glowColor as keyof typeof glowClasses] || glowClasses.teal} ${className}`}>
+  return <div className={`relative bg-slate-900/80 border-2 rounded-lg p-6 backdrop-blur-sm shadow-lg ${glowClasses[glowColor as keyof typeof glowClasses] || glowClasses.teal} ${className}`}>
       {/* Top glow line */}
       <div className={`absolute top-0 left-8 right-8 h-0.5 bg-gradient-to-r from-transparent via-${glowColor}-500/60 to-transparent print:hidden`} />
       {children}
@@ -262,8 +262,8 @@ const IconBadge = ({
     amber: "bg-amber-500/20 text-amber-400 border-amber-500/40",
     rose: "bg-rose-500/20 text-rose-400 border-rose-500/40"
   };
-  return <div className={`w-12 h-12 rounded-lg border flex items-center justify-center print:bg-gray-100 print:border-gray-300 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.teal}`}>
-      <Icon className="h-6 w-6 print:text-gray-700" />
+  return <div className={`w-12 h-12 rounded-lg border flex items-center justify-center ${colorClasses[color as keyof typeof colorClasses] || colorClasses.teal}`}>
+      <Icon className="h-6 w-6" />
     </div>;
 };
 export default function Deck() {
@@ -392,7 +392,7 @@ export default function Deck() {
       <div className="pt-16 print:pt-0">
         {/* SLIDE 1: Cover */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden">
             <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 print:hidden" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(45,212,191,0.28),transparent_40%),radial-gradient(ellipse_at_50%_110%,rgba(34,211,238,0.18),transparent_50%),linear-gradient(180deg,rgba(2,6,23,0.8),rgba(2,6,23,0.97))] print:hidden" />
             {/* Perspective floor grid */}
@@ -411,21 +411,21 @@ export default function Deck() {
                 <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[210px] h-[210px] object-contain drop-shadow-[0_0_40px_rgba(45,212,191,0.5)]" />
               </div>
 
-              <h1 className="mt-10 text-[128px] leading-[0.95] font-black tracking-[-0.04em] bg-gradient-to-b from-white via-white to-teal-200/70 bg-clip-text text-transparent print:text-black">
+              <h1 className="mt-10 text-[128px] leading-[0.95] font-black tracking-[-0.04em] bg-gradient-to-b from-white via-white to-teal-200/70 bg-clip-text text-transparent">
                 Startup Factory Hub
               </h1>
-              <p className="mt-6 text-[40px] font-semibold leading-tight bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent print:text-teal-700">
+              <p className="mt-6 text-[40px] font-semibold leading-tight bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
                 The AI-Powered Hybrid Accelerator for Building Startups from Idea to Scale
               </p>
-              <p className="mt-7 max-w-[1350px] text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
+              <p className="mt-7 max-w-[1350px] text-[26px] leading-[1.5] text-slate-300">
                 Startup Factory Hub is a <span className="text-white font-semibold">hybrid digital-physical accelerator</span> that combines <span className="text-white font-semibold">AI-powered technology</span>, expert mentorship, strategic resources, and a global network to help founders build, validate, launch, and scale companies.
               </p>
-              <p className="mt-5 text-[24px] tracking-[0.25em] uppercase text-teal-300 print:text-teal-700">
+              <p className="mt-5 text-[24px] tracking-[0.25em] uppercase text-teal-300">
                 From idea to MVP <span className="text-slate-500">/</span> From MVP to market <span className="text-slate-500">/</span> From market to scale
               </p>
 
               <div className="mt-auto w-full">
-                <p className="max-w-[1350px] mx-auto text-[22px] leading-[1.5] text-slate-400 print:text-gray-700">
+                <p className="max-w-[1350px] mx-auto text-[22px] leading-[1.5] text-slate-400">
                   <span className="text-teal-300 font-semibold">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-white">intelligent operating system</span> that merges AI automation, physical workspaces, global resources, and human expertise into one continuous execution engine across global locations.
                 </p>
                 <div className="mt-8 h-px w-full bg-gradient-to-r from-transparent via-teal-400/50 to-transparent" />
@@ -444,7 +444,7 @@ export default function Deck() {
 
         {/* SLIDE 2: End-to-End Startup Execution */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-[#03080a] print:relative print:break-after-page">
+          <section className="absolute inset-0 overflow-hidden bg-[#03080a]">
             <img src={slide2Img} alt="Startup team working together" className="absolute inset-0 h-full w-full object-cover opacity-60 scale-105" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,10,0.2)_0%,rgba(3,8,10,0.75)_45%,rgba(3,8,10,0.97)_62%)]" />
             <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(3,8,10,0.9)_0%,transparent_35%)]" />
@@ -495,7 +495,7 @@ export default function Deck() {
 
         {/* SLIDE 3: The Problem - The Execution Gap */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-[#0a0406] print:relative print:break-after-page">
+          <section className="absolute inset-0 overflow-hidden bg-[#0a0406]">
             <img src={slide3Img} alt="Founder under pressure" className="absolute inset-0 h-full w-full object-cover opacity-55 grayscale-[40%]" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-[linear-gradient(270deg,rgba(10,4,6,0.15)_0%,rgba(10,4,6,0.75)_42%,rgba(10,4,6,0.97)_60%)]" />
             <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(10,4,6,0.9)_0%,transparent_35%)]" />
@@ -547,7 +547,7 @@ export default function Deck() {
 
         {/* SLIDE 4: Solution - Unified Execution */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
             <div className="absolute left-[120px] top-[200px] w-[700px] h-[700px] rounded-full bg-teal-400/15 blur-[140px] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
@@ -578,12 +578,12 @@ export default function Deck() {
             </div>
 
             <div className="relative z-10 h-full ml-auto w-[58%] flex flex-col justify-center pr-[100px]">
-              <span className="text-[22px] font-medium text-emerald-300 tracking-[0.35em] uppercase print:text-gray-600">Solution</span>
-              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-emerald-100 to-teal-300 bg-clip-text text-transparent print:text-black">
+              <span className="text-[22px] font-medium text-emerald-300 tracking-[0.35em] uppercase">Solution</span>
+              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-emerald-100 to-teal-300 bg-clip-text text-transparent">
                 Unified Execution
               </h2>
-              <p className="mt-4 text-[30px] font-semibold text-teal-300 print:text-teal-700">The AI-Powered Hybrid Accelerator</p>
-              <p className="mt-5 text-[25px] leading-[1.45] text-slate-300 print:text-gray-700">
+              <p className="mt-4 text-[30px] font-semibold text-teal-300">The AI-Powered Hybrid Accelerator</p>
+              <p className="mt-5 text-[25px] leading-[1.45] text-slate-300">
                 AI, people, resources, market access, and capital—<span className="text-white font-semibold">in one continuous accelerator.</span> No more program to program, tool to tool, mentor to mentor.
               </p>
 
@@ -598,9 +598,9 @@ export default function Deck() {
                 ].map((p) => (
                   <div key={p.t} className="group flex items-center gap-4 transition-transform duration-500 hover:translate-x-1">
                     <span className="flex items-center justify-center w-14 h-14 rounded-full bg-emerald-400/10 shadow-[0_0_30px_rgba(52,211,153,0.25)] group-hover:shadow-[0_0_40px_rgba(52,211,153,0.55)] transition-shadow">
-                      <p.icon className="h-7 w-7 text-emerald-300 print:text-emerald-700" />
+                      <p.icon className="h-7 w-7 text-emerald-300" />
                     </span>
-                    <h4 className="text-[26px] font-semibold text-white print:text-black">{p.t}</h4>
+                    <h4 className="text-[26px] font-semibold text-white">{p.t}</h4>
                   </div>
                 ))}
               </div>
@@ -622,7 +622,7 @@ export default function Deck() {
 
         {/* SLIDE 5: Ecosystem Overview - Orbital ecosystem + journey */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute left-[-150px] top-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
             <div className="absolute right-[-200px] bottom-[-200px] w-[700px] h-[700px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[35%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
@@ -662,11 +662,11 @@ export default function Deck() {
 
             {/* Content */}
             <div className="relative z-10 h-full ml-auto w-[52%] flex flex-col justify-center pr-[100px]">
-              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Ecosystem</span>
-              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Ecosystem</span>
+              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent">
                 Ecosystem Overview
               </h2>
-              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
+              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300">
                 One platform. <span className="text-white font-semibold">8 stakeholder types.</span> Role-specific dashboards and AI-powered workflow automation.
               </p>
 
@@ -698,7 +698,7 @@ export default function Deck() {
         </SlideWrapper>
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25 print:hidden" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/60 print:hidden" />
             <div className="absolute right-[-120px] top-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
@@ -707,9 +707,9 @@ export default function Deck() {
             <div className="relative z-10 h-full flex">
               {/* Left: headline + segments */}
               <div className="w-[52%] flex flex-col justify-center pl-[100px] pr-[40px]">
-                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Growth Landscape</span>
-                <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">Market Opportunity</h2>
-                <p className="mt-6 text-[28px] text-slate-300 print:text-gray-700">
+                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Growth Landscape</span>
+                <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent">Market Opportunity</h2>
+                <p className="mt-6 text-[28px] text-slate-300">
                   <span className="text-white font-semibold">$25B+</span> global accelerator & startup services market.
                 </p>
 
@@ -784,13 +784,13 @@ export default function Deck() {
 
         {/* SLIDE 7: Business Model & Revenue Streams */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_80%,rgba(52,211,153,0.12),transparent_50%)] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
             <div className="relative z-10 h-full flex flex-col px-[100px] py-[80px]">
-              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Monetization</span>
-              <h2 className="mt-3 text-[80px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">Business Model</h2>
-              <p className="mt-5 text-[26px] text-slate-300 print:text-gray-700">Recurring subscriptions at the core. <span className="text-white font-semibold">Programs, partners and transactions on top.</span></p>
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Monetization</span>
+              <h2 className="mt-3 text-[80px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent">Business Model</h2>
+              <p className="mt-5 text-[26px] text-slate-300">Recurring subscriptions at the core. <span className="text-white font-semibold">Programs, partners and transactions on top.</span></p>
 
               <div className="mt-12 flex items-center gap-4">
                 <span className="w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_16px_rgba(94,234,212,1)]" />
@@ -849,7 +849,7 @@ export default function Deck() {
 
         {/* SLIDE 8: Financial Projections */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_20%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[380px] opacity-40 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
             <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full border border-cyan-400/10 animate-[spin_90s_linear_infinite] print:hidden">
@@ -859,9 +859,9 @@ export default function Deck() {
             <div className="relative z-10 h-full flex px-[110px] py-[80px] gap-[90px]">
               {/* LEFT: hero + growth curve */}
               <div className="flex-[1.35] flex flex-col">
-                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">5-Year Financial Projections</span>
+                <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">5-Year Financial Projections</span>
                 <div className="mt-4 flex items-end gap-6">
-                  <h2 className="text-[150px] leading-[0.9] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">$60.9M</h2>
+                  <h2 className="text-[150px] leading-[0.9] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">$60.9M</h2>
                   <div className="pb-4">
                     <p className="text-[24px] text-slate-400 uppercase tracking-[0.2em]">Year 5 Revenue</p>
                     <p className="text-[30px] font-semibold text-teal-300 flex items-center gap-2"><TrendingUp className="h-8 w-8" />10x from $6.09M</p>
@@ -985,7 +985,7 @@ export default function Deck() {
         </SlideWrapper>
         {/* SLIDE: Traction */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute inset-y-0 left-0 w-[52%] print:hidden">
               <img src={nasdaqTower} alt="Startup Factory Hub featured on the Nasdaq Tower in Times Square" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-950/30 to-slate-950" />
@@ -996,10 +996,10 @@ export default function Deck() {
             </div>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(20,184,166,0.18),transparent_55%)] print:hidden" />
             <div className="relative z-10 h-full ml-[50%] flex flex-col justify-center pr-[110px] pl-[40px]">
-              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Traction</span>
-              <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">Real Momentum</h2>
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Traction</span>
+              <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">Real Momentum</h2>
               <div className="mt-12 flex items-end gap-6">
-                <span className="text-[170px] leading-[0.85] font-bold text-white drop-shadow-[0_0_40px_rgba(45,212,191,0.45)] print:text-black">{totalUsers !== null ? totalUsers.toLocaleString() : '—'}</span>
+                <span className="text-[170px] leading-[0.85] font-bold text-white drop-shadow-[0_0_40px_rgba(45,212,191,0.45)]">{totalUsers !== null ? totalUsers.toLocaleString() : '—'}</span>
                 <div className="pb-4">
                   <p className="text-[30px] font-semibold text-teal-300">Total Users</p>
                   <p className="text-[20px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />Live on platform</p>
@@ -1058,14 +1058,14 @@ export default function Deck() {
 
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_90%_90%,rgba(34,211,238,0.12),transparent_50%)] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[320px] opacity-30 print:hidden" style={{ backgroundImage: 'linear-gradient(rgba(45,212,191,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.25) 1px, transparent 1px)', backgroundSize: '80px 80px', transform: 'perspective(600px) rotateX(60deg)', transformOrigin: 'bottom', maskImage: 'linear-gradient(to top, black, transparent)' }} />
             <div className="relative z-10 h-full flex flex-col px-[110px] py-[70px]">
               <div className="flex items-end justify-between gap-12">
                 <div>
-                  <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Strategic Network</span>
-                  <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent print:text-black">Partners & Network</h2>
+                  <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Strategic Network</span>
+                  <h2 className="mt-3 text-[88px] leading-[1] font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">Partners & Network</h2>
                 </div>
                 <div className="flex items-center gap-6">
                   {PARTNERS.filter(p => p.name.startsWith('NASA')).map(p => (
@@ -1098,7 +1098,7 @@ export default function Deck() {
 
         {/* SLIDE: Leadership Team */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page">
+          <section className="absolute inset-0 overflow-hidden bg-slate-950">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(20,184,166,0.18),transparent_60%)]" />
             <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2 w-[1500px] h-[1500px] rounded-full border border-teal-400/10 animate-[spin_120s_linear_infinite]">
               <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_6px_rgba(45,212,191,0.6)]" />
@@ -1135,7 +1135,7 @@ export default function Deck() {
 
         {/* SLIDE 10: Contact */}
         <SlideWrapper>
-          <section className="absolute inset-0 overflow-hidden bg-[#020b0a] print:relative print:break-after-avoid">
+          <section className="absolute inset-0 overflow-hidden bg-[#020b0a]">
             <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,11,10,0.55)_0%,rgba(2,11,10,0.95)_70%)]" />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-teal-400/10" />
