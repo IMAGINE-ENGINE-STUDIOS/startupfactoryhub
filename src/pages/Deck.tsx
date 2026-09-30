@@ -1101,10 +1101,10 @@ export default function Deck() {
               <div className="mt-20 grid grid-cols-5 gap-10 w-full">
                 {[
                   { name: "James Stuber", role: "Legal", loc: null, img: teamStuberAsset.url, linkedin: "https://www.linkedin.com/in/jamesstuber" },
-                  { name: "Dominic Catrambone", role: "CFO", loc: null, img: teamCatramboneAsset.url, linkedin: null },
+                  { name: "Dominic Catrambone", role: "CFO", loc: null, img: teamCatramboneAsset.url, linkedin: "https://www.linkedin.com/in/dom-catrambone/" },
                   { name: "N. MacDonnell Ulsch", role: "Senior Advisor", loc: null, img: teamUlschAsset.url, linkedin: "https://www.linkedin.com/in/n-macdonnell-ulsch-38abb21" },
-                  { name: "Ricardo Font", role: "Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: null },
-                  { name: "Khalia Padilla", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: null },
+                  { name: "Ricardo Font", role: "Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: "https://www.linkedin.com/in/ricardo-font-952034248/" },
+                  { name: "Khalia Padilla", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: "https://www.linkedin.com/in/khaliapadilla/" },
                 ].map((m) => (
                   <div key={m.name} className="group flex flex-col items-center text-center">
                     <div className="relative">
