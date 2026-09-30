@@ -7,6 +7,8 @@ export interface Partner {
 export const PARTNERS: Partner[] = [
   { name: "NASA", logo: "/partners/nasa-logo.png", tier: "Space Agency" },
   { name: "NASA Technology Transfer Program (T2)", logo: "/partners/nasa-t2-logo.webp", tier: "Commercialization" },
+  { name: "UK Space Agency", logo: "/partners/uksa-logo.png", tier: "Space Agency" },
+  { name: "APEX Accelerators", logo: "/partners/apex-accelerators-logo.png", tier: "Accelerator" },
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
   { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
