@@ -34,6 +34,7 @@ import teamGary from '@/assets/team-gary.png';
 import { PARTNERS } from '@/config/partners';
 import { supabase } from '@/integrations/supabase/client';
 import nasdaqTower from '@/assets/nasdaq-feature.jpg';
+import earthPlanet from '@/assets/earth-intelligence-pass.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -545,6 +546,10 @@ export default function Deck() {
             <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
             <div className="absolute left-[120px] top-[200px] w-[700px] h-[700px] rounded-full bg-teal-400/15 blur-[140px] print:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-[40%] opacity-30 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+
+            {/* Planet behind the platform screens */}
+            <img src={earthPlanet} alt="" aria-hidden className="absolute left-[-6%] bottom-[-38%] w-[58%] mix-blend-screen opacity-90 animate-[spin_240s_linear_infinite] print:hidden" style={{ transformOrigin: '50% 62%' }} crossOrigin="anonymous" />
+            <div className="absolute left-[2%] bottom-[-10%] w-[46%] h-[40%] rounded-full bg-sky-400/20 blur-[100px] print:hidden" />
 
             {/* Live platform interface */}
             <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[36%] aspect-[4/3] print:hidden" style={{ perspective: 1800 }}>
