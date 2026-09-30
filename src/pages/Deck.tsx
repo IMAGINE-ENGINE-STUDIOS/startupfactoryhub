@@ -503,112 +503,64 @@ export default function Deck() {
           </section>
         </SlideWrapper>
 
-        {/* SLIDE 3: The Problem - System Failure */}
+        {/* SLIDE 3: The Problem - The Execution Gap */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Background image */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
-            backgroundImage: `url(${moonEarthBg})`
-          }} />
-            {/* Dark overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
-            {/* Border frame */}
-            <div className="absolute inset-[1%] border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
-              <div className="flex flex-col items-center w-full">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-rose-500 rotate-45" />
-              <span className="text-base font-semibold text-rose-400 tracking-[0.3em] uppercase print:text-gray-600">System Failure</span>
-              <div className="w-3 h-3 bg-rose-500 rotate-45" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3 print:text-black">The Problem</h2>
-            
-            {/* Main Problem Statement */}
-            <div className="w-full mb-6">
-              <p className="text-xl md:text-2xl text-center text-slate-300 leading-relaxed print:text-gray-700">
-                Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold print:text-rose-700">they fail because execution breaks between stages.</span>
-              </p>
-            </div>
-            
-            {/* Visual Broken System Flow */}
-            <div className="relative w-full mb-6">
-              {/* Broken flow line */}
-              <div className="absolute top-14 left-0 right-0 h-1 print:hidden">
-                <div className="absolute left-0 w-[18%] h-full bg-gradient-to-r from-teal-500/60 to-rose-500/60" />
-                <div className="absolute left-[20%] w-5 h-5 -top-2 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
-                  <span className="text-rose-500 text-sm font-bold">✕</span>
-                </div>
-                <div className="absolute left-[24%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
-                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
-                  }} />
-                <div className="absolute left-[40%] w-5 h-5 -top-2 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
-                  <span className="text-rose-500 text-sm font-bold">✕</span>
-                </div>
-                <div className="absolute left-[44%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
-                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
-                  }} />
-                <div className="absolute left-[60%] w-5 h-5 -top-2 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
-                  <span className="text-rose-500 text-sm font-bold">✕</span>
-                </div>
-                <div className="absolute left-[64%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
-                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
-                  }} />
-                <div className="absolute left-[80%] w-5 h-5 -top-2 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
-                  <span className="text-rose-500 text-sm font-bold">✕</span>
-                </div>
-                <div className="absolute left-[84%] w-[16%] h-full bg-gradient-to-r from-rose-500/30 to-slate-500/20 opacity-50" />
+          <section className="absolute inset-0 overflow-hidden print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-cover bg-center opacity-40 print:hidden" style={{ backgroundImage: `url(${moonEarthBg})` }} />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(244,63,94,0.10),transparent_55%),linear-gradient(180deg,rgba(2,6,23,0.85),rgba(2,6,23,0.97))] print:hidden" />
+
+            <div className="relative z-10 h-full flex flex-col items-center px-[110px] pt-[70px] pb-[60px]">
+              <div className="flex items-center gap-4 mb-5">
+                <span className="h-px w-16 bg-gradient-to-r from-transparent to-rose-400" />
+                <span className="text-[22px] font-medium text-rose-300 tracking-[0.35em] uppercase print:text-gray-600">The Problem</span>
+                <span className="h-px w-16 bg-gradient-to-l from-transparent to-rose-400" />
               </div>
-              
-              {/* Journey Stages - Disconnected */}
-              <div className="grid grid-cols-5 gap-4 relative">
+              <h2 className="text-[84px] leading-none font-bold tracking-tight text-center bg-gradient-to-r from-white via-rose-100 to-rose-300 bg-clip-text text-transparent print:text-black">
+                The Execution Gap
+              </h2>
+              <p className="mt-7 max-w-[1350px] text-center text-[26px] leading-[1.5] text-slate-300 print:text-gray-700">
+                Startups have access to more resources than ever—but those resources are <span className="text-white font-semibold">fragmented across disconnected programs, tools, mentors, investors, and communities.</span> Founders are often supported at one stage, then left to navigate the next stage on their own.
+              </p>
+
+              {/* Where the journey breaks */}
+              <p className="mt-12 text-[20px] tracking-[0.3em] uppercase text-slate-400">Where the Journey Breaks</p>
+              <div className="mt-8 relative w-full flex items-start justify-between">
+                <div className="absolute left-[6%] right-[6%] top-[22px] h-px bg-[repeating-linear-gradient(90deg,rgba(45,212,191,0.6)_0_18px,transparent_18px_34px)] print:hidden" />
                 {[
-                  { icon: GraduationCap, label: "Education", active: true, color: "teal" },
-                  { icon: Cpu, label: "Product", active: false, color: "slate" },
-                  { icon: Target, label: "Market", active: false, color: "slate" },
-                  { icon: DollarSign, label: "Revenue", active: false, color: "slate" },
-                  { icon: TrendingUp, label: "Scale", active: false, color: "slate", dim: true },
-                ].map((stage, i) => (
-                  <div key={i} className={`flex flex-col items-center ${!stage.active ? 'opacity-70' : ''} ${stage.dim ? 'opacity-40' : ''}`}>
-                    <div className={`w-18 h-18 rounded-full bg-gradient-to-br ${stage.active ? `from-${stage.color}-500/30 to-${stage.color}-600/20 border-2 border-${stage.color}-500/60` : 'from-slate-800 to-slate-900 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center z-10 print:bg-white`} style={{ width: 72, height: 72 }}>
-                      <stage.icon className={`h-8 w-8 ${stage.active ? `text-${stage.color}-400` : 'text-slate-500'} print:text-gray-500`} />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <h5 className={`text-sm font-bold ${stage.active ? `text-${stage.color}-400` : 'text-slate-500'} print:text-gray-500`}>{stage.label}</h5>
-                    </div>
+                  { t: "Education", d: "Learn what to do" },
+                  { t: "Product", d: "Build the product" },
+                  { t: "Market", d: "Find customers" },
+                  { t: "Revenue", d: "Build a sustainable business" },
+                  { t: "Scale", d: "Access capital, talent, markets, and strategic partners" },
+                ].map((s, i) => (
+                  <div key={i} className="relative flex-1 flex flex-col items-center text-center px-4">
+                    <span className="relative w-11 h-11 rounded-full bg-slate-950 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.35)]">
+                      <span className="w-3 h-3 rounded-full bg-teal-300" />
+                    </span>
+                    {i < 4 && <span className="absolute top-[12px] left-[calc(100%-10px)] text-[20px] text-rose-400 font-bold print:hidden">×</span>}
+                    <h4 className="mt-4 text-[26px] font-semibold tracking-[0.15em] uppercase text-white print:text-black">{s.t}</h4>
+                    <p className="mt-1 text-[19px] leading-snug text-slate-400 max-w-[280px] print:text-gray-600">{s.d}</p>
                   </div>
                 ))}
               </div>
-            </div>
 
-            <SectionDivider title="Core Gaps" />
-            
-            {/* Core Gaps - Visual Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 w-full">
-              {[
-                { icon: Network, num: "01", desc: "Fragmented tools & platforms" },
-                { icon: Calendar, num: "02", desc: "No support post-demo day" },
-                { icon: Users, num: "03", desc: "Limited access to operators" },
-                { icon: DollarSign, num: "04", desc: "Capital ≠ execution" },
-                { icon: TrendingUp, num: "05", desc: "Education ≠ revenue" },
-              ].map((gap, i) => (
-                <div key={i} className="relative group">
-                  <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-xl opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                  <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-xl p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                    <div className="flex items-center gap-2 mb-2">
-                      <gap.icon className="h-5 w-5 text-rose-400 print:text-rose-700" />
-                      <span className="text-sm font-bold text-rose-400 print:text-rose-700">{gap.num}</span>
-                    </div>
-                    <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">{gap.desc}</p>
+              {/* Core gaps */}
+              <div className="mt-auto grid grid-cols-5 gap-10 w-full">
+                {[
+                  { n: "01", t: "Fragmented Support", d: "Founders jump between programs, platforms, tools, mentors, and service providers." },
+                  { n: "02", t: "Short-Term Programs", d: "Traditional programs often end before the company reaches meaningful traction." },
+                  { n: "03", t: "Limited Operator Access", d: "Founders need people who can help them execute—not only teach them." },
+                  { n: "04", t: "Capital Is Not Enough", d: "Funding can accelerate a company, but it does not replace product, customers, talent, or execution." },
+                  { n: "05", t: "Learning Doesn't Equal Traction", d: "Education and mentorship only create value when founders turn them into products, customers, revenue, and growth." },
+                ].map((g) => (
+                  <div key={g.n} className="group relative pl-6 transition-transform duration-500 hover:-translate-y-1">
+                    <span className="absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-rose-300 via-rose-500/40 to-transparent print:bg-gray-300" />
+                    <span className="text-[40px] font-bold leading-none bg-gradient-to-b from-rose-200 to-rose-500/40 bg-clip-text text-transparent">{g.n}</span>
+                    <h4 className="mt-3 text-[24px] font-semibold text-white leading-tight print:text-black">{g.t}</h4>
+                    <p className="mt-2 text-[18px] leading-[1.5] text-slate-400 print:text-gray-600">{g.d}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-            </div>
+                ))}
+              </div>
             </div>
           </section>
         </SlideWrapper>
