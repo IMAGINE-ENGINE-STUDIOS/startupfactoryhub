@@ -808,135 +808,69 @@ export default function Deck() {
         </SlideWrapper>
 
         {/* SLIDE 7: Business Model & Revenue Streams */}
-        <SlideContainer>
-          <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
-              <span className="text-base font-semibold text-emerald-400 tracking-[0.3em] uppercase print:text-gray-600">Monetization</span>
-              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Business Model & Revenue Streams</h2>
-            <p className="text-lg md:text-xl text-slate-300 text-center mb-5 print:text-gray-600">
-              Freemium adoption drives monetization through tiered subscriptions + enterprise revenue streams
-            </p>
-            
-            {/* Core Growth Model */}
-            <div className="grid grid-cols-3 gap-5 w-full mb-5">
-              <TechCard glowColor="teal" className="p-5">
-                <h3 className="font-semibold text-sm text-teal-400 mb-3 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" /> Growth Engine
-                </h3>
-                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
-                  <p><span className="text-teal-400 font-medium">Start:</span> 100 startups Month 1</p>
-                  <p><span className="text-teal-400 font-medium">Growth:</span> 10% MoM compound</p>
-                  <p><span className="text-teal-400 font-medium">Model:</span> 40% Free / 60% Paid</p>
-                </div>
-              </TechCard>
-              
-              <TechCard glowColor="emerald" className="p-5">
-                <h3 className="font-semibold text-sm text-emerald-400 mb-3 flex items-center gap-2">
-                  <Award className="h-5 w-5" /> Subscription Tiers
-                </h3>
-                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
-                  <div className="flex justify-between"><span>Early Stage</span><span className="text-emerald-400">$350/mo</span></div>
-                  <div className="flex justify-between"><span>Build Stage</span><span className="text-emerald-400">$550/mo</span></div>
-                  <div className="flex justify-between"><span>Growth Stage</span><span className="text-emerald-400">$950/mo</span></div>
-                  <div className="flex justify-between"><span>Scale Stage</span><span className="text-emerald-400">$1,500/mo</span></div>
-                  <div className="flex justify-between border-t border-emerald-500/30 pt-2 mt-2"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$813/mo</span></div>
-                </div>
-              </TechCard>
-              
-              <TechCard glowColor="cyan" className="p-5">
-                <h3 className="font-semibold text-sm text-cyan-400 mb-3 flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" /> 5-Year Startup Growth
-                </h3>
-                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
-                  <div className="flex justify-between"><span>Year 1</span><span className="text-cyan-400">~190 startups</span></div>
-                  <div className="flex justify-between"><span>Year 2</span><span className="text-cyan-400">~540 startups</span></div>
-                  <div className="flex justify-between"><span>Year 3</span><span className="text-cyan-400">~1,550 startups</span></div>
-                  <div className="flex justify-between"><span>Year 4</span><span className="text-cyan-400">~4,420 startups</span></div>
-                  <div className="flex justify-between"><span>Year 5</span><span className="text-cyan-400 font-bold">~12,650 startups</span></div>
-                </div>
-              </TechCard>
-            </div>
-            
-            {/* Revenue Streams Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 w-full">
-              <TechCard glowColor="purple" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-purple-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-purple-400">Corporate Partners</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-purple-400 font-medium">$100K/year</span> per partner
-                </p>
-              </TechCard>
-              
-              <TechCard glowColor="amber" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <Target className="h-5 w-5 text-amber-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-amber-400">Pilot Programs</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-amber-400 font-medium">$200K</span> per pilot (2+/year)
-                </p>
-              </TechCard>
-              
-              <TechCard glowColor="rose" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
-                    <Globe className="h-5 w-5 text-rose-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-rose-400">New Chapters</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-rose-400 font-medium">$200K</span> per chapter (2+/year)
-                </p>
-              </TechCard>
-              
-              <TechCard glowColor="teal" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                    <Award className="h-5 w-5 text-teal-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-teal-400">Sponsorships</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-teal-400 font-medium">$5K-$50K</span> (avg $20K/sponsor)
-                </p>
-              </TechCard>
-              
-              <TechCard glowColor="cyan" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-cyan-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-cyan-400">Education Programs</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-cyan-400 font-medium">$10K avg</span> (100 students Y1, 2x/year)
-                </p>
-              </TechCard>
-              
-              <TechCard glowColor="emerald" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-emerald-400">Platform Transaction Fees</h3>
-                </div>
-                <p className="text-sm text-slate-300 print:text-gray-600">
-                  <span className="text-emerald-400 font-medium">10%</span> on event tickets & marketplace · <span className="text-emerald-400 font-medium">20%</span> on donations
-                </p>
-              </TechCard>
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(20,184,166,0.18),transparent_55%),radial-gradient(ellipse_at_85%_80%,rgba(52,211,153,0.12),transparent_50%)] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[30%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+            <div className="relative z-10 h-full flex flex-col px-[100px] py-[80px]">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Monetization</span>
+              <h2 className="mt-3 text-[80px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">Business Model</h2>
+              <p className="mt-5 text-[26px] text-slate-300 print:text-gray-700">Recurring subscriptions at the core. <span className="text-white font-semibold">Programs, partners and transactions on top.</span></p>
 
+              <div className="mt-12 flex items-center gap-4">
+                <span className="w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_16px_rgba(94,234,212,1)]" />
+                <span className="text-[20px] tracking-[0.3em] uppercase text-teal-300">Core recurring revenue · in projections</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-teal-300/50 to-transparent" />
+              </div>
+              <div className="mt-6 grid grid-cols-5 gap-6">
+                {[
+                  { icon: Building2, name: "Global Desk", price: "$550", unit: "/ month" },
+                  { icon: Globe, name: "Global Office", price: "$950", unit: "/ month" },
+                  { icon: Award, name: "Members Club", price: "$50", unit: "/ month" },
+                  { icon: Rocket, name: "Accelerator as a Service", price: "$5K", unit: "software + $5K / startup" },
+                  { icon: Cpu, name: "AI Credits", price: "$9–$29", unit: "/ month + usage packs" },
+                ].map((r) => (
+                  <div key={r.name} className="group rounded-3xl bg-white/[0.04] ring-1 ring-teal-300/25 p-7 shadow-[0_0_40px_rgba(45,212,191,0.12)] transition-all duration-500 hover:-translate-y-1 hover:ring-teal-200/60 hover:shadow-[0_0_60px_rgba(45,212,191,0.35)]">
+                    <div className="w-[60px] h-[60px] rounded-full bg-slate-950 ring-1 ring-teal-300/50 flex items-center justify-center shadow-[0_0_25px_rgba(45,212,191,0.4)]">
+                      <r.icon className="w-7 h-7 text-teal-300" />
+                    </div>
+                    <p className="mt-6 text-[22px] font-semibold text-white leading-tight">{r.name}</p>
+                    <p className="mt-3 text-[52px] font-bold leading-none bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">{r.price}</p>
+                    <p className="mt-2 text-[17px] text-slate-400">{r.unit}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-12 flex items-center gap-4">
+                <span className="w-3 h-3 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,1)]" />
+                <span className="text-[20px] tracking-[0.3em] uppercase text-emerald-300">Additional revenue · upside, not in projections</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-emerald-300/50 to-transparent" />
+              </div>
+              <div className="mt-6 grid grid-cols-4 gap-x-10 gap-y-7">
+                {[
+                  { icon: Target, name: "Accelerator Programs", price: "$500 · $1,500 · $5,000" },
+                  { icon: Diamond, name: "Equity Participation", price: "Up to 5% equity + 5% profit share" },
+                  { icon: Handshake, name: "Corporate Partners", price: "$100K / year" },
+                  { icon: Lightbulb, name: "Pilot Programs", price: "$200K / pilot" },
+                  { icon: Network, name: "New Chapters", price: "$200K / chapter" },
+                  { icon: Award, name: "Sponsorships", price: "$5K–$50K" },
+                  { icon: GraduationCap, name: "Education Programs", price: "$10K avg" },
+                  { icon: DollarSign, name: "Transaction Fees", price: "5% events · 10% marketplace · 20% donations" },
+                ].map((r) => (
+                  <div key={r.name} className="flex items-start gap-4">
+                    <div className="w-[50px] h-[50px] shrink-0 rounded-full bg-slate-950 ring-1 ring-emerald-300/40 flex items-center justify-center">
+                      <r.icon className="w-6 h-6 text-emerald-300" />
+                    </div>
+                    <div>
+                      <p className="text-[21px] font-semibold text-white leading-tight">{r.name}</p>
+                      <p className="mt-1 text-[17px] text-slate-400 leading-snug">{r.price}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </SlideContainer>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 8: Financial Projections */}
         <SlideWrapper>
