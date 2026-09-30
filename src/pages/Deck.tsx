@@ -144,7 +144,7 @@ const SlideWrapper = ({
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full aspect-video bg-slate-950" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div ref={containerRef} data-slide-frame className="w-full aspect-video bg-slate-950" style={{ position: 'relative', overflow: 'hidden' }}>
       <div data-slide style={{
         width: 1920,
         height: 1080,
