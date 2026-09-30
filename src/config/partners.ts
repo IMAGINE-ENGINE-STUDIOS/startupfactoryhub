@@ -44,4 +44,5 @@ export const PARTNERS: Partner[] = [
   { name: "Notion", logo: "/partners/notion-logo.png", tier: "Productivity" },
   { name: "Moonshot.nx", logo: "/partners/moonshot-nx-logo.png", tier: "Innovation" },
   { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
+  { name: "Deep Checks", logo: "/partners/deepchecks-logo.png", tier: "Technology" },
 ];
