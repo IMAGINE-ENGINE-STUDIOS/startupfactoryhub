@@ -31,6 +31,11 @@ import teamKhalia from '@/assets/team-khalia.jpg';
 import teamRicardo from '@/assets/team-ricardo.jpg';
 import teamSteven from '@/assets/team-steven.png';
 import teamGary from '@/assets/team-gary.png';
+import teamStuberAsset from '@/assets/team-stuber.jpg.asset.json';
+import teamCatramboneAsset from '@/assets/team-catrambone.png.asset.json';
+import teamUlschAsset from '@/assets/team-ulsch.jpg.asset.json';
+import teamRicardoAsset from '@/assets/team-ricardo-new.png.asset.json';
+import teamKhaliaAsset from '@/assets/team-khalia-new.png.asset.json';
 import { PARTNERS } from '@/config/partners';
 import { supabase } from '@/integrations/supabase/client';
 import nasdaqTower from '@/assets/nasdaq-feature.jpg';
@@ -1093,23 +1098,24 @@ export default function Deck() {
               <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase">Leadership</span>
               <h2 className="mt-4 text-[96px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-cyan-300 bg-clip-text text-transparent">The Team</h2>
               <p className="mt-5 text-[26px] text-slate-300">Operators, founders and advisors building the next generation of startups.</p>
-              <div className="mt-20 grid grid-cols-4 gap-16 w-full">
+              <div className="mt-20 grid grid-cols-5 gap-10 w-full">
                 {[
-                  { name: "Khalia Padilla", role: "Managing Partner & Founder", loc: null, img: teamKhalia },
-                  { name: "Ricardo Font", role: "Managing Partner & Founder", loc: null, img: teamRicardo },
-                  { name: "Steven Lidgreen", role: "Managing Partner", loc: "SFH Tokyo", img: teamSteven },
-                  { name: "Gary Jinks", role: "Strategic Advisor", loc: null, img: teamGary },
+                  { name: "James Stuber", role: "Legal", loc: null, img: teamStuberAsset.url, linkedin: "https://www.linkedin.com/in/jamesstuber" },
+                  { name: "Dominic Catrambone", role: "CFO", loc: null, img: teamCatramboneAsset.url, linkedin: null },
+                  { name: "N. MacDonnell Ulsch", role: "Senior Advisor", loc: null, img: teamUlschAsset.url, linkedin: "https://www.linkedin.com/in/n-macdonnell-ulsch-38abb21" },
+                  { name: "Ricardo Font", role: "Co-Founder", loc: null, img: teamRicardoAsset.url, linkedin: null },
+                  { name: "Khalia Padilla", role: "CEO & Co-Founder", loc: null, img: teamKhaliaAsset.url, linkedin: null },
                 ].map((m) => (
                   <div key={m.name} className="group flex flex-col items-center text-center">
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full bg-teal-400/30 blur-2xl scale-110 opacity-60 group-hover:opacity-100 transition-opacity" />
-                      <div className="relative w-[260px] h-[260px] rounded-full p-[3px] bg-gradient-to-br from-teal-300 via-cyan-400/40 to-transparent">
+                      <div className="relative w-[230px] h-[230px] rounded-full p-[3px] bg-gradient-to-br from-teal-300 via-cyan-400/40 to-transparent">
                         <img src={m.img} alt={m.name} className="w-full h-full rounded-full object-cover bg-slate-900" crossOrigin="anonymous" />
                       </div>
                     </div>
-                    <p className="mt-8 text-[32px] font-bold text-white">{m.name}</p>
-                    <p className="mt-2 text-[20px] tracking-[0.2em] uppercase text-teal-300">{m.role}</p>
-                    {m.loc && <p className="mt-2 text-[18px] text-slate-400">{m.loc}</p>}
+                    <p className="mt-8 text-[28px] font-bold text-white whitespace-nowrap">{m.name}</p>
+                    <p className="mt-2 text-[18px] tracking-[0.2em] uppercase text-teal-300">{m.role}</p>
+                    {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="mt-2 text-[16px] text-slate-400 hover:text-teal-300">LinkedIn</a>}
                   </div>
                 ))}
               </div>
