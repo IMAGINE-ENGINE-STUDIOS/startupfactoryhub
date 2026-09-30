@@ -939,7 +939,24 @@ export default function Deck() {
                   ))}
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-teal-400/15">
+                <div className="mt-8 rounded-2xl px-6 py-5 bg-emerald-400/[0.06] ring-1 ring-emerald-300/25 shadow-[0_0_40px_rgba(52,211,153,0.15)]">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-400/10 shadow-[0_0_24px_rgba(52,211,153,0.35)]">
+                      <Percent className="h-6 w-6 text-emerald-300" />
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-[24px] font-semibold text-white leading-tight">Equity Program · 100 startups / year</p>
+                      <p className="text-[17px] text-slate-400">1% equity each · exits at $50M+ · upside, not in revenue totals</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[28px] font-bold text-emerald-300 leading-none">$50M</p>
+                      <p className="text-[14px] text-slate-400 uppercase tracking-[0.15em] mt-1">per cohort</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 ml-16 text-[17px] text-emerald-200/90">$500K per exit · $250M equity value across 500 startups by Year 5</p>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-teal-400/15">
                   <div className="flex items-baseline justify-between">
                     <p className="text-[34px] font-bold text-cyan-300">Raising $1.5M</p>
                     <p className="text-[18px] text-slate-400 uppercase tracking-[0.2em]">Seed · 18-Month Runway</p>
