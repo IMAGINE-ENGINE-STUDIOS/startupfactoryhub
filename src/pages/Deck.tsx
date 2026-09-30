@@ -10,6 +10,7 @@ import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
 import slide2Img from '@/assets/deck-slide2-hybrid.jpg';
 import slide3Img from '@/assets/deck-slide3-gap.jpg';
+import slide4Img from '@/assets/deck-slide4-solution.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
@@ -510,263 +511,52 @@ export default function Deck() {
           </section>
         </SlideWrapper>
 
-        {/* SLIDE 4: Solution */}
+        {/* SLIDE 4: Solution - Unified Execution */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Galaxy background */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${galaxyBg})` }} />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            {/* Border frame */}
-             <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full mx-auto px-[2%]">
-          <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Unified Execution</span>
-              <div className="w-3 h-3 bg-teal-500 rotate-45" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Solution</h2>
-            <p className="text-xl md:text-2xl text-teal-400 font-semibold text-center mb-2 print:text-teal-700">AI-Powered Hybrid Acceleration Platform</p>
-            <p className="text-base md:text-lg text-slate-300 text-center mb-6 print:text-gray-600">
-              Startup Factory Hub provides a unified execution platform that combines AI, human expertise, physical infrastructure, and capital access to help startups move from idea to growth-stage scale.
-            </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 w-full">
-              {/* AI-Driven Execution Engine */}
-              <TechCard glowColor="teal" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                    <Cpu className="h-5 w-5 text-teal-400" />
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <img src={slide4Img} alt="Founders planning together" className="absolute left-0 top-0 h-full w-[50%] object-cover print:hidden" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.1)_0%,rgba(2,6,23,0.4)_30%,rgba(2,6,23,0.95)_48%,rgb(2,6,23)_56%)] print:hidden" />
+            <div className="absolute right-[-200px] top-[-200px] w-[800px] h-[800px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
+
+            <div className="relative z-10 h-full ml-auto w-[58%] flex flex-col justify-center pr-[100px]">
+              <span className="text-[22px] font-medium text-emerald-300 tracking-[0.35em] uppercase print:text-gray-600">Solution</span>
+              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-emerald-100 to-teal-300 bg-clip-text text-transparent print:text-black">
+                Unified Execution
+              </h2>
+              <p className="mt-4 text-[30px] font-semibold text-teal-300 print:text-teal-700">The AI-Powered Hybrid Accelerator</p>
+              <p className="mt-5 text-[25px] leading-[1.45] text-slate-300 print:text-gray-700">
+                AI, people, resources, market access, and capital—<span className="text-white font-semibold">in one continuous accelerator.</span> No more program to program, tool to tool, mentor to mentor.
+              </p>
+
+              <div className="mt-10 grid grid-cols-2 gap-x-10 gap-y-7">
+                {[
+                  { icon: Cpu, t: "AI-Powered Acceleration" },
+                  { icon: Globe, t: "Digital + Physical" },
+                  { icon: Users, t: "Human Expertise" },
+                  { icon: Building2, t: "Market & Corporate Access" },
+                  { icon: DollarSign, t: "Capital Connectivity" },
+                  { icon: Network, t: "Global Resource Network" },
+                ].map((p) => (
+                  <div key={p.t} className="group flex items-center gap-4 transition-transform duration-500 hover:translate-x-1">
+                    <span className="flex items-center justify-center w-14 h-14 rounded-full bg-emerald-400/10 shadow-[0_0_30px_rgba(52,211,153,0.25)] group-hover:shadow-[0_0_40px_rgba(52,211,153,0.55)] transition-shadow">
+                      <p.icon className="h-7 w-7 text-emerald-300 print:text-emerald-700" />
+                    </span>
+                    <h4 className="text-[26px] font-semibold text-white print:text-black">{p.t}</h4>
                   </div>
-                  <h3 className="font-semibold text-sm text-teal-400 print:text-teal-700">AI-Driven Execution Engine</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  A comprehensive algorithm guides startups through strategy, product development, market validation, go-to-market, and scaling—reducing execution risk at every stage.
-                </p>
-              </TechCard>
-
-              {/* Hybrid Digital + Physical Model */}
-              <TechCard glowColor="cyan" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-cyan-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-cyan-400 print:text-cyan-700">Hybrid Digital + Physical</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  Startups operate digitally through the platform while accessing local innovation hubs worldwide through partnerships with IWG, enabling founders to work from 5,800+ locations across 130 countries.
-                </p>
-              </TechCard>
-
-              {/* Human Capital & Expertise */}
-              <TechCard glowColor="purple" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-purple-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-purple-400 print:text-purple-700">Human Capital & Expertise</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  On-demand access to mentors, operators, technical experts, interns, and advisors aligned to each startup's specific execution needs.
-                </p>
-              </TechCard>
-
-              {/* Corporate & Market Access */}
-              <TechCard glowColor="amber" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-amber-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-amber-400 print:text-amber-700">Corporate & Market Access</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  Direct pathways to corporate partnerships, pilot programs, customers, and industry collaborators to accelerate real-world traction.
-                </p>
-              </TechCard>
-
-              {/* Capital & Investor Connectivity */}
-              <TechCard glowColor="emerald" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <Diamond className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-emerald-400 print:text-emerald-700">Capital & Investor Connectivity</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  Integrated investor engagement, pitch readiness, and access to VCs, family offices, and strategic capital—connected directly to execution progress.
-                </p>
-              </TechCard>
-
-              {/* Global Resource Map */}
-              <TechCard glowColor="rose" className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
-                    <Globe className="h-5 w-5 text-rose-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-rose-400 print:text-rose-700">Global Resource Map</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-400 print:text-gray-600">
-                  A comprehensive 3D global visualization tool to map resources across the world—coworking spaces, labs, accelerators, grants, and partners in one interactive view.
-                </p>
-              </TechCard>
-            </div>
-          </div>
-            </div>
-          </section>
-        </SlideWrapper>
-
-        {/* NEW SLIDE: The Product */}
-        <SlideWrapper>
-          <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Background image */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${nebulaBg})` }} />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-
-            {/* Tron-style glowing circuit lines */}
-            <div className="absolute top-[30%] left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
-            <div className="absolute top-[70%] left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent shadow-[0_0_10px_rgba(6,182,212,0.2)] print:hidden" />
-            <div className="absolute top-0 left-[25%] w-px h-full bg-gradient-to-b from-transparent via-emerald-500/15 to-transparent print:hidden" />
-            <div className="absolute top-0 right-[20%] w-px h-full bg-gradient-to-b from-transparent via-teal-500/15 to-transparent print:hidden" />
-
-            {/* Diagonal light beams */}
-            <div className="absolute top-0 right-[30%] w-[1px] h-[60%] bg-gradient-to-b from-emerald-500/20 via-emerald-500/5 to-transparent origin-top rotate-[15deg] print:hidden" />
-            <div className="absolute top-0 right-[50%] w-[1px] h-[50%] bg-gradient-to-b from-cyan-500/15 via-cyan-500/5 to-transparent origin-top rotate-[-10deg] print:hidden" />
-
-            {/* Neon ring accents */}
-            <div className="absolute top-[12%] left-[6%] w-16 h-16 rounded-full border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)] print:hidden" />
-            <div className="absolute top-[14%] left-[7%] w-12 h-12 rounded-full border border-emerald-500/10 print:hidden" />
-            <div className="absolute bottom-[15%] right-[5%] w-20 h-20 rounded-full border border-cyan-500/15 shadow-[0_0_25px_rgba(6,182,212,0.12)] print:hidden" />
-            <div className="absolute bottom-[17%] right-[6%] w-14 h-14 rounded-full border border-cyan-500/10 print:hidden" />
-
-            {/* Glowing particle dots */}
-            <div className="absolute top-[18%] left-[20%] w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)] print:hidden" />
-            <div className="absolute top-[45%] left-[4%] w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)] print:hidden" />
-            <div className="absolute bottom-[22%] left-[15%] w-1.5 h-1.5 bg-teal-400 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.5)] print:hidden" />
-            <div className="absolute top-[55%] right-[3%] w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)] print:hidden" />
-            <div className="absolute top-[75%] right-[18%] w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)] print:hidden" />
-            <div className="absolute bottom-[40%] left-[30%] w-1.5 h-1.5 bg-teal-400 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.5)] print:hidden" />
-
-            {/* Pulsing corner nodes */}
-            <div className="absolute top-[16%] left-[16%] w-1.5 h-1.5 bg-emerald-500/40 shadow-[0_0_6px_rgba(16,185,129,0.4)] print:hidden" />
-            <div className="absolute top-[32%] left-[48%] w-1.5 h-1.5 bg-teal-500/40 shadow-[0_0_6px_rgba(20,184,166,0.4)] print:hidden" />
-            <div className="absolute bottom-[32%] right-[32%] w-1.5 h-1.5 bg-cyan-500/40 shadow-[0_0_6px_rgba(6,182,212,0.4)] print:hidden" />
-            <div className="absolute top-[48%] right-[16%] w-1.5 h-1.5 bg-emerald-500/40 shadow-[0_0_6px_rgba(16,185,129,0.4)] print:hidden" />
-
-            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-[4%] py-[3%]">
-              {/* Centered Title */}
-              <div className="flex flex-col items-center mb-4">
-                <div className="flex items-center gap-3 mb-1">
-                  <IconBadge icon={Cpu} color="emerald" />
-                  <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">The Product</h2>
-                </div>
-                <p className="text-sm text-emerald-400 font-semibold">All-in-One Startup Operating System</p>
+                ))}
               </div>
 
-              {/* Main layout: big screen center + overlapping screens */}
-              <div className="relative flex-1 w-full min-h-0">
-                
-                {/* Floating screen - top left */}
-                <div className="absolute bg-white rounded overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_20px_rgba(6,182,212,0.2)]"
-                  style={{ width: '28%', aspectRatio: '16/10', left: '2%', top: '5%', transform: 'rotateY(6deg) rotateZ(-2deg)', zIndex: 2 }}>
-                  <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Floating screen - top right */}
-                <div className="absolute bg-white rounded overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_20px_rgba(6,182,212,0.2)]"
-                  style={{ width: '26%', aspectRatio: '16/10', right: '3%', top: '3%', transform: 'rotateY(-5deg) rotateZ(2deg)', zIndex: 2 }}>
-                  <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Floating screen - mid left */}
-                <div className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_15px_rgba(16,185,129,0.15)]"
-                  style={{ width: '22%', aspectRatio: '16/10', left: '5%', top: '40%', transform: 'rotateY(8deg) rotateZ(-1deg)', zIndex: 1 }}>
-                  <img src={mockupHubs} alt="Hubs Map" className="w-full h-full object-cover object-center" />
-                </div>
-
-                {/* Floating screen - mid right */}
-                <div className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_15px_rgba(16,185,129,0.15)]"
-                  style={{ width: '24%', aspectRatio: '16/10', right: '4%', top: '38%', transform: 'rotateY(-6deg) rotateZ(1deg)', zIndex: 1 }}>
-                  <img src={mockupHubs} alt="Hubs" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Central monitor - large, dominant */}
-                <div className="absolute left-1/2 top-[48%] -translate-x-1/2 -translate-y-1/2" style={{ width: '52%', zIndex: 4 }}>
-                  <div className="rounded-xl overflow-hidden bg-black p-[4px] shadow-[0_25px_80px_rgba(0,0,0,0.5),0_0_40px_rgba(16,185,129,0.25)]">
-                    <div className="bg-black flex justify-center py-[3px]">
-                      <div className="w-2 h-2 rounded-full bg-slate-700" />
-                    </div>
-                    <div className="bg-white rounded-sm overflow-hidden">
-                      <img src={mockupDashboard} alt="Platform" className="w-full h-auto block" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-[5%] h-5 bg-gradient-to-b from-slate-500 to-slate-600" />
-                    <div className="w-[18%] h-[3px] bg-slate-500 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Phone mockup - bottom right overlapping */}
-                <div className="absolute" style={{ right: '14%', bottom: '6%', width: '11%', zIndex: 5 }}>
-                  <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4),0_0_25px_rgba(16,185,129,0.25)]">
-                    <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
-                      <div className="w-6 h-1 bg-slate-800 rounded-full" />
-                    </div>
-                    <div className="bg-white overflow-hidden">
-                      <img src={mockupMobile} alt="Mobile App" className="w-full h-auto block" />
-                    </div>
-                    <div className="bg-black flex justify-center py-[2px]">
-                      <div className="w-4 h-0.5 bg-slate-700 rounded-full" />
-                    </div>
-                  </div>
+              <div className="mt-12">
+                <p className="text-[22px] tracking-[0.3em] uppercase text-slate-400">One Accelerator. Every Stage.</p>
+                <div className="mt-4 flex items-center gap-3 text-[24px] font-semibold tracking-[0.15em] uppercase">
+                  {["Idea", "Build", "Validate", "Launch", "Fund", "Scale"].map((s, i) => (
+                    <span key={s} className="flex items-center gap-3">
+                      <span className="text-white">{s}</span>
+                      {i < 5 && <ArrowRight className="h-5 w-5 text-emerald-400" />}
+                    </span>
+                  ))}
                 </div>
               </div>
-
-              {/* Feature bubbles distributed around the slide */}
-              {[
-                { icon: Cpu, label: 'AI Strategies', desc: 'Smart growth recommendations', color: 'emerald', top: '8%', left: '4%' },
-                { icon: BarChart3, label: 'Business Intelligence', desc: 'Market insights & analytics', color: 'cyan', top: '8%', right: '4%' },
-                { icon: MapPin, label: 'Resources Map', desc: 'Global partners & perks', color: 'teal', top: '40%', left: '1%' },
-                { icon: Rocket, label: 'Startup Journey', desc: 'Idea to scale guidance', color: 'emerald', bottom: '18%', left: '3%' },
-                { icon: Users, label: 'Mentorship', desc: 'Mentors & advisors', color: 'purple', top: '40%', right: '1%' },
-                { icon: Diamond, label: 'Investor Match', desc: 'Pitch & raise capital', color: 'amber', bottom: '18%', right: '3%' },
-                { icon: Smartphone, label: 'Mobile Ready', desc: 'Any device, anywhere', color: 'cyan', bottom: '6%', left: '38%' },
-                { icon: Building2, label: 'Hybrid', desc: 'Digital + physical model', color: 'rose', bottom: '6%', right: '35%' },
-              ].map((item, i) => {
-                const posStyle: React.CSSProperties = { zIndex: 6 };
-                if (item.top) posStyle.top = item.top;
-                if (item.bottom) posStyle.bottom = item.bottom;
-                if (item.left) posStyle.left = item.left;
-                if (item.right) posStyle.right = item.right;
-                return (
-                  <div
-                    key={i}
-                    className={`absolute backdrop-blur-md bg-slate-900/70 border border-${item.color}-500/30 rounded-xl px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_15px_rgba(16,185,129,0.15)] hover:border-${item.color}-500/60 transition-all`}
-                    style={posStyle}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-9 h-9 rounded-lg bg-${item.color}-500/20 flex items-center justify-center`}>
-                        <item.icon className={`h-5 w-5 text-${item.color}-400`} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className={`text-[11px] font-bold text-${item.color}-400 whitespace-nowrap`}>{item.label}</span>
-                        <span className="text-[8px] text-slate-400 leading-tight">{item.desc}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Bottom accent bar */}
-              <div className="mt-1.5 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
             </div>
           </section>
         </SlideWrapper>
