@@ -584,82 +584,82 @@ export default function Deck() {
           </section>
         </SlideWrapper>
 
-        {/* SLIDE 5: Ecosystem Overview - Consolidated Users + Key Value */}
-        <SlideContainer>
-          <div className="flex flex-col items-center justify-center w-full h-full">
-            <div className="flex items-center gap-4 mb-3">
-              <IconBadge icon={Users} color="teal" />
-              <h2 className="text-4xl font-bold text-white print:text-black">Ecosystem Overview</h2>
-            </div>
-            <p className="text-lg text-slate-400 text-center mb-4 max-w-4xl print:text-gray-600">
-              A unified platform serving 8 stakeholder types with role-specific dashboards and AI-powered workflow automation.
-            </p>
-            
-            {/* Compact User Grid - 8 columns */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 w-full mb-6">
+        {/* SLIDE 5: Ecosystem Overview - Orbital ecosystem + journey */}
+        <SlideWrapper>
+          <section className="absolute inset-0 overflow-hidden bg-slate-950 print:relative print:break-after-page print:bg-white">
+            <div className="absolute left-[-150px] top-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full bg-teal-400/10 blur-[140px] print:hidden" />
+            <div className="absolute right-[-200px] bottom-[-200px] w-[700px] h-[700px] rounded-full bg-emerald-400/10 blur-[120px] print:hidden" />
+            <div className="absolute inset-x-0 bottom-0 h-[35%] opacity-25 print:hidden [background-image:linear-gradient(rgba(45,212,191,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.25)_1px,transparent_1px)] [background-size:80px_80px] [transform:perspective(900px)_rotateX(60deg)] origin-bottom [mask-image:linear-gradient(to_top,black,transparent)]" />
+
+            {/* Orbital ecosystem */}
+            <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-[720px] h-[720px]">
+              <div className="absolute inset-0 rounded-full border border-teal-300/20" />
+              <div className="absolute inset-[90px] rounded-full border border-dashed border-teal-300/25 animate-[spin_60s_linear_infinite] print:hidden" />
+              <div className="absolute inset-[190px] rounded-full border border-emerald-300/20" />
+              <div className="absolute inset-[260px] rounded-full bg-teal-400/20 blur-3xl print:hidden" />
+              <div className="absolute inset-0 animate-[spin_40s_linear_infinite] print:hidden">
+                <span className="absolute left-1/2 top-[-6px] w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_20px_rgba(94,234,212,1)]" />
+              </div>
+              <img src={sfhLogo} alt="Startup Factory Hub" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] object-contain drop-shadow-[0_0_60px_rgba(45,212,191,0.6)]" crossOrigin="anonymous" />
               {[
-                { icon: Rocket, label: "Startups", color: "emerald" },
-                { icon: Diamond, label: "Investors", color: "purple" },
-                { icon: Lightbulb, label: "Mentors", color: "cyan" },
-                { icon: Award, label: "Advisors", color: "amber" },
-                { icon: GraduationCap, label: "Students", color: "rose" },
-                { icon: Building2, label: "Accelerators", color: "teal" },
-                { icon: Handshake, label: "Corporates", color: "indigo" },
-                { icon: Network, label: "Admins", color: "slate" },
-              ].map((user, i) => (
-                <div key={i} className={`bg-slate-900/60 border border-${user.color}-500/30 rounded-xl p-3 text-center hover:border-${user.color}-500/60 transition-all print:bg-gray-50`}>
-                  <div className={`w-10 h-10 rounded-lg bg-${user.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
-                    <user.icon className={`h-5 w-5 text-${user.color}-400`} />
+                { icon: Rocket, label: "Startups" },
+                { icon: Diamond, label: "Investors" },
+                { icon: Lightbulb, label: "Mentors" },
+                { icon: Award, label: "Advisors" },
+                { icon: GraduationCap, label: "Students" },
+                { icon: Building2, label: "Accelerators" },
+                { icon: Handshake, label: "Corporates" },
+                { icon: Network, label: "Admins" },
+              ].map((u, i) => {
+                const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+                const r = 270;
+                return (
+                  <div key={u.label} className="group absolute flex flex-col items-center gap-2 -translate-x-1/2 -translate-y-1/2" style={{ left: 360 + Math.cos(a) * r, top: 360 + Math.sin(a) * r }}>
+                    <div className="w-[76px] h-[76px] rounded-full bg-slate-950 ring-1 ring-teal-300/50 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.35)] transition-all duration-500 group-hover:scale-110 group-hover:ring-teal-200 group-hover:shadow-[0_0_50px_rgba(45,212,191,0.7)]">
+                      <u.icon className="w-8 h-8 text-teal-300" />
+                    </div>
+                    <span className="text-[17px] font-semibold tracking-wide text-white whitespace-nowrap">{u.label}</span>
                   </div>
-                  <span className={`text-xs font-semibold text-${user.color}-400`}>{user.label}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            <SectionDivider title="Startup Journey Roadmap" />
-            
-            {/* Dynamic Roadmap Timeline - Full Width */}
-            <div className="relative w-full mt-2">
-              {/* Glowing connection line */}
-              <div className="absolute top-[72px] left-[8%] right-[8%] h-[4px] z-0">
-                <div className="w-full h-full bg-gradient-to-r from-amber-500/50 via-teal-500/70 via-purple-500/60 to-rose-500/50 rounded-full" />
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 via-teal-500/40 via-purple-500/30 to-rose-500/30 rounded-full blur-lg" />
-                <div className="absolute inset-[-2px] bg-gradient-to-r from-amber-500/10 via-teal-500/15 to-rose-500/10 rounded-full blur-2xl" />
-              </div>
+            {/* Content */}
+            <div className="relative z-10 h-full ml-auto w-[52%] flex flex-col justify-center pr-[100px]">
+              <span className="text-[22px] font-medium text-teal-300 tracking-[0.35em] uppercase print:text-gray-600">Ecosystem</span>
+              <h2 className="mt-4 text-[88px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent print:text-black">
+                Ecosystem Overview
+              </h2>
+              <p className="mt-6 text-[26px] leading-[1.45] text-slate-300 print:text-gray-700">
+                One platform. <span className="text-white font-semibold">8 stakeholder types.</span> Role-specific dashboards and AI-powered workflow automation.
+              </p>
 
-              <div className="grid grid-cols-6 gap-4 relative z-10">
-                {[
-                  { icon: Lightbulb, label: "Idea", desc: "Validate concept & identify market need", color: "amber", step: "01" },
-                  { icon: Search, label: "Research", desc: "Analyze market, competitors & segments", color: "cyan", step: "02" },
-                  { icon: Cpu, label: "MVP", desc: "Build minimum viable product & core features", color: "teal", step: "03" },
-                  { icon: Target, label: "Validation", desc: "User testing & iterate on real feedback", color: "purple", step: "04" },
-                  { icon: Rocket, label: "Launch", desc: "Go-to-market & customer acquisition", color: "emerald", step: "05" },
-                  { icon: TrendingUp, label: "Growth", desc: "Scale operations, raise funding & expand", color: "rose", step: "06" },
-                ].map((stage, i) => (
-                  <div key={i} className="flex flex-col items-center group relative">
-                    {/* Step number badge */}
-                    <div className={`text-xs font-bold tracking-widest text-${stage.color}-400/80 mb-2 uppercase`}>Step {stage.step}</div>
-                    
-                    {/* Glowing node circle */}
-                    <div className="relative mb-4">
-                      <div className={`absolute inset-[-10px] rounded-full bg-${stage.color}-500/20 blur-xl group-hover:bg-${stage.color}-500/40 transition-all duration-500`} />
-                      <div className={`relative w-20 h-20 rounded-full bg-gradient-to-br from-${stage.color}-500/30 to-${stage.color}-600/20 border-2 border-${stage.color}-500/50 flex items-center justify-center group-hover:border-${stage.color}-400 group-hover:scale-110 transition-all duration-500`}>
-                        <stage.icon className={`h-9 w-9 text-${stage.color}-400 group-hover:text-${stage.color}-300 transition-colors`} />
+              <span className="mt-14 text-[18px] tracking-[0.35em] uppercase text-slate-400">Startup Journey Roadmap</span>
+              <div className="relative mt-8">
+                <div className="absolute left-[34px] right-[34px] top-[34px] h-[2px] bg-gradient-to-r from-teal-300/10 via-teal-300/70 to-emerald-300/10" />
+                <div className="absolute left-[34px] right-[34px] top-[34px] h-[6px] -translate-y-[2px] bg-teal-300/30 blur-md print:hidden" />
+                <div className="relative grid grid-cols-6">
+                  {[
+                    { icon: Lightbulb, label: "Idea" },
+                    { icon: Search, label: "Research" },
+                    { icon: Cpu, label: "MVP" },
+                    { icon: Target, label: "Validation" },
+                    { icon: Rocket, label: "Launch" },
+                    { icon: TrendingUp, label: "Growth" },
+                  ].map((s, i) => (
+                    <div key={s.label} className="group flex flex-col items-center">
+                      <div className="w-[68px] h-[68px] rounded-full bg-slate-950 ring-1 ring-emerald-300/50 flex items-center justify-center shadow-[0_0_25px_rgba(52,211,153,0.35)] transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_45px_rgba(52,211,153,0.7)]">
+                        <s.icon className="w-7 h-7 text-emerald-300" />
                       </div>
-                      <div className={`absolute inset-[-5px] rounded-full border border-${stage.color}-500/0 group-hover:border-${stage.color}-500/40 group-hover:scale-125 transition-all duration-700`} />
+                      <span className="mt-4 text-[14px] tracking-[0.3em] text-teal-300/70">0{i + 1}</span>
+                      <span className="mt-1 text-[20px] font-semibold text-white">{s.label}</span>
                     </div>
-
-                    {/* Content card */}
-                    <div className={`bg-slate-900/70 border border-${stage.color}-500/20 rounded-xl p-4 text-center w-full group-hover:border-${stage.color}-500/50 group-hover:bg-slate-800/60 transition-all duration-500`}>
-                      <p className={`text-lg font-bold text-${stage.color}-400 mb-1.5`}>{stage.label}</p>
-                      <p className="text-xs text-slate-400 leading-relaxed">{stage.desc}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </SlideContainer>
+          </section>
+        </SlideWrapper>
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
            <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
