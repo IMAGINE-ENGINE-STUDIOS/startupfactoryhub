@@ -794,7 +794,7 @@ export default function Deck() {
               </div>
               <div className="mt-6 grid grid-cols-4 gap-x-10 gap-y-7">
                 {[
-                  { icon: Target, name: "Accelerator Programs", price: "$500 · $1,500 · $5,000" },
+                  { icon: Target, name: "MVP Program", price: "$5,000 / startup" },
                   { icon: Diamond, name: "Equity Participation", price: "Up to 5% equity + 5% profit share" },
                   { icon: Handshake, name: "Corporate Partners", price: "$100K / year" },
                   { icon: Lightbulb, name: "Pilot Programs", price: "$200K / pilot" },
