@@ -31,6 +31,25 @@ const PROVIDERS: Record<string, { secret: string; url: string; kind: "openai" | 
 
 const ALLOWED_KEYS = Object.keys(DEFAULTS);
 
+// Storage-backed state (private bucket, service role only) — no client access.
+const BUCKET = "imagine-ai-private";
+async function ensureBucket(admin: any) {
+  const { data } = await admin.storage.getBucket(BUCKET);
+  if (!data) await admin.storage.createBucket(BUCKET, { public: false });
+}
+async function readJson(admin: any, path: string) {
+  const { data } = await admin.storage.from(BUCKET).download(path);
+  if (!data) return null;
+  try { return JSON.parse(await data.text()); } catch { return null; }
+}
+async function writeJson(admin: any, path: string, v: unknown) {
+  const { error } = await admin.storage.from(BUCKET).upload(path, new Blob([JSON.stringify(v)], { type: "application/json" }), { upsert: true });
+  if (error) throw error;
+}
+const monthKey = () => `usage/${new Date().toISOString().slice(0, 7)}.json`;
+const dayKey = () => new Date().toISOString().slice(0, 10);
+
+
 function systemPrompt(tab: string, ctx: any, extra: string) {
   return `You are Imagine AI, the universal builder copilot inside Imagine Engine by Startup Factory Hub.
 You help users build any project: landing pages on the Canvas, automation in Flow, code in Dev, schemas in Database, and releases in Deploy.
@@ -64,8 +83,10 @@ serve(async (req) => {
     const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
     const isAdmin = !!roleRow;
 
-    const { data: row } = await admin.from("imagine_ai_settings").select("*").eq("id", 1).maybeSingle();
-    const settings: any = { ...DEFAULTS, ...(row || {}) };
+    await ensureBucket(admin);
+    const stored = await readJson(admin, "settings.json");
+    const settings: any = { ...DEFAULTS, ...(stored || {}) };
+    const usage: any = (await readJson(admin, monthKey())) || { users: {} };
 
     if (action === "get_config" || action === "save_config" || action === "stats") {
       if (!isAdmin) return json({ error: "Forbidden" }, 403);
@@ -73,24 +94,19 @@ serve(async (req) => {
         const patch: Record<string, unknown> = {};
         for (const k of ALLOWED_KEYS) if (k in (body.config || {})) patch[k] = body.config[k];
         if (patch.provider && !PROVIDERS[String(patch.provider)]) return json({ error: "Unknown provider" }, 400);
-        const { error } = await admin.from("imagine_ai_settings").upsert({ id: 1, ...patch, updated_at: new Date().toISOString(), updated_by: user.id });
-        if (error) return json({ error: error.message }, 500);
+        await writeJson(admin, "settings.json", { ...settings, ...patch, updated_at: new Date().toISOString(), updated_by: user.id });
         return json({ ok: true });
       }
       if (action === "stats") {
-        const since = new Date(); since.setUTCDate(1); since.setUTCHours(0, 0, 0, 0);
-        const { data: rows, error } = await admin.from("imagine_ai_usage")
-          .select("user_id,input_tokens,output_tokens,cost_usd,charge_usd,created_at").gte("created_at", since.toISOString()).limit(50000);
-        if (error) return json({ error: error.message }, 500);
-        const t = { requests: 0, input: 0, output: 0, cost: 0, charge: 0, users: new Set<string>() };
-        for (const r of rows || []) {
-          t.requests++; t.input += r.input_tokens; t.output += r.output_tokens;
-          t.cost += Number(r.cost_usd); t.charge += Number(r.charge_usd); t.users.add(r.user_id);
+        const t = { requests: 0, input_tokens: 0, output_tokens: 0, cost_usd: 0, charge_usd: 0, active_users: 0 };
+        for (const u of Object.values<any>(usage.users)) {
+          t.active_users++; t.requests += u.requests; t.input_tokens += u.input; t.output_tokens += u.output;
+          t.cost_usd += u.cost; t.charge_usd += u.charge;
         }
-        return json({ requests: t.requests, input_tokens: t.input, output_tokens: t.output, cost_usd: t.cost, charge_usd: t.charge, active_users: t.users.size });
+        return json(t);
       }
       const keys = Object.fromEntries(Object.entries(PROVIDERS).map(([k, v]) => [k, !!Deno.env.get(v.secret)]));
-      return json({ config: settings, providerKeys: keys, tableReady: !!row });
+      return json({ config: settings, providerKeys: keys });
     }
 
     // ── chat ──
@@ -99,17 +115,10 @@ serve(async (req) => {
     if (!messages.length) return json({ error: "messages required" }, 400);
     const tab = String(body.tab || "canvas").slice(0, 20);
 
-    // Quotas (admins exempt)
-    if (!isAdmin && row) {
-      const day = new Date(); day.setUTCHours(0, 0, 0, 0);
-      const month = new Date(day); month.setUTCDate(1);
-      const { count } = await admin.from("imagine_ai_usage").select("id", { count: "exact", head: true })
-        .eq("user_id", user.id).gte("created_at", day.toISOString());
-      if ((count ?? 0) >= settings.daily_message_limit) return json({ error: `Daily limit of ${settings.daily_message_limit} AI messages reached. Try again tomorrow.` }, 429);
-      const { data: mRows } = await admin.from("imagine_ai_usage").select("input_tokens,output_tokens")
-        .eq("user_id", user.id).gte("created_at", month.toISOString()).limit(10000);
-      const used = (mRows || []).reduce((a, r) => a + r.input_tokens + r.output_tokens, 0);
-      if (used >= settings.monthly_token_limit) return json({ error: "Monthly AI token allowance reached." }, 429);
+    const me = usage.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
+    if (!isAdmin) {
+      if ((me.days[dayKey()] || 0) >= settings.daily_message_limit) return json({ error: `Daily limit of ${settings.daily_message_limit} AI messages reached. Try again tomorrow.` }, 429);
+      if (me.input + me.output >= settings.monthly_token_limit) return json({ error: "Monthly AI token allowance reached." }, 429);
     }
 
     const prov = PROVIDERS[settings.provider] || PROVIDERS.lovable;
@@ -153,13 +162,14 @@ serve(async (req) => {
     }
     const cost = (inTok / 1000) * Number(settings.cost_per_1k_input) + (outTok / 1000) * Number(settings.cost_per_1k_output);
     const charge = settings.pricing_mode === "metered" || settings.pricing_mode === "hybrid" ? cost * Number(settings.markup_multiplier) : 0;
-    if (row) {
-      const { error } = await admin.from("imagine_ai_usage").insert({
-        user_id: user.id, tab, provider: settings.provider, model: settings.model,
-        input_tokens: inTok, output_tokens: outTok, cost_usd: cost, charge_usd: charge,
-      });
-      if (error) console.error("usage insert failed", error);
-    }
+    try {
+      const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
+      const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
+      u.requests++; u.input += inTok; u.output += outTok; u.cost += cost; u.charge += charge;
+      u.days[dayKey()] = (u.days[dayKey()] || 0) + 1;
+      fresh.users[user.id] = u;
+      await writeJson(admin, monthKey(), fresh);
+    } catch (err) { console.error("usage write failed", err); }
     return json({ text, usage: { input: inTok, output: outTok } });
   } catch (e) {
     console.error("imagine-ai error", e);
