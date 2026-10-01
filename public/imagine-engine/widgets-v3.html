@@ -20,5 +20,17 @@ Error generating stack: `+u.message+`
 </script>
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
-</body>
+<script src="/imagine-engine/edit.js"></script><script>(function(){var q=new URLSearchParams(location.search),thumb=q.get("thumb"),eid=q.get("eid")||("w"+q.get("w"));
+document.documentElement.style.background="transparent";document.body.style.background="transparent";
+var st=document.createElement("style");st.textContent="#root>div{background:transparent!important;min-height:0!important}.ie-c :is(h1,h2,h3,h4,h5,h6,p,label,li,td,th),.ie-c{color:var(--ie-c)!important}"+(thumb?"html,body{overflow:hidden}.fixed{display:none!important}":"");document.head.appendChild(st);
+var card=function(){var r=document.querySelector("#root>div>div");return r&&r.firstElementChild};
+if(thumb)return;
+var iv=setInterval(function(){var c=card();if(c){clearInterval(iv);window.__IEEdit(c,eid)}},100);
+addEventListener("message",function(e){var d=e.data;if(!d||d.ie!=="style")return;var c=card();if(!c)return;var s=d.style||{};
+c.style.backgroundColor=s.backgroundColor&&s.backgroundColor!=="transparent"?s.backgroundColor:"";
+c.style.backgroundImage=s.backgroundImage&&s.backgroundImage!=="none"?s.backgroundImage:"";
+if(s.color){c.style.setProperty("--ie-c",s.color);c.classList.add("ie-c")}else c.classList.remove("ie-c");
+c.style.borderRadius=s.borderRadius||"";if(s.borderColor&&s.borderColor!=="transparent")c.style.borderColor=s.borderColor;});
+addEventListener("mousedown",function(){try{parent.postMessage({ie:"select",eid:eid},"*")}catch(e){}},true);
+})();</script></body>
 </html>
