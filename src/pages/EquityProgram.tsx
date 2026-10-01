@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '@google/model-viewer';
 import roverAsset from '@/assets/perseverance-rover.glb.asset.json';
-import { Button } from '@/components/ui/button';
 import {
   Rocket, Hammer, Users, FlaskConical, Globe, DollarSign, Presentation, FileCheck2, Cpu,
   Satellite, MapPin, Brain, Coffee, PenLine, Building2, Store, CalendarDays, FileText, Landmark,
@@ -93,6 +92,8 @@ export default function EquityProgram() {
         @keyframes eq-trace{0%{stroke-dashoffset:400}100%{stroke-dashoffset:0}}
         @keyframes eq-node{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
         @keyframes eq-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        @keyframes eq-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @keyframes eq-travel{0%{left:0}100%{left:calc(100% - 6rem)}}
         @keyframes eq-sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
       `}</style>
 
@@ -117,7 +118,7 @@ export default function EquityProgram() {
         }} />
         {/* orbital rings behind rover */}
         {[520, 720, 920].map((s, i) => (
-          <div key={s} aria-hidden className="pointer-events-none absolute left-[28%] top-1/2 rounded-full border"
+          <div key={s} aria-hidden className="pointer-events-none absolute left-[72%] top-1/2 rounded-full border"
             style={{ width: s, height: s, borderColor: 'rgba(34,211,238,0.14)', animation: `eq-orbit ${40 + i * 20}s linear infinite${i % 2 ? ' reverse' : ''}` }}>
             <span className="absolute -top-1.5 left-1/2 h-3 w-3 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 20px #22d3ee' }} />
           </div>
@@ -139,52 +140,54 @@ export default function EquityProgram() {
         ))}
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
-          {/* Interactive 3D rover (left) */}
-          <div className="relative h-[460px] sm:h-[580px]" style={{ animation: 'eq-float 8s ease-in-out infinite' }}>
-            <div className="absolute inset-0 overflow-hidden rounded-3xl backdrop-blur-sm"
-              style={{ border: '1px solid rgba(34,211,238,0.3)', background: 'radial-gradient(circle at 50% 60%,rgba(20,184,166,0.12),rgba(4,10,24,0.6) 70%)', boxShadow: '0 0 60px -20px rgba(34,211,238,0.5)' }}>
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 h-px animate-[eq-scan_4s_linear_infinite]" style={{ background: 'linear-gradient(90deg,transparent,#22d3ee,transparent)' }} />
-              {['left-3 top-3 border-l border-t', 'right-3 top-3 border-r border-t', 'left-3 bottom-3 border-l border-b', 'right-3 bottom-3 border-r border-b'].map((c) => (
-                <span key={c} aria-hidden className={`pointer-events-none absolute h-6 w-6 ${c}`} style={{ borderColor: 'rgba(34,211,238,0.7)' }} />
-              ))}
-              <model-viewer
-                ref={mvRef as never}
-                src={roverAsset.url}
-                alt="Interactive 3D model of NASA's Perseverance Mars rover"
-                ar
-                ar-modes="webxr scene-viewer quick-look"
-                ar-scale="auto"
-                ar-placement="floor"
-                environment-image="neutral"
-                auto-rotate
-                camera-controls
-                touch-action="pan-y"
-                loading="eager"
-                shadow-intensity="1.5"
-                exposure="1.15"
-                camera-orbit="35deg 72deg auto"
-                interaction-prompt="auto"
-                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-              >
-                <button slot="ar-button" className="absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
-                  style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6)', border: '1px solid rgba(34,211,238,0.6)' }}>
-                  <View className="h-4 w-4" /> View in AR
-                </button>
-              </model-viewer>
-              {!loaded && (
-                <div className="absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] animate-[eq-pulse_1.6s_ease-in-out_infinite]" style={{ color: '#22d3ee' }}>
-                  Loading rover…
-                </div>
-              )}
-              <div className="pointer-events-none absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                <p style={{ color: '#22d3ee' }}>Perseverance · NASA</p>
-                <p>Drag to rotate · Pinch to zoom</p>
+          {/* Interactive 3D rover (right) — no box, floats over the background */}
+          <div className="relative h-[460px] sm:h-[600px] lg:order-2" style={{ animation: 'eq-float 8s ease-in-out infinite' }}>
+            {/* soft ground glow, no frame */}
+            <div aria-hidden className="pointer-events-none absolute bottom-[12%] left-1/2 h-16 w-[70%] -translate-x-1/2 rounded-[50%] blur-2xl" style={{ background: 'radial-gradient(ellipse,rgba(34,211,238,0.35),transparent 70%)' }} />
+            <div aria-hidden className="pointer-events-none absolute bottom-[14%] left-1/2 h-10 w-[60%] -translate-x-1/2 rounded-[50%] border" style={{ borderColor: 'rgba(34,211,238,0.35)' }} />
+            <model-viewer
+              ref={mvRef as never}
+              src={roverAsset.url}
+              alt="Interactive 3D model of NASA's Perseverance Mars rover"
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              ar-scale="auto"
+              ar-placement="floor"
+              environment-image="neutral"
+              auto-rotate
+              camera-controls
+              touch-action="pan-y"
+              loading="eager"
+              shadow-intensity="0"
+              exposure="1.15"
+              camera-orbit="35deg 72deg auto"
+              interaction-prompt="none"
+              style={{ width: '100%', height: '100%', backgroundColor: 'transparent', ['--poster-color' as string]: 'transparent', ['--progress-bar-height' as string]: '0px' }}
+            >
+              <button slot="ar-button" className="absolute bottom-2 right-2 z-10 flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
+                style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6)', border: '1px solid rgba(34,211,238,0.6)' }}>
+                <View className="h-4 w-4" /> View in AR
+              </button>
+            </model-viewer>
+            {!loaded && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] animate-[eq-pulse_1.6s_ease-in-out_infinite]" style={{ color: '#22d3ee' }}>
+                Loading rover…
               </div>
-              <div className="pointer-events-none absolute bottom-5 left-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#22d3ee' }}>
-                <span className="h-2 w-2 rounded-full animate-[eq-pulse_1.2s_ease-in-out_infinite]" style={{ background: '#22d3ee' }} /> Live 3D · AR ready
-              </div>
+            )}
+            {/* floating holographic chips */}
+            <div className="pointer-events-none absolute left-0 top-6 rounded-lg px-3 py-1.5 backdrop-blur-md" style={{ border: '1px solid rgba(34,211,238,0.35)', background: 'rgba(4,14,26,0.55)' }}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#22d3ee' }}>Perseverance · NASA</p>
+              <p className="font-mono text-[10px] text-white/60">Drag to rotate · Pinch to zoom</p>
+            </div>
+            <div className="pointer-events-none absolute right-0 top-[38%] rounded-lg px-3 py-1.5 backdrop-blur-md" style={{ border: '1px solid rgba(129,140,248,0.4)', background: 'rgba(4,14,26,0.55)' }}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#a5b4fc' }}>Equity</p>
+              <p className="font-mono text-xs text-white">1% · ALIGNED</p>
+            </div>
+            <div className="pointer-events-none absolute bottom-2 left-0 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#22d3ee' }}>
+              <span className="h-2 w-2 rounded-full animate-[eq-pulse_1.2s_ease-in-out_infinite]" style={{ background: '#22d3ee' }} /> Live 3D · AR ready
             </div>
           </div>
+
 
           {/* Copy (right) */}
           <div>
@@ -248,33 +251,47 @@ export default function EquityProgram() {
         </div>
       </section>
 
+      {/* TICKER */}
+      <div className="relative overflow-hidden border-y py-3" style={{ borderColor: 'rgba(34,211,238,0.2)', background: 'rgba(4,14,26,0.6)' }}>
+        <div className="flex w-max gap-10 animate-[eq-marquee_40s_linear_infinite]">
+          {[...TICKER, ...TICKER].map((s, i) => (
+            <span key={i} className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/60">
+              {s}<span className="ml-10" style={{ color: '#22d3ee' }}>/</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* TERMS */}
       <section id="terms" className="relative mx-auto max-w-6xl px-6 py-28">
-        <div data-reveal className="text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-primary">The Terms</p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">Simple. Aligned. 1%.</h2>
-        </div>
-        <div data-reveal className="relative mt-16 grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-          <div className="relative mx-auto flex h-72 w-72 items-center justify-center">
-            <div className="absolute inset-0 rounded-full border border-primary/30 animate-[spin_30s_linear_infinite]" />
-            <div className="absolute inset-6 rounded-full border border-dashed border-primary/40 animate-[spin_20s_linear_infinite_reverse]" />
-            <div className="absolute inset-12 rounded-full bg-primary/10 blur-2xl" />
+        <SectionHead tag="// 01 · The Terms" title="Simple. Aligned. 1%." />
+        <div data-reveal className="relative mt-16 grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+          <div className="relative mx-auto flex h-80 w-80 items-center justify-center">
+            <div className="absolute inset-0 rounded-full border animate-[spin_30s_linear_infinite]" style={{ borderColor: 'rgba(34,211,238,0.35)', borderTopColor: '#22d3ee' }} />
+            <div className="absolute inset-6 rounded-full border border-dashed animate-[spin_20s_linear_infinite_reverse]" style={{ borderColor: 'rgba(129,140,248,0.5)' }} />
+            <svg className="absolute inset-10" viewBox="0 0 100 100" aria-hidden>
+              {Array.from({ length: 60 }).map((_, i) => (
+                <line key={i} x1="50" y1="2" x2="50" y2={i % 5 ? 5 : 8} stroke={i < 6 ? '#22d3ee' : 'rgba(255,255,255,0.18)'} strokeWidth="0.6" transform={`rotate(${i * 6} 50 50)`} />
+              ))}
+            </svg>
+            <div className="absolute inset-16 rounded-full blur-2xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.35),transparent 70%)' }} />
             <div className="relative text-center">
-              <p className="text-8xl font-bold text-primary drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)]">1<Percent className="inline h-14 w-14" /></p>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">Equity</p>
+              <p className="text-8xl font-black" style={{ backgroundImage: 'linear-gradient(180deg,#fff,#22d3ee)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 30px rgba(34,211,238,0.6))' }}>1%</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.35em]" style={{ color: '#22d3ee' }}>Equity · Locked</p>
             </div>
           </div>
-          <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {[
-              ['1% equity stake', 'Startup Factory Hub takes 1% equity in exchange for full program and network access.'],
-              ['We win when you win', 'Our return comes from your success, so every part of the network works for your growth.'],
-              ['Signed online', 'The agreement is signed digitally on the platform, with a full record of every step.'],
-              ['Full access from day one', 'Every benefit on this page opens up as soon as you are accepted.'],
-            ].map(([t, d]) => (
-              <div key={t} className="tech-card border-0 rounded-2xl p-6">
-                <h3 className="text-xl font-semibold">{t}</h3>
-                <p className="mt-1 text-muted-foreground">{d}</p>
-              </div>
+              ['PRM.01', '1% equity stake', 'Startup Factory Hub takes 1% equity in exchange for full program and network access.'],
+              ['PRM.02', 'We win when you win', 'Our return comes from your success, so every part of the network works for your growth.'],
+              ['PRM.03', 'Signed online', 'The agreement is signed digitally on the platform, with a full record of every step.'],
+              ['PRM.04', 'Full access from day one', 'Every benefit on this page opens up as soon as you are accepted.'],
+            ].map(([c, t, d]) => (
+              <HoloCard key={t} glow="rgba(34,211,238,0.45)">
+                <p className="font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: '#22d3ee' }}>{c}</p>
+                <h3 className="mt-2 text-lg font-semibold text-white">{t}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">{d}</p>
+              </HoloCard>
             ))}
           </div>
         </div>
@@ -282,45 +299,46 @@ export default function EquityProgram() {
 
       {/* HOW TO APPLY */}
       <section className="relative mx-auto max-w-6xl px-6 py-28">
-        <div data-reveal className="text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-primary">How to Apply</p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">Five steps to launch</h2>
-        </div>
-        <div className="relative mt-16">
-          <div aria-hidden className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary via-primary/40 to-transparent md:left-1/2" />
-          {STEPS.map((s, i) => (
-            <div key={s.n} data-reveal className={`relative mb-10 flex md:w-1/2 ${i % 2 ? 'md:ml-auto md:pl-12' : 'md:pr-12 md:text-right'} pl-16 md:pl-0`}>
-              <span className={`absolute top-4 left-6 -translate-x-1/2 h-4 w-4 rounded-full bg-primary shadow-[0_0_20px_hsl(var(--primary))] ${i % 2 ? 'md:left-0' : 'md:left-auto md:right-0 md:translate-x-1/2'}`} />
-              <div className="tech-card border-0 w-full rounded-2xl p-6">
-                <p className="font-mono text-sm text-primary">{s.n}</p>
-                <h3 className="mt-1 text-2xl font-semibold">{s.t}</h3>
-                <p className="mt-2 text-muted-foreground">{s.d}</p>
+        <SectionHead tag="// 02 · Launch Sequence" title="Five steps to launch" />
+        <div className="relative mt-20">
+          <div aria-hidden className="absolute left-0 right-0 top-7 hidden h-px md:block" style={{ background: 'linear-gradient(90deg,transparent,#14b8a6,#22d3ee,#818cf8,transparent)' }} />
+          <div aria-hidden className="absolute top-[26px] hidden h-1 w-24 rounded-full md:block animate-[eq-travel_6s_linear_infinite]" style={{ background: 'linear-gradient(90deg,transparent,#fff,transparent)', boxShadow: '0 0 20px #22d3ee' }} />
+          <div className="grid gap-6 md:grid-cols-5">
+            {STEPS.map((s, i) => (
+              <div key={s.n} data-reveal style={{ transitionDelay: `${i * 100}ms` }} className="relative">
+                <div className="relative z-10 mx-auto flex h-14 w-14 items-center justify-center rounded-full font-mono text-sm font-bold text-white"
+                  style={{ background: 'radial-gradient(circle,#0f2a3a,#04101f)', border: '1.5px solid #22d3ee', boxShadow: '0 0 30px -4px rgba(34,211,238,0.8)' }}>
+                  {s.n}
+                </div>
+                <HoloCard className="mt-6 text-center" glow="rgba(20,184,166,0.45)">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#14b8a6' }}>Phase {s.n}</p>
+                  <h3 className="mt-2 text-base font-semibold text-white">{s.t}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-white/60">{s.d}</p>
+                </HoloCard>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* BENEFITS */}
       <section className="relative mx-auto max-w-7xl px-6 py-28">
-        <div data-reveal className="text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-primary">Why Join the Program</p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">From idea to investable MVP</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">A structured acceleration experience designed to take a startup from idea to investable MVP in a single, high-intensity batch.</p>
-        </div>
+        <SectionHead tag="// 03 · Why Join the Program" title="From idea to investable MVP"
+          sub="A structured acceleration experience designed to take a startup from idea to investable MVP in a single, high-intensity batch." />
         <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {BENEFITS.map((b, i) => (
-            <div key={b.code} data-reveal style={{ transitionDelay: `${(i % 4) * 90}ms` }}
-              className="group tech-card border-0 relative overflow-hidden rounded-2xl p-6 transition-transform duration-500 hover:-translate-y-2">
-              <div aria-hidden className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl transition-opacity opacity-0 group-hover:opacity-100" />
-              <div className="flex items-center justify-between">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/5">
-                  <b.icon className="h-6 w-6 text-primary" />
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{b.code} · 0{i + 1}</span>
-              </div>
-              <h3 className="mt-5 text-lg font-semibold">{b.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
+            <div key={b.code} data-reveal style={{ transitionDelay: `${(i % 4) * 90}ms` }}>
+              <HoloCard glow={GLOWS[i % GLOWS.length]} className="h-full min-h-[230px]">
+                <div className="flex items-start justify-between">
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-xl backdrop-blur-sm"
+                    style={{ border: `1px solid ${GLOWS[i % GLOWS.length]}`, background: 'rgba(255,255,255,0.03)' }}>
+                    <b.icon className="h-6 w-6 text-white" />
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{b.code} · 0{i + 1}</span>
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-white">{b.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/60">{b.desc}</p>
+              </HoloCard>
             </div>
           ))}
         </div>
@@ -328,37 +346,75 @@ export default function EquityProgram() {
 
       {/* EXTRAS */}
       <section className="relative mx-auto max-w-7xl px-6 py-28">
-        <div data-reveal className="text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-primary">Plus the Full Network</p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">Everything else we unlock</h2>
-        </div>
+        <SectionHead tag="// 04 · Plus the Full Network" title="Everything else we unlock" />
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {EXTRAS.map((e, i) => (
-            <div key={e.title} data-reveal style={{ transitionDelay: `${(i % 3) * 80}ms` }}
-              className="group tech-card border-0 flex gap-4 rounded-2xl p-5 transition-colors hover:bg-primary/5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 shadow-[0_0_24px_hsl(var(--primary)/0.25)]">
-                <e.icon className="h-5 w-5 text-primary" />
-              </span>
-              <div>
-                <h3 className="font-semibold">{e.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{e.desc}</p>
-              </div>
+            <div key={e.title} data-reveal style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
+              <HoloCard glow={GLOWS[(i + 3) % GLOWS.length]} className="flex h-full gap-4">
+                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                  style={{ background: 'radial-gradient(circle,rgba(34,211,238,0.25),rgba(4,14,26,0.8))', border: '1px solid rgba(34,211,238,0.45)', boxShadow: '0 0 24px -4px rgba(34,211,238,0.6)' }}>
+                  <e.icon className="h-5 w-5" style={{ color: '#22d3ee' }} />
+                </span>
+                <div>
+                  <h3 className="font-semibold text-white">{e.title}</h3>
+                  <p className="mt-1 text-sm text-white/60">{e.desc}</p>
+                </div>
+              </HoloCard>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="relative px-6 py-32 text-center">
-        <div aria-hidden className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-[120px]" />
+      <section className="relative overflow-hidden px-6 py-32 text-center">
+        <div aria-hidden className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.35),rgba(99,102,241,0.2),transparent 70%)' }} />
+        {[380, 560].map((s, i) => (
+          <div key={s} aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border" style={{ width: s, height: s, borderColor: 'rgba(34,211,238,0.15)', animation: `eq-orbit ${30 + i * 15}s linear infinite${i ? ' reverse' : ''}` }}>
+            <span className="absolute -top-1 left-1/2 h-2 w-2 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 14px #22d3ee' }} />
+          </div>
+        ))}
         <div data-reveal className="relative">
-          <h2 className="text-5xl font-bold tracking-tight sm:text-7xl">Ready for launch?</h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">Apply to the Equity Program and bring your startup into the network.</p>
-          <Button size="lg" onClick={apply} className="mt-10 gap-2 px-10 shadow-[0_0_50px_hsl(var(--primary)/0.5)]">
-            Apply Now <Rocket className="h-4 w-4" />
-          </Button>
+          <p className="font-mono text-xs uppercase tracking-[0.35em]" style={{ color: '#22d3ee' }}>// T-minus 00:00</p>
+          <h2 className="mt-4 text-5xl font-black uppercase tracking-tight text-white sm:text-7xl">Ready for launch?</h2>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/60">Apply to the Equity Program and bring your startup into the network.</p>
+          <button onClick={apply}
+            className="group relative mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full px-10 py-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03]"
+            style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6,#0d9488)', border: '1.5px solid rgba(34,211,238,0.55)', boxShadow: '0 0 50px -8px rgba(20,184,166,0.8)' }}>
+            <span className="relative z-10 flex items-center gap-2">Apply Now <Rocket className="h-4 w-4" /></span>
+            <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+          </button>
         </div>
       </section>
+    </div>
+  );
+}
+
+const TICKER = ['1% Equity', '130 Countries', '5,800 Locations', 'NASA KSC Access', 'UK Space Agency', 'Genius AI', 'Accelerated Fundraising', 'Corporate Pilots', 'Demo Day', 'Investor Readiness'];
+const GLOWS = ['rgba(20,184,166,0.55)', 'rgba(34,211,238,0.55)', 'rgba(129,140,248,0.55)', 'rgba(245,158,11,0.5)', 'rgba(236,72,153,0.45)', 'rgba(56,189,248,0.55)'];
+
+function SectionHead({ tag, title, sub }: { tag: string; title: string; sub?: string }) {
+  return (
+    <div data-reveal className="text-center">
+      <p className="font-mono text-xs uppercase tracking-[0.35em]" style={{ color: '#22d3ee' }}>{tag}</p>
+      <h2 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-6xl"
+        style={{ backgroundImage: 'linear-gradient(90deg,#ffffff,#22d3ee 60%,#818cf8)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{title}</h2>
+      <div className="mx-auto mt-5 h-px w-40" style={{ background: 'linear-gradient(90deg,transparent,#22d3ee,transparent)' }} />
+      {sub && <p className="mx-auto mt-5 max-w-2xl text-white/60">{sub}</p>}
+    </div>
+  );
+}
+
+function HoloCard({ children, glow, className = '' }: { children: React.ReactNode; glow: string; className?: string }) {
+  return (
+    <div style={{ ['--g' as string]: glow, background: 'linear-gradient(160deg,rgba(10,25,45,0.75),rgba(4,10,24,0.85))', border: '1px solid rgba(34,211,238,0.18)' }}
+      className={`group relative overflow-hidden rounded-2xl p-6 backdrop-blur-md transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-15px_var(--g)] ${className}`}>
+      <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-80" style={{ background: 'radial-gradient(circle,var(--g),transparent 70%)' }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] group-hover:opacity-[0.12]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '24px 24px' }} />
+      {['left-2 top-2 border-l border-t', 'right-2 top-2 border-r border-t', 'left-2 bottom-2 border-l border-b', 'right-2 bottom-2 border-r border-b'].map((c) => (
+        <span key={c} aria-hidden className={`pointer-events-none absolute h-4 w-4 transition-all duration-300 group-hover:h-6 group-hover:w-6 ${c}`} style={{ borderColor: 'rgba(34,211,238,0.55)' }} />
+      ))}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 group-hover:animate-[eq-scan_2.4s_linear_infinite]" style={{ background: 'linear-gradient(90deg,transparent,#22d3ee,transparent)' }} />
+      <div className="relative">{children}</div>
     </div>
   );
 }
