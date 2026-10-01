@@ -347,7 +347,7 @@
 
     // Product
     var pd = sec(box, "Product");
-    var tables = []; try { tables = (window.__IE.tables && (typeof window.__IE.tables === "function" ? window.__IE.tables() : window.__IE.tables)) || []; } catch (e) {}
+    var tables = []; try { tables = window.__IE.tableData || []; } catch (e) {}
     var linked = {}; try { linked = JSON.parse(getAttr("@product") || "{}"); } catch (e) {}
     if (linked.name) note(pd, "Linked: " + linked.name + " • $" + Number(linked.price).toFixed(2), "#4ade80");
     var tsel = h("select", { style: INP + ";margin-top:6px" }); tsel.appendChild(h("option", { value: "" }, ["Pick a product table"]));
