@@ -24,6 +24,8 @@ const DEFAULTS = {
   business_model: "subscription",
   platform_fee_percent: 0,
   free_trial_days: 0,
+  storage_included_mb: 500,
+  storage_price_per_gb: 2.5,
   plans: [
     { id: "starter", name: "Starter", price_monthly: 0, price_yearly: 0, monthly_tokens: 100000, daily_messages: 20 },
     { id: "pro", name: "Pro", price_monthly: 25, price_yearly: 240, monthly_tokens: 2000000, daily_messages: 150 },

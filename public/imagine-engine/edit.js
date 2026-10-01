@@ -33,6 +33,15 @@
     if (t.tagName && /^(svg|path|g|circle|rect|line|polyline|polygon)$/i.test(t.tagName)) { var s = t.closest("svg"); if (s && s.parentElement && root.contains(s.parentElement)) return s.parentElement; }
     return t !== root ? t : null;
   }
+  function setAttr(el, c, v) {
+    if (c === "@src") {
+      if (/^(IMG|VIDEO|SOURCE)$/.test(el.tagName)) { if (el.getAttribute("src") !== v) { el.setAttribute("src", v); if (el.tagName === "IMG") el.removeAttribute("srcset"); } }
+      else if (/\.(mp4|webm|mov)(\?|$)/i.test(v)) { var vd = el.querySelector("video[data-ie-media]"); if (!vd) { vd = document.createElement("video"); vd.setAttribute("data-ie-media", "1"); vd.autoplay = vd.muted = vd.loop = true; vd.playsInline = true; vd.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none"; if (!el.style.position) el.style.position = "relative"; el.prepend(vd); } if (vd.getAttribute("src") !== v) vd.src = v; }
+      else { var bg = 'url("' + v + '")'; if (el.style.backgroundImage !== bg) { el.style.backgroundImage = bg; el.style.backgroundSize = "cover"; el.style.backgroundPosition = "center"; } }
+    } else if (c === "@href") { if (v) el.setAttribute("data-ie-href", v); else el.removeAttribute("data-ie-href"); }
+    else if (c === "@target") { if (v) el.setAttribute("data-ie-target", v); else el.removeAttribute("data-ie-target"); }
+    else if (c === "@product") { if (v) el.setAttribute("data-ie-product", v); else el.removeAttribute("data-ie-product"); }
+  }
   function J(k, d) { try { return JSON.parse(localStorage.getItem(k) || d); } catch (e) { return JSON.parse(d); } }
   function S(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
@@ -55,14 +64,14 @@
         var m = J(KT, "{}");
         for (var p in m) { var el = byPath(root, p); if (el && el.children.length === 0 && el.textContent !== m[p] && document.activeElement !== el) el.textContent = m[p]; }
         var st = J(KS, "{}");
-        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; for (var c in o) { if (e2.style[c] !== o[c]) e2.style[c] = o[c]; } }
+        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; for (var c in o) { if (c.charAt(0) === "@") setAttr(e2, c, o[c]); else if (e2.style[c] !== o[c]) e2.style[c] = o[c]; } }
       } finally { applying = false; }
     };
     root.__ieApi = {
       key: key, win: window,
       setStyle: function (el, patch) {
         var p = pathOf(el, root); if (p == null) return;
-        for (var c in patch) el.style[c] = patch[c];
+        for (var c in patch) { if (c.charAt(0) === "@") setAttr(el, c, patch[c]); else el.style[c] = patch[c]; }
         if (p.charAt(0) === "a") { var adds = J(KA, "[]"), i = +p.split(".")[0].slice(1); if (adds[i] && p.indexOf(".") < 0) { adds[i].css = el.style.cssText; S(KA, adds); return; } }
         var st = J(KS, "{}"); st[p] = Object.assign(st[p] || {}, patch); S(KS, st);
       },
@@ -80,7 +89,10 @@
       },
       reset: function () { localStorage.removeItem(KT); localStorage.removeItem(KS); localStorage.removeItem(KA); }
     };
+    if (TOP !== window && !document.__ieClick) { document.__ieClick = 1; document.addEventListener("click", function (e) { if (TOP.__IEClickHandler) TOP.__IEClickHandler(e, document); }, true); }
+    var playing = function () { try { return !!(TOP.__IE && TOP.__IE.playing); } catch (x) { return false; } };
     root.addEventListener("dblclick", function (e) {
+      if (playing()) return;
       var el = e.target;
       if (!isLeaf(el)) return;
       e.preventDefault(); e.stopPropagation();
@@ -97,7 +109,7 @@
 
     // click select + drag move
     root.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || playing()) return;
       var t = e.target; if (t.isContentEditable) return;
       if (t.closest && t.closest('[title="drag handle top left"]')) return;
       var el = pickTarget(t, root); if (!el) return;
@@ -196,6 +208,14 @@
     var tg = target(); if (!tg) return;
     if (tg.kind === "dom") tg.api.setText(tg.el, v); else if (window.__IE && window.__IE.text) window.__IE.text(v);
   }
+  function getAttr(name) {
+    var tg = target(); if (!tg) return "";
+    if (tg.kind === "native") return (tg.node.style || {})[name] || "";
+    var m = { "@href": "data-ie-href", "@target": "data-ie-target", "@product": "data-ie-product" }[name];
+    if (m) return tg.el.getAttribute(m) || "";
+    if (name === "@src") return tg.el.getAttribute("src") || "";
+    return "";
+  }
   function toHex(c) {
     if (!c) return "#ffffff"; if (c.charAt(0) === "#") return c.length === 4 ? "#" + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c.slice(0, 7);
     var m = c.match(/\d+/g); if (!m) return "#ffffff";
@@ -266,7 +286,135 @@
       box.appendChild(h("div", { style: "font:10px system-ui;color:#71717a;margin-top:10px" }, ["Drag this element to move it. Drop it on another widget to move it there."]));
       box.appendChild(h("button", { style: BTN + ";width:100%;margin-top:6px", onclick: function () { setStyle({ transform: "", display: "" }); render(true); } }, ["Reset position"]));
     }
+    extras(box, tg, c, isBtn);
     slot.appendChild(box);
+  }
+  // ---------- Link, media, product, payments, storage ----------
+  function sec(box, title) { var d = h("div", { style: "border-top:1px solid #27272a;margin-top:12px;padding-top:8px" }, [h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, [title])]); box.appendChild(d); return d; }
+  function note(d, t, color) { var n = h("div", { style: "font:11px system-ui;margin-top:6px;color:" + (color || "#a1a1aa") }, [t]); d.appendChild(n); return n; }
+  function sectionIds() {
+    var out = [], ie = window.__IE; try { (ie.sections || []).forEach(function (s) { out.push(s.id); }); } catch (e) {}
+    if (!out.length) document.querySelectorAll('[data-id^="sec_"]').forEach(function (e) { var id = e.getAttribute("data-id"); if (out.indexOf(id) < 0) out.push(id); });
+    return out;
+  }
+  function extras(box, tg, c, isBtn) {
+    var Cl = window.__IECloud;
+    // Link
+    var ld = sec(box, isBtn ? "Button link" : "Link");
+    var cur = getAttr("@href"), kind = !cur ? "none" : cur.indexOf("cart:") === 0 ? cur : cur.charAt(0) === "#" ? "section" : "url";
+    var ks = h("select", { style: INP + ";margin-top:6px" });
+    [["none", "No link"], ["url", "Web address"], ["section", "Scroll to a section"], ["cart:open", "Open cart"], ["cart:checkout", "Go to checkout"]].forEach(function (o) { var op = h("option", { value: o[0] }, [o[1]]); if (o[0] === kind) op.selected = true; ks.appendChild(op); });
+    ld.appendChild(ks);
+    var lw = h("div"); ld.appendChild(lw);
+    function linkUI(ev) {
+      lw.innerHTML = "";
+      var k = ks.value;
+      if (k === "url") {
+        var ui = h("input", { style: INP + ";margin-top:6px", placeholder: "https://..." }); ui.value = cur.charAt(0) !== "#" && cur.indexOf("cart:") ? cur : "";
+        var nt = h("label", { style: "display:flex;gap:6px;align-items:center;margin-top:6px;font:11px system-ui;color:#a1a1aa" }, [h("input", { type: "checkbox" }), "Open in a new tab"]);
+        var cb = nt.querySelector("input"); cb.checked = getAttr("@target") === "_blank";
+        var save = function () { var v = ui.value.trim(); if (v && !/^(https?:|mailto:|tel:)/.test(v)) v = "https://" + v; setStyle({ "@href": v, "@target": cb.checked ? "_blank" : "" }); cur = v; };
+        ui.addEventListener("change", save); cb.addEventListener("change", save);
+        lw.appendChild(ui); lw.appendChild(nt);
+      } else if (k === "section") {
+        var ss = h("select", { style: INP + ";margin-top:6px" }); ss.appendChild(h("option", { value: "" }, ["Pick a section"]));
+        sectionIds().forEach(function (id) { var o = h("option", { value: "#" + id }, [id.replace(/^sec_/, "").replace(/_/g, " ")]); if ("#" + id === cur) o.selected = true; ss.appendChild(o); });
+        ss.addEventListener("change", function () { setStyle({ "@href": ss.value, "@target": "" }); cur = ss.value; });
+        lw.appendChild(ss);
+      } else if (ev) { setStyle({ "@href": k === "none" ? "" : k, "@target": "" }); cur = k === "none" ? "" : k; }
+      note(lw, "Links work when you press Play.");
+    }
+    ks.addEventListener("change", linkUI); linkUI();
+
+    // Media
+    var md = sec(box, "Image or video");
+    var isMedia = tg.kind === "dom" && /^(IMG|VIDEO)$/.test(tg.el.tagName);
+    note(md, isMedia ? "Replace this " + (tg.el.tagName === "IMG" ? "image" : "video") + "." : "Upload to set this element's background image or video.");
+    var fi = h("input", { type: "file", accept: "image/*,video/*", style: "display:none" });
+    var st = note(md, "");
+    var ub = h("button", { style: BTN + ";width:100%;margin-top:6px", onclick: function () { fi.click(); } }, ["Upload image or video"]);
+    fi.addEventListener("change", function () {
+      var f = fi.files && fi.files[0]; if (!f) return;
+      if (!Cl || !Cl.signedIn()) { st.textContent = "Sign in to upload files."; st.style.color = "#f87171"; return; }
+      st.textContent = "Uploading " + f.name + "..."; st.style.color = "#a1a1aa"; ub.disabled = true;
+      Cl.upload(f).then(function (u) { setStyle({ "@src": u }); st.textContent = "Uploaded."; st.style.color = "#4ade80"; })
+        .catch(function (e) { st.textContent = e.message; st.style.color = "#f87171"; }).finally(function () { ub.disabled = false; fi.value = ""; });
+    });
+    md.appendChild(ub); md.appendChild(fi);
+    var mu = h("input", { style: INP + ";margin-top:6px", placeholder: "...or paste an image/video address" }); mu.value = getAttr("@src");
+    mu.addEventListener("change", function () { if (mu.value.trim()) setStyle({ "@src": mu.value.trim() }); });
+    md.appendChild(mu);
+
+    // Product
+    var pd = sec(box, "Product");
+    var tables = []; try { tables = window.__IE.tableData || []; } catch (e) {}
+    var linked = {}; try { linked = JSON.parse(getAttr("@product") || "{}"); } catch (e) {}
+    if (linked.name) note(pd, "Linked: " + linked.name + " • $" + Number(linked.price).toFixed(2), "#4ade80");
+    var tsel = h("select", { style: INP + ";margin-top:6px" }); tsel.appendChild(h("option", { value: "" }, ["Pick a product table"]));
+    tables.forEach(function (t, i) { tsel.appendChild(h("option", { value: String(i) }, [t.name || ("Table " + (i + 1))])); });
+    pd.appendChild(tsel);
+    var rw = h("div"); pd.appendChild(rw);
+    if (!tables.length) note(pd, "Create a product table in the Database tab (with name, price and image columns) to connect real products.");
+    tsel.addEventListener("change", function () {
+      rw.innerHTML = ""; var t = tables[+tsel.value]; if (!t) return;
+      var rows = t.rows || t.data || [];
+      var cols = (t.columns || []).map(function (x) { return typeof x === "string" ? x : x.name; });
+      if (!cols.length && rows[0]) cols = Object.keys(rows[0]);
+      var find = function (re) { return cols.filter(function (k) { return re.test(k); })[0]; };
+      var nk = find(/name|title/i), pk = find(/price|amount|cost/i), ik = find(/image|img|photo|picture/i);
+      if (!rows.length || !nk || !pk) { note(rw, "This table needs rows with a name and a price column.", "#f87171"); return; }
+      var rs = h("select", { style: INP + ";margin-top:6px" }); rs.appendChild(h("option", { value: "" }, ["Pick a product"]));
+      rows.forEach(function (r, i) { rs.appendChild(h("option", { value: String(i) }, [String(r[nk]) + " — $" + r[pk]])); });
+      rs.addEventListener("change", function () {
+        var r = rows[+rs.value]; if (!r) return;
+        var p = { name: String(r[nk]), price: Number(String(r[pk]).replace(/[^\d.]/g, "")) || 0, image: ik ? String(r[ik] || "") : "" };
+        setStyle({ "@product": JSON.stringify(p) });
+        if (tg.kind === "dom") {
+          var leaves = [].slice.call(tg.el.querySelectorAll("*")).filter(function (x) { return x.children.length === 0 && (x.textContent || "").trim(); });
+          var priceEl = leaves.filter(function (x) { return /\$\s?\d/.test(x.textContent); })[0];
+          var nameEl = leaves.filter(function (x) { return x !== priceEl && !/add to|buy|cart|bag/i.test(x.textContent) && x.textContent.trim().length > 2; })[0];
+          if (priceEl) tg.api.setText(priceEl, "$" + p.price.toFixed(2));
+          if (nameEl) tg.api.setText(nameEl, p.name);
+          var im = tg.el.tagName === "IMG" ? tg.el : tg.el.querySelector("img");
+          if (im && p.image) tg.api.setStyle(im, { "@src": p.image });
+        }
+        render(true);
+      });
+      rw.appendChild(rs);
+      note(rw, "Select the whole product card first, then pick the product. Its name, price and photo fill in, and Add to cart uses this price.");
+    });
+
+    // Payments
+    var pyd = sec(box, "Cart & payments");
+    var cartRow = h("div", { style: "display:flex;gap:4px;margin-top:6px" });
+    cartRow.appendChild(h("button", { style: BTN + ";flex:1", onclick: function () { window.__IECart && window.__IECart.open(); } }, ["View cart"]));
+    cartRow.appendChild(h("button", { style: BTN + ";flex:1", onclick: function () { window.__IECart && window.__IECart.clear(); } }, ["Empty cart"]));
+    pyd.appendChild(cartRow);
+    var ps = note(pyd, "Checking payment setup...");
+    if (!Cl || !Cl.signedIn()) { ps.textContent = "Sign in to set up payments."; }
+    else Cl.call("payment_status").then(function (r) {
+      if (r.isAdmin) { ps.textContent = "Admin project: payments go to the Startup Factory Hub Stripe account."; ps.style.color = "#4ade80"; return; }
+      ps.textContent = r.stripe_connect ? "Stripe connected." : r.keys.stripe ? "Using your Stripe key " + r.keys.stripe + "." : "Payments are not set up yet.";
+      if (r.platform_fee_percent && r.stripe_connect) ps.textContent += " Platform fee: " + r.platform_fee_percent + "% per sale.";
+      pyd.appendChild(h("button", { style: BTN + ";width:100%;margin-top:6px;background:#635bff;border-color:#635bff;color:#fff", onclick: function () {
+        Cl.call("connect_stripe", { returnUrl: (window.top || window).location.href.split("?")[0] }).then(function (x) { window.open(x.url, "_blank"); }).catch(function (e) { Cl.toast(e.message); });
+      } }, [r.stripe_connect ? "Finish / manage Stripe setup" : "Connect Stripe"]));
+      var prov = h("select", { style: INP + ";margin-top:6px" });
+      [["stripe", "Stripe secret key"], ["paypal", "PayPal"], ["square", "Square"], ["other", "Other payment service"]].forEach(function (o) { prov.appendChild(h("option", { value: o[0] }, [o[1] + (r.keys[o[0]] ? " (" + r.keys[o[0]] + ")" : "")])); });
+      var key = h("input", { type: "password", style: INP + ";margin-top:6px", placeholder: "Paste key" });
+      pyd.appendChild(prov); pyd.appendChild(key);
+      pyd.appendChild(h("button", { style: BTN + ";width:100%;margin-top:6px", onclick: function () {
+        Cl.call("save_payment_key", { provider: prov.value, key: key.value }).then(function () { key.value = ""; Cl.toast("Key saved securely"); render(true); }).catch(function (e) { Cl.toast(e.message); });
+      } }, ["Save key"]));
+    }).catch(function (e) { ps.textContent = e.message; });
+
+    // Storage
+    var sd = sec(box, "Your storage");
+    var su = note(sd, Cl && Cl.signedIn() ? "Your edits save to your account automatically." : "Sign in to save your edits to your account.");
+    if (Cl && Cl.signedIn()) Cl.call("usage").then(function (u) {
+      var mb = function (b) { return (b / 1048576).toFixed(1) + " MB"; };
+      note(sd, "Used " + mb(u.bytes) + " of " + mb(u.included_bytes) + " included. No limit — extra storage is $" + u.price_per_gb + "/GB per month." + (u.monthly_charge_usd ? " This month: $" + u.monthly_charge_usd.toFixed(2) + "." : ""));
+    }).catch(function () {});
   }
   window.__IEElRefresh = function () { render(true); };
   setInterval(function () { render(false); }, 400);
