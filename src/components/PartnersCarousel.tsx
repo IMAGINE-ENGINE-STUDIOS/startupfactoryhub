@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { PARTNERS, type Partner } from "@/config/partners";
+import { WEBSITE_PARTNERS as PARTNERS, type Partner } from "@/config/partners";
 
 const PartnersCarousel = () => {
   const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set());

@@ -47,3 +47,7 @@ export const PARTNERS: Partner[] = [
   { name: "Deep Checks", logo: "/partners/deepchecks-logo.png", tier: "Technology" },
   { name: "Chase", logo: "/partners/chase-logo.png", tier: "Banking" },
 ];
+
+/** Partners shown only on the pitch deck, hidden from website carousels. */
+const DECK_ONLY = new Set(["UK Space Agency", "APEX Accelerators"]);
+export const WEBSITE_PARTNERS: Partner[] = PARTNERS.filter(p => !DECK_ONLY.has(p.name));
