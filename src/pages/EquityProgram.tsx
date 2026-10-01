@@ -117,7 +117,7 @@ export default function EquityProgram() {
         }} />
         {/* orbital rings behind rover */}
         {[520, 720, 920].map((s, i) => (
-          <div key={s} aria-hidden className="pointer-events-none absolute left-[28%] top-1/2 rounded-full border"
+          <div key={s} aria-hidden className="pointer-events-none absolute left-[72%] top-1/2 rounded-full border"
             style={{ width: s, height: s, borderColor: 'rgba(34,211,238,0.14)', animation: `eq-orbit ${40 + i * 20}s linear infinite${i % 2 ? ' reverse' : ''}` }}>
             <span className="absolute -top-1.5 left-1/2 h-3 w-3 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 20px #22d3ee' }} />
           </div>
@@ -139,52 +139,54 @@ export default function EquityProgram() {
         ))}
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
-          {/* Interactive 3D rover (left) */}
-          <div className="relative h-[460px] sm:h-[580px]" style={{ animation: 'eq-float 8s ease-in-out infinite' }}>
-            <div className="absolute inset-0 overflow-hidden rounded-3xl backdrop-blur-sm"
-              style={{ border: '1px solid rgba(34,211,238,0.3)', background: 'radial-gradient(circle at 50% 60%,rgba(20,184,166,0.12),rgba(4,10,24,0.6) 70%)', boxShadow: '0 0 60px -20px rgba(34,211,238,0.5)' }}>
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 h-px animate-[eq-scan_4s_linear_infinite]" style={{ background: 'linear-gradient(90deg,transparent,#22d3ee,transparent)' }} />
-              {['left-3 top-3 border-l border-t', 'right-3 top-3 border-r border-t', 'left-3 bottom-3 border-l border-b', 'right-3 bottom-3 border-r border-b'].map((c) => (
-                <span key={c} aria-hidden className={`pointer-events-none absolute h-6 w-6 ${c}`} style={{ borderColor: 'rgba(34,211,238,0.7)' }} />
-              ))}
-              <model-viewer
-                ref={mvRef as never}
-                src={roverAsset.url}
-                alt="Interactive 3D model of NASA's Perseverance Mars rover"
-                ar
-                ar-modes="webxr scene-viewer quick-look"
-                ar-scale="auto"
-                ar-placement="floor"
-                environment-image="neutral"
-                auto-rotate
-                camera-controls
-                touch-action="pan-y"
-                loading="eager"
-                shadow-intensity="1.5"
-                exposure="1.15"
-                camera-orbit="35deg 72deg auto"
-                interaction-prompt="auto"
-                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-              >
-                <button slot="ar-button" className="absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
-                  style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6)', border: '1px solid rgba(34,211,238,0.6)' }}>
-                  <View className="h-4 w-4" /> View in AR
-                </button>
-              </model-viewer>
-              {!loaded && (
-                <div className="absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] animate-[eq-pulse_1.6s_ease-in-out_infinite]" style={{ color: '#22d3ee' }}>
-                  Loading rover…
-                </div>
-              )}
-              <div className="pointer-events-none absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                <p style={{ color: '#22d3ee' }}>Perseverance · NASA</p>
-                <p>Drag to rotate · Pinch to zoom</p>
+          {/* Interactive 3D rover (right) — no box, floats over the background */}
+          <div className="relative h-[460px] sm:h-[600px] lg:order-2" style={{ animation: 'eq-float 8s ease-in-out infinite' }}>
+            {/* soft ground glow, no frame */}
+            <div aria-hidden className="pointer-events-none absolute bottom-[12%] left-1/2 h-16 w-[70%] -translate-x-1/2 rounded-[50%] blur-2xl" style={{ background: 'radial-gradient(ellipse,rgba(34,211,238,0.35),transparent 70%)' }} />
+            <div aria-hidden className="pointer-events-none absolute bottom-[14%] left-1/2 h-10 w-[60%] -translate-x-1/2 rounded-[50%] border" style={{ borderColor: 'rgba(34,211,238,0.35)' }} />
+            <model-viewer
+              ref={mvRef as never}
+              src={roverAsset.url}
+              alt="Interactive 3D model of NASA's Perseverance Mars rover"
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              ar-scale="auto"
+              ar-placement="floor"
+              environment-image="neutral"
+              auto-rotate
+              camera-controls
+              touch-action="pan-y"
+              loading="eager"
+              shadow-intensity="0"
+              exposure="1.15"
+              camera-orbit="35deg 72deg auto"
+              interaction-prompt="none"
+              style={{ width: '100%', height: '100%', backgroundColor: 'transparent', ['--poster-color' as string]: 'transparent', ['--progress-bar-height' as string]: '0px' }}
+            >
+              <button slot="ar-button" className="absolute bottom-2 right-2 z-10 flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
+                style={{ background: 'linear-gradient(90deg,#0d9488,#14b8a6)', border: '1px solid rgba(34,211,238,0.6)' }}>
+                <View className="h-4 w-4" /> View in AR
+              </button>
+            </model-viewer>
+            {!loaded && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-xs uppercase tracking-[0.3em] animate-[eq-pulse_1.6s_ease-in-out_infinite]" style={{ color: '#22d3ee' }}>
+                Loading rover…
               </div>
-              <div className="pointer-events-none absolute bottom-5 left-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#22d3ee' }}>
-                <span className="h-2 w-2 rounded-full animate-[eq-pulse_1.2s_ease-in-out_infinite]" style={{ background: '#22d3ee' }} /> Live 3D · AR ready
-              </div>
+            )}
+            {/* floating holographic chips */}
+            <div className="pointer-events-none absolute left-0 top-6 rounded-lg px-3 py-1.5 backdrop-blur-md" style={{ border: '1px solid rgba(34,211,238,0.35)', background: 'rgba(4,14,26,0.55)' }}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#22d3ee' }}>Perseverance · NASA</p>
+              <p className="font-mono text-[10px] text-white/60">Drag to rotate · Pinch to zoom</p>
+            </div>
+            <div className="pointer-events-none absolute right-0 top-[38%] rounded-lg px-3 py-1.5 backdrop-blur-md" style={{ border: '1px solid rgba(129,140,248,0.4)', background: 'rgba(4,14,26,0.55)' }}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#a5b4fc' }}>Equity</p>
+              <p className="font-mono text-xs text-white">1% · ALIGNED</p>
+            </div>
+            <div className="pointer-events-none absolute bottom-2 left-0 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: '#22d3ee' }}>
+              <span className="h-2 w-2 rounded-full animate-[eq-pulse_1.2s_ease-in-out_infinite]" style={{ background: '#22d3ee' }} /> Live 3D · AR ready
             </div>
           </div>
+
 
           {/* Copy (right) */}
           <div>
