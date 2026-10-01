@@ -48,3 +48,8 @@
 
 - [x] MVP follow-up email for accepted-but-unregistered startups: urgency (they lose their spot), low-cost build + network, financing support via info@startupfactoryhub.com; button next to reject/interview invite in cohort application review.
 - [x] General Accelerated Fundraising invitation email with animated banner and direct application link in Email Command Center.
+
+## Imagine Engine widgets (phased)
+- [x] Step 1: widgets editable (text, background, border), movable, real previews
+- [ ] Step 2: map widgets track the shop's own places
+- [ ] Step 3: global cart + Stripe (admin → SFH Stripe; users → Stripe Connect or own keys; admin-set fee)
