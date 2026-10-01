@@ -136,8 +136,8 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://startupfactoryhub.com";
     const rescheduleUrl = body.rescheduleUrl || `${origin}/mvp-program?reschedule=1`;
     const requestedTemplate = String(body.template || body.variant || "").trim().toLowerCase();
-    const isNoShow = requestedTemplate === "no-show";
-    const isFinalNotice = !isNoShow;
+    const isFinalNotice = requestedTemplate === "final-notice";
+    const isNoShow = !isFinalNotice;
 
     if (body.validateTemplate === true) {
       return new Response(JSON.stringify({ success: true, template: isFinalNotice ? "final-notice" : "no-show" }), {

@@ -31,6 +31,14 @@ export async function prepareImageForUpload(
     if (!ctx) return file;
     ctx.drawImage(bitmap as CanvasImageSource, 0, 0, w, h);
 
+    // Transparent images must stay PNG — JPEG would turn transparency black.
+    if (hasAlpha(ctx, w, h)) {
+      const png = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/png'));
+      if (!png) return file;
+      const base = file.name.replace(/\.[^.]+$/, '') || 'image';
+      return new File([png], `${base}.png`, { type: 'image/png', lastModified: Date.now() });
+    }
+
     let quality = 0.88;
     let blob = await toBlob(canvas, quality);
     while (blob && blob.size > maxBytes && quality > 0.5) {
@@ -44,6 +52,14 @@ export async function prepareImageForUpload(
     console.warn('[prepareImage] could not convert image, uploading original', err);
     return file;
   }
+}
+
+function hasAlpha(ctx: CanvasRenderingContext2D, w: number, h: number): boolean {
+  try {
+    const data = ctx.getImageData(0, 0, w, h).data;
+    for (let i = 3; i < data.length; i += 4) if (data[i] < 255) return true;
+  } catch { /* ignore */ }
+  return false;
 }
 
 function toBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
