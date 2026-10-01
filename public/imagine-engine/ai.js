@@ -53,6 +53,13 @@
         else if (a.type === "clearFlow") { ie.clearFlow(); done.push("Cleared flow"); }
         else if (a.type === "createMetascript" && a.name) { var pid = ie.createMetascript(a.name, a.code || "", a.description); if (a.ref) refs[a.ref] = pid; done.push("Metascript " + a.name); }
         else if (a.type === "callMetascript" && a.id) { var pid2 = rid(a.id); var nid = ie.addNode("metascript", "metascriptRef", a.label || "Metascript", { metascriptId: pid2 }, a.x, a.y); if (a.ref) refs[a.ref] = nid; done.push("Metascript node"); }
+        else if (a.type === "addCustomSection" && Array.isArray(a.children) && ie.addSection) {
+          var sfx = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+          var mk = function (n, i) { var tp = ["h1", "p", "button", "badge", "card", "div", "grid"].indexOf(n.type) > -1 ? n.type : "p";
+            return { id: tp + "_" + sfx + "_" + i + Math.random().toString(36).slice(2, 4), type: tp, content: String(n.content || ""), style: Object.assign({}, n.style || {}), children: Array.isArray(n.children) ? n.children.map(mk) : undefined }; };
+          ie.addSection({ id: "sec_ai_" + sfx, type: "section", style: Object.assign({ backgroundColor: "#0b0b0c", color: "#fafafa", borderColor: "#27272a", borderWidth: "1px", borderStyle: "solid", borderRadius: "24px", padding: "32px" }, a.style || {}), children: a.children.map(mk) });
+          done.push("Built section");
+        }
         else if (a.type === "removeSection" && a.id) { ie.removeSection(a.id); done.push("Removed section"); }
         else if (a.type === "addTable" && a.name) { ie.addTable({ id: "tbl_" + Date.now() + Math.random().toString(36).slice(2, 5), name: a.name, columns: a.columns || ["id"], rows: [] }); done.push("Table " + a.name); }
         else if (a.type === "setMode" && a.mode) { ie.setMode(a.mode); done.push("Opened " + a.mode); }

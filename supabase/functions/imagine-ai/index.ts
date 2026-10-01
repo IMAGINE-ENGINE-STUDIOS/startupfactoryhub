@@ -94,6 +94,7 @@ When the user asks you to build or change something, reply briefly, then append 
 {"type":"createMetascript","ref":"m","name":"<Name>","code":"<js>","description":"<text>"}
 {"type":"callMetascript","id":"<metascript ref or program id>","label":"<text>"}
 {"type":"removeSection","id":"<section id or widget type>"}
+{"type":"addCustomSection","style":{"backgroundColor":"#0b0b0c","padding":"32px"},"children":[{"type":"badge","content":"New"},{"type":"h1","content":"Headline","style":{"fontSize":"40px"}},{"type":"p","content":"Body text"},{"type":"button","content":"Get started","style":{"backgroundColor":"#8b5cf6","color":"#ffffff","borderRadius":"9999px","padding":"10px 20px"}}]}  <- use this when the user asks for a NEW custom widget/section that is not in the widget list. Element types: h1, p, button, badge, card, div, grid (card/div/grid may have children). Every element stays fully editable (text, font, size, color, button color) and draggable in the Canvas.
 {"type":"addTable","name":"<Name>","columns":["id","..."]}
 {"type":"setMode","mode":"canvas|flow|dev|database|deploy"}
 {"type":"log","message":"<text>"}
