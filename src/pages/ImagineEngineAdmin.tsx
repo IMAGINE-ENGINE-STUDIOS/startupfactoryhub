@@ -20,6 +20,7 @@ type Config = {
   flat_fee_monthly: number; monthly_token_limit: number; daily_message_limit: number;
   enabled: boolean; system_prompt_extra: string; maintenance_message: string;
   business_model: string; platform_fee_percent: number; free_trial_days: number;
+  storage_included_mb: number; storage_price_per_gb: number;
   plans: Plan[]; custom_providers: Custom[];
 };
 type Stats = { requests: number; input_tokens: number; output_tokens: number; cost_usd: number; charge_usd: number; active_users: number };
@@ -196,6 +197,16 @@ export default function ImagineEngineAdmin() {
                 </div>
                 <div className="space-y-1.5"><Label>Platform fee on user sales (%)</Label><Input type="number" step="0.5" value={cfg.platform_fee_percent} onChange={num("platform_fee_percent")} /></div>
                 <div className="space-y-1.5"><Label>Free trial (days)</Label><Input type="number" step="1" value={cfg.free_trial_days} onChange={num("free_trial_days")} /></div>
+                <div className="space-y-1.5"><Label>Included storage per user (MB)</Label><Input type="number" step="50" value={cfg.storage_included_mb ?? 500} onChange={num("storage_included_mb")} /></div>
+                <div className="space-y-1.5"><Label>Extra storage price ($ per GB / month)</Label><Input type="number" step="0.25" value={cfg.storage_price_per_gb ?? 2.5} onChange={num("storage_price_per_gb")} /></div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Button type="button" variant="outline" onClick={async () => {
+                    const { data, error } = await supabase.functions.invoke("imagine-commerce", { body: { action: "bill_storage" } });
+                    if (error || data?.error) toast.error(data?.error || error?.message || "Billing failed");
+                    else toast.success(`Storage invoices sent: ${data.charged.length}`);
+                  }}>Charge this month's extra storage</Button>
+                  <p className="text-xs text-muted-foreground">Sends each user over their included storage a Stripe invoice. Run once a month; users are only charged once per month.</p>
+                </div>
               </div>
             </section>
             <section className="tech-card border-0 p-5 space-y-4">
