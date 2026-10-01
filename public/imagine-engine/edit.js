@@ -306,7 +306,7 @@
     [["none", "No link"], ["url", "Web address"], ["section", "Scroll to a section"], ["cart:open", "Open cart"], ["cart:checkout", "Go to checkout"]].forEach(function (o) { var op = h("option", { value: o[0] }, [o[1]]); if (o[0] === kind) op.selected = true; ks.appendChild(op); });
     ld.appendChild(ks);
     var lw = h("div"); ld.appendChild(lw);
-    function linkUI() {
+    function linkUI(ev) {
       lw.innerHTML = "";
       var k = ks.value;
       if (k === "url") {
@@ -321,7 +321,7 @@
         sectionIds().forEach(function (id) { var o = h("option", { value: "#" + id }, [id.replace(/^sec_/, "").replace(/_/g, " ")]); if ("#" + id === cur) o.selected = true; ss.appendChild(o); });
         ss.addEventListener("change", function () { setStyle({ "@href": ss.value, "@target": "" }); cur = ss.value; });
         lw.appendChild(ss);
-      } else { setStyle({ "@href": k === "none" ? "" : k, "@target": "" }); cur = k === "none" ? "" : k; }
+      } else if (ev) { setStyle({ "@href": k === "none" ? "" : k, "@target": "" }); cur = k === "none" ? "" : k; }
       note(lw, "Links work when you press Play.");
     }
     ks.addEventListener("change", linkUI); linkUI();
