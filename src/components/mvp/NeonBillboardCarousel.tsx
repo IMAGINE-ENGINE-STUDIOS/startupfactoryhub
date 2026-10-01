@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PARTNERS, type Partner } from '@/config/partners';
+import { WEBSITE_PARTNERS as PARTNERS, type Partner } from '@/config/partners';
 
 function PartnerCard({ partner, index }: { partner: Partner; index: number }) {
   const [failed, setFailed] = useState(false);
