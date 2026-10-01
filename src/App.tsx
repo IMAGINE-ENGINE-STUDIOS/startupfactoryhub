@@ -56,6 +56,7 @@ const HubsLab = lazy(() => import("./pages/HubsLab"));
 const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
 const EquityProgram = lazy(() => import("./pages/EquityProgram"));
+const ImagineEngine = lazy(() => import("./pages/ImagineEngine"));
 const DemoAccounts = lazy(() => import("./pages/DemoAccounts"));
 const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
@@ -184,6 +185,8 @@ const App = () => (
                     <Route path="/hubs/apply" element={<PublicHubApplication />} />
                     <Route path="/mvp-program" element={<MVPProgram />} />
                     <Route path="/equity-program" element={<EquityProgram />} />
+                    <Route path="/Imagine-Engine" element={<ImagineEngine />} />
+                    <Route path="/imagine-engine" element={<ImagineEngine />} />
                     <Route path="/demo" element={<DemoAccounts />} />
                     <Route path="/accelerated-fundraising" element={<AcceleratedFundraising />} />
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
