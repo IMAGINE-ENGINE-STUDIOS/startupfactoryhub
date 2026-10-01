@@ -31,27 +31,142 @@
   }
   function ctx() {
     var ie = window.__IE || {};
-    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [] };
+    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}) };
   }
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function runActions(text) {
     var m = text.match(/```actions\s*([\s\S]*?)```/);
     var done = [];
-    if (!m || !window.__IE) return { text: text.replace(/```actions[\s\S]*?```/g, "").trim(), done: done };
+    var clean = text.replace(/```actions[\s\S]*?```/g, "").trim();
+    if (!m || !window.__IE) return { text: clean, done: done };
     try {
       var list = JSON.parse(m[1]);
-      var ie = window.__IE;
-      (Array.isArray(list) ? list : [list]).slice(0, 25).forEach(function (a) {
+      var ie = window.__IE, refs = {}, wantRun = false;
+      var rid = function (r) { return refs[r] || r; };
+      (Array.isArray(list) ? list : [list]).slice(0, 40).forEach(function (a) {
+        ie = window.__IE;
         if (a.type === "addWidget" && ie.widgets.indexOf(a.id) > -1) { ie.addWidget(a.id); done.push("Added " + a.id); }
-        else if (a.type === "addNode") { ie.addNode(a.kind || "action", a.subType || "custom", a.label); done.push("Flow node: " + (a.label || a.subType)); }
+        else if (a.type === "addNode") { var id = ie.addNode(a.kind || "action", a.subType || "custom", a.label, a.params, a.x, a.y); if (a.ref) refs[a.ref] = id; done.push("Node " + (a.label || a.subType)); }
+        else if (a.type === "connect" && a.from && a.to) { ie.connect(rid(a.from), rid(a.to), a.fromPort); done.push("Linked"); }
+        else if (a.type === "removeNode" && a.id) { ie.removeNode(rid(a.id)); done.push("Removed node"); }
+        else if (a.type === "clearFlow") { ie.clearFlow(); done.push("Cleared flow"); }
+        else if (a.type === "createMetascript" && a.name) { var pid = ie.createMetascript(a.name, a.code || "", a.description); if (a.ref) refs[a.ref] = pid; done.push("Metascript " + a.name); }
+        else if (a.type === "callMetascript" && a.id) { var pid2 = rid(a.id); var nid = ie.addNode("metascript", "metascriptRef", a.label || "Metascript", { metascriptId: pid2 }, a.x, a.y); if (a.ref) refs[a.ref] = nid; done.push("Metascript node"); }
+        else if (a.type === "removeSection" && a.id) { ie.removeSection(a.id); done.push("Removed section"); }
         else if (a.type === "addTable" && a.name) { ie.addTable({ id: "tbl_" + Date.now() + Math.random().toString(36).slice(2, 5), name: a.name, columns: a.columns || ["id"], rows: [] }); done.push("Table " + a.name); }
         else if (a.type === "setMode" && a.mode) { ie.setMode(a.mode); done.push("Opened " + a.mode); }
+        else if (a.type === "runFlow") { wantRun = true; }
         else if (a.type === "log" && a.message) { ie.log("AI: " + a.message); }
       });
+      if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
-    return { text: text.replace(/```actions[\s\S]*?```/g, "").trim(), done: done };
+    return { text: clean, done: done };
   }
+
+  /* ---------- Flow runtime: real actions ---------- */
+  var SB = FN.replace("/functions/v1/imagine-ai", "");
+  window.__IEState = window.__IEState || {};
+  function L(msg, type) { if (window.__IE) window.__IE.log(msg, type); }
+  function hdr() { var t = token(); return { apikey: ANON, Authorization: "Bearer " + (t || ANON), "Content-Type": "application/json" }; }
+  function put(k, v) { if (k) window.__IEState[k] = v; }
+  function safeTable(t) { return /^[A-Za-z_][A-Za-z0-9_]*$/.test(t || "") ? t : null; }
+  function dbq(p, method, body, label) {
+    var tb = safeTable(p.table); if (!tb) { L(label + ": choose a table name", "error"); return "missing table"; }
+    var q = SB + "/rest/v1/" + tb + "?";
+    if (method === "GET") q += "select=*&limit=" + (Number(p.limit) || 10) + "&";
+    if (p.filterColumn && p.filterValue !== "" && p.filterValue != null) q += encodeURIComponent(p.filterColumn) + "=eq." + encodeURIComponent(p.filterValue);
+    if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
+    var h = hdr(); h.Prefer = "return=representation";
+    fetch(q, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (r) {
+        if (!r.ok) { L(label + " " + tb + " failed: " + ((r.j && r.j.message) || "denied"), "error"); return; }
+        put(p.stateKey, r.j); L(label + " " + tb + ": " + (Array.isArray(r.j) ? r.j.length + " rows" : "ok"));
+      }).catch(function () { L(label + " " + tb + " network error", "error"); });
+    return tb;
+  }
+  function http(p, method) {
+    if (!/^https:\/\//.test(p.url || "")) { L("Request needs an https:// URL", "error"); return "bad url"; }
+    var opt = { method: method };
+    if (method !== "GET" && p.body != null) { opt.body = typeof p.body === "string" ? p.body : JSON.stringify(p.body); opt.headers = { "Content-Type": "application/json" }; }
+    fetch(p.url, opt).then(function (r) { return r.text().then(function (x) { var v = x; try { v = JSON.parse(x); } catch (e) {} put(p.stateKey, v); L(method + " " + p.url + " -> " + r.status, r.ok ? "success" : "error"); }); })
+      .catch(function () { L(method + " " + p.url + " blocked or offline", "error"); });
+    return p.url;
+  }
+  function toast(msg, type) {
+    var d = document.createElement("div");
+    d.textContent = msg;
+    d.style.cssText = "position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:10000;padding:10px 16px;border-radius:12px;font:12px system-ui;color:#fff;box-shadow:0 10px 30px #0008;background:" + (type === "error" ? "#b91c1c" : type === "warning" ? "#b45309" : "linear-gradient(135deg,#0d9488,#a21caf)");
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600);
+  }
+  function makeCtx(node) {
+    var ie = window.__IE || {};
+    return {
+      state: window.__IEState,
+      getState: function (k) { return window.__IEState[k]; },
+      setState: function (patch) { Object.assign(window.__IEState, patch || {}); },
+      addSection: function (w) { if (ie.widgets && ie.widgets.indexOf(w) > -1) ie.addWidget(w); else L("Unknown widget " + w, "error"); },
+      removeSection: function (id) { ie.removeSection(id); },
+      notify: function (m, t) { toast(String(m), t); },
+      log: function (m) { L("script: " + m, "log"); },
+      db: function (table) {
+        return {
+          select: function (o) { return dbq(Object.assign({ table: table }, o || {}), "GET", null, "select"); },
+          insert: function (v) { return dbq({ table: table }, "POST", v, "insert"); },
+        };
+      },
+      fetch: function (url, o) { return fetch(url, o); },
+      node: node,
+    };
+  }
+  window.__IEMeta = function (code, node) {
+    code = String(code || "").replace(/\bexport\s+(default\s+)?/g, "");
+    var fn = code.match(/function\s+([A-Za-z_$][\w$]*)\s*\(/);
+    try { new Function("ctx", code + (fn ? "\nreturn " + fn[1] + "(ctx);" : ""))(makeCtx(node)); }
+    catch (e) { L("Metascript error: " + e.message, "error"); throw e; }
+  };
+  window.__IEX = {
+    fetchData: function (p) { return http(p, "GET"); },
+    httpRequest: function (p) { return http(p, String(p.method || "POST").toUpperCase()); },
+    dbSelect: function (p) { return dbq(p, "GET", null, "select"); },
+    dbInsert: function (p) { return dbq(p, "POST", p.values || {}, "insert"); },
+    dbUpdate: function (p) { return dbq(p, "PATCH", p.values || {}, "update"); },
+    dbDelete: function (p) { return dbq(p, "DELETE", null, "delete"); },
+    removeSection: function (p) { if (!p.sectionId) return "no section id"; window.__IE.removeSection(p.sectionId); return p.sectionId; },
+    showToast: function (p) { toast(p.message || "Done", p.type); return p.message; },
+    requireAuth: function () { if (!token()) { toast("Please sign in first", "warning"); throw new Error("Not signed in"); } return "signed in"; },
+    getUser: function (p) { var t = token(); if (!t) throw new Error("Not signed in"); try { var u = JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); put(p.stateKey || "user", { id: u.sub, email: u.email }); return u.email || u.sub; } catch (e) { throw new Error("Could not read user"); } },
+    redirect: function (p) { if (!/^https?:\/\//.test(p.url || "")) throw new Error("Invalid URL"); window.open(p.url, p.newTab === false ? "_top" : "_blank", "noopener"); return p.url; },
+    runScript: function (p, node) { window.__IEMeta(p.code || "", node); return "done"; },
+    onTimer: function (p, node) {
+      window.__IETimers = window.__IETimers || {};
+      clearInterval(window.__IETimers[node.id]);
+      var ms = Math.max(5000, Number(p.everyMs) || 60000);
+      window.__IETimers[node.id] = setInterval(function () { L("Timer " + node.id + " tick"); }, ms);
+      return "every " + ms + "ms";
+    },
+    aiGenerate: function (p) {
+      var t = token(); if (!t) throw new Error("Not signed in");
+      fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: String(p.prompt || "") }], context: { plain: true } }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j.error) { L("aiGenerate: " + j.error, "error"); return; } put(p.stateKey || "ai", j.text); L("aiGenerate saved to state." + (p.stateKey || "ai")); })
+        .catch(function () { L("aiGenerate network error", "error"); });
+      return "asked AI";
+    },
+  };
+
+  /* Admin tab visible only to Startup Factory Hub admins */
+  var adminCss = document.createElement("style");
+  adminCss.textContent = '[data-mode="admin"]{display:none!important}';
+  document.head.appendChild(adminCss);
+  (function () {
+    var t = token(); if (!t) return;
+    fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "whoami" }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.isAdmin) adminCss.textContent = ""; })
+      .catch(function () {});
+  })();
 
   var css = document.createElement("style");
   css.textContent =
@@ -87,10 +202,11 @@
 
   var SUG = {
     canvas: ["Build a SaaS landing page", "Add pricing and testimonials", "Make a marketplace homepage"],
-    flow: ["Create a signup automation flow", "On click, add a widget to canvas", "Build a lead capture flow"],
+    flow: ["Build a lead capture flow and run it", "Create a metascript that adds a pricing section", "Load the signed-in user and greet them"],
     dev: ["Write a React pricing component", "Explain this project's structure", "Add a shadcn form with Zod"],
     database: ["Design tables for a marketplace", "Add a Subscriptions table", "Schema for a CRM"],
     deploy: ["Pre-launch checklist", "How do I deploy this?", "Review my project for issues"],
+    admin: ["How should I price AI for my users?", "Compare flat fee vs per token", "Suggest paid plan tiers"],
   };
   function render() {
     var tab = currentTab();
