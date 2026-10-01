@@ -218,7 +218,7 @@
   function render(force) {
     var slot = document.getElementById("ie-el-panel"); if (!slot) return;
     var tg = target();
-    var sig = tg ? (tg.kind === "dom" ? "d" + (tg.el.__ieid || (tg.el.__ieid = Math.random())) : "n" + tg.node.id + JSON.stringify(tg.node.style || {})) : "none";
+    var sig = tg ? (tg.kind === "dom" ? "d" + (tg.el.__ieid || (tg.el.__ieid = Math.random())) : "n" + tg.node.id) : "none";
     if (!force && sig === lastSig && slot.childNodes.length) return; lastSig = sig;
     slot.innerHTML = "";
     if (!tg) return;
