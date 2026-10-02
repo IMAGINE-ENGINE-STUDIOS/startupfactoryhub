@@ -65,6 +65,7 @@
         else if (a.type === "setMode" && a.mode) { ie.setMode(a.mode); done.push("Opened " + a.mode); }
         else if (a.type === "runFlow") { wantRun = true; }
         else if (a.type === "log" && a.message) { ie.log("AI: " + a.message); }
+        else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
