@@ -92,7 +92,7 @@ function LocalVideo() {
 function PeerCount({ onCount }: { onCount: (n: number) => void }) {
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone], { onlySubscribed: false });
   const n = new Set(tracks.map((t) => t.participant.identity)).size;
-  useEffect(() => { onCount(n); }, [n, onCount]);
+  useEffect(() => { onCount(Math.max(1, n)); }, [n, onCount]);
   return null;
 }
 
