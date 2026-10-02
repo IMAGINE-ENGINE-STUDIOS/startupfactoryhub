@@ -165,9 +165,16 @@ export default function Auth() {
     }
 
     setResendingVerification(true);
-    const { error } = await supabase.functions.invoke('send-verification-email', {
+    const { error: invokeError } = await supabase.functions.invoke('send-verification-email', {
       body: { email, name: fullName || email },
     });
+    let error: { message: string } | null = invokeError;
+    if (invokeError) {
+      try {
+        const ctx = (invokeError as any).context;
+        if (ctx?.json) error = { message: (await ctx.json())?.error || invokeError.message };
+      } catch { /* keep original message */ }
+    }
     setResendingVerification(false);
 
     if (error) {

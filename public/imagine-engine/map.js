@@ -31,6 +31,7 @@
       sid = secIdFrom(fr);
       var w = new URLSearchParams(win.location.search).get("w"), NW = window.__NW || {};
       for (var k in NW) if (String(NW[k]) === w) wid = k;
+      if (!wid && w && typeOf(w)) wid = w; // ?w= may already be the widget slug
     } else {
       sid = secIdFrom(el);
       var m = sid && sid.match(/^sec_(.+)_[^_]+$/); wid = m && m[1];

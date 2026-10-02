@@ -168,6 +168,9 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
   'actions': { label: 'Actions', icon: Globe },
 };
 
+// Routes prompts to the Imagine Engine canvas assistant (only offered on /imagine-engine)
+const IMAGINE_TOOL: ToolItem = { id: 'imagine', name: 'Imagine Engine builder', icon: BoltIcon, category: 'actions', systemHint: 'IMAGINE' };
+
 // Shared visual groups (used by the empty-state Command Deck and the full tool overlay)
 const TOOL_GROUPS = [
   { key: 'quick', label: 'INSTANT', gradient: 'from-amber-500 to-orange-500', ring: 'ring-amber-400/40' },
@@ -872,6 +875,27 @@ You can help with:
 
     const userMessage = inputToUse.trim();
     setAiInput('');
+
+    // Imagine Engine builder mode: hand the prompt to the canvas assistant inside the editor.
+    if (activeTool?.id === 'imagine') {
+      const frame = document.querySelector<HTMLIFrameElement>('iframe[title="Imagine Engine"]');
+      if (!frame?.contentWindow) {
+        setAiMessages(prev => [...prev, { role: 'user', content: userMessage }, { role: 'assistant', content: 'Open the Imagine Engine to build with this mode.' }]);
+        return;
+      }
+      setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+      setIsAiLoading(true);
+      const reqId = Math.random().toString(36).slice(2);
+      const onReply = (ev: MessageEvent) => {
+        if (ev.source !== frame.contentWindow || ev.data?.iea !== 'reply' || ev.data?.id !== reqId) return;
+        window.removeEventListener('message', onReply);
+        setIsAiLoading(false);
+        setAiMessages(prev => [...prev, { role: 'assistant', content: String(ev.data.text || 'Done.') }]);
+      };
+      window.addEventListener('message', onReply);
+      frame.contentWindow.postMessage({ iea: 'send', id: reqId, text: userMessage }, window.location.origin);
+      return;
+    }
     
     // Handle "learn this" intent
     if (isLearnIntent(userMessage)) {
@@ -1507,6 +1531,38 @@ You can help with:
                 </TabsContent>
 
                 <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
+                  {/* Mode dropdown — every Genius option lives here */}
+                  <div className="px-3 pb-1 shrink-0">
+                    <select
+                      aria-label="Genius AI mode"
+                      value={activeTool?.id ?? ''}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        if (!id) { setActiveTool(null); return; }
+                        if (id === 'imagine') {
+                          setActiveTool(IMAGINE_TOOL);
+                          setAiMessages(prev => [...prev, { role: 'assistant', content: 'Imagine Engine builder is on. Tell me what to build or change on your canvas.' }]);
+                          return;
+                        }
+                        const t = ALL_TOOLS.find(x => x.id === id);
+                        if (t) startMission(t);
+                      }}
+                      className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="">Genius chat (default)</option>
+                      {location.pathname.startsWith('/imagine-engine') && (
+                        <option value="imagine">Imagine Engine builder</option>
+                      )}
+                      {TOOL_GROUPS.map(group => (
+                        <optgroup key={group.key} label={group.label}>
+                          {ALL_TOOLS.filter(t => t.category === group.key).map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Active tool indicator */}
                   {activeTool && activeTool.id !== 'quick' && (
                     <div className="px-3 pt-1 pb-1 shrink-0">
@@ -1556,72 +1612,9 @@ You can help with:
                               Ask Genius anything
                             </h2>
                             <p className="text-[10px] text-muted-foreground/80 font-mono uppercase tracking-[0.18em]">
-                              Or swipe a mission below
+                              Pick a mode from the menu above
                             </p>
                           </div>
-                        </div>
-
-                        {/* Horizontal mission rails — no long scrolling */}
-                        <div className="space-y-2.5 pb-1">
-                          {([
-                            {
-                              key: 'quick', label: 'INSTANT',
-                              gradient: 'from-amber-500 to-orange-500',
-                              ring: 'ring-amber-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'quick'),
-                            },
-                            {
-                              key: 'document', label: 'CREATE',
-                              gradient: 'from-violet-500 to-fuchsia-500',
-                              ring: 'ring-violet-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'document'),
-                            },
-                            {
-                              key: 'ai-tools', label: 'ANALYZE',
-                              gradient: 'from-cyan-500 to-blue-500',
-                              ring: 'ring-cyan-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'ai-tools'),
-                            },
-                            {
-                              key: 'actions', label: 'EXECUTE',
-                              gradient: 'from-emerald-500 to-teal-500',
-                              ring: 'ring-emerald-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'actions'),
-                            },
-                          ]).map(group => (
-                            <div key={group.key}>
-                              <div className="flex items-center gap-2 mb-1 px-1">
-                                <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
-                                <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
-                                  {group.label}
-                                </span>
-                                <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
-                              </div>
-                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
-                                {group.tools.map(tool => {
-                                  const ToolIcon = tool.icon;
-                                  return (
-                                    <button
-                                      key={tool.id}
-                                      type="button"
-                                      onClick={() => { startMission(tool); }}
-                                      className={`group relative aspect-square flex flex-col items-center justify-center gap-1 p-1 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-1 ${group.ring}`}
-                                      title={tool.name}
-                                    >
-                                      <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                                      <span className={`relative h-7 w-7 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-110`}>
-                                        <ToolIcon className="h-4 w-4 text-white" />
-                                      </span>
-                                      <span className="relative w-full px-0.5 text-[8.5px] font-semibold text-foreground leading-[1.1] text-center line-clamp-2">
-                                        {tool.name}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                            </div>
-                          ))}
                         </div>
                       </div>
                     )}
