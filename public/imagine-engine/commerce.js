@@ -64,57 +64,89 @@
     },
   };
 
-  // ---------- shared cart ----------
-  var CK = "ie-cart";
+  // ---------- shared cart (global, customizable, synced across every widget) ----------
+  var CK = "ie-cart", CFK = "ie-cart-cfg";
+  var CDEF = { title: "Your cart", emptyMsg: "Your cart is empty", currency: "$", accent: "#8b5cf6", theme: "dark", fab: true, fabPos: "right", fabLabel: "Cart", checkoutLabel: "Checkout", note: "", taxPct: 0, shipping: 0, checkoutUrl: "" };
+  function cfg() { try { return Object.assign({}, CDEF, JSON.parse(localStorage.getItem(CFK) || "{}")); } catch (e) { return Object.assign({}, CDEF); } }
   function items() { try { return JSON.parse(localStorage.getItem(CK) || "[]"); } catch (e) { return []; } }
-  function setItems(a) { localStorage.setItem(CK, JSON.stringify(a)); paint(); }
+  function money(v) { return cfg().currency + (+v || 0).toFixed(2); }
+  var subs = [];
+  function broadcast() {
+    paint();
+    var st = { items: items(), count: cart.count(), subtotal: cart.subtotal(), total: cart.total(), config: cfg() };
+    subs.forEach(function (f) { try { f(st); } catch (e) {} });
+    var docs = [document]; document.querySelectorAll("iframe").forEach(function (f) { try { if (f.contentDocument) docs.push(f.contentDocument); f.contentWindow.postMessage({ ie: "cart", state: st }, "*"); } catch (e) {} });
+    docs.forEach(function (d) {
+      d.querySelectorAll("[data-ie-cart-count]").forEach(function (e) { e.textContent = st.count; });
+      d.querySelectorAll("[data-ie-cart-total]").forEach(function (e) { e.textContent = money(st.total); });
+    });
+    try { window.dispatchEvent(new CustomEvent("ie-cart", { detail: st })); } catch (e) {}
+  }
+  function setItems(a) { localStorage.setItem(CK, JSON.stringify(a)); broadcast(); }
   var cart = window.__IECart = {
-    items: items,
+    items: items, config: cfg,
+    setConfig: function (p) { localStorage.setItem(CFK, JSON.stringify(Object.assign(cfg(), p || {}))); broadcast(); },
+    resetConfig: function () { localStorage.removeItem(CFK); broadcast(); },
+    subscribe: function (f) { subs.push(f); return function () { subs = subs.filter(function (x) { return x !== f; }); }; },
     add: function (p) {
+      if (!p || !p.name) return;
       var a = items(), f = a.filter(function (x) { return x.name === p.name; })[0];
-      if (f) f.qty += p.qty || 1; else a.push({ name: p.name, price: +p.price, image: p.image || "", qty: p.qty || 1 });
+      if (f) f.qty += +p.qty || 1; else a.push({ name: p.name, price: +p.price || 0, image: p.image || "", qty: +p.qty || 1, source: p.source || "" });
       setItems(a); toast("Added to cart: " + p.name);
     },
+    remove: function (name) { setItems(items().filter(function (x) { return x.name !== name; })); },
     setQty: function (i, q) { var a = items(); if (!a[i]) return; if (q <= 0) a.splice(i, 1); else a[i].qty = q; setItems(a); },
     clear: function () { setItems([]); },
-    total: function () { return items().reduce(function (s, x) { return s + x.price * x.qty; }, 0); },
+    count: function () { return items().reduce(function (s, x) { return s + x.qty; }, 0); },
+    subtotal: function () { return items().reduce(function (s, x) { return s + x.price * x.qty; }, 0); },
+    total: function () { var c = cfg(), sub = cart.subtotal(); return sub ? sub + sub * (+c.taxPct || 0) / 100 + (+c.shipping || 0) : 0; },
     open: function () { drawer(true); }, close: function () { drawer(false); },
     checkout: function () {
-      var a = items(); if (!a.length) { toast("Your cart is empty"); return; }
+      var a = items(), c = cfg(); if (!a.length) { toast(c.emptyMsg); return; }
+      if (c.checkoutUrl && /^https?:\/\//.test(c.checkoutUrl)) { var u = c.checkoutUrl + (c.checkoutUrl.indexOf("?") < 0 ? "?" : "&") + "cart=" + encodeURIComponent(JSON.stringify(a)); (window.top || window).location.href = u; return; }
       toast("Opening secure checkout...");
       call("checkout", { items: a, returnUrl: (window.top || window).location.href.split("?")[0] })
         .then(function (r) { (window.top || window).location.href = r.url; })
         .catch(function (e) { toast(e.message); });
     },
   };
+  window.addEventListener("storage", function (e) { if (e.key === CK || e.key === CFK) broadcast(); });
+  window.addEventListener("message", function (e) { var d = e.data; if (!d || d.ie !== "cart-cmd") return; var f = cart[d.cmd]; if (typeof f === "function") f.apply(null, d.args || []); });
   var fab, panel;
   function paint() {
     if (!document.body) return;
-    var a = items(), n = a.reduce(function (s, x) { return s + x.qty; }, 0);
+    var c = cfg(), n = cart.count();
     if (!fab) {
       fab = document.createElement("button"); fab.id = "ie-cart-fab"; fab.title = "Cart";
-      fab.style.cssText = "position:fixed;right:20px;bottom:84px;z-index:2147483000;height:44px;min-width:44px;padding:0 14px;border-radius:9999px;background:#8b5cf6;color:#fff;border:0;font:600 13px system-ui;cursor:pointer;box-shadow:0 8px 24px rgba(139,92,246,.4);display:none";
       fab.onclick = function () { drawer(!panel || panel.style.display === "none"); };
       document.body.appendChild(fab);
     }
-    fab.textContent = "Cart (" + n + ")";
-    fab.style.display = n ? "block" : "none";
+    fab.style.cssText = "position:fixed;" + (c.fabPos === "left" ? "left:20px" : "right:20px") + ";bottom:84px;z-index:2147483000;height:44px;min-width:44px;padding:0 14px;border-radius:9999px;background:" + c.accent + ";color:#fff;border:0;font:600 13px system-ui;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)";
+    fab.textContent = c.fabLabel + " (" + n + ")";
+    fab.style.display = n && c.fab ? "block" : "none";
     if (panel && panel.style.display !== "none") drawer(true);
   }
   function drawer(show) {
     if (!panel) { panel = document.createElement("div"); panel.id = "ie-cart-drawer"; document.body.appendChild(panel); }
-    panel.style.cssText = "position:fixed;top:0;right:0;bottom:0;width:340px;max-width:100vw;z-index:2147483001;background:#0b0b0c;color:#fafafa;border-left:1px solid #27272a;font:13px system-ui;display:" + (show ? "flex" : "none") + ";flex-direction:column";
+    var c = cfg(), L = c.theme === "light", G = c.theme === "glass";
+    var bg = L ? "#ffffff" : G ? "rgba(20,20,24,.72)" : "#0b0b0c", fg = L ? "#18181b" : "#fafafa", bd = L ? "#e4e4e7" : "#27272a", mu = L ? "#71717a" : "#a1a1aa", ch = L ? "#f4f4f5" : "#27272a";
+    panel.style.cssText = "position:fixed;top:0;" + (c.fabPos === "left" ? "left:0;border-right" : "right:0;border-left") + ":1px solid " + bd + ";bottom:0;width:340px;max-width:100vw;z-index:2147483001;background:" + bg + ";color:" + fg + ";font:13px system-ui;" + (G ? "backdrop-filter:blur(18px);" : "") + "display:" + (show ? "flex" : "none") + ";flex-direction:column";
     if (!show) return;
-    var a = items();
-    panel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #27272a"><b style="font-size:15px">Your cart</b><button data-x style="background:none;border:0;color:#a1a1aa;font-size:18px;cursor:pointer">×</button></div><div data-list style="flex:1;overflow:auto;padding:12px"></div><div style="padding:16px;border-top:1px solid #27272a"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Total</span><b>$' + cart.total().toFixed(2) + '</b></div><button data-co style="width:100%;height:42px;border-radius:12px;background:#8b5cf6;color:#fff;border:0;font:600 14px system-ui;cursor:pointer">Checkout</button></div>';
+    var a = items(), sub = cart.subtotal();
+    panel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid ' + bd + '"><b data-t style="font-size:15px"></b><button data-x style="background:none;border:0;color:' + mu + ';font-size:18px;cursor:pointer">×</button></div><div data-n style="padding:0 16px;color:' + mu + ';font-size:12px"></div><div data-list style="flex:1;overflow:auto;padding:12px"></div><div style="padding:16px;border-top:1px solid ' + bd + '">' +
+      ((+c.taxPct || +c.shipping) && sub ? '<div style="display:flex;justify-content:space-between;color:' + mu + '"><span>Subtotal</span><span>' + money(sub) + '</span></div>' + (+c.taxPct ? '<div style="display:flex;justify-content:space-between;color:' + mu + '"><span>Tax (' + c.taxPct + '%)</span><span>' + money(sub * c.taxPct / 100) + '</span></div>' : "") + (+c.shipping ? '<div style="display:flex;justify-content:space-between;color:' + mu + '"><span>Shipping</span><span>' + money(c.shipping) + '</span></div>' : "") : "") +
+      '<div style="display:flex;justify-content:space-between;margin:6px 0 10px"><span>Total</span><b>' + money(cart.total()) + '</b></div><button data-co style="width:100%;height:42px;border-radius:12px;background:' + c.accent + ';color:#fff;border:0;font:600 14px system-ui;cursor:pointer"></button></div>';
+    panel.querySelector("[data-t]").textContent = c.title;
+    panel.querySelector("[data-n]").textContent = c.note || "";
+    panel.querySelector("[data-co]").textContent = c.checkoutLabel;
     var list = panel.querySelector("[data-list]");
-    if (!a.length) list.innerHTML = '<div style="color:#71717a;text-align:center;padding:40px 0">Your cart is empty</div>';
+    if (!a.length) { var em = document.createElement("div"); em.style.cssText = "color:" + mu + ";text-align:center;padding:40px 0"; em.textContent = c.emptyMsg; list.appendChild(em); }
     a.forEach(function (x, i) {
       var r = document.createElement("div");
-      r.style.cssText = "display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #18181b";
-      r.innerHTML = (x.image ? '<img src="' + x.image + '" style="width:44px;height:44px;border-radius:8px;object-fit:cover">' : "") +
-        '<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div><div style="color:#a1a1aa">$' + x.price.toFixed(2) + '</div></div>' +
-        '<button data-m style="width:26px;height:26px;border-radius:8px;background:#27272a;color:#fff;border:0;cursor:pointer">-</button><span>' + x.qty + '</span><button data-p style="width:26px;height:26px;border-radius:8px;background:#27272a;color:#fff;border:0;cursor:pointer">+</button>';
+      r.style.cssText = "display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid " + bd;
+      r.innerHTML = (x.image ? '<img src="' + String(x.image).replace(/"/g, "") + '" style="width:44px;height:44px;border-radius:8px;object-fit:cover">' : "") +
+        '<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div><div style="color:' + mu + '">' + money(x.price) + '</div></div>' +
+        '<button data-m style="width:26px;height:26px;border-radius:8px;background:' + ch + ';color:' + fg + ';border:0;cursor:pointer">-</button><span>' + x.qty + '</span><button data-p style="width:26px;height:26px;border-radius:8px;background:' + ch + ';color:' + fg + ';border:0;cursor:pointer">+</button>';
       r.querySelector("div div").textContent = x.name;
       r.querySelector("[data-m]").onclick = function () { cart.setQty(i, x.qty - 1); };
       r.querySelector("[data-p]").onclick = function () { cart.setQty(i, x.qty + 1); };
@@ -124,6 +156,7 @@
     panel.querySelector("[data-co]").onclick = cart.checkout;
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", paint); else paint();
+  setInterval(function () { var d = [document]; document.querySelectorAll("iframe").forEach(function (f) { try { f.contentDocument && d.push(f.contentDocument); } catch (e) {} }); d.forEach(function (x) { x.querySelectorAll("[data-ie-cart-count]").forEach(function (e) { var v = String(cart.count()); if (e.textContent !== v) e.textContent = v; }); }); }, 1500);
   if (/checkout=success/.test(location.search)) { setTimeout(function () { cart.clear(); toast("Payment complete. Thank you!"); }, 500); }
 
   // ---------- product detection + link actions ----------
@@ -151,6 +184,7 @@
     if (!href) return false;
     if (href === "cart:open") { cart.open(); return true; }
     if (href === "cart:checkout") { cart.checkout(); return true; }
+    if (href.indexOf("page:") === 0) { var ie = window.__IE; if (ie && ie.goPage) { ie.goPage(href.slice(5)); return true; } return false; }
     if (href.charAt(0) === "#") { var d = document.querySelector('[data-id="' + href.slice(1) + '"]'); if (d) d.scrollIntoView({ behavior: "smooth" }); return true; }
     if (/^(https?:|mailto:|tel:)/.test(href)) { if (target === "_blank") window.open(href, "_blank", "noopener"); else (window.top || window).location.href = href; return true; }
     return false;

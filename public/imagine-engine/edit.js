@@ -311,25 +311,56 @@
     if (!out.length) document.querySelectorAll('[data-id^="sec_"]').forEach(function (e) { var id = e.getAttribute("data-id"); if (out.indexOf(id) < 0) out.push(id); });
     return out;
   }
+  function cartDesigner(d) {
+    var C = window.__IECart; if (!C || !C.config) return;
+    var det = h("details", { style: "margin-top:8px" }, [h("summary", { style: "cursor:pointer;font:600 11px system-ui;color:#e4e4e7" }, ["Customize cart (whole project)"])]);
+    d.appendChild(det);
+    var c = C.config();
+    function fld(lbl, key, type, opts) {
+      det.appendChild(h("div", { style: "font:10px system-ui;color:#a1a1aa;margin-top:8px" }, [lbl]));
+      var el;
+      if (opts) { el = h("select", { style: INP + ";margin-top:4px" }); opts.forEach(function (o) { var op = h("option", { value: o[0] }, [o[1]]); if (String(c[key]) === o[0]) op.selected = true; el.appendChild(op); }); }
+      else if (type === "checkbox") { el = h("input", { type: "checkbox" }); el.checked = !!c[key]; }
+      else { el = h("input", { type: type || "text", style: type === "color" ? "width:40px;height:28px;border:0;background:none;margin-top:4px" : INP + ";margin-top:4px" }); el.value = c[key]; }
+      el.addEventListener("change", function () { var p = {}; p[key] = type === "checkbox" ? el.checked : type === "number" ? +el.value || 0 : el.value; C.setConfig(p); });
+      det.appendChild(el);
+    }
+    fld("Cart title", "title"); fld("Note under title", "note"); fld("Empty cart message", "emptyMsg");
+    fld("Currency symbol", "currency"); fld("Tax %", "taxPct", "number"); fld("Flat shipping", "shipping", "number");
+    fld("Look", "theme", null, [["dark", "Dark"], ["light", "Light"], ["glass", "Glass"]]);
+    fld("Accent color", "accent", "color");
+    fld("Show floating cart button", "fab", "checkbox");
+    fld("Button side", "fabPos", null, [["right", "Right"], ["left", "Left"]]);
+    fld("Cart button text", "fabLabel"); fld("Checkout button text", "checkoutLabel");
+    fld("Send checkout to my own page (optional, https://...)", "checkoutUrl");
+    det.appendChild(h("button", { style: BTN + ";margin-top:8px;width:100%", onclick: function () { C.resetConfig(); } }, ["Reset cart look"]));
+    note(det, "Every widget shares this cart. Add-to-cart, buy, cart and checkout buttons in any widget, including ones the AI builds, use it.");
+  }
   function extras(box, tg, c, isBtn) {
     var Cl = window.__IECloud;
     // Link
     var ld = sec(box, isBtn ? "Button link" : "Link");
-    var cur = getAttr("@href"), kind = !cur ? "none" : cur.indexOf("cart:") === 0 ? cur : cur.charAt(0) === "#" ? "section" : "url";
+    var cur = getAttr("@href"), kind = !cur ? "none" : cur.indexOf("cart:") === 0 ? cur : cur.indexOf("page:") === 0 ? "page" : cur.charAt(0) === "#" ? "section" : "url";
     var ks = h("select", { style: INP + ";margin-top:6px" });
-    [["none", "No link"], ["url", "Web address"], ["section", "Scroll to a section"], ["cart:open", "Open cart"], ["cart:checkout", "Go to checkout"]].forEach(function (o) { var op = h("option", { value: o[0] }, [o[1]]); if (o[0] === kind) op.selected = true; ks.appendChild(op); });
+    [["none", "No link"], ["page", "Go to a page"], ["url", "Web address"], ["section", "Scroll to a section"], ["cart:open", "Open cart"], ["cart:checkout", "Go to checkout"]].forEach(function (o) { var op = h("option", { value: o[0] }, [o[1]]); if (o[0] === kind) op.selected = true; ks.appendChild(op); });
     ld.appendChild(ks);
     var lw = h("div"); ld.appendChild(lw);
     function linkUI(ev) {
       lw.innerHTML = "";
       var k = ks.value;
       if (k === "url") {
-        var ui = h("input", { style: INP + ";margin-top:6px", placeholder: "https://..." }); ui.value = cur.charAt(0) !== "#" && cur.indexOf("cart:") ? cur : "";
+        var ui = h("input", { style: INP + ";margin-top:6px", placeholder: "https://..." }); ui.value = cur.charAt(0) !== "#" && cur.indexOf("cart:") && cur.indexOf("page:") ? cur : "";
         var nt = h("label", { style: "display:flex;gap:6px;align-items:center;margin-top:6px;font:11px system-ui;color:#a1a1aa" }, [h("input", { type: "checkbox" }), "Open in a new tab"]);
         var cb = nt.querySelector("input"); cb.checked = getAttr("@target") === "_blank";
         var save = function () { var v = ui.value.trim(); if (v && !/^(https?:|mailto:|tel:)/.test(v)) v = "https://" + v; setStyle({ "@href": v, "@target": cb.checked ? "_blank" : "" }); cur = v; };
         ui.addEventListener("change", save); cb.addEventListener("change", save);
         lw.appendChild(ui); lw.appendChild(nt);
+      } else if (k === "page") {
+        var pg = h("select", { style: INP + ";margin-top:6px" }); pg.appendChild(h("option", { value: "" }, ["Pick a page"]));
+        ((window.__IE && window.__IE.pages) || []).forEach(function (p) { var o = h("option", { value: "page:" + p.id }, [p.name]); if ("page:" + p.id === cur) o.selected = true; pg.appendChild(o); });
+        pg.addEventListener("change", function () { setStyle({ "@href": pg.value, "@target": "" }); cur = pg.value; });
+        lw.appendChild(pg);
+        note(lw, "Make new pages with the page menu at the top of the canvas.");
       } else if (k === "section") {
         var ss = h("select", { style: INP + ";margin-top:6px" }); ss.appendChild(h("option", { value: "" }, ["Pick a section"]));
         sectionIds().forEach(function (id) { var o = h("option", { value: "#" + id }, [id.replace(/^sec_/, "").replace(/_/g, " ")]); if ("#" + id === cur) o.selected = true; ss.appendChild(o); });
@@ -404,6 +435,7 @@
     cartRow.appendChild(h("button", { style: BTN + ";flex:1", onclick: function () { window.__IECart && window.__IECart.open(); } }, ["View cart"]));
     cartRow.appendChild(h("button", { style: BTN + ";flex:1", onclick: function () { window.__IECart && window.__IECart.clear(); } }, ["Empty cart"]));
     pyd.appendChild(cartRow);
+    cartDesigner(pyd);
     var ps = note(pyd, "Checking payment setup...");
     if (!Cl || !Cl.signedIn()) { ps.textContent = "Sign in to set up payments."; }
     else Cl.call("payment_status").then(function (r) {

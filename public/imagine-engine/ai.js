@@ -134,6 +134,13 @@
     catch (e) { L("Metascript error: " + e.message, "error"); throw e; }
   };
   window.__IEX = {
+    addToCart: function (p) { window.__IECart.add({ name: p.name, price: p.price, image: p.image, qty: p.qty }); return p.name; },
+    openCart: function () { window.__IECart.open(); return "open"; },
+    checkout: function () { window.__IECart.checkout(); return "checkout"; },
+    clearCart: function () { window.__IECart.clear(); return "cleared"; },
+    setCartConfig: function (p) { window.__IECart.setConfig(p.config || p); return "cart updated"; },
+    addPage: function (p) { window.__IE.addPage(p.name); return p.name; },
+    goPage: function (p) { var ie = window.__IE, pg = (ie.pages || []).filter(function (x) { return x.id === p.pageId || x.name === p.name; })[0]; if (!pg) throw new Error("No such page"); ie.goPage(pg.id); return pg.name; },
     fetchData: function (p) { return http(p, "GET"); },
     httpRequest: function (p) { return http(p, String(p.method || "POST").toUpperCase()); },
     dbSelect: function (p) { return dbq(p, "GET", null, "select"); },
