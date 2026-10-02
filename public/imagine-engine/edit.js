@@ -29,6 +29,7 @@
   function pickTarget(t, root) {
     // prefer buttons/links/images, then leaf text, else the clicked element
     if (t.closest && t.closest("[data-ie-map]")) return null;
+    if (isLeaf(t) && !/^(BUTTON|A)$/.test(t.tagName)) { var bb = t.closest("button,a,[role=button]"); if (!bb || (bb.textContent || "").trim() !== (t.textContent || "").trim()) return t; }
     var b = t.closest && t.closest("button,a,img,[role=button]");
     if (b && root.contains(b) && b !== root) return b;
     if (t.tagName && /^(svg|path|g|circle|rect|line|polyline|polygon)$/i.test(t.tagName)) { var s = t.closest("svg"); if (s && s.parentElement && root.contains(s.parentElement)) return s.parentElement; }
@@ -42,6 +43,15 @@
     } else if (c === "@href") { if (v) el.setAttribute("data-ie-href", v); else el.removeAttribute("data-ie-href"); }
     else if (c === "@target") { if (v) el.setAttribute("data-ie-target", v); else el.removeAttribute("data-ie-target"); }
     else if (c === "@product") { if (v) el.setAttribute("data-ie-product", v); else el.removeAttribute("data-ie-product"); }
+  }
+  var TXT = { color: "color", fontSize: "font-size", fontFamily: "font-family", fontWeight: "font-weight", textAlign: "text-align", lineHeight: "line-height", letterSpacing: "letter-spacing" };
+  var IMP = { backgroundColor: "background-color", backgroundImage: "background-image", borderColor: "border-color", borderRadius: "border-radius", padding: "padding" };
+  function applyProp(el, c, v) {
+    var css = TXT[c] || IMP[c];
+    if (!css) { if (el.style[c] !== v) el.style[c] = v; return; }
+    var set = function (e) { if (v === "" || v == null) e.style.removeProperty(css); else if (e.style.getPropertyValue(css) !== v || e.style.getPropertyPriority(css) !== "important") e.style.setProperty(css, v, "important"); };
+    set(el);
+    if (TXT[c] && c !== "textAlign") { var k = el.querySelectorAll("*"); for (var i = 0; i < k.length; i++) { if (!/^(svg|path|g|circle|rect|line|polyline|polygon|img|video|input|textarea|select)$/i.test(k[i].tagName) && !k[i].closest("[data-ie-map]")) set(k[i]); } }
   }
   function J(k, d) { try { return JSON.parse(localStorage.getItem(k) || d); } catch (e) { return JSON.parse(d); } }
   function S(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -65,14 +75,14 @@
         var m = J(KT, "{}");
         for (var p in m) { var el = byPath(root, p); if (el && el.children.length === 0 && el.textContent !== m[p] && document.activeElement !== el) el.textContent = m[p]; }
         var st = J(KS, "{}");
-        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; for (var c in o) { if (c.charAt(0) === "@") setAttr(e2, c, o[c]); else if (e2.style[c] !== o[c]) e2.style[c] = o[c]; } }
+        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; for (var c in o) { if (c.charAt(0) === "@") setAttr(e2, c, o[c]); else applyProp(e2, c, o[c]); } }
       } finally { applying = false; }
     };
     root.__ieApi = {
       key: key, win: window,
       setStyle: function (el, patch) {
         var p = pathOf(el, root); if (p == null) return;
-        for (var c in patch) { if (c.charAt(0) === "@") setAttr(el, c, patch[c]); else el.style[c] = patch[c]; }
+        for (var c in patch) { if (c.charAt(0) === "@") setAttr(el, c, patch[c]); else applyProp(el, c, patch[c]); }
         if (p.charAt(0) === "a") { var adds = J(KA, "[]"), i = +p.split(".")[0].slice(1); if (adds[i] && p.indexOf(".") < 0) { adds[i].css = el.style.cssText; S(KA, adds); return; } }
         var st = J(KS, "{}"); st[p] = Object.assign(st[p] || {}, patch); S(KS, st);
       },
