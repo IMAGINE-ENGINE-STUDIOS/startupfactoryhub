@@ -46,12 +46,16 @@
   }
   var STYLES = { dark: STYLE, satellite: "mapbox://styles/mapbox/satellite-streets-v12", standard: "mapbox://styles/mapbox/standard" };
   function hostOf(root) {
+    var flagged = root.querySelector("[data-ie-map-host]"); if (flagged) return flagged;
     var best = null, ba = 0, rr = root.getBoundingClientRect();
-    Array.prototype.forEach.call(root.querySelectorAll("svg,canvas,[class*='map' i],[class*='Map']"), function (e) {
+    // Map placeholders: drawn svg/canvas, "map" classes, or fixed-height picture boxes (h-[160px], gradients, crosshair areas)
+    var sel = "svg,canvas,[class*='map' i],[class*='Map'],[class*='h-[1'],[class*='h-[2'],[class*='h-[3'],[class*='cursor-crosshair'],[class*='bg-gradient'],[style*='gradient']";
+    Array.prototype.forEach.call(root.querySelectorAll(sel), function (e) {
       if (e.closest("[data-ie-map]") || e.closest("button")) return;
       var t = /^(svg|canvas)$/i.test(e.tagName) ? e.parentElement : e; if (!t || t === root) return;
+      if (t.querySelector("input,textarea,select") || (t.querySelectorAll("button").length > 2)) return;
       var b = t.getBoundingClientRect(), a = b.width * b.height;
-      if (b.width >= 160 && b.height >= 110 && a < rr.width * rr.height * 0.95 && a > ba) { ba = a; best = t; }
+      if (b.width >= 160 && b.height >= 110 && a < rr.width * rr.height * 0.8 && a > ba) { ba = a; best = t; }
     });
     return best;
   }

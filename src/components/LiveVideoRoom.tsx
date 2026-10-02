@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useTracks, useConnectionState, useDataChannel } from '@livekit/components-react';
+import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useTracks, useConnectionState, useDataChannel, useLocalParticipant } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 import {
@@ -13,11 +13,9 @@ import { LiveChat, LocalChat } from './LiveChatPanel';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
 
-type Peer = { id: string; name: string; muted: boolean; camOff: boolean; hand: boolean };
 type Product = { id: string; name: string; price: number; tag: string; image: string };
 type CartItem = { id: string; name: string; price: number; qty: number };
 
-const MOCK_NAMES = ['Alex Rivera', 'Sora Kim', 'Marcus Lee', 'Priya Nair', 'Jordan Wu', 'Lena Ortiz', 'Omar Haddad', 'Mia Chen'];
 const initials = (n: string) => n.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const REACTIONS = [{ k: 'heart', i: Heart, c: 'text-rose-500' }, { k: 'fire', i: Flame, c: 'text-orange-500' }, { k: 'up', i: ThumbsUp, c: 'text-amber-500' }];
@@ -73,6 +71,29 @@ function RemoteTiles() {
       ))}
     </>
   );
+}
+
+// Publishes this person's real camera and microphone to everyone in the room, kept in sync with the buttons.
+function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
+  const { localParticipant } = useLocalParticipant();
+  const state = useConnectionState();
+  useEffect(() => { if (state === 'connected') localParticipant.setCameraEnabled(cam).catch(() => {}); }, [cam, state, localParticipant]);
+  useEffect(() => { if (state === 'connected') localParticipant.setMicrophoneEnabled(mic).catch(() => {}); }, [mic, state, localParticipant]);
+  return null;
+}
+
+function LocalVideo() {
+  const tracks = useTracks([Track.Source.Camera], { onlySubscribed: false });
+  const mine = tracks.find((t) => t.participant.isLocal && t.publication?.track);
+  if (!mine) return null;
+  return <VideoTrack trackRef={mine as any} className="absolute inset-0 w-full h-full object-cover -scale-x-100" />;
+}
+
+function PeerCount({ onCount }: { onCount: (n: number) => void }) {
+  const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone], { onlySubscribed: false });
+  const n = new Set(tracks.map((t) => t.participant.identity)).size;
+  useEffect(() => { onCount(Math.max(1, n)); }, [n, onCount]);
+  return null;
 }
 
 function ConnBadge() {
@@ -140,10 +161,12 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [rec, setRec] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [pinned, setPinned] = useState<string | null>(null);
-  const [reaction, setReaction] = useState<{ key: number; icon: any; c: string } | null>(null);
+  const [floats, setFloats] = useState<{ key: number; icon: any; c: string; x: number }[]>([]);
+  const [peerCount, setPeerCount] = useState(1);
+  const recRef = useRef<MediaRecorder | null>(null);
   const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
-  const [presenting, setPresenting] = useState<{ name: string; url: string } | null>(null);
+  const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
   const [tab, setTab] = useState<'shop' | 'chat' | 'money' | 'rules'>('shop');
   const [chatCount, setChatCount] = useState(0);
   const [seenCount, setSeenCount] = useState(0);
@@ -154,7 +177,6 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true });
   const [copied, setCopied] = useState(false);
   const [cartTick, setCartTick] = useState(0);
-  const [peers, setPeers] = useState<Peer[]>([]);
 
   // Shop
   const catalogKey = `ie-live-catalog:${name}`;
@@ -215,6 +237,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
 
   useEffect(() => {
     let active = true;
+    if (token) { streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null; return; }
     if (!cam && !mic) { streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null; return; }
     navigator.mediaDevices?.getUserMedia({ video: cam, audio: mic }).then((s) => {
       if (!active) { s.getTracks().forEach((t) => t.stop()); return; }
@@ -223,17 +246,22 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       if (videoRef.current) videoRef.current.srcObject = s;
     }).catch(() => {});
     return () => { active = false; };
-  }, [cam, mic]);
+  }, [cam, mic, token]);
   useEffect(() => () => streamRef.current?.getTracks().forEach((t) => t.stop()), []);
 
   const onShopMessage = useCallback((m: any) => {
     if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
     if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
+    if (m.t === 'present') setPresenting(m.p || null);
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
   }, []); // eslint-disable-line
 
-  const showReaction = (r: typeof REACTIONS[number]) => { setReaction({ key: Date.now(), icon: r.i, c: r.c }); setTimeout(() => setReaction(null), 1500); };
+  const showReaction = (r: typeof REACTIONS[number]) => {
+    const key = Date.now() + Math.random();
+    setFloats((f) => [...f, { key, icon: r.i, c: r.c, x: 10 + Math.random() * 25 }]);
+    setTimeout(() => setFloats((f) => f.filter((x) => x.key !== key)), 2600);
+  };
   const react = (r: typeof REACTIONS[number]) => { showReaction(r); broadcast({ t: 'react', k: r.k }); };
   const canSell = isHost || !rules.hostProducts;
   const pushToAll = (p: Product) => { setDrop(p); setStageOffer(true); broadcast({ t: 'push', p }); };
@@ -257,25 +285,58 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       s.getVideoTracks()[0].onended = () => setSharing(false);
     } catch { /* cancelled */ }
   };
-  const addPeer = () => {
-    if (peers.length + 1 >= userLimit) return;
-    setPeers((p) => [...p, { id: `p${Date.now()}`, name: MOCK_NAMES[p.length % MOCK_NAMES.length], muted: rules.muteEntry, camOff: false, hand: false }]);
-  };
-  const onFiles = (list: FileList | null) => {
+  const present = (p: typeof presenting, share = true) => { setPresenting(p); if (share) broadcast({ t: 'present', p }); };
+  const onFiles = async (list: FileList | null) => {
     const f = list?.[0];
     if (!f) return;
-    setPresenting({ name: f.name, url: URL.createObjectURL(f) });
     setPresentOpen(false);
+    if (f.type.startsWith('image/')) {
+      // Photos are resized so they can be sent live to everyone in the call.
+      const url = await new Promise<string>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const s = Math.min(1, 1280 / Math.max(img.width, img.height));
+          const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = URL.createObjectURL(f);
+      });
+      present({ name: f.name, url, kind: 'image' });
+    } else if (f.type.startsWith('video/')) present({ name: f.name, url: URL.createObjectURL(f), kind: 'video' }, false);
+    else present({ name: f.name, url: URL.createObjectURL(f), kind: 'pdf' }, false);
+  };
+  const toggleRec = async () => {
+    if (recRef.current) { recRef.current.stop(); return; }
+    try {
+      const screen = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: true, preferCurrentTab: true });
+      let tracks: MediaStreamTrack[] = [...screen.getTracks()];
+      try { const m = await navigator.mediaDevices.getUserMedia({ audio: true }); tracks = [...tracks, ...m.getAudioTracks()]; } catch { /* no mic */ }
+      const stream = new MediaStream(tracks);
+      const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
+      const chunks: Blob[] = [];
+      mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      mr.onstop = () => {
+        tracks.forEach((t) => t.stop());
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
+        a.download = `recording-${name}-${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+        a.click();
+        recRef.current = null; setRec(false);
+      };
+      screen.getVideoTracks()[0].onended = () => { if (mr.state !== 'inactive') mr.stop(); };
+      mr.start(1000); recRef.current = mr; setRec(true);
+    } catch { /* cancelled */ }
   };
   const openLink = () => {
     if (!link.trim()) return;
     const url = link.startsWith('http') ? link : `https://${link}`;
-    setPresenting({ name: url, url });
+    present({ name: url, url, kind: 'link' });
     setLink(''); setPresentOpen(false);
   };
 
   const inviteUrl = (() => {
-    const u = new URL(`${window.location.origin}/live-video`);
+    const host = /lovable\.app$|localhost/.test(window.location.hostname) ? 'https://startupfactoryhub.com' : window.location.origin;
+    const u = new URL(`${host}/live-video`);
     u.searchParams.set('room', name);
     if (hostId) u.searchParams.set('host', hostId);
     return u.toString();
@@ -284,7 +345,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const cartItems = useMemo(readCart, [cartTick]); // eslint-disable-line
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
-  const totalPeers = peers.length + 1;
+  const totalPeers = token ? peerCount : 1;
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
   const checkout = () => { const c = (window as any).__IECart; c?.checkout ? c.checkout() : c?.open?.(); };
 
@@ -309,7 +370,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : `${totalPeers} in call`}</span>
         <div className="ml-auto flex items-center gap-2">
-          {isHost && <button onClick={() => setRec((r) => !r)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500' : ''}`} />REC {rec ? 'ON' : 'OFF'}</button>}
+          {isHost && <button onClick={toggleRec} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500' : ''}`} />REC {rec ? 'ON' : 'OFF'}</button>}
           <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-zinc-200 bg-zinc-50">
             <span className={`w-1.5 h-1.5 rounded-full ${token ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
             {token ? <ConnBadge /> : <span className="font-mono text-[11px] text-zinc-500" title={connError}>{connError ? 'Offline' : 'Connecting'}</span>}
@@ -317,7 +378,12 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         </div>
       </div>
 
-      <div className="relative flex-1 overflow-y-auto p-4">
+      <div className="relative flex-1 min-h-0">
+      <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+        {floats.map((f) => <span key={f.key} className="absolute bottom-4 animate-[ie-float_2.6s_ease-out_forwards]" style={{ right: `${f.x}%` }}><f.icon className={`w-10 h-10 fill-current ${f.c}`} /></span>)}
+      </div>
+      <style>{`@keyframes ie-float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-40px) scale(1.1)}100%{transform:translateY(-420px) scale(1);opacity:0}}`}</style>
+      <div className="h-full overflow-y-auto p-4">
         {drop && stageOffer && (
           <div className="sticky top-0 z-20 mb-3 ml-auto w-full max-w-md bg-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
             <Thumb p={drop} className="w-14 h-14 rounded-xl shrink-0" />
@@ -333,15 +399,17 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         {(sharing || presenting) && (
           <div className="relative mb-3 rounded-2xl overflow-hidden border border-white/10 bg-zinc-900 h-[360px]">
             {sharing ? <video ref={screenRef} autoPlay muted playsInline className="w-full h-full object-contain" />
-              : presenting && (/\.(png|jpe?g|gif|webp)$/i.test(presenting.name)
+              : presenting && (presenting.kind === 'image'
                 ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
+                : presenting.kind === 'video' ? <video src={presenting.url} controls autoPlay className="w-full h-full object-contain" />
+                : presenting.kind === 'pdf' ? <object data={presenting.url} type="application/pdf" className="w-full h-full bg-white"><a href={presenting.url} target="_blank" rel="noreferrer" className="block p-6 text-white underline">Open {presenting.name}</a></object>
                 : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
-            <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else setPresenting(null); }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
+            <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else present(null); }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
           </div>
         )}
         <div className="grid grid-cols-3 gap-3">
           <div onClick={() => setPinned(pinned === 'host' ? null : 'host')} className={`${tileBase} ring-2 ring-white ${pinned === 'host' ? 'col-span-2 row-span-2' : ''}`}>
-            {cam ? <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
+            {cam && token ? <LocalVideo /> : cam ? <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
               : <div className="absolute inset-0 flex items-center justify-center">
                   {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
                     : <span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 flex items-center justify-center">{initials(displayName)}</span>}
@@ -352,22 +420,11 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center ${mic ? 'bg-white/15' : 'bg-red-500'}`}>{mic ? <Mic className="w-3 h-3 text-white" /> : <MicOff className="w-3 h-3 text-white" />}</span>
               </span>
             </div>
-            {reaction && <span key={reaction.key} className="absolute right-4 bottom-12 animate-bounce"><reaction.icon className={`w-8 h-8 ${reaction.c}`} /></span>}
           </div>
 
           {token && <RemoteTiles />}
-
-          {peers.map((p) => (
-            <div key={p.id} onClick={() => setPinned(pinned === p.id ? null : p.id)} className={`${tileBase} ${pinned === p.id ? 'col-span-2 row-span-2' : ''}`}>
-              <div className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 font-medium flex items-center justify-center">{initials(p.name)}</span></div>
-              <div className="absolute inset-x-0 bottom-0 p-3 flex items-center bg-gradient-to-t from-black/60 to-transparent">
-                <span className="font-mono text-xs text-white">{p.name}</span>
-                <button aria-label="Mute" onClick={(e) => { e.stopPropagation(); setPeers((ps) => ps.map((x) => x.id === p.id ? { ...x, muted: !x.muted } : x)); }} className={`ml-auto w-6 h-6 rounded-full flex items-center justify-center ${p.muted ? 'bg-red-500' : 'bg-white/15'}`}>{p.muted ? <MicOff className="w-3 h-3 text-white" /> : <Mic className="w-3 h-3 text-white" />}</button>
-              </div>
-            </div>
-          ))}
         </div>
-        {isHost && <button onClick={addPeer} className="mt-3 flex items-center gap-1 px-4 py-2 rounded-full bg-zinc-800 text-zinc-300 border border-white/10 font-mono text-xs"><Plus className="w-3 h-3" />Add test person • {totalPeers}/{userLimit}</button>}
+      </div>
       </div>
 
       {catalog.length > 0 && (
@@ -577,6 +634,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     <LiveKitRoom serverUrl={serverUrl} token={token} connect video={false} audio={false} data-lk-theme="default"
       onError={(e) => setConnError(e.message)} style={{ height: '100vh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
+      <LocalPublisher cam={cam} mic={mic} />
+      <PeerCount onCount={setPeerCount} />
       {body}
       <RoomAudioRenderer />
     </LiveKitRoom>
