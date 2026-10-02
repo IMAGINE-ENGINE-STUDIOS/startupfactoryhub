@@ -978,14 +978,14 @@ export default function Deck() {
                     </span>
                     <div className="flex-1">
                       <p className="text-[24px] font-semibold text-white leading-tight">Equity Program · 100 startups / year</p>
-                      <p className="text-[17px] text-slate-400">1% equity each · 10% exit at $50M+ · upside, not in revenue totals</p>
+                      <p className="text-[17px] text-slate-400">1% equity each · 10% reach $50M by Year 3–5 and exit · upside, not in revenue totals</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[28px] font-bold text-emerald-300 leading-none">$5M</p>
                       <p className="text-[14px] text-slate-400 uppercase tracking-[0.15em] mt-1">per cohort</p>
                     </div>
                   </div>
-                  <p className="mt-3 ml-16 text-[17px] text-emerald-200/90">10 exits / year × $500K · $25M equity value by Year 5</p>
+                  <p className="mt-3 ml-16 text-[17px] text-emerald-200/90">10 exits per cohort × $500K (1% of $50M) · exits start Year 3 · $15M realized by Year 5</p>
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-teal-400/15">
