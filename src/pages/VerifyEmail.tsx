@@ -151,11 +151,10 @@ export default function VerifyEmail() {
     }
 
     setResending(true);
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: target,
-      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    const { data: sendData, error: sendError } = await supabase.functions.invoke('send-verification-email', {
+      body: { email: target },
     });
+    const error = sendError || (sendData?.error ? { message: sendData.error } : null);
     setResending(false);
 
     if (error) {
