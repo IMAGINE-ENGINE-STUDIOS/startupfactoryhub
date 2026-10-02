@@ -88,16 +88,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       metadata.accelerated_fundraising = 'true';
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: metadata,
-      }
+    void redirectUrl;
+    // Account is created server-side so only the branded verification email is sent.
+    const { data, error } = await supabase.functions.invoke('send-verification-email', {
+      body: { register: true, email, password, metadata },
     });
-
-    return { error };
+    if (error) {
+      let message = error.message;
+      try {
+        const ctx = (error as any).context;
+        if (ctx?.json) message = (await ctx.json())?.error || message;
+      } catch { /* ignore */ }
+      if (/already/i.test(message)) message = 'User already registered';
+      return { error: { message } as any };
+    }
+    if (data?.error) return { error: { message: data.error } as any };
+    return { error: null };
   };
 
   const signOut = async () => {
