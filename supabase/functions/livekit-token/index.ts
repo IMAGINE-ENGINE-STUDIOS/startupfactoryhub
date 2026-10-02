@@ -15,9 +15,10 @@ const clean = (v: unknown, fallback: string) => {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const apiKey = Deno.env.get("LIVEKIT_API_KEY");
-    const apiSecret = Deno.env.get("LIVEKIT_API_SECRET");
-    const url = Deno.env.get("LIVEKIT_URL");
+    const sanitize = (v?: string) => v?.trim().replace(/^['"]|['"]$/g, "").trim();
+    const apiKey = sanitize(Deno.env.get("LIVEKIT_API_KEY"));
+    const apiSecret = sanitize(Deno.env.get("LIVEKIT_API_SECRET"));
+    const url = sanitize(Deno.env.get("LIVEKIT_URL"))?.replace(/\/+$/, "");
     if (!apiKey || !apiSecret || !url) {
       return json({ error: "LiveKit is not configured (LIVEKIT_API_KEY, LIVEKIT_API_SECRET, LIVEKIT_URL)." }, 500);
     }
