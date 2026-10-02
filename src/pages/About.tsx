@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -18,6 +19,13 @@ const offerItems = [
 
 const About = () => {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 400);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen">
