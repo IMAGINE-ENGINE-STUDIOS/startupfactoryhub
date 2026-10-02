@@ -128,17 +128,32 @@
       var sx = e.clientX, sy = e.clientY, moved = false;
       var base = (el.style.transform || "").match(/translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)/);
       var bx = base ? +base[1] : 0, by = base ? +base[2] : 0;
+      // magnetic alignment: sibling edges/centers and the element's own auto (un-moved) slot
+      var r0 = el.getBoundingClientRect(), hx = [], hy = [], gx = null, gy = null;
+      hx.push(r0.left - bx); hy.push(r0.top - by); // auto position
+      Array.prototype.forEach.call(el.parentElement ? el.parentElement.children : [], function (s) {
+        if (s === el || !s.getBoundingClientRect) return; var r = s.getBoundingClientRect(); if (!r.width) return;
+        hx.push(r.left, r.left + r.width / 2 - r0.width / 2, r.right - r0.width); hy.push(r.top, r.top + r.height / 2 - r0.height / 2, r.bottom + 8);
+      });
+      var guide = function (vert, pos) { var g = document.createElement("div"); g.style.cssText = "position:fixed;z-index:99999;pointer-events:none;background:#8b5cf6;opacity:.8;" + (vert ? "top:0;bottom:0;width:1px;left:" + pos + "px" : "left:0;right:0;height:1px;top:" + pos + "px"); document.body.appendChild(g); return g; };
+      var clearG = function () { if (gx) gx.remove(); if (gy) gy.remove(); gx = gy = null; };
       var mv = function (ev) {
         var dx = ev.clientX - sx, dy = ev.clientY - sy;
         if (!moved && Math.abs(dx) + Math.abs(dy) < 5) return;
         if (!moved) { moved = true; if (el.style.position === "" ) el.style.position = "relative"; el.style.zIndex = "30"; el.style.pointerEvents = "none"; }
         ev.preventDefault();
+        var L = r0.left + dx, T = r0.top + dy, snapped = false; clearG();
+        for (var i = 0; i < hx.length; i++) if (Math.abs(hx[i] - L) < 8) { dx += hx[i] - L; gx = guide(true, hx[i]); snapped = true; break; }
+        for (var j = 0; j < hy.length; j++) if (Math.abs(hy[j] - T) < 8) { dy += hy[j] - T; gy = guide(false, hy[j]); snapped = true; break; }
+        el.style.opacity = snapped ? "0.5" : "";
         el.style.transform = "translate(" + (bx + dx) + "px," + (by + dy) + "px)";
       };
       var up = function (ev) {
         window.removeEventListener("pointermove", mv, true); window.removeEventListener("pointerup", up, true);
+        clearG(); el.style.opacity = "";
         if (!moved) return;
         el.style.pointerEvents = ""; el.style.zIndex = "";
+        if (/translate\(0px,\s*0px\)/.test(el.style.transform)) el.style.transform = "";
         var dropped = TOP.__IEElDrop && TOP.__IEElDrop(el, root, window, ev.clientX, ev.clientY);
         if (dropped) { el.style.transform = base ? base[0] : ""; root.__ieApi.setStyle(el, { display: "none" }); }
         else root.__ieApi.setStyle(el, { transform: el.style.transform, position: el.style.position || "relative", zIndex: "1" });
