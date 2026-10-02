@@ -53,3 +53,5 @@
 - [x] Step 1: widgets editable (text, background, border), movable, real previews
 - [ ] Step 2: map widgets track the shop's own places
 - [ ] Step 3: global cart + Stripe (admin → SFH Stripe; users → Stripe Connect or own keys; admin-set fee)
+
+- [x] Imagine Engine Step 2: map widget controllers, remove Layout tab, Design+Content integration, thumbnail reload fix
