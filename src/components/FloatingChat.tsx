@@ -872,6 +872,27 @@ You can help with:
 
     const userMessage = inputToUse.trim();
     setAiInput('');
+
+    // Imagine Engine builder mode: hand the prompt to the canvas assistant inside the editor.
+    if (activeTool?.id === 'imagine') {
+      const frame = document.querySelector<HTMLIFrameElement>('iframe[title="Imagine Engine"]');
+      if (!frame?.contentWindow) {
+        setAiMessages(prev => [...prev, { role: 'user', content: userMessage }, { role: 'assistant', content: 'Open the Imagine Engine to build with this mode.' }]);
+        return;
+      }
+      setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+      setIsAiLoading(true);
+      const reqId = Math.random().toString(36).slice(2);
+      const onReply = (ev: MessageEvent) => {
+        if (ev.source !== frame.contentWindow || ev.data?.iea !== 'reply' || ev.data?.id !== reqId) return;
+        window.removeEventListener('message', onReply);
+        setIsAiLoading(false);
+        setAiMessages(prev => [...prev, { role: 'assistant', content: String(ev.data.text || 'Done.') }]);
+      };
+      window.addEventListener('message', onReply);
+      frame.contentWindow.postMessage({ iea: 'send', id: reqId, text: userMessage }, window.location.origin);
+      return;
+    }
     
     // Handle "learn this" intent
     if (isLearnIntent(userMessage)) {
