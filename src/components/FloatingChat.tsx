@@ -168,6 +168,9 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
   'actions': { label: 'Actions', icon: Globe },
 };
 
+// Routes prompts to the Imagine Engine canvas assistant (only offered on /imagine-engine)
+const IMAGINE_TOOL: ToolItem = { id: 'imagine', name: 'Imagine Engine builder', icon: BoltIcon, category: 'actions', systemHint: 'IMAGINE' };
+
 // Shared visual groups (used by the empty-state Command Deck and the full tool overlay)
 const TOOL_GROUPS = [
   { key: 'quick', label: 'INSTANT', gradient: 'from-amber-500 to-orange-500', ring: 'ring-amber-400/40' },
@@ -1609,72 +1612,9 @@ You can help with:
                               Ask Genius anything
                             </h2>
                             <p className="text-[10px] text-muted-foreground/80 font-mono uppercase tracking-[0.18em]">
-                              Or swipe a mission below
+                              Pick a mode from the menu above
                             </p>
                           </div>
-                        </div>
-
-                        {/* Horizontal mission rails — no long scrolling */}
-                        <div className="space-y-2.5 pb-1">
-                          {([
-                            {
-                              key: 'quick', label: 'INSTANT',
-                              gradient: 'from-amber-500 to-orange-500',
-                              ring: 'ring-amber-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'quick'),
-                            },
-                            {
-                              key: 'document', label: 'CREATE',
-                              gradient: 'from-violet-500 to-fuchsia-500',
-                              ring: 'ring-violet-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'document'),
-                            },
-                            {
-                              key: 'ai-tools', label: 'ANALYZE',
-                              gradient: 'from-cyan-500 to-blue-500',
-                              ring: 'ring-cyan-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'ai-tools'),
-                            },
-                            {
-                              key: 'actions', label: 'EXECUTE',
-                              gradient: 'from-emerald-500 to-teal-500',
-                              ring: 'ring-emerald-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'actions'),
-                            },
-                          ]).map(group => (
-                            <div key={group.key}>
-                              <div className="flex items-center gap-2 mb-1 px-1">
-                                <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
-                                <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
-                                  {group.label}
-                                </span>
-                                <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
-                              </div>
-                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
-                                {group.tools.map(tool => {
-                                  const ToolIcon = tool.icon;
-                                  return (
-                                    <button
-                                      key={tool.id}
-                                      type="button"
-                                      onClick={() => { startMission(tool); }}
-                                      className={`group relative aspect-square flex flex-col items-center justify-center gap-1 p-1 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-1 ${group.ring}`}
-                                      title={tool.name}
-                                    >
-                                      <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                                      <span className={`relative h-7 w-7 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-110`}>
-                                        <ToolIcon className="h-4 w-4 text-white" />
-                                      </span>
-                                      <span className="relative w-full px-0.5 text-[8.5px] font-semibold text-foreground leading-[1.1] text-center line-clamp-2">
-                                        {tool.name}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                            </div>
-                          ))}
                         </div>
                       </div>
                     )}
