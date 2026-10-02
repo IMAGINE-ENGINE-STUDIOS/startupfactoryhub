@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import CommunitySection from "@/components/CommunitySection";
+import FeaturesSection from "@/components/FeaturesSection";
 import { Target, Rocket, Brain, Globe, BookOpen, Briefcase, Banknote } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import bannerBg from "@/assets/wtc-institutional.jpg";
@@ -16,6 +19,13 @@ const offerItems = [
 
 const About = () => {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 400);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -146,6 +156,9 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <CommunitySection />
+      <FeaturesSection />
 
       <Footer />
     </div>

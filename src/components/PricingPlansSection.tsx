@@ -181,12 +181,21 @@ const acceleratorMemberships: {
   },
 ];
 
+type PlanTabKey = "featured" | "ai" | "startup" | "accelerator";
+const PLAN_TABS: { key: PlanTabKey; label: string }[] = [
+  { key: "featured", label: "Get Started" },
+  { key: "ai", label: "Genius AI Plans" },
+  { key: "startup", label: "Startup, Student & Advisor" },
+  { key: "accelerator", label: "Accelerators & Programs" },
+];
+
 const PricingPlansSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [checkoutKey, setCheckoutKey] = useState<string | null>(null);
   /** Which plan brochure flipbook is open as a popup over this page. */
+  const [planTab, setPlanTab] = useState<PlanTabKey>("featured");
   const [planOverlay, setPlanOverlay] = useState<PlanOverlayKind | null>(null);
 
   const handleSubscribe = async (key: string, priceId: string) => {
@@ -263,38 +272,10 @@ const PricingPlansSection = () => {
     </div>
   );
 
-  return (
-    <section className="relative overflow-hidden py-12 sm:py-20">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-0 h-[60%] w-[60%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.10)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:56px_56px]" />
-      </div>
 
-      <div className="container relative z-10 mx-auto px-4">
-        {/* Header */}
-        <div className="mb-10 text-center sm:mb-16">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
-            Plans & Programs
-          </div>
-          <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-            <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              Choose Your Path to Growth
-            </span>
-          </h2>
-          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
-            Genius AI plans to power your workflow, and accelerator programs to take your venture global.
-          </p>
-        </div>
-
-        {/* Genius AI Plans */}
-        <div className="mb-14 sm:mb-20">
-          <SectionTitle title="Genius AI Plans" />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
-            {Object.values(GENIUS_PLANS).map((plan) => {
+  const renderAi = (plan: (typeof GENIUS_PLANS)[keyof typeof GENIUS_PLANS]) => {
               const isPro = plan.key === "pro";
-              return (
+                  return (
                 <div
                   key={plan.key}
                   className={`${shell} ${isPro ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
@@ -334,41 +315,15 @@ const PricingPlansSection = () => {
                   </Button>
                 </div>
               );
-            })}
-          </div>
-        </div>
+  };
 
-        {/* Startup Memberships */}
-        <div className="mb-14 sm:mb-20">
-          <SectionTitle
-            title="Startup, Student & Advisor Memberships"
-            subtitle="Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo."
-          />
-
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/40 p-1">
-              {(["monthly", "yearly"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setBilling(mode)}
-                  className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
-                    billing === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  {mode === "monthly" ? "Monthly" : "Yearly · save 10%"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
-            {startupMemberships.map((plan) => {
+  const renderStartup = (plan: (typeof startupMemberships)[number]) => {
               const tier = plan.basic ? null : MEMBERSHIP_TIERS[plan.key as Exclude<MembershipTier, "free">];
               const price = plan.basic
                 ? billing === "monthly" ? 50 : 480
                 : billing === "monthly" ? tier!.price : tier!.yearly_price;
               const priceId = tier ? (billing === "monthly" ? tier.price_id : tier.yearly_price_id) : null;
-              return (
+                  return (
                 <div
                   key={plan.key}
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
@@ -432,20 +387,9 @@ const PricingPlansSection = () => {
                   </Button>
                 </div>
               );
-            })}
-          </div>
-        </div>
+  };
 
-        {/* Accelerator Memberships & Programs */}
-        <div className="mb-14 sm:mb-20">
-          <SectionTitle
-            title="Accelerator Memberships & Programs"
-            subtitle="For accelerators, incubators and innovation programs — memberships plus the MVP Program and Accelerator-as-a-Service."
-          />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
-            {acceleratorMemberships.map((plan) => {
-              return (
+  const renderAcc = (plan: (typeof acceleratorMemberships)[number]) => (
                 <div
                   key={plan.key}
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
@@ -498,10 +442,92 @@ const PricingPlansSection = () => {
                   </Button>
                 </div>
               );
-            })}
+
+  return (
+    <section className="relative overflow-hidden py-12 sm:py-20">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/4 top-0 h-[60%] w-[60%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.10)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:56px_56px]" />
+      </div>
+
+      <div className="container relative z-10 mx-auto px-4">
+        {/* Header */}
+        <div className="mb-10 text-center sm:mb-16">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+            Plans & Programs
+          </div>
+          <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              Choose Your Path to Growth
+            </span>
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
+            Genius AI plans to power your workflow, and accelerator programs to take your venture global.
+          </p>
+        </div>
+
+        {/* Unified plans widget with tabs */}
+        <div className="mb-14 sm:mb-20">
+          <div className="mb-6 flex justify-center">
+            <div className="inline-flex flex-wrap justify-center gap-1 rounded-full border border-border/50 bg-muted/40 p-1">
+              {PLAN_TABS.map((tb) => (
+                <button
+                  key={tb.key}
+                  onClick={() => setPlanTab(tb.key)}
+                  className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                    planTab === tb.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tb.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {(planTab === "featured" || planTab === "startup") && (
+            <div className="mb-8 flex justify-center">
+              <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/40 p-1">
+                {(["monthly", "yearly"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setBilling(mode)}
+                    className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                      billing === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {mode === "monthly" ? "Monthly" : "Yearly · save 10%"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {planTab === "startup" && (
+            <p className="mx-auto mb-6 max-w-2xl text-center text-xs sm:text-sm text-muted-foreground">
+              Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo.
+            </p>
+          )}
+          {planTab === "accelerator" && (
+            <p className="mx-auto mb-6 max-w-2xl text-center text-xs sm:text-sm text-muted-foreground">
+              For accelerators, incubators and innovation programs — memberships plus the MVP Program and Accelerator-as-a-Service.
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+            {planTab === "featured" && (
+              <>
+                {renderAi(GENIUS_PLANS.free)}
+                {renderAi(GENIUS_PLANS.starter)}
+                {startupMemberships.filter((p) => p.key === "basic" || p.key === "self_paced_office").map(renderStartup)}
+              </>
+            )}
+            {planTab === "ai" && Object.values(GENIUS_PLANS).map(renderAi)}
+            {planTab === "startup" && startupMemberships.map(renderStartup)}
+            {planTab === "accelerator" && acceleratorMemberships.map(renderAcc)}
+          </div>
         </div>
+
 
 
       </div>

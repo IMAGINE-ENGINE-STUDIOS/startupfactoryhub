@@ -68,9 +68,7 @@ const HeroSection = () => {
               Learn More
             </Button>
             
-            <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-primary/30 hover:border-primary/50" onClick={() => document.getElementById('features')?.scrollIntoView({
-            behavior: 'smooth'
-          })}>
+            <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-primary/30 hover:border-primary/50" onClick={() => navigate("/about#features")}>
               Explore Features
             </Button>
 
