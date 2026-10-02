@@ -423,8 +423,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
           </div>
 
           {token && <RemoteTiles />}
-
         </div>
+      </div>
       </div>
 
       {catalog.length > 0 && (
@@ -634,6 +634,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     <LiveKitRoom serverUrl={serverUrl} token={token} connect video={false} audio={false} data-lk-theme="default"
       onError={(e) => setConnError(e.message)} style={{ height: '100vh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
+      <LocalPublisher cam={cam} mic={mic} />
+      <PeerCount onCount={setPeerCount} />
       {body}
       <RoomAudioRenderer />
     </LiveKitRoom>
