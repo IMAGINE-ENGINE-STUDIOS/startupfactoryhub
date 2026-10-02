@@ -1528,6 +1528,38 @@ You can help with:
                 </TabsContent>
 
                 <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
+                  {/* Mode dropdown — every Genius option lives here */}
+                  <div className="px-3 pb-1 shrink-0">
+                    <select
+                      aria-label="Genius AI mode"
+                      value={activeTool?.id ?? ''}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        if (!id) { setActiveTool(null); return; }
+                        if (id === 'imagine') {
+                          setActiveTool(IMAGINE_TOOL);
+                          setAiMessages(prev => [...prev, { role: 'assistant', content: 'Imagine Engine builder is on. Tell me what to build or change on your canvas.' }]);
+                          return;
+                        }
+                        const t = ALL_TOOLS.find(x => x.id === id);
+                        if (t) startMission(t);
+                      }}
+                      className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="">Genius chat (default)</option>
+                      {location.pathname.startsWith('/imagine-engine') && (
+                        <option value="imagine">Imagine Engine builder</option>
+                      )}
+                      {TOOL_GROUPS.map(group => (
+                        <optgroup key={group.key} label={group.label}>
+                          {ALL_TOOLS.filter(t => t.category === group.key).map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Active tool indicator */}
                   {activeTool && activeTool.id !== 'quick' && (
                     <div className="px-3 pt-1 pb-1 shrink-0">
