@@ -3,7 +3,7 @@
    localStorage "ie-ver:<projectId>" (ie- prefix, so they sync with the account). */
 (function () {
   var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-ai";
-  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWlobWRzZGd3ZGN3bXJ5eW0iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc1OTkzNTc2OSwiZXhwIjoyMDc1NTExNzY5fQ";
+  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
   var MAX = 50;
 
   /* ---------- phone / tablet layout ---------- */
