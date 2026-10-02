@@ -517,7 +517,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         <div className="mt-4 flex items-center gap-2">
           <div className="flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[11px]">
             {pills.map((t) => (
-              <button key={t.k} onClick={() => setTab(t.k as any)} className={`relative px-3 py-1.5 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-500'}`}>
+              <button key={t.k} onClick={() => setTab(t.k as any)} className={`relative whitespace-nowrap px-3 py-1.5 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-500'}`}>
                 {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.label}
                 {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
               </button>
