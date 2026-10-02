@@ -395,7 +395,13 @@
     var ub = h("button", { style: BTN + ";width:100%;margin-top:6px", onclick: function () { fi.click(); } }, ["Upload image or video"]);
     fi.addEventListener("change", function () {
       var f = fi.files && fi.files[0]; if (!f) return;
-      if (!Cl || !Cl.signedIn()) { st.textContent = "Sign in to upload files."; st.style.color = "#f87171"; return; }
+      if (!Cl || !Cl.signedIn()) {
+        // Not signed in: keep images in this browser so they still show immediately.
+        if (!/^image\//.test(f.type) || f.size > 2 * 1024 * 1024) { st.textContent = "Sign in to upload videos or images over 2 MB."; st.style.color = "#f87171"; fi.value = ""; return; }
+        var rd = new FileReader();
+        rd.onload = function () { setStyle({ "@src": rd.result }); st.textContent = "Added (saved in this browser). Sign in to store it in your account."; st.style.color = "#4ade80"; fi.value = ""; };
+        rd.readAsDataURL(f); return;
+      }
       st.textContent = "Uploading " + f.name + "..."; st.style.color = "#a1a1aa"; ub.disabled = true;
       Cl.upload(f).then(function (u) { setStyle({ "@src": u }); st.textContent = "Uploaded."; st.style.color = "#4ade80"; })
         .catch(function (e) { st.textContent = e.message; st.style.color = "#f87171"; }).finally(function () { ub.disabled = false; fi.value = ""; });
