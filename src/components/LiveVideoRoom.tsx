@@ -5,7 +5,7 @@ import { Track } from 'livekit-client';
 import {
   Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, MonitorUp, Presentation,
   Heart, Flame, ThumbsUp, PhoneOff, Upload, Sliders, DollarSign, ShoppingBag, Copy, Check,
-  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, MoreHorizontal,
+  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -461,7 +461,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
             <button onClick={() => { setAdding(false); setDraft({ name: '', price: '', tag: '', image: '' }); }} className="px-4 py-1.5 rounded-full border border-zinc-200 text-sm text-zinc-700">Cancel</button>
             <button onClick={saveProduct} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm">Save</button>
           </div>
-          <input ref={imgInput} type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) setDraft((d) => ({ ...d, image: '' })), setDraft((d) => d), shrinkImage(f).then((img) => setDraft((d) => ({ ...d, image: img }))); e.target.value = ''; }} />
+          <input ref={imgInput} type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) shrinkImage(f).then((img) => setDraft((d) => ({ ...d, image: img }))); e.target.value = ''; }} />
         </div>
       )}
 
