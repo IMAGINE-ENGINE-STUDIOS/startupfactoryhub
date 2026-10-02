@@ -40,8 +40,35 @@
   }
   function cfgOf(w) {
     var c = J("ie-map:" + w.sid);
-    if (!c) c = { type: w.type, wid: w.wid, enabled: true, places: [], driver: null, zoneKm: 10, routeInfo: null };
+    if (!c) c = { type: w.type, wid: w.wid, enabled: true, view: null, places: [], driver: null, zoneKm: 10, routeInfo: null };
+    c.view = Object.assign({ proj: "globe", style: "dark", pitch: 45, bearing: 0, fog: true, search: true, traffic: false, buildings: false, pin: "#8b5cf6", height: 320 }, c.view || {});
     return c;
+  }
+  var STYLES = { dark: STYLE, satellite: "mapbox://styles/mapbox/satellite-streets-v12", standard: "mapbox://styles/mapbox/standard" };
+  function hostOf(root) {
+    var best = null, ba = 0, rr = root.getBoundingClientRect();
+    Array.prototype.forEach.call(root.querySelectorAll("svg,canvas,[class*='map' i],[class*='Map']"), function (e) {
+      if (e.closest("[data-ie-map]") || e.closest("button")) return;
+      var t = /^(svg|canvas)$/i.test(e.tagName) ? e.parentElement : e; if (!t || t === root) return;
+      var b = t.getBoundingClientRect(), a = b.width * b.height;
+      if (b.width >= 160 && b.height >= 110 && a < rr.width * rr.height * 0.95 && a > ba) { ba = a; best = t; }
+    });
+    return best;
+  }
+  function applyView(box, c) {
+    var m = box.__m, v = c.view, mb = box.ownerDocument.defaultView.mapboxgl;
+    var sig = JSON.stringify(v);
+    if (box.__vs === sig) return; var prev = box.__vs ? JSON.parse(box.__vs) : {}; box.__vs = sig;
+    if (box.__inline) box.style.height = (+v.height || 320) + "px";
+    if (prev.style && prev.style !== v.style) { box.__ready = false; m.setStyle(STYLES[v.style] || STYLE); return; }
+    try { m.setProjection(v.proj === "flat" ? "mercator" : "globe"); } catch (e) {}
+    m.easeTo({ pitch: +v.pitch || 0, bearing: +v.bearing || 0, duration: 400 });
+    try { m.setFog(v.fog ? { color: "rgb(12,12,20)", "high-color": "rgb(36,92,223)", "horizon-blend": 0.03, "space-color": "rgb(5,5,12)", "star-intensity": 0.6 } : null); } catch (e) {}
+    if (m.getLayer("ie-traffic")) m.removeLayer("ie-traffic"); if (m.getSource("ie-traffic")) m.removeSource("ie-traffic");
+    if (v.traffic) { m.addSource("ie-traffic", { type: "vector", url: "mapbox://mapbox.mapbox-traffic-v1" }); m.addLayer({ id: "ie-traffic", type: "line", source: "ie-traffic", "source-layer": "traffic", paint: { "line-width": 2, "line-color": ["match", ["get", "congestion"], "low", "#22c55e", "moderate", "#f59e0b", "heavy", "#ef4444", "severe", "#7f1d1d", "#64748b"] } }); }
+    if (m.getLayer("ie-3d")) m.removeLayer("ie-3d");
+    if (v.buildings && v.style !== "standard" && m.getSource("composite")) { try { m.addLayer({ id: "ie-3d", source: "composite", "source-layer": "building", filter: ["==", "extrude", "true"], type: "fill-extrusion", minzoom: 14, paint: { "fill-extrusion-color": "#3f3f46", "fill-extrusion-height": ["get", "height"], "fill-extrusion-base": ["get", "min_height"], "fill-extrusion-opacity": 0.8 } }); } catch (e) {} }
+    var sb = box.querySelector("[data-ie-map-search]"); if (sb) sb.style.display = v.search ? "" : "none";
   }
   function save(w, c) { S("ie-map:" + w.sid, c); c.__v = Date.now(); bump[w.sid] = (bump[w.sid] || 0) + 1; }
   var bump = {};
@@ -82,7 +109,7 @@
     var pts = c.places.slice(), info = box.querySelector("[data-ie-map-info]");
     c.places.forEach(function (p, i) {
       var html = "<b>" + (p.name || "Place") + "</b><br>" + (p.address || "") + (p.hours ? "<br>" + p.hours : "") + (p.radiusKm ? "<br>Covers " + p.radiusKm + " km" : "");
-      var col = c.type === "route" || c.type === "tracker" ? (i === 0 ? "#22c55e" : i === c.places.length - 1 ? "#ef4444" : "#a78bfa") : "#8b5cf6";
+      var col = c.type === "route" || c.type === "tracker" ? (i === 0 ? "#22c55e" : i === c.places.length - 1 ? "#ef4444" : "#a78bfa") : (c.view && c.view.pin) || "#8b5cf6";
       box.__mk.push(new mb.Marker({ element: pin(win, col, p.name) }).setLngLat([p.lng, p.lat]).setPopup(new mb.Popup({ offset: 12 }).setHTML(html)).addTo(m));
     });
     var feats = [];
@@ -118,7 +145,8 @@
   }
   function mount(root, w) {
     var c = cfgOf(w), box = root.querySelector(":scope > [data-ie-map]");
-    if (!c.enabled || !J("ie-map:" + w.sid)) { if (box) box.remove(); return; }
+    if (!box) box = root.querySelector("[data-ie-map='" + w.sid + "']");
+    if (!c.enabled) { if (box) { if (box.__host) box.__host.style.visibility = ""; box.remove(); } return; }
     var win = root.ownerDocument.defaultView;
     if (!box) {
       box = root.ownerDocument.createElement("div"); box.setAttribute("data-ie-map", w.sid);
@@ -126,18 +154,30 @@
       var mapEl = root.ownerDocument.createElement("div"); mapEl.style.cssText = "position:absolute;inset:0";
       var inf = root.ownerDocument.createElement("div"); inf.setAttribute("data-ie-map-info", "1");
       inf.style.cssText = "position:absolute;left:10px;bottom:10px;z-index:2;padding:6px 10px;border-radius:10px;background:rgba(9,9,11,.85);color:#e4e4e7;font:12px system-ui;max-width:80%";
-      box.appendChild(mapEl); box.appendChild(inf); root.appendChild(box);
+      box.appendChild(mapEl); box.appendChild(inf);
+      var sr = root.ownerDocument.createElement("input"); sr.setAttribute("data-ie-map-search", "1"); sr.placeholder = "Search address";
+      sr.style.cssText = "position:absolute;left:10px;top:10px;z-index:3;width:min(240px,70%);height:30px;border-radius:10px;border:1px solid #3f3f46;background:rgba(9,9,11,.88);color:#e4e4e7;font:12px system-ui;padding:0 10px;outline:none";
+      sr.addEventListener("keydown", function (e) { e.stopPropagation(); if (e.key === "Enter" && sr.value.trim() && box.__m) geocode(sr.value.trim()).then(function (g) { box.__m.flyTo({ center: [g.lng, g.lat], zoom: 14, pitch: +c.view.pitch || 0, duration: 1800 }); }).catch(function () {}); });
+      ["mousedown", "dblclick", "click"].forEach(function (ev) { sr.addEventListener(ev, function (e) { e.stopPropagation(); }); });
+      box.appendChild(sr);
+      var host = hostOf(root);
+      if (host) {
+        if (root.ownerDocument.defaultView.getComputedStyle(host).position === "static") host.style.position = "relative";
+        box.style.cssText = "position:absolute;inset:0;z-index:5;overflow:hidden;border-radius:inherit;background:#0b0b0c";
+        box.__host = host; host.appendChild(box);
+      } else { box.__inline = true; root.appendChild(box); }
       ensureLib(win, function () {
         if (box.__m) return;
         win.mapboxgl.accessToken = TOKEN;
-        var m = box.__m = new win.mapboxgl.Map({ container: mapEl, style: STYLE, center: [-81.38, 28.54], zoom: 3, attributionControl: false });
-        m.on("load", function () { box.__ready = true; box.__v = -1; });
+        var m = box.__m = new win.mapboxgl.Map({ container: mapEl, style: STYLES[c.view.style] || STYLE, projection: c.view.proj === "flat" ? "mercator" : "globe", pitch: +c.view.pitch || 0, bearing: +c.view.bearing || 0, center: [-81.38, 28.54], zoom: 2.2, attributionControl: false });
+        m.on("style.load", function () { box.__ready = true; box.__v = -1; box.__vs = null; box.__rk = null; });
         m.on("click", function (e) {
           var cc = cfgOf(w); if (cc.type !== "confirm") return;
           cc.customer = { lng: e.lngLat.lng, lat: e.lngLat.lat }; save(w, cc);
         });
       });
     }
+    if (box.__ready) { try { applyView(box, c); } catch (e) {} }
     if (box.__ready && box.__v !== (bump[w.sid] || 0)) { box.__v = bump[w.sid] || 0; try { draw(box, c); } catch (e) {} }
   }
   function docs() {
@@ -187,9 +227,29 @@
     box.appendChild(wrap);
     wrap.appendChild(h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, ["Map • " + T.label]));
     function commit() { save(w, c); refresh && refresh(); }
-    var en = h("input", { type: "checkbox" }); en.checked = !first && c.enabled;
+    var en = h("input", { type: "checkbox" }); en.checked = c.enabled;
     en.addEventListener("change", function () { c.enabled = en.checked; commit(); });
     wrap.appendChild(h("label", { style: "display:flex;gap:6px;align-items:center;font:12px system-ui;color:#e4e4e7;margin-top:8px" }, [en, "Show a live map in this widget"]));
+
+    // view & style controls
+    var V = c.view;
+    wrap.appendChild(h("div", { style: L }, ["Map look"]));
+    var sty = h("select", { style: INP }); [["dark", "Dark globe"], ["satellite", "Satellite streets"], ["standard", "3D city"]].forEach(function (o) { var e = h("option", { value: o[0] }, [o[1]]); if (V.style === o[0]) e.selected = true; sty.appendChild(e); });
+    sty.addEventListener("change", function () { V.style = sty.value; commit(); }); wrap.appendChild(sty);
+    var pr = h("select", { style: INP }); [["globe", "3D globe"], ["flat", "Flat map"]].forEach(function (o) { var e = h("option", { value: o[0] }, [o[1]]); if (V.proj === o[0]) e.selected = true; pr.appendChild(e); });
+    pr.addEventListener("change", function () { V.proj = pr.value; commit(); }); wrap.appendChild(pr);
+    function slider(label, key, min, max) {
+      var lab = h("div", { style: "font:11px system-ui;color:#a1a1aa;margin-top:8px" }, [label + ": " + V[key]]);
+      var r = h("input", { type: "range", min: String(min), max: String(max), value: String(V[key]), style: "width:100%" });
+      r.addEventListener("input", function () { V[key] = +r.value; lab.textContent = label + ": " + r.value; save(w, c); });
+      wrap.appendChild(lab); wrap.appendChild(r);
+    }
+    slider("Tilt", "pitch", 0, 85); slider("Rotation", "bearing", -180, 180); slider("Height (when below the widget)", "height", 180, 720);
+    function tog(label, key) { var cb = h("input", { type: "checkbox" }); cb.checked = !!V[key]; cb.addEventListener("change", function () { V[key] = cb.checked; save(w, c); }); wrap.appendChild(h("label", { style: "display:flex;gap:6px;align-items:center;font:12px system-ui;color:#e4e4e7;margin-top:6px" }, [cb, label])); }
+    tog("Space & atmosphere", "fog"); tog("Address search on the map", "search"); tog("Live traffic", "traffic"); tog("3D buildings", "buildings");
+    var pc = h("input", { type: "color", value: V.pin, style: "width:40px;height:24px;border:0;background:none;cursor:pointer" });
+    pc.addEventListener("input", function () { V.pin = pc.value; save(w, c); });
+    wrap.appendChild(h("label", { style: "display:flex;gap:8px;align-items:center;font:12px system-ui;color:#e4e4e7;margin-top:6px" }, [pc, "Pin color"]));
 
     // places list
     wrap.appendChild(h("div", { style: L }, [w.type === "tracker" ? "Stops (first = pickup, last = delivery)" : w.type === "route" ? "Stops in order" : w.type === "coverage" ? "Your warehouses" : "Your locations"]));
