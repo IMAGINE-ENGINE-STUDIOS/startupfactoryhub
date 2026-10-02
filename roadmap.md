@@ -61,10 +61,13 @@
 - [x] Built for Everyone + Powerful Features moved to the About page
 - [x] All plans in one tabbed widget; default tab: Free AI, Starter AI, Basic, Self-Paced + Desk
 
-## Imagine Engine canvas overhaul (next)
-- [ ] Content/Design edits reach the upper 40 widgets (text, font, size, image upload, links)
-- [ ] Edits and pages show in Play as user
-- [ ] Section handle: up/down arrows + delete with confirmation
-- [ ] Undo / redo
-- [ ] Record + version log in header; restoring a version costs credits
-- [ ] Magnetic element drag with transparent preview; free drop leaves others untouched
+## Imagine Engine canvas overhaul
+- [x] Content/Design edits reach the upper 40 widgets (text, font, size, image upload, links)
+- [x] Edits and real maps show in Play as user; page links switch pages
+- [x] Section handle: up/down arrows + delete with confirmation
+- [x] Undo / redo across canvas, flow and dev (Ctrl+Z / Ctrl+Y)
+- [x] Record + version log in header; restore costs credits, free for admins
+- [x] Magnetic element drag with transparent preview; free drop leaves others untouched
+- [x] Phone/iPad: header fits, bottom bar = AI, Widgets, Projects, Content, Design
+- [ ] Page background editor + "merge widget with background"
+- [ ] Click-on-map pin placement for map widgets
