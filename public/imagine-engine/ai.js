@@ -268,6 +268,20 @@
       .finally(function () { busy = false; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
+
+  // Prompts from the Startup Factory Hub assistant bubble (parent window, same origin only)
+  window.addEventListener("message", function (ev) {
+    if (ev.origin !== location.origin || !ev.data || ev.data.iea !== "send") return;
+    var id = ev.data.id, before = messages.length;
+    send(String(ev.data.text || ""));
+    var poll = setInterval(function () {
+      if (busy) return;
+      clearInterval(poll);
+      var last = messages.slice(before).filter(function (m) { return m.role === "assistant"; }).pop();
+      var text = last ? (last.display || last.content) + (last.done && last.done.length ? "\n\nDone: " + last.done.join(", ") : "") : "Done.";
+      ev.source && ev.source.postMessage({ iea: "reply", id: id, text: text }, location.origin);
+    }, 300);
+  });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); } });
   root.querySelector("#iea-clr").onclick = function () { messages = []; save(); render(); };
 
@@ -285,6 +299,9 @@
       if (root.parentNode !== slot) slot.appendChild(root);
       drawer.style.display = "none";
       fab.style.display = "none";
+    } else if (window.top !== window) {
+      // Embedded in Startup Factory Hub: the site's single assistant bubble handles chat.
+      fab.style.display = "none"; drawer.style.display = "none";
     } else {
       if (root.parentNode !== drawer) drawer.appendChild(root);
       if (!fab.parentNode) { document.body.appendChild(fab); document.body.appendChild(drawer); }
