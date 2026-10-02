@@ -154,7 +154,14 @@ export default function VerifyEmail() {
     const { data: sendData, error: sendError } = await supabase.functions.invoke('send-verification-email', {
       body: { email: target },
     });
-    const error = sendError || (sendData?.error ? { message: sendData.error } : null);
+    let error: { message: string } | null = sendData?.error ? { message: sendData.error } : null;
+    if (sendError) {
+      error = { message: sendError.message };
+      try {
+        const ctx = (sendError as any).context;
+        if (ctx?.json) error = { message: (await ctx.json())?.error || sendError.message };
+      } catch { /* keep original message */ }
+    }
     setResending(false);
 
     if (error) {

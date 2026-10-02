@@ -202,10 +202,21 @@ serve(async (req) => {
     }
 
     // ---- Single mode: (re)send branded email to an existing account ----
+    // Never create accounts here: a magic link for an unknown email would sign one up without a password.
+    let existing: any = null;
+    for (let page = 1; page <= 50 && !existing; page++) {
+      const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (listErr) throw new Error(`listUsers: ${listErr.message}`);
+      existing = list.users.find((u: any) => (u.email || "").toLowerCase() === email.toLowerCase()) ?? null;
+      if (list.users.length < 1000) break;
+    }
+    if (!existing) return json({ error: "No account found with this email. Please sign up first." }, 404);
+    if (existing.email_confirmed_at) return json({ error: "This email is already verified. You can sign in now.", alreadyVerified: true }, 400);
 
-    const name = String(body.name || body.full_name || email.split("@")[0]);
-    const mvp = body.mvpProgram === true || String(body.mvpProgram ?? "") === "true";
-    const af = body.acceleratedFundraising === true || String(body.acceleratedFundraising ?? "") === "true";
+    const meta = existing.user_metadata ?? {};
+    const name = String(body.name || body.full_name || meta.full_name || email.split("@")[0]);
+    const mvp = body.mvpProgram === true || String(body.mvpProgram ?? meta.mvp_program ?? "") === "true";
+    const af = body.acceleratedFundraising === true || String(body.acceleratedFundraising ?? meta.accelerated_fundraising ?? "") === "true";
 
     await sendFor(admin, email, name, mvp, af);
     return json({ success: true });
