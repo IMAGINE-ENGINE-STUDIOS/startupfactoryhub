@@ -188,7 +188,6 @@ const App = () => (
                     <Route path="/mvp-program" element={<MVPProgram />} />
                     <Route path="/equity-program" element={<EquityProgram />} />
                     <Route path="/imagine-engine/admin" element={<ImagineEngineAdmin />} />
-                    <Route path="/Imagine-Engine" element={<ImagineEngine />} />
                     <Route path="/imagine-engine" element={<ImagineEngine />} />
                     <Route path="/demo" element={<DemoAccounts />} />
                     <Route path="/live-video" element={<LiveVideo />} />
