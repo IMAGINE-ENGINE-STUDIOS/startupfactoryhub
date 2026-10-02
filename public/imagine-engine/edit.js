@@ -28,6 +28,7 @@
   }
   function pickTarget(t, root) {
     // prefer buttons/links/images, then leaf text, else the clicked element
+    if (t.closest && t.closest("[data-ie-map]")) return null;
     var b = t.closest && t.closest("button,a,img,[role=button]");
     if (b && root.contains(b) && b !== root) return b;
     if (t.tagName && /^(svg|path|g|circle|rect|line|polyline|polygon)$/i.test(t.tagName)) { var s = t.closest("svg"); if (s && s.parentElement && root.contains(s.parentElement)) return s.parentElement; }
@@ -148,6 +149,8 @@
   if (TOP !== window) return; // panel + drop logic live only in the top window
 
   var sel = null;
+  window.__IEElActive = function () { return !!(sel && sel.el && sel.el.isConnected); };
+  window.__IEElStyle = function (o) { if (sel && sel.el) { sel.api.setStyle(sel.el, o); render(true); } };
   window.__IEElSelect = function (s) {
     if (sel && sel.el && sel.el !== s.el) sel.el.style.outline = sel.prevOutline || "";
     if (!sel || sel.el !== s.el) { s.prevOutline = s.el.style.outline; s.el.style.outline = "2px dashed #8b5cf6"; s.el.style.outlineOffset = "2px"; }
@@ -287,6 +290,7 @@
       box.appendChild(h("button", { style: BTN + ";width:100%;margin-top:6px", onclick: function () { setStyle({ transform: "", display: "" }); render(true); } }, ["Reset position"]));
     }
     extras(box, tg, c, isBtn);
+    if (window.__IEMapPanel) try { window.__IEMapPanel(box, tg, function () { render(true); }); } catch (er) {}
     slot.appendChild(box);
   }
   // ---------- Link, media, product, payments, storage ----------
