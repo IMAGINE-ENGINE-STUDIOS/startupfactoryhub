@@ -59,6 +59,7 @@ const EquityProgram = lazy(() => import("./pages/EquityProgram"));
 const ImagineEngine = lazy(() => import("./pages/ImagineEngine"));
 const ImagineEngineAdmin = lazy(() => import("./pages/ImagineEngineAdmin"));
 const DemoAccounts = lazy(() => import("./pages/DemoAccounts"));
+const LiveVideo = lazy(() => import("./pages/LiveVideo"));
 const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
 const MembersClub = lazy(() => import("./pages/MembersClub"));
@@ -190,6 +191,7 @@ const App = () => (
                     <Route path="/Imagine-Engine" element={<ImagineEngine />} />
                     <Route path="/imagine-engine" element={<ImagineEngine />} />
                     <Route path="/demo" element={<DemoAccounts />} />
+                    <Route path="/live-video" element={<LiveVideo />} />
                     <Route path="/accelerated-fundraising" element={<AcceleratedFundraising />} />
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
                     <Route path="/emails" element={<EmailTemplates />} />
