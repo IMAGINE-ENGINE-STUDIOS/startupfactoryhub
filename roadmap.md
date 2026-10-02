@@ -55,3 +55,16 @@
 - [ ] Step 3: global cart + Stripe (admin → SFH Stripe; users → Stripe Connect or own keys; admin-set fee)
 
 - [x] Imagine Engine Step 2: map widget controllers, remove Layout tab, Design+Content integration, thumbnail reload fix
+
+## Website reorganization (done)
+- [x] About link in top menu (desktop + mobile) and footer → /about
+- [x] Built for Everyone + Powerful Features moved to the About page
+- [x] All plans in one tabbed widget; default tab: Free AI, Starter AI, Basic, Self-Paced + Desk
+
+## Imagine Engine canvas overhaul (next)
+- [ ] Content/Design edits reach the upper 40 widgets (text, font, size, image upload, links)
+- [ ] Edits and pages show in Play as user
+- [ ] Section handle: up/down arrows + delete with confirmation
+- [ ] Undo / redo
+- [ ] Record + version log in header; restoring a version costs credits
+- [ ] Magnetic element drag with transparent preview; free drop leaves others untouched
