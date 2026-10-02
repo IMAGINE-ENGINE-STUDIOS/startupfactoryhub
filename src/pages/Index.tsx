@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import NasdaqFeature from "@/components/NasdaqFeature";
-import FeaturesSection from "@/components/FeaturesSection";
-import CommunitySection from "@/components/CommunitySection";
 import ResourceMapSection from "@/components/ResourceMapSection";
 import PricingPlansSection from "@/components/PricingPlansSection";
 import AboutHero from "@/components/AboutHero";
@@ -35,8 +33,6 @@ const SECTIONS: { key: string; label: string; render: () => JSX.Element }[] = [
   { key: "about", label: "About Startup Factory Hub", render: () => <AboutHero /> },
   { key: "resourceMap", label: "Resource Map", render: () => <ResourceMapSection /> },
   { key: "pricing", label: "Pricing Plans", render: () => <PricingPlansSection /> },
-  { key: "features", label: "Features", render: () => <FeaturesSection /> },
-  { key: "community", label: "Community", render: () => <CommunitySection /> },
 ];
 
 const DEFAULT_ORDER = SECTIONS.map((s) => s.key);

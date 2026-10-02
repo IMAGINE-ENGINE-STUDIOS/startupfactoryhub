@@ -33,6 +33,7 @@ const Navigation = () => {
                 Emergency Response
               </a>
             </Button>
+            <Button variant="ghost" onClick={() => navigate("/about")} className="min-h-[44px]">{t('nav.about')}</Button>
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">{t('nav.dashboard')}</Button>
@@ -61,6 +62,9 @@ const Navigation = () => {
                       <Siren className="h-4 w-4 mr-2" />
                       Emergency Response
                     </a>
+                  </Button>
+                  <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => { navigate("/about"); closeMenu(); }}>
+                    {t('nav.about')}
                   </Button>
                   {user ? (
                     <>
