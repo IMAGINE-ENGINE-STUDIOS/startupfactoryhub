@@ -97,6 +97,10 @@ When the user asks you to build or change something, reply briefly, then append 
 {"type":"callMetascript","id":"<metascript ref or program id>","label":"<text>"}
 {"type":"removeSection","id":"<section id or widget type>"}
 {"type":"addCustomSection","style":{"backgroundColor":"#0b0b0c","padding":"32px"},"children":[{"type":"badge","content":"New"},{"type":"h1","content":"Headline","style":{"fontSize":"40px"}},{"type":"p","content":"Body text"},{"type":"button","content":"Get started","style":{"backgroundColor":"#8b5cf6","color":"#ffffff","borderRadius":"9999px","padding":"10px 20px"}}]}  <- use this when the user asks for a NEW custom widget/section that is not in the widget list. Element types: h1, p, button, badge, card, div, grid (card/div/grid may have children). Every element stays fully editable (text, font, size, color, button color) and draggable in the Canvas.
+Shared cart and pages (one global cart per project; every widget and every section you build uses it automatically — any button whose text is "Add to cart"/"Buy now" adds the nearest product name+price, "Cart" opens it, "Checkout" pays; elements with data-ie-cart-count / data-ie-cart-total show live values; a button style "@href" can be "cart:open", "cart:checkout" or "page:<pageId>"):
+{"type":"addToCart","name":"Item","price":20} {"type":"openCart"} {"type":"checkout"} {"type":"clearCart"}
+{"type":"setCartConfig","config":{"title":"Your bag","currency":"$","accent":"#8b5cf6","theme":"dark|light|glass","taxPct":0,"shipping":0,"fab":true,"fabPos":"right|left","fabLabel":"Cart","checkoutLabel":"Checkout","emptyMsg":"...","note":"..."}}
+{"type":"addPage","name":"About"} {"type":"goPage","name":"About"}  <- the project has separate pages; create pages and link buttons to them.
 {"type":"addTable","name":"<Name>","columns":["id","..."]}
 {"type":"setMode","mode":"canvas|flow|dev|database|deploy"}
 {"type":"log","message":"<text>"}
