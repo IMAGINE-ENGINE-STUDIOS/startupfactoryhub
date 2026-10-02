@@ -1,47 +1,64 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useTracks, useConnectionState } from '@livekit/components-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useTracks, useConnectionState, useDataChannel } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 import {
-  FileText, Circle, Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, Link2,
-  MonitorUp, Presentation, Smile, Heart, Flame, ThumbsUp, Laugh, PhoneOff, Upload, Sliders,
-  Package, DollarSign, ShoppingCart, Copy, Play, Sparkles, Check, MessageSquare,
+  Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, MonitorUp, Presentation,
+  Heart, Flame, ThumbsUp, PhoneOff, Upload, Sliders, DollarSign, ShoppingBag, Copy, Check,
+  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, MoreHorizontal,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 
-interface LiveVideoRoomProps {
-  roomName?: string;
-  room?: string;
-  identity?: string;
-  onLeave?: () => void;
-}
+interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
 
 type Peer = { id: string; name: string; muted: boolean; camOff: boolean; hand: boolean };
-type Product = { id: string; code: string; name: string; price: number };
+type Product = { id: string; name: string; price: number; tag: string; image: string };
+type CartItem = { id: string; name: string; price: number; qty: number };
 
-const PRODUCTS: Product[] = [
-  { id: 'hs', code: 'HS', name: 'Studio Headset Pro', price: 249 },
-  { id: 'rl', code: 'RL', name: '4K Ring Light', price: 89 },
-  { id: 'ap', code: 'AP', name: 'Acoustic Panel Set', price: 129 },
-];
-
-const MOCK_NAMES = ['Alex Rivera', 'Sora Kim', 'Marcus Lee', 'Priya Nair', 'Jordan Wu', 'Lena Ortiz', 'Omar Haddad', 'Mia Chen', 'Noah Patel', 'Ava Rossi'];
+const MOCK_NAMES = ['Alex Rivera', 'Sora Kim', 'Marcus Lee', 'Priya Nair', 'Jordan Wu', 'Lena Ortiz', 'Omar Haddad', 'Mia Chen'];
 const initials = (n: string) => n.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const REACTIONS = [{ k: 'heart', i: Heart, c: 'text-rose-500' }, { k: 'fire', i: Flame, c: 'text-orange-500' }, { k: 'up', i: ThumbsUp, c: 'text-amber-500' }];
 
+const readCart = (): CartItem[] => {
+  const c = (window as any).__IECart;
+  if (c?.items) { try { return c.items(); } catch { /* ignore */ } }
+  try { return JSON.parse(localStorage.getItem('ie-live-cart') || '[]'); } catch { return []; }
+};
 const addToCart = (p: Product) => {
   const cart = (window as any).__IECart;
-  if (cart?.add) { cart.add({ id: p.id, name: p.name, price: p.price, qty: 1 }); cart.open?.(); }
+  if (cart?.add) { cart.add({ id: p.id, name: p.name, price: p.price, image: p.image, qty: 1 }); }
   else {
-    const key = 'ie-live-cart';
-    const items = JSON.parse(localStorage.getItem(key) || '[]');
-    const found = items.find((i: any) => i.id === p.id);
+    const items = readCart();
+    const found = items.find((i) => i.id === p.id);
     found ? found.qty++ : items.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
-    localStorage.setItem(key, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent('ie-live-cart'));
+    localStorage.setItem('ie-live-cart', JSON.stringify(items));
   }
+  window.dispatchEvent(new CustomEvent('ie-live-cart', { detail: { added: p } }));
 };
+const removeFromCart = (id: string) => {
+  const cart = (window as any).__IECart;
+  if (cart?.remove) cart.remove(id);
+  else localStorage.setItem('ie-live-cart', JSON.stringify(readCart().filter((i) => i.id !== id)));
+  window.dispatchEvent(new CustomEvent('ie-live-cart'));
+};
+
+// Shrinks an uploaded photo so it can be shared live with everyone in the call.
+const shrinkImage = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(1, 240 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+    resolve(c.toDataURL('image/webp', 0.72));
+    URL.revokeObjectURL(img.src);
+  };
+  img.onerror = reject;
+  img.src = URL.createObjectURL(file);
+});
 
 function RemoteTiles() {
   const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare], { onlySubscribed: true });
@@ -60,27 +77,56 @@ function RemoteTiles() {
 
 function ConnBadge() {
   const state = useConnectionState();
-  return <span className="font-mono text-[11px] text-zinc-400">{state === 'connected' ? 'LiveKit Live' : 'LiveKit Preview'}</span>;
+  return <span className="font-mono text-[11px] text-zinc-500">{state === 'connected' ? 'Live' : 'Connecting'}</span>;
+}
+
+// Bridges the shop to everyone in the call over the room's data channel.
+function ShopSync({ onSend, onMessage }: { onSend: (fn: (m: any) => void) => void; onMessage: (m: any) => void }) {
+  const { send } = useDataChannel('shop', (msg) => {
+    try { onMessage(JSON.parse(new TextDecoder().decode(msg.payload))); } catch { /* ignore */ }
+  });
+  useEffect(() => {
+    onSend((m) => { try { send(new TextEncoder().encode(JSON.stringify(m)), { reliable: true }); } catch { /* ignore */ } });
+  }, [send, onSend]);
+  return null;
 }
 
 function Toggle({ on, onClick, title, sub }: { on: boolean; onClick: () => void; title: string; sub: string }) {
   return (
     <button onClick={onClick} className="w-full flex items-start gap-3 text-left border border-zinc-200 rounded-2xl px-4 py-3 hover:bg-zinc-50">
-      <span className={`mt-1 w-4 h-4 rounded border flex items-center justify-center ${on ? 'border-zinc-800' : 'border-zinc-400'}`}>
-        {on && <Check className="w-3 h-3 text-zinc-900" />}
-      </span>
-      <span>
-        <span className="block text-[15px] text-zinc-900">{title}</span>
-        <span className="block text-xs text-zinc-500 mt-0.5">{sub}</span>
-      </span>
+      <span className={`mt-1 w-4 h-4 rounded border flex items-center justify-center ${on ? 'border-zinc-800' : 'border-zinc-400'}`}>{on && <Check className="w-3 h-3 text-zinc-900" />}</span>
+      <span><span className="block text-[15px] text-zinc-900">{title}</span><span className="block text-xs text-zinc-500 mt-0.5">{sub}</span></span>
     </button>
   );
 }
 
+function Thumb({ p, className }: { p: Product; className: string }) {
+  return p.image
+    ? <img src={p.image} alt={p.name} className={`${className} object-cover bg-zinc-100`} />
+    : <span className={`${className} bg-zinc-200 text-zinc-600 font-mono text-xs flex items-center justify-center`}>{initials(p.name)}</span>;
+}
+
 export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoomProps) {
   const name = roomName || room || 'live-commerce-room';
-  const id = useMemo(() => identity || `user-${Math.floor(Math.random() * 10000)}`, [identity]);
-  const roomCode = useMemo(() => `LIVE-${Math.floor(100 + Math.random() * 900)}`, []);
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
+  const guestId = useMemo(() => `guest-${Math.floor(Math.random() * 100000)}`, []);
+  const id = identity || user?.id || guestId;
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Guest';
+
+  // Host = the person whose account id is in the invite link; the first signed-in person to open a room becomes its host.
+  const hostId = useMemo(() => {
+    const url = new URL(window.location.href);
+    let h = url.searchParams.get('host');
+    if (!h && user?.id) {
+      h = user.id;
+      url.searchParams.set('host', h);
+      if (!url.searchParams.get('room')) url.searchParams.set('room', name);
+      window.history.replaceState(null, '', url.toString());
+    }
+    return h;
+  }, [user?.id, name]);
+  const isHost = !hostId || hostId === id;
 
   const [token, setToken] = useState('');
   const [serverUrl, setServerUrl] = useState('');
@@ -94,12 +140,11 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [rec, setRec] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [pinned, setPinned] = useState<string | null>(null);
-  const [reaction, setReaction] = useState<{ key: number; icon: any } | null>(null);
-  const [spotlight, setSpotlight] = useState<Product | null>(PRODUCTS[0]);
+  const [reaction, setReaction] = useState<{ key: number; icon: any; c: string } | null>(null);
+  const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
-  const [files, setFiles] = useState<{ name: string; url: string }[]>([]);
   const [presenting, setPresenting] = useState<{ name: string; url: string } | null>(null);
-  const [tab, setTab] = useState<'rules' | 'chat' | 'products' | 'money' | 'cart'>('rules');
+  const [tab, setTab] = useState<'shop' | 'chat' | 'money' | 'rules'>('shop');
   const [chatCount, setChatCount] = useState(0);
   const [seenCount, setSeenCount] = useState(0);
   useEffect(() => { if (tab === 'chat') setSeenCount(chatCount); }, [tab, chatCount]);
@@ -107,26 +152,41 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [userLimit, setUserLimit] = useState(100);
   const [timeLimit, setTimeLimit] = useState(120);
   const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true });
-  const [copied, setCopied] = useState('');
+  const [copied, setCopied] = useState(false);
   const [cartTick, setCartTick] = useState(0);
-  const [peers, setPeers] = useState<Peer[]>([
-    { id: 'p1', name: 'Alex Rivera', muted: false, camOff: false, hand: false },
-    { id: 'p2', name: 'Sora Kim', muted: true, camOff: false, hand: true },
-    { id: 'p3', name: 'Marcus Lee', muted: false, camOff: true, hand: false },
-    { id: 'p4', name: 'Priya Nair', muted: false, camOff: false, hand: false },
-    { id: 'p5', name: 'Jordan Wu', muted: true, camOff: false, hand: false },
-  ]);
+  const [peers, setPeers] = useState<Peer[]>([]);
+
+  // Shop
+  const catalogKey = `ie-live-catalog:${name}`;
+  const [catalog, setCatalog] = useState<Product[]>(() => { try { return JSON.parse(localStorage.getItem(catalogKey) || '[]'); } catch { return []; } });
+  const [drop, setDrop] = useState<Product | null>(null);
+  const [stageOffer, setStageOffer] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState({ name: '', price: '', tag: '', image: '' });
+  const [stats, setStats] = useState({ adds: 0, value: 0 });
+  useEffect(() => { try { localStorage.setItem(catalogKey, JSON.stringify(catalog)); } catch { /* storage full */ } }, [catalog, catalogKey]);
+
+  const sendRef = useRef<(m: any) => void>(() => {});
+  const setSend = useCallback((fn: (m: any) => void) => { sendRef.current = fn; }, []);
+  const broadcast = (m: any) => sendRef.current(m);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const screenRef = useRef<HTMLVideoElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const imgInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user?.id) { setProfile(null); return; }
+    supabase.from('profiles').select('full_name, avatar_url').eq('user_id', user.id).order('created_at').limit(1)
+      .then(({ data }) => setProfile(data?.[0] ?? null));
+  }, [user?.id]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: name, identity: id } });
+        const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: name, identity: id, name: displayName } });
         if (error) throw error;
         if (!data?.token) throw new Error(data?.error || 'No token returned');
         const url = data.url || import.meta.env.VITE_LIVEKIT_URL;
@@ -137,19 +197,17 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       }
     })();
     return () => { cancelled = true; };
-  }, [name, id]);
+  }, [name, id, displayName]);
+
+  useEffect(() => { const t = setInterval(() => setSeconds((s) => s + 1), 1000); return () => clearInterval(t); }, []);
+  useEffect(() => { if (rules.autoEnd && seconds >= timeLimit * 60) setLeft(true); }, [seconds, timeLimit, rules.autoEnd]);
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (rules.autoEnd && seconds >= timeLimit * 60) setLeft(true);
-  }, [seconds, timeLimit, rules.autoEnd]);
-
-  useEffect(() => {
-    const h = () => setCartTick((n) => n + 1);
+    const h = (e: Event) => {
+      setCartTick((n) => n + 1);
+      const added = (e as CustomEvent).detail?.added as Product | undefined;
+      if (added) setStats((s) => ({ adds: s.adds + 1, value: s.value + added.price }));
+    };
     window.addEventListener('ie-live-cart', h);
     window.addEventListener('ie-cart', h);
     return () => { window.removeEventListener('ie-live-cart', h); window.removeEventListener('ie-cart', h); };
@@ -166,15 +224,32 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     }).catch(() => {});
     return () => { active = false; };
   }, [cam, mic]);
-
   useEffect(() => () => streamRef.current?.getTracks().forEach((t) => t.stop()), []);
 
+  const onShopMessage = useCallback((m: any) => {
+    if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
+    if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
+    if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
+    if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
+  }, []); // eslint-disable-line
+
+  const showReaction = (r: typeof REACTIONS[number]) => { setReaction({ key: Date.now(), icon: r.i, c: r.c }); setTimeout(() => setReaction(null), 1500); };
+  const react = (r: typeof REACTIONS[number]) => { showReaction(r); broadcast({ t: 'react', k: r.k }); };
+  const canSell = isHost || !rules.hostProducts;
+  const pushToAll = (p: Product) => { setDrop(p); setStageOffer(true); broadcast({ t: 'push', p }); };
+  const saveProduct = () => {
+    const price = parseFloat(draft.price);
+    if (!draft.name.trim() || !(price >= 0)) return;
+    const p: Product = { id: `lp-${Date.now()}`, name: draft.name.trim(), price, tag: draft.tag.trim().toUpperCase(), image: draft.image };
+    setCatalog((c) => [...c, p]);
+    broadcast({ t: 'product', p });
+    setDraft({ name: '', price: '', tag: '', image: '' });
+    setAdding(false);
+  };
+  const deleteProduct = (pid: string) => { setCatalog((c) => c.filter((x) => x.id !== pid)); if (drop?.id === pid) setDrop(null); broadcast({ t: 'remove', id: pid }); };
+
   const toggleShare = async () => {
-    if (sharing) {
-      (screenRef.current?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop());
-      setSharing(false);
-      return;
-    }
+    if (sharing) { (screenRef.current?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop()); setSharing(false); return; }
     try {
       const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
       setSharing(true);
@@ -182,39 +257,36 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       s.getVideoTracks()[0].onended = () => setSharing(false);
     } catch { /* cancelled */ }
   };
-
-  const react = (icon: any) => { setReaction({ key: Date.now(), icon }); setTimeout(() => setReaction(null), 1500); };
   const addPeer = () => {
     if (peers.length + 1 >= userLimit) return;
-    const n = MOCK_NAMES[peers.length % MOCK_NAMES.length];
-    setPeers((p) => [...p, { id: `p${Date.now()}`, name: n, muted: rules.muteEntry, camOff: false, hand: false }]);
+    setPeers((p) => [...p, { id: `p${Date.now()}`, name: MOCK_NAMES[p.length % MOCK_NAMES.length], muted: rules.muteEntry, camOff: false, hand: false }]);
   };
   const onFiles = (list: FileList | null) => {
-    if (!list) return;
-    const added = Array.from(list).map((f) => ({ name: f.name, url: URL.createObjectURL(f) }));
-    setFiles((f) => [...f, ...added]);
-    setPresenting(added[0]);
+    const f = list?.[0];
+    if (!f) return;
+    setPresenting({ name: f.name, url: URL.createObjectURL(f) });
+    setPresentOpen(false);
   };
   const openLink = () => {
     if (!link.trim()) return;
     const url = link.startsWith('http') ? link : `https://${link}`;
-    const item = { name: url, url };
-    setFiles((f) => [...f, item]);
-    setPresenting(item);
-    setLink('');
+    setPresenting({ name: url, url });
+    setLink(''); setPresentOpen(false);
   };
-  const copy = (text: string, key: string) => { navigator.clipboard?.writeText(text); setCopied(key); setTimeout(() => setCopied(''), 1200); };
 
-  const roomUrl = `${window.location.origin}/live-video?room=${encodeURIComponent(name)}`;
-  const cartItems: { id: string; name: string; price: number; qty: number }[] = useMemo(() => {
-    const c = (window as any).__IECart;
-    if (c?.items) return c.items();
-    try { return JSON.parse(localStorage.getItem('ie-live-cart') || '[]'); } catch { return []; }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartTick]);
+  const inviteUrl = (() => {
+    const u = new URL(`${window.location.origin}/live-video`);
+    u.searchParams.set('room', name);
+    if (hostId) u.searchParams.set('host', hostId);
+    return u.toString();
+  })();
+  const copyInvite = () => { navigator.clipboard?.writeText(inviteUrl); setCopied(true); setTimeout(() => setCopied(false), 1200); };
+  const cartItems = useMemo(readCart, [cartTick]); // eslint-disable-line
+  const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const totalPeers = peers.length + 1;
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
+  const checkout = () => { const c = (window as any).__IECart; c?.checkout ? c.checkout() : c?.open?.(); };
 
   if (left) {
     return (
@@ -230,221 +302,265 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const tileBase = 'relative aspect-video rounded-2xl overflow-hidden bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/[0.06]';
 
   const stage = (
-    <div className="flex-1 min-w-0 flex flex-col rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950">
-      {/* Header */}
+    <div className="flex-1 min-w-0 flex flex-col rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950"
+      onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}>
       <div className="h-14 bg-white flex items-center gap-4 px-5 font-mono text-[13px] text-zinc-800 border-b border-zinc-200">
-        <span className="tracking-wider">{roomCode}</span>
-        <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Timer className="w-3.5 h-3.5" />{fmtTime(seconds)}</span>
         <span className="w-px h-4 bg-zinc-200" />
-        <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : `${totalPeers} peers`} • no cap</span>
+        <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : `${totalPeers} in call`}</span>
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={() => fileInput.current?.click()} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-zinc-200 hover:bg-zinc-50"><FileText className="w-3.5 h-3.5" />Present file</button>
-          <button onClick={() => setRec((r) => !r)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500' : ''}`} />REC {rec ? 'ON' : 'OFF'}</button>
+          {isHost && <button onClick={() => setRec((r) => !r)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500' : ''}`} />REC {rec ? 'ON' : 'OFF'}</button>}
           <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-zinc-200 bg-zinc-50">
             <span className={`w-1.5 h-1.5 rounded-full ${token ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
-            {token ? <ConnBadge /> : <span className="font-mono text-[11px] text-zinc-400" title={connError}>LiveKit Preview</span>}
+            {token ? <ConnBadge /> : <span className="font-mono text-[11px] text-zinc-500" title={connError}>{connError ? 'Offline' : 'Connecting'}</span>}
           </span>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="relative flex-1 overflow-y-auto p-4">
+        {drop && stageOffer && (
+          <div className="sticky top-0 z-20 mb-3 ml-auto w-full max-w-md bg-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
+            <Thumb p={drop} className="w-14 h-14 rounded-xl shrink-0" />
+            <span className="flex-1 min-w-0">
+              <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600"><Radio className="w-3 h-3" />LIVE DROP</span>
+              <span className="block text-[15px] text-zinc-900 truncate">{drop.name}</span>
+              <span className="block font-mono text-xs text-zinc-500">${drop.price}</span>
+            </span>
+            <button onClick={() => addToCart(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm">Add to cart</button>
+            <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
+          </div>
+        )}
         {(sharing || presenting) && (
           <div className="relative mb-3 rounded-2xl overflow-hidden border border-white/10 bg-zinc-900 h-[360px]">
             {sharing ? <video ref={screenRef} autoPlay muted playsInline className="w-full h-full object-contain" />
               : presenting && (/\.(png|jpe?g|gif|webp)$/i.test(presenting.name)
                 ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
                 : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
-            <button onClick={() => { if (sharing) toggleShare(); else setPresenting(null); }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
+            <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else setPresenting(null); }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
           </div>
         )}
         <div className="grid grid-cols-3 gap-3">
-          {/* Host */}
           <div onClick={() => setPinned(pinned === 'host' ? null : 'host')} className={`${tileBase} ring-2 ring-white ${pinned === 'host' ? 'col-span-2 row-span-2' : ''}`}>
             {cam ? <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
-              : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"><span className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"><VideoOff className="w-5 h-5 text-zinc-300" /></span><span className="font-mono text-xs text-zinc-400">Camera off • voice still live</span></div>}
-            <span className="absolute top-3 left-3 bg-white text-zinc-900 font-mono text-[10px] tracking-wider px-2.5 py-1 rounded-full">SPEAKING • VIDEO+VOICE</span>
+              : <div className="absolute inset-0 flex items-center justify-center">
+                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
+                    : <span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 flex items-center justify-center">{initials(displayName)}</span>}
+                </div>}
             <div className="absolute inset-x-0 bottom-0 p-3 flex items-center bg-gradient-to-t from-black/70 to-transparent">
-              <span className="font-mono text-xs text-white flex items-center gap-1.5">You (Host) <Crown className="w-3.5 h-3.5 text-amber-400" />{hand && <Hand className="w-3.5 h-3.5 text-amber-400" />}</span>
+              <span className="font-mono text-xs text-white flex items-center gap-1.5">{displayName} (You){isHost && <Crown className="w-3.5 h-3.5 text-amber-400" />}{hand && <Hand className="w-3.5 h-3.5 text-amber-400" />}</span>
               <span className="ml-auto flex gap-1.5">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center ${mic ? 'bg-white/15' : 'bg-red-500'}`}>{mic ? <Mic className="w-3 h-3 text-white" /> : <MicOff className="w-3 h-3 text-white" />}</span>
-                <span className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center">{cam ? <Video className="w-3 h-3 text-white" /> : <VideoOff className="w-3 h-3 text-white" />}</span>
               </span>
             </div>
-            {reaction && <span key={reaction.key} className="absolute right-4 bottom-12 animate-bounce"><reaction.icon className="w-8 h-8 text-rose-400" /></span>}
+            {reaction && <span key={reaction.key} className="absolute right-4 bottom-12 animate-bounce"><reaction.icon className={`w-8 h-8 ${reaction.c}`} /></span>}
           </div>
 
           {token && <RemoteTiles />}
 
-          {peers.map((p, i) => (
+          {peers.map((p) => (
             <div key={p.id} onClick={() => setPinned(pinned === p.id ? null : p.id)} className={`${tileBase} ${pinned === p.id ? 'col-span-2 row-span-2' : ''}`}>
-              {i === 0 && spotlight && (
-                <div onClick={(e) => e.stopPropagation()} className="absolute top-1 left-1 right-1 z-10 bg-white rounded-2xl p-3 flex items-center gap-3 shadow-xl">
-                  <span className="w-14 h-14 rounded-xl bg-zinc-900 text-white font-mono text-[10px] flex items-center justify-center">{spotlight.code}</span>
-                  <span className="flex-1 min-w-0"><span className="block text-[15px] text-zinc-900 truncate">{spotlight.name}</span><span className="block font-mono text-xs text-zinc-500">${spotlight.price}</span></span>
-                  <button onClick={() => addToCart(spotlight)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm">Add to cart</button>
-                  <button onClick={() => setSpotlight(null)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
-                </div>
-              )}
-              {p.camOff
-                ? <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"><span className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"><VideoOff className="w-5 h-5 text-zinc-300" /></span><span className="font-mono text-xs text-zinc-400">Camera off • voice still live</span></div>
-                : <div className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 font-medium flex items-center justify-center">{initials(p.name)}</span></div>}
+              <div className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 font-medium flex items-center justify-center">{initials(p.name)}</span></div>
               <div className="absolute inset-x-0 bottom-0 p-3 flex items-center bg-gradient-to-t from-black/60 to-transparent">
-                <span className="font-mono text-xs text-white flex items-center gap-1.5">{p.name}{p.hand && <Hand className="w-3.5 h-3.5 text-amber-400" />}</span>
-                <span className="ml-auto flex gap-1.5">
-                  <button onClick={(e) => { e.stopPropagation(); setPeers((ps) => ps.map((x) => x.id === p.id ? { ...x, muted: !x.muted } : x)); }} className={`w-6 h-6 rounded-full flex items-center justify-center ${p.muted ? 'bg-red-500' : 'bg-white/15'}`}>{p.muted ? <MicOff className="w-3 h-3 text-white" /> : <Mic className="w-3 h-3 text-white" />}</button>
-                  <span className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center">{p.camOff ? <VideoOff className="w-3 h-3 text-white" /> : <Video className="w-3 h-3 text-white" />}</span>
-                </span>
+                <span className="font-mono text-xs text-white">{p.name}</span>
+                <button aria-label="Mute" onClick={(e) => { e.stopPropagation(); setPeers((ps) => ps.map((x) => x.id === p.id ? { ...x, muted: !x.muted } : x)); }} className={`ml-auto w-6 h-6 rounded-full flex items-center justify-center ${p.muted ? 'bg-red-500' : 'bg-white/15'}`}>{p.muted ? <MicOff className="w-3 h-3 text-white" /> : <Mic className="w-3 h-3 text-white" />}</button>
               </div>
             </div>
           ))}
         </div>
+        {isHost && <button onClick={addPeer} className="mt-3 flex items-center gap-1 px-4 py-2 rounded-full bg-zinc-800 text-zinc-300 border border-white/10 font-mono text-xs"><Plus className="w-3 h-3" />Add test person • {totalPeers}/{userLimit}</button>}
+      </div>
 
-        <div className="mt-3 flex flex-wrap gap-2 font-mono text-xs">
-          <button onClick={addPeer} className="flex items-center gap-1 px-4 py-2 rounded-full bg-zinc-800 text-zinc-200 border border-white/10"><Plus className="w-3 h-3" />Add mock peer (no cap) • {totalPeers}/{userLimit}</button>
-          <span className="px-4 py-2 rounded-full border border-white/10 text-zinc-400">SFU • grid scrolls to 100+</span>
-          <button onClick={() => fileInput.current?.click()} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-700"><FileText className="w-3 h-3" />Drop files or paste Google link</button>
-          {files.map((f) => (
-            <button key={f.url} onClick={() => setPresenting(f)} className="px-3 py-2 rounded-full border border-white/10 text-zinc-300 max-w-[200px] truncate">{f.name}</button>
+      {catalog.length > 0 && (
+        <div className="px-4 pb-3 flex gap-2 overflow-x-auto">
+          {catalog.map((p) => (
+            <button key={p.id} onClick={() => addToCart(p)} className="shrink-0 flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white font-mono text-xs text-zinc-800 hover:bg-zinc-100">
+              <Thumb p={p} className="w-8 h-8 rounded-full" />{p.name} • ${p.price}<Plus className="w-3 h-3" />
+            </button>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Offers ribbon */}
-      <div className="px-4 pb-3 flex flex-wrap gap-2 bg-zinc-950">
-        {PRODUCTS.map((p, i) => (
-          <button key={p.id} onClick={() => addToCart(p)} className="flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white font-mono text-xs text-zinc-800 hover:bg-zinc-100">
-            <span className={`w-8 h-8 rounded-full text-[8px] flex items-center justify-center ${i === 0 ? 'bg-zinc-900 text-white' : 'bg-zinc-200 text-zinc-600'}`}>{p.code}</span>
-            {p.name} • ${p.price}
-          </button>
-        ))}
-      </div>
-
-      {/* Dock */}
-      <div className="mx-4 mb-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-2 flex items-center gap-2"
-        onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}>
-        <div className="flex items-center gap-2 flex-1 min-w-0 px-3 py-2.5 rounded-full border border-white/10">
-          <Link2 className="w-4 h-4 text-zinc-500 shrink-0" />
-          <input value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && openLink()} placeholder="Paste Google Drive / Sheets / Slides link"
-            className="flex-1 min-w-0 bg-transparent font-mono text-sm text-zinc-200 placeholder:text-zinc-400 outline-none" />
-        </div>
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-zinc-950 border border-white/10">
+      <div className="relative mx-4 mb-4 flex justify-center">
+        {presentOpen && (
+          <div className="absolute bottom-14 z-30 w-[360px] rounded-2xl bg-zinc-900 border border-white/10 p-3 space-y-2 shadow-2xl">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10">
+              <Link2 className="w-4 h-4 text-zinc-500 shrink-0" />
+              <input autoFocus value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && openLink()} placeholder="Paste a Google Drive / Slides link"
+                className="flex-1 min-w-0 bg-transparent font-mono text-sm text-zinc-200 placeholder:text-zinc-500 outline-none" />
+              <button onClick={openLink} className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs">Open</button>
+            </div>
+            <button onClick={() => fileInput.current?.click()} className="w-full flex items-center justify-center gap-2 py-2 rounded-full border border-white/10 text-zinc-200 text-sm"><Upload className="w-4 h-4" />Upload a file (or drop it on the call)</button>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-zinc-900 border border-white/10">
           {[
-            { on: cam, icon: cam ? Video : VideoOff, fn: () => setCam((v) => !v), label: 'Camera' },
-            { on: mic, icon: mic ? Mic : MicOff, fn: () => setMic((v) => !v), label: 'Microphone' },
+            { on: mic, icon: mic ? Mic : MicOff, fn: () => setMic((v) => !v), label: 'Microphone', danger: true },
+            { on: cam, icon: cam ? Video : VideoOff, fn: () => setCam((v) => !v), label: 'Camera', danger: true },
             { on: sharing, icon: MonitorUp, fn: toggleShare, label: 'Share screen' },
-            { on: !!pinned, icon: Presentation, fn: () => setPinned(pinned ? null : 'host'), label: 'Pin tile' },
+            { on: presentOpen || !!presenting, icon: Presentation, fn: () => setPresentOpen((v) => !v), label: 'Present' },
+            { on: hand, icon: Hand, fn: () => setHand((h) => !h), label: 'Raise hand' },
           ].map((b) => (
-            <button key={b.label} aria-label={b.label} onClick={b.fn} className={`w-10 h-10 rounded-full flex items-center justify-center ${b.label === 'Camera' || b.label === 'Microphone' ? (b.on ? 'bg-zinc-800 text-white' : 'bg-red-500 text-white') : b.on ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`}><b.icon className="w-4 h-4" /></button>
-          ))}
-          <span className="w-px h-6 bg-white/10 mx-1" />
-          <button aria-label="Raise hand" onClick={() => setHand((h) => !h)} className={`w-10 h-10 rounded-full flex items-center justify-center ${hand ? 'bg-amber-400 text-zinc-900' : 'bg-zinc-800 text-white'}`}><Hand className="w-4 h-4" /></button>
-          <button aria-label="Chat" onClick={() => setTab('chat')} className={`relative w-10 h-10 rounded-full flex items-center justify-center ${tab === 'chat' ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`}><MessageSquare className="w-4 h-4" />
-            {unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
-          </button>
-          <button aria-label="React" onClick={() => react(Smile)} className="w-10 h-10 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Smile className="w-4 h-4" /></button>
-          {[{ i: Heart, c: 'text-rose-400' }, { i: Flame, c: 'text-orange-400' }, { i: ThumbsUp, c: 'text-amber-300' }, { i: Laugh, c: 'text-yellow-300' }].map(({ i: I, c }, k) => (
-            <button key={k} onClick={() => react(I)} className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center"><I className={`w-4 h-4 ${c}`} /></button>
+            <button key={b.label} aria-label={b.label} title={b.label} onClick={b.fn}
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${b.danger ? (b.on ? 'bg-zinc-800 text-white' : 'bg-red-500 text-white') : b.on ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`}><b.icon className="w-4 h-4" /></button>
           ))}
           <button onClick={() => { streamRef.current?.getTracks().forEach((t) => t.stop()); setLeft(true); }} className="ml-1 flex items-center gap-2 px-5 h-10 rounded-full bg-red-500 text-white text-sm font-medium"><PhoneOff className="w-4 h-4" />Leave</button>
         </div>
-        <button onClick={openLink} className="px-5 h-10 rounded-full bg-white text-zinc-900 text-sm">Open</button>
-        <button onClick={() => fileInput.current?.click()} className="flex items-center gap-2 px-5 h-10 rounded-full border border-white/10 text-white font-mono text-sm"><Upload className="w-4 h-4" />Upload file</button>
-        <input ref={fileInput} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
-      </div>
-
-      {/* Footer */}
-      <div className="h-12 bg-white flex items-center px-5 font-mono text-xs text-zinc-500 border-t border-zinc-200">
-        <span className="truncate">Video+Voice combined • Screenshare pinned large • File present independent pages • Drop files or paste Google link • You control your view</span>
-        <span className="ml-auto shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 text-white"><Sparkles className="w-3.5 h-3.5" />Ecommerce ready</span>
+        <input ref={fileInput} type="file" hidden onChange={(e) => onFiles(e.target.files)} />
       </div>
     </div>
   );
 
-  const tabs = [
-    { k: 'rules', label: 'Rules', icon: Sliders },
-    { k: 'chat', label: 'Chat', icon: MessageSquare },
-    { k: 'products', label: 'Products', icon: Package },
-    { k: 'money', label: '$', icon: DollarSign },
-    { k: 'cart', label: 'Cart', icon: ShoppingCart },
+  const pills = [
+    { k: 'shop', label: `SHOP • ${catalog.length}` },
+    { k: 'chat', label: `CHAT • ${chatCount}` },
+    ...(isHost ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
   ] as const;
+
+  const shop = (
+    <div className="space-y-4">
+      {drop ? (
+        <div className="rounded-3xl bg-zinc-900 p-4 text-white">
+          <div className="flex items-center justify-between font-mono text-[11px] tracking-wider">
+            <span className="flex items-center gap-1.5 text-zinc-400"><Radio className="w-3.5 h-3.5 text-emerald-400" />LIVE NOW • HOST PUSH</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-white text-zinc-900">LIVE DROP</span>
+          </div>
+          <div className="mt-3 flex gap-4">
+            <Thumb p={drop} className="w-24 h-24 rounded-2xl shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">{drop.name}</p>
+              <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
+              <button onClick={() => addToCart(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm"><ShoppingBag className="w-4 h-4" />Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No live drop yet. {canSell ? 'Use "Push to All" on a product.' : 'The host will push products here.'}</div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">CATALOG</p>
+        {canSell && !adding && <button onClick={() => setAdding(true)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Plus className="w-3 h-3" />Add product</button>}
+      </div>
+
+      {adding && (
+        <div className="rounded-2xl border border-zinc-200 p-3 space-y-2">
+          <div className="flex gap-3">
+            <button onClick={() => imgInput.current?.click()} className="w-20 h-20 shrink-0 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 overflow-hidden flex items-center justify-center">
+              {draft.image ? <img src={draft.image} alt="" className="w-full h-full object-cover" /> : <ImagePlus className="w-5 h-5 text-zinc-400" />}
+            </button>
+            <div className="flex-1 space-y-2">
+              <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Product name" className="w-full text-sm px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900" />
+              <div className="flex gap-2">
+                <input value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} placeholder="Price" inputMode="decimal" className="w-24 text-sm px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900" />
+                <input value={draft.tag} onChange={(e) => setDraft({ ...draft, tag: e.target.value })} placeholder="Tag (optional)" className="flex-1 min-w-0 text-sm px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900" />
+              </div>
+            </div>
+          </div>
+          <input value={draft.image.startsWith('data:') ? '' : draft.image} onChange={(e) => setDraft({ ...draft, image: e.target.value })} placeholder="…or paste a photo link" className="w-full text-xs px-3 py-2 rounded-xl border border-zinc-200 bg-white text-zinc-900" />
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => { setAdding(false); setDraft({ name: '', price: '', tag: '', image: '' }); }} className="px-4 py-1.5 rounded-full border border-zinc-200 text-sm text-zinc-700">Cancel</button>
+            <button onClick={saveProduct} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm">Save</button>
+          </div>
+          <input ref={imgInput} type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) setDraft((d) => ({ ...d, image: '' })), setDraft((d) => d), shrinkImage(f).then((img) => setDraft((d) => ({ ...d, image: img }))); e.target.value = ''; }} />
+        </div>
+      )}
+
+      {catalog.length === 0 && !adding && <p className="rounded-2xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No products yet.{canSell ? ' Add one with a photo and price.' : ''}</p>}
+      {catalog.map((p) => (
+        <div key={p.id} className="flex gap-4 border border-zinc-200 rounded-2xl p-4">
+          <Thumb p={p} className="w-20 h-20 rounded-xl shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-2">
+              <p className="flex-1 text-[15px] text-zinc-900 truncate">{p.name}</p>
+              {canSell && <button aria-label="Delete product" onClick={() => deleteProduct(p.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
+            </div>
+            <p className="font-mono text-xs text-zinc-500 mt-1">${p.price}{p.tag && ` • ${p.tag}`}</p>
+            <div className="mt-2 flex gap-2">
+              <button onClick={() => addToCart(p)} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm">Add</button>
+              {canSell && <button onClick={() => pushToAll(p)} className="px-4 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">Push to All</button>}
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <div className="border-t border-zinc-100 pt-4">
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">UNIVERSAL CART • {cartCount}</p>
+          <button onClick={checkout} className="font-mono text-xs text-zinc-900 underline">View</button>
+        </div>
+        {cartItems.length === 0
+          ? <p className="mt-3 rounded-2xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No items yet. Add from live push.</p>
+          : (
+            <div className="mt-3 space-y-1">
+              {cartItems.map((i) => (
+                <div key={i.id} className="flex items-center gap-2 text-sm text-zinc-800 py-1.5">
+                  <span className="flex-1 truncate">{i.name} x{i.qty}</span>
+                  <span className="font-mono">${(i.price * i.qty).toFixed(2)}</span>
+                  <button aria-label="Remove" onClick={() => removeFromCart(i.id)} className="text-zinc-400 hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+                </div>
+              ))}
+              <button onClick={checkout} className="w-full mt-2 py-2.5 rounded-full bg-zinc-900 text-white text-sm">Checkout • ${cartTotal.toFixed(2)}</button>
+            </div>
+          )}
+      </div>
+    </div>
+  );
 
   const sidebar = (
     <aside className="w-[400px] shrink-0 rounded-2xl border border-zinc-200 bg-white flex flex-col overflow-hidden">
-      <div className="px-6 pt-6 pb-4 border-b border-zinc-100">
-        <div className="flex items-center gap-3">
-          <span className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center"><Sliders className="w-4 h-4 text-white" /></span>
-          <span className="text-lg font-semibold text-zinc-900 tracking-tight">Control Room</span>
-          <span className="ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full border border-zinc-200 text-zinc-700">HOST</span>
+      <div className="px-5 pt-5 pb-4 border-b border-zinc-100">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-500 truncate max-w-[150px]">ROOM {name}</span>
+          <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
+          <span className="ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700">{isHost ? 'HOST' : 'GUEST'}</span>
         </div>
-        <div className="mt-5 flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[12px]">
-          {tabs.map((t) => (
-            <button key={t.k} onClick={() => setTab(t.k)} className={`relative flex-1 flex items-center justify-center gap-1 py-2 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-600'}`}><t.icon className="w-3.5 h-3.5" />{t.label}
-              {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
-            </button>
-          ))}
+        <div className="mt-4 flex items-center gap-2">
+          <div className="flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[11px]">
+            {pills.map((t) => (
+              <button key={t.k} onClick={() => setTab(t.k)} className={`relative px-3 py-1.5 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-500'}`}>
+                {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.label}
+                {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto flex gap-1.5">
+            {REACTIONS.map((r) => (
+              <button key={r.k} aria-label={`React ${r.k}`} onClick={() => react(r)} className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center"><r.i className={`w-4 h-4 ${r.c}`} /></button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3">
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-3">
         <div className={tab === 'chat' ? 'h-full' : 'hidden'}>
           {token ? <LiveChat onCount={setChatCount} /> : <LocalChat onCount={setChatCount} />}
         </div>
+        {tab === 'shop' && shop}
+        {tab === 'money' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-zinc-200 p-4"><p className="font-mono text-[10px] text-zinc-500">ADDED TO CART THIS CALL</p><p className="text-2xl font-semibold text-zinc-900 mt-1">{stats.adds}</p></div>
+              <div className="rounded-2xl border border-zinc-200 p-4"><p className="font-mono text-[10px] text-zinc-500">VALUE ADDED</p><p className="text-2xl font-semibold text-zinc-900 mt-1">${stats.value.toFixed(2)}</p></div>
+            </div>
+            <div className="rounded-2xl border border-zinc-200 p-4"><p className="font-mono text-[10px] text-zinc-500">YOUR CART NOW</p><p className="text-2xl font-semibold text-zinc-900 mt-1">${cartTotal.toFixed(2)}</p></div>
+            <p className="text-xs text-zinc-500">Counts what was added from this screen. Payments go through the project's shared cart and checkout.</p>
+          </div>
+        )}
         {tab === 'rules' && (
           <>
-            <div className="flex items-center justify-between"><span className="text-[15px] text-zinc-900">User limit (no cap)</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-900 text-white">{userLimit}</span></div>
+            <div className="flex items-center justify-between"><span className="text-[15px] text-zinc-900">User limit</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-900 text-white">{userLimit}</span></div>
             <input type="range" min={2} max={1000} value={userLimit} onChange={(e) => setUserLimit(+e.target.value)} className="w-full accent-zinc-900" />
-            <p className="font-mono text-xs text-zinc-500 leading-relaxed">Default 100, slider to 1000, SFU allows unlimited. No cap enforced server-side.</p>
             <div className="flex items-center justify-between pt-2"><span className="text-[15px] text-zinc-900">Time limit</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-100 text-zinc-800">{timeLabel}</span></div>
             <input type="range" min={5} max={720} step={5} value={timeLimit} onChange={(e) => setTimeLimit(+e.target.value)} className="w-full accent-zinc-900" />
             <div className="pt-2 space-y-3">
               <Toggle on={rules.autoEnd} onClick={() => setRules((r) => ({ ...r, autoEnd: !r.autoEnd }))} title="Auto end when time limit" sub="Ends call for all after timer" />
               <Toggle on={rules.approval} onClick={() => setRules((r) => ({ ...r, approval: !r.approval }))} title="Require approval to join" sub="Host approves lobby" />
-              <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New peers start muted, video on" />
+              <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
               <Toggle on={rules.hostProducts} onClick={() => setRules((r) => ({ ...r, hostProducts: !r.hostProducts }))} title="Only host can share products" sub="Commerce control" />
             </div>
-            <div className="mt-4 rounded-2xl bg-zinc-900 p-5 text-zinc-200">
-              <p className="font-mono text-xs tracking-[0.2em] text-zinc-400">SCREENSHARE + FILE PRESENT</p>
-              <p className="mt-3 text-sm leading-relaxed">Screenshare pinned tile + file viewer. Use <code className="font-mono bg-white/10 px-1 rounded">forceSync</code> to force all to same page. Otherwise <code className="font-mono bg-white/10 px-1 rounded">You control your view</code> independent.</p>
-            </div>
           </>
         )}
-        {tab === 'products' && PRODUCTS.map((p) => (
-          <div key={p.id} className="flex items-center gap-3 border border-zinc-200 rounded-2xl p-3">
-            <span className="w-10 h-10 rounded-xl bg-zinc-900 text-white font-mono text-[10px] flex items-center justify-center">{p.code}</span>
-            <span className="flex-1"><span className="block text-sm text-zinc-900">{p.name}</span><span className="font-mono text-xs text-zinc-500">${p.price}</span></span>
-            <button onClick={() => setSpotlight(p)} className="px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs">Push to call</button>
-          </div>
-        ))}
-        {tab === 'money' && (
-          <div className="space-y-3">
-            <div className="rounded-2xl border border-zinc-200 p-4"><p className="font-mono text-xs text-zinc-500">CART VALUE THIS CALL</p><p className="text-2xl font-semibold text-zinc-900 mt-1">${cartTotal.toFixed(2)}</p></div>
-            <p className="text-xs text-zinc-500">Purchases from the call go through the project's shared cart and checkout.</p>
-          </div>
-        )}
-        {tab === 'cart' && (
-          <div className="space-y-2">
-            {cartItems.length === 0 && <p className="text-sm text-zinc-500">Cart is empty.</p>}
-            {cartItems.map((i) => (
-              <div key={i.id} className="flex justify-between text-sm text-zinc-800 border-b border-zinc-100 py-2"><span>{i.name} x{i.qty}</span><span className="font-mono">${(i.price * i.qty).toFixed(2)}</span></div>
-            ))}
-            {cartItems.length > 0 && <button onClick={() => (window as any).__IECart?.checkout?.()} className="w-full mt-2 py-2.5 rounded-full bg-zinc-900 text-white text-sm">Checkout • ${cartTotal.toFixed(2)}</button>}
-          </div>
-        )}
-      </div>
-
-      <div className="border-t border-zinc-100 px-5 py-4 space-y-2">
-        <div className="flex gap-2">
-          <input readOnly value={roomUrl} className="flex-1 min-w-0 font-mono text-xs px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-zinc-700" />
-          <button onClick={() => copy(roomUrl, 'url')} className="flex items-center gap-1.5 px-4 rounded-xl bg-zinc-900 text-white font-mono text-xs"><Copy className="w-3.5 h-3.5" />{copied === 'url' ? 'Copied' : 'Copy'}</button>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => copy(JSON.stringify({ serverUrl, room: name, identity: id }, null, 2), 'cfg')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-zinc-200 font-mono text-xs text-zinc-800"><Copy className="w-3.5 h-3.5" />{copied === 'cfg' ? 'Copied' : 'Copy LiveKit config'}</button>
-          <button onClick={() => setSpotlight(PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)])} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-200 font-mono text-xs text-zinc-800"><Play className="w-3.5 h-3.5" />Demo push</button>
-        </div>
-        <p className="font-mono text-[11px] text-zinc-500 leading-relaxed">Integrate: LiveCall + file presentation + offers via data channel. Drop files or paste Google link inside call.</p>
       </div>
     </aside>
   );
@@ -460,6 +576,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   return (
     <LiveKitRoom serverUrl={serverUrl} token={token} connect video={false} audio={false} data-lk-theme="default"
       onError={(e) => setConnError(e.message)} style={{ height: '100vh' }}>
+      <ShopSync onSend={setSend} onMessage={onShopMessage} />
       {body}
       <RoomAudioRenderer />
     </LiveKitRoom>
