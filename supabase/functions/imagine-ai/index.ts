@@ -130,6 +130,18 @@ serve(async (req) => {
     const usage: any = (await readJson(admin, monthKey())) || { users: {} };
 
     if (action === "whoami") return json({ isAdmin });
+    if (action === "restore_version") {
+      // Restoring a saved canvas version is free for admins; everyone else is charged the admin-set price.
+      const price = isAdmin ? 0 : Math.max(0, Number(settings.version_restore_price ?? 0.25));
+      if (price > 0) {
+        const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
+        const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
+        u.charge += price; u.restores = (u.restores || 0) + 1;
+        fresh.users[user.id] = u;
+        await writeJson(admin, monthKey(), fresh);
+      }
+      return json({ ok: true, charged: price, isAdmin });
+    }
     if (action === "save_key" || action === "delete_key") {
       if (!isAdmin) return json({ error: "Forbidden" }, 403);
       const pid = String(body.provider || "");
