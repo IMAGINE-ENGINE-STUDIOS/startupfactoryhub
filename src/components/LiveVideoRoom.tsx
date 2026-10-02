@@ -5,9 +5,10 @@ import { Track } from 'livekit-client';
 import {
   FileText, Circle, Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, Link2,
   MonitorUp, Presentation, Smile, Heart, Flame, ThumbsUp, Laugh, PhoneOff, Upload, Sliders,
-  Package, DollarSign, ShoppingCart, Copy, Play, Sparkles, Check,
+  Package, DollarSign, ShoppingCart, Copy, Play, Sparkles, Check, MessageSquare,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { LiveChat, LocalChat } from './LiveChatPanel';
 
 interface LiveVideoRoomProps {
   roomName?: string;
@@ -98,7 +99,11 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [link, setLink] = useState('');
   const [files, setFiles] = useState<{ name: string; url: string }[]>([]);
   const [presenting, setPresenting] = useState<{ name: string; url: string } | null>(null);
-  const [tab, setTab] = useState<'rules' | 'products' | 'money' | 'cart'>('rules');
+  const [tab, setTab] = useState<'rules' | 'chat' | 'products' | 'money' | 'cart'>('rules');
+  const [chatCount, setChatCount] = useState(0);
+  const [seenCount, setSeenCount] = useState(0);
+  useEffect(() => { if (tab === 'chat') setSeenCount(chatCount); }, [tab, chatCount]);
+  const unread = Math.max(0, chatCount - seenCount);
   const [userLimit, setUserLimit] = useState(100);
   const [timeLimit, setTimeLimit] = useState(120);
   const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true });
@@ -335,6 +340,9 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
           ))}
           <span className="w-px h-6 bg-white/10 mx-1" />
           <button aria-label="Raise hand" onClick={() => setHand((h) => !h)} className={`w-10 h-10 rounded-full flex items-center justify-center ${hand ? 'bg-amber-400 text-zinc-900' : 'bg-zinc-800 text-white'}`}><Hand className="w-4 h-4" /></button>
+          <button aria-label="Chat" onClick={() => setTab('chat')} className={`relative w-10 h-10 rounded-full flex items-center justify-center ${tab === 'chat' ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`}><MessageSquare className="w-4 h-4" />
+            {unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
+          </button>
           <button aria-label="React" onClick={() => react(Smile)} className="w-10 h-10 rounded-full bg-zinc-800 text-white flex items-center justify-center"><Smile className="w-4 h-4" /></button>
           {[{ i: Heart, c: 'text-rose-400' }, { i: Flame, c: 'text-orange-400' }, { i: ThumbsUp, c: 'text-amber-300' }, { i: Laugh, c: 'text-yellow-300' }].map(({ i: I, c }, k) => (
             <button key={k} onClick={() => react(I)} className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center"><I className={`w-4 h-4 ${c}`} /></button>
@@ -356,6 +364,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
 
   const tabs = [
     { k: 'rules', label: 'Rules', icon: Sliders },
+    { k: 'chat', label: 'Chat', icon: MessageSquare },
     { k: 'products', label: 'Products', icon: Package },
     { k: 'money', label: '$', icon: DollarSign },
     { k: 'cart', label: 'Cart', icon: ShoppingCart },
@@ -369,14 +378,19 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
           <span className="text-lg font-semibold text-zinc-900 tracking-tight">Control Room</span>
           <span className="ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full border border-zinc-200 text-zinc-700">HOST</span>
         </div>
-        <div className="mt-5 flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[13px]">
+        <div className="mt-5 flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[12px]">
           {tabs.map((t) => (
-            <button key={t.k} onClick={() => setTab(t.k)} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-600'}`}><t.icon className="w-3.5 h-3.5" />{t.label}</button>
+            <button key={t.k} onClick={() => setTab(t.k)} className={`relative flex-1 flex items-center justify-center gap-1 py-2 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-600'}`}><t.icon className="w-3.5 h-3.5" />{t.label}
+              {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
+            </button>
           ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3">
+        <div className={tab === 'chat' ? 'h-full' : 'hidden'}>
+          {token ? <LiveChat onCount={setChatCount} /> : <LocalChat onCount={setChatCount} />}
+        </div>
         {tab === 'rules' && (
           <>
             <div className="flex items-center justify-between"><span className="text-[15px] text-zinc-900">User limit (no cap)</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-900 text-white">{userLimit}</span></div>
