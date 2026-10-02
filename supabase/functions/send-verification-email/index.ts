@@ -167,9 +167,41 @@ serve(async (req) => {
       return json({ success: true, total: unverified.length, sent, mvpSent, failed: failures.length, failures });
     }
 
-    // ---- Single mode: called right after signup ----
     const email = String(body.email || "").trim().toLowerCase();
     if (!email || !email.includes("@")) return json({ error: "Valid email is required" }, 400);
+
+    // ---- Register mode: create the account WITHOUT the default auth email, send only the branded one ----
+    if (body.register === true) {
+      const password = String(body.password || "");
+      if (password.length < 6 || password.length > 128) return json({ error: "Invalid password" }, 400);
+      const raw = (body.metadata && typeof body.metadata === "object") ? body.metadata : {};
+      const allowed = ["full_name", "role", "referred_by", "venezuela_rebuild", "mvp_program", "accelerated_fundraising"];
+      const metadata: Record<string, string> = {};
+      for (const k of allowed) if (raw[k] != null) metadata[k] = String(raw[k]).slice(0, 200);
+
+      const { data, error } = await admin.auth.admin.generateLink({
+        type: "signup",
+        email,
+        password,
+        options: { data: metadata, redirectTo: `${APP_URL}/verify-email` },
+      });
+      if (error) {
+        const msg = /already|registered|exists/i.test(error.message) ? "User already registered" : error.message;
+        return json({ error: msg }, 400);
+      }
+      const link = data?.properties?.action_link;
+      if (!link) return json({ error: "No action link returned" }, 500);
+      await sendCompliantEmail({
+        to: email,
+        subject: "Verify your email — Startup Factory Hub",
+        html: buildHtml(metadata.full_name || email.split("@")[0], link, metadata.mvp_program === "true", metadata.accelerated_fundraising === "true"),
+        source: "email-verification",
+        skipSuppression: true,
+      });
+      return json({ success: true });
+    }
+
+    // ---- Single mode: (re)send branded email to an existing account ----
 
     const name = String(body.name || body.full_name || email.split("@")[0]);
     const mvp = body.mvpProgram === true || String(body.mvpProgram ?? "") === "true";

@@ -165,10 +165,8 @@ export default function Auth() {
     }
 
     setResendingVerification(true);
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    const { error } = await supabase.functions.invoke('send-verification-email', {
+      body: { email, name: fullName || email },
     });
     setResendingVerification(false);
 
@@ -274,15 +272,7 @@ export default function Auth() {
       description: "We've sent a verification link to " + email + ". Please verify your email, then sign in to " + (isInviteFlow ? "accept your Official invitation." : "continue."),
     });
 
-    // Always send our own branded verification email (Resend), so delivery never
-    // depends on the built-in auth mailer rate limits.
-    try {
-      await supabase.functions.invoke('send-verification-email', {
-        body: { email, name: fullName || email, mvpProgram: mvpProgram, acceleratedFundraising },
-      });
-    } catch (err: any) {
-      console.error('Failed to send verification email:', err);
-    }
+    // The branded verification email is sent by the server during sign-up.
 
     // If the user signed up for the MVP program, send the application follow-up email in the background
     if (mvpProgram) {
