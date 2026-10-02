@@ -22,7 +22,7 @@ Error generating stack: `+u.message+`
   
 <script src="/imagine-engine/edit.js"></script><script>(function(){var q=new URLSearchParams(location.search),thumb=q.get("thumb"),eid=q.get("eid")||("w"+q.get("w"));
 document.documentElement.style.background="transparent";document.body.style.background="transparent";
-var st=document.createElement("style");st.textContent="#root>div{background:transparent!important;min-height:0!important}.ie-c :is(h1,h2,h3,h4,h5,h6,p,label,li,td,th,span):not([style*="color"]),.ie-c{color:var(--ie-c)!important}"+(thumb?"html,body{overflow:hidden}.fixed{display:none!important}":"");document.head.appendChild(st);
+var st=document.createElement("style");st.textContent="#root>div{background:transparent!important;min-height:0!important}.ie-c :is(h1,h2,h3,h4,h5,h6,p,label,li,td,th,span):not([style*=\"color\"]),.ie-c{color:var(--ie-c)!important}"+(thumb?"html,body{overflow:hidden}.fixed{display:none!important}":"");document.head.appendChild(st);
 var card=function(){var r=document.querySelector("#root>div>div");return r&&r.firstElementChild};
 if(thumb)return;
 var iv=setInterval(function(){var c=card();if(c){clearInterval(iv);window.__IEEdit(c,eid)}},100);
