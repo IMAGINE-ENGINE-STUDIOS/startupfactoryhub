@@ -55,6 +55,13 @@ export default function QuickActionsMenu() {
       color: 'bg-red-500/10 text-red-500',
     },
     {
+      icon: Video,
+      label: 'Live Studio',
+      description: 'Host or join a live call',
+      onClick: () => navigate('/live-video'),
+      color: 'bg-rose-500/10 text-rose-500',
+    },
+    {
       icon: Compass,
       label: 'Explore',
       description: 'Browse opportunities',
