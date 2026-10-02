@@ -423,7 +423,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
 
       <div className="border-t border-zinc-100 px-5 py-4 space-y-2">
         <div className="flex gap-2">
-          <input readOnly value={roomUrl} className="flex-1 min-w-0 font-mono text-xs px-3 py-2.5 rounded-xl border border-zinc-200 text-zinc-700" />
+          <input readOnly value={roomUrl} className="flex-1 min-w-0 font-mono text-xs px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-zinc-700" />
           <button onClick={() => copy(roomUrl, 'url')} className="flex items-center gap-1.5 px-4 rounded-xl bg-zinc-900 text-white font-mono text-xs"><Copy className="w-3.5 h-3.5" />{copied === 'url' ? 'Copied' : 'Copy'}</button>
         </div>
         <div className="flex gap-2">
