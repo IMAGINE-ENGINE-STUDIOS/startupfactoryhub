@@ -90,8 +90,6 @@ Return only the post text.`
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Lovable-API-Key': opts.apiKey,
-      'X-Lovable-AIG-SDK': 'fetch',
     },
     body: JSON.stringify({
       model: 'openai/gpt-5.6-sol',

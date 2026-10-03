@@ -55,7 +55,6 @@ async function extractFunding(apiKey: string, articles: RawArticle[]) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey,
     },
     body: JSON.stringify({
       model: "google/gemini-3.6-flash",

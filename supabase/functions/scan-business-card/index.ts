@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const lovableKey = aiKeysConfigured();
-    if (!lovableKey) {
+    const aiKeys = aiKeysConfigured();
+    if (!aiKeys) {
       return new Response(JSON.stringify({ error: 'AI provider keys are not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -64,7 +64,6 @@ Do not include any prose, markdown fences, or explanations. Return the JSON obje
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Lovable-API-Key': lovableKey,
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
