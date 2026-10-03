@@ -72,12 +72,23 @@
           el.setAttribute("data-ie-added", i); el.style.cssText = a.css || ""; el.style.position = "relative";
           root.appendChild(el);
         });
-        var m = J(KT, "{}");
-        for (var p in m) { var el = byPath(root, p); if (el && el.children.length === 0 && el.textContent !== m[p] && document.activeElement !== el) el.textContent = m[p]; }
-        var st = J(KS, "{}");
-        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; for (var c in o) { if (c.charAt(0) === "@") setAttr(e2, c, o[c]); else applyProp(e2, c, o[c]); } }
+        var m = J(KT, "{}"), orig = root.__ieOrigT || (root.__ieOrigT = {});
+        for (var p in m) { var el = byPath(root, p); if (el && el.children.length === 0 && el.textContent !== m[p] && document.activeElement !== el) { if (!(p in orig)) orig[p] = el.textContent; el.textContent = m[p]; } }
+        var st = J(KS, "{}"), seen = root.__ieSeenS || (root.__ieSeenS = {});
+        for (var q in st) { var e2 = byPath(root, q); if (!e2) continue; var o = st[q]; seen[q] = Object.assign(seen[q] || {}, o); for (var c in o) { if (c.charAt(0) === "@") setAttr(e2, c, o[c]); else applyProp(e2, c, o[c]); } }
       } finally { applying = false; }
     };
+    // Full re-render from storage (used by undo/redo): clears old edits, then re-applies the saved ones.
+    root.__ieReload = function () {
+      var seen = root.__ieSeenS || {};
+      for (var q in seen) { var e = byPath(root, q); if (!e) continue; for (var c in seen[q]) if (c.charAt(0) !== "@") applyProp(e, c, ""); }
+      root.__ieSeenS = {};
+      var orig = root.__ieOrigT || {}, m = J(KT, "{}");
+      for (var p in orig) { if (p in m) continue; var el = byPath(root, p); if (el && el.children.length === 0) el.textContent = orig[p]; }
+      root.querySelectorAll("[data-ie-added]").forEach(function (n) { n.remove(); });
+      apply();
+    };
+    try { (TOP.__IERoots = TOP.__IERoots || []).push(root); } catch (e) {}
     root.__ieApi = {
       key: key, win: window,
       setStyle: function (el, patch) {
