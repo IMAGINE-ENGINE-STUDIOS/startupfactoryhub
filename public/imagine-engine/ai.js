@@ -212,7 +212,16 @@
   root.innerHTML =
     '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Imagine AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
-    '<div class="iea-f"><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div>';
+    '<div class="iea-att" id="iea-att"></div>' +
+    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>cheapest, fast</small></button><button data-m="build">Build <small>code builder</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div>' +
+    '<input type="file" id="iea-ff" multiple hidden><input type="file" id="iea-fm" accept="image/*,video/*" multiple hidden>';
+  css.textContent +=
+    ".iea-pl{position:relative}.iea-pl>button{width:34px;height:34px;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:18px;cursor:pointer}" +
+    ".iea-menu{display:none;position:absolute;bottom:40px;left:0;width:210px;background:#0a0a0c;border:1px solid #3f3f46;border-radius:10px;padding:4px;z-index:5;box-shadow:0 10px 30px #000a}.iea-menu.on{display:block}" +
+    ".iea-menu button{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:#e4e4e7;text-align:left;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:12px;height:auto}.iea-menu button:hover,.iea-menu button.sel{background:#27272a}" +
+    ".iea-menu small{color:#71717a;font-size:10px}.iea-mh{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#71717a;padding:6px 8px 2px}.iea-ms{font-size:10px;color:#52525b;padding:4px 8px}" +
+    ".iea-att{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px}.iea-att span{background:#18181b;border:1px solid #3f3f46;border-radius:8px;padding:2px 8px;font-size:10px;cursor:pointer}";
+  var model = localStorage.getItem("iea-model") || "build", atts = [];
   var list = root.querySelector("#iea-l"), input = root.querySelector("#iea-in"), go = root.querySelector("#iea-go");
 
   var SUG = {
@@ -246,6 +255,8 @@
 
   function send(text) {
     text = (text || "").trim();
+    var ready = atts.filter(function (a) { return a.url; });
+    if (ready.length) { text += "\n\nReference files:\n" + ready.map(function (a) { return "- " + a.name + " (" + (a.type || "file") + "): " + a.url; }).join("\n"); atts = atts.filter(function (a) { return !a.url; }); drawAtts(); }
     if (!text || busy) return;
     var t = token();
     messages.push({ role: "user", content: text });
@@ -256,7 +267,7 @@
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: ctx() }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: ctx(), model: model }),
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -268,6 +279,25 @@
       .finally(function () { busy = false; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
+  var menu = root.querySelector("#iea-menu");
+  function markModel() { menu.querySelectorAll("[data-m]").forEach(function (b) { b.classList.toggle("sel", b.getAttribute("data-m") === model); }); }
+  markModel();
+  root.querySelector("#iea-plus").onclick = function () { menu.classList.toggle("on"); };
+  menu.querySelectorAll("[data-m]").forEach(function (b) { b.onclick = function () { model = b.getAttribute("data-m"); localStorage.setItem("iea-model", model); markModel(); menu.classList.remove("on"); }; });
+  menu.querySelectorAll("[data-up]").forEach(function (b) { b.onclick = function () { menu.classList.remove("on"); root.querySelector(b.getAttribute("data-up") === "file" ? "#iea-ff" : "#iea-fm").click(); }; });
+  function drawAtts() { var a = root.querySelector("#iea-att"); a.innerHTML = atts.map(function (x, i) { return '<span data-i="' + i + '" title="Remove">' + esc(x.name) + (x.url ? "" : " (uploading)") + " &times;</span>"; }).join(""); a.querySelectorAll("span").forEach(function (sp) { sp.onclick = function () { atts.splice(+sp.getAttribute("data-i"), 1); drawAtts(); }; }); }
+  function uid(t) { try { return JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub; } catch (e) { return ""; } }
+  function upload(files) {
+    var t = token(); if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to upload files." }); render(); return; }
+    Array.prototype.forEach.call(files, function (f) {
+      var item = { name: f.name, type: f.type, url: "" }; atts.push(item); drawAtts();
+      var path = uid(t) + "/imagine-ai/" + Date.now() + "-" + f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      fetch(SB + "/storage/v1/object/feed-media/" + path, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + t, "Content-Type": f.type || "application/octet-stream", "x-upsert": "true" }, body: f })
+        .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.message || j.error || "Upload failed"); }); item.url = SB + "/storage/v1/object/public/feed-media/" + path; drawAtts(); })
+        .catch(function (e) { atts.splice(atts.indexOf(item), 1); drawAtts(); messages.push({ role: "assistant", error: true, content: f.name + ": " + e.message }); render(); });
+    });
+  }
+  ["#iea-ff", "#iea-fm"].forEach(function (sel) { var el = root.querySelector(sel); el.onchange = function () { upload(el.files); el.value = ""; }; });
 
   // Prompts from the Startup Factory Hub assistant bubble (parent window, same origin only)
   window.addEventListener("message", function (ev) {
