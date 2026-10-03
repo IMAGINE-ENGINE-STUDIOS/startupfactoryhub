@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { routeChat, costUsd, type Tier } from "../_shared/ai.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -9,8 +10,8 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
 const DEFAULTS = {
-  provider: "lovable",
-  model: "openai/gpt-6-astra",
+  provider: "router",
+  model: "smart-router",
   pricing_mode: "metered",
   cost_per_1k_input: 0.00125,
   cost_per_1k_output: 0.01,
@@ -35,7 +36,8 @@ const DEFAULTS = {
 };
 
 const PROVIDERS: Record<string, { secret: string; url: string; kind: "openai" | "anthropic" }> = {
-  lovable: { secret: "LOVABLE_API_KEY", url: "https://ai.gateway.lovable.dev/v1/chat/completions", kind: "openai" },
+  groq: { secret: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", kind: "openai" },
+  gemini: { secret: "GEMINI_API_KEY", url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", kind: "openai" },
   openai: { secret: "OPENAI_API_KEY", url: "https://api.openai.com/v1/chat/completions", kind: "openai" },
   xai: { secret: "XAI_API_KEY", url: "https://api.x.ai/v1/chat/completions", kind: "openai" },
   anthropic: { secret: "ANTHROPIC_API_KEY", url: "https://api.anthropic.com/v1/messages", kind: "anthropic" },
@@ -184,63 +186,56 @@ serve(async (req) => {
     if (!messages.length) return json({ error: "messages required" }, 400);
     const tab = String(body.tab || "canvas").slice(0, 20);
 
-    // Credits: 1 per build generation, 0.2 per fast chat / small tweak. Admins are free.
+    // Smart Model Router: fast (Groq 8B) for chat/tweaks, standard (Groq 70B -> Gemini) for builds,
+    // heavy (OpenAI / Gemini Pro) only for paid plans. Credits = real cost x tier markup / $0.05.
     const light = body.model === "chat" || !!body.context?.plain;
-    const price = isAdmin ? 0 : light ? 0.2 : 1;
+    const lastText = String(messages[messages.length - 1]?.content || "");
+    const wantsHeavy = body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText);
+    const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
+    const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
+    const tier: Tier = light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
+    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2 };
+    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2 };
+    const reserve = isAdmin ? 0 : RESERVE[tier];
     let balance: number | null = null;
-    if (price > 0) {
-      const { data: nb, error: ce } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: price, _reason: light ? "chat" : "build" });
+    if (reserve > 0) {
+      const { data: nb, error: ce } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: reserve, _reason: "reserve:" + tier });
       if (ce) { console.error("credit consume failed", ce); return json({ error: "Could not check your credits. Please try again." }, 500); }
       if (Number(nb) < 0) return json({ error: "You're out of credits. You get 5 free credits every day, or upgrade to a monthly plan for more.", code: "no_credits" }, 402);
       balance = Number(nb);
     }
-    const refund = async () => { if (price > 0) { const { data: b } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: price, _reason: "refund", _ref: "refund:" + crypto.randomUUID() }); } };
-
-    const storedKeys: any = (await readJson(admin, "keys.json")) || {};
-    const prov = resolveProvider(settings, storedKeys);
-    const key = prov?.key;
-    if (!prov || !key) { await refund(); return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503); }
+    const grant = async (amt: number, reason: string) => { const { data: b } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: amt, _reason: reason, _ref: reason + ":" + crypto.randomUUID() }); if (b != null) balance = Number(b); };
+    const refund = async () => { if (reserve > 0) await grant(reserve, "refund"); };
 
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 8000) }));
 
-    let resp: Response;
-    if (prov.kind === "anthropic") {
-      resp = await fetch(prov.url, {
-        method: "POST",
-        headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
-        body: JSON.stringify({ model: settings.model, max_tokens: 4096, system: sys, messages: clean }),
-      });
-    } else {
-      // "chat" uses the same fast model as Genius AI; "build" uses the admin-set code builder model.
-      const useModel = settings.provider === "lovable" && body.model === "chat" ? "google/gemini-3-flash-preview" : settings.model;
-      const payload: Record<string, unknown> = { model: useModel, messages: [{ role: "system", content: sys }, ...clean] };
-      if (String(useModel).startsWith("openai/gpt-6") || String(useModel).startsWith("openai/gpt-5")) payload.reasoning_effort = "low";
-      resp = await fetch(prov.url, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    }
+    const routed = await routeChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : 8000 });
+    const resp = routed.resp;
     if (!resp.ok) {
       await refund();
       const t = await resp.text();
-      console.error("imagine-ai provider error", resp.status, t);
+      console.error("imagine-ai provider error", routed.provider, routed.model, resp.status, t);
       if (resp.status === 429) return json({ error: "The AI is busy right now. Please try again in a moment." }, 429);
-      if (resp.status === 402) return json({ error: "AI credits are exhausted. An administrator needs to top up." }, 402);
+      if (resp.status === 503 && !routed.provider) return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503);
       return json({ error: "The AI provider returned an error." }, resp.status === 403 ? 403 : 502);
     }
     const data = await resp.json();
-    let text = "", inTok = 0, outTok = 0;
-    if (prov.kind === "anthropic") {
-      text = (data.content || []).map((c: any) => c.text || "").join("");
-      inTok = data.usage?.input_tokens ?? 0; outTok = data.usage?.output_tokens ?? 0;
-    } else {
-      text = data.choices?.[0]?.message?.content ?? "";
-      inTok = data.usage?.prompt_tokens ?? 0; outTok = data.usage?.completion_tokens ?? 0;
+    const text = data.choices?.[0]?.message?.content ?? "";
+    const inTok = data.usage?.prompt_tokens ?? 0, outTok = data.usage?.completion_tokens ?? 0;
+    const realCost = costUsd(routed.model, inTok, outTok);
+    let price = isAdmin ? 0 : Math.max(0.05, Math.round((realCost * MARKUP[tier] / 0.05) * 100) / 100);
+    const tag = `${tier}:${routed.provider}/${routed.model}:${inTok}/${outTok}:$${realCost.toFixed(6)}`;
+    if (!isAdmin) {
+      const diff = Math.round((price - reserve) * 100) / 100;
+      if (diff < 0) await grant(-diff, "adjust:" + tag);
+      else if (diff > 0) {
+        const { data: nb } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: diff, _reason: "usage:" + tag });
+        if (Number(nb) >= 0) balance = Number(nb); else price = reserve;
+      }
     }
-    const cost = (inTok / 1000) * Number(settings.cost_per_1k_input) + (outTok / 1000) * Number(settings.cost_per_1k_output);
-    const charge = settings.pricing_mode === "metered" || settings.pricing_mode === "hybrid" ? cost * Number(settings.markup_multiplier) : 0;
+    const cost = realCost;
+    const charge = price * 0.05;
     try {
       const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
       const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
@@ -249,7 +244,7 @@ serve(async (req) => {
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
-    return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance } });
+    return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: wantsHeavy && !paid ? "Heavy models are available on paid plans." : undefined });
   } catch (e) {
     console.error("imagine-ai error", e);
     return json({ error: "Something went wrong. Please try again." }, 500);
