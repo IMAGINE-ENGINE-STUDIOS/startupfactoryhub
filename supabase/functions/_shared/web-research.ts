@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "./ai.ts";
 // Live internet research helper.
 // Uses the Lovable AI Gateway with Google Search grounding so market features
 // read the REAL, current web instead of a news API feed.
@@ -23,9 +24,9 @@ export async function researchWeb(
   query: string,
   instructions = "",
 ): Promise<WebResearch> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
+  const key = aiKeysConfigured();
   if (!key) {
-    console.warn("[web-research] LOVABLE_API_KEY missing — no live grounding");
+    console.warn("[web-research] AI provider keys missing — no live grounding");
     return { digest: "", sources: [] };
   }
 
@@ -43,7 +44,7 @@ Rules:
 - Output a compact bulleted digest. Each bullet ends with "| source: <url>".`;
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await aiFetch("ai:chat", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key}`,

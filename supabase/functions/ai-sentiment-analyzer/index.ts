@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -29,7 +30,7 @@ serve(async (req) => {
 
     const { text, contentType, contentId } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const AI_KEYS = aiKeysConfigured();
     
     const systemPrompt = `You are a sentiment analysis expert. Analyze the sentiment and tone of text.
 Return a JSON object with:
@@ -39,10 +40,10 @@ Return a JSON object with:
 - urgency: "low", "medium", or "high"
 - category: Main topic category`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await aiFetch('ai:chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${AI_KEYS}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

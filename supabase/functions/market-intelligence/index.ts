@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { researchBlock, researchWeb, todayContext } from "../_shared/web-research.ts";
@@ -53,8 +54,8 @@ serve(async (req) => {
     const { query, type } = await req.json();
     console.log('Market intelligence search:', { query, type });
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    const AI_KEYS = aiKeysConfigured();
+    if (!AI_KEYS) throw new Error('AI provider keys are not configured');
 
     const upperType = String(type || 'STARTUPS').toUpperCase();
     const lowerQuery = String(query || '').toLowerCase();
@@ -115,10 +116,10 @@ ${grounding}
 Respond with exactly this JSON shape:
 ${schema}`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await aiFetch('ai:chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${AI_KEYS}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderMvpBanner } from '../_shared/announcement-banner.ts'
 import { resolveLinkedInAuthor } from '../_shared/linkedinAuthor.ts'
@@ -85,7 +86,7 @@ ${opts.previous.map((p, i) => `--- previous ${i + 1} ---\n${p.slice(0, 500)}`).j
 
 Return only the post text.`
 
-  const res = await fetch('https://ai.gateway.lovable.dev/v1/responses', {
+  const res = await aiFetch('ai:responses', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -210,8 +211,8 @@ Deno.serve(async (req) => {
     const angle =
       ANGLES.find((a) => !usedAngles.has(a)) || ANGLES[Math.floor(Math.random() * ANGLES.length)]
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
+    const AI_KEYS = aiKeysConfigured()
+    if (!AI_KEYS) throw new Error('AI provider keys are not configured')
 
     // UTM-tagged link so every auto-posted item can be attributed
     const trackingCode = `mvp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
@@ -245,7 +246,7 @@ Deno.serve(async (req) => {
     let dupe = { duplicate: false, score: 0, reason: undefined as string | undefined }
     for (let attempt = 0; attempt < 4; attempt++) {
       postText = await generateCopy({
-        apiKey: LOVABLE_API_KEY,
+        apiKey: AI_KEYS,
         angle,
         daysLeft,
         startups: settings.startups_per_batch,
