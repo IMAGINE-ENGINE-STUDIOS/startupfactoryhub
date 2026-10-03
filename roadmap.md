@@ -72,4 +72,4 @@
 - [ ] Page background editor + "merge widget with background"
 - [ ] Click-on-map pin placement for map widgets
 
-- [ ] Credit top-up pack prices: waiting on user (disputed 100 credits = $5)
+- [ ] Credit top-up packs: waiting on user to set the price (they disputed 100 credits = $5)

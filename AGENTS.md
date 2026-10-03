@@ -8,3 +8,5 @@
 - Imagine Engine undo/redo, Record/Version Log and phone/tablet layout live in public/imagine-engine/history.js using window.__IE.raw; version restores are charged via the imagine-ai "restore_version" action (admins free); why: the minified bundle is only patched via string replacements.
 
 - Imagine Engine gradient studio, project background (localStorage ie-bg:<pid>) and advanced Content inspector live in public/imagine-engine/design.js, mounted into #ie-design-panel / #ie-content-pro slots; why: the minified bundle is only patched via string replacements.
+- AI credits live in user_ai_credits + ai_credit_ledger and change only through the service-role functions ai_credits_sync/consume/grant (idempotent by ledger ref); imagine-ai deducts per request and check-genius-plan grants monthly plan credits from active Stripe subscriptions; why: atomic, double-grant-safe billing without webhooks.
+- Imagine Engine undo/redo snapshots include the ie-txt:/ie-sty:/ie-add:/ie-bg: localStorage keys and repaint via each edit root's __ieReload (registered in window.__IERoots); why: canvas edits are stored outside the bundle state.
