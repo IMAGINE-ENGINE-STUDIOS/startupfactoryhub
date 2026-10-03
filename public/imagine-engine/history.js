@@ -21,15 +21,38 @@
 
   /* ---------- snapshots ---------- */
   function raw() { var ie = window.__IE; return ie && ie.raw; }
+  // Canvas edits (text, styles, added elements) and the project background live in localStorage,
+  // so every snapshot captures those keys too.
+  var EDIT_RE = /^ie-(txt|sty|add):/;
+  function editKeys(p) {
+    var o = {};
+    for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (EDIT_RE.test(k) || k === "ie-bg:" + p) o[k] = localStorage.getItem(k); }
+    return o;
+  }
   function snap() {
     var r = raw(); if (!r) return null;
     var p = (r.projects || []).filter(function (x) { return x.id === r.pid; })[0];
-    return JSON.stringify({ pid: r.pid, project: p || null, nodes: r.nodes, links: r.links, files: r.files });
+    var ed = editKeys(r.pid), sorted = {}; Object.keys(ed).sort().forEach(function (k) { sorted[k] = ed[k]; });
+    return JSON.stringify({ pid: r.pid, project: p || null, nodes: r.nodes, links: r.links, files: r.files, edits: sorted });
+  }
+  function reloadCanvas() {
+    var roots = window.__IERoots || [];
+    window.__IERoots = roots.filter(function (x) { return x && x.isConnected; });
+    window.__IERoots.forEach(function (x) { try { x.__ieReload && x.__ieReload(); } catch (e) {} });
+    if (window.__IEApplyBg) window.__IEApplyBg();
+    if (window.__IEElRefresh) try { window.__IEElRefresh(); } catch (e) {}
   }
   function apply(s) {
     var r = raw(); if (!r || !s) return; var o = JSON.parse(s);
     if (o.project) r.setProjects(function (q) { return q.map(function (x) { return x.id === o.project.id ? o.project : x; }); });
     if (o.nodes) r.setNodes(o.nodes); if (o.links) r.setLinks(o.links); if (o.files) r.setFiles(o.files);
+    if (o.edits) {
+      var cur = editKeys(o.pid || r.pid);
+      for (var k in cur) if (!(k in o.edits)) localStorage.removeItem(k);
+      for (var k2 in o.edits) { try { localStorage.setItem(k2, o.edits[k2]); } catch (e) {} }
+      // Let React re-render sections first, then repaint edits.
+      setTimeout(reloadCanvas, 60); setTimeout(reloadCanvas, 400);
+    }
   }
   var past = [], future = [], cur = null, pid = null, busy = false, stable = 0, pending = null;
   setInterval(function () {

@@ -64,6 +64,7 @@
     var base = b.mode === "solid" ? b.solid : (b.mode === "default" ? "#0a0a0a" : b.solid);
     bgStyle.textContent = "#ie-canvas-bg,#ie-play-bg{background:" + (layers.length ? layers.join(",") + "," : "") + base + "!important;background-attachment:local!important}";
   }
+  window.__IEApplyBg = function () { applyBg(); try { paint(true); } catch (e) {} };
   var lastPid = "";
   setInterval(function () { if (pid() !== lastPid) { lastPid = pid(); applyBg(); paint(true); } }, 700);
 
