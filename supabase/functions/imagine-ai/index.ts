@@ -211,8 +211,10 @@ serve(async (req) => {
         body: JSON.stringify({ model: settings.model, max_tokens: 4096, system: sys, messages: clean }),
       });
     } else {
-      const payload: Record<string, unknown> = { model: settings.model, messages: [{ role: "system", content: sys }, ...clean] };
-      if (String(settings.model).startsWith("openai/gpt-6") || String(settings.model).startsWith("openai/gpt-5")) payload.reasoning_effort = "low";
+      // "chat" uses the same fast model as Genius AI; "build" uses the admin-set code builder model.
+      const useModel = settings.provider === "lovable" && body.model === "chat" ? "google/gemini-3-flash-preview" : settings.model;
+      const payload: Record<string, unknown> = { model: useModel, messages: [{ role: "system", content: sys }, ...clean] };
+      if (String(useModel).startsWith("openai/gpt-6") || String(useModel).startsWith("openai/gpt-5")) payload.reasoning_effort = "low";
       resp = await fetch(prov.url, {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
