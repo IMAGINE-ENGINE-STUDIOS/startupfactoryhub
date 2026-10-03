@@ -45,8 +45,8 @@
         Object.keys(collect()).forEach(function (k) { origRemove.call(localStorage, k); });
         for (var k in st.ls) origSet.call(localStorage, k, st.ls[k]);
         origSet.call(localStorage, "ie-cloud-at", st.updated_at);
+        // Cloud copy is applied in place; it shows on the next open. Never reload the page.
         sessionStorage.setItem("ie-cloud-reloaded", "1");
-        location.reload(); return;
       }
       sessionStorage.removeItem("ie-cloud-reloaded");
       ready = true; if (!st) schedule();

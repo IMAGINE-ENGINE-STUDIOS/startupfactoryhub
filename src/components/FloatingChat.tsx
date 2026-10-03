@@ -22,7 +22,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
 import ReactMarkdown from 'react-markdown';
-import geniusAILogo from '@/assets/genius-ai-logo.png';
+const geniusAILogo = '/startup-factory-hub-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
 import { getAIHeaders } from "@/lib/aiAuth";
@@ -251,7 +251,13 @@ export default function FloatingChat() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [activeTool, setActiveTool] = useState<ToolItem | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
+  const [modeMenuOpen, setModeMenuOpen] = useState(false);
+  // Opening the bubble on Imagine Engine starts in builder mode.
+  useEffect(() => {
+    if (location.pathname.startsWith('/imagine-engine')) setActiveTool(t => t ?? IMAGINE_TOOL);
+  }, [location.pathname]);
   const [showToolMenu, setShowToolMenu] = useState(false);
   const [currentChatLogId, setCurrentChatLogId] = useState<string | null>(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
@@ -1283,23 +1289,10 @@ You can help with:
             <div className="flex items-center gap-2.5">
               {activeTab === 'ai' ? (
                 <>
-                  <div className="relative">
-                    <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-md opacity-70 animate-pulse" />
-                    <span className="relative h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                      <Brain className="h-4 w-4 text-white" />
-                    </span>
-                  </div>
+                  <img src="/startup-factory-hub-logo.png" alt="Startup Factory Hub" className="h-8 w-8 rounded-full object-cover" />
                   <div className="flex flex-col leading-tight">
-                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">{isFullscreen ? 'GENIUS DECK' : 'GENIUS AI'}</h3>
-                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1">
-                      <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Online
-                    </span>
+                    <h3 className="font-bold text-sm tracking-wide text-foreground">{isFullscreen ? 'GENIUS DECK' : 'GENIUS AI'}</h3>
                   </div>
-                  {activeTool && (
-                    <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 gap-1 ml-1 bg-violet-500/20 text-violet-300 border border-violet-400/30">
-                      <activeTool.icon className="h-3 w-3" /> {activeTool.name}
-                    </Badge>
-                  )}
                 </>
               ) : (
                 <>
@@ -1531,36 +1524,52 @@ You can help with:
                 </TabsContent>
 
                 <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
-                  {/* Mode dropdown — every Genius option lives here */}
-                  <div className="px-3 pb-1 shrink-0">
-                    <select
+                  {/* Mode menu — visual, grouped list of every Genius option */}
+                  <div className="px-3 pb-1 shrink-0 relative">
+                    <button
+                      type="button"
                       aria-label="Genius AI mode"
-                      value={activeTool?.id ?? ''}
-                      onChange={(e) => {
-                        const id = e.target.value;
-                        if (!id) { setActiveTool(null); return; }
-                        if (id === 'imagine') {
-                          setActiveTool(IMAGINE_TOOL);
-                          setAiMessages(prev => [...prev, { role: 'assistant', content: 'Imagine Engine builder is on. Tell me what to build or change on your canvas.' }]);
-                          return;
-                        }
-                        const t = ALL_TOOLS.find(x => x.id === id);
-                        if (t) startMission(t);
-                      }}
-                      className="w-full h-9 rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      onClick={() => setModeMenuOpen(o => !o)}
+                      className="w-full h-10 rounded-lg border border-border bg-background px-3 flex items-center gap-2 text-xs text-foreground hover:bg-muted/40"
                     >
-                      <option value="">Genius chat (default)</option>
-                      {location.pathname.startsWith('/imagine-engine') && (
-                        <option value="imagine">Imagine Engine builder</option>
-                      )}
-                      {TOOL_GROUPS.map(group => (
-                        <optgroup key={group.key} label={group.label}>
-                          {ALL_TOOLS.filter(t => t.category === group.key).map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
+                      {activeTool ? <activeTool.icon className="h-4 w-4 text-primary" /> : <MessageSquare className="h-4 w-4 text-primary" />}
+                      <span className="flex-1 text-left font-medium truncate">{activeTool?.name ?? 'Genius chat'}</span>
+                      <ChevronRight className={`h-4 w-4 transition-transform ${modeMenuOpen ? 'rotate-90' : ''}`} />
+                    </button>
+                    {modeMenuOpen && (
+                      <div className="absolute left-3 right-3 top-11 z-50 max-h-80 overflow-y-auto rounded-lg border border-border bg-background backdrop-blur-none shadow-xl p-1">
+                        {[
+                          { id: '', name: 'Genius chat', icon: MessageSquare as GeniusIcon, desc: 'Ask anything, general help' },
+                          ...(location.pathname.startsWith('/imagine-engine') ? [{ id: 'imagine', name: IMAGINE_TOOL.name, icon: IMAGINE_TOOL.icon, desc: 'Build pages, data and code in your project' }] : []),
+                        ].map(o => (
+                          <button key={o.id || 'chat'} type="button"
+                            onClick={() => {
+                              setModeMenuOpen(false);
+                              if (!o.id) { setActiveTool(null); return; }
+                              setActiveTool(IMAGINE_TOOL);
+                            }}
+                            className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-muted/50 ${(activeTool?.id ?? '') === o.id ? 'bg-primary/10' : ''}`}>
+                            <span className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0"><o.icon className="h-4 w-4 text-primary" /></span>
+                            <span className="flex flex-col min-w-0"><span className="text-xs font-semibold text-foreground">{o.name}</span><span className="text-[10px] text-muted-foreground truncate">{o.desc}</span></span>
+                          </button>
+                        ))}
+                        {TOOL_GROUPS.map(group => (
+                          <div key={group.key} className="mt-1">
+                            <div className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{group.label}</div>
+                            <div className="grid grid-cols-2 gap-1">
+                              {ALL_TOOLS.filter(t => t.category === group.key).map(t => (
+                                <button key={t.id} type="button"
+                                  onClick={() => { setModeMenuOpen(false); startMission(t); }}
+                                  className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted/50 ${activeTool?.id === t.id ? 'bg-primary/10' : ''}`}>
+                                  <t.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+                                  <span className="text-[11px] text-foreground truncate">{t.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Active tool indicator */}
@@ -1604,7 +1613,7 @@ You can help with:
                           <div className="relative shrink-0">
                             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-lg animate-pulse" />
                             <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
-                              <Brain className="h-4 w-4 text-white" />
+                              <img src="/startup-factory-hub-logo.png" alt="" className="h-full w-full rounded-full object-cover" />
                             </span>
                           </div>
                           <div className="min-w-0">
@@ -1632,10 +1641,7 @@ You can help with:
                               {/* AI avatar */}
                               {!isUser && (
                                 <div className="relative shrink-0 mb-1">
-                                  <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60" />
-                                  <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
-                                    <Brain className="h-3.5 w-3.5 text-white" />
-                                  </span>
+                                  <img src="/startup-factory-hub-logo.png" alt="Startup Factory Hub" className="h-7 w-7 rounded-full object-cover" />
                                 </div>
                               )}
 
@@ -1702,7 +1708,7 @@ You can help with:
                           <div className="relative shrink-0 mb-1">
                             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60 animate-pulse" />
                             <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
-                              <Brain className="h-3.5 w-3.5 text-white" />
+                              <img src="/startup-factory-hub-logo.png" alt="" className="h-full w-full rounded-full object-cover" />
                             </span>
                           </div>
                           <div className="bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg backdrop-blur-sm">
