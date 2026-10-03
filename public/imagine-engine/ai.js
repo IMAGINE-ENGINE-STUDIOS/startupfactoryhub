@@ -213,7 +213,7 @@
     '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Imagine AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
     '<div class="iea-att" id="iea-att"></div>' +
-    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>cheapest, fast</small></button><button data-m="build">Build <small>code builder</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div>' +
+    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>cheapest, fast</small></button><button data-m="build">Build <small>code builder</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
     '<input type="file" id="iea-ff" multiple hidden><input type="file" id="iea-fm" accept="image/*,video/*" multiple hidden>';
   css.textContent +=
     ".iea-pl{position:relative}.iea-pl>button{width:34px;height:34px;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:18px;cursor:pointer}" +
@@ -271,7 +271,8 @@
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); return; }
+        if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
+        if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
         var out = runActions(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
       })
@@ -292,8 +293,8 @@
     Array.prototype.forEach.call(files, function (f) {
       var item = { name: f.name, type: f.type, url: "" }; atts.push(item); drawAtts();
       var path = uid(t) + "/imagine-ai/" + Date.now() + "-" + f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      fetch(SB + "/storage/v1/object/feed-media/" + path, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + t, "Content-Type": f.type || "application/octet-stream", "x-upsert": "true" }, body: f })
-        .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.message || j.error || "Upload failed"); }); item.url = SB + "/storage/v1/object/public/feed-media/" + path; drawAtts(); })
+      fetch(SB + "/storage/v1/object/imagine-media/" + path, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + t, "Content-Type": f.type || "application/octet-stream", "x-upsert": "true" }, body: f })
+        .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.message || j.error || "Upload failed"); }); item.url = SB + "/storage/v1/object/public/imagine-media/" + path; drawAtts(); })
         .catch(function (e) { atts.splice(atts.indexOf(item), 1); drawAtts(); messages.push({ role: "assistant", error: true, content: f.name + ": " + e.message }); render(); });
     });
   }
@@ -351,4 +352,80 @@
     setTimeout(function () { input.focus(); }, 300);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
+
+/* ---------- AI credits: balance pill (header + chat) and plans modal ---------- */
+(function () {
+  var SB = "https://zqiihhmdsdgwdcwmryym.supabase.co", FN = SB + "/functions/v1/imagine-ai", CK = SB + "/functions/v1/create-genius-checkout", PT = SB + "/functions/v1/customer-portal";
+  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
+  var PLANS = [
+    { name: "Imagine Starter", price: 15, credits: 300, id: "price_1UMWRHK5N1RcUVuYuamlc3g7" },
+    { name: "Imagine Pro", price: 35, credits: 700, id: "price_1UMWRcK5N1RcUVuYbfH395fy" },
+    { name: "Imagine Studio", price: 79, credits: 1600, id: "price_1UMWhHK5N1RcUVuY1bB3pmLA" }
+  ];
+  function token() {
+    for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (/^sb-.*-auth-token$/.test(k)) { try { return JSON.parse(localStorage.getItem(k)).access_token; } catch (e) {} } }
+    return null;
+  }
+  function post(url, body) {
+    var t = token(); if (!t) return Promise.reject(new Error("Please sign in first."));
+    return fetch(url, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t }, body: JSON.stringify(body || {}) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.error) throw new Error(j.error || "Request failed"); return j; }); });
+  }
+  var state = { balance: null, admin: false, plan: "free" };
+  function fmt(n) { return (Math.round(n * 10) / 10).toLocaleString(); }
+  function paint() {
+    var txt = !token() ? "Sign in for credits" : state.admin ? "Admin: unlimited" : state.balance == null ? "Credits" : fmt(state.balance) + " credits";
+    var col = state.admin || state.balance == null ? "#e4e4e7" : state.balance <= 0 ? "#f87171" : state.balance <= 10 ? "#fbbf24" : "#e4e4e7";
+    document.querySelectorAll("[data-ie-credits-text]").forEach(function (e) { e.textContent = txt; e.style.color = col; });
+  }
+  function refresh() {
+    if (!token()) { paint(); return; }
+    post(FN, { action: "credits" }).then(function (j) { state.balance = j.balance; state.admin = !!j.isAdmin; state.plan = j.plan; paint(); }).catch(function () {});
+  }
+  var modal = null;
+  function openPlans() {
+    if (modal) return;
+    modal = document.createElement("div");
+    modal.style.cssText = "position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:grid;place-items:center;padding:12px;font:13px system-ui;color:#e4e4e7";
+    var cards = PLANS.map(function (p) {
+      return '<div style="border:1px solid #27272a;border-radius:14px;padding:14px;background:#0f0f12;display:flex;flex-direction:column;gap:6px"><b>' + p.name + '</b><div style="font-size:24px;font-weight:700">$' + p.price + '<span style="font-size:11px;color:#71717a">/mo</span></div><div style="color:#a1a1aa;font-size:11px">' + p.credits.toLocaleString() + ' credits every month, unused credits roll over, plus 5 free daily</div><button data-buy="' + p.id + '" style="margin-top:auto;height:34px;border-radius:9999px;border:0;background:#7c3aed;color:#fff;cursor:pointer;font:600 12px system-ui">Subscribe</button></div>';
+    }).join("");
+    modal.innerHTML = '<div style="width:min(720px,100%);max-height:90vh;overflow:auto;background:#09090b;border:1px solid #27272a;border-radius:18px;padding:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:16px">Get more AI credits</b><button data-x style="background:none;border:0;color:#a1a1aa;font-size:18px;cursor:pointer">&times;</button></div>' +
+      '<div style="color:#a1a1aa;font-size:12px;margin-bottom:12px">Balance: <b data-ie-credits-text></b>. 1 credit = 1 AI build. Quick chats and small tweaks cost 0.2. Editing by hand, undo and versions are free. Everyone gets 5 free credits every day.</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">' + cards + '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px;flex-wrap:wrap"><span data-msg style="color:#a1a1aa;font-size:11px"></span><button data-portal style="height:30px;border-radius:9999px;border:1px solid #27272a;background:#18181b;color:#e4e4e7;padding:0 12px;cursor:pointer;font:11px system-ui">Manage billing</button></div></div>';
+    document.body.appendChild(modal); paint();
+    var msg = modal.querySelector("[data-msg]");
+    function close() { if (modal) { modal.remove(); modal = null; } }
+    modal.onclick = function (e) { if (e.target === modal) close(); };
+    modal.querySelector("[data-x]").onclick = close;
+    modal.querySelectorAll("[data-buy]").forEach(function (b) {
+      b.onclick = function () {
+        msg.textContent = "Opening secure checkout...";
+        var path = (window.top !== window ? "/imagine-engine" : location.pathname);
+        post(CK, { priceId: b.getAttribute("data-buy"), returnPath: path }).then(function (j) { window.open(j.url, "_blank"); msg.textContent = "Finish checkout in the new tab. Your credits update automatically."; poll(); })
+          .catch(function (e) { msg.textContent = e.message; });
+      };
+    });
+    modal.querySelector("[data-portal]").onclick = function () {
+      post(PT, {}).then(function (j) { window.open(j.url, "_blank"); }).catch(function () { msg.textContent = "No billing account yet. Subscribe to a plan first."; });
+    };
+  }
+  // After checkout, sync the subscription (grants monthly credits) and refresh for a few minutes.
+  function poll() {
+    var n = 0, iv = setInterval(function () { n++; post(SB + "/functions/v1/check-genius-plan", {}).then(function (j) { if (j.balance != null) { state.balance = j.balance; paint(); } }).catch(function () {}); if (n > 20) clearInterval(iv); }, 15000);
+  }
+  window.__IECredits = { refresh: refresh, openPlans: openPlans, set: function (b) { state.balance = Number(b); paint(); }, get: function () { return state.balance; } };
+  document.addEventListener("click", function (e) { var p = e.target.closest && e.target.closest("[data-ie-credits-pill]"); if (p) openPlans(); });
+  // Header pill next to undo/redo
+  setInterval(function () {
+    var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.querySelector("[data-ie-credits-pill]")) return;
+    var b = document.createElement("button"); b.setAttribute("data-ie-credits-pill", "1"); b.title = "AI credits";
+    b.style.cssText = "height:28px;border-radius:9999px;background:#18181b;border:1px solid #3b2a63;font:11px system-ui;padding:0 10px;cursor:pointer;white-space:nowrap;margin-left:4px";
+    b.innerHTML = '<span data-ie-credits-text>Credits</span>'; slot.appendChild(b); paint();
+  }, 500);
+  // Sync plan credits once per load (monthly rollover), then keep balance fresh.
+  if (token()) post(SB + "/functions/v1/check-genius-plan", {}).then(function (j) { if (j.balance != null) { state.balance = j.balance; paint(); } refresh(); }).catch(refresh); else paint();
+  setInterval(refresh, 60000);
 })();
