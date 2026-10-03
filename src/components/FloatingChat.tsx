@@ -251,7 +251,13 @@ export default function FloatingChat() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [activeTool, setActiveTool] = useState<ToolItem | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
+  const [modeMenuOpen, setModeMenuOpen] = useState(false);
+  // Opening the bubble on Imagine Engine starts in builder mode.
+  useEffect(() => {
+    if (location.pathname.startsWith('/imagine-engine')) setActiveTool(t => t ?? IMAGINE_TOOL);
+  }, [location.pathname]);
   const [showToolMenu, setShowToolMenu] = useState(false);
   const [currentChatLogId, setCurrentChatLogId] = useState<string | null>(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
