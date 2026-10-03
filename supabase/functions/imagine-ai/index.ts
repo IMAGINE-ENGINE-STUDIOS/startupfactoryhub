@@ -199,7 +199,7 @@ serve(async (req) => {
     const storedKeys: any = (await readJson(admin, "keys.json")) || {};
     const prov = resolveProvider(settings, storedKeys);
     const key = prov?.key;
-    if (!prov || !key) return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503);
+    if (!prov || !key) { await refund(); return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503); }
 
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 8000) }));
@@ -223,6 +223,7 @@ serve(async (req) => {
       });
     }
     if (!resp.ok) {
+      await refund();
       const t = await resp.text();
       console.error("imagine-ai provider error", resp.status, t);
       if (resp.status === 429) return json({ error: "The AI is busy right now. Please try again in a moment." }, 429);
@@ -248,7 +249,7 @@ serve(async (req) => {
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
-    return json({ text, usage: { input: inTok, output: outTok } });
+    return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance } });
   } catch (e) {
     console.error("imagine-ai error", e);
     return json({ error: "Something went wrong. Please try again." }, 500);
