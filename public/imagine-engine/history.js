@@ -90,16 +90,9 @@
     say("Version saved");
   }
   function restore(v) {
-    var t = token(); if (!t) { alert("Please sign in to restore versions."); return; }
-    if (!confirm("Restore \"" + v.name + "\"? Restoring a version uses credits (free for admins). You can undo afterwards.")) return;
-    fetch(FN, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t }, body: JSON.stringify({ action: "restore_version" }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        if (!res.ok || !res.j.ok) { alert(res.j.error || "Could not restore this version."); return; }
-        past.push(snap()); future = []; busy = true; apply(v.data); cur = v.data; paint(); closeLog();
-        say(res.j.charged > 0 ? "Version restored (charged " + res.j.charged + " credits)" : "Version restored");
-      })
-      .catch(function () { alert("Could not reach the server. Please try again."); });
+    if (!confirm("Restore \"" + v.name + "\"? You can undo afterwards.")) return;
+    past.push(snap()); if (past.length > MAX) past.shift(); future = []; busy = true; apply(v.data); cur = v.data; paint(); closeLog();
+    say("Version restored");
   }
   var logEl = null;
   function closeLog() { if (logEl) { logEl.remove(); logEl = null; } }
