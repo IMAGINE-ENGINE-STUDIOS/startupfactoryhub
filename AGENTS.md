@@ -6,3 +6,5 @@
 - Imagine Engine map widgets render a real map (same map service as the resource map) from public/imagine-engine/map.js, configured per widget section from the Content tab; why: widget bundles are minified so maps are injected alongside them.
 - Imagine Engine page menu (create/rename/copy/delete/switch pages, Play page switcher) lives in public/imagine-engine/pages.js using window.__IE page helpers; why: the minified bundle only exposes hooks via string patches.
 - Imagine Engine undo/redo, Record/Version Log and phone/tablet layout live in public/imagine-engine/history.js using window.__IE.raw; version restores are charged via the imagine-ai "restore_version" action (admins free); why: the minified bundle is only patched via string replacements.
+
+- Imagine Engine gradient studio, project background (localStorage ie-bg:<pid>) and advanced Content inspector live in public/imagine-engine/design.js, mounted into #ie-design-panel / #ie-content-pro slots; why: the minified bundle is only patched via string replacements.

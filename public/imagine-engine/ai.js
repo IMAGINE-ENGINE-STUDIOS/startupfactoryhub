@@ -329,6 +329,10 @@
       if (root.parentNode !== slot) slot.appendChild(root);
       drawer.style.display = "none";
       fab.style.display = "none";
+    } else if (true) {
+      // AI chat lives only inside an AI tab slot; never float over other tabs.
+      fab.style.display = "none"; drawer.style.display = "none";
+      if (root.parentNode && root.parentNode !== drawer) root.parentNode.removeChild(root);
     } else if (window.top !== window) {
       // Embedded in Startup Factory Hub: the site's single assistant bubble handles chat.
       fab.style.display = "none"; drawer.style.display = "none";
