@@ -232,6 +232,8 @@
     if (tg.kind === "dom") tg.api.setStyle(tg.el, patch);
     else if (window.__IE && window.__IE.style) window.__IE.style(patch);
   }
+  window.__IEElSetStyle = function (p) { setStyle(p); if (typeof render === "function") render(true); };
+  window.__IEElHasTarget = function () { return !!target(); };
   function setText(v) {
     var tg = target(); if (!tg) return;
     if (tg.kind === "dom") tg.api.setText(tg.el, v); else if (window.__IE && window.__IE.text) window.__IE.text(v);
