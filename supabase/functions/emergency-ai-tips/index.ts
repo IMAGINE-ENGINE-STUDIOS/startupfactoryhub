@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -12,9 +13,9 @@ serve(async (req) => {
 
   try {
     const { disaster, location, language = 'en', question } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: 'Missing LOVABLE_API_KEY' }), {
+    const AI_KEYS = aiKeysConfigured();
+    if (!AI_KEYS) {
+      return new Response(JSON.stringify({ error: 'AI provider keys are not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -29,10 +30,10 @@ Tailor advice to the disaster type and location when provided. Be specific, calm
       ? question
       : `Give emergency safety tips for: ${disaster || 'general natural disaster'}${location ? ` in ${location}` : ''}.`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await aiFetch('ai:chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${AI_KEYS}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

@@ -107,7 +107,9 @@ const AdminSettings = () => {
     { name: 'SUPABASE_URL', value: 'https://zqiihhmd...', masked: true },
     { name: 'WHEREBY_API_KEY', value: 'eyJhbG...', masked: true },
     { name: 'WEBZ_API_TOKEN', value: 'a1b2c3...', masked: true },
-    { name: 'LOVABLE_API_KEY', value: 'lov_...', masked: true },
+    { name: 'OPENAI_API_KEY', value: 'sk-...', masked: true },
+    { name: 'GROQ_API_KEY', value: 'gsk_...', masked: true },
+    { name: 'GEMINI_API_KEY', value: 'AIza...', masked: true },
     { name: 'RESEND_API_KEY', value: 're_...', masked: true },
     { name: 'LINKEDIN_API', value: 'linkedin_...', masked: true }
   ];

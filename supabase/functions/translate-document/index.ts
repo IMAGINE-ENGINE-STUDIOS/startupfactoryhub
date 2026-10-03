@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 // Public document translation for the Signature Suite / LightPaper.
 // Preserves HTML structure and only translates human-readable text.
 const corsHeaders = {
@@ -48,11 +49,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const AI_KEYS = aiKeysConfigured();
+    const res = await aiFetch("ai:chat", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${AI_KEYS}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

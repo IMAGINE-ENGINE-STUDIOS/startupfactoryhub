@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "./ai.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -50,11 +51,10 @@ async function fetchWebz(token: string, query: string, size: number): Promise<{ 
 async function extractFunding(apiKey: string, articles: RawArticle[]) {
   const payload = articles.map((a, i) => ({ i, title: a.title, text: a.text, site: a.site }));
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const res = await aiFetch("ai:chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey,
     },
     body: JSON.stringify({
       model: "google/gemini-3.6-flash",
@@ -95,9 +95,9 @@ async function extractFunding(apiKey: string, articles: RawArticle[]) {
 export async function collectFundingNews(limitPerQuery = 12) {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const token = Deno.env.get("WEBZ_API_TOKEN");
-  const aiKey = Deno.env.get("LOVABLE_API_KEY");
+  const aiKey = aiKeysConfigured();
   if (!token) throw new Error("WEBZ_API_TOKEN is not configured");
-  if (!aiKey) throw new Error("LOVABLE_API_KEY is not configured");
+  if (!aiKey) throw new Error("AI provider keys are not configured");
 
   const week = weekOf();
   const seen = new Map<string, RawArticle>();

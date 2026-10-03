@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -38,9 +39,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    const lovableKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableKey) {
-      return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY not configured' }), {
+    const aiKeys = aiKeysConfigured();
+    if (!aiKeys) {
+      return new Response(JSON.stringify({ error: 'AI provider keys are not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -59,11 +60,10 @@ Deno.serve(async (req) => {
 }
 Do not include any prose, markdown fences, or explanations. Return the JSON object only.`;
 
-    const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiRes = await aiFetch('ai:chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Lovable-API-Key': lovableKey,
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',

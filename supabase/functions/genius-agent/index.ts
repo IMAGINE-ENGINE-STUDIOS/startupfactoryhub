@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 // Genius AI Agent — function-calling edge function.
 // Returns either:
 //   { type: 'message', content: string }
@@ -526,8 +527,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const AI_KEYS = aiKeysConfigured();
+    if (!AI_KEYS) throw new Error("AI provider keys are not configured");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -593,10 +594,10 @@ serve(async (req) => {
         memorySnippets.slice(0, 15).map((m: any) => `- [${m.category || "general"}] ${m.title}: ${String(m.content).slice(0, 200)}`).join("\n");
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await aiFetch("ai:chat", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${AI_KEYS}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

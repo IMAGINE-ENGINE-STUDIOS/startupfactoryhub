@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveLinkedInAuthor } from '../_shared/linkedinAuthor.ts'
 import {
@@ -104,12 +105,10 @@ ${opts.previous.map((p, i) => `--- previous ${i + 1} ---\n${p.slice(0, 600)}`).j
 
 Return only the post text.`
 
-  const res = await fetch('https://ai.gateway.lovable.dev/v1/responses', {
+  const res = await aiFetch('ai:responses', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Lovable-API-Key': opts.apiKey,
-      'X-Lovable-AIG-SDK': 'fetch',
     },
     body: JSON.stringify({ model: 'openai/gpt-5.6-sol', input: prompt, stream: true }),
   })
@@ -327,7 +326,7 @@ Deno.serve(async (req) => {
 
     const dedupeCfg = readDedupeConfig(settings)
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
+    const AI_KEYS = aiKeysConfigured()
 
     // ---- Save LinkedIn credentials from the settings screen ----
     if (action === 'set-credentials') {
@@ -396,8 +395,8 @@ Deno.serve(async (req) => {
         })
       }
 
-      if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const preview = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url, dedupeCfg)
+      if (!AI_KEYS) throw new Error('AI provider keys are not configured')
+      const preview = await buildPost(admin, AI_KEYS, settings.landing_url, dedupeCfg)
       return json({
         source: 'generated',
         post_id: null,
@@ -419,10 +418,10 @@ Deno.serve(async (req) => {
     // ---- Generate a draft for a given slot (queue filler / regenerate) ----
 
     if (action === 'generate' || action === 'regenerate') {
-      if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
+      if (!AI_KEYS) throw new Error('AI provider keys are not configured')
       const { text, angle, trackingCode, trackingUrl } = await buildPost(
         admin,
-        LOVABLE_API_KEY,
+        AI_KEYS,
         settings.landing_url,
         dedupeCfg,
         action === 'regenerate' && body?.id ? String(body.id) : undefined,
@@ -531,10 +530,10 @@ Deno.serve(async (req) => {
     }
 
     if (!target) {
-      if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
+      if (!AI_KEYS) throw new Error('AI provider keys are not configured')
       const { text, angle, trackingCode, trackingUrl } = await buildPost(
         admin,
-        LOVABLE_API_KEY,
+        AI_KEYS,
         settings.landing_url,
         dedupeCfg,
       )
@@ -587,7 +586,7 @@ Deno.serve(async (req) => {
         .eq('id', settings.id)
 
       // Pre-generate the draft for the next slot so it can be reviewed a day ahead
-      if (LOVABLE_API_KEY) {
+      if (AI_KEYS) {
         try {
           const next = nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0]
           const { data: exists } = await admin
@@ -598,7 +597,7 @@ Deno.serve(async (req) => {
             .limit(1)
             .maybeSingle()
           if (!exists) {
-            const nextPost = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url, dedupeCfg)
+            const nextPost = await buildPost(admin, AI_KEYS, settings.landing_url, dedupeCfg)
             await admin.from('partners_campaign_posts').insert({
               post_text: nextPost.text,
               angle: nextPost.angle,

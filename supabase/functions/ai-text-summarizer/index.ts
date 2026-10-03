@@ -1,3 +1,4 @@
+import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -45,17 +46,17 @@ serve(async (req) => {
     }
 
     // Call AI to generate summary
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const AI_KEYS = aiKeysConfigured();
     
     const systemPrompt = `You are a text summarization expert. Provide concise, clear summaries that capture the key information.
 Return a JSON object with:
 - summary: A 2-3 sentence summary
 - keyPoints: An array of ${keyPointsCount} key takeaways`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await aiFetch('ai:chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${AI_KEYS}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
