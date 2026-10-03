@@ -8,61 +8,64 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const ALLOWED_PRICES = new Set([
-  "price_1TyPiMK5N1RcUVuYQk1w5Az9", // Genius AI Starter $9/mo
-  "price_1TyPjmK5N1RcUVuYQQeU2piq", // Genius AI Pro $29/mo
+// Monthly subscriptions
+const SUBSCRIPTION_PRICES = new Set([
+  "price_1UMWRHK5N1RcUVuYuamlc3g7", // Imagine Starter $15/mo - 300 credits
+  "price_1UMWRcK5N1RcUVuYbfH395fy", // Imagine Pro $35/mo - 700 credits
+  "price_1UMWhHK5N1RcUVuY1bB3pmLA", // Imagine Studio $79/mo - 1600 credits
 ]);
+// One-time credit packs (added once prices are confirmed)
+const PACK_PRICES = new Set<string>([]);
+
+const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-  );
+  const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
+    if (!authHeader) return json({ error: "Please sign in first." }, 401);
     const { data } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    if (!user?.email) return json({ error: "Please sign in first." }, 401);
 
     const body = await req.json().catch(() => ({}));
     const priceId = typeof body?.priceId === "string" ? body.priceId : "";
-    if (!ALLOWED_PRICES.has(priceId)) {
-      return new Response(JSON.stringify({ error: "Invalid priceId" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const isSub = SUBSCRIPTION_PRICES.has(priceId);
+    if (!isSub && !PACK_PRICES.has(priceId)) return json({ error: "Invalid plan" }, 400);
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2025-08-27.basil",
-    });
+    const returnTo = typeof body?.returnPath === "string" && body.returnPath.startsWith("/") ? body.returnPath : "/dashboard?tab=profile";
+    const origin = req.headers.get("origin") || "https://startupfactoryhub.com";
+    const sep = returnTo.includes("?") ? "&" : "?";
 
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     const customerId = customers.data[0]?.id;
+
+    if (isSub && customerId) {
+      // Already on an Imagine plan? Send them to the portal to switch instead of double-billing.
+      const subs = await stripe.subscriptions.list({ customer: customerId, status: "active", limit: 20 });
+      const existing = subs.data.find((s) => s.items.data.some((i) => SUBSCRIPTION_PRICES.has(i.price.id)));
+      if (existing) {
+        const portal = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: `${origin}${returnTo}` });
+        return json({ url: portal.url, portal: true });
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: "subscription",
+      mode: isSub ? "subscription" : "payment",
       allow_promotion_codes: true,
-      success_url: `${req.headers.get("origin")}/dashboard?tab=profile&genius=success`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?tab=profile&genius=cancelled`,
-      metadata: { user_id: user.id, kind: "genius_ai_plan" },
+      success_url: `${origin}${returnTo}${sep}credits=success`,
+      cancel_url: `${origin}${returnTo}${sep}credits=cancelled`,
+      metadata: { user_id: user.id, kind: isSub ? "imagine_plan" : "ai_credit_pack", price_id: priceId },
     });
-
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ url: session.url });
   } catch (error) {
     console.error("create-genius-checkout error:", error);
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: (error as Error).message }, 500);
   }
 });

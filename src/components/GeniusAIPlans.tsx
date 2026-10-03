@@ -2,25 +2,24 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useGeniusPlan } from '@/hooks/useGeniusPlan';
-import { GENIUS_PLANS, GENIUS_PLAN_ORDER, type GeniusPlanKey } from '@/lib/genius-plans';
-import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp } from 'lucide-react';
+import { GENIUS_PLANS, GENIUS_PLAN_ORDER, PLAN_LABELS, SERVER_PLAN_TO_KEY, type GeniusPlanKey } from '@/lib/genius-plans';
+import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp, Settings2 } from 'lucide-react';
 
 const ICONS: Record<GeniusPlanKey, typeof Zap> = {
   free: Sparkles,
   starter: Zap,
   pro: Crown,
-  enterprise: Building2,
+  studio: Building2,
 };
 
 const GRADIENTS: Record<GeniusPlanKey, string> = {
   free: 'from-slate-500 to-slate-400',
   starter: 'from-blue-500 to-cyan-500',
   pro: 'from-primary to-teal-400',
-  enterprise: 'from-purple-500 to-pink-500',
+  studio: 'from-purple-500 to-pink-500',
 };
 
 export default function GeniusAIPlans() {
@@ -28,19 +27,34 @@ export default function GeniusAIPlans() {
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
-  const currentPlan = (usage.plan as GeniusPlanKey) || 'free';
-  const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.turns_used / usage.limit) * 100)) : 0;
+  const currentPlan: GeniusPlanKey = SERVER_PLAN_TO_KEY[usage.plan] ?? 'free';
+  const isLegacy = usage.plan !== 'free' && !SERVER_PLAN_TO_KEY[usage.plan];
 
   const handleSubscribe = async (priceId: string) => {
     setCheckoutLoading(priceId);
     try {
       const { data, error } = await supabase.functions.invoke('create-genius-checkout', {
-        body: { priceId },
+        body: { priceId, returnPath: window.location.pathname + window.location.search.replace(/[?&]credits=\w+/, '') },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       if (data?.url) window.open(data.url, '_blank');
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Checkout unavailable', description: err.message, variant: 'destructive' });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const openPortal = async () => {
+    setCheckoutLoading('portal');
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.url) window.open(data.url, '_blank');
+    } catch (err: any) {
+      toast({ title: 'Could not open billing', description: err.message, variant: 'destructive' });
     } finally {
       setCheckoutLoading(null);
     }
@@ -48,7 +62,7 @@ export default function GeniusAIPlans() {
 
   return (
     <div className="space-y-4">
-      {/* Usage header */}
+      {/* Balance header */}
       <Card className="tech-card border-0 overflow-hidden">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -57,34 +71,34 @@ export default function GeniusAIPlans() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Genius AI Plan</p>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-foreground">{GENIUS_PLANS[currentPlan]?.name}</h3>
-                  <Badge variant={currentPlan === 'free' ? 'secondary' : 'default'} className="text-xs">
-                    {GENIUS_PLANS[currentPlan]?.allowance}
+                <p className="text-sm text-muted-foreground font-medium">AI Credits</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-xl font-bold text-foreground">{usage.balance.toLocaleString(undefined, { maximumFractionDigits: 1 })} credits</h3>
+                  <Badge variant={usage.plan === 'free' ? 'secondary' : 'default'} className="text-xs">
+                    {PLAN_LABELS[usage.plan] ?? 'Free'}
                   </Badge>
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading} className="gap-2">
-              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-              Refresh
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Turns used this month</span>
-              <span className="font-semibold text-foreground">
-                {usage.turns_used.toLocaleString()} / {usage.limit.toLocaleString()}
-              </span>
+            <div className="flex gap-2">
+              {usage.has_customer && (
+                <Button variant="outline" size="sm" onClick={openPortal} disabled={checkoutLoading === 'portal'} className="gap-2">
+                  {checkoutLoading === 'portal' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Settings2 className="h-3.5 w-3.5" />}
+                  Manage billing
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading} className="gap-2">
+                {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                Refresh
+              </Button>
             </div>
-            <Progress value={pct} className="h-2" />
-            <p className="text-[11px] text-muted-foreground">
-              {(usage.input_tokens + usage.output_tokens).toLocaleString()} tokens consumed
-              {usage.turns_used >= usage.limit ? ' — limit reached, upgrade to continue.' : ''}
-            </p>
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            {usage.monthly_credits > 0
+              ? `${usage.monthly_credits.toLocaleString()} credits are added every month${usage.current_period_end ? `; next billing ${new Date(usage.current_period_end).toLocaleDateString()}` : ''}${usage.cancel_at_period_end ? ' (cancels at period end)' : ''}. Unused credits roll over.`
+              : 'You get 5 free credits every day. Upgrade for a monthly credit allowance that rolls over.'}
+            {isLegacy ? ' Your existing plan has been converted to monthly credits.' : ''}
+          </p>
         </CardContent>
       </Card>
 
@@ -93,7 +107,7 @@ export default function GeniusAIPlans() {
         {GENIUS_PLAN_ORDER.map((key) => {
           const plan = GENIUS_PLANS[key];
           const Icon = ICONS[key];
-          const isCurrent = currentPlan === key;
+          const isCurrent = currentPlan === key && !isLegacy;
           const isUpgrade = GENIUS_PLAN_ORDER.indexOf(key) > GENIUS_PLAN_ORDER.indexOf(currentPlan);
 
           return (
@@ -117,14 +131,8 @@ export default function GeniusAIPlans() {
 
                 <h4 className="text-base font-bold text-foreground mb-1">{plan.name}</h4>
                 <div className="flex items-baseline gap-1 mb-3">
-                  {plan.price === null ? (
-                    <span className="text-2xl font-bold text-foreground">Custom</span>
-                  ) : (
-                    <>
-                      <span className="text-2xl font-bold text-foreground">${plan.price}</span>
-                      <span className="text-xs text-muted-foreground">/mo</span>
-                    </>
-                  )}
+                  <span className="text-2xl font-bold text-foreground">${plan.price}</span>
+                  <span className="text-xs text-muted-foreground">/mo</span>
                 </div>
 
                 <p className="text-xs text-muted-foreground mb-3">{plan.allowance}</p>
@@ -159,15 +167,6 @@ export default function GeniusAIPlans() {
                     )}
                     {isUpgrade ? 'Upgrade' : 'Switch'}
                   </Button>
-                ) : key === 'enterprise' ? (
-                  <Button
-                    className="w-full mt-3"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open('mailto:ceo@imagineengine.space?subject=Genius%20AI%20Enterprise', '_blank')}
-                  >
-                    Contact sales
-                  </Button>
                 ) : (
                   <Button className="w-full mt-3" variant="outline" size="sm" disabled>
                     Included
@@ -181,18 +180,16 @@ export default function GeniusAIPlans() {
 
       {/* Credit / pricing disclosure */}
       <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2">
-        <p className="text-xs font-semibold text-foreground">How credits (turns) are priced</p>
+        <p className="text-xs font-semibold text-foreground">How credits work</p>
         <ul className="space-y-1 text-[11px] text-muted-foreground">
-          <li>• 1 credit = 1 Genius AI turn (one message you send + its full answer, including tool use).</li>
-          <li>• Free: 50 credits/mo — $0.00. Included, no card required.</li>
-          <li>• Starter: $9/mo for 1,000 credits ≈ <span className="text-foreground font-medium">$0.009 per credit</span>.</li>
-          <li>• Pro: $29/mo for 5,000 credits ≈ <span className="text-foreground font-medium">$0.0058 per credit</span> (premium models included).</li>
-          <li>• Enterprise: volume pricing, billed on dedicated capacity — contact sales.</li>
-          <li>• Credits reset on the 1st of each month and do not roll over. Unused credits expire.</li>
-          <li>• Long documents or heavy tool runs still count as 1 credit, but very large contexts may consume more tokens from your plan's token equivalent.</li>
+          <li>• 1 credit = 1 AI build (a new section, database table, automation or page redesign).</li>
+          <li>• Quick chat answers and small text or style tweaks cost 0.2 credits (5 per credit).</li>
+          <li>• Editing by hand, undo, redo and restoring versions are always free.</li>
+          <li>• Everyone gets 100 welcome credits plus 5 free credits every day.</li>
+          <li>• Monthly plans add credits each billing month. Unused credits roll over while you stay subscribed.</li>
+          <li>• Cancel, upgrade or downgrade anytime from Manage billing.</li>
         </ul>
       </div>
     </div>
   );
 }
-

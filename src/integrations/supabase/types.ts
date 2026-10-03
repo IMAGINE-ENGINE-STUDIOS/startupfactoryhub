@@ -530,6 +530,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_credit_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          ref: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          ref?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          ref?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_documents: {
         Row: {
           content: string
@@ -8269,6 +8296,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_ai_credits: {
+        Row: {
+          balance: number
+          bonus_claimed: boolean
+          created_at: string
+          id: string
+          last_daily_grant: string
+          last_plan_period_end: string | null
+          plan: string
+          plan_credits_monthly: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          bonus_claimed?: boolean
+          created_at?: string
+          id?: string
+          last_daily_grant?: string
+          last_plan_period_end?: string | null
+          plan?: string
+          plan_credits_monthly?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          bonus_claimed?: boolean
+          created_at?: string
+          id?: string
+          last_daily_grant?: string
+          last_plan_period_end?: string | null
+          plan?: string
+          plan_credits_monthly?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_goals: {
         Row: {
           created_at: string | null
@@ -9093,6 +9159,20 @@ export type Database = {
       }
     }
     Functions: {
+      ai_credits_consume: {
+        Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: number
+      }
+      ai_credits_grant: {
+        Args: {
+          _amount: number
+          _reason: string
+          _ref: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      ai_credits_sync: { Args: { _user_id: string }; Returns: number }
       assign_user_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

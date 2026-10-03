@@ -21,15 +21,38 @@
 
   /* ---------- snapshots ---------- */
   function raw() { var ie = window.__IE; return ie && ie.raw; }
+  // Canvas edits (text, styles, added elements) and the project background live in localStorage,
+  // so every snapshot captures those keys too.
+  var EDIT_RE = /^ie-(txt|sty|add):/;
+  function editKeys(p) {
+    var o = {};
+    for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (EDIT_RE.test(k) || k === "ie-bg:" + p) o[k] = localStorage.getItem(k); }
+    return o;
+  }
   function snap() {
     var r = raw(); if (!r) return null;
     var p = (r.projects || []).filter(function (x) { return x.id === r.pid; })[0];
-    return JSON.stringify({ pid: r.pid, project: p || null, nodes: r.nodes, links: r.links, files: r.files });
+    var ed = editKeys(r.pid), sorted = {}; Object.keys(ed).sort().forEach(function (k) { sorted[k] = ed[k]; });
+    return JSON.stringify({ pid: r.pid, project: p || null, nodes: r.nodes, links: r.links, files: r.files, edits: sorted });
+  }
+  function reloadCanvas() {
+    var roots = window.__IERoots || [];
+    window.__IERoots = roots.filter(function (x) { return x && x.isConnected; });
+    window.__IERoots.forEach(function (x) { try { x.__ieReload && x.__ieReload(); } catch (e) {} });
+    if (window.__IEApplyBg) window.__IEApplyBg();
+    if (window.__IEElRefresh) try { window.__IEElRefresh(); } catch (e) {}
   }
   function apply(s) {
     var r = raw(); if (!r || !s) return; var o = JSON.parse(s);
     if (o.project) r.setProjects(function (q) { return q.map(function (x) { return x.id === o.project.id ? o.project : x; }); });
     if (o.nodes) r.setNodes(o.nodes); if (o.links) r.setLinks(o.links); if (o.files) r.setFiles(o.files);
+    if (o.edits) {
+      var cur = editKeys(o.pid || r.pid);
+      for (var k in cur) if (!(k in o.edits)) localStorage.removeItem(k);
+      for (var k2 in o.edits) { try { localStorage.setItem(k2, o.edits[k2]); } catch (e) {} }
+      // Let React re-render sections first, then repaint edits.
+      setTimeout(reloadCanvas, 60); setTimeout(reloadCanvas, 400);
+    }
   }
   var past = [], future = [], cur = null, pid = null, busy = false, stable = 0, pending = null;
   setInterval(function () {
@@ -67,16 +90,9 @@
     say("Version saved");
   }
   function restore(v) {
-    var t = token(); if (!t) { alert("Please sign in to restore versions."); return; }
-    if (!confirm("Restore \"" + v.name + "\"? Restoring a version uses credits (free for admins). You can undo afterwards.")) return;
-    fetch(FN, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t }, body: JSON.stringify({ action: "restore_version" }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        if (!res.ok || !res.j.ok) { alert(res.j.error || "Could not restore this version."); return; }
-        past.push(snap()); future = []; busy = true; apply(v.data); cur = v.data; paint(); closeLog();
-        say(res.j.charged > 0 ? "Version restored (charged " + res.j.charged + " credits)" : "Version restored");
-      })
-      .catch(function () { alert("Could not reach the server. Please try again."); });
+    if (!confirm("Restore \"" + v.name + "\"? You can undo afterwards.")) return;
+    past.push(snap()); if (past.length > MAX) past.shift(); future = []; busy = true; apply(v.data); cur = v.data; paint(); closeLog();
+    say("Version restored");
   }
   var logEl = null;
   function closeLog() { if (logEl) { logEl.remove(); logEl = null; } }
@@ -116,11 +132,11 @@
   }
   function mk(txt, title, fn) { var b = document.createElement("button"); b.textContent = txt; b.title = title; b.setAttribute("aria-label", title); b.style.cssText = B; b.onclick = fn; return b; }
   setInterval(function () {
-    var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.firstChild) return;
+    var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.querySelector("[data-ie-hist]")) return;
     u = mk("\u21B6", "Undo (Ctrl+Z)", undo); rd = mk("\u21B7", "Redo (Ctrl+Y)", redo);
     var rec = mk("", "Record a version", record);
     rec.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:5px;vertical-align:middle"></span>Record';
     var log = mk("Log", "Version log", openLog);
-    [u, rd, rec, log].forEach(function (b) { slot.appendChild(b); }); paint();
+    [u, rd, rec, log].forEach(function (b) { b.setAttribute("data-ie-hist", "1"); }); var first = slot.firstChild; [u, rd, rec, log].forEach(function (b) { slot.insertBefore(b, first); }); paint();
   }, 400);
 })();

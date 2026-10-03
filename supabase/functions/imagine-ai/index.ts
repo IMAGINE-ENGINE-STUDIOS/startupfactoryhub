@@ -130,17 +130,12 @@ serve(async (req) => {
     const usage: any = (await readJson(admin, monthKey())) || { users: {} };
 
     if (action === "whoami") return json({ isAdmin });
-    if (action === "restore_version") {
-      // Restoring a saved canvas version is free for admins; everyone else is charged the admin-set price.
-      const price = isAdmin ? 0 : Math.max(0, Number(settings.version_restore_price ?? 0.25));
-      if (price > 0) {
-        const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
-        const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
-        u.charge += price; u.restores = (u.restores || 0) + 1;
-        fresh.users[user.id] = u;
-        await writeJson(admin, monthKey(), fresh);
-      }
-      return json({ ok: true, charged: price, isAdmin });
+    // Version restores are free for everyone.
+    if (action === "restore_version") return json({ ok: true, charged: 0, isAdmin });
+    if (action === "credits") {
+      const { data: bal } = await admin.rpc("ai_credits_sync", { _user_id: user.id });
+      const { data: row } = await admin.from("user_ai_credits").select("plan, plan_credits_monthly, last_plan_period_end").eq("user_id", user.id).maybeSingle();
+      return json({ balance: Number(bal ?? 0), isAdmin, plan: row?.plan ?? "free", monthly: row?.plan_credits_monthly ?? 0, renews: row?.last_plan_period_end ?? null });
     }
     if (action === "save_key" || action === "delete_key") {
       if (!isAdmin) return json({ error: "Forbidden" }, 403);
@@ -189,16 +184,22 @@ serve(async (req) => {
     if (!messages.length) return json({ error: "messages required" }, 400);
     const tab = String(body.tab || "canvas").slice(0, 20);
 
-    const me = usage.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
-    if (!isAdmin) {
-      if ((me.days[dayKey()] || 0) >= settings.daily_message_limit) return json({ error: `Daily limit of ${settings.daily_message_limit} AI messages reached. Try again tomorrow.` }, 429);
-      if (me.input + me.output >= settings.monthly_token_limit) return json({ error: "Monthly AI token allowance reached." }, 429);
+    // Credits: 1 per build generation, 0.2 per fast chat / small tweak. Admins are free.
+    const light = body.model === "chat" || !!body.context?.plain;
+    const price = isAdmin ? 0 : light ? 0.2 : 1;
+    let balance: number | null = null;
+    if (price > 0) {
+      const { data: nb, error: ce } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: price, _reason: light ? "chat" : "build" });
+      if (ce) { console.error("credit consume failed", ce); return json({ error: "Could not check your credits. Please try again." }, 500); }
+      if (Number(nb) < 0) return json({ error: "You're out of credits. You get 5 free credits every day, or upgrade to a monthly plan for more.", code: "no_credits" }, 402);
+      balance = Number(nb);
     }
+    const refund = async () => { if (price > 0) { const { data: b } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: price, _reason: "refund", _ref: "refund:" + crypto.randomUUID() }); } };
 
     const storedKeys: any = (await readJson(admin, "keys.json")) || {};
     const prov = resolveProvider(settings, storedKeys);
     const key = prov?.key;
-    if (!prov || !key) return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503);
+    if (!prov || !key) { await refund(); return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503); }
 
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 8000) }));
@@ -222,6 +223,7 @@ serve(async (req) => {
       });
     }
     if (!resp.ok) {
+      await refund();
       const t = await resp.text();
       console.error("imagine-ai provider error", resp.status, t);
       if (resp.status === 429) return json({ error: "The AI is busy right now. Please try again in a moment." }, 429);
@@ -247,7 +249,7 @@ serve(async (req) => {
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
-    return json({ text, usage: { input: inTok, output: outTok } });
+    return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance } });
   } catch (e) {
     console.error("imagine-ai error", e);
     return json({ error: "Something went wrong. Please try again." }, 500);
