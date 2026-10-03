@@ -132,11 +132,11 @@
   }
   function mk(txt, title, fn) { var b = document.createElement("button"); b.textContent = txt; b.title = title; b.setAttribute("aria-label", title); b.style.cssText = B; b.onclick = fn; return b; }
   setInterval(function () {
-    var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.firstChild) return;
+    var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.querySelector("[data-ie-hist]")) return;
     u = mk("\u21B6", "Undo (Ctrl+Z)", undo); rd = mk("\u21B7", "Redo (Ctrl+Y)", redo);
     var rec = mk("", "Record a version", record);
     rec.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:5px;vertical-align:middle"></span>Record';
     var log = mk("Log", "Version log", openLog);
-    [u, rd, rec, log].forEach(function (b) { slot.appendChild(b); }); paint();
+    [u, rd, rec, log].forEach(function (b) { b.setAttribute("data-ie-hist", "1"); }); var first = slot.firstChild; [u, rd, rec, log].forEach(function (b) { slot.insertBefore(b, first); }); paint();
   }, 400);
 })();
