@@ -71,3 +71,5 @@
 - [x] Phone/iPad: header fits, bottom bar = AI, Widgets, Projects, Content, Design
 - [ ] Page background editor + "merge widget with background"
 - [ ] Click-on-map pin placement for map widgets
+
+- [ ] Credit top-up pack prices: waiting on user (disputed 100 credits = $5)
