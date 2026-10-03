@@ -50,7 +50,7 @@ function tierFor(model: string, messages: any[]): Tier {
   return "standard";
 }
 
-const RETRY = new Set([408, 413, 429, 500, 502, 503, 504]);
+const RETRY = new Set([400, 404, 408, 413, 429, 500, 502, 503, 504]);
 
 export interface RouteResult { resp: Response; provider: Provider | null; model: string }
 
@@ -76,7 +76,7 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>): Prom
       if (resp.ok) return { resp, provider: prov, model };
       last = { resp, provider: prov, model };
       if (!RETRY.has(resp.status)) return last;
-      console.warn(`[ai] ${prov}/${model} ${resp.status}, trying next provider`);
+      console.warn(`[ai] ${prov}/${model} ${resp.status}: ${(await resp.clone().text()).slice(0, 300)}`);
     } catch (e) {
       console.warn(`[ai] ${prov}/${model} network error`, e);
     }
