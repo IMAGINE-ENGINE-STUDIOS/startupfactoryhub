@@ -1613,7 +1613,7 @@ You can help with:
                           <div className="relative shrink-0">
                             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-lg animate-pulse" />
                             <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
-                              <Brain className="h-4 w-4 text-white" />
+                              <img src="/startup-factory-hub-logo.png" alt="" className="h-full w-full rounded-full object-cover" />
                             </span>
                           </div>
                           <div className="min-w-0">
@@ -1708,7 +1708,7 @@ You can help with:
                           <div className="relative shrink-0 mb-1">
                             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60 animate-pulse" />
                             <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
-                              <Brain className="h-3.5 w-3.5 text-white" />
+                              <img src="/startup-factory-hub-logo.png" alt="" className="h-full w-full rounded-full object-cover" />
                             </span>
                           </div>
                           <div className="bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg backdrop-blur-sm">
