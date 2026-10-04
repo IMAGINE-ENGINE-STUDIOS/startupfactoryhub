@@ -46,6 +46,7 @@ export const PARTNERS: Partner[] = [
   { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
   { name: "Deep Checks", logo: "/partners/deepchecks-logo.png", tier: "Technology" },
   { name: "Chase", logo: "/partners/chase-logo.png", tier: "Banking" },
+  { name: "Papermark", logo: "/partners/papermark-logo.png", tier: "Documents" },
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
