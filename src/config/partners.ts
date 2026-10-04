@@ -47,6 +47,7 @@ export const PARTNERS: Partner[] = [
   { name: "Deep Checks", logo: "/partners/deepchecks-logo.png", tier: "Technology" },
   { name: "Chase", logo: "/partners/chase-logo.png", tier: "Banking" },
   { name: "Papermark", logo: "/partners/papermark-logo.png", tier: "Documents" },
+  { name: "Airtable", logo: "/partners/airtable-logo.png", tier: "Productivity" },
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
