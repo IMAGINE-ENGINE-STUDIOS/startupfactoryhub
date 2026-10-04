@@ -66,9 +66,7 @@ const AboutHero = () => {
               </span>
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              An accelerator platform for <span className="font-medium text-foreground">deep tech startups</span>,
-              offering unique technology to help your startup succeed through our proprietary
-              <span className="font-medium text-primary"> development acceleration algorithm</span>.
+              Startup Factory Hub is building the <span className="font-medium text-primary">AI-powered infrastructure layer</span> for the global startup ecosystem.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-2 lg:justify-start">
               {["Deep Tech", "AI, Biotech, Quantum", "Growth methodology", "Built for success"].map((tag) => (
