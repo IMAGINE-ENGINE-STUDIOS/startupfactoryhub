@@ -427,7 +427,7 @@ export default function Deck() {
                 Startup Factory Hub
               </h1>
               <p className="mt-6 text-[40px] font-semibold leading-tight bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
-                The AI-Powered Hybrid Accelerator for Building Startups from Idea to Scale
+                Startup Factory Hub is building the AI-powered infrastructure layer for the global startup ecosystem.
               </p>
               <p className="mt-7 max-w-[1350px] text-[26px] leading-[1.5] text-slate-300">
                 Startup Factory Hub is a <span className="text-white font-semibold">hybrid digital-physical accelerator</span> that combines <span className="text-white font-semibold">AI-powered technology</span>, expert mentorship, strategic resources, and a global network to help founders build, validate, launch, and scale companies.
