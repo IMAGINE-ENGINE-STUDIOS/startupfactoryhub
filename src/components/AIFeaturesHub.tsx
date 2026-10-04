@@ -364,7 +364,7 @@ const PERKS: Perk[] = [
     name: "MongoDB for Startups",
     description: "Up to $5,000 in Atlas credits + expert technical advice.",
     badge: "Database",
-    href: "https://www.mongodb.com/startups",
+    href: "https://www.mongodb.com/lp/solutions/startups/partners?utm_campaign=startups-partners&utm_source=startup%20factory%20hub&utm_medium=referral&utm_content=startups",
     accent: "from-green-600 to-emerald-700",
     glow: "hsl(150 80% 40%)",
     domain: "mongodb.com",
