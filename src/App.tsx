@@ -167,7 +167,7 @@ const App = () => (
                     <Route path="/terms-of-service" element={<TermsOfService />} />
                     <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog" element={<Navigate to="/" replace />} />
                     <Route path="/sponsorship" element={<Sponsorship />} />
                     <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
                     <Route path="/marketing" element={<Marketing />} />

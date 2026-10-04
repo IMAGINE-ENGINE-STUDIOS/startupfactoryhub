@@ -39,11 +39,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {t('nav.blog')}
-                </Link>
-              </li>
-              <li>
                 <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <BookOpen className="h-3 w-3" />
                   {t('nav.guidelines')}
