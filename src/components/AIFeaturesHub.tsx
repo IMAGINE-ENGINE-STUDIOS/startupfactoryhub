@@ -341,6 +341,15 @@ const PERKS: Perk[] = [
     domain: "papermark.com",
   },
   {
+    name: "Airtable",
+    description: "Build flexible databases, workflows and apps to organize your startup's operations.",
+    badge: "Productivity",
+    href: "https://airtable.com/invite/r/dbKEIlnq",
+    accent: "from-amber-400 to-sky-500",
+    glow: "hsl(200 90% 55%)",
+    domain: "airtable.com",
+  },
+  {
     name: "Working Advantage",
     description: "Use code STARTUPPERKS for exclusive lifestyle benefits.",
     badge: "Lifestyle",
