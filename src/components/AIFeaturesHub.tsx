@@ -332,6 +332,15 @@ const PERKS: Perk[] = [
     domain: "lovable.dev",
   },
   {
+    name: "Papermark",
+    description: "Open-source document sharing with page-by-page analytics for pitch decks and data rooms.",
+    badge: "Documents",
+    href: "https://refer.papermark.com/startupfactoryhub",
+    accent: "from-zinc-700 to-zinc-900",
+    glow: "hsl(0 0% 45%)",
+    domain: "papermark.com",
+  },
+  {
     name: "Working Advantage",
     description: "Use code STARTUPPERKS for exclusive lifestyle benefits.",
     badge: "Lifestyle",
