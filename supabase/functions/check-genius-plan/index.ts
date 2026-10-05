@@ -11,6 +11,8 @@ const log = (s: string, d?: unknown) => console.log(`[CHECK-GENIUS-PLAN] ${s}${d
 
 // Stripe product -> plan key + monthly AI credits (higher wins when several are active).
 const PLANS: Record<string, { plan: string; credits: number }> = {
+  prod_VO19wW9Qe9JhxQ: { plan: "imagine_starter", credits: 180 },
+  prod_VO1AspAEw0Txl0: { plan: "imagine_pro", credits: 600 },
   prod_VNGzBi4OgZ7Hgl: { plan: "imagine_starter", credits: 300 },
   prod_VNGzC3vqRTiZMN: { plan: "imagine_pro", credits: 700 },
   prod_VNHFv9mfca4xTZ: { plan: "imagine_studio", credits: 1600 },
