@@ -84,6 +84,7 @@
     t.sections.forEach(addSection);
     var X = window.__IEX || {};
     (t.pages || []).forEach(function (p) { try { X.addPage && X.addPage({ name: p }); } catch (e) {} });
+    if ((t.pages || []).length && X.goPage) try { X.goPage({ name: "Main" }); } catch (e) {}
     if (t.cart && X.setCartConfig) try { X.setCartConfig({ config: t.cart }); } catch (e) {}
     (t.tables || []).forEach(function (tb) { try { window.__IE.addTable({ id: "tbl_" + sfx(), name: tb[0], columns: tb[1], rows: [] }); } catch (e) {} });
     return t.name;
