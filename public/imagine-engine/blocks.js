@@ -33,7 +33,7 @@
   /* ---- Templates ---- */
   var C = { bg: "#0b0b0c", card: "#18181b", line: "#27272a", text: "#fafafa", mute: "#a1a1aa", acc: "#8b5cf6" };
   var btn = function (t, href, ghost) { return { type: "button", content: t, style: Object.assign({ backgroundColor: ghost ? C.card : C.acc, color: "#ffffff", borderRadius: "9999px", padding: "12px 22px" }, href ? { "@href": href } : {}) }; };
-  var card = function (title, body) { return { type: "card", children: [{ type: "h1", content: title, style: { fontSize: "18px" } }, { type: "p", content: body, style: { color: C.mute } }], style: { backgroundColor: C.card, borderRadius: "16px", padding: "20px" } }; };
+  var card = function (title, body) { return { type: "div", children: [{ type: "h1", content: title, style: { fontSize: "18px" } }, { type: "p", content: body, style: { color: C.mute } }], style: { backgroundColor: C.card, borderRadius: "16px", padding: "20px" } }; };
   var grid = function (items) { return { type: "grid", children: items, style: { gap: "16px" } }; };
   var head = function (badge, h, p) { return [{ type: "badge", content: badge }, { type: "h1", content: h, style: { fontSize: "40px" } }, { type: "p", content: p, style: { color: C.mute } }]; };
   var embed = function (file) { return { embed: "/imagine-engine/blocks/" + file + "?b=1" }; };
@@ -48,7 +48,7 @@
     ] },
     ecommerce: { name: "Online store", pages: ["Shop", "About"], cart: { title: "Your bag", accent: C.acc, theme: "dark", fab: true }, tables: [["Products", ["id", "name", "price", "stock", "image"]], ["Orders", ["id", "email", "items", "total", "status"]]], sections: [
       { children: head("New season", "Pieces made to last", "Free shipping on orders over $75. Easy 30-day returns.").concat([btn("Shop now", "page:Shop"), btn("Cart", "cart:open", true)]) },
-      { children: [{ type: "h1", content: "Best sellers", style: { fontSize: "28px" } }, grid(["Classic tee|$28", "Everyday hoodie|$64", "Canvas tote|$22", "Wool beanie|$26"].map(function (s) { var p = s.split("|"); return { type: "card", children: [{ type: "h1", content: p[0], style: { fontSize: "18px" } }, { type: "p", content: p[1], style: { color: C.mute } }, btn("Add to cart")], style: { backgroundColor: C.card, borderRadius: "16px", padding: "20px" } }; }))] },
+      { children: [{ type: "h1", content: "Best sellers", style: { fontSize: "28px" } }, grid(["Classic tee|$28", "Everyday hoodie|$64", "Canvas tote|$22", "Wool beanie|$26"].map(function (s) { var p = s.split("|"); return { type: "div", children: [{ type: "h1", content: p[0], style: { fontSize: "18px" } }, { type: "p", content: p[1], style: { color: C.mute } }, btn("Add to cart")], style: { backgroundColor: C.card, borderRadius: "16px", padding: "20px" } }; }))] },
       { children: [grid([card("Free shipping", "On every order over $75"), card("30-day returns", "No questions asked"), card("Secure checkout", "Card payments by Stripe")])] },
       { children: [{ type: "h1", content: "Join the list", style: { fontSize: "24px" } }, { type: "p", content: "Get early access to new drops.", style: { color: C.mute } }, btn("Subscribe")] }
     ] },
