@@ -1,0 +1,18 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>html,body{margin:0;height:100%;background:#0b0b10;overflow:hidden;font-family:system-ui,sans-serif;color:#fafafa}canvas{display:block}#ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}#ui button{background:#8b5cf6;color:#fff;border:0;border-radius:999px;padding:12px 26px;font-size:16px;cursor:pointer}#s{position:absolute;top:14px;left:18px;font-weight:700}</style></head>
+<body><canvas id="c"></canvas><div id="s">Score 0</div><div id="ui"><h2 id="h" style="margin:0">Catch the stars</h2><p style="margin:0;color:#a1a1aa">Move with mouse, touch or arrow keys</p><button id="b">Start</button></div>
+<script>
+var c=document.getElementById("c"),x=c.getContext("2d"),W,H,p,stars,score,run=false,keys={};
+function size(){W=c.width=innerWidth;H=c.height=innerHeight}addEventListener("resize",size);size();
+function start(){p={x:W/2,w:90};stars=[];score=0;run=true;document.getElementById("ui").style.display="none"}
+document.getElementById("b").onclick=start;
+addEventListener("pointermove",function(e){if(p)p.x=e.clientX});addEventListener("keydown",function(e){keys[e.key]=1});addEventListener("keyup",function(e){keys[e.key]=0});
+function over(){run=false;document.getElementById("h").textContent="Game over - "+score;document.getElementById("b").textContent="Play again";document.getElementById("ui").style.display="flex"}
+(function f(){requestAnimationFrame(f);x.fillStyle="#0b0b10";x.fillRect(0,0,W,H);if(!run)return;
+if(keys.ArrowLeft)p.x-=8;if(keys.ArrowRight)p.x+=8;p.x=Math.max(p.w/2,Math.min(W-p.w/2,p.x));
+if(Math.random()<.03+score*.001)stars.push({x:Math.random()*W,y:-10,v:2+Math.random()*2+score*.05,bad:Math.random()<.25});
+x.fillStyle="#8b5cf6";x.fillRect(p.x-p.w/2,H-30,p.w,12);
+for(var i=stars.length-1;i>=0;i--){var s=stars[i];s.y+=s.v;x.fillStyle=s.bad?"#ef4444":"#facc15";x.beginPath();x.arc(s.x,s.y,8,0,7);x.fill();
+if(s.y>H-36&&s.y<H-18&&Math.abs(s.x-p.x)<p.w/2){stars.splice(i,1);if(s.bad)return over();score++}else if(s.y>H)stars.splice(i,1)}
+document.getElementById("s").textContent="Score "+score})();
+</script></body></html>
