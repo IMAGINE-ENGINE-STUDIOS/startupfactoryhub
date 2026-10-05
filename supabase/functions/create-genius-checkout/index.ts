@@ -10,8 +10,8 @@ const corsHeaders = {
 
 // Monthly subscriptions
 const SUBSCRIPTION_PRICES = new Set([
-  "price_1UMWRHK5N1RcUVuYuamlc3g7", // Imagine Starter $15/mo - 300 credits
-  "price_1UMWRcK5N1RcUVuYbfH395fy", // Imagine Pro $35/mo - 700 credits
+  "price_1UNF7bK5N1RcUVuYHlnpmkkA", // Imagine Starter $9/mo - 180 credits
+  "price_1UNF7vK5N1RcUVuY121ICYxa", // Imagine Pro $29/mo - 600 credits
   "price_1UMWhHK5N1RcUVuY1bB3pmLA", // Imagine Studio $79/mo - 1600 credits
 ]);
 // One-time credit packs (added once prices are confirmed)

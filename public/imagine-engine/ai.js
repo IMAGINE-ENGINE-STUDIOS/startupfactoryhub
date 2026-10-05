@@ -35,13 +35,33 @@
   }
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
+  function extractActions(text) {
+    var found = [], clean = String(text || "");
+    var tryParse = function (s) { try { var v = JSON.parse(s.trim()); var arr = Array.isArray(v) ? v : (v && Array.isArray(v.actions) ? v.actions : [v]); return arr.filter(function (a) { return a && typeof a === "object" && typeof a.type === "string"; }); } catch (e) { return null; } };
+    clean = clean.replace(/```(actions|json|javascript|js)?\s*([\s\S]*?)```/gi, function (all, lang, body) { var r = tryParse(body); if (r && r.length) { found = found.concat(r); return ""; } return lang === "actions" ? "" : all; });
+    // Bare JSON arrays / objects with "type" outside fences
+    var i = 0;
+    while (i < clean.length) {
+      var c = clean[i];
+      if ((c === "[" || c === "{") && /"type"\s*:/.test(clean.slice(i, i + 400))) {
+        var depth = 0, inStr = false, esc = false, j = i;
+        for (; j < clean.length; j++) { var ch = clean[j];
+          if (inStr) { if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === '"') inStr = false; continue; }
+          if (ch === '"') inStr = true; else if (ch === "[" || ch === "{") depth++; else if (ch === "]" || ch === "}") { depth--; if (depth === 0) break; } }
+        var r2 = tryParse(clean.slice(i, j + 1));
+        if (r2 && r2.length) { found = found.concat(r2); clean = clean.slice(0, i) + clean.slice(j + 1); continue; }
+      }
+      i++;
+    }
+    return { list: found, clean: clean.replace(/\n{3,}/g, "\n\n").trim() };
+  }
   function runActions(text) {
-    var m = text.match(/```actions\s*([\s\S]*?)```/);
+    var ex = extractActions(text);
     var done = [];
-    var clean = text.replace(/```actions[\s\S]*?```/g, "").trim();
-    if (!m || !window.__IE) return { text: clean, done: done };
+    var clean = ex.clean || (ex.list.length ? "Done — applied your changes to the canvas." : "");
+    if (!ex.list.length || !window.__IE) return { text: clean, done: done };
     try {
-      var list = JSON.parse(m[1]);
+      var list = ex.list;
       var ie = window.__IE, refs = {}, wantRun = false;
       var rid = function (r) { return refs[r] || r; };
       (Array.isArray(list) ? list : [list]).slice(0, 40).forEach(function (a) {
