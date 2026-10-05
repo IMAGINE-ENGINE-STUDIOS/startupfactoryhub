@@ -81,12 +81,16 @@
   function apply(key) {
     key = String(key || "").toLowerCase(); key = ALIAS[key] || key;
     var t = T[key]; if (!t || !window.__IE) return null;
-    t.sections.forEach(addSection);
     var X = window.__IEX || {};
-    (t.pages || []).forEach(function (p) { try { X.addPage && X.addPage({ name: p }); } catch (e) {} });
-    if ((t.pages || []).length && X.goPage) try { X.goPage({ name: "Main" }); } catch (e) {}
-    if (t.cart && X.setCartConfig) try { X.setCartConfig({ config: t.cart }); } catch (e) {}
-    (t.tables || []).forEach(function (tb) { try { window.__IE.addTable({ id: "tbl_" + sfx(), name: tb[0], columns: tb[1], rows: [] }); } catch (e) {} });
+    var pages = t.pages || [];
+    pages.forEach(function (p, i) { setTimeout(function () { try { X.addPage && X.addPage({ name: p }); } catch (e) {} }, i * 150); });
+    var wait = pages.length ? pages.length * 150 + 300 : 0;
+    setTimeout(function () { if (pages.length && X.goPage) try { X.goPage({ name: "Main" }); } catch (e) {} }, wait);
+    setTimeout(function () {
+      t.sections.forEach(addSection);
+      if (t.cart && X.setCartConfig) try { X.setCartConfig({ config: t.cart }); } catch (e) {}
+      (t.tables || []).forEach(function (tb) { try { window.__IE.addTable({ id: "tbl_" + sfx(), name: tb[0], columns: tb[1], rows: [] }); } catch (e) {} });
+    }, wait + 300);
     return t.name;
   }
   window.__IEBlocks = { apply: apply, list: Object.keys(T).map(function (k) { return { id: k, name: T[k].name }; }) };
