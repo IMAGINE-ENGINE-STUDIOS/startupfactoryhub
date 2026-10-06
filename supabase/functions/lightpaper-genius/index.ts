@@ -1,4 +1,4 @@
-import { aiFetch, aiKeysConfigured } from "../_shared/ai.ts";
+import { routeChat, aiKeysConfigured } from "../_shared/ai.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -34,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, systemOverride, language } = await req.json();
+    const { messages, systemOverride, language, document: doc } = await req.json();
     const AI_KEYS = aiKeysConfigured();
     if (!AI_KEYS)
       throw new Error("AI provider keys are not configured");
@@ -67,26 +67,31 @@ OUTPUT LANGUAGE - ABSOLUTE RULE:
 - Never mix languages. Only proper nouns, brand names, code and quoted source text keep their original form.
 - If the user writes in another language, still answer in ${langName}.`;
 
-    const systemPrompt = (systemOverride || defaultSystem) + languageDirective;
+    const docContext = doc && typeof doc === "object"
+      ? `
 
-    const response = await aiFetch("ai:chat",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${AI_KEYS}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages,
-          ],
-          stream: true,
-          max_tokens: 16000,
-        }),
-      }
-    );
+OPEN DOCUMENT (your memory of the file the user is editing):
+Title: ${String(doc.title || "Untitled").slice(0, 200)}
+Words: ${Number(doc.words) || 0}
+${doc.selection ? `SELECTED TEXT:\n"""${String(doc.selection).slice(0, 8000)}"""\n` : ""}FULL TEXT:
+"""${String(doc.text || "").slice(0, 60000)}"""`
+      : "";
+
+    const formatRules = `
+
+PROFESSIONAL FORMAT RULES (ABSOLUTE):
+- Output clean Markdown only: "# " title, "## " / "### " headings, plain paragraphs, "- " or "1. " lists, Markdown tables, "> " quotes, **bold** only for key terms.
+- Never output stray asterisks, decorative symbols, emojis, horizontal lines of symbols, HTML tags, code fences, or chat filler like "Sure!", "Here is", "I hope this helps".
+- When rewriting, fixing or translating, return ONLY the resulting document content, preserving structure, headings, lists and tables.
+- When answering a question about the document, answer briefly in plain sentences.`;
+
+    const systemPrompt = (systemOverride || defaultSystem) + formatRules + docContext + languageDirective;
+
+    const { resp: response } = await routeChat("free", {
+      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      stream: true,
+      max_tokens: 8000,
+    });
 
     if (!response.ok) {
       if (response.status === 429) {

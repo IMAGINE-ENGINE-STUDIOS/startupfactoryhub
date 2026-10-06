@@ -2,7 +2,7 @@
 // Supabase secrets. No Lovable gateway. `aiFetch` is a drop-in replacement for the old
 // OpenAI-style chat-completions fetch so existing callers keep their request/response shapes.
 
-export type Tier = "fast" | "standard" | "vision" | "heavy";
+export type Tier = "fast" | "standard" | "vision" | "heavy" | "free";
 type Provider = "groq" | "gemini" | "openai";
 
 const URLS: Record<Provider, string> = {
@@ -17,6 +17,8 @@ export const CHAINS: Record<Tier, [Provider, string][]> = {
   standard: [["groq", "openai/gpt-oss-120b"], ["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
   vision: [["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"]],
+  // Groq free-plan models only (no paid OpenAI hop).
+  free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
