@@ -45,6 +45,7 @@ import { PageManagementPanel } from "./PageManagementPanel";
 import { TextReader } from "./TextReader";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import GeniusAIBubble from "./GeniusAIBubble";
+import DOMPurify from "dompurify";
 import LightPaperAISidebar, { type ApplyMode } from "./LightPaperAISidebar";
 import { GeniusTaskRegistry } from "./GeniusTaskRegistry";
 import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
@@ -3206,7 +3207,7 @@ export function LightPaperDocument({
   const applyAIContent = (html: string, mode: ApplyMode) => {
     const editor = editorRef.current;
     if (!editor || viewMode) { toast.error("Switch to edit mode to insert Genius content"); return; }
-    const clean = sanitizeHTML(html);
+    const clean = DOMPurify.sanitize(html);
     if (mode === "replace") {
       editor.innerHTML = clean;
     } else if (mode === "append") {
