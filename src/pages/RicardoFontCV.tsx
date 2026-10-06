@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
   Crown,
   Download,
   Loader2,
+  Printer,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/ricardo-font-portrait.png";
@@ -258,6 +259,7 @@ const tools = [
   "Google / Meta Ads",
 ];
 
+
 export default function RicardoFontCV() {
   const cvRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -278,406 +280,353 @@ export default function RicardoFontCV() {
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
     setIsExporting(true);
-
-    // Inject temporary stylesheet to neutralize features html2canvas can't render
-    // (backdrop-filter, bg-clip-text on transparent text, etc.)
     const overrideStyle = document.createElement("style");
     overrideStyle.id = "pdf-export-overrides";
     overrideStyle.textContent = `
-      .pdf-exporting * {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }
-      .pdf-exporting .bg-clip-text.text-transparent {
-        -webkit-background-clip: initial !important;
-        background-clip: initial !important;
-        -webkit-text-fill-color: hsl(var(--foreground)) !important;
-        color: hsl(var(--foreground)) !important;
-        background: none !important;
-      }
+      .pdf-exporting * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+      .pdf-exporting .kp-grid-bg, .pdf-exporting .kp-line-anim { display: none !important; }
     `;
     document.head.appendChild(overrideStyle);
     cvRef.current.classList.add("pdf-exporting");
-
+    const initialScrollY = window.scrollY;
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas"),
-        import("jspdf"),
-      ]);
-
-      // Resolve the real background color from the live page; fall back to dark surface
-      const rawBg = getComputedStyle(document.body).backgroundColor;
-      const parseRgb = (s: string): [number, number, number] => {
-        const m = s.match(/rgba?\(([^)]+)\)/);
-        if (!m) return [10, 10, 10];
-        const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
-        const [r, g, b, a = 1] = parts;
-        if (!a || a === 0 || Number.isNaN(r)) return [10, 10, 10];
-        return [Math.round(r), Math.round(g), Math.round(b)];
-      };
-      const [bgR, bgG, bgB] = parseRgb(rawBg);
-      const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-
-      const canvas = await html2canvas(cvRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: bgHex,
-        windowWidth: cvRef.current.scrollWidth,
-        windowHeight: cvRef.current.scrollHeight,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdfWidth = 210; // A4 mm
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
+      const [bgR, bgG, bgB] = [246, 243, 236];
+      const bgHex = "#f6f3ec";
+      const pdfWidth = 210;
       const pdfHeight = 297;
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      const fillPageBg = () => {
-        pdf.setFillColor(bgR, bgG, bgB);
-        pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
-      };
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
+      const marginMM = 10;
+      const contentWidth = pdfWidth - marginMM * 2;
+      const blockGap = 4;
+      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+      const fillPageBg = () => { pdf.setFillColor(bgR, bgG, bgB); pdf.rect(0, 0, pdfWidth, pdfHeight, "F"); };
+      const blocks = Array.from(cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-block]")).filter((el) => !el.querySelector("[data-pdf-block]"));
+      let currentY = marginMM;
       fillPageBg();
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        fillPageBg();
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+      for (const el of blocks) {
+        if (!el.offsetWidth || !el.offsetHeight) continue;
+        const canvas = await html2canvas(el, { scale: 1.25, useCORS: true, logging: false, backgroundColor: bgHex, scrollX: 0, scrollY: -window.scrollY });
+        if (!canvas.width || !canvas.height) continue;
+        const heightMM = (canvas.height * contentWidth) / canvas.width;
+        const contentHeight = pdfHeight - marginMM * 2;
+        if (heightMM > contentHeight) {
+          if (currentY > marginMM) { pdf.addPage(); fillPageBg(); currentY = marginMM; }
+          const pxPerMM = canvas.width / contentWidth;
+          let offsetPx = 0;
+          let first = true;
+          while (offsetPx < canvas.height) {
+            const sliceH = Math.min(contentHeight * pxPerMM, canvas.height - offsetPx);
+            const slice = document.createElement("canvas");
+            slice.width = canvas.width;
+            slice.height = sliceH;
+            const ctx = slice.getContext("2d");
+            if (ctx) { ctx.fillStyle = bgHex; ctx.fillRect(0, 0, slice.width, slice.height); ctx.drawImage(canvas, 0, offsetPx, canvas.width, sliceH, 0, 0, canvas.width, sliceH); }
+            if (!first) { pdf.addPage(); fillPageBg(); currentY = marginMM; }
+            const sliceMM = sliceH / pxPerMM;
+            pdf.addImage(slice.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, sliceMM);
+            currentY += sliceMM;
+            offsetPx += sliceH;
+            first = false;
+          }
+          currentY += blockGap;
+          continue;
+        }
+        if (heightMM > pdfHeight - marginMM - currentY && currentY > marginMM) { pdf.addPage(); fillPageBg(); currentY = marginMM; }
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, heightMM);
+        currentY += heightMM + blockGap;
       }
-
       pdf.save("Ricardo-Font-CV.pdf");
+    } catch (err) {
+      console.error("[PDF] generation failed", err);
+      window.print();
     } finally {
+      window.scrollTo({ top: initialScrollY, left: 0, behavior: "auto" });
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
       setIsExporting(false);
     }
   };
 
+  const cell = { background: "#fdfbf6" } as const;
+  const grid = { background: "var(--rule)", border: "1px solid var(--rule)" } as const;
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="kp-institutional min-h-screen">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        .kp-institutional { --ink:#0d1321; --ink-soft:#3b4252; --ink-mute:#6b7280; --paper:#f6f3ec; --paper-2:#efeae0; --rule:#d9d3c4; --navy:#1c2e4a; --navy-2:#2a426b; --gold:#a0813b; background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif; letter-spacing:-0.005em; }
+        .kp-institutional .kp-display { font-family:'Cormorant Garamond','Times New Roman',serif; font-weight:500; letter-spacing:-0.02em; color:var(--ink); }
+        .kp-institutional .kp-mono { font-family:'JetBrains Mono',monospace; }
+        .kp-institutional .kp-eyebrow { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.32em; text-transform:uppercase; color:var(--navy); }
+        .kp-institutional .kp-card { background:#fdfbf6; border:1px solid var(--rule); border-radius:2px; }
+        .kp-institutional .kp-section-num { font-family:'JetBrains Mono',monospace; color:var(--gold); font-size:11px; letter-spacing:0.2em; }
+        .kp-institutional .kp-link { color:var(--navy); text-decoration:underline; text-decoration-color:var(--rule); text-underline-offset:3px; }
+        .kp-institutional .kp-tag { display:inline-block; padding:4px 10px; border:1px solid var(--rule); background:#fdfbf6; font-size:11px; letter-spacing:0.05em; color:var(--ink-soft); border-radius:1px; }
+        .kp-institutional .kp-grid-bg { background-image:linear-gradient(to right, rgba(28,46,74,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(28,46,74,0.04) 1px, transparent 1px); background-size:48px 48px; }
+        .kp-institutional .kp-tick-anim { animation:kp-tick 6s linear infinite; }
+        @keyframes kp-tick { 0%,100% { opacity:0.25 } 50% { opacity:0.9 } }
+        .kp-institutional .kp-line-anim { background:linear-gradient(90deg, transparent, var(--navy) 50%, transparent); background-size:200% 100%; animation:kp-shift 8s linear infinite; }
+        @keyframes kp-shift { 0% { background-position:200% 0 } 100% { background-position:-200% 0 } }
+        .kp-institutional [data-pdf-block] { background:var(--paper); }
+      `}</style>
+
       <Navigation />
 
-      {/* Floating Download Button */}
-      <div className="fixed bottom-6 right-6 z-40 print:hidden">
-        <Button
-          onClick={handleDownloadPDF}
-          disabled={isExporting}
-          size="lg"
-          className="shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Generating PDF…
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              Download CV as PDF
-            </>
-          )}
+      <div className="fixed bottom-6 right-6 z-40 print:hidden flex flex-col sm:flex-row gap-3">
+        <Button onClick={() => window.print()} disabled={isExporting} size="lg" variant="outline"
+          style={{ background: "#fdfbf6", color: "#1c2e4a", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 12, padding: "0 22px", height: 48, border: "1px solid #d9d3c4" }}
+          className="hover:opacity-90 transition-opacity">
+          <Printer className="w-4 h-4 mr-2" />Print / Save PDF
+        </Button>
+        <Button onClick={handleDownloadPDF} disabled={isExporting} size="lg"
+          style={{ background: "#1c2e4a", color: "#f6f3ec", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 12, padding: "0 22px", height: 48, border: "1px solid #2a426b" }}
+          className="hover:opacity-90 transition-opacity">
+          {isExporting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating PDF</> : <><Download className="w-4 h-4 mr-2" />Download PDF</>}
         </Button>
       </div>
 
       <div ref={cvRef}>
-        {/* Hero */}
-        <header className="relative pt-32 pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-          <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
-          <div className="container mx-auto px-4 sm:px-6 relative">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 md:gap-12 items-center">
-              {/* Portrait */}
-              <div className="relative mx-auto md:mx-0">
-                <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
-                <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-2 border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.25)]">
-                  <img
-                    src={portrait}
-                    alt="Ricardo Font portrait"
-                    className="w-full h-full object-cover grayscale contrast-110"
-                    crossOrigin="anonymous"
-                  />
+        {/* HERO */}
+        <header data-pdf-block data-pdf-block-type="hero" className="relative pt-24 pb-16 overflow-hidden">
+          {!isExporting && <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />}
+          {!isExporting && <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />}
+          <div className="container mx-auto px-6 lg:px-10 relative">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center justify-between mb-12 pb-4" style={{ borderBottom: "1px solid var(--rule)" }}>
+                <div className="kp-eyebrow">Curriculum Vitae</div>
+                <div className="kp-eyebrow hidden sm:block">REF / RF-2026</div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-700 kp-tick-anim" />
+                  <span className="kp-eyebrow">Founder · Physicist</span>
                 </div>
               </div>
 
-              {/* Identity */}
-              <div>
-                <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-                  Curriculum Vitae
-                </Badge>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
-                  Ricardo Font
-                </h1>
-                <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  Founder, physicist and architect of space-industry infrastructure — building the
-                  technology, policy and coalitions that accelerate human development across Earth and orbit.
-                </p>
-
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <a
-                    href="mailto:fosstheory@gmail.com"
-                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
-                  >
-                    <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm break-all">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Contact</div>
-                      <div className="font-medium text-foreground">fosstheory@gmail.com</div>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-end">
+                <div>
+                  <div className="kp-eyebrow mb-6">Ricardo Font · Founder · Chairman</div>
+                  <h1 className="kp-display text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] leading-[0.98] mb-8">
+                    Ricardo Font
+                  </h1>
+                  <p className="text-lg sm:text-xl leading-relaxed max-w-3xl" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>
+                    Founder, physicist and architect of space-industry infrastructure — building the
+                    technology, policy and coalitions that accelerate human development across Earth and orbit.
+                  </p>
+                  <div className="mt-10 flex flex-wrap gap-x-10 gap-y-3 kp-mono text-xs" style={{ color: "var(--ink-mute)" }}>
+                    {["Gold Arrow", "Decahedron Ventures", "Lightware", "Startup Factory"].map((o) => (
+                      <span key={o}><span style={{ color: "var(--gold)" }}>◆</span>&nbsp; {o}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="relative shrink-0 mx-auto lg:mx-0">
+                  <div className="relative" style={{ padding: 6, border: "1px solid var(--rule)", background: "#fdfbf6" }}>
+                    <div className="relative overflow-hidden" style={{ width: 240, height: 300, background: "var(--paper-2)" }}>
+                      <img src={portrait} alt="Ricardo Font portrait" className="w-full h-full object-cover" crossOrigin="anonymous" style={{ filter: isExporting ? "none" : "grayscale(0.85) contrast(1.05)" }} />
                     </div>
-                  </a>
-                  <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
-                    <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
-                      <div className="font-medium text-foreground">Spanish · English</div>
-                      <div className="text-xs text-muted-foreground">Native bilingual · IT, PT, CA basic</div>
+                    <div className="mt-3 px-1 flex items-center justify-between">
+                      <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>PORTRAIT · 2026</span>
+                      <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>RF / 01</span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-px" style={grid}>
+                {[
+                  { k: "Contact", v: "fosstheory@gmail.com", href: "mailto:fosstheory@gmail.com" },
+                  { k: "Languages", v: "Spanish · English" },
+                  { k: "Also", v: "IT, PT, CA basic" },
+                  { k: "Focus", v: "Space · Photonics · AI" },
+                ].map((c) => (
+                  <div key={c.k} className="px-5 py-4" style={cell}>
+                    <div className="kp-eyebrow mb-1.5">{c.k}</div>
+                    {c.href ? (
+                      <a href={c.href} className="text-sm kp-link break-all" style={{ fontWeight: 500 }}>{c.v}</a>
+                    ) : (
+                      <div className="text-sm" style={{ color: "var(--ink)", fontWeight: 500 }}>{c.v}</div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </header>
 
-      {/* Summary */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Profile</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-          </div>
-          <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-            <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              <p className="text-xl sm:text-2xl text-foreground font-light leading-snug">
-                I build the institutions, technologies and coalitions that move humanity forward —
-                from quantum-scale physics to orbital infrastructure.
-              </p>
-              <p>
-                My career spans business, deep technology and scientific research, with a primary
-                focus on <span className="text-foreground">deep physics</span>. From an early age I
-                was fortunate to experience every layer of a large corporation — knowledge I have
-                since applied across more than a dozen ventures, operating roles and board seats.
-              </p>
-              <p>
-                I have led research across mental health, environmental science, sustainability,
-                photonics and deep physics. I have advised governments, ministers and high-ranking
-                officials in the United States and abroad on economic development, space policy,
-                STEAM education and space-infrastructure strategy — and have served as a U.S.
-                delegate in exclusive diplomatic talks on space commerce.
-              </p>
-              <p>
-                Today I lead a global space accelerator alongside partners including
-                <span className="text-foreground"> Voyager Space, Nvidia, Google, NASA and NASDAQ</span>,
-                supporting the next generation of space-infrastructure startups. My mission is
-                straightforward: accelerate human development through technology, economic design,
-                policy and new coalitions — on Earth and beyond.
-              </p>
+        {/* PROFILE */}
+        <Section num="01" title="Profile" subtitle="Biography &amp; mission">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-10">
+              <div>
+                <div className="kp-eyebrow mb-3">Profile</div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                  I build the institutions, technologies and coalitions that move humanity forward —
+                  from quantum-scale physics to orbital infrastructure.
+                </p>
+              </div>
+              <div className="space-y-6 text-base sm:text-lg leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>
+                <p>
+                  My career spans business, deep technology and scientific research, with a primary
+                  focus on <strong style={{ color: "var(--ink)", fontWeight: 500 }}>deep physics</strong>. From an early age I
+                  was fortunate to experience every layer of a large corporation — knowledge I have
+                  since applied across more than a dozen ventures, operating roles and board seats.
+                </p>
+                <p>
+                  I have led research across mental health, environmental science, sustainability,
+                  photonics and deep physics. I have advised governments, ministers and high-ranking
+                  officials in the United States and abroad on economic development, space policy,
+                  STEAM education and space-infrastructure strategy — and have served as a U.S.
+                  delegate in exclusive diplomatic talks on space commerce.
+                </p>
+                <p>
+                  Today I lead a global space accelerator alongside partners including
+                  <strong style={{ color: "var(--ink)", fontWeight: 500 }}> Voyager Space, Nvidia, Google, NASA and NASDAQ</strong>,
+                  supporting the next generation of space-infrastructure startups. My mission is
+                  straightforward: accelerate human development through technology, economic design,
+                  policy and new coalitions — on Earth and beyond.
+                </p>
+              </div>
             </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Experience timeline */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Experience</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
           </div>
+        </Section>
 
-          <div className="relative">
-            <div className="absolute left-4 sm:left-6 top-2 bottom-2 w-px bg-gradient-to-b from-primary/60 via-primary/20 to-transparent" />
-            <div className="space-y-6">
-              {experiences.map((exp, i) => {
-                const Icon = exp.icon;
-                return (
-                  <div key={i} className="relative pl-12 sm:pl-16 group">
-                    <div className="absolute left-0 top-3 w-8 h-8 sm:w-12 sm:h-12 rounded-full border border-primary/40 bg-card flex items-center justify-center group-hover:border-primary group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] transition-all">
-                      <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+        {/* EXPERIENCE */}
+        <Section num="02" title="Career Experience" subtitle="Operating, research and leadership roles">
+          <div className="space-y-px" style={grid}>
+            {experiences.map((exp, i) => (
+              <div key={i} data-pdf-block data-pdf-block-type="experience" className="px-6 sm:px-10 py-8" style={cell}>
+                <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-6 md:gap-10">
+                  <div>
+                    <div className="kp-mono text-[11px]" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <div className="kp-mono text-xs mt-2" style={{ color: "var(--ink-mute)" }}>{exp.period}</div>
+                    <div className="kp-mono text-xs mt-1" style={{ color: "var(--ink-mute)" }}>{exp.location}</div>
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-3">
+                      <h3 className="kp-display text-2xl sm:text-3xl">{exp.role}</h3>
+                      <span className="text-sm kp-mono" style={{ color: "var(--navy)", letterSpacing: "0.08em" }}>— {exp.org}</span>
                     </div>
-                    <Card className="p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors">
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
-                        <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {exp.period}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{exp.location}</span>
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-semibold text-foreground">{exp.role}</h3>
-                      <div className="text-sm text-primary/90 font-medium mb-3">{exp.org}</div>
-                      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{exp.desc}</p>
-                    </Card>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Research */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {research.map((r, i) => (
-              <Card
-                key={i}
-                className="p-5 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors group"
-              >
-                <div className="flex items-start gap-3">
-                  <FlaskConical className="w-5 h-5 text-primary mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <Badge variant="outline" className="text-[10px] mb-2 border-primary/30 text-primary">
-                      {r.period}
-                    </Badge>
-                    <div className="text-sm sm:text-base text-foreground leading-snug">{r.title}</div>
+                    <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </Section>
 
-      {/* Education */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Academic Education</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {education.map((e, i) => (
-              <Card key={i} className="p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg border border-primary/40 bg-primary/5 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <Badge variant="outline" className="text-[10px] mb-2 border-primary/30 text-primary">
-                      {e.period}
-                    </Badge>
-                    <h3 className="font-semibold text-foreground">{e.degree}</h3>
-                    <div className="text-sm text-primary/90 mb-2">{e.school}</div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{e.note}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Board Positions */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Chairman of the Board</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* BOARD */}
+        <Section num="03" title="Chairman of the Board" subtitle="Board positions">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={grid}>
             {boardPositions.map((b, i) => (
-              <Card
-                key={i}
-                className="p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 hover:shadow-[0_0_24px_hsl(var(--primary)/0.15)] transition-all group"
-              >
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg border border-primary/40 bg-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Crown className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="text-[10px] mb-2 border-primary/30 text-primary">
-                      Chairman
-                    </Badge>
-                    <h3 className="font-semibold text-foreground leading-tight">{b.org}</h3>
-                  </div>
+              <div key={i} className="px-6 py-7" style={cell}>
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="kp-display text-xl">{b.org}</h3>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
-              </Card>
+                <div className="kp-mono text-[11px] mb-3" style={{ color: "var(--navy)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Chairman</div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{b.desc}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </Section>
 
-      {/* Certifications */}
-      <section className="container mx-auto px-4 sm:px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+        {/* RESEARCH */}
+        <Section num="04" title="Research Projects" subtitle="Scientific and technology research">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={grid}>
+            {research.map((r, i) => (
+              <div key={i} className="px-6 sm:px-8 py-6" style={cell}>
+                <div className="kp-mono text-[10px] mb-2" style={{ color: "var(--gold)" }}>R&amp;D · {String(i + 1).padStart(2, "0")} · {r.period}</div>
+                <div className="kp-display text-xl leading-snug">{r.title}</div>
+              </div>
+            ))}
           </div>
-          <Card className="p-6 sm:p-8 bg-card/40 backdrop-blur border border-border/50">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {certifications.map((c, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Award className="w-4 h-4 text-primary mt-1 shrink-0" />
-                  <span className="text-sm text-foreground">{c}</span>
-                </div>
-              ))}
+        </Section>
+
+        {/* CREDENTIALS */}
+        <Section num="05" title="Credentials &amp; Education" subtitle="Academic and certification record">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-px" style={grid}>
+            <div className="px-6 sm:px-8 py-7" style={cell}>
+              <div className="kp-eyebrow mb-5">Education</div>
+              <div className="space-y-5">
+                {education.map((e, i) => (
+                  <div key={i} className="pb-4" style={{ borderBottom: i < education.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="flex items-baseline justify-between gap-4 mb-1">
+                      <h4 className="kp-display text-xl">{e.degree}</h4>
+                      <span className="kp-mono text-[10px] shrink-0" style={{ color: "var(--ink-mute)" }}>{e.period}</span>
+                    </div>
+                    <div className="kp-mono text-[11px]" style={{ color: "var(--navy)" }}>{e.school}</div>
+                    <div className="text-xs mt-1 italic" style={{ color: "var(--ink-mute)" }}>{e.note}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* Skills & Tools */}
-      <section className="container mx-auto px-4 sm:px-6 py-16 pb-24">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills & Tools</h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-6 sm:p-8 bg-card/40 backdrop-blur border border-border/50">
-              <h3 className="text-sm tracking-[0.2em] uppercase text-primary mb-5">Strengths</h3>
-              <div className="flex flex-wrap gap-2">
-                {skills.map((s, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs font-normal py-1.5 px-3">
-                    {s}
-                  </Badge>
+            <div className="px-6 sm:px-8 py-7" style={cell}>
+              <div className="kp-eyebrow mb-5">Certifications</div>
+              <ul className="space-y-4">
+                {certifications.map((c, i) => (
+                  <li key={i} className="grid grid-cols-[32px_1fr] gap-3 pb-4" style={{ borderBottom: i < certifications.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="kp-mono text-[10px] pt-1" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <div className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{c}</div>
+                  </li>
                 ))}
-              </div>
-            </Card>
-            <Card className="p-6 sm:p-8 bg-card/40 backdrop-blur border border-border/50">
-              <h3 className="text-sm tracking-[0.2em] uppercase text-primary mb-5">Tools & Platforms</h3>
-              <div className="flex flex-wrap gap-2">
-                {tools.map((t, i) => (
-                  <Badge key={i} variant="outline" className="text-xs font-normal py-1.5 px-3 border-primary/30">
-                    {t}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
+              </ul>
+            </div>
           </div>
+        </Section>
 
-          <Separator className="my-16 bg-border/40" />
-
-          <div className="text-center">
-            <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">
-              Ricardo Font · Curriculum Vitae · {new Date().getFullYear()}
-            </p>
+        {/* SKILLS */}
+        <Section num="06" title="Skills &amp; Tools" subtitle="Strengths and platforms">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={grid}>
+            <div className="px-6 sm:px-8 py-7" style={cell}>
+              <div className="kp-eyebrow mb-5">Strengths</div>
+              <div className="flex flex-wrap gap-2">{skills.map((s) => <span key={s} className="kp-tag">{s}</span>)}</div>
+            </div>
+            <div className="px-6 sm:px-8 py-7" style={cell}>
+              <div className="kp-eyebrow mb-5">Tools &amp; Platforms</div>
+              <div className="flex flex-wrap gap-2">{tools.map((t) => <span key={t} className="kp-tag">{t}</span>)}</div>
+            </div>
           </div>
-        </div>
-      </section>
+        </Section>
+
+        {/* CONTACT */}
+        <Section num="07" title="Contact" subtitle="Inquiries">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <div className="kp-eyebrow mb-2">Direct</div>
+                <a href="mailto:fosstheory@gmail.com" className="kp-display text-2xl block kp-link">fosstheory@gmail.com</a>
+              </div>
+              <div>
+                <div className="kp-eyebrow mb-2">Languages</div>
+                <div className="kp-display text-2xl">Spanish · English</div>
+                <div className="kp-mono text-sm mt-2" style={{ color: "var(--ink-soft)" }}>Native bilingual · IT, PT, CA basic</div>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        <footer className="container mx-auto px-6 lg:px-10 pt-10 pb-16">
+          <div className="max-w-6xl mx-auto pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ borderTop: "1px solid var(--rule)" }}>
+            <div className="kp-mono text-[11px]" style={{ color: "var(--ink-mute)", letterSpacing: "0.18em" }}>RICARDO FONT · CURRICULUM VITAE · {new Date().getFullYear()}</div>
+          </div>
+        </footer>
       </div>
     </div>
+  );
+}
+
+function Section({ num, title, subtitle, children }: { num: string; title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <section className="container mx-auto px-6 lg:px-10 py-16 sm:py-20">
+      <div className="max-w-6xl mx-auto">
+        <div data-pdf-block data-pdf-block-type="header" className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-6 md:gap-10 items-end mb-10 pb-5" style={{ borderBottom: "1px solid var(--ink, #0d1321)" }}>
+          <div className="kp-section-num">SECTION&nbsp;/&nbsp;{num}</div>
+          <div>
+            <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" dangerouslySetInnerHTML={{ __html: title }} />
+            {subtitle && <div className="kp-eyebrow mt-3" dangerouslySetInnerHTML={{ __html: subtitle }} />}
+          </div>
+        </div>
+        {children}
+      </div>
+    </section>
   );
 }

@@ -95,7 +95,7 @@ const experiences = [
     desc: "Founded a vertically integrated platform for patio and outdoor experiences powered by proprietary configure-and-quote technology — collapsing a fragmented buying journey into a single real-time customer flow from design to fulfillment.",
     icon: Building2,
     metrics: [
-      { k: "Profit Margin Lift", v: "+10%" },
+      { k: "Profit Margin Lift", v: "+35%" },
       { k: "Driver", v: "Automation Tech" },
     ],
   },
