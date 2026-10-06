@@ -4708,7 +4708,8 @@ export function LightPaperDocument({
           )}
           
           {/* Genius launcher — deliberate, docked, never auto-popping */}
-          {!geniusBubblePos && (
+          {/* Replaced by the left-side Genius panel */}
+          {false && !geniusBubblePos && (
             <button
               type="button"
               onClick={() => setGeniusBubblePos({ x: 24, y: window.innerHeight - 120 })}
