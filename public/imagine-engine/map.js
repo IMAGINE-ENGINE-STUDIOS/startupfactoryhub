@@ -177,8 +177,19 @@
         var m = box.__m = new win.mapboxgl.Map({ container: mapEl, style: STYLES[c.view.style] || STYLE, projection: c.view.proj === "flat" ? "mercator" : "globe", pitch: +c.view.pitch || 0, bearing: +c.view.bearing || 0, center: [-81.38, 28.54], zoom: 2.2, attributionControl: false });
         m.on("style.load", function () { box.__ready = true; box.__v = -1; box.__vs = null; box.__rk = null; });
         m.on("click", function (e) {
-          var cc = cfgOf(w); if (cc.type !== "confirm") return;
-          cc.customer = { lng: e.lngLat.lng, lat: e.lngLat.lat }; save(w, cc);
+          var cc = cfgOf(w);
+          if (cc.type === "confirm") { cc.customer = { lng: e.lngLat.lng, lat: e.lngLat.lat }; save(w, cc); return; }
+          // Builder only: click the map to drop a named pin at the exact spot (visitors in Play can't edit).
+          if (document.getElementById("ie-play-bg")) return;
+          var feats = []; try { feats = m.queryRenderedFeatures(e.point).filter(function (f) { return /^ie-/.test(f.layer && f.layer.id || ""); }); } catch (x) {}
+          var hit = e.originalEvent && e.originalEvent.target && e.originalEvent.target.closest && e.originalEvent.target.closest(".mapboxgl-marker,.mapboxgl-popup");
+          if (hit) return;
+          var label = TYPES[cc.type] ? TYPES[cc.type].place : "place";
+          var name = window.prompt("Name this " + label + " (" + e.lngLat.lat.toFixed(5) + ", " + e.lngLat.lng.toFixed(5) + ")", label.charAt(0).toUpperCase() + label.slice(1) + " " + (cc.places.length + 1));
+          if (name == null) return;
+          var pl = { name: String(name).slice(0, 80) || "Pin", lng: +e.lngLat.lng.toFixed(6), lat: +e.lngLat.lat.toFixed(6) };
+          if (cc.type === "coverage") pl.radiusKm = 25;
+          cc.places.push(pl); cc.enabled = true; save(w, cc);
         });
       });
     }

@@ -34,12 +34,12 @@ export const GENIUS_PLANS = {
   studio: {
     key: "studio",
     name: "Imagine Studio",
-    price: 79 as number | null,
-    credits: 1600,
-    product_id: "prod_VNHFv9mfca4xTZ" as string | null,
-    price_id: "price_1UMWhHK5N1RcUVuY1bB3pmLA" as string | null,
-    allowance: "1,600 credits / month + 5 daily",
-    features: ["1,600 AI credits every month", "Unused credits roll over", "Plus 5 free credits every day", "Best value per credit"],
+    price: 60 as number | null,
+    credits: 1400,
+    product_id: "prod_VONbDTht6tFgwo" as string | null,
+    price_id: "price_1UNapwK5N1RcUVuYx1SW05kL" as string | null,
+    allowance: "1,400 credits / month + 5 daily",
+    features: ["1,400 AI credits every month", "Unused credits roll over", "Plus 5 free credits every day", "Best value per credit"],
   },
 } as const;
 
@@ -67,3 +67,8 @@ export const PLAN_LABELS: Record<string, string> = {
 
 export const getGeniusPlan = (plan: string) =>
   GENIUS_PLANS[(SERVER_PLAN_TO_KEY[plan] ?? plan) as GeniusPlanKey] ?? GENIUS_PLANS.free;
+
+/** One-time credits: $15 minimum, no maximum. $0.05/credit with volume bonus up to 15% at $500+. */
+export const CREDIT_PRESETS = [15, 30, 60, 100, 250, 500];
+export const creditBonus = (usd: number) => (usd >= 500 ? 0.15 : usd >= 250 ? 0.12 : usd >= 100 ? 0.08 : usd >= 60 ? 0.05 : 0);
+export const creditsForUsd = (usd: number) => Math.floor(usd * 20 * (1 + creditBonus(usd)));

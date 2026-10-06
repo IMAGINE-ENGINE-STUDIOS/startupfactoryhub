@@ -62,8 +62,39 @@
     if (b.mode === "gradient" && b.grad) layers.push(gcss(b.grad));
     if (b.mode === "image" && b.img) layers.push('url("' + b.img.replace(/"/g, "") + '") ' + b.posi + "/" + (b.fit === "tile" ? "auto" : b.fit) + (b.fit === "tile" ? " repeat" : " no-repeat"));
     var base = b.mode === "solid" ? b.solid : (b.mode === "default" ? "#0a0a0a" : b.solid);
-    bgStyle.textContent = "#ie-canvas-bg,#ie-play-bg{background:" + (layers.length ? layers.join(",") + "," : "") + base + "!important;background-attachment:local!important}";
+    bgStyle.textContent = "#ie-canvas-bg,#ie-play-bg{background:" + (layers.length ? layers.join(",") + "," : "") + base + "!important;background-attachment:local!important}" +
+      // inner scroll areas paint their own dark fill over the background; let the project background show through
+      "#ie-canvas-bg [class*='bg-[#0a0a0a]'],#ie-canvas-bg [class*='bg-[#09090b]'],#ie-play-bg [class*='bg-[#0a0a0a]'],#ie-play-bg [class*='bg-[#09090b]']{background-color:transparent!important}";
   }
+  /* quick background button on the canvas */
+  function quickBg() {
+    var host = document.getElementById("ie-canvas-bg"); if (!host || host.querySelector("[data-ie-qbg]")) return;
+    if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var pop = null;
+    var btn = h("button", { "data-ie-qbg": "1", title: "Page background", style: BTN + ";position:absolute;right:12px;bottom:12px;z-index:40;height:30px;padding:0 10px;box-shadow:0 4px 14px rgba(0,0,0,.4)", onclick: function (ev) {
+      ev.stopPropagation(); if (pop) { pop.remove(); pop = null; return; }
+      var b = bgOf();
+      pop = h("div", { style: "position:absolute;right:12px;bottom:50px;z-index:41;width:240px;background:#18181b;border:1px solid #3f3f46;border-radius:12px;padding:10px;color:#e4e4e7;font:12px system-ui" }, [
+        h("div", { style: L }, ["Solid color"]),
+        h("input", { type: "color", value: b.solid || "#0a0a0a", style: "width:100%;height:28px;border:0;background:none", oninput: function (e) { var x = bgOf(); x.mode = "solid"; x.solid = e.target.value; saveBg(x); } }),
+        h("div", { style: L }, ["Gradient"]),
+        h("div", { style: "display:grid;grid-template-columns:repeat(4,1fr);gap:4px" }, PRESETS.slice(0, 12).map(function (pr) {
+          return h("button", { title: pr[0], style: "height:24px;border-radius:6px;border:1px solid #3f3f46;cursor:pointer;background:" + gcss(pr[1]), onclick: function () { var x = bgOf(); x.mode = "gradient"; x.grad = JSON.parse(JSON.stringify(pr[1])); saveBg(x); } });
+        })),
+        h("div", { style: L }, ["Image link"]),
+        h("input", { style: INP, placeholder: "https://...", value: b.img || "", onchange: function (e) { var x = bgOf(); x.mode = e.target.value ? "image" : "default"; x.img = e.target.value.trim(); saveBg(x); } }),
+        h("div", { style: L }, ["Pattern"]),
+        h("div", { style: "display:flex;gap:4px" }, ["none", "grid", "dots"].map(function (pt) { return h("button", { style: BTN + (b.pattern === pt ? ON : ""), onclick: function () { var x = bgOf(); x.pattern = pt; saveBg(x); pop.remove(); pop = null; } }, [pt]); })),
+        h("button", { style: BTN + ";width:100%;margin-top:10px", onclick: function () { var x = bgOf(); x.mode = "default"; x.pattern = "none"; x.img = ""; x.ova = 0; saveBg(x); pop.remove(); pop = null; } }, ["Reset background"]),
+      ]);
+      pop.addEventListener("click", function (e) { e.stopPropagation(); });
+      host.appendChild(pop);
+    } }, ["Background"]);
+    host.appendChild(btn);
+    document.addEventListener("click", function () { if (pop) { pop.remove(); pop = null; } });
+  }
+  setInterval(quickBg, 1000);
+
   window.__IEApplyBg = function () { applyBg(); try { paint(true); } catch (e) {} };
   var lastPid = "";
   setInterval(function () { if (pid() !== lastPid) { lastPid = pid(); applyBg(); paint(true); } }, 700);
