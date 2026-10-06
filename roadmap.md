@@ -73,3 +73,12 @@
 - [ ] Click-on-map pin placement for map widgets
 
 - [ ] Credit top-up packs: waiting on user to set the price (they disputed 100 credits = $5)
+
+## Imagine AI job (Oct 2026)
+- [x] Groq router on openai/gpt-oss-20b (fast), gpt-oss-120b (standard), qwen3.8-27b (vision)
+- [x] Plans $9/180, $29/600, $60/1400 credits per month
+- [x] One-time credits: any amount from $15, no cap, presets to $500 with up to 15% bonus
+- [x] GitHub push/pull in Imagine Engine
+- [x] Click-to-drop map pins, quick canvas Background button
+- [x] LightPaper save: session refresh, offload pasted images, exact error messages
+- [ ] Owner: create a new Groq key at console.groq.com/keys and replace GROQ_API_KEY in Supabase secrets
