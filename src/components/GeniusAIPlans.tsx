@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useGeniusPlan } from '@/hooks/useGeniusPlan';
-import { GENIUS_PLANS, GENIUS_PLAN_ORDER, PLAN_LABELS, SERVER_PLAN_TO_KEY, type GeniusPlanKey } from '@/lib/genius-plans';
-import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp, Settings2 } from 'lucide-react';
+import { GENIUS_PLANS, GENIUS_PLAN_ORDER, PLAN_LABELS, SERVER_PLAN_TO_KEY, CREDIT_PRESETS, creditBonus, creditsForUsd, type GeniusPlanKey } from '@/lib/genius-plans';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp, Settings2, Coins } from 'lucide-react';
 
 const ICONS: Record<GeniusPlanKey, typeof Zap> = {
   free: Sparkles,
@@ -30,11 +32,14 @@ export default function GeniusAIPlans() {
   const currentPlan: GeniusPlanKey = SERVER_PLAN_TO_KEY[usage.plan] ?? 'free';
   const isLegacy = usage.plan !== 'free' && !SERVER_PLAN_TO_KEY[usage.plan];
 
-  const handleSubscribe = async (priceId: string) => {
+  const [buyAmount, setBuyAmount] = useState('60');
+  const buyUsd = Number(buyAmount) || 0;
+
+  const handleSubscribe = async (priceId: string, amount?: number) => {
     setCheckoutLoading(priceId);
     try {
       const { data, error } = await supabase.functions.invoke('create-genius-checkout', {
-        body: { priceId, returnPath: window.location.pathname + window.location.search.replace(/[?&]credits=\w+/, '') },
+        body: { priceId, amount, returnPath: window.location.pathname + window.location.search.replace(/[?&]credits=\w+/, '') },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -177,6 +182,47 @@ export default function GeniusAIPlans() {
           );
         })}
       </div>
+
+      {/* One-time credit purchase - no cap */}
+      <Card className="tech-card border-0">
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Coins className="h-4 w-4 text-primary" />
+            <h4 className="text-base font-bold text-foreground">Buy credits</h4>
+            <Badge variant="secondary" className="text-[10px]">One-time, no limit</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Choose an amount</p>
+              <Select value={CREDIT_PRESETS.includes(buyUsd) ? String(buyUsd) : ''} onValueChange={setBuyAmount}>
+                <SelectTrigger><SelectValue placeholder="Custom amount" /></SelectTrigger>
+                <SelectContent className="bg-background backdrop-blur-none">
+                  {CREDIT_PRESETS.map((usd) => (
+                    <SelectItem key={usd} value={String(usd)}>
+                      ${usd} - {creditsForUsd(usd).toLocaleString()} credits{creditBonus(usd) ? ` (${Math.round(creditBonus(usd) * 100)}% bonus)` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Or enter any amount (USD, $15 minimum)</p>
+              <Input type="number" min={15} step={1} value={buyAmount} onChange={(e) => setBuyAmount(e.target.value)} />
+            </div>
+            <Button
+              onClick={() => handleSubscribe('credits', buyUsd)}
+              disabled={buyUsd < 15 || checkoutLoading === 'credits'}
+              className="gap-2"
+            >
+              {checkoutLoading === 'credits' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Coins className="h-3.5 w-3.5" />}
+              Buy {buyUsd >= 15 ? creditsForUsd(buyUsd).toLocaleString() : ''} credits
+            </Button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            $0.05 per credit. Bonus credits: 5% from $60, 8% from $100, 12% from $250, 15% from $500. No maximum. Credits never expire. All sales are final.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Credit / pricing disclosure */}
       <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2">
