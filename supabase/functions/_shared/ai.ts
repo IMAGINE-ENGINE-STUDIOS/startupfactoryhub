@@ -13,16 +13,17 @@ const URLS: Record<Provider, string> = {
 const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY" };
 
 export const CHAINS: Record<Tier, [Provider, string][]> = {
-  fast: [["groq", "llama-3.1-8b-instant"], ["gemini", "gemini-2.5-flash-lite"], ["openai", "gpt-4o-mini"]],
-  standard: [["groq", "llama-3.3-70b-versatile"], ["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
-  vision: [["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
+  fast: [["groq", "openai/gpt-oss-20b"], ["gemini", "gemini-2.5-flash-lite"], ["openai", "gpt-4o-mini"]],
+  standard: [["groq", "openai/gpt-oss-120b"], ["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
+  vision: [["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"], ["openai", "gpt-4o-mini"]],
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
 export const PRICES: Record<string, [number, number]> = {
-  "llama-3.1-8b-instant": [0.05, 0.08],
-  "llama-3.3-70b-versatile": [0.59, 0.79],
+  "openai/gpt-oss-20b": [0.075, 0.3],
+  "openai/gpt-oss-120b": [0.15, 0.6],
+  "qwen/qwen3.8-27b": [0.8, 4],
   "gemini-2.5-flash-lite": [0.1, 0.4],
   "gemini-2.5-flash": [0.3, 2.5],
   "gemini-2.5-pro": [1.25, 10],
@@ -46,11 +47,11 @@ const hasImages = (messages: any[]) =>
 
 function tierFor(model: string, messages: any[]): Tier {
   if (hasImages(messages)) return "vision";
-  if (/lite|8b|instant/.test(model)) return "fast";
+  if (/lite|8b|instant|20b/.test(model)) return "fast";
   return "standard";
 }
 
-const RETRY = new Set([400, 404, 408, 413, 429, 500, 502, 503, 504]);
+const RETRY = new Set([400, 401, 403, 404, 408, 413, 429, 500, 502, 503, 504]);
 
 export interface RouteResult { resp: Response; provider: Provider | null; model: string }
 
@@ -65,6 +66,7 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>): Prom
     const payload: Record<string, unknown> = { ...clean, model };
     if (prov === "openai" && payload.max_tokens) { payload.max_completion_tokens = payload.max_tokens; delete payload.max_tokens; }
     if (prov === "groq" && Number(payload.max_tokens) > 8000) payload.max_tokens = 8000;
+    if (prov === "groq" && /gpt-oss|qwen/.test(model)) { payload.reasoning_format = "hidden"; if (/gpt-oss/.test(model)) { delete payload.reasoning_format; payload.include_reasoning = false; } }
     if (payload.stream) payload.stream_options = { include_usage: true };
     if (prov === "gemini") delete payload.stream_options;
     try {

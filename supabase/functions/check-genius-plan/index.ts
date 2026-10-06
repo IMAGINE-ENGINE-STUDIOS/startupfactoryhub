@@ -15,6 +15,7 @@ const PLANS: Record<string, { plan: string; credits: number }> = {
   prod_VO1AspAEw0Txl0: { plan: "imagine_pro", credits: 600 },
   prod_VNGzBi4OgZ7Hgl: { plan: "imagine_starter", credits: 300 },
   prod_VNGzC3vqRTiZMN: { plan: "imagine_pro", credits: 700 },
+  prod_VONbDTht6tFgwo: { plan: "imagine_studio", credits: 1400 },
   prod_VNHFv9mfca4xTZ: { plan: "imagine_studio", credits: 1600 },
   // Legacy plans converted to credits
   prod_UyMR3vZjOO9AGS: { plan: "starter", credits: 180 },
@@ -22,8 +23,6 @@ const PLANS: Record<string, { plan: string; credits: number }> = {
   prod_VBmemZuuco0yOB: { plan: "members_club", credits: 1000 },
   prod_VBmgE3TZ1f0O7F: { plan: "members_club", credits: 1000 },
 };
-// One-time credit packs: price -> credits (filled in once pack prices are confirmed)
-const PACKS: Record<string, number> = {};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -67,12 +66,13 @@ serve(async (req) => {
           }
         }
         // Paid one-time credit packs (idempotent per checkout session)
-        if (Object.keys(PACKS).length) {
-          const sessions = await stripe.checkout.sessions.list({ customer: customerId, limit: 30 });
+        {
+          const sessions = await stripe.checkout.sessions.list({ customer: customerId, limit: 50 });
           for (const s of sessions.data) {
             if (s.mode !== "payment" || s.payment_status !== "paid" || s.metadata?.kind !== "ai_credit_pack") continue;
-            const credits = PACKS[String(s.metadata?.price_id)];
-            if (credits) await supabase.rpc("ai_credits_grant", { _user_id: user.id, _amount: credits, _reason: "pack", _ref: "pack:" + s.id });
+            if (s.metadata?.user_id && s.metadata.user_id !== user.id) continue;
+            const credits = Math.floor(Number(s.metadata?.credits) || 0);
+            if (credits > 0) await supabase.rpc("ai_credits_grant", { _user_id: user.id, _amount: credits, _reason: "credits_purchase", _ref: "pack:" + s.id });
           }
         }
       }
