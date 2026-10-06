@@ -45,6 +45,7 @@ import { PageManagementPanel } from "./PageManagementPanel";
 import { TextReader } from "./TextReader";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import GeniusAIBubble from "./GeniusAIBubble";
+import LightPaperAISidebar, { type ApplyMode } from "./LightPaperAISidebar";
 import { GeniusTaskRegistry } from "./GeniusTaskRegistry";
 import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
 import html2canvas from "html2canvas";
@@ -3202,8 +3203,45 @@ export function LightPaperDocument({
 
   };
   
+  const applyAIContent = (html: string, mode: ApplyMode) => {
+    const editor = editorRef.current;
+    if (!editor || viewMode) { toast.error("Switch to edit mode to insert Genius content"); return; }
+    const clean = sanitizeHTML(html);
+    if (mode === "replace") {
+      editor.innerHTML = clean;
+    } else if (mode === "append") {
+      editor.innerHTML += clean;
+    } else {
+      const range = savedRangeRef.current;
+      if (range && editor.contains(range.commonAncestorContainer)) {
+        if (mode === "selection") range.deleteContents();
+        else range.collapse(false);
+        const frag = range.createContextualFragment(clean);
+        range.insertNode(frag);
+      } else {
+        editor.innerHTML += clean;
+      }
+    }
+    setDocumentContent(editor.innerHTML);
+    setPages(prev => { const np = [...prev]; np[currentPage - 1] = editor.innerHTML; return np; });
+    setTimeout(() => checkAndHandleOverflow(), 50);
+    toast.success("Genius content added to the document");
+  };
+
+  const getAIDocument = () => {
+    const range = savedRangeRef.current;
+    const editor = editorRef.current;
+    const selection = range && editor && editor.contains(range.commonAncestorContainer) ? range.toString() : "";
+    const allText = pages.length > 1
+      ? pages.map(p => { const d = document.createElement("div"); d.innerHTML = p || ""; return d.innerText || d.textContent || ""; }).join("\n\n")
+      : (editor?.innerText || "");
+    return { title: projectTitle || "Untitled", text: allText, selection };
+  };
+
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex h-full min-h-0">
+    <LightPaperAISidebar docKey={currentProjectId || "draft"} getDocument={getAIDocument} onApply={applyAIContent} />
+    <div className="flex flex-col h-full min-h-0 flex-1 min-w-0">
       {/* Desktop Toolbar */}
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40" onMouseDown={(e) => { const t = e.target as HTMLElement; if (!t.closest('input, textarea, [contenteditable="true"], [role="combobox"]')) e.preventDefault(); }}>
       <CollapsibleToolbar>
@@ -5176,6 +5214,7 @@ export function LightPaperDocument({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
