@@ -103,6 +103,14 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       try {
         // Offload base64 page images to Storage so the JSONB payload stays small.
         // If offloading fails for any reason, save the raw (lossless) content.
+        // Renew an expired sign-in before saving so long editing sessions don't fail.
+        try {
+          const { data: sess } = await supabase.auth.getSession();
+          const exp = sess.session?.expires_at ?? 0;
+          if (!sess.session || exp * 1000 - Date.now() < 60_000) await supabase.auth.refreshSession();
+        } catch (refreshError) {
+          console.warn("Could not refresh session before save", refreshError);
+        }
         let payload: any = content;
         try {
           payload = await offloadHeavyContent(content, user.id);

@@ -199,6 +199,13 @@ export async function offloadHeavyContent(content: any, userId: string): Promise
     next.html = await offloadHtmlImages(next.html, userId);
   }
 
+  // Any other HTML string field (document body, overlays) with pasted base64 images.
+  for (const key of Object.keys(next)) {
+    if (key === "html" || key === "pages") continue;
+    const v = next[key];
+    if (typeof v === "string" && v.length > 20000 && v.includes("data:image")) next[key] = await offloadHtmlImages(v, userId);
+  }
+
   if (Array.isArray(next.pages)) {
     const pages: string[] = [];
     for (const page of next.pages) {

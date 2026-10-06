@@ -2278,15 +2278,15 @@ export function LightPaperDocument({
         setIsSaving(true);
         const content = buildSaveContent();
         const saved = await saveProject(projectTitle, "document", content, currentProjectId);
-        if (!saved) throw new Error("The document could not be saved");
+        if (!saved) return; // the save helper already showed the exact reason
         setLastSaved(new Date());
         // Log a manual save version entry
         if (editorRef.current) {
           await saveVersionToDatabase(editorRef.current.innerHTML, "manual", `Saved: ${projectTitle}`);
         }
         toast.success("Document saved");
-      } catch (error) {
-        toast.error("Failed to save document");
+      } catch (error: any) {
+        toast.error(`Failed to save document${error?.message ? `: ${error.message}` : ""}`);
       } finally {
         setIsSaving(false);
       }
@@ -2324,8 +2324,8 @@ export function LightPaperDocument({
         }
         toast.success("Document saved");
       }
-    } catch (error) {
-      toast.error("Failed to save document");
+    } catch (error: any) {
+      toast.error(`Failed to save document${error?.message ? `: ${error.message}` : ""}`);
     } finally {
       setIsSaving(false);
     }
