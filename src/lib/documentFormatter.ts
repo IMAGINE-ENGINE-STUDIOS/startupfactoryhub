@@ -41,7 +41,12 @@ function inline(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*(?!\s)([^*]+?)\*/g, "$1<em>$2</em>")
     .replace(/__(.+?)__/g, "<strong>$1</strong>")
-    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2">$1</a>')
+    // Professional output: drop any leftover markdown markers and emoji.
+    .replace(/\*+/g, "")
+    .replace(/(^|\s)#{1,6}(?=\s)/g, "$1")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "")
+    .replace(/\s{2,}/g, " ");
 }
 
 function isTableRow(line: string): boolean {
