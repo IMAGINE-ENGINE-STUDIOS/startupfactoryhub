@@ -59,10 +59,11 @@
       { children: [{ type: "h1", content: "Have a project in mind?", style: { fontSize: "28px" } }, btn("Get in touch", "page:Contact")] }
     ] },
     webgl: { name: "3D hero", sections: [embed("webgl.html"), { children: head("3D", "Built with real-time 3D", "Swap the shape, colors and copy to match your product.") }] },
+    cargame: { name: "3D car game", sections: [embed("cargame.html"), { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Steer with arrow keys, A/D or the on-screen buttons. Hold Up/W to go faster. Dodge traffic to score.", style: { color: C.mute } }] }] },
     game: { name: "2D game", sections: [embed("game.html"), { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Catch yellow stars, avoid red ones. Speed rises with your score.", style: { color: C.mute } }] }] },
     camera: { name: "Camera and motion", sections: [embed("camera.html"), { children: [{ type: "h1", content: "Live motion detection", style: { fontSize: "24px" } }, { type: "p", content: "Runs fully in the browser. Video never leaves the device. Motion level is shared with flows as state key 'motion'.", style: { color: C.mute } }] }] }
   };
-  var ALIAS = { dashboard: "saas", shop: "ecommerce", store: "ecommerce", portfolio: "agency", "3d": "webgl", three: "webgl", cv: "camera", vision: "camera", sensor: "camera" };
+  var ALIAS = { car: "cargame", racing: "cargame", race: "cargame", "3dgame": "cargame", driving: "cargame", dashboard: "saas", shop: "ecommerce", store: "ecommerce", portfolio: "agency", "3d": "webgl", three: "webgl", cv: "camera", vision: "camera", sensor: "camera" };
 
   function sfx() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function mk(n, s, i) {
