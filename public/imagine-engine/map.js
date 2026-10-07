@@ -14,6 +14,12 @@
     route: { label: "Route & fleet", ids: ["route-optimizer", "fleet-dispatch-drivers"], place: "stop" },
     confirm: { label: "Delivery address check", ids: ["checkout-map-confirm", "address-autocomplete"], place: "store" }
   };
+  // the owner's real store places (from every store-locator map) for the store list next to the map
+  window.__IEStores = function () {
+    var out = [], pin = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#8b5cf6"><rect width="24" height="24" fill="#18181b"/><path d="M12 3a6 6 0 0 0-6 6c0 4.5 6 12 6 12s6-7.5 6-12a6 6 0 0 0-6-6zm0 8.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>');
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf("ie-map:sec_store-locator-map_") !== 0) continue; var c = J(k); ((c && c.places) || []).forEach(function (p, n) { var z = (String(p.address || "").match(/\b\d{4,6}\b/) || [""])[0]; out.push({ id: k + n, name: p.name || "Store", zip: z, addr: p.address || "", hours: p.hours || "", img: pin }); }); } } catch (e) {}
+    return out;
+  };
   function typeOf(wid) { for (var k in TYPES) if (TYPES[k].ids.indexOf(wid) >= 0) return k; return null; }
   function J(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
   function S(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
