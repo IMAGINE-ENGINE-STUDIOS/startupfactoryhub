@@ -150,6 +150,20 @@
       node: node,
     };
   }
+  // turn module / TypeScript style scripts into plain JS that runs inside Function("ctx", code)
+  window.__IESan = function (code) {
+    code = String(code || "").replace(/\r/g, "")
+      .replace(/^\s*import\s[^\n]*$/gm, "")
+      .replace(/\bexport\s+default\s+/g, "var __def = ")
+      .replace(/\bexport\s+/g, "")
+      .replace(/\(\s*ctx\s*:\s*[A-Za-z_$][\w$<>\[\]]*\s*\)/g, "(ctx)")
+      .replace(/\)\s*:\s*(?:Promise<[^>]*>|[A-Za-z_$][\w$]*(?:\[\])?)\s*(=>|\{)/g, ") $1")
+      .replace(/\bas\s+(?:any|unknown|string|number|boolean)\b/g, "");
+    var fn = code.match(/(?:function\s+|(?:const|let|var)\s+)([A-Za-z_$][\w$]*)\s*(?:\(|=\s*(?:async\s*)?(?:\(|[A-Za-z_$][\w$]*\s*=>|function))/);
+    if (/var __def = /.test(code)) code += "\n;return typeof __def==='function'?__def(ctx):__def;";
+    else if (fn) code += "\n;return typeof " + fn[1] + "==='function'?" + fn[1] + "(ctx):undefined;";
+    return code;
+  };
   window.__IEMeta = function (code, node) {
     code = String(code || "").replace(/\bexport\s+(default\s+)?/g, "");
     var fn = code.match(/function\s+([A-Za-z_$][\w$]*)\s*\(/);
