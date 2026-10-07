@@ -4,7 +4,12 @@
    - Drag a selected element to move it; drop it on another widget to move it there.
    All edits persist per widget in localStorage and are re-applied after re-renders. */
 (function () {
-  var TOP = (function () { try { return window.top.__IEEdit ? window.top : window; } catch (e) { return window; } })();
+  // nearest ancestor window that hosts the editor panel (app.html), even when app.html is itself inside the site page
+  var TOP = (function () {
+    var w = window, best = window;
+    try { while (w.parent && w.parent !== w) { w = w.parent; if (w.document && w.document.getElementById("ie-el-panel") || /imagine-engine\/app\.html/.test(w.location.pathname)) { best = w; break; } } } catch (e) {}
+    return best;
+  })();
   function pathOf(el, root) {
     var p = [];
     while (el && el !== root) {
