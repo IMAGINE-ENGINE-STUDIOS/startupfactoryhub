@@ -36,6 +36,7 @@ const experiences = [
     location: "Global",
     desc: "A live commodity marketplace tokenizing real-world assets — bullion, oil, LNG, natural gas, rare earth minerals, bonds and livestock — bridging traditional commodity markets with on-chain liquidity and transparent, real-time price discovery.",
     icon: Crown,
+    metrics: [{ k: "Focus", v: "Tokenized Securities" },{ k: "Scope", v: "Cross-Border Trading" },{ k: "Partners", v: "Gov + Institutional" }],
   },
   {
     period: "2025 — Present",
@@ -44,6 +45,7 @@ const experiences = [
     location: "Global",
     desc: "A venture firm deploying $100M into space and deep-tech infrastructure, with a focus on pre-IPO companies shaping the next generation of orbital, energy and frontier-technology platforms.",
     icon: Rocket,
+    metrics: [{ k: "Status", v: "Emerging Fund" },{ k: "Thesis Verticals", v: "5 Frontier Sectors" },{ k: "Allocation Model", v: "φ Golden Ratio" }],
   },
   {
     period: "2025 — Present",
@@ -68,6 +70,7 @@ const experiences = [
     location: "Orlando, FL",
     desc: "Pioneering the world's most advanced laser technology for data and energy transmission. Building products for multicolor open-space telecommunications, spacecraft-to-spacecraft links and multicolor fiber-optic transceivers — paving the way toward a generation of non-electronic devices.",
     icon: Zap,
+    metrics: [{ k: "Focus", v: "Photonics · Energy · Space" },{ k: "Recognition", v: "Global Innovation Award" }],
   },
   {
     period: "2024 — Present",
@@ -76,6 +79,7 @@ const experiences = [
     location: "Florida, USA",
     desc: "A real-estate development company crafting home entertainment spaces, luxury patios and modern, sustainable communities — blending architecture, immersive technology and outdoor living into a new standard of residential experience.",
     icon: Building2,
+    metrics: [{ k: "Profit Margin Lift", v: "+35%" },{ k: "Driver", v: "Automation Tech" }],
   },
   {
     period: "Feb 2023 — Present",
@@ -92,6 +96,7 @@ const experiences = [
     location: "Tarragona, Spain",
     desc: "The leading logistics and food-delivery service across the Terras del Ebro region, now expanding into the Valencia Community and Barcelonès. Awarded Most Innovative Startup of Terras del Ebro and acquired by Imagine Engine Studios.",
     icon: Globe2,
+    metrics: [{ k: "Capital Invested", v: "€40,000" },{ k: "Revenue Generated (2 yrs)", v: "€837,555" },{ k: "Community Served", v: "200,000+" }],
   },
   {
     period: "2022 — Present",
@@ -100,6 +105,7 @@ const experiences = [
     location: "Orlando · Miami · Ohio · Uruguay",
     desc: "A global accelerator nurturing the next generation of unicorn startups — building them from zero alongside intern students, advisors and partner incubators. Backed by industry leaders including Voyager Space, Nvidia, Google, NASA and NASDAQ.",
     icon: Rocket,
+    metrics: [{ k: "Ventures Graduated", v: "40+" },{ k: "Institutional Partnerships", v: "50+" },{ k: "ML Matching Lift", v: "+75%" },{ k: "Readiness Signal", v: "TRL 1–9 Scoring" }],
   },
   {
     period: "Jan 2022 — Apr 2023",
@@ -506,6 +512,16 @@ export default function RicardoFontCV() {
                       <span className="text-sm kp-mono" style={{ color: "var(--navy)", letterSpacing: "0.08em" }}>— {exp.org}</span>
                     </div>
                     <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
+                    {(exp as any).metrics && (
+                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {(exp as any).metrics.map((m: { k: string; v: string }, mi: number) => (
+                          <div key={mi} className="px-4 py-4" style={{ background: "var(--navy)", border: "1px solid var(--navy-2)" }}>
+                            <div className="kp-display text-2xl sm:text-3xl" style={{ color: "#f6f3ec", lineHeight: 1 }}>{m.v}</div>
+                            <div className="kp-mono text-[9px] mt-2" style={{ color: "var(--gold)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{m.k}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -587,6 +603,57 @@ export default function RicardoFontCV() {
           </div>
         </Section>
 
+        {/* ── 07b PARTNERS & COLLABORATORS ────────────────────────────────── */}
+        <Section num="06b" title="Partners &amp; Collaborators" subtitle="Institutional, agency &amp; research alliances">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+              {[
+                { name: "NASA", sub: "National Aeronautics and Space Administration", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Technology Transfer Program", sub: "T2 · Commercialization & dual-use", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Kennedy Space Center", sub: "Florida · Launch & ground systems", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Glenn Research Center", sub: "Ohio · Propulsion & comms research", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "UK Space Agency", sub: "United Kingdom", logo: "" },
+                { name: "MYSA — Malaysian Space Agency", sub: "Malaysia", logo: "" },
+                { name: "Maldives Space Agency", sub: "Indian Ocean", logo: "" },
+                { name: "METI — Government of Japan", sub: "Ministry of Economy, Trade & Industry", logo: "" },
+                { name: "National Space Consortium of Chile", sub: "Latin America", logo: "" },
+                { name: "Venezuela", sub: "900 ecosystem partners · Energy & Investment", logo: "" },
+                { name: "Space Florida", sub: "State spaceport authority", logo: "" },
+                { name: "APEX Federal Network", sub: "U.S. federal contracting", logo: "" },
+                { name: "Princeton · Lehigh", sub: "Research & tech transfer", logo: "" },
+              ].map((p) => {
+                const hasLogo = typeof p.logo === "string" && p.logo.trim().length > 0;
+
+                return (
+                  <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
+                    {hasLogo ? (
+                      <img
+                        src={p.logo}
+                        alt={`${p.name} logo`}
+                        crossOrigin="anonymous"
+                        data-pdf-ignore="true"
+                        className="h-12 w-auto object-contain"
+                        style={{ filter: "grayscale(0.2)" }}
+                      />
+                    ) : (
+                      <div className="h-12 flex items-center justify-center">
+                        <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+                      </div>
+                    )}
+                    <div>
+                      <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
+                      <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="kp-mono text-[10px] mt-6" style={{ color: "var(--ink-mute)" }}>
+              Logos shown for identification purposes; partnerships described reflect direct engagements, contracts, mentor/advisor roles or active collaborations across the entities listed.
+            </p>
+          </div>
+        </Section>
+
         {/* CONTACT */}
         <Section num="07" title="Contact" subtitle="Inquiries">
           <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
@@ -594,6 +661,7 @@ export default function RicardoFontCV() {
               <div>
                 <div className="kp-eyebrow mb-2">Direct</div>
                 <a href="mailto:fosstheory@gmail.com" className="kp-display text-2xl block kp-link">fosstheory@gmail.com</a>
+                <a href="tel:+12392570637" className="kp-display text-2xl block kp-link mt-2">+1 (239) 257-0637</a>
               </div>
               <div>
                 <div className="kp-eyebrow mb-2">Languages</div>
