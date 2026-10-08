@@ -88,6 +88,8 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { window.__IEFiles.put(a.name, a.content || a.code || "", a.lang); done.push("File " + a.name); }
+        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
