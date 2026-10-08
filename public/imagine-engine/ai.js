@@ -126,6 +126,13 @@
       .catch(function () { L(method + " " + p.url + " blocked or offline", "error"); });
     return p.url;
   }
+  function frames3D(doc, out) {
+    out = out || []; var fs = doc.querySelectorAll("iframe");
+    for (var i = 0; i < fs.length; i++) { var src = fs[i].getAttribute("src") || ""; if (/imagine-engine\/blocks\//.test(src)) out.push(fs[i].contentWindow); else { try { frames3D(fs[i].contentDocument, out); } catch (e) {} } }
+    return out;
+  }
+  function send3D(msg) { var f = frames3D(document); f.forEach(function (w) { try { w.postMessage(msg, "*"); } catch (e) {} }); if (!f.length) L("No 3D block on this page", "warning"); return f.length; }
+  window.__IE3DSend = send3D;
   function toast(msg, type) {
     var d = document.createElement("div");
     d.textContent = msg;
@@ -198,6 +205,67 @@
       var ms = Math.max(5000, Number(p.everyMs) || 60000);
       window.__IETimers[node.id] = setInterval(function () { L("Timer " + node.id + " tick"); }, ms);
       return "every " + ms + "ms";
+    },
+
+    /* ---- live data + search ---- */
+    liveQuery: function (p, node) {
+      window.__IETimers = window.__IETimers || {}; clearInterval(window.__IETimers[node.id]);
+      var tick = function () {
+        var tb = safeTable(p.table); if (!tb) { L("liveQuery: choose a table name", "error"); return; }
+        var q = SB + "/rest/v1/" + tb + "?select=*&limit=" + (Number(p.limit) || 50);
+        if (p.filterColumn && p.filterValue !== "" && p.filterValue != null) q += "&" + encodeURIComponent(p.filterColumn) + "=" + encodeURIComponent((p.op || "eq") + "." + p.filterValue);
+        if (p.orderBy) q += "&order=" + encodeURIComponent(p.orderBy) + "." + (p.desc === false ? "asc" : "desc");
+        fetch(q, { headers: hdr() }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (r) { if (!r.ok) { L("liveQuery " + tb + ": " + ((r.j && r.j.message) || "denied"), "error"); return; }
+            var prev = JSON.stringify(window.__IEState[p.stateKey || "live"]); if (prev !== JSON.stringify(r.j)) { (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "live", r.j); L("liveQuery " + tb + ": " + r.j.length + " rows (updated)"); } })
+          .catch(function () { L("liveQuery network error", "error"); });
+      };
+      tick(); window.__IETimers[node.id] = setInterval(tick, Math.max(3000, Number(p.refreshMs) || 10000));
+      return "watching " + p.table;
+    },
+    smartSearch: function (p) {
+      var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
+      var q = String(p.query != null ? p.query : (window.__IEState[p.queryKey || "query"] || "")).toLowerCase().trim(), keys = p.keys && p.keys.length ? p.keys : null;
+      var lev = function (a, b) { if (a === b) return 0; var m = [], i, j; for (i = 0; i <= b.length; i++) m[i] = [i]; for (j = 0; j <= a.length; j++) m[0][j] = j; for (i = 1; i <= b.length; i++) for (j = 1; j <= a.length; j++) m[i][j] = Math.min(m[i - 1][j] + 1, m[i][j - 1] + 1, m[i - 1][j - 1] + (b[i - 1] === a[j - 1] ? 0 : 1)); return m[b.length][a.length]; };
+      var words = q.split(/\s+/).filter(Boolean);
+      var scored = src.map(function (row) {
+        var text = (keys ? keys.map(function (k) { return row[k]; }) : Object.values(row || {})).filter(function (v) { return v != null; }).join(" ").toLowerCase(), toks = text.split(/[^a-z0-9]+/).filter(Boolean), sc = 0;
+        words.forEach(function (w) { if (text.indexOf(w) > -1) { sc += 3; return; } var best = 9; toks.forEach(function (t) { var d = lev(w, t.slice(0, w.length + 1)); if (d < best) best = d; }); if (best <= Math.max(1, Math.floor(w.length / 4))) sc += 2 - best * .5; });
+        return { row: row, sc: sc };
+      }).filter(function (x) { return !words.length || x.sc > 0; }).sort(function (a, b) { return b.sc - a.sc; }).slice(0, Number(p.limit) || 20).map(function (x) { return x.row; });
+      (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "results", scored); return scored.length + " matches";
+    },
+    aiSearch: function (p) {
+      var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
+      if (!token()) throw new Error("Not signed in");
+      var list = src.slice(0, 200).map(function (r, i) { return i + ": " + JSON.stringify(r).slice(0, 300); }).join("\n");
+      fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j.error) { L("aiSearch: " + j.error, "error"); return; } var m = String(j.text || "").match(/\[[\d,\s]*\]/); var ids = m ? JSON.parse(m[0]) : [];
+          var out = ids.map(function (i) { return src[i]; }).filter(Boolean); (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "results", out); L("aiSearch: " + out.length + " matches"); })
+        .catch(function () { L("aiSearch network error", "error"); });
+      return "searching";
+    },
+    aggregate: function (p) {
+      var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
+      var g = {}, f = p.field, fn = p.fn || "count";
+      src.forEach(function (r) { var k = p.groupBy ? String(r[p.groupBy]) : "all"; (g[k] = g[k] || []).push(r); });
+      var out = Object.keys(g).map(function (k) { var rows = g[k], nums = rows.map(function (r) { return Number(r[f]) || 0; }), sum = nums.reduce(function (a, b) { return a + b; }, 0);
+        var v = fn === "sum" ? sum : fn === "avg" ? (nums.length ? sum / nums.length : 0) : fn === "min" ? Math.min.apply(null, nums) : fn === "max" ? Math.max.apply(null, nums) : rows.length; return { group: k, value: Math.round(v * 100) / 100 }; })
+        .sort(function (a, b) { return p.sort === "asc" ? a.value - b.value : b.value - a.value; }).slice(0, Number(p.limit) || 100);
+      (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "summary", p.groupBy ? out : (out[0] ? out[0].value : 0)); return out.length + " groups";
+    },
+    /* ---- 3D scene blueprint steps (sent to every 3D block on the page) ---- */
+    set3D: function (p) { return send3D({ __IE3D: "set", cfg: p.settings || p }) + " 3D blocks updated"; },
+    spawn3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "spawn" }, p)) + " spawned " + (p.id || p.shape || "box"); },
+    move3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "move" }, p)) + " moved " + p.id; },
+    color3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "color" }, p)) + " recolored " + p.id; },
+    remove3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "remove" }, p)) + " removed " + p.id; },
+    on3DEvent: function (p) {
+      if (!window.__IEBus || !p.event) throw new Error("Choose an event, e.g. game:over");
+      window.__IE3DSubs = window.__IE3DSubs || {}; if (window.__IE3DSubs[p.event]) window.__IE3DSubs[p.event]();
+      window.__IE3DSubs[p.event] = window.__IEBus.subscribe(p.event, function (v) { if (p.message) toast(String(p.message).replace("{value}", typeof v === "object" ? JSON.stringify(v) : v)); if (p.program && window.__IE.runProgram) window.__IE.runProgram(p.program); L("3D event " + p.event); });
+      return "listening " + p.event;
     },
     aiGenerate: function (p) {
       var t = token(); if (!t) throw new Error("Not signed in");
