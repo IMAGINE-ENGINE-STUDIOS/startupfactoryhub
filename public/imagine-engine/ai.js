@@ -88,8 +88,15 @@
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function extractActions(text) {
-    var found = [], clean = String(text || "");
+    var found = [], clean = String(text || ""), roots = [];
     var tryParse = function (s) { try { var v = JSON.parse(s.trim()); var arr = Array.isArray(v) ? v : (v && Array.isArray(v.actions) ? v.actions : [v]); return arr.filter(function (a) { return a && typeof a === "object" && typeof a.type === "string"; }); } catch (e) { return null; } };
+    /* Source files arrive as plain code fences: ```tsx file=apps/Name.tsx ... ``` (no JSON escaping, so big apps never break). */
+    clean = clean.replace(/```[\w-]*[ \t]+(?:file=|path=|name=)?["']?((?:apps|components|lib|src|styles|custom-scripts)\/[\w\-./]+\.(?:tsx|ts|jsx|js|html|css|json))["']?[^\n]*\n([\s\S]*?)```/gi, function (all, path, body) {
+      var code = body.replace(/\s+$/, "") + "\n";
+      if (/^apps\/[^/]+\.(tsx|jsx|html)$/i.test(path)) roots.push({ type: "addLiveApp", name: path.replace(/^apps\//, "").replace(/\.\w+$/, ""), kind: /\.html$/i.test(path) ? "html" : "react", code: code });
+      else found.push({ type: "addFile", name: path, content: code });
+      return "";
+    });
     clean = clean.replace(/```(actions|json|javascript|js)?\s*([\s\S]*?)```/gi, function (all, lang, body) { var r = tryParse(body); if (r && r.length) { found = found.concat(r); return ""; } return lang === "actions" ? "" : all; });
     // Bare JSON arrays / objects with "type" outside fences
     var i = 0;
@@ -105,6 +112,7 @@
       }
       i++;
     }
+    found = found.filter(function (a) { return a.type !== "addLiveApp" || !roots.some(function (r) { return r.name === a.name; }); }).concat(roots);
     return { list: found, clean: clean.replace(/\n{3,}/g, "\n\n").trim() };
   }
   var APPWORDS = /\b(game|car|cars|player|enemy|enemies|level|scene|speed|lane|lanes|obstacle|bump|jump|score|traffic|road|physics|camera|character|3d|app|ui|button|animation)\b/i;
@@ -121,6 +129,16 @@
     return kept;
   }
   var needFix = false;
+  window.__IEAIApply = function (text) { return runActions(text); };
+  var SITEWORDS = /\b(landing|website|web site|homepage|home page|marketing page|portfolio|one-?pager|blog)\b/i;
+  var APPKIND = /\b(app|apps|application|dashboard|crm|erp|tool|tracker|calculator|game|platform|portal|system|manager|editor|booking|scheduler|marketplace|store|shop|e-?commerce|chat|messenger|kanban|todo|to-do|inventory|planner|simulator|visuali[sz]er|3d|configurator|quiz|saas|analytics|admin panel|wallet|timer|player|feed|social network|lms|course)\b/i;
+  /* what kind of build this message is: a real app (React live app + libraries) or a marketing site (canvas sections) */
+  function buildKind(text) {
+    var hasApp = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); });
+    if (hasApp && !REBUILD.test(text)) return "edit";
+    if (APPKIND.test(text) && !(SITEWORDS.test(text) && !/\b(app|dashboard|game|tool|platform|system|store|shop)\b/i.test(text))) return "app";
+    return SITEWORDS.test(text) ? "site" : "edit";
+  }
   function runActions(text) {
     var ex = extractActions(text);
     var done = [];
@@ -473,7 +491,7 @@
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit" }), model: mode === "chat" ? "chat" : model, mode: mode }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text) }), model: mode === "chat" ? "chat" : model, mode: mode }),
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -481,6 +499,14 @@
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
         if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: extractActions(res.j.text || "").clean || res.j.text, done: [], chat: true }); return; }
         needFix = false;
+        var kindNow = buildKind(text), exNow = extractActions(res.j.text || "").list;
+        var builtApp = exNow.some(function (a) { return /^(addLiveApp|applyTemplate|updateFile|patchFile)$/.test(a.type); });
+        if (kindNow === "app" && !builtApp && !doSend._retried) {
+          doSend._retried = true;
+          messages.push({ role: "assistant", content: res.j.text || "" });
+          messages.push({ role: "user", content: "That did not build a working app. Build it now as a real React live app: write each file as a code fence like ```tsx file=apps/<Name>.tsx (root, export default function App) plus module fences under apps/<name>/..., using real libraries (lucide-react, framer-motion, recharts, zustand, date-fns, three/@react-three/fiber when 3D) and IE.db for saved data. No widgets, no Flow nodes." });
+          setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
+        }
         var out = runActions(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
         if (needFix && !doSend._retried) {
