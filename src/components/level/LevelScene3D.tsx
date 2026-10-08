@@ -39,6 +39,7 @@ import { ScenePathOverlay } from "./geometry/ScenePathOverlay";
 import PerfSampler from "./perf/PerfSampler";
 import PerfHUD from "./perf/PerfHUD";
 import { buildNaniteLods, updateNanite } from "@/lib/nanite";
+import { Imagine3DBridge } from "./Imagine3DBridge";
 
 /* ---------- helpers ---------- */
 
@@ -1703,6 +1704,7 @@ function LevelScene3DInner(
       <KeyboardCameraController controlsRef={controlsRef} enabled={!hasActivePlayer(rest)} />
       <ResetCameraController nonce={resetReq} controlsRef={controlsRef} />
       <PerfSampler />
+      <Imagine3DBridge />
     </Canvas>
     {/* DOM-overlay performance HUD (toggle with `) — rendered as a sibling
         so it sits outside the WebGL canvas and never affects scene state. */}
