@@ -4,7 +4,7 @@
   var css = document.createElement("style");
   css.textContent =
     "#ie-studio-ws{position:fixed;z-index:60;background:#05070d;display:none}#ie-studio-ws iframe{width:100%;height:100%;border:0}" +
-    "#ie-studio-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font:500 12px system-ui;cursor:pointer;border:1px solid rgba(120,160,255,.35);background:rgba(60,100,255,.12);color:inherit;margin-left:6px}" +
+    "#ie-studio-btn{display:inline-flex;white-space:nowrap;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font:500 12px system-ui;cursor:pointer;border:1px solid rgba(120,160,255,.35);background:rgba(60,100,255,.12);color:inherit;margin-left:6px}" +
     "#ie-studio-btn.on{background:rgba(60,100,255,.45)}" +
     ".ie-bar{position:absolute;top:8px;right:8px;z-index:5;display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(10,14,24,.78);backdrop-filter:blur(8px);opacity:0;transition:opacity .15s;font:500 11px system-ui;color:#e6ecff}" +
     ".ie-host:hover>.ie-bar,.ie-bar:focus-within{opacity:1}.ie-bar button{background:transparent;border:0;color:inherit;padding:4px 7px;border-radius:6px;cursor:pointer;font:inherit}.ie-bar button:hover{background:rgba(255,255,255,.12)}.ie-bar .fps{padding:4px 7px;opacity:.8;min-width:48px}";
