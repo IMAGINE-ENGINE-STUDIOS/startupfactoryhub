@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Live app</title>
+<script type="importmap">
+{ "imports": {
+  "react": "https://esm.sh/react@19.1.0",
+  "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
+  "react-dom": "https://esm.sh/react-dom@19.1.0?external=react",
+  "react-dom/client": "https://esm.sh/react-dom@19.1.0/client?external=react"
+} }
+</script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #0b0b0c; color: #fafafa; font-family: system-ui, sans-serif; }
+  #root { min-height: 520px; }
+  #ie-err { display: none; position: fixed; inset: auto 12px 12px 12px; background: #2a0f12; color: #fecaca; border: 1px solid #7f1d1d; border-radius: 12px; padding: 12px; font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap; z-index: 99; }
+  #ie-load { padding: 24px; color: #a1a1aa; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="root"><div id="ie-load">Loading app…</div></div>
+<div id="ie-err"></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), file = q.get("file") || "", kind = q.get("kind") || "react";
+  function host() { var w = window; try { while (w.parent && w.parent !== w) { w = w.parent; if (w.__IEFiles) return w; } } catch (e) {} return null; }
+  function src() { var h = host(); try { return (h && h.__IEFiles.get(file)) || localStorage.getItem("ie-live:" + file) || ""; } catch (e) { return ""; } }
+  function fail(m) { var e = document.getElementById("ie-err"); e.style.display = "block"; e.textContent = "App error: " + m; try { var h = host(); h && h.__IE && h.__IE.log("Live app " + file + ": " + m, "error"); } catch (x) {} }
+  window.addEventListener("error", function (e) { fail(e.message); });
+  window.addEventListener("unhandledrejection", function (e) { fail((e.reason && e.reason.message) || String(e.reason)); });
+  function load(u) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = u; s.onload = res; s.onerror = function () { rej(new Error("Could not load " + u)); }; document.head.appendChild(s); }); }
+
+  var code = src(), last = code;
+  if (!code) { document.getElementById("root").innerHTML = '<div id="ie-load">No code yet for ' + file + '. Ask the AI to build an app.</div>'; }
+  else if (kind === "aframe") {
+    load("https://aframe.io/releases/1.6.0/aframe.min.js").then(function () {
+      var body = /<a-scene[\s\S]*<\/a-scene>/i.exec(code); document.getElementById("root").innerHTML = body ? body[0] : code;
+    }).catch(function (e) { fail(e.message); });
+  } else {
+    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js")]).then(function () {
+      var out = Babel.transform(code, { filename: "App.tsx", presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+      out = out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"'./][^"']*)\2/g, function (m, pre, qt, spec) {
+        if (/^(react|react-dom)(\/|$)/.test(spec) || /^https?:/.test(spec)) return m;
+        return pre + qt + "https://esm.sh/" + spec + "?external=react,react-dom" + qt;
+      });
+      if (!/export\s+default/.test(out)) out += "\nexport default (typeof App!=='undefined'?App:()=>null);";
+      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce } from "react";\n__cr(document.getElementById("root")).render(__ce(__ie_default));';
+      out = out.replace(/export\s+default\s+function\s+(\w+)/, "const __ie_default = $1; function $1").replace(/export\s+default\s+/, "const __ie_default = ");
+      var hoist = /const __ie_default = (\w+); function \1/.test(out);
+      if (hoist) out = out.replace(/const __ie_default = (\w+); function \1/, "function $1").replace("__ce(__ie_default)", "__ce(" + /function (\w+)/.exec(out.split("__cr(")[0].match(/function \w+/g).slice(-1)[0] || "function App")[1] + ")");
+      var s = document.createElement("script"); s.type = "module";
+      s.src = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
+      document.body.appendChild(s);
+    }).catch(function (e) { fail(e.message); });
+  }
+  /* hot reload when the Dev tab file changes */
+  setInterval(function () { var c = src(); if (c && c !== last) location.reload(); }, 1200);
+})();
+</script>
+</body>
+</html>
