@@ -128,7 +128,8 @@
     if (kept.length !== list.length) { done.push("Skipped Flow scripts that could not reach the running app - ask again and Imagine AI will edit the app file"); needFix = true; }
     return kept;
   }
-  var needFix = false, needApp = false;
+  var needFix = false;
+  window.__IEAIApply = function (text) { return runActions(text); };
   var SITEWORDS = /\b(landing|website|web site|homepage|home page|marketing page|portfolio|one-?pager|blog)\b/i;
   var APPKIND = /\b(app|apps|application|dashboard|crm|erp|tool|tracker|calculator|game|platform|portal|system|manager|editor|booking|scheduler|marketplace|store|shop|e-?commerce|chat|messenger|kanban|todo|to-do|inventory|planner|simulator|visuali[sz]er|3d|configurator|quiz|saas|analytics|admin panel|wallet|timer|player|feed|social network|lms|course)\b/i;
   /* what kind of build this message is: a real app (React live app + libraries) or a marketing site (canvas sections) */
