@@ -112,6 +112,7 @@
       }
       i++;
     }
+    found = found.filter(function (a) { return a.type !== "addLiveApp" || !roots.some(function (r) { return r.name === a.name; }); }).concat(roots);
     return { list: found, clean: clean.replace(/\n{3,}/g, "\n\n").trim() };
   }
   var APPWORDS = /\b(game|car|cars|player|enemy|enemies|level|scene|speed|lane|lanes|obstacle|bump|jump|score|traffic|road|physics|camera|character|3d|app|ui|button|animation)\b/i;
@@ -127,7 +128,17 @@
     if (kept.length !== list.length) { done.push("Skipped Flow scripts that could not reach the running app - ask again and Imagine AI will edit the app file"); needFix = true; }
     return kept;
   }
-  var needFix = false;
+  var needFix = false, needApp = false;
+  var SITEWORDS = /\b(landing|website|web site|homepage|home page|marketing page|portfolio|one-?pager|blog)\b/i;
+  var APPKIND = /\b(app|apps|application|dashboard|crm|erp|tool|tracker|calculator|game|platform|portal|system|manager|editor|booking|scheduler|marketplace|store|shop|e-?commerce|chat|messenger|kanban|todo|to-do|inventory|planner|simulator|visuali[sz]er|3d|configurator|quiz|saas|analytics|admin panel|wallet|timer|player|feed|social network|lms|course)\b/i;
+  /* what kind of build this message is: a real app (React live app + libraries) or a marketing site (canvas sections) */
+  function buildKind(text) {
+    if (REBUILD.test(text) || !((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); })) {
+      if (APPKIND.test(text) && !(SITEWORDS.test(text) && !/\b(app|dashboard|game|tool|platform|system)\b/i.test(text))) return "app";
+      if (SITEWORDS.test(text)) return "site";
+    }
+    return APPKIND.test(text) && /\b(build|create|make|develop|generate|new|design)\b/i.test(text) && !((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); }) ? "app" : "edit";
+  }
   function runActions(text) {
     var ex = extractActions(text);
     var done = [];
