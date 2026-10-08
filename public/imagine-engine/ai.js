@@ -82,13 +82,27 @@
     }
     return { list: found, clean: clean.replace(/\n{3,}/g, "\n\n").trim() };
   }
+  var APPWORDS = /\b(game|car|cars|player|enemy|enemies|level|scene|speed|lane|lanes|obstacle|bump|jump|score|traffic|road|physics|camera|character|3d|app|ui|button|animation)\b/i;
+  var FLOWTYPES = /^(addNode|connect|createMetascript|callMetascript|runFlow|clearFlow)$/;
+  /* continuous development: changes to a running app must edit its apps/* file, never add disconnected Flow scripts */
+  function guard(list, done) {
+    var last = (messages.filter(function (m) { return m.role === "user"; }).pop() || {}).content || "";
+    var hasApp = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); });
+    var editsFile = list.some(function (a) { return /^(patchFile|updateFile|addFile|addLiveApp|applyTemplate)$/.test(a.type); });
+    var wantsFlow = /\b(flow|automation|automate|workflow|trigger|schedule|webhook|database|query|email|notify)\b/i.test(last);
+    if (!hasApp || editsFile || wantsFlow || REBUILD.test(last) || !APPWORDS.test(last)) return list;
+    var kept = list.filter(function (a) { return !FLOWTYPES.test(a.type); });
+    if (kept.length !== list.length) { done.push("Skipped Flow scripts that could not reach the running app - ask again and Imagine AI will edit the app file"); needFix = true; }
+    return kept;
+  }
+  var needFix = false;
   function runActions(text) {
     var ex = extractActions(text);
     var done = [];
     var clean = ex.clean || (ex.list.length ? "Done — applied your changes to the canvas." : "");
     if (!ex.list.length || !window.__IE) return { text: clean, done: done };
     try {
-      var list = ex.list;
+      var list = guard(ex.list, done);
       var ie = window.__IE, refs = {}, wantRun = false;
       var rid = function (r) { return refs[r] || r; };
       (Array.isArray(list) ? list : [list]).slice(0, 40).forEach(function (a) {
@@ -123,6 +137,7 @@
           if (ok) { window.__IEFiles.put(a.name, cur); try { localStorage.setItem("ie-live:" + a.name, cur); } catch (e) {} }
           done.push("Edited " + a.name + " (" + ok + " change" + (ok === 1 ? "" : "s") + (miss ? ", " + miss + " not found" : "") + ")");
         }
+        else if (a.type === "dispatchApp" && a.action) { var n2 = window.__IEAppBus.broadcast(a.action, a.payload); done.push("Sent " + a.action + " to " + n2 + " app" + (n2 === 1 ? "" : "s")); }
         else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
@@ -190,9 +205,31 @@
         };
       },
       fetch: function (url, o) { return fetch(url, o); },
+      broadcast: function (action, payload) { return window.__IEAppBus.broadcast(action, payload); },
+      on: function (event, cb) { return window.__IEAppBus.on(event, function (p) { try { cb(p, makeCtx(node)); } catch (e) { L("ctx.on " + event + ": " + e.message, "error"); } }); },
       node: node,
     };
   }
+
+  /* ---------- App bus: Flow <-> running live apps / games (apps/*) ---------- */
+  (function () {
+    var subs = {};
+    function frames() {
+      var out = [];
+      (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { if (/\/imagine-engine\/blocks\/|\/imagine-studio|\/level\//.test(f.getAttribute("src") || "") || f.getAttribute("data-ie-3d") === "1") out.push(f); else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document);
+      return out;
+    }
+    window.addEventListener("message", function (e) {
+      var d = e.data; if (!d || !d.ieBus || !d.event) return;
+      window.__IEState["app:" + d.event] = d.payload === undefined ? true : d.payload;
+      (subs[d.event] || []).concat(subs["*"] || []).forEach(function (cb) { try { cb(d.payload, d.event); } catch (x) {} });
+      if (window.__IEBus && window.__IEBus.emit) try { window.__IEBus.emit("app:" + d.event, d.payload); } catch (x) {}
+    });
+    window.__IEAppBus = {
+      broadcast: function (action, payload) { var fs = frames(); fs.forEach(function (f) { try { f.contentWindow.postMessage({ __IE_ACTION: String(action), payload: payload }, "*"); } catch (e) {} }); return fs.length; },
+      on: function (event, cb) { (subs[event] = subs[event] || []).push(cb); return function () { subs[event] = (subs[event] || []).filter(function (x) { return x !== cb; }); }; },
+    };
+  })();
   // turn module / TypeScript style scripts into plain JS that runs inside Function("ctx", code)
   window.__IESan = function (code) {
     code = String(code || "").replace(/\r/g, "")
@@ -418,8 +455,15 @@
         if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
         if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: extractActions(res.j.text || "").clean || res.j.text, done: [], chat: true }); return; }
+        needFix = false;
         var out = runActions(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
+        if (needFix && !doSend._retried) {
+          needFix = false; doSend._retried = true;
+          messages.push({ role: "user", content: "Those Flow nodes cannot change the running app. Make the change by editing the existing apps/* file with patchFile (exact find/replace snippets copied from the current file). Do not add Flow nodes." });
+          setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
+        }
+        doSend._retried = false;
       })
       .catch(function () { messages.push({ role: "assistant", error: true, content: "Network error. Please try again." }); })
       .finally(function () { busy = false; render(); save(); input.focus(); });
