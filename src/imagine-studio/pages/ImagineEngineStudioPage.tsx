@@ -14,7 +14,7 @@ export default function ImagineEngineStudioPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const isRigRoom = location.pathname.endsWith("/rig-room");
+  const isRigRoom = location.pathname.endsWith("/rig-room") || location.pathname === "/locomotion";
 
   useEffect(() => {
     if (id || isRigRoom) return;
