@@ -90,6 +90,37 @@ serve(async (req) => {
       await writeJson(admin, `${base}/state.json`, { ls: clean, updated_at: at });
       return json({ ok: true, updated_at: at });
     }
+    // ── app data for apps built in Imagine Engine (IE.db) ──
+    if (action === "appdb") {
+      const ns = String(body.ns || "");
+      const col = String(body.collection || "").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 60);
+      if (!/^[0-9a-f-]{36}\/[a-zA-Z0-9_-]{1,80}$/.test(ns) || !col) return json({ error: "Invalid app data request" }, 400);
+      const creator = ns.split("/")[0];
+      const path = `appdata/${ns}/${col}.json`;
+      let rows: any[] = (await readJson(admin, path)) || [];
+      const op = String(body.op || "list");
+      const canEdit = (r: any) => r && (r._owner === user.id || creator === user.id || isAdmin);
+      const view = (r: any) => ({ ...r, _mine: r._owner === user.id });
+      if (op === "list") return json({ result: rows.map(view) });
+      if (op === "insert") {
+        const rec = body.record && typeof body.record === "object" && !Array.isArray(body.record) ? body.record : {};
+        if (JSON.stringify(rec).length > 50000) return json({ error: "Record too large" }, 400);
+        if (rows.length >= 20000) return json({ error: "Collection is full" }, 400);
+        const r = { ...rec, id: crypto.randomUUID(), _owner: user.id, created_at: new Date().toISOString() };
+        rows.push(r); await writeJson(admin, path, rows); return json({ result: view(r) });
+      }
+      const idx = rows.findIndex((r) => r.id === body.id);
+      if (idx < 0) return json({ error: "Record not found" }, 404);
+      if (!canEdit(rows[idx])) return json({ error: "You can only change your own records" }, 403);
+      if (op === "update") {
+        const patch = body.patch && typeof body.patch === "object" ? body.patch : {};
+        delete patch.id; delete patch._owner;
+        rows[idx] = { ...rows[idx], ...patch, updated_at: new Date().toISOString() };
+        await writeJson(admin, path, rows); return json({ result: view(rows[idx]) });
+      }
+      if (op === "delete") { rows.splice(idx, 1); await writeJson(admin, path, rows); return json({ result: true }); }
+      return json({ error: "Unknown op" }, 400);
+    }
     if (action === "upload_url") {
       const name = String(body.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
       const type = String(body.type || "");
