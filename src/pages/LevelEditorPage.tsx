@@ -1,5 +1,5 @@
 // @ts-nocheck -- imported 3D studio; uses cloud tables not in this project yet
-import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
+import React, { lazy, useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft, Save, Plus, Trash2, Box, Circle, Square, Cylinder, Cone,
@@ -14,8 +14,6 @@ import {
 import { Spline as SplineIcon, Paintbrush } from "lucide-react";
 import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import CharacterAnimationGallery from "@/components/level/animations/CharacterAnimationGallery";
-import ObjectAnimationGallery from "@/components/level/animations/ObjectAnimationGallery";
 import type { CharacterClipEntry } from "@/lib/characterAnimationLibrary";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandItem, CommandGroup } from "@/components/ui/command";
@@ -44,10 +42,7 @@ import PlayBehaviorRuntime from "@/components/level/play/PlayBehaviorRuntime";
 import PlayInputManager from "@/components/level/play/PlayInputManager";
 import PlayHUD from "@/components/level/play/PlayHUD";
 import MobileTouchControls from "@/components/level/play/MobileTouchControls";
-import RigControllerRoom from "@/components/level/locomotion/RigControllerRoom";
-import BoneHierarchyPanel from "@/components/level/BoneHierarchyPanel";
 import { useCharacterAnimationNames } from "@/components/level/LevelCharacter";
-import AtlasMiniMap from "@/components/level/AtlasMiniMap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +84,18 @@ import {
   onRigSavesChanged,
   type RigSave,
 } from "@/lib/rigSaves";
+
+// Heavy side panels load on demand (and are prefetched when the browser is idle) so the editor opens fast.
+function lazyPanel<P extends object>(load: () => Promise<{ default: React.ComponentType<P> }>) {
+  const L = lazy(load);
+  if (typeof window !== "undefined") (window.requestIdleCallback || ((f: any) => setTimeout(f, 1500)))(() => { load().catch(() => {}); });
+  return (props: P) => <Suspense fallback={null}><L {...(props as any)} /></Suspense>;
+}
+const CharacterAnimationGallery = lazyPanel(() => import("@/components/level/animations/CharacterAnimationGallery"));
+const ObjectAnimationGallery = lazyPanel(() => import("@/components/level/animations/ObjectAnimationGallery"));
+const RigControllerRoom = lazyPanel(() => import("@/components/level/locomotion/RigControllerRoom"));
+const BoneHierarchyPanel = lazyPanel(() => import("@/components/level/BoneHierarchyPanel"));
+const AtlasMiniMap = lazyPanel(() => import("@/components/level/AtlasMiniMap"));
 
 type ActiveTool = { key: string; label: string; icon: React.ReactNode; active: boolean };
 

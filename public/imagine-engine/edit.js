@@ -281,12 +281,55 @@
     row.appendChild(h("input", { type: "color", value: toHex(val), style: "width:28px;height:22px;border:0;background:none;cursor:pointer", oninput: function (e) { var p = {}; p[prop] = e.target.value; if (prop === "backgroundColor") p.backgroundImage = "none"; setStyle(p); } }));
     return [h("div", { style: L }, [label]), row];
   }
+
+  // ---------- 3D scene / game control deck ----------
+  var sel3d = null;
+  var DECK = [
+    ["Camera", [["fov", "Field of view", 30, 120, 1, 65], ["camDist", "Camera distance", .4, 3, .05, 1]]],
+    ["Lighting", [["sun", "Sun strength", 0, 3, .05, 1], ["sunAngle", "Sun angle", 0, 180, 1, 60], ["ambient", "Ambient light", 0, 3, .05, 1], ["exposure", "Exposure", .2, 3, .05, 1]]],
+    ["Atmosphere", [["fog", "Fog density", 0, 1, .01, .3]]],
+    ["Materials", [["roughness", "Roughness", 0, 1, .01, .4], ["metalness", "Metalness", 0, 1, .01, .3]]],
+  ];
+  var GAME = ["Gameplay", [["gameSpeed", "Game speed", .3, 3, .05, 1], ["steering", "Steering", .3, 3, .05, 1], ["traffic", "Traffic / spawn rate", 0, 4, .05, 1]]];
+  function send3d(patch) { if (!sel3d) return; Object.assign(sel3d.cfg, patch); try { sel3d.win.postMessage({ __IE3D: "set", cfg: patch }, "*"); } catch (e) {} }
+  function deck3D() {
+    var box = h("div", { style: "border-top:1px solid #27272a;padding-top:8px;color:#e4e4e7;font:12px system-ui" });
+    box.appendChild(h("div", { style: "display:flex;justify-content:space-between;align-items:center" }, [h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, [(sel3d.game ? "3D game" : "3D scene") + " • live settings"]), h("button", { style: BTN, onclick: function () { sel3d = null; render(true); } }, ["Close"])]));
+    (sel3d.game ? DECK.concat([GAME]) : DECK).forEach(function (grp) {
+      box.appendChild(h("div", { style: L }, [grp[0]]));
+      grp[1].forEach(function (f) {
+        var v = sel3d.cfg[f[0]] != null ? sel3d.cfg[f[0]] : f[5];
+        var out = h("span", { style: "color:#a1a1aa;font-size:11px" }, [String(v)]);
+        var r = h("input", { type: "range", min: String(f[2]), max: String(f[3]), step: String(f[4]), value: String(v), style: "width:100%;accent-color:#8b5cf6", oninput: function (e) { out.textContent = e.target.value; var p = {}; p[f[0]] = +e.target.value; send3d(p); } });
+        box.appendChild(h("div", { style: "display:flex;justify-content:space-between;font-size:11px;margin-top:4px" }, [f[1], out])); box.appendChild(r);
+      });
+    });
+    box.appendChild(h("div", { style: L }, ["Sky / background"]));
+    var sky = h("div", { style: "display:flex;gap:4px;flex-wrap:wrap" });
+    ["#05060a", "#0b1020", "#1e1b4b", "#7dd3fc", "#fde68a", "#f97316", "#ffffff"].forEach(function (c) { sky.appendChild(h("button", { title: c, style: "width:22px;height:22px;border-radius:6px;border:1px solid #3f3f46;cursor:pointer;background:" + c, onclick: function () { send3d({ bg: c }); } })); });
+    sky.appendChild(h("input", { type: "color", value: sel3d.cfg.bg || "#05060a", style: "width:28px;height:22px;border:0;background:none", oninput: function (e) { send3d({ bg: e.target.value }); } }));
+    box.appendChild(sky);
+    var wf = h("label", { style: "display:flex;gap:6px;align-items:center;margin-top:10px;font-size:11px" }, [h("input", { type: "checkbox", onchange: function (e) { send3d({ wireframe: e.target.checked }); } }), "Wireframe view"]);
+    if (sel3d.cfg.wireframe) wf.firstChild.checked = true; box.appendChild(wf);
+    box.appendChild(h("button", { style: BTN + ";margin-top:10px;width:100%", onclick: function () { try { sel3d.win.postMessage({ __IE3D: "reset" }, "*"); } catch (e) {} sel3d.cfg = {}; render(true); } }, ["Reset to defaults"]));
+    box.appendChild(h("div", { style: "font-size:10px;color:#71717a;margin-top:6px" }, ["Changes apply instantly and are saved with this block. Flow steps set3D / spawn3D / move3D control it too."]));
+    return box;
+  }
+  addEventListener("message", function (e) {
+    var d = e.data; if (!d || d.__IE3D !== "pick" || !e.source) return;
+    sel3d = { win: e.source, key: d.key, cfg: d.cfg || {}, game: !!d.game };
+    if (window.__IEElClear && sel) { sel.el.style.outline = sel.prevOutline || ""; sel = null; }
+    lastSig = ""; render(true);
+  });
+  document.addEventListener("pointerdown", function (e) { var t = e.target; if (sel3d && t.closest && t.closest("[data-id]") && !t.closest("#ie-el-panel")) { sel3d = null; setTimeout(function () { render(true); }, 30); } }, true);
   function render(force) {
     var slot = document.getElementById("ie-el-panel"); if (!slot) return;
+    if (sel3d && !(sel3d.win && sel3d.win.closed === false)) sel3d = null;
     var tg = target();
-    var sig = tg ? (tg.kind === "dom" ? "d" + (tg.el.__ieid || (tg.el.__ieid = Math.random())) : "n" + tg.node.id) : "none";
+    var sig = sel3d ? "3d" + sel3d.key : tg ? (tg.kind === "dom" ? "d" + (tg.el.__ieid || (tg.el.__ieid = Math.random())) : "n" + tg.node.id) : "none";
     if (!force && sig === lastSig && slot.childNodes.length) return; lastSig = sig;
     slot.innerHTML = "";
+    if (sel3d) { slot.appendChild(deck3D()); return; }
     if (!tg) return;
     var c = cs(tg), isBtn = /^(button|a)$/.test(c.tag) || (tg.kind === "dom" && tg.el.getAttribute("role") === "button");
     var box = h("div", { style: "border-top:1px solid #27272a;padding-top:8px;color:#e4e4e7;font:12px system-ui" });
