@@ -42,11 +42,64 @@
     return null;
   }
   var deps = {};
+  /* ---- Visual inspector: every DOM JSX tag gets data-ie-loc="file:line:col" so Content/Design edits patch the exact source ---- */
+  function locPlugin(name) { return function (api) { var t = api.types; return { visitor: { JSXOpeningElement: function (p) {
+    var n = p.node; if (!n.loc || n.name.type !== "JSXIdentifier" || !/^[a-z]/.test(n.name.name)) return;
+    if (n.attributes.some(function (a) { return a.name && a.name.name === "data-ie-loc"; })) return;
+    n.attributes.push(t.jsxAttribute(t.jsxIdentifier("data-ie-loc"), t.stringLiteral(name + ":" + n.loc.start.line + ":" + n.loc.start.column)));
+  } } }; }; }
+  function offsetOf(code, line, col) { var o = 0; for (var i = 1; i < line; i++) { o = code.indexOf("\n", o) + 1; if (!o) return -1; } return o + col; }
+  function tagEnd(code, o) { var d = 0, q = null; for (var i = o + 1; i < code.length; i++) { var c = code[i]; if (q) { if (c === q && code[i - 1] !== "\\") q = null; continue; } if (c === '"' || c === "'" || c === "`") q = c; else if (c === "{") d++; else if (c === "}") d--; else if (c === ">" && d === 0) return i; } return -1; }
+  function patchSource(code, line, col, ch) {
+    var o = offsetOf(code, line, col); if (o < 0 || code[o] !== "<") return null;
+    var e = tagEnd(code, o); if (e < 0) return null;
+    var tag = code.slice(o, e + 1), after = code.slice(e + 1);
+    if (ch.text != null && tag[tag.length - 2] !== "/") {
+      var m = /^([^<{]*)<\//.exec(after);
+      if (m) after = after.replace(m[1], ch.text.replace(/[{}<>]/g, ""));
+    }
+    if (ch.style && Object.keys(ch.style).length) {
+      var props = Object.keys(ch.style).map(function (k) { return k + ": " + JSON.stringify(ch.style[k]); }).join(", ");
+      var si = tag.indexOf("style={{");
+      if (si > -1) { var d = 0, j = si + 7; for (; j < tag.length; j++) { if (tag[j] === "{") d++; else if (tag[j] === "}") { d--; if (d === 0) break; } }
+        var inner = tag.slice(si + 8, j - 1).replace(/,?\s*$/, ""); tag = tag.slice(0, si) + "style={{" + inner + (inner.trim() ? ", " : "") + props + "}}" + tag.slice(j + 1); }
+      else { var cut = tag[tag.length - 2] === "/" ? tag.length - 2 : tag.length - 1; tag = tag.slice(0, cut).replace(/\s*$/, "") + " style={{ " + props + " }}" + tag.slice(cut); }
+    }
+    return code.slice(0, o) + tag + after;
+  }
+  var inspectOn = false, hoverBox = null;
+  function box() { if (!hoverBox) { hoverBox = document.createElement("div"); hoverBox.style.cssText = "position:fixed;pointer-events:none;z-index:99999;border:2px solid #3b82f6;border-radius:4px;background:rgba(59,130,246,.08);display:none"; document.body.appendChild(hoverBox); } return hoverBox; }
+  function locEl(t) { return t && t.closest ? t.closest("[data-ie-loc]") : null; }
+  document.addEventListener("mousemove", function (e) { if (!inspectOn) return; var el = locEl(e.target), b = box(); if (!el) { b.style.display = "none"; return; } var r = el.getBoundingClientRect(); b.style.display = "block"; b.style.left = r.left + "px"; b.style.top = r.top + "px"; b.style.width = r.width + "px"; b.style.height = r.height + "px"; }, true);
+  document.addEventListener("click", function (e) {
+    if (!inspectOn) return; var el = locEl(e.target); if (!el) return; e.preventDefault(); e.stopPropagation();
+    var cs = getComputedStyle(el), h = host(); var leaf = !el.children.length;
+    var msg = { ie: "liveapp-select", loc: el.getAttribute("data-ie-loc"), tag: el.tagName.toLowerCase(), text: leaf ? el.textContent : null, style: { color: cs.color, backgroundColor: cs.backgroundColor, fontSize: cs.fontSize, fontWeight: cs.fontWeight, textAlign: cs.textAlign, padding: cs.padding, borderRadius: cs.borderRadius } };
+    try { (h || parent).postMessage(msg, "*"); } catch (x) {}
+  }, true);
+  window.addEventListener("message", function (e) {
+    var d = e.data; if (!d || typeof d !== "object") return;
+    if (d.ie === "liveapp-inspect") { inspectOn = !!d.on; if (!inspectOn && hoverBox) hoverBox.style.display = "none"; tog && (tog.textContent = inspectOn ? "Done editing" : "Edit elements"); }
+    if (d.ie === "liveapp-patch" && d.loc) {
+      var parts = d.loc.split(":"), col = +parts.pop(), line = +parts.pop(), fname = parts.join(":");
+      var h = host(); var code = getFile(fname); if (!code) return;
+      var next = patchSource(code, line, col, d); if (!next || next === code) return;
+      try { localStorage.setItem("ie-live:" + fname, next); } catch (x) {}
+      if (h && h.__IEFiles) h.__IEFiles.put(fname, next);
+    }
+  });
+  var tog = null;
+  if (kind === "react" && host()) setTimeout(function () {
+    tog = document.createElement("button"); tog.textContent = "Edit elements";
+    tog.style.cssText = "position:fixed;right:10px;bottom:10px;z-index:99998;font:12px system-ui;padding:6px 10px;border-radius:9999px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;cursor:pointer;opacity:.85";
+    tog.onclick = function (e) { e.stopPropagation(); inspectOn = !inspectOn; tog.textContent = inspectOn ? "Done editing" : "Edit elements"; if (!inspectOn && hoverBox) hoverBox.style.display = "none"; try { (host() || parent).postMessage({ ie: "liveapp-inspect-state", on: inspectOn }, "*"); } catch (x) {} };
+    document.body.appendChild(tog);
+  }, 300);
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
-      : Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+      : Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), plugins: [locPlugin(name)], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
     return out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"']+)\2/g, function (m, pre, qt, spec) {
       if (/^(\.{1,2}\/|@\/)/.test(spec)) {
         var r = resolve(name, spec); if (!r) throw new Error("Cannot find " + spec + " (imported from " + name + ") in the Dev tab");

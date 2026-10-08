@@ -547,3 +547,48 @@
   window.__IEElRefresh = function () { render(true); };
   setInterval(function () { render(false); }, 400);
 })();
+
+/* ---------- Live app inspector: edit text/styles of elements inside React live apps; edits patch apps/*.tsx source ---------- */
+(function () {
+  var panel = null, cur = null, src = null;
+  var INP = "width:100%;box-sizing:border-box;background:#0f0f12;border:1px solid #27272a;border-radius:8px;color:#e4e4e7;padding:6px 8px;font:12px system-ui";
+  function hex(c) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c || ""); if (!m || m[4] === "0") return ""; return "#" + [m[1], m[2], m[3]].map(function (x) { return (+x).toString(16).padStart(2, "0"); }).join(""); }
+  function row(label, el) { var d = document.createElement("label"); d.style.cssText = "display:block;margin-top:8px;font:11px system-ui;color:#a1a1aa"; d.textContent = label; el.style.cssText += ";margin-top:4px"; d.appendChild(el); return d; }
+  function inp(type, val) { var i = document.createElement(type === "area" ? "textarea" : "input"); if (type !== "area") i.type = type; i.value = val == null ? "" : val; i.style.cssText = INP; return i; }
+  function close() { if (panel) panel.remove(); panel = null; }
+  function open(d, source) {
+    close(); cur = d; src = source;
+    panel = document.createElement("div");
+    panel.style.cssText = "position:fixed;right:16px;top:72px;width:260px;z-index:2147483000;background:#18181b;border:1px solid #27272a;border-radius:14px;padding:14px;color:#e4e4e7;font:12px system-ui;box-shadow:0 20px 50px rgba(0,0,0,.5)";
+    var file = d.loc.split(":").slice(0, -2).join(":"), line = d.loc.split(":").slice(-2)[0];
+    panel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">Edit &lt;' + d.tag + '&gt;</b><button data-x style="background:none;border:0;color:#a1a1aa;cursor:pointer;font-size:16px">×</button></div><div style="color:#71717a;margin-top:2px">' + file + " line " + line + "</div>";
+    var f = {};
+    if (d.text != null) panel.appendChild(row("Text", f.text = inp("area", d.text)));
+    panel.appendChild(row("Text color", f.color = inp("color", hex(d.style.color) || "#ffffff")));
+    panel.appendChild(row("Background", f.backgroundColor = inp("color", hex(d.style.backgroundColor) || "#000000")));
+    panel.appendChild(row("Font size", f.fontSize = inp("text", d.style.fontSize)));
+    var w = document.createElement("select"); w.style.cssText = INP; ["300", "400", "500", "600", "700", "800"].forEach(function (v) { var o = document.createElement("option"); o.value = o.textContent = v; w.appendChild(o); }); w.value = String(d.style.fontWeight); panel.appendChild(row("Font weight", f.fontWeight = w));
+    var a = document.createElement("select"); a.style.cssText = INP; ["left", "center", "right", "justify"].forEach(function (v) { var o = document.createElement("option"); o.value = o.textContent = v; a.appendChild(o); }); a.value = d.style.textAlign === "start" ? "left" : d.style.textAlign; panel.appendChild(row("Alignment", f.textAlign = a));
+    panel.appendChild(row("Padding", f.padding = inp("text", d.style.padding)));
+    panel.appendChild(row("Corner radius", f.borderRadius = inp("text", d.style.borderRadius)));
+    var bg0 = f.backgroundColor.value, orig = {};
+    Object.keys(f).forEach(function (k) { orig[k] = f[k].value; });
+    var ap = document.createElement("button"); ap.textContent = "Apply"; ap.style.cssText = "margin-top:12px;width:100%;padding:8px;border-radius:9px;border:0;background:#3b82f6;color:#fff;cursor:pointer;font:600 12px system-ui";
+    ap.onclick = function () {
+      var style = {}, msg = { ie: "liveapp-patch", loc: cur.loc };
+      Object.keys(f).forEach(function (k) { if (f[k].value === orig[k]) return; if (k === "text") msg.text = f[k].value; else style[k] = f[k].value; });
+      msg.style = style; try { src.postMessage(msg, "*"); } catch (e) {}
+      Object.keys(f).forEach(function (k) { orig[k] = f[k].value; });
+    };
+    var jc = document.createElement("button"); jc.textContent = "Jump to code"; jc.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #3f3f46;background:transparent;color:#e4e4e7;cursor:pointer;font:12px system-ui";
+    jc.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "dev" }); window.__IEFiles && window.__IEFiles.open && window.__IEFiles.open(file); } catch (e) {} };
+    panel.appendChild(ap); panel.appendChild(jc);
+    panel.querySelector("[data-x]").onclick = close;
+    document.body.appendChild(panel);
+  }
+  window.addEventListener("message", function (e) {
+    var d = e.data; if (!d || typeof d !== "object") return;
+    if (d.ie === "liveapp-select" && d.loc) open(d, e.source);
+    if (d.ie === "liveapp-inspect-state" && !d.on) close();
+  });
+})();
