@@ -88,7 +88,7 @@
     if (sec.liveFile) {
       /* templates become editable Dev files (apps/*.html) so the AI can keep developing them */
       fetch("/imagine-engine/blocks/" + sec.liveFile).then(function (r) { return r.text(); }).then(function (code) {
-        if (window.__IEFiles) window.__IEFiles.liveApp(sec.app, code, "html");
+        if (window.__IEFiles) window.__IEFiles.liveApp(sec.app, code, sec.kind || "html");
         else addSection({ embed: "/imagine-engine/blocks/" + sec.liveFile + "?b=1" });
       }).catch(function () { addSection({ embed: "/imagine-engine/blocks/" + sec.liveFile + "?b=1" }); });
       return;
@@ -115,6 +115,8 @@
     return t.name;
   }
   T.vr = { name: "3D / VR room", live: { name: "VRRoom", kind: "aframe", code: '<a-scene background="color: #cfe3f2" renderer="antialias: true">\n  <a-entity light="type: hemisphere; color: #ffffff; groundColor: #7a6a55; intensity: 0.9"></a-entity>\n  <a-entity light="type: directional; intensity: 0.8" position="4 8 3"></a-entity>\n  <a-plane rotation="-90 0 0" width="30" height="30" color="#9fb38a"></a-plane>\n  <a-box position="-1.5 0.5 -4" color="#c0563b" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000"></a-box>\n  <a-sphere position="0 1.25 -5" radius="1.1" color="#e8b04b"></a-sphere>\n  <a-cylinder position="1.8 0.75 -4" radius="0.5" height="1.5" color="#3d6e8f"></a-cylinder>\n  <a-text value="Welcome - open in a headset for VR" position="-2.2 2.9 -5" color="#1f2933" width="6"></a-text>\n  <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>\n</a-scene>' }, sections: [{ children: [{ type: "h1", content: "Walk around", style: { fontSize: "24px" } }, { type: "p", content: "Drag to look, WASD to move. Works in VR headsets with the VR button.", style: { color: C.mute } }] }] };
+  T.store = { name: "Online store app", sections: [{ liveFile: "store.tsx", app: "Store", kind: "react" }] };
+  ALIAS.shop = "store"; ALIAS.store = "store"; ALIAS.ecommerce_app = "store"; ALIAS.shopapp = "store";
   ALIAS.aframe = "vr"; ALIAS.webxr = "vr"; ALIAS.metaverse = "vr"; ALIAS.virtual = "vr";
   var _apply = apply;
   apply = function (key) { var k = String(key || "").toLowerCase(); k = ALIAS[k] || k; var t = T[k]; if (t && t.live && window.__IEFiles) { window.__IEFiles.liveApp(t.live.name, t.live.code, t.live.kind); } return _apply(key); };
