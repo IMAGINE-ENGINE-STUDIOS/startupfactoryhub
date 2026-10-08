@@ -294,7 +294,7 @@
   function send3d(patch) { if (!sel3d) return; Object.assign(sel3d.cfg, patch); try { sel3d.win.postMessage({ __IE3D: "set", cfg: patch }, "*"); } catch (e) {} }
   function deck3D() {
     var box = h("div", { style: "border-top:1px solid #27272a;padding-top:8px;color:#e4e4e7;font:12px system-ui" });
-    box.appendChild(h("div", { style: "display:flex;justify-content:space-between;align-items:center" }, [h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, [(sel3d.game ? "3D game" : "3D scene") + " • live settings"]), h("button", { style: BTN, onclick: function () { sel3d = null; render(true); } }, ["Close"])]));
+    box.appendChild(h("div", { style: "display:flex;justify-content:space-between;align-items:center" }, [h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, [(sel3d.studio ? "Studio 3D Active" : sel3d.game ? "3D game" : "3D scene") + " • live settings" + (sel3d.studio && sel3d.nanite ? " • Nanite LOD on " + sel3d.nanite + " meshes" : "")]), h("button", { style: BTN, onclick: function () { sel3d = null; render(true); } }, ["Close"])]));
     (sel3d.game ? DECK.concat([GAME]) : DECK).forEach(function (grp) {
       box.appendChild(h("div", { style: L }, [grp[0]]));
       grp[1].forEach(function (f) {
@@ -317,7 +317,7 @@
   }
   addEventListener("message", function (e) {
     var d = e.data; if (!d || d.__IE3D !== "pick" || !e.source) return;
-    sel3d = { win: e.source, key: d.key, cfg: d.cfg || {}, game: !!d.game };
+    sel3d = { win: e.source, key: d.key, cfg: d.cfg || {}, game: !!d.game, studio: !!d.studio, nanite: d.nanite || 0 };
     if (window.__IEElClear && sel) { sel.el.style.outline = sel.prevOutline || ""; sel = null; }
     lastSig = ""; render(true);
   });

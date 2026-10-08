@@ -128,7 +128,7 @@
   }
   function frames3D(doc, out) {
     out = out || []; var fs = doc.querySelectorAll("iframe");
-    for (var i = 0; i < fs.length; i++) { var src = fs[i].getAttribute("src") || ""; if (/imagine-engine\/blocks\//.test(src)) out.push(fs[i].contentWindow); else { try { frames3D(fs[i].contentDocument, out); } catch (e) {} } }
+    for (var i = 0; i < fs.length; i++) { var src = fs[i].getAttribute("src") || ""; if (/imagine-engine\/blocks\/|\/imagine-studio|\/level\//.test(src) || fs[i].getAttribute("data-ie-3d") === "1") out.push(fs[i].contentWindow); else { try { frames3D(fs[i].contentDocument, out); } catch (e) {} } }
     return out;
   }
   function send3D(msg) { var f = frames3D(document); f.forEach(function (w) { try { w.postMessage(msg, "*"); } catch (e) {} }); if (!f.length) L("No 3D block on this page", "warning"); return f.length; }
@@ -237,7 +237,7 @@
     },
     aiSearch: function (p) {
       var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
-      if (!token()) throw new Error("Not signed in");
+      if (!token()) { toast("Sign in required for AI search", "warning"); throw new Error("Sign in required for AI search"); }
       var list = src.slice(0, 200).map(function (r, i) { return i + ": " + JSON.stringify(r).slice(0, 300); }).join("\n");
       fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
         .then(function (r) { return r.json(); })
