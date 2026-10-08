@@ -15,6 +15,7 @@ import CampaignClickTracking from "./hooks/useCampaignClickTracking";
 
 // Lazy load heavy always-on widgets so the initial bundle stays small
 const FloatingChat = lazy(() => import("./components/FloatingChat"));
+const ImagineEngineStudioPage = lazy(() => import("./pages/ImagineEngineStudioPage"));
 const InteractiveTour = lazy(() => import("./components/InteractiveTour"));
 const Tracker = lazy(() => import("./components/Tracker"));
 const DJAudioEngine = lazy(() => import("./components/dj/DJAudioEngine"));
@@ -152,6 +153,10 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/imagine-studio" element={<ImagineEngineStudioPage />} />
+                    <Route path="/imagine-studio/:id" element={<ImagineEngineStudioPage />} />
+                    <Route path="/level/:id" element={<ImagineEngineStudioPage />} />
+                    <Route path="/levels" element={<ImagineEngineStudioPage />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />

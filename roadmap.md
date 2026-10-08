@@ -82,3 +82,6 @@
 - [x] Click-to-drop map pins, quick canvas Background button
 - [x] LightPaper save: session refresh, offload pasted images, exact error messages
 - [ ] Owner: create a new Groq key at console.groq.com/keys and replace GROQ_API_KEY in Supabase secrets
+- [ ] 3D Studio: Content tab sliders for 3D scenes/games (camera, light, fog, speed) via postMessage to blocks
+- [ ] Flow steps: liveDataQuery (realtime), smartSearch (fuzzy), aiSearch, aggregateData
+- [ ] Integrate 3D Studio into Imagine Engine (embed level as canvas block; cloud levels table)
