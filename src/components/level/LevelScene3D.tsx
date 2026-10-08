@@ -38,6 +38,7 @@ import GroupRuntime from "./GroupRuntime";
 import { ScenePathOverlay } from "./geometry/ScenePathOverlay";
 import PerfSampler from "./perf/PerfSampler";
 import PerfHUD from "./perf/PerfHUD";
+import { buildNaniteLods, updateNanite } from "@/lib/nanite";
 
 /* ---------- helpers ---------- */
 
@@ -428,6 +429,10 @@ function GLTFModelMesh({ obj, onSelect }: { obj: ModelObject; onSelect?: (id: st
   // Clone once per url so each instance owns its own materials and the
   // override pass can mutate them without leaking across instances.
   const root = useMemo(() => gltf.scene.clone(true), [gltf]);
+  // Nanite-style detail streaming: dense meshes swap to simplified levels by screen-space error.
+  const naniteOn = useRef(false);
+  useEffect(() => { let alive = true; buildNaniteLods(root).then((n) => { if (alive) naniteOn.current = n > 0; }).catch(() => {}); return () => { alive = false; }; }, [root]);
+  useFrame(({ camera, size }) => { if (naniteOn.current) updateNanite(root, camera, size.height); });
 
   // Apply per-mesh material overrides. We assign each mesh a stable key
   // (mesh.name or fallback) and stash the ORIGINAL material in userData

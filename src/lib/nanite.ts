@@ -29,11 +29,13 @@ export async function buildNaniteLods(root: THREE.Object3D): Promise<number> {
     const radius = g.boundingSphere?.radius || 1;
     const scale = MeshoptSimplifier.getScale(verts, 3);
     const levels: Level[] = [{ geo: g, error: 0 }];
+    let prevLen = indices.length;
     for (const r of RATIOS) {
       const target = Math.floor((indices.length * r) / 3) * 3;
       if (target < 36) break;
       const [out, err] = MeshoptSimplifier.simplify(indices, verts, 3, target, 0.05, ["LockBorder"]);
-      if (out.length >= levels[levels.length - 1].geo.index!?.count * 0.9 && levels.length > 1) continue;
+      if (out.length >= prevLen * 0.9) continue;
+      prevLen = out.length;
       const lg = g.clone();
       lg.setIndex(new THREE.BufferAttribute(out, 1));
       levels.push({ geo: lg, error: err * scale });
