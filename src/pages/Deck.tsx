@@ -376,7 +376,8 @@ export default function Deck() {
           [data-slide-frame] { content-visibility: auto; contain-intrinsic-size: auto 56.25vw; contain: layout paint; }
         }
         @media screen and (max-width: 1024px), screen and (pointer: coarse) {
-          [data-slide] [class*="blur-["], [data-slide] [class*="backdrop-blur"] { filter: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+          [data-slide] [class*=" blur-["] { filter: blur(16px) !important; }
+          [data-slide] [class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
           [data-slide] [class*="animate-"] { animation: none !important; }
         }
         @media print {
