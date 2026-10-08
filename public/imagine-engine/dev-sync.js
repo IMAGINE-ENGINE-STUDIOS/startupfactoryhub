@@ -66,6 +66,7 @@
     var body = c.slice(a + B.length, b).replace(/^\s*export\s+const\s+sections(\s*:\s*[^=]+)?=\s*/, "").replace(/;\s*$/, "");
     var data; try { data = JSON.parse(body); } catch (e) { return; } /* still typing */
     if (!Array.isArray(data)) return;
+    data = data.filter(function (n) { return n && typeof n === "object"; }).map(function (n) { return window.__IEFix ? window.__IEFix(n) : n; });
     var json = JSON.stringify(data); lastOut = c;
     if (json === lastJson) return;
     lastJson = json;
