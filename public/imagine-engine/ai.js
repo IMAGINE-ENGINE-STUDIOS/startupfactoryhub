@@ -133,11 +133,10 @@
   var APPKIND = /\b(app|apps|application|dashboard|crm|erp|tool|tracker|calculator|game|platform|portal|system|manager|editor|booking|scheduler|marketplace|store|shop|e-?commerce|chat|messenger|kanban|todo|to-do|inventory|planner|simulator|visuali[sz]er|3d|configurator|quiz|saas|analytics|admin panel|wallet|timer|player|feed|social network|lms|course)\b/i;
   /* what kind of build this message is: a real app (React live app + libraries) or a marketing site (canvas sections) */
   function buildKind(text) {
-    if (REBUILD.test(text) || !((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); })) {
-      if (APPKIND.test(text) && !(SITEWORDS.test(text) && !/\b(app|dashboard|game|tool|platform|system)\b/i.test(text))) return "app";
-      if (SITEWORDS.test(text)) return "site";
-    }
-    return APPKIND.test(text) && /\b(build|create|make|develop|generate|new|design)\b/i.test(text) && !((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); }) ? "app" : "edit";
+    var hasApp = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).some(function (f) { return /^apps\//.test(f.name); });
+    if (hasApp && !REBUILD.test(text)) return "edit";
+    if (APPKIND.test(text) && !(SITEWORDS.test(text) && !/\b(app|dashboard|game|tool|platform|system|store|shop)\b/i.test(text))) return "app";
+    return SITEWORDS.test(text) ? "site" : "edit";
   }
   function runActions(text) {
     var ex = extractActions(text);
@@ -491,7 +490,7 @@
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit" }), model: mode === "chat" ? "chat" : model, mode: mode }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text) }), model: mode === "chat" ? "chat" : model, mode: mode }),
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -499,6 +498,14 @@
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
         if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: extractActions(res.j.text || "").clean || res.j.text, done: [], chat: true }); return; }
         needFix = false;
+        var kindNow = buildKind(text), exNow = extractActions(res.j.text || "").list;
+        var builtApp = exNow.some(function (a) { return /^(addLiveApp|applyTemplate|updateFile|patchFile)$/.test(a.type); });
+        if (kindNow === "app" && !builtApp && !doSend._retried) {
+          doSend._retried = true;
+          messages.push({ role: "assistant", content: res.j.text || "" });
+          messages.push({ role: "user", content: "That did not build a working app. Build it now as a real React live app: write each file as a code fence like ```tsx file=apps/<Name>.tsx (root, export default function App) plus module fences under apps/<name>/..., using real libraries (lucide-react, framer-motion, recharts, zustand, date-fns, three/@react-three/fiber when 3D) and IE.db for saved data. No widgets, no Flow nodes." });
+          setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
+        }
         var out = runActions(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
         if (needFix && !doSend._retried) {
