@@ -31,8 +31,34 @@
   }
   function ctx() {
     var ie = window.__IE || {};
-    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}) };
+    var files = ((ie.raw && ie.raw.files) || []).map(function (f) { return { name: f.name, content: String(f.content || "") }; });
+    var budget = 36000, fileCtx = files.map(function (f) {
+      var full = /^apps\//.test(f.name) || f.content.length < 3000;
+      var c = full && budget > 0 ? f.content.slice(0, Math.min(budget, 24000)) : "";
+      budget -= c.length; return { name: f.name, size: f.content.length, content: c };
+    });
+    var sel = null; try { var s = document.querySelector("[data-ie-selected], .ie-selected"); if (s) sel = { tag: s.tagName, text: (s.textContent || "").trim().slice(0, 120) }; } catch (e) {}
+    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}), files: fileCtx, selected: sel, legacyBlocks: legacyBlocks() };
   }
+  /* static template blocks placed before templates became Dev files */
+  function legacyBlocks() {
+    var out = [];
+    (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { var m = /\/imagine-engine\/blocks\/(cargame|webgl|game)\.html/.exec(f.getAttribute("src") || ""); if (m) { if (out.indexOf(m[1]) < 0) out.push(m[1]); } else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document);
+    return out;
+  }
+  var LEG = { cargame: "StreetRacer", webgl: "Hero3D", game: "StarCatcher" };
+  /* migrate old static blocks into editable apps/*.html Dev files so follow-up edits reach them */
+  function migrateLegacy() {
+    var list = legacyBlocks(); if (!list.length || !window.__IEFiles) return Promise.resolve();
+    return Promise.all(list.map(function (k) {
+      var file = "apps/" + LEG[k] + ".html"; if (window.__IEFiles.get(file)) return null;
+      return fetch("/imagine-engine/blocks/" + k + ".html").then(function (r) { return r.text(); }).then(function (code) {
+        window.__IEFiles.put(file, code, "html"); try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
+        (function swap(doc) { doc.querySelectorAll("iframe").forEach(function (f) { var src = f.getAttribute("src") || ""; if (src.indexOf("/blocks/" + k + ".html") > -1) f.setAttribute("src", "/imagine-engine/blocks/liveapp.html?b=1&kind=html&file=" + encodeURIComponent(file)); else { try { swap(f.contentDocument); } catch (e) {} } }); })(document);
+      }).catch(function () {});
+    }));
+  }
+  var REBUILD = /\b(revamp|redesign|rebuild|remake|start over|from scratch|recreate|build (it )?again|make (it )?again|brand new|replace (the )?(whole|entire))\b/i;
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function extractActions(text) {
@@ -88,8 +114,15 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
-        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { window.__IEFiles.put(a.name, a.content || a.code || "", a.lang); done.push("File " + a.name); }
-        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (a.name || "App")); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
+        else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
+          var cur = window.__IEFiles.get(a.name); if (cur == null) { done.push("Missing file " + a.name); return; }
+          var ok = 0, miss = 0;
+          a.edits.forEach(function (e) { if (e && typeof e.find === "string" && e.find && cur.indexOf(e.find) > -1) { cur = cur.replace(e.find, String(e.replace == null ? "" : e.replace)); ok++; } else miss++; });
+          if (ok) { window.__IEFiles.put(a.name, cur); try { localStorage.setItem("ie-live:" + a.name, cur); } catch (e) {} }
+          done.push("Edited " + a.name + " (" + ok + " change" + (ok === 1 ? "" : "s") + (miss ? ", " + miss + " not found" : "") + ")");
+        }
+        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
@@ -553,11 +586,13 @@
   }
   function liveApp(name, code, kind) {
     var ie = window.__IE; if (!ie || !ie.addSection) return null;
-    kind = kind === "aframe" || /<a-scene/i.test(code) ? "aframe" : "react";
+    kind = kind === "html" || /^\s*(<!doctype|<html)/i.test(code) ? "html" : kind === "aframe" || /<a-scene/i.test(code) ? "aframe" : "react";
     var slug = String(name).replace(/[^A-Za-z0-9]/g, "") || "App";
-    var file = "apps/" + slug + (kind === "aframe" ? ".html" : ".tsx");
-    put(file, code, kind === "aframe" ? "html" : "tsx");
+    var file = "apps/" + slug + (kind === "react" ? ".tsx" : ".html");
+    var exists = !!get(file) && !!document.querySelector('iframe[src*="' + encodeURIComponent(file) + '"]');
+    put(file, code, kind === "react" ? "tsx" : "html");
     try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
+    if (exists) return file; /* already on the canvas: updating the file hot-reloads it, no duplicate section */
     var s = Date.now().toString(36);
     ie.addSection({ id: "sec_live_" + s, type: "section", style: { backgroundColor: "transparent", borderColor: "#27272a", borderWidth: "1px", borderStyle: "solid", borderRadius: "20px", padding: "0px", overflow: "hidden" },
       children: [{ id: "emb_live_" + s, type: "embed", content: "/imagine-engine/blocks/liveapp.html?b=1&kind=" + kind + "&file=" + encodeURIComponent(file), style: {} }] });
