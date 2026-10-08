@@ -31,8 +31,35 @@
   }
   function ctx() {
     var ie = window.__IE || {};
-    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}) };
+    var files = ((ie.raw && ie.raw.files) || []).map(function (f) { return { name: f.name, content: String(f.content || "") }; });
+    var budget = 36000, fileCtx = files.map(function (f) {
+      var full = /^apps\//.test(f.name) || f.content.length < 3000;
+      var c = full && budget > 0 ? f.content.slice(0, Math.min(budget, 24000)) : "";
+      budget -= c.length; return { name: f.name, size: f.content.length, content: c };
+    });
+    var sel = null; try { var s = document.querySelector("[data-ie-selected], .ie-selected"); if (s) sel = { tag: s.tagName, text: (s.textContent || "").trim().slice(0, 120) }; } catch (e) {}
+    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}), files: fileCtx, selected: sel, legacyBlocks: legacyBlocks() };
   }
+  /* static template blocks placed before templates became Dev files */
+  function legacyBlocks() {
+    var out = [];
+    (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { var m = /\/imagine-engine\/blocks\/(cargame|webgl|game)\.html/.exec(f.getAttribute("src") || ""); if (m) { if (out.indexOf(m[1]) < 0) out.push(m[1]); } else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document);
+    return out;
+  }
+  var LEG = { cargame: "StreetRacer", webgl: "Hero3D", game: "StarCatcher" };
+  /* migrate old static blocks into editable apps/*.html Dev files so follow-up edits reach them */
+  function migrateLegacy() {
+    var list = legacyBlocks(); if (!list.length || !window.__IEFiles) return Promise.resolve();
+    return Promise.all(list.map(function (k) {
+      var file = "apps/" + LEG[k] + ".html"; if (window.__IEFiles.get(file)) return null;
+      return fetch("/imagine-engine/blocks/" + k + ".html").then(function (r) { return r.text(); }).then(function (code) {
+        window.__IEFiles.put(file, code, "html"); try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
+        var raw = window.__IE && window.__IE.raw, from = "/imagine-engine/blocks/" + k + ".html?b=1", to = "/imagine-engine/blocks/liveapp.html?b=1&kind=html&file=" + encodeURIComponent(file);
+        if (raw && raw.setProjects) raw.setProjects(function (ps) { return ps.map(function (pr) { return pr.id !== raw.pid ? pr : JSON.parse(JSON.stringify(pr).split(from).join(to)); }); });
+      }).catch(function () {});
+    }));
+  }
+  var REBUILD = /\b(revamp|redesign|rebuild|remake|start over|from scratch|recreate|build (it )?again|make (it )?again|brand new|replace (the )?(whole|entire))\b/i;
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function extractActions(text) {
@@ -88,8 +115,15 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
-        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { window.__IEFiles.put(a.name, a.content || a.code || "", a.lang); done.push("File " + a.name); }
-        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (a.name || "App")); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
+        else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
+          var cur = window.__IEFiles.get(a.name); if (cur == null) { done.push("Missing file " + a.name); return; }
+          var ok = 0, miss = 0;
+          a.edits.forEach(function (e) { if (e && typeof e.find === "string" && e.find && cur.indexOf(e.find) > -1) { cur = cur.replace(e.find, String(e.replace == null ? "" : e.replace)); ok++; } else miss++; });
+          if (ok) { window.__IEFiles.put(a.name, cur); try { localStorage.setItem("ie-live:" + a.name, cur); } catch (e) {} }
+          done.push("Edited " + a.name + " (" + ok + " change" + (ok === 1 ? "" : "s") + (miss ? ", " + miss + " not found" : "") + ")");
+        }
+        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
@@ -319,7 +353,7 @@
     '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Imagine AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
     '<div class="iea-att" id="iea-att"></div>' +
-    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>cheapest, fast</small></button><button data-m="build">Build <small>code builder</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
+    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>ideas, analysis, plans</small></button><button data-m="build">Build <small>makes the changes</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
     '<input type="file" id="iea-ff" multiple hidden><input type="file" id="iea-fm" accept="image/*,video/*" multiple hidden>';
   css.textContent +=
     ".iea-pl{position:relative}.iea-pl>button{width:34px;height:34px;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:18px;cursor:pointer}" +
@@ -346,14 +380,14 @@
       h += '<div class="iea-a">Hi! I can build pages on the canvas, create flows, write code, design databases and help you deploy. What are we building?</div><div class="iea-sug">' +
         (SUG[tab] || SUG.canvas).map(function (s) { return "<button>" + esc(s) + "</button>"; }).join("") + "</div>";
     }
-    messages.forEach(function (m) {
+    messages.forEach(function (m, i) {
       if (m.role === "user") h += '<div class="iea-u">' + esc(m.content) + "</div>";
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
-      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + "</div>";
+      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
     });
     if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span></div>';
     list.innerHTML = h;
-    list.querySelectorAll(".iea-sug button").forEach(function (b) { b.onclick = function () { send(b.textContent); }; });
+    list.querySelectorAll(".iea-sug button").forEach(function (b) { b.onclick = b.hasAttribute("data-impl") ? function () { model = "build"; localStorage.setItem("iea-model", model); markModel(); send("Implement the plan you just described. Make surgical changes to the existing project only."); } : function () { send(b.textContent); }; });
     list.scrollTop = list.scrollHeight;
     go.disabled = busy;
   }
@@ -369,16 +403,21 @@
     input.value = "";
     if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Imagine AI." }); render(); save(); return; }
     busy = true; render();
+    var mode = model === "chat" ? "chat" : "build";
+    migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); }, 200); });
+  }
+  function doSend(t, text, mode) {
     var history = messages.filter(function (m) { return !m.error; }).map(function (m) { return { role: m.role, content: m.content }; });
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: ctx(), model: model }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit" }), model: mode === "chat" ? "chat" : model, mode: mode }),
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
+        if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: extractActions(res.j.text || "").clean || res.j.text, done: [], chat: true }); return; }
         var out = runActions(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
       })
@@ -553,11 +592,13 @@
   }
   function liveApp(name, code, kind) {
     var ie = window.__IE; if (!ie || !ie.addSection) return null;
-    kind = kind === "aframe" || /<a-scene/i.test(code) ? "aframe" : "react";
+    kind = kind === "html" || /^\s*(<!doctype|<html)/i.test(code) ? "html" : kind === "aframe" || /<a-scene/i.test(code) ? "aframe" : "react";
     var slug = String(name).replace(/[^A-Za-z0-9]/g, "") || "App";
-    var file = "apps/" + slug + (kind === "aframe" ? ".html" : ".tsx");
-    put(file, code, kind === "aframe" ? "html" : "tsx");
+    var file = "apps/" + slug + (kind === "react" ? ".tsx" : ".html");
+    var exists = !!get(file) && !!document.querySelector('iframe[src*="' + encodeURIComponent(file) + '"]');
+    put(file, code, kind === "react" ? "tsx" : "html");
     try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
+    if (exists) return file; /* already on the canvas: updating the file hot-reloads it, no duplicate section */
     var s = Date.now().toString(36);
     ie.addSection({ id: "sec_live_" + s, type: "section", style: { backgroundColor: "transparent", borderColor: "#27272a", borderWidth: "1px", borderStyle: "solid", borderRadius: "20px", padding: "0px", overflow: "hidden" },
       children: [{ id: "emb_live_" + s, type: "embed", content: "/imagine-engine/blocks/liveapp.html?b=1&kind=" + kind + "&file=" + encodeURIComponent(file), style: {} }] });

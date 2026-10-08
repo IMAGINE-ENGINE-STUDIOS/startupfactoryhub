@@ -69,9 +69,9 @@
       { children: [{ type: "h1", content: "Selected work", style: { fontSize: "28px" } }, grid([card("Project one", "Add your case study"), card("Project two", "Add your case study"), card("Project three", "Add your case study")])] },
       { children: [{ type: "h1", content: "Have a project in mind?", style: { fontSize: "28px" } }, btn("Get in touch", "page:Contact")] }
     ] },
-    webgl: { name: "3D hero", sections: [embed("webgl.html"), { children: head("3D", "Built with real-time 3D", "Swap the shape, colors and copy to match your product.") }] },
-    cargame: { name: "3D car game", sections: [embed("cargame.html"), { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Steer with arrow keys, A/D or the on-screen buttons. Hold Up/W to go faster. Dodge traffic to score.", style: { color: C.mute } }] }] },
-    game: { name: "2D game", sections: [embed("game.html"), { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Catch yellow stars, avoid red ones. Speed rises with your score.", style: { color: C.mute } }] }] },
+    webgl: { name: "3D hero", sections: [{ liveFile: "webgl.html", app: "Hero3D" }, { children: head("3D", "Built with real-time 3D", "Swap the shape, colors and copy to match your product.") }] },
+    cargame: { name: "3D car game", sections: [{ liveFile: "cargame.html", app: "StreetRacer" }, { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Steer with arrow keys, A/D or the on-screen buttons. Hold Up/W to go faster. Dodge traffic to score.", style: { color: C.mute } }] }] },
+    game: { name: "2D game", sections: [{ liveFile: "game.html", app: "StarCatcher" }, { children: [{ type: "h1", content: "How to play", style: { fontSize: "24px" } }, { type: "p", content: "Catch yellow stars, avoid red ones. Speed rises with your score.", style: { color: C.mute } }] }] },
     studio3d: { name: "3D Level Studio", sections: [{ embed: "/imagine-studio" }, { children: [{ type: "h1", content: "3D Level Studio", style: { fontSize: "24px" } }, { type: "p", content: "Build levels with terrain, characters, physics and lighting, then press Play.", style: { color: C.mute } }] }] },
     camera: { name: "Camera and motion", sections: [embed("camera.html"), { children: [{ type: "h1", content: "Live motion detection", style: { fontSize: "24px" } }, { type: "p", content: "Runs fully in the browser. Video never leaves the device. Motion level is shared with flows as state key 'motion'.", style: { color: C.mute } }] }] }
   };
@@ -85,6 +85,14 @@
   function addSection(sec) {
     var ie = window.__IE; if (!ie || !ie.addSection) return;
     var s = sfx();
+    if (sec.liveFile) {
+      /* templates become editable Dev files (apps/*.html) so the AI can keep developing them */
+      fetch("/imagine-engine/blocks/" + sec.liveFile).then(function (r) { return r.text(); }).then(function (code) {
+        if (window.__IEFiles) window.__IEFiles.liveApp(sec.app, code, "html");
+        else addSection({ embed: "/imagine-engine/blocks/" + sec.liveFile + "?b=1" });
+      }).catch(function () { addSection({ embed: "/imagine-engine/blocks/" + sec.liveFile + "?b=1" }); });
+      return;
+    }
     if (sec.embed) {
       ie.addSection({ id: "sec_tpl_" + s, type: "section", style: { backgroundColor: "transparent", borderColor: C.line, borderWidth: "1px", borderStyle: "solid", borderRadius: "20px", padding: "0px", overflow: "hidden" }, children: [{ id: "emb_tpl_" + s, type: "embed", content: sec.embed, style: {} }] });
       return;
