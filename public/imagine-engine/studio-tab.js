@@ -13,10 +13,9 @@
   /* ---------- 3D Studio workspace ---------- */
   var ws, btn, onTab = false;
   function center() {
-    var c = document.querySelector("#ie-canvas, [data-ie-canvas], main") || document.body;
-    var r = c.getBoundingClientRect();
-    if (r.width < 300) r = { left: 0, top: 56, width: innerWidth, height: innerHeight - 56 };
-    return r;
+    var bar = btn && btn.parentElement, top = 56;
+    if (bar) { var hb = bar.getBoundingClientRect(); var row = bar.closest("header,nav") || bar.parentElement; top = Math.max(hb.bottom, row ? row.getBoundingClientRect().bottom : 0); }
+    return { left: 0, top: top, width: innerWidth, height: innerHeight - top };
   }
   function place() { if (!ws || !onTab) return; var r = center(); Object.assign(ws.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" }); }
   function show(on) {
