@@ -218,7 +218,7 @@ serve(async (req) => {
     // heavy (OpenAI / Gemini Pro) only for paid plans. Credits = real cost x tier markup / $0.05.
     const light = (body.model === "chat" && body.mode !== "chat") || !!body.context?.plain;
     const lastText = String(messages[messages.length - 1]?.content || "");
-    const wantsHeavy = body.mode !== "chat" && body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText);
+    const wantsHeavy = body.mode !== "chat" && (body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText));
     const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
     const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
     const tier: Tier = light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
