@@ -466,7 +466,7 @@
         doSend._retried = false;
       })
       .catch(function () { messages.push({ role: "assistant", error: true, content: "Network error. Please try again." }); })
-      .finally(function () { busy = false; render(); save(); input.focus(); });
+      .then(function (v) { if (v === "retry") { render(); return; } busy = false; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
   var menu = root.querySelector("#iea-menu");
