@@ -371,6 +371,15 @@ export default function Deck() {
         [data-slide] .md\\:text-xl { font-size: 30px !important; }
         [data-slide] .md\\:text-2xl { font-size: 36px !important; }
         [data-slide] .md\\:text-lg { font-size: 26px !important; }
+        /* Stability: only paint slides near the screen so phones and laptops don't run out of graphics memory */
+        @media screen {
+          [data-slide-frame] { content-visibility: auto; contain-intrinsic-size: auto 56.25vw; contain: layout paint; }
+        }
+        @media screen and (max-width: 1024px), screen and (pointer: coarse) {
+          [data-slide] [class*=" blur-["] { filter: blur(16px) !important; }
+          [data-slide] [class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+          [data-slide] [class*="animate-"] { animation: none !important; }
+        }
         @media print {
           @page { size: 1920px 1080px; margin: 0; }
           html, body, #root { background: #020617 !important; margin: 0 !important; padding: 0 !important; max-width: none !important; overflow: visible !important; }
