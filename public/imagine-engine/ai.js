@@ -264,7 +264,7 @@
     on3DEvent: function (p) {
       if (!window.__IEBus || !p.event) throw new Error("Choose an event, e.g. game:over");
       window.__IE3DSubs = window.__IE3DSubs || {}; if (window.__IE3DSubs[p.event]) window.__IE3DSubs[p.event]();
-      window.__IE3DSubs[p.event] = window.__IEBus.subscribe(p.event, function (v) { if (p.message) toast(String(p.message).replace("{value}", typeof v === "object" ? JSON.stringify(v) : v)); if (p.program && window.__IE.runProgram) window.__IE.runProgram(p.program); L("3D event " + p.event); });
+      window.__IE3DSubs[p.event] = window.__IEBus.subscribe(p.event, function (v) { if (p.message) toast(String(p.message).replace("{value}", typeof v === "object" ? JSON.stringify(v) : v)); if (p.stateKey && p.stateKey !== p.event) put(p.stateKey, v); L("3D event " + p.event); });
       return "listening " + p.event;
     },
     aiGenerate: function (p) {
