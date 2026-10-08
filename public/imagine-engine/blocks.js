@@ -19,7 +19,18 @@
     confetti: "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js",
     pixi: "https://cdn.jsdelivr.net/npm/pixi.js@7.4.2/dist/pixi.min.js",
     matter: "https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js",
-    d3: "https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+    d3: "https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js",
+    aframe: "https://aframe.io/releases/1.6.0/aframe.min.js",
+    babylon: "https://cdn.babylonjs.com/babylon.js",
+    babylonloaders: "https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js",
+    playcanvas: "https://cdn.jsdelivr.net/npm/playcanvas@2.3.3/build/playcanvas.min.js",
+    tone: "https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js",
+    howler: "https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js",
+    phaser: "https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js",
+    leaflet: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+    tfjs: "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
+    babel: "https://unpkg.com/@babel/standalone@7.26.4/babel.min.js",
+    tailwind: "https://cdn.tailwindcss.com"
   };
   var loaded = {};
   window.__IELoad = function (name) {
@@ -94,5 +105,9 @@
     }, wait + 300);
     return t.name;
   }
+  T.vr = { name: "3D / VR room", live: { name: "VRRoom", kind: "aframe", code: '<a-scene background="color: #cfe3f2" renderer="antialias: true">\n  <a-entity light="type: hemisphere; color: #ffffff; groundColor: #7a6a55; intensity: 0.9"></a-entity>\n  <a-entity light="type: directional; intensity: 0.8" position="4 8 3"></a-entity>\n  <a-plane rotation="-90 0 0" width="30" height="30" color="#9fb38a"></a-plane>\n  <a-box position="-1.5 0.5 -4" color="#c0563b" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000"></a-box>\n  <a-sphere position="0 1.25 -5" radius="1.1" color="#e8b04b"></a-sphere>\n  <a-cylinder position="1.8 0.75 -4" radius="0.5" height="1.5" color="#3d6e8f"></a-cylinder>\n  <a-text value="Welcome - open in a headset for VR" position="-2.2 2.9 -5" color="#1f2933" width="6"></a-text>\n  <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>\n</a-scene>' }, sections: [{ children: [{ type: "h1", content: "Walk around", style: { fontSize: "24px" } }, { type: "p", content: "Drag to look, WASD to move. Works in VR headsets with the VR button.", style: { color: C.mute } }] }] };
+  ALIAS.aframe = "vr"; ALIAS.webxr = "vr"; ALIAS.metaverse = "vr"; ALIAS.virtual = "vr";
+  var _apply = apply;
+  apply = function (key) { var k = String(key || "").toLowerCase(); k = ALIAS[k] || k; var t = T[k]; if (t && t.live && window.__IEFiles) { window.__IEFiles.liveApp(t.live.name, t.live.code, t.live.kind); } return _apply(key); };
   window.__IEBlocks = { apply: apply, list: Object.keys(T).map(function (k) { return { id: k, name: T[k].name }; }) };
 })();

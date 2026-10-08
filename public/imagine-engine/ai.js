@@ -88,6 +88,8 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { window.__IEFiles.put(a.name, a.content || a.code || "", a.lang); done.push("File " + a.name); }
+        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
     } catch (e) { done.push("Could not apply some changes"); }
@@ -464,4 +466,36 @@
   // Sync plan credits once per load (monthly rollover), then keep balance fresh.
   if (token()) post(SB + "/functions/v1/check-genius-plan", {}).then(function (j) { if (j.balance != null) { state.balance = j.balance; paint(); } refresh(); }).catch(refresh); else paint();
   setInterval(refresh, 60000);
+})();
+
+/* ---------- Dev tab files + live apps (React/TSX or A-Frame HTML) ---------- */
+(function () {
+  function langOf(n, l) { if (l) return l; var m = /\.(\w+)$/.exec(n); return m ? m[1] : "ts"; }
+  function put(name, content, lang) {
+    var ie = window.__IE; if (!ie || !ie.raw || !ie.raw.setFiles) return null;
+    var id = "file_" + name.replace(/[^A-Za-z0-9]/g, "_");
+    var folder = name.indexOf("/") > -1 ? name.split("/")[0] : undefined;
+    ie.raw.setFiles(function (fs) {
+      var hit = false;
+      var out = fs.map(function (f) { if (f.name === name) { hit = true; return Object.assign({}, f, { content: content }); } return f; });
+      if (!hit) out.push({ id: id, name: name, lang: langOf(name, lang), folder: folder, content: content });
+      return out;
+    });
+    return id;
+  }
+  function liveApp(name, code, kind) {
+    var ie = window.__IE; if (!ie || !ie.addSection) return null;
+    kind = kind === "aframe" || /<a-scene/i.test(code) ? "aframe" : "react";
+    var slug = String(name).replace(/[^A-Za-z0-9]/g, "") || "App";
+    var file = "apps/" + slug + (kind === "aframe" ? ".html" : ".tsx");
+    put(file, code, kind === "aframe" ? "html" : "tsx");
+    try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
+    var s = Date.now().toString(36);
+    ie.addSection({ id: "sec_live_" + s, type: "section", style: { backgroundColor: "transparent", borderColor: "#27272a", borderWidth: "1px", borderStyle: "solid", borderRadius: "20px", padding: "0px", overflow: "hidden" },
+      children: [{ id: "emb_live_" + s, type: "embed", content: "/imagine-engine/blocks/liveapp.html?b=1&kind=" + kind + "&file=" + encodeURIComponent(file), style: {} }] });
+    return file;
+  }
+  /* live apps read their source from the Dev tab, so edits there re-render the canvas */
+  function get(name) { var f = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (x) { return x.name === name; })[0]; return f ? f.content : localStorage.getItem("ie-live:" + name); }
+  window.__IEFiles = { put: put, liveApp: liveApp, get: get };
 })();
