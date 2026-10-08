@@ -67,7 +67,7 @@
     try { if (typeof window.__IE_DISPATCH === "function") window.__IE_DISPATCH(d.__IE_ACTION, d.payload); } catch (x) { fail(x.message); }
     window.dispatchEvent(new CustomEvent("ie:action", { detail: { action: d.__IE_ACTION, payload: d.payload } }));
   });
-  var BRIDGE = '<script>window.IE=window.IE||{};IE.emit=function(e,p){parent.postMessage({ieBus:true,event:String(e),payload:p},"*")};addEventListener("message",function(e){var d=e.data;if(!d||!d.__IE_ACTION)return;if(typeof window.__IE_DISPATCH==="function")window.__IE_DISPATCH(d.__IE_ACTION,d.payload);dispatchEvent(new CustomEvent("ie:action",{detail:{action:d.__IE_ACTION,payload:d.payload}}))});<\/script>';
+  var BRIDGE = '<script src="/imagine-engine/blocks/ie-sdk.js"><\/script><script>window.IE=window.IE||{};IE.emit=function(e,p){parent.postMessage({ieBus:true,event:String(e),payload:p},"*")};addEventListener("message",function(e){var d=e.data;if(!d||!d.__IE_ACTION)return;if(typeof window.__IE_DISPATCH==="function")window.__IE_DISPATCH(d.__IE_ACTION,d.payload);dispatchEvent(new CustomEvent("ie:action",{detail:{action:d.__IE_ACTION,payload:d.payload}}))});<\/script>';
 
   var code = src(), last = code;
   if (!code) { document.getElementById("root").innerHTML = '<div id="ie-load">No code yet for ' + file + '. Ask the AI to build an app.</div>'; }
@@ -91,7 +91,7 @@
       var body = /<a-scene[\s\S]*<\/a-scene>/i.exec(code); document.getElementById("root").innerHTML = body ? body[0] : code;
     }).catch(function (e) { fail(e.message); });
   } else {
-    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js")]).then(function () {
+    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"), load("/imagine-engine/blocks/ie-sdk.js")]).then(function () {
       var out = compile(code, file, {});
       var nm = /export\s+default\s+(?:async\s+)?function\s+(\w+)/.exec(out);
       if (nm) out = out.replace(/export\s+default\s+(async\s+)?function/, "$1function") + "\nconst __ie_default = " + nm[1] + ";";
