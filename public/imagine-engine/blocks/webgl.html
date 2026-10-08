@@ -1,7 +1,7 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>html,body{margin:0;height:100%;background:#05060a;overflow:hidden;font-family:system-ui,sans-serif}#t{position:absolute;left:28px;bottom:24px;color:#fafafa}#t h2{margin:0;font-size:28px}#t p{margin:6px 0 0;color:#a1a1aa}</style></head>
 <body><div id="t"><h2>Interactive 3D</h2><p>Drag to rotate</p></div>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script><script src="rt3d.js"></script>
 <script>
 var R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));document.body.appendChild(R.domElement);
 var S=new THREE.Scene(),C=new THREE.PerspectiveCamera(55,1,0.1,100);C.position.z=5;
@@ -11,5 +11,6 @@ S.add(new THREE.AmbientLight(0xffffff,.4));var l=new THREE.PointLight(0xec4899,4
 var dx=0,dy=0,down=false,px=0,py=0;addEventListener("pointerdown",function(e){down=true;px=e.clientX;py=e.clientY});addEventListener("pointerup",function(){down=false});
 addEventListener("pointermove",function(e){if(!down)return;dy+=(e.clientX-px)*.01;dx+=(e.clientY-py)*.01;px=e.clientX;py=e.clientY});
 function size(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}addEventListener("resize",size);size();
+window.IE3D&&IE3D.attach({THREE:THREE,scene:S,camera:C,renderer:R,lookAt:new THREE.Vector3(0,0,0)});
 (function f(){requestAnimationFrame(f);m.rotation.x+=(dx-m.rotation.x)*.08+.002;m.rotation.y+=(dy-m.rotation.y)*.08+.003;pts.rotation.y+=.0005;R.render(S,C)})();
 </script></body></html>
