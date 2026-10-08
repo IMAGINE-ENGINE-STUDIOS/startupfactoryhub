@@ -36,7 +36,7 @@
       var lines = p.split("\n"), html = "", list = null, para = [], tbl = [];
       function flushP() { if (para.length) { html += "<p>" + para.map(inl).join(" ") + "</p>"; para = []; } }
       function flushL() { if (list) { html += "<" + list.t + ">" + list.items.map(function (x) { return "<li>" + inl(x) + "</li>"; }).join("") + "</" + list.t + ">"; list = null; } }
-      function flushT() { if (tbl.length) { var rows = tbl.filter(function (r) { return !/^\s*\|?\s*:?-{2,}/.test(r); }).map(function (r) { return r.replace(/^\s*\||\|\s*$/g, "").split("|"); });
+      function flushT() { if (tbl.length) { var rows = tbl.filter(function (r) { return !/^[\s|:-]+$/.test(r); }).map(function (r) { return r.replace(/^\s*\||\|\s*$/g, "").split("|"); });
         html += '<table class="iea-tb">' + rows.map(function (r, k) { var tg = k ? "td" : "th"; return "<tr>" + r.map(function (c) { return "<" + tg + ">" + inl(c.trim()) + "</" + tg + ">"; }).join("") + "</tr>"; }).join("") + "</table>"; tbl = []; } }
       function flush() { flushP(); flushL(); flushT(); }
       lines.forEach(function (ln) {
