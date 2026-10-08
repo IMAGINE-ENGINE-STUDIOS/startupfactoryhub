@@ -88,8 +88,15 @@
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function extractActions(text) {
-    var found = [], clean = String(text || "");
+    var found = [], clean = String(text || ""), roots = [];
     var tryParse = function (s) { try { var v = JSON.parse(s.trim()); var arr = Array.isArray(v) ? v : (v && Array.isArray(v.actions) ? v.actions : [v]); return arr.filter(function (a) { return a && typeof a === "object" && typeof a.type === "string"; }); } catch (e) { return null; } };
+    /* Source files arrive as plain code fences: ```tsx file=apps/Name.tsx ... ``` (no JSON escaping, so big apps never break). */
+    clean = clean.replace(/```[\w-]*[ \t]+(?:file=|path=|name=)?["']?((?:apps|components|lib|src|styles|custom-scripts)\/[\w\-./]+\.(?:tsx|ts|jsx|js|html|css|json))["']?[^\n]*\n([\s\S]*?)```/gi, function (all, path, body) {
+      var code = body.replace(/\s+$/, "") + "\n";
+      if (/^apps\/[^/]+\.(tsx|jsx|html)$/i.test(path)) roots.push({ type: "addLiveApp", name: path.replace(/^apps\//, "").replace(/\.\w+$/, ""), kind: /\.html$/i.test(path) ? "html" : "react", code: code });
+      else found.push({ type: "addFile", name: path, content: code });
+      return "";
+    });
     clean = clean.replace(/```(actions|json|javascript|js)?\s*([\s\S]*?)```/gi, function (all, lang, body) { var r = tryParse(body); if (r && r.length) { found = found.concat(r); return ""; } return lang === "actions" ? "" : all; });
     // Bare JSON arrays / objects with "type" outside fences
     var i = 0;
