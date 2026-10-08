@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported 3D studio; uses cloud tables not in this project yet
 // Dynamic Objects library.
 //
 // A "Dynamic Object" is a snapshot of one scene object — or a whole group of

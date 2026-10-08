@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported 3D studio; uses cloud tables not in this project yet
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UserLite {

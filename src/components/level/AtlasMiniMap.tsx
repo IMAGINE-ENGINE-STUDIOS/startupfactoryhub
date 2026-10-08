@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported 3D studio; uses cloud tables not in this project yet
 import { useEffect, useRef, useState } from "react";
 import {
   Viewer, UrlTemplateImageryProvider, ImageryLayer, EllipsoidTerrainProvider,

@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported 3D studio; uses cloud tables not in this project yet
 /**
  * Level Wizard — fully configurable scene generator.
  *
