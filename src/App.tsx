@@ -156,6 +156,7 @@ const App = () => (
                     <Route path="/imagine-studio" element={<ImagineEngineStudioPage />} />
                     <Route path="/imagine-studio/:id" element={<ImagineEngineStudioPage />} />
                     <Route path="/level/:id" element={<ImagineEngineStudioPage />} />
+                    <Route path="/levels" element={<ImagineEngineStudioPage />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
