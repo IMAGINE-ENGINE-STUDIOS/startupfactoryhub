@@ -39,6 +39,8 @@ import GroupRuntime from "./GroupRuntime";
 import { ScenePathOverlay } from "./geometry/ScenePathOverlay";
 import PerfSampler from "./perf/PerfSampler";
 import PerfHUD from "./perf/PerfHUD";
+import { buildNaniteLods, updateNanite } from "@/lib/nanite";
+import { Imagine3DBridge } from "./Imagine3DBridge";
 
 /* ---------- helpers ---------- */
 
@@ -429,6 +431,9 @@ function GLTFModelMesh({ obj, onSelect }: { obj: ModelObject; onSelect?: (id: st
   // Clone once per url so each instance owns its own materials and the
   // override pass can mutate them without leaking across instances.
   const root = useMemo(() => gltf.scene.clone(true), [gltf]);
+  const naniteOn = useRef(false);
+  useEffect(() => { let alive = true; buildNaniteLods(root).then((n) => { if (alive) naniteOn.current = n > 0; }).catch(() => {}); return () => { alive = false; }; }, [root]);
+  useFrame(({ camera, size }) => { if (naniteOn.current) updateNanite(root, camera, size.height); });
 
   // Apply per-mesh material overrides. We assign each mesh a stable key
   // (mesh.name or fallback) and stash the ORIGINAL material in userData
@@ -1699,6 +1704,7 @@ function LevelScene3DInner(
       <KeyboardCameraController controlsRef={controlsRef} enabled={!hasActivePlayer(rest)} />
       <ResetCameraController nonce={resetReq} controlsRef={controlsRef} />
       <PerfSampler />
+      <Imagine3DBridge />
     </Canvas>
     {/* DOM-overlay performance HUD (toggle with `) — rendered as a sibling
         so it sits outside the WebGL canvas and never affects scene state. */}
