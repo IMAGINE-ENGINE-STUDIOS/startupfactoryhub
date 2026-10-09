@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Rocket } from "lucide-react";
+import { ArrowRight, Sparkles, Rocket, Radio } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "./VideoBackground";
 import MatrixEffect from "./MatrixEffect";
 import sfhMainLogo from "@/assets/sfh-main-logo.png.asset.json";
+// Reverse Pitch Event: temporary main-page call to action, shown for 24 hours.
+const EVENT_UNTIL = Date.parse("2026-10-10T18:45:00Z");
 const HeroSection = () => {
   const navigate = useNavigate();
   const {
@@ -56,6 +58,18 @@ const HeroSection = () => {
           </div>
 
           {/* CTA Buttons */}
+          {Date.now() < EVENT_UNTIL ? (
+            <div className="flex flex-col items-center justify-center gap-4 mb-12 sm:mb-16 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <Button variant="hero" size="xl" className="group w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all" onClick={() => navigate("/live-video?room=main")}>
+                <Radio className="w-5 h-5 mr-2 animate-pulse" />
+                Join the Reverse Pitch Event
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-primary/30 hover:border-primary/50" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
+                Go to Dashboard
+              </Button>
+            </div>
+          ) : (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 sm:mb-16 animate-fade-in" style={{
           animationDelay: '0.3s'
         }}>
@@ -73,6 +87,7 @@ const HeroSection = () => {
             </Button>
 
           </div>
+          )}
         </div>
       </div>
 

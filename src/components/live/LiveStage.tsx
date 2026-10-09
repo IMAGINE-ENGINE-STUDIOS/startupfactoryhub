@@ -14,7 +14,7 @@ type Props = {
   autoFollow: boolean;
   audience: boolean;
   allowed: string[];
-  onMod: (to: string, action: 'mute' | 'cam' | 'allow' | 'revoke') => void;
+  onMod: (to: string, action: 'mute' | 'cam' | 'allow' | 'revoke' | 'kick') => void;
   hero: ReactNode | null;
   localAvatar?: string;
 };
@@ -137,6 +137,7 @@ function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allow
           {audience && (onStage
             ? <TileBtn label="Move to audience" onClick={() => onMod(id, 'revoke')}><UserX className="w-3.5 h-3.5" /></TileBtn>
             : <TileBtn label="Invite to speak" onClick={() => onMod(id, 'allow')}><Megaphone className="w-3.5 h-3.5" /></TileBtn>)}
+          {id !== hostId && <TileBtn label="Remove from call" onClick={() => onMod(id, 'kick')}><X className="w-3.5 h-3.5 text-red-400" /></TileBtn>}
         </>}
       </div>
     </div>
