@@ -75,6 +75,8 @@ export function useLightPaperProjects(projectType?: ProjectType) {
   // Throttle failure toasts so a broken save never spams the user.
   const lastErrorToastRef = useRef(0);
   const creatingRef = useRef(false);
+  // Maps a project id whose row no longer exists to the copy saved in its place.
+  const replacedRef = useRef<Record<string, string>>({});
 
   const notifyFailure = (message: string) => {
     const now = Date.now();
@@ -127,7 +129,9 @@ export function useLightPaperProjects(projectType?: ProjectType) {
         }
 
         const attempt = async () => {
-          if (projectId) {
+          // If this project's row vanished earlier, keep writing to its replacement copy.
+          const targetId = projectId ? replacedRef.current[projectId] || projectId : undefined;
+          if (targetId) {
             const { data, error } = await supabase
               .from("lightpaper_projects")
               .update({
@@ -135,11 +139,12 @@ export function useLightPaperProjects(projectType?: ProjectType) {
                 content: payload,
                 updated_at: new Date().toISOString(),
               })
-              .eq("id", projectId)
+              .eq("id", targetId)
               .select()
-              .single();
+              .maybeSingle();
             if (error) throw error;
-            return data;
+            if (data) return data;
+            // 0 rows: the project was deleted or isn't owned by this user — save it as a new copy.
           }
           const { data, error } = await supabase
             .from("lightpaper_projects")
@@ -152,6 +157,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
             .select()
             .single();
           if (error) throw error;
+          if (projectId && data?.id) replacedRef.current[projectId] = data.id;
           return data;
         };
 
