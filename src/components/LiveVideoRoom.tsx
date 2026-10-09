@@ -124,13 +124,13 @@ function Thumb({ p, className }: { p: Product; className: string }) {
     : <span className={`${className} bg-zinc-200 text-zinc-600 font-mono text-xs flex items-center justify-center`}>{initials(p.name)}</span>;
 }
 
-function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomProps & { guest?: Checkin | null }) {
+function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: LiveVideoRoomProps & { guest?: Checkin | null; chosenName?: string | null }) {
   const name = roomName || room || 'live-commerce-room';
   const { user } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const guestId = useMemo(() => `guest-${Math.floor(Math.random() * 100000)}`, []);
   const id = identity || user?.id || guestId;
-  const displayName = profile?.full_name || user?.email?.split('@')[0]
+  const displayName = chosenName || profile?.full_name || user?.email?.split('@')[0]
     || (guest ? `${guest.name} (${guest.role === 'investor' ? 'Investor' : 'Startup'})` : 'Guest');
 
   // Platform admins can always take over as host (e.g. when an old link names someone else).
@@ -814,7 +814,38 @@ export default function LiveVideoRoom(props: LiveVideoRoomProps) {
   const { user, loading } = useAuth();
   const [checkin, setCheckin] = useState<Checkin | null>(readCheckin);
   const name = props.roomName || props.room || 'live-commerce-room';
+  const nameKey = user ? `sfh-live-name:${user.id}` : '';
+  const [chosen, setChosen] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  useEffect(() => {
+    if (!user) return;
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(nameKey); } catch { /* ignore */ }
+    setDraft(saved || (user.user_metadata as any)?.full_name || user.email?.split('@')[0] || '');
+  }, [user, nameKey]);
   if (loading) return <div className="w-full h-screen bg-zinc-950" />;
   if (!user && !checkin) return <GuestCheckIn room={name} onDone={setCheckin} />;
-  return <LiveVideoRoomInner {...props} guest={user ? null : checkin} />;
+  if (user && !chosen) {
+    const submit = (e: React.FormEvent) => {
+      e.preventDefault();
+      const v = draft.trim().slice(0, 60);
+      if (!v) return;
+      try { localStorage.setItem(nameKey, v); } catch { /* ignore */ }
+      setChosen(v);
+    };
+    return (
+      <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-4">
+        <form onSubmit={submit} className="tech-card border-0 w-full max-w-sm p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-foreground">Choose your display name</h2>
+          <p className="text-sm text-muted-foreground">This is how others will see you in the call.</p>
+          <input autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={60}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground"
+            placeholder="Your name" />
+          <button type="submit" disabled={!draft.trim()}
+            className="w-full rounded-md bg-primary text-primary-foreground py-2 font-medium disabled:opacity-50">Join call</button>
+        </form>
+      </div>
+    );
+  }
+  return <LiveVideoRoomInner {...props} guest={user ? null : checkin} chosenName={chosen} />;
 }
