@@ -37,13 +37,13 @@ function ChatView({ msgs, send, onCount, live }: { msgs: Msg[]; send: (t: string
   );
 }
 
-export function LiveChat({ onCount }: { onCount: (n: number) => void }) {
+export function LiveChat({ onCount, onSent }: { onCount: (n: number) => void; onSent?: (t: string) => void }) {
   const { chatMessages, send } = useChat();
   const msgs: Msg[] = chatMessages.map((m) => ({
     id: m.id ?? String(m.timestamp), ts: m.timestamp, text: m.message,
     mine: !!m.from?.isLocal, from: m.from?.name || m.from?.identity || 'Guest',
   }));
-  return <ChatView live msgs={msgs} send={(t) => { send(t).catch(() => {}); }} onCount={onCount} />;
+  return <ChatView live msgs={msgs} send={(t) => { send(t).then(() => onSent?.(t)).catch(() => {}); }} onCount={onCount} />;
 }
 
 export function LocalChat({ onCount }: { onCount: (n: number) => void }) {

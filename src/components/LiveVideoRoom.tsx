@@ -5,7 +5,7 @@ import { Track } from 'livekit-client';
 import {
   Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, MonitorUp, Presentation,
   Heart, Flame, ThumbsUp, PhoneOff, Upload, Sliders, DollarSign, ShoppingBag, Copy, Check,
-  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, Sparkles,
+  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, Sparkles, Captions,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
 import { SFH_PACKAGES } from './live/sfhPackages';
 import { BackgroundApplier, BackgroundPicker, readBgChoice, type BgChoice } from './live/BackgroundEffects';
+import { TranscriptPanel, useSpeechTranscriber, saveLiveLog, type TxLine } from './live/Transcript';
 import GuestCheckIn, { readCheckin, type Checkin } from './live/GuestCheckIn';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
@@ -215,7 +216,11 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [link, setLink] = useState('');
   const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
-  const [tab, setTab] = useState<'shop' | 'chat' | 'money' | 'rules'>('shop');
+  const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'money' | 'rules'>('shop');
+  const [txOn, setTxOn] = useState(false);
+  const [txLines, setTxLines] = useState<TxLine[]>([]);
+  const [txPartial, setTxPartial] = useState('');
+  const [hostAsk, setHostAsk] = useState<'unmute' | 'camon' | null>(null);
   const [chatCount, setChatCount] = useState(0);
   const [seenCount, setSeenCount] = useState(0);
   useEffect(() => { if (tab === 'chat') setSeenCount(chatCount); }, [tab, chatCount]);
@@ -314,7 +319,9 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       if (m.a === 'cam') { setCam(false); setNotice('The host turned your camera off'); }
       if (m.a === 'allow') setNotice('The host invited you to speak. Turn on your mic or camera.');
       if (m.a === 'revoke') setNotice('You were moved to the audience');
+      if (m.a === 'unmute' || m.a === 'camon') setHostAsk(m.a);
     }
+    if (m.t === 'tx' && m.line?.text) setTxLines((l) => l.some((x) => x.id === m.line.id) ? l : [...l, m.line].slice(-2000));
   }, []); // eslint-disable-line
 
   const showReaction = (r: typeof REACTIONS[number]) => {
@@ -355,7 +362,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   useEffect(() => { if (isHost) catRef.current.forEach((p) => sendRef.current({ t: 'product', p })); }, [peerCount, token, isHost]);
   useEffect(() => { syncRoom(); }, [spotlight, rules.audience, allowed, peerCount, token, syncRoom]);
   const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
-  const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke' | 'kick') => {
+  const onMod = (to: string, a: 'mute' | 'cam' | 'unmute' | 'camon' | 'allow' | 'revoke' | 'kick') => {
+    if (a === 'unmute' || a === 'camon') { setAllowed((l) => l.includes(to) ? l : [...l, to]); setNotice(a === 'unmute' ? 'Asked them to turn their mic on' : 'Asked them to turn their camera on'); }
     if (a === 'allow') setAllowed((l) => l.includes(to) ? l : [...l, to]);
     if (a === 'revoke') setAllowed((l) => l.filter((x) => x !== to));
     if (a === 'kick') {
@@ -367,6 +375,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     broadcast({ t: 'mod', to, a });
   };
   useEffect(() => { if (!canSpeak) { setMic(false); setCam(false); } }, [canSpeak]);
+  useSpeechTranscriber(txOn && mic && !!token, (text) => {
+    const line: TxLine = { id: `${id}-${Date.now()}`, speaker: displayName, text, ts: Date.now() };
+    setTxLines((l) => [...l, line].slice(-2000));
+    broadcast({ t: 'tx', line });
+    saveLiveLog(name, 'transcript', displayName, text, user?.id);
+  }, setTxPartial);
+  const toggleTx = () => { setTxOn((v) => { if (!v && !mic) setNotice('Transcript is on. Turn your mic on so your words are written.'); return !v; }); };
   useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
 
   // Removed people can knock; the host admits or denies them (works while they're out of the call).
@@ -575,6 +590,21 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
         {floats.map((f) => <span key={f.key} className="absolute bottom-4 animate-[ie-float_2.6s_ease-out_forwards]" style={{ right: `${f.x}%` }}><f.icon className={`w-10 h-10 fill-current ${f.c}`} /></span>)}
       </div>
       <style>{`@keyframes ie-float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-40px) scale(1.1)}100%{transform:translateY(-420px) scale(1);opacity:0}}`}</style>
+      {hostAsk && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 w-80 rounded-2xl bg-white text-zinc-900 shadow-2xl p-3">
+          <p className="text-sm font-medium">The host asks you to turn your {hostAsk === 'unmute' ? 'microphone' : 'camera'} on</p>
+          <div className="mt-2 flex gap-2">
+            <button onClick={() => { if (hostAsk === 'unmute') setMic(true); else setCam(true); setHostAsk(null); }} className="flex-1 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs">Turn on</button>
+            <button onClick={() => setHostAsk(null)} className="flex-1 px-3 py-1.5 rounded-full border border-zinc-300 text-xs">Not now</button>
+          </div>
+        </div>
+      )}
+      {txOn && (txPartial || txLines.length > 0) && (
+        <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 z-30 max-w-[80%] px-4 py-2 rounded-xl bg-black/75 text-white text-sm text-center">
+          {txLines.slice(-2).map((l) => <p key={l.id}><span className="text-zinc-400">{l.speaker}:</span> {l.text}</p>)}
+          {txPartial && <p className="text-zinc-300">{txPartial}</p>}
+        </div>
+      )}
       {notice && <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm shadow-2xl">{notice}</div>}
       {isHost && knocks.length > 0 && (
         <div className="absolute top-16 right-4 z-50 w-72 space-y-2">
@@ -657,6 +687,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             { on: mic, icon: mic ? Mic : MicOff, fn: () => canSpeak ? setMic((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Microphone' : 'Microphone (host invite needed)', danger: true },
             { on: cam, icon: cam ? Video : VideoOff, fn: () => canSpeak ? setCam((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Camera' : 'Camera (host invite needed)', danger: true },
             { on: bgOpen || bg.kind !== 'none', icon: Sparkles, fn: () => { setBgOpen((v) => !v); setPresentOpen(false); }, label: 'Background' },
+            { on: txOn, icon: Captions, fn: toggleTx, label: 'Transcript' },
             { on: sharing, icon: MonitorUp, fn: toggleShare, label: 'Share screen' },
             { on: presentOpen || !!presenting, icon: Presentation, fn: () => setPresentOpen((v) => !v), label: 'Present' },
             { on: hand, icon: Hand, fn: () => { const up = !hand; setHand(up); broadcast({ t: 'hand', id, name: displayName, up }); }, label: 'Raise hand' },
@@ -674,6 +705,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const pills = [
     { k: 'shop', label: `SHOP • ${catalog.length}` },
     { k: 'chat', label: `CHAT • ${chatCount}` },
+    { k: 'text', label: 'TEXT' },
     ...(isHost ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
   ] as const;
 
@@ -825,8 +857,9 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
 
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-3">
         <div className={tab === 'chat' ? 'h-full' : 'hidden'}>
-          {token ? <LiveChat onCount={setChatCount} /> : <LocalChat onCount={setChatCount} />}
+          {token ? <LiveChat onCount={setChatCount} onSent={(t) => saveLiveLog(name, 'chat', displayName, t, user?.id)} /> : <LocalChat onCount={setChatCount} />}
         </div>
+        {tab === 'text' && <TranscriptPanel room={name} lines={txLines} on={txOn} onToggle={toggleTx} />}
         {tab === 'shop' && shop}
         {tab === 'money' && (
           <div className="space-y-3">
