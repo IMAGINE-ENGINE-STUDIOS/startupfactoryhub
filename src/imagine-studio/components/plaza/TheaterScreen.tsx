@@ -4,6 +4,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Html } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import * as pdfjs from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -26,9 +27,10 @@ export function useSourceTexture(src: TheaterSource) {
     let dead = false; let t: THREE.Texture | null = null;
     if (!src) { setTex(null); return; }
     if (src.kind === 'video') {
-      const v = src.el; const mk = () => { if (dead || t) return; t = new THREE.VideoTexture(v); t.colorSpace = THREE.SRGBColorSpace; setTex(t); };
+      const v = src.el; const mk = () => { if (dead || t) return; if (!v.videoWidth) return; t = new THREE.VideoTexture(v); t.minFilter = THREE.LinearFilter; t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.colorSpace = THREE.SRGBColorSpace; setTex(t); };
       v.play().catch(() => {});
-      if (v.readyState >= 2) mk(); else { v.addEventListener('loadeddata', mk, { once: true }); v.addEventListener('playing', mk, { once: true }); }
+      mk(); const iv = setInterval(() => { if (t || dead) return clearInterval(iv); v.play().catch(() => {}); mk(); }, 300);
+      ['loadeddata', 'playing', 'resize'].forEach((e) => v.addEventListener(e, mk));
     } else if (src.kind === 'image') {
       new THREE.TextureLoader().load(src.url, (x) => { if (dead) return x.dispose(); x.colorSpace = THREE.SRGBColorSpace; t = x; setTex(x); });
     } else {
@@ -50,6 +52,7 @@ export function useSourceTexture(src: TheaterSource) {
 
 export function TheaterScreen({ source, onPages }: { source: TheaterSource; onPages?: (n: number) => void }) {
   const { tex, pages } = useSourceTexture(source);
+  useFrame(() => { if (source?.kind === 'video' && tex && source.el.readyState >= 2) tex.needsUpdate = true; });
   useEffect(() => { onPages?.(pages); }, [pages]); // eslint-disable-line
   const idle = useMemo(() => {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 576;

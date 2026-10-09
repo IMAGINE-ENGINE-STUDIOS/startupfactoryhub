@@ -454,7 +454,7 @@ export default function PlazaPage() {
       const identity = (user?.id || 'guest') + '-' + Math.random().toString(36).slice(2, 8);
       const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: ROOM, identity, name: name.trim() } });
       if (error || !data?.token) throw new Error(data?.error || 'Could not join the plaza.');
-      const r = new Room({ adaptiveStream: true, dynacast: true });
+      const r = new Room({ adaptiveStream: false, dynacast: true });
       r.on(RoomEvent.DataReceived, (payload: Uint8Array, p?: RemoteParticipant) => {
         if (!p) return;
         try {
@@ -480,7 +480,7 @@ export default function PlazaPage() {
         if (track.kind === Track.Kind.Video && track.source === Track.Source.ScreenShare) {
           const el = track.attach() as HTMLVideoElement; el.muted = true; el.playsInline = true; el.autoplay = true;
           // Keep it rendered (not display:none) so the browser keeps decoding and LiveKit keeps sending frames.
-          el.style.cssText = 'position:fixed;left:0;top:0;width:320px;height:180px;opacity:0.01;pointer-events:none;z-index:-1';
+          el.style.cssText = 'position:fixed;right:0;bottom:0;width:4px;height:4px;opacity:0.01;pointer-events:none';
           document.body.appendChild(el); el.play().catch(() => {});
           setTheater({ kind: 'video', el, by: p.name || 'Host' });
           return;
@@ -499,6 +499,7 @@ export default function PlazaPage() {
       r.on(RoomEvent.ParticipantConnected, () => {
         setCount(r.remoteParticipants.size + 1);
         // Late joiners: re-send the document on the theater screen.
+        if (r.localParticipant.isScreenShareEnabled) r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'theater', kind: 'video', by: meRef.current.name })), { reliable: true }).catch(() => {});
         const d = docRef.current; if (d) r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'theater', ...d, by: meRef.current.name })), { reliable: true }).catch(() => {});
       });
       r.on(RoomEvent.LocalTrackUnpublished, (pub) => { if (pub.source === Track.Source.ScreenShare) { setPresenting(false); setTheater((cur) => (cur?.kind === 'video' ? null : cur)); } });
@@ -550,7 +551,7 @@ export default function PlazaPage() {
       stopDoc();
       const pub = await r.localParticipant.setScreenShareEnabled(true, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
       const mst = pub?.track?.mediaStreamTrack; if (!mst) return;
-      const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.style.cssText = 'position:fixed;left:0;top:0;width:320px;height:180px;opacity:0.01;pointer-events:none;z-index:-1'; document.body.appendChild(el); el.play().catch(() => {});
+      const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.style.cssText = 'position:fixed;right:0;bottom:0;width:4px;height:4px;opacity:0.01;pointer-events:none'; document.body.appendChild(el); el.play().catch(() => {});
       setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true);
     } catch { setErr('Screen sharing was cancelled or blocked.'); }
   };

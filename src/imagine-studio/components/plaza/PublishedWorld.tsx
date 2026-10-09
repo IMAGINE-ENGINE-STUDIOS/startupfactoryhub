@@ -37,7 +37,7 @@ export function PublishedWorld({ scene }: { scene: any }) {
   return (
     <group>
       {(scene.lights || []).filter((l) => l.kind === 'point').map((l) => <pointLight key={l.id} position={l.position} color={col(l.color)} intensity={l.intensity} distance={30} />)}
-      {scene.objects.filter((o) => o.visible !== false).map((o) => {
+      {scene.objects.filter((o) => o.visible !== false && !o.theater && !/theater\s*screen/i.test(o.name || '')).map((o) => {
         if (o.kind === 'primitive') {
           const a = Array.isArray(o.color) ? o.color[3] ?? 1 : 1;
           return (
