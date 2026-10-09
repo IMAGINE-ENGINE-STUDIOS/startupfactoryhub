@@ -59,21 +59,33 @@ const shrinkImage = (file: File): Promise<string> => new Promise((resolve, rejec
   img.src = URL.createObjectURL(file);
 });
 
-// Sends this person's shared screen (and its sound) to everyone in the room.
-function ScreenPublisher({ stream }: { stream: MediaStream | null }) {
+// Sends this person's shared screen (and its sound) to everyone in the room using LiveKit's native screen share.
+function ScreenPublisher({ on, onStream, onEnd, onFail }: { on: boolean; onStream: (s: MediaStream) => void; onEnd: () => void; onFail: (msg: string) => void }) {
   const { localParticipant } = useLocalParticipant();
   const state = useConnectionState();
+  const cbs = useRef({ onStream, onEnd, onFail }); cbs.current = { onStream, onEnd, onFail };
   useEffect(() => {
-    if (!stream || state !== 'connected') return;
-    const v = stream.getVideoTracks()[0];
-    const a = stream.getAudioTracks()[0];
-    if (v) localParticipant.publishTrack(v, { source: Track.Source.ScreenShare, name: 'screen' }).catch((e) => console.warn('Screen share publish failed', e));
-    if (a) localParticipant.publishTrack(a, { source: Track.Source.ScreenShareAudio, name: 'screen-audio' }).catch(() => {});
-    return () => {
-      if (v) localParticipant.unpublishTrack(v, false).catch(() => {});
-      if (a) localParticipant.unpublishTrack(a, false).catch(() => {});
-    };
-  }, [stream, state, localParticipant]);
+    if (state !== 'connected') return;
+    let cancelled = false;
+    if (on) {
+      localParticipant.setScreenShareEnabled(true, { audio: true, video: { frameRate: 15 } as any, selfBrowserSurface: 'include', systemAudio: 'include' } as any, { simulcast: false, videoEncoding: { maxBitrate: 3_000_000, maxFramerate: 15 } } as any)
+        .then((pub) => {
+          const tr = pub?.track?.mediaStreamTrack;
+          if (!tr) { if (!cancelled) cbs.current.onEnd(); return; }
+          cbs.current.onStream(new MediaStream([tr]));
+          tr.addEventListener('ended', () => cbs.current.onEnd());
+        })
+        .catch((e) => {
+          console.warn('Screen share failed', e);
+          const msg = String(e?.name || e?.message || '');
+          if (!/NotAllowed|Abort|cancel/i.test(msg)) cbs.current.onFail('Screen share failed. Use Chrome or Edge on a computer and allow screen sharing.');
+          cbs.current.onEnd();
+        });
+    } else if (localParticipant.isScreenShareEnabled) {
+      localParticipant.setScreenShareEnabled(false).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [on, state, localParticipant]);
   return null;
 }
 
@@ -402,15 +414,20 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     if (/checkout=success/.test(window.location.search)) { localStorage.removeItem('ie-live-cart'); setCartTick((n) => n + 1); setNotice('Payment complete. Thank you!'); }
   }, []);
 
+  const [shareOn, setShareOn] = useState(false);
+  const stopShare = () => { setShareOn(false); setScreenStream(null); setSharing(false); };
+  const onShareStream = (s: MediaStream) => {
+    setScreenStream(s); setSharing(true);
+    setTimeout(() => { if (screenRef.current) screenRef.current.srcObject = s; }, 0);
+  };
   const toggleShare = async () => {
-    if (sharing) { screenStream?.getTracks().forEach((t) => t.stop()); setScreenStream(null); setSharing(false); return; }
+    if (sharing || shareOn) { if (!token) screenStream?.getTracks().forEach((t) => t.stop()); stopShare(); return; }
+    if (presenting) present(null);
+    if (token) { setShareOn(true); return; } // LiveKit asks for the screen and sends it to everyone
     try {
       const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 15 }, audio: true });
-      if (presenting) present(null);
-      setScreenStream(s);
-      setSharing(true);
-      setTimeout(() => { if (screenRef.current) screenRef.current.srcObject = s; }, 0);
-      s.getVideoTracks()[0].onended = () => { setScreenStream(null); setSharing(false); };
+      onShareStream(s);
+      s.getVideoTracks()[0].onended = stopShare;
     } catch { /* cancelled */ }
   };
   const presentMine = useRef(false);
@@ -825,7 +842,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <input type="range" min={5} max={720} step={5} value={timeLimit} onChange={(e) => setTimeLimit(+e.target.value)} className="w-full accent-zinc-900" />
             <div className="pt-2 space-y-3">
       <LocalPublisher cam={cam} mic={mic} />
-      <ScreenPublisher stream={screenStream} />
+      <ScreenPublisher on={shareOn} onStream={onShareStream} onEnd={stopShare} onFail={setNotice} />
               <Toggle on={rules.approval} onClick={() => setRules((r) => ({ ...r, approval: !r.approval }))} title="Require approval to join" sub="Host approves lobby" />
               <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
