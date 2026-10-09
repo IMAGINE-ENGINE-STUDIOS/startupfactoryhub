@@ -93,6 +93,6 @@
 - [x] Direct Stripe checkout for viewers
 
 ## Live Video: guests + backgrounds
-- [ ] Guest check-in form (name, email, startup/investor) before joining; saved to database
-- [ ] Admin panel "Live Guests" tab with search, filter, CSV export
-- [ ] Video backgrounds: blur, sample images, custom upload
+- [x] Guest check-in form (name, email, startup/investor) before joining; saved to database
+- [x] Admin panel "Live Guests" tab with search, filter, CSV export
+- [x] Video backgrounds: blur, sample images, custom upload
