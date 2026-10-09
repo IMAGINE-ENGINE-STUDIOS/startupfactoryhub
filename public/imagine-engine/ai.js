@@ -560,7 +560,7 @@
     d = d || {}; var f = String(d.file || ""); if (!f || busy) return false;
     if (healAt[f] && Date.now() - healAt[f] < 20000) return false; healAt[f] = Date.now();
     var srcTxt = ""; try { srcTxt = (window.__IEFiles && window.__IEFiles.get(f)) || ""; } catch (e) {}
-    if (model === "chat") { model = "auto"; try { localStorage.setItem("iea-model", model); } catch (e) {} }
+    if (model === "chat") { model = "build"; try { localStorage.setItem("iea-model", model); } catch (e) {} }
     send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : ""));
     return true;
   };
