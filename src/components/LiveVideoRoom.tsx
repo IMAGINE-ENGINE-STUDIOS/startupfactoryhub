@@ -20,6 +20,8 @@ type Product = { id: string; name: string; price: number; tag: string; image: st
 type CartItem = { id: string; name: string; price: number; qty: number; image?: string };
 const absUrl = (u: string) => { try { return u && !u.startsWith('data:') ? new URL(u, window.location.origin).href : u; } catch { return u; } };
 const priceLabel = (p: Product) => `$${p.price.toLocaleString()}${p.interval ? (p.interval === 'year' ? '/yr' : '/mo') : ''}`;
+// Old demo-account ids that must never be treated as a room host.
+const DEMO_HOST_IDS = ['dc29b196-c2c5-46aa-bdac-8bc762b739c1'];
 
 const initials = (n: string) => n.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -110,10 +112,19 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const id = identity || user?.id || guestId;
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Guest';
 
+  // Platform admins can always take over as host (e.g. when an old link names someone else).
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    if (!user?.id) { setIsAdmin(false); return; }
+    if (user.email?.toLowerCase() === 'ceo@imagineengine.space') { setIsAdmin(true); return; }
+    supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => setIsAdmin(!!data));
+  }, [user?.id, user?.email]);
+  const [hostTick, setHostTick] = useState(0);
   // Host = the person whose account id is in the invite link; the first signed-in person to open a room becomes its host.
   const hostId = useMemo(() => {
     const url = new URL(window.location.href);
     let h = url.searchParams.get('host');
+    if (h && DEMO_HOST_IDS.includes(h)) h = null; // old demo account links never own a room
     if (!h && user?.id) {
       h = user.id;
       url.searchParams.set('host', h);
@@ -121,8 +132,16 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       window.history.replaceState(null, '', url.toString());
     }
     return h;
-  }, [user?.id, name]);
+  }, [user?.id, name, hostTick]); // eslint-disable-line
   const isHost = !hostId || hostId === id;
+  const canClaimHost = !!user?.id && isAdmin;
+  const claimHost = () => {
+    if (!user?.id) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('host', user.id);
+    window.history.replaceState(null, '', url.toString());
+    setHostTick((t) => t + 1);
+  };
 
   const [token, setToken] = useState('');
   const [serverUrl, setServerUrl] = useState('');
@@ -139,6 +158,13 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [spotlight, setSpotlight] = useState<string | null>(null); // host pin, seen by everyone
   const [localPin, setLocalPin] = useState<string | null | undefined>(undefined); // guest's own pin
   const [allowed, setAllowed] = useState<string[]>([]);
+  const [banned, setBanned] = useState<string[]>([]);
+  const kickKey = `ie-live-kicked:${name}`;
+  const [kicked, setKicked] = useState(() => { try { return localStorage.getItem(kickKey) === '1'; } catch { return false; } });
+  const beKicked = () => { try { localStorage.setItem(kickKey, '1'); } catch { /* ignore */ } setKicked(true); setLeft(true); };
+  const beKickedRef = useRef(beKicked); beKickedRef.current = beKicked;
+  const [recSecs, setRecSecs] = useState(0);
+  useEffect(() => { if (!rec) return; const t = setInterval(() => setRecSecs((s) => s + 1), 1000); return () => clearInterval(t); }, [rec]);
   const [roomAudience, setRoomAudience] = useState(false);
   const [notice, setNotice] = useState('');
   const idRef = useRef(id);
@@ -240,9 +266,10 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
     if (m.t === 'present') setPresenting(m.p || null);
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
-    if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); }
+    if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); setBanned(Array.isArray(m.banned) ? m.banned : []); }
     if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
     if (m.t === 'mod' && m.to === idRef.current) {
+      if (m.a === 'kick') { beKickedRef.current(); return; }
       if (m.a === 'mute') { setMic(false); setNotice('The host muted your microphone'); }
       if (m.a === 'cam') { setCam(false); setNotice('The host turned your camera off'); }
       if (m.a === 'allow') setNotice('The host invited you to speak. Turn on your mic or camera.');
@@ -280,20 +307,27 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const audience = isHost ? rules.audience : roomAudience;
   const canSpeak = isHost || !audience || allowed.includes(id);
   const pinned = isHost ? spotlight : (localPin !== undefined ? localPin : spotlight);
-  const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed });
-  roomRef.current = { spot: spotlight, audience: rules.audience, allowed };
+  const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed, banned });
+  roomRef.current = { spot: spotlight, audience: rules.audience, allowed, banned };
   const syncRoom = useCallback(() => { if (isHost) sendRef.current({ t: 'room', ...roomRef.current }); }, [isHost]);
   const catRef = useRef(catalog); catRef.current = catalog;
   // Late joiners: host resends the room catalog whenever someone joins.
   useEffect(() => { if (isHost) catRef.current.forEach((p) => sendRef.current({ t: 'product', p })); }, [peerCount, token, isHost]);
   useEffect(() => { syncRoom(); }, [spotlight, rules.audience, allowed, peerCount, token, syncRoom]);
   const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
-  const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke') => {
+  const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke' | 'kick') => {
     if (a === 'allow') setAllowed((l) => l.includes(to) ? l : [...l, to]);
     if (a === 'revoke') setAllowed((l) => l.filter((x) => x !== to));
+    if (a === 'kick') {
+      if (!window.confirm('Remove this person from the call? They will not be able to rejoin.')) return;
+      setBanned((l) => l.includes(to) ? l : [...l, to]);
+      if (spotlight === to) setSpotlight(null);
+      setNotice('Participant removed');
+    }
     broadcast({ t: 'mod', to, a });
   };
   useEffect(() => { if (!canSpeak) { setMic(false); setCam(false); } }, [canSpeak]);
+  useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
   useEffect(() => { if (notice) { const t = setTimeout(() => setNotice(''), 4000); return () => clearTimeout(t); } }, [notice]);
 
   // Checkout through Startup Factory Hub's Stripe account.
@@ -342,26 +376,46 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     else present({ name: f.name, url: URL.createObjectURL(f), kind: 'pdf' }, false);
   };
   const toggleRec = async () => {
-    if (recRef.current) { recRef.current.stop(); return; }
+    if (recRef.current) { if (recRef.current.state !== 'inactive') recRef.current.stop(); return; }
+    if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) { setNotice('Recording is not supported in this browser. Use Chrome or Edge on a computer.'); return; }
+    let screen: MediaStream;
     try {
-      const screen = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: true, preferCurrentTab: true });
-      let tracks: MediaStreamTrack[] = [...screen.getTracks()];
-      try { const m = await navigator.mediaDevices.getUserMedia({ audio: true }); tracks = [...tracks, ...m.getAudioTracks()]; } catch { /* no mic */ }
-      const stream = new MediaStream(tracks);
-      const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
-      const chunks: Blob[] = [];
-      mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
-      mr.onstop = () => {
-        tracks.forEach((t) => t.stop());
+      screen = await (navigator.mediaDevices as any).getDisplayMedia({ video: { frameRate: 30 }, audio: true, preferCurrentTab: true, selfBrowserSurface: 'include', systemAudio: 'include' });
+    } catch { setNotice('Recording cancelled'); return; }
+    let mic: MediaStream | null = null;
+    try { mic = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { /* no mic */ }
+    // Mix tab/system audio and the host microphone into one track so everything is heard.
+    let ac: AudioContext | null = null;
+    const audioTracks: MediaStreamTrack[] = [];
+    try {
+      ac = new AudioContext();
+      const dest = ac.createMediaStreamDestination();
+      let any = false;
+      [screen, mic].forEach((s) => { if (s && s.getAudioTracks().length) { ac!.createMediaStreamSource(new MediaStream(s.getAudioTracks())).connect(dest); any = true; } });
+      if (any) audioTracks.push(...dest.stream.getAudioTracks());
+    } catch { audioTracks.push(...screen.getAudioTracks(), ...(mic?.getAudioTracks() || []).slice(0, 1)); }
+    const stream = new MediaStream([...screen.getVideoTracks(), ...audioTracks]);
+    const mime = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'].find((m) => MediaRecorder.isTypeSupported(m)) || '';
+    let mr: MediaRecorder;
+    try { mr = mime ? new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 }) : new MediaRecorder(stream); }
+    catch { screen.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); setNotice('Could not start recording'); return; }
+    const chunks: Blob[] = [];
+    mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    mr.onstop = () => {
+      screen.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); ac?.close().catch(() => {});
+      const type = mr.mimeType || mime || 'video/webm';
+      const ext = type.includes('mp4') ? 'mp4' : 'webm';
+      if (chunks.length) {
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
-        a.download = `recording-${name}-${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
-        a.click();
-        recRef.current = null; setRec(false);
-      };
-      screen.getVideoTracks()[0].onended = () => { if (mr.state !== 'inactive') mr.stop(); };
-      mr.start(1000); recRef.current = mr; setRec(true);
-    } catch { /* cancelled */ }
+        a.href = URL.createObjectURL(new Blob(chunks, { type }));
+        a.download = `Startup-Factory-${name}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.${ext}`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setNotice('Recording saved to your downloads');
+      }
+      recRef.current = null; setRec(false);
+    };
+    screen.getVideoTracks()[0]?.addEventListener('ended', () => { if (mr.state !== 'inactive') mr.stop(); });
+    mr.start(1000); recRef.current = mr; setRec(true); setRecSecs(0);
   };
   const openLink = () => {
     if (!link.trim()) return;
@@ -385,6 +439,15 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
   const checkout = () => { if (cartItems.length) pay('cart', { items: cartItems }); };
 
+  if (kicked) {
+    return (
+      <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
+        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-10 max-w-sm w-full text-center">
+          <p className="text-white font-medium">You were removed from this call by the host</p>
+        </div>
+      </div>
+    );
+  }
   if (left) {
     return (
       <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
@@ -401,14 +464,15 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const stage = (
     <div className="flex-1 min-w-0 flex flex-col rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950"
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}>
-      <div className="h-14 bg-white flex items-center gap-4 px-5 font-mono text-[13px] text-zinc-800 border-b border-zinc-200">
-        <img src={sfhLogo} alt="Startup Factory Hub" className="h-8 w-8 object-contain" />
+      <div className="h-14 bg-white flex items-center gap-4 pl-2 pr-5 font-mono text-[13px] text-zinc-800 border-b border-zinc-200">
+        <img src={sfhLogo} alt="Startup Factory Hub" className="h-[52px] w-24 object-contain" />
         <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Timer className="w-3.5 h-3.5" />{fmtTime(seconds)}</span>
         <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : `${totalPeers} in call`}</span>
         <div className="ml-auto flex items-center gap-2">
-          {isHost && <button onClick={toggleRec} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500' : ''}`} />REC {rec ? 'ON' : 'OFF'}</button>}
+          {!isHost && canClaimHost && <button onClick={claimHost} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-amber-300 text-amber-700"><Crown className="w-3.5 h-3.5" />Claim host</button>}
+          {isHost && <button onClick={toggleRec} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500 animate-pulse' : ''}`} />{rec ? `REC ${fmtTime(recSecs)}` : 'REC OFF'}</button>}
           <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-zinc-200 bg-zinc-50">
             <span className={`w-1.5 h-1.5 rounded-full ${token ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
             {token ? <ConnBadge /> : <span className="font-mono text-[11px] text-zinc-500" title={connError}>{connError ? 'Offline' : 'Connecting'}</span>}
