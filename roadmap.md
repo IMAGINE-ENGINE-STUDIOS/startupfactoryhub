@@ -85,3 +85,9 @@
 - [ ] 3D Studio: Content tab sliders for 3D scenes/games (camera, light, fog, speed) via postMessage to blocks
 - [ ] Flow steps: liveDataQuery (realtime), smartSearch (fuzzy), aiSearch, aggregateData
 - [ ] Integrate 3D Studio into Imagine Engine (embed level as canvas block; cloud levels table)
+
+## Live Video upgrade
+- [x] Full-screen adaptive video layout, pin + speaker suggestion, right-side gallery
+- [x] Host mic/camera/stage controls, audience mode
+- [x] Startup Factory packages in Shop tab with images
+- [x] Direct Stripe checkout for viewers
