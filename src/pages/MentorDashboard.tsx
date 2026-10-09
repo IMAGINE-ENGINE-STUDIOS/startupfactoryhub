@@ -101,7 +101,7 @@ const MentorDashboard = () => {
   return <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
+      <div className="w-full max-w-none px-4 sm:px-6 xl:px-8 pt-2 sm:pt-4 pb-4 sm:pb-8">
 
         {/* User avatar */}
         <div className="mb-4 sm:mb-6 flex justify-start">

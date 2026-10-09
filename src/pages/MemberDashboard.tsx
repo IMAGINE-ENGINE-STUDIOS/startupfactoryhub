@@ -13,6 +13,9 @@ import BookingsList from '@/components/BookingsList';
 import MVPReferralCard from '@/components/referral/MVPReferralCard';
 import FloatingChat from '@/components/FloatingChat';
 import MatchingSystem from '@/components/MatchingSystem';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
+import LiveRooms from '@/components/LiveRooms';
+import { Video } from 'lucide-react';
 import EducationalResources from '@/components/EducationalResources';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
@@ -71,7 +74,7 @@ const MemberDashboard = () => {
     <div className="min-h-screen bg-background pb-6 relative overflow-x-hidden">
       <DashboardHeader />
 
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
+      <div className="w-full max-w-none px-4 sm:px-6 xl:px-8 pt-2 sm:pt-4 pb-4">
 
         {/* User avatar */}
         <div className="mb-4 sm:mb-6 flex justify-start">
@@ -92,6 +95,7 @@ const MemberDashboard = () => {
               { value: 'tools', icon: Wrench, label: t('nav.tools') },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network', icon: Network, label: t('nav.network') },
+              { value: 'calendar', icon: Video, label: 'Meetings' },
               { value: 'learn', icon: GraduationCap, label: t('nav.learn') },
               { value: 'intelligence', icon: Brain, label: t('nav.intelligence') },
               { value: 'jobs', icon: Briefcase, label: t('nav.jobs') },
@@ -143,6 +147,8 @@ const MemberDashboard = () => {
 
           {activeTab === 'calendar' && (
             <TabsContent value="calendar" className="space-y-4">
+              <MeetingsHubHeader subtitle="Join live rooms and upcoming sessions." />
+              <LiveRooms />
               <BookingsList variant="requests" />
               <BookingsList variant="scheduled" emptyLabel="No confirmed meetings yet." />
               <UnifiedCalendar userRole="member" />
