@@ -1577,6 +1577,7 @@ export default function MatchingSystem() {
         open={isScannerOpen}
         onOpenChange={setIsScannerOpen}
       />
+      <UserProfileDialog userId={profileUserId} open={!!profileUserId} onOpenChange={(o) => !o && setProfileUserId(null)} />
     </div>
   );
 }
