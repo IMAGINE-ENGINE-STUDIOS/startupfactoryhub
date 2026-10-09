@@ -165,7 +165,7 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
   }
 
   return (
-    <aside className="no-print flex h-full w-[340px] shrink-0 flex-col border-r bg-background">
+    <aside className="no-print flex h-full w-full max-md:fixed max-md:inset-0 max-md:z-50 md:w-[340px] shrink-0 flex-col border-r bg-background overflow-x-hidden">
       <div className="flex items-center justify-between border-b px-3 py-2">
         <div className="flex items-center gap-2 min-w-0">
           <img src={geniusAILogo} alt="" className="h-5 w-5" />
@@ -184,7 +184,7 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+      <div ref={scrollRef} className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-3 break-words [overflow-wrap:anywhere]">
         {messages.length === 0 && (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">Ask about this document, edit a selection, translate, or write full documents.</p>
@@ -201,7 +201,7 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
           ) : (
             <div key={idx} className="space-y-1.5">
               <div
-                className="lp-ai-answer rounded-lg border bg-card px-3 py-2 text-xs text-card-foreground [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-[13px] [&_h2]:font-semibold [&_h3]:font-semibold [&_*]:!text-xs [&_*]:!m-0 [&_*]:!mb-1.5 [&_table]:w-full"
+                className="lp-ai-answer max-w-full overflow-x-hidden rounded-lg border bg-card px-3 py-2 text-xs text-card-foreground break-words [overflow-wrap:anywhere] [&_*]:!max-w-full [&_*]:!whitespace-normal [&_img]:h-auto [&_pre]:overflow-x-auto [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-[13px] [&_h2]:font-semibold [&_h3]:font-semibold [&_*]:!text-xs [&_*]:!m-0 [&_*]:!mb-1.5 [&_table]:w-full [&_table]:table-fixed"
                 dangerouslySetInnerHTML={{ __html: m.content ? markdownToDocumentHtml(m.content) : "" }}
               />
               {!m.content && loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
