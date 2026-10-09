@@ -114,3 +114,9 @@
 - [x] Imagine AI 3D requests open/drive the 3D Studio; scene syncs to Dev tab scenes/level.json both ways
 - [x] Plaza District editable level + Publish Plaza (admin) / Publish level
 - [ ] Live test Sketchfab downloads, Genius 3D and Plaza publishing after publishing the site
+
+- [x] Plaza screen share black for viewers (hidden video stopped decoding)
+- [x] 3D Studio theater screens (screen + document), Genius 3D / Imagine AI aware
+- [x] New Flow 3D steps: scale, rotate, spin, visible, camera, light, theater
+- [x] Zip model reader (Sketchfab zips + uploads)
+- [ ] Studio theater screens are local only (viewers of published levels do not see the share yet)
