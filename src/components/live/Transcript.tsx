@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -90,7 +90,7 @@ export function useSpeechTranscriber(on: boolean, onFinal: (text: string) => voi
       stream?.getTracks().forEach((t) => t.stop());
       cb.current.onPartial?.('');
     };
-  }, [on]);
+  }, [on, useNative]);
 }
 
 export const downloadTranscript = (room: string, lines: TxLine[]) => {
