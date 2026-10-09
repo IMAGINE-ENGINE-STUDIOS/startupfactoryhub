@@ -27,9 +27,22 @@
   var q = new URLSearchParams(location.search), file = q.get("file") || "", kind = q.get("kind") || "react";
   function host() { var w = window; try { while (w.parent && w.parent !== w) { w = w.parent; if (w.__IEFiles) return w; } } catch (e) {} return null; }
   function src() { var h = host(); try { return (h && h.__IEFiles.get(file)) || localStorage.getItem("ie-live:" + file) || ""; } catch (e) { return ""; } }
-  function fail(m) { var e = document.getElementById("ie-err"); e.style.display = "block"; e.textContent = "App error: " + m; try { var h = host(); h && h.__IE && h.__IE.log("Live app " + file + ": " + m, "error"); } catch (x) {} }
-  window.addEventListener("error", function (e) { fail(e.message); });
-  window.addEventListener("unhandledrejection", function (e) { fail((e.reason && e.reason.message) || String(e.reason)); });
+  var lastErr = "";
+  function fail(m, stack) {
+    m = String(m || "Unknown error"); if (m === lastErr) return; lastErr = m;
+    var e = document.getElementById("ie-err"), h = host(); e.style.display = "block"; e.textContent = "App error: " + m;
+    var info = { ie: "liveapp-error", file: file, message: m, stack: String(stack || "").slice(0, 2000) };
+    try { (h || parent).postMessage(info, "*"); } catch (x) {}
+    if (h) {
+      var b = document.createElement("button"); b.textContent = "Auto-repair with AI";
+      b.style.cssText = "display:block;margin-top:8px;font:600 12px system-ui;padding:6px 12px;border-radius:9999px;border:0;background:#3b82f6;color:#fff;cursor:pointer";
+      b.onclick = function () { b.disabled = true; b.textContent = "Repairing…"; try { h.postMessage(Object.assign({}, info, { ie: "liveapp-autoheal" }), "*"); } catch (x) {} };
+      e.appendChild(b);
+    }
+  }
+  window.__IEFail = fail;
+  window.addEventListener("error", function (e) { fail(e.message, e.error && e.error.stack); });
+  window.addEventListener("unhandledrejection", function (e) { fail((e.reason && e.reason.message) || String(e.reason), e.reason && e.reason.stack); });
   function load(u) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = u; s.onload = res; s.onerror = function () { rej(new Error("Could not load " + u)); }; document.head.appendChild(s); }); }
 
   /* ---- Dev-tab module resolver: relative imports load sibling files from the Dev tab ---- */
@@ -39,9 +52,13 @@
     var base = spec.charAt(0) === "@" && spec.charAt(1) === "/" ? spec.slice(2) : join(from, spec);
     var tries = [base, base + ".tsx", base + ".ts", base + ".jsx", base + ".js", base + "/index.tsx", base + "/index.ts"];
     for (var i = 0; i < tries.length; i++) { var c = getFile(tries[i]); if (c != null && c !== "") return { name: tries[i], code: c }; }
+    var kit = /(?:^|\/)(components\/ui\/[\w-]+|lib\/utils)$/.exec(base.replace(/\.(tsx?|jsx?)$/, ""));
+    if (kit && window.__IE_UI && window.__IE_UI[kit[1]]) return { name: "@ui/" + kit[1] + ".tsx", code: window.__IE_UI[kit[1]] };
     return null;
   }
   var deps = {};
+  /* pinned versions for the common app libraries so builds stay stable and cache well */
+  var PINS = { "lucide-react": "0.468.0", "recharts": "2.15.0", "framer-motion": "11.15.0", "canvas-confetti": "1.9.3", "clsx": "2.1.1", "tailwind-merge": "2.6.0", "class-variance-authority": "0.7.1", "@tanstack/react-table": "8.20.6", "@tanstack/react-query": "5.62.8", "date-fns": "4.1.0", "zustand": "5.0.2", "react-hook-form": "7.54.2", "zod": "3.24.1" };
   /* ---- Visual inspector: every DOM JSX tag gets data-ie-loc="file:line:col" so Content/Design edits patch the exact source ---- */
   function locPlugin(name) { return function (api) { var t = api.types; return { visitor: { JSXOpeningElement: function (p) {
     var n = p.node; if (!n.loc || n.name.type !== "JSXIdentifier" || !/^[a-z]/.test(n.name.name)) return;
@@ -109,7 +126,8 @@
         seen[r.name] = url; return pre + qt + url + qt;
       }
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
-      return pre + qt + "https://esm.sh/" + spec + "?external=react,react-dom" + qt;
+      var pm = /^(@[^/]+\/[^/@]+|[^/@]+)(.*)$/.exec(spec), pkg = pm ? pm[1] : spec, ver = PINS[pkg];
+      return pre + qt + "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + "?external=react,react-dom" + qt;
     });
   }
   /* ---- App bridge: Flow ctx.broadcast(action) -> window.__IE_DISPATCH / "ie:action"; IE.emit(event) -> Flow ctx.on ---- */
@@ -144,20 +162,20 @@
       var body = /<a-scene[\s\S]*<\/a-scene>/i.exec(code); document.getElementById("root").innerHTML = body ? body[0] : code;
     }).catch(function (e) { fail(e.message); });
   } else {
-    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"), load("/imagine-engine/blocks/ie-sdk.js")]).then(function () {
+    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"), load("/imagine-engine/blocks/ie-sdk.js"), load("/imagine-engine/blocks/ui-kit.js")]).then(function () {
       var out = compile(code, file, {});
       var nm = /export\s+default\s+(?:async\s+)?function\s+(\w+)/.exec(out);
       if (nm) out = out.replace(/export\s+default\s+(async\s+)?function/, "$1function") + "\nconst __ie_default = " + nm[1] + ";";
       else if (/export\s+default\s+/.test(out)) out = out.replace(/export\s+default\s+/, "const __ie_default = ");
       else out += "\nconst __ie_default = (typeof App !== 'undefined' ? App : () => null);";
-      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce } from "react";\n__cr(document.getElementById("root")).render(__ce(__ie_default));';
+      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce, Component as __Cmp } from "react";\nclass __IEBoundary extends __Cmp { constructor(p){super(p);this.state={e:null};} static getDerivedStateFromError(e){return {e:e};} componentDidCatch(e,i){ window.__IEFail && window.__IEFail(e && e.message, (e && e.stack || "") + (i && i.componentStack || "")); } render(){ return this.state.e ? __ce("div",{style:{padding:24,color:"#fca5a5",font:"13px system-ui"}},"This app hit an error. Use Auto-repair below or edit it in the Dev tab.") : this.props.children; } }\n__cr(document.getElementById("root")).render(__ce(__IEBoundary,null,__ce(__ie_default)));';
       var s = document.createElement("script"); s.type = "module";
       s.src = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
       document.body.appendChild(s);
     }).catch(function (e) { fail(e.message); });
   }
   /* hot reload when the Dev tab file changes */
-  setInterval(function () { var c = src(); if (c && c !== last) return location.reload(); for (var n in deps) { if (n !== file && (getFile(n) || "") !== deps[n]) return location.reload(); } }, 1200);
+  setInterval(function () { var c = src(); if (c && c !== last) return location.reload(); for (var n in deps) { if (n !== file && n.indexOf("@ui/") !== 0 && (getFile(n) || "") !== deps[n]) return location.reload(); } }, 1200);
 })();
 </script>
 </body>

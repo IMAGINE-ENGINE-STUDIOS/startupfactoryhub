@@ -553,6 +553,22 @@
       ev.source && ev.source.postMessage({ iea: "reply", id: id, text: text }, location.origin);
     }, 300);
   });
+
+  // Self-healing: live apps report crashes; "Auto-repair with AI" sends the broken file + stack for a surgical patch
+  var healAt = {};
+  window.__IEAutoHeal = function (d) {
+    d = d || {}; var f = String(d.file || ""); if (!f || busy) return false;
+    if (healAt[f] && Date.now() - healAt[f] < 20000) return false; healAt[f] = Date.now();
+    var srcTxt = ""; try { srcTxt = (window.__IEFiles && window.__IEFiles.get(f)) || ""; } catch (e) {}
+    if (model === "chat") { model = "build"; try { localStorage.setItem("iea-model", model); } catch (e) {} }
+    send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : ""));
+    return true;
+  };
+  window.addEventListener("message", function (ev) {
+    var d = ev.data; if (!d || typeof d !== "object") return;
+    if (d.ie === "liveapp-error") { try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message, "error"); } catch (e) {} }
+    if (d.ie === "liveapp-autoheal") window.__IEAutoHeal(d);
+  });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); } });
   root.querySelector("#iea-clr").onclick = function () { messages = []; save(); render(); };
 
