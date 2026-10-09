@@ -1173,8 +1173,9 @@ export function LightPaperDocument({
       try {
         setIsSaving(true);
         const content = buildSaveContent();
-        await saveProject(projectTitle, "document", content, currentProjectId, { silent: true });
-        setLastSaved(new Date());
+        const saved = await saveProject(projectTitle, "document", content, currentProjectId, { silent: true });
+        if (saved?.id && saved.id !== currentProjectId) setCurrentProjectId(saved.id);
+        if (saved) setLastSaved(new Date());
       } catch (err) {
         console.error('Auto-save failed:', err);
       } finally {
