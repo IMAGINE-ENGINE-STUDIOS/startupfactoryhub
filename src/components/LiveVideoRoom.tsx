@@ -283,6 +283,9 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed });
   roomRef.current = { spot: spotlight, audience: rules.audience, allowed };
   const syncRoom = useCallback(() => { if (isHost) sendRef.current({ t: 'room', ...roomRef.current }); }, [isHost]);
+  const catRef = useRef(catalog); catRef.current = catalog;
+  // Late joiners: host resends the room catalog whenever someone joins.
+  useEffect(() => { if (isHost) catRef.current.forEach((p) => sendRef.current({ t: 'product', p })); }, [peerCount, token, isHost]);
   useEffect(() => { syncRoom(); }, [spotlight, rules.audience, allowed, peerCount, token, syncRoom]);
   const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
   const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke') => {
@@ -540,7 +543,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         return (
           <div className="rounded-2xl border border-zinc-200 overflow-hidden">
             <select value={k.id} onChange={(e) => setPkgPick(e.target.value)} className="w-full text-sm px-3 py-2 border-b border-zinc-200 bg-white text-zinc-900">
-              {SFH_PACKAGES.map((x) => <option key={x.id} value={x.id}>{catalog.some((c) => c.id === `pkg-${x.id}`) ? '✓ ' : ''}{x.name} — ${x.price.toLocaleString()}/{x.interval === 'year' ? 'yr' : 'mo'}</option>)}
+              {SFH_PACKAGES.map((x) => <option key={x.id} value={x.id}>{catalog.some((c) => c.id === `pkg-${x.id}`) ? '(added) ' : ''}{x.name} — ${x.price.toLocaleString()}/{x.interval === 'year' ? 'yr' : 'mo'}</option>)}
             </select>
             <div className="relative h-32">
               <img src={k.image} alt={k.name} className="w-full h-full object-cover" />
