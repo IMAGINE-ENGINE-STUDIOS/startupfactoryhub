@@ -15,6 +15,10 @@ import { districtChat } from '@/lib/districtChatBus';
 import { TheaterScreen, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { supabase } from '@/integrations/supabase/client';
 import DistrictElectionPanel from '@/components/DistrictElectionPanel';
+import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
+import { buildPlazaScene, PLAZA_LEVEL_NAME } from '@/imagine-studio/lib/plazaLevel';
+import { ensurePlazaLevel } from '@/imagine-studio/lib/localLevels';
+import { Box as BoxIcon } from 'lucide-react';
 
 const ROOM = 'plaza';
 const NEAR = 3;
@@ -397,6 +401,7 @@ export default function PlazaPage() {
   const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0 });
   const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
   const [isAdmin, setIsAdmin] = useState(false);
+  const published = usePublishedPlaza();
   const [theater, setTheater] = useState<TheaterSource>(null);
   const [pdfPages, setPdfPages] = useState(0);
   const [presenting, setPresenting] = useState(false);
@@ -625,7 +630,7 @@ export default function PlazaPage() {
         <hemisphereLight args={['#dfefff', '#6b8f4e', 0.4]} />
         <directionalLight position={[30, 40, 20]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} />
-        <PlazaWorld />
+        {published ? <PublishedWorld scene={published} /> : <PlazaWorld />}
         <TheaterScreen source={theater} onPages={setPdfPages} />
         <Game me={{ color, name, char }} peers={peers} input={input} onMove={onMove} />
       </Canvas>
@@ -638,6 +643,9 @@ export default function PlazaPage() {
       {isAdmin && (
         <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           <div className="flex gap-2">
+            <button onClick={() => { const l = ensurePlazaLevel(buildPlazaScene, PLAZA_LEVEL_NAME); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+              <BoxIcon className="w-4 h-4" />Edit in 3D Studio
+            </button>
             <button onClick={shareScreen} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
               {presenting ? <Square className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}{presenting ? 'Stop sharing' : 'Share screen to theater'}
             </button>
