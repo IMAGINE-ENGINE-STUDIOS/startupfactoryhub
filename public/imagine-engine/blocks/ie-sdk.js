@@ -53,15 +53,40 @@
     if (op === "delete") { rows = rows.filter(function (x) { return x.id !== extra.id; }); save(); return Promise.resolve(true); }
     return Promise.resolve(null);
   }
+  /* change notifications across components and browser tabs */
+  var bc = null; try { bc = new BroadcastChannel("ie-sync:" + appName); } catch (e) {}
+  var subs = {};
+  function notify(col, remote) { (subs[col] || []).forEach(function (fn) { fn(); }); if (!remote && bc) try { bc.postMessage({ col: col }); } catch (e) {} }
+  if (bc) bc.onmessage = function (e) { if (e.data && e.data.col) notify(e.data.col, true); };
+  function query(rows, o) {
+    o = o || {}; var r = rows || [];
+    if (o.where) r = r.filter(function (x) { return Object.keys(o.where).every(function (k) { return x[k] === o.where[k]; }); });
+    if (typeof o.filter === "function") r = r.filter(o.filter);
+    if (o.mine) r = r.filter(function (x) { return x._mine; });
+    if (o.order) { var d = o.desc ? -1 : 1; r = r.slice().sort(function (a, b) { return a[o.order] > b[o.order] ? d : a[o.order] < b[o.order] ? -d : 0; }); }
+    if (o.page) { var pp = o.perPage || 20; r = r.slice((o.page - 1) * pp, o.page * pp); }
+    return o.limit ? r.slice(0, o.limit) : r;
+  }
   IE.db = function (col) {
     col = String(col || "items").replace(/[^a-zA-Z0-9_-]/g, "_");
-    return {
-      list: function (o) { return call("list", col).then(function (rows) { o = o || {}; var r = rows || []; if (o.where) r = r.filter(function (x) { return Object.keys(o.where).every(function (k) { return x[k] === o.where[k]; }); }); if (o.mine) r = r.filter(function (x) { return x._mine; }); if (o.order) { var d = o.desc ? -1 : 1; r = r.slice().sort(function (a, b) { return a[o.order] > b[o.order] ? d : a[o.order] < b[o.order] ? -d : 0; }); } return o.limit ? r.slice(0, o.limit) : r; }); },
-      insert: function (record) { return call("insert", col, { record: record }); },
-      update: function (id, patch) { return call("update", col, { id: id, patch: patch }); },
-      remove: function (id) { return call("delete", col, { id: id }); },
+    var after = function (p) { return p.then(function (v) { notify(col); return v; }); };
+    var api = {
+      list: function (o) { return call("list", col).then(function (rows) { return query(rows, o); }); },
+      insert: function (record) { return after(call("insert", col, { record: record })); },
+      update: function (id, patch) { return after(call("update", col, { id: id, patch: patch })); },
+      remove: function (id) { return after(call("delete", col, { id: id })); },
+      /* fn(rows) now and after every change; returns an unsubscribe function */
+      subscribe: function (fn, o) {
+        var run = function () { api.list(o).then(fn).catch(function () {}); };
+        (subs[col] = subs[col] || []).push(run); run();
+        return function () { subs[col] = (subs[col] || []).filter(function (x) { return x !== run; }); };
+      },
     };
+    return api;
   };
+  /* "owner" = the creator who first opened the app signed in, "member" = other signed-in users, "guest" = signed out */
+  IE.auth.role = function () { return ns().then(function (i) { if (!i.user) return "guest"; return i.ns && i.ns.indexOf(i.user.id + "/") === 0 ? "owner" : "member"; }); };
+  IE.auth.hasRole = function (r) { return IE.auth.role().then(function (x) { return x === r || (r === "member" && x === "owner"); }); };
 
   /* hash router: IE.route() -> "/settings", IE.navigate("/settings"), IE.useRoute(React) hook */
   IE.route = function () { return (location.hash.replace(/^#/, "") || "/").split("?")[0]; };
