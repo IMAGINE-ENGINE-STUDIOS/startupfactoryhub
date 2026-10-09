@@ -507,7 +507,17 @@
     var d = ev.data; if (!d || !d.__IEStudio) return;
     if (d.__IEStudio === "scene" && d.json) { try { window.__IEFiles && window.__IEFiles.put("scenes/level.json", d.json, "json"); } catch (e) {} }
     if (d.__IEStudio === "reply" && d.text) { messages.push({ role: "assistant", content: String(d.text) }); render(); save(); }
+    if (d.__IEStudio === "scene" && d.json) lastStudioJson = d.json;
   });
+  /* Dev tab -> 3D Studio: hand edits to scenes/level.json reload the open level */
+  var lastStudioJson = null;
+  setInterval(function () {
+    var cur = window.__IEFiles && window.__IEFiles.get("scenes/level.json");
+    if (!cur || lastStudioJson === null || cur === lastStudioJson) return;
+    try { JSON.parse(cur); } catch (e) { return; }
+    lastStudioJson = cur;
+    studioFrames().forEach(function (f) { try { f.contentWindow.postMessage({ __IEStudio: "load", json: cur }, "*"); } catch (e) {} });
+  }, 1500);
   function doSend(t, text, mode) {
     if (mode !== "chat" && !doSend._retried && (STUDIO3D.test(text) || studioFrames().length && /\b(scene|level|model|object|this|it)\b/i.test(text) && !/\b(page|website|app|dashboard|store)\b/i.test(text))) {
       if (send3DStudio(text)) { busy = false; render(); save(); return; }
