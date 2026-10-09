@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Crown, Vote, ShoppingBag, Loader2, DollarSign, Lock, Key, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import RoomImagePicker, { uploadRoomImage } from '@/components/live/RoomImagePicker';
 
 interface CreateDistrictDialogProps {
   open: boolean;
@@ -53,6 +54,7 @@ export default function CreateDistrictDialog({ open, onOpenChange }: CreateDistr
   const [step, setStep] = useState<'configure' | 'confirm'>('configure');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [selectedType, setSelectedType] = useState<DistrictType | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -184,6 +186,8 @@ export default function CreateDistrictDialog({ open, onOpenChange }: CreateDistr
                   rows={2}
                 />
               </div>
+
+              <RoomImagePicker file={coverFile} onChange={setCoverFile} />
 
               {/* Type selection */}
               <div className="space-y-2">
