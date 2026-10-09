@@ -108,41 +108,13 @@ serve(async (req) => {
     const joinFeeCents = parseInt(meta.join_fee_cents || "100");
     const govFundCents = parseInt(meta.gov_fund_cents || "100");
 
-    logStep("Creating Whereby room", { villageName });
+    logStep("Creating Live Video district room", { villageName });
 
-    // Create Whereby room (permanent — 10 years)
-    const wherebyApiKey = Deno.env.get("WHEREBY_API_KEY");
-    if (!wherebyApiKey) throw new Error("WHEREBY_API_KEY not configured");
-
+    // Permanent native Startup Factory Live Video room (10 years)
     const tenYearsFromNow = new Date();
     tenYearsFromNow.setFullYear(tenYearsFromNow.getFullYear() + 10);
-
     const sanitizedName = villageName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").substring(0, 30);
-    const wherebyRes = await fetch("https://api.whereby.dev/v1/meetings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${wherebyApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        endDate: tenYearsFromNow.toISOString(),
-        fields: ["hostRoomUrl"],
-        roomNamePrefix: sanitizedName,
-        roomMode: "normal",
-      }),
-    });
-
-    if (!wherebyRes.ok) {
-      const err = await wherebyRes.json();
-      throw new Error(`Whereby error: ${err.message || wherebyRes.status}`);
-    }
-
-    const wherebyData = await wherebyRes.json();
-    const meetingLink = wherebyData.roomUrl;
-
-    // Log API usage with multiplier
-    const wherebyBaseCost = 0.10;
-    await logApiUsage(supabaseAdmin, "whereby", "/v1/meetings", wherebyBaseCost, apiMultiplier, user.id);
+    const meetingLink = `https://startupfactoryhub.com/live-video?room=${encodeURIComponent(`district-${sanitizedName || "room"}-${crypto.randomUUID().slice(0, 8)}`)}`;
 
     logStep("Creating live room in DB");
 
@@ -170,6 +142,7 @@ serve(async (req) => {
         join_fee_cents: joinFeeCents,
         government_fund_cents: govFundCents,
         membership_fee_cents: joinFeeCents + govFundCents,
+        cover_image_url: meta.cover_image_url || null,
       })
       .select()
       .single();

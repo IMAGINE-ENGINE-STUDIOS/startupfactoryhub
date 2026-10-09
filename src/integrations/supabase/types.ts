@@ -5091,6 +5091,7 @@ export type Database = {
       live_rooms: {
         Row: {
           api_cost_multiplier: number | null
+          cover_image_url: string | null
           created_at: string | null
           creator_id: string
           current_host_id: string | null
@@ -5116,6 +5117,7 @@ export type Database = {
         }
         Insert: {
           api_cost_multiplier?: number | null
+          cover_image_url?: string | null
           created_at?: string | null
           creator_id: string
           current_host_id?: string | null
@@ -5141,6 +5143,7 @@ export type Database = {
         }
         Update: {
           api_cost_multiplier?: number | null
+          cover_image_url?: string | null
           created_at?: string | null
           creator_id?: string
           current_host_id?: string | null

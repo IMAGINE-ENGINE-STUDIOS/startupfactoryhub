@@ -11,6 +11,7 @@ interface LiveRoom {
   meeting_link: string;
   is_active: boolean;
   is_public: boolean;
+  cover_image_url?: string | null;
   created_at: string;
   expires_at: string;
   creator?: {
@@ -103,7 +104,7 @@ export const useLiveRooms = () => {
     };
   }, [fetchRooms]);
 
-  const createRoom = async (name: string, description?: string, isPublic: boolean = true) => {
+  const createRoom = async (name: string, description?: string, isPublic: boolean = true, coverImageUrl?: string | null) => {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -140,7 +141,8 @@ export const useLiveRooms = () => {
           meeting_link: meetingLink,
           is_public: isPublic,
           expires_at: expiresAt,
-        })
+          cover_image_url: coverImageUrl || null,
+        } as any)
         .select()
         .single();
 
@@ -156,7 +158,8 @@ export const useLiveRooms = () => {
             room_id: room.id, 
             meeting_link: meetingLink,
             room_name: name,
-            description: description || null
+            description: description || null,
+            cover_image_url: coverImageUrl || null
           },
         } as any);
       }
