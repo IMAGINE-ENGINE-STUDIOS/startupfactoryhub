@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Html, Sky } from '@react-three/drei';
 import * as THREE from 'three';
-import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack, DataPacket_Kind } from 'livekit-client';
+import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack } from 'livekit-client';
 import { Mic, MicOff, Loader2, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
