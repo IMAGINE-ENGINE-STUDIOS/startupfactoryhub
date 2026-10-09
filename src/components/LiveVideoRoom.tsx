@@ -352,6 +352,38 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   };
   useEffect(() => { if (!canSpeak) { setMic(false); setCam(false); } }, [canSpeak]);
   useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
+
+  // Removed people can knock; the host admits or denies them (works while they're out of the call).
+  const [knocks, setKnocks] = useState<{ id: string; name: string }[]>([]);
+  const [knockState, setKnockState] = useState<'idle' | 'waiting' | 'denied'>('idle');
+  const knockChan = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  useEffect(() => {
+    if (!isHost && !kicked) return;
+    const ch = supabase.channel(`live-knock:${name}`, { config: { broadcast: { self: false } } });
+    ch.on('broadcast', { event: 'knock' }, ({ payload }) => {
+      if (!isHost || !payload?.id) return;
+      setKnocks((l) => l.some((k) => k.id === payload.id) ? l : [...l, { id: payload.id, name: payload.name || 'Someone' }]);
+    });
+    ch.on('broadcast', { event: 'reply' }, ({ payload }) => {
+      if (isHost || payload?.to !== idRef.current) return;
+      if (payload.ok) {
+        try { localStorage.removeItem(kickKey); } catch { /* ignore */ }
+        setKnockState('idle'); setKicked(false); setLeft(false); setSeconds(0);
+      } else setKnockState('denied');
+    });
+    ch.subscribe();
+    knockChan.current = ch;
+    return () => { supabase.removeChannel(ch); knockChan.current = null; };
+  }, [isHost, kicked, name, kickKey]);
+  const askToJoin = () => {
+    setKnockState('waiting');
+    knockChan.current?.send({ type: 'broadcast', event: 'knock', payload: { id, name: displayName } });
+  };
+  const answerKnock = (who: string, ok: boolean) => {
+    setKnocks((l) => l.filter((k) => k.id !== who));
+    if (ok) setBanned((l) => l.filter((x) => x !== who));
+    knockChan.current?.send({ type: 'broadcast', event: 'reply', payload: { to: who, ok } });
+  };
   useEffect(() => { if (notice) { const t = setTimeout(() => setNotice(''), 4000); return () => clearTimeout(t); } }, [notice]);
 
   // Checkout through Startup Factory Hub's Stripe account.
@@ -475,6 +507,12 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-10 max-w-sm w-full text-center">
           <p className="text-white font-medium">You were removed from this call by the host</p>
+          {knockState === 'waiting'
+            ? <p className="mt-6 text-sm text-zinc-300">Request sent. Waiting for the host to let you in…</p>
+            : <>
+                {knockState === 'denied' && <p className="mt-4 text-sm text-zinc-400">The host declined your request.</p>}
+                <button onClick={askToJoin} className="mt-6 px-5 py-2 rounded-full bg-white text-zinc-900 text-sm">Ask to join again</button>
+              </>}
         </div>
       </div>
     );
@@ -517,6 +555,19 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       </div>
       <style>{`@keyframes ie-float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-40px) scale(1.1)}100%{transform:translateY(-420px) scale(1);opacity:0}}`}</style>
       {notice && <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm shadow-2xl">{notice}</div>}
+      {isHost && knocks.length > 0 && (
+        <div className="absolute top-16 right-4 z-50 w-72 space-y-2">
+          {knocks.map((k) => (
+            <div key={k.id} className="rounded-2xl bg-white text-zinc-900 shadow-2xl p-3">
+              <p className="text-sm font-medium">{k.name} asks to join again</p>
+              <div className="mt-2 flex gap-2">
+                <button onClick={() => answerKnock(k.id, true)} className="flex-1 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs">Let in</button>
+                <button onClick={() => answerKnock(k.id, false)} className="flex-1 px-3 py-1.5 rounded-full border border-zinc-300 text-xs">Deny</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {drop && stageOffer && (
         <div className="absolute top-3 right-3 z-20 w-[calc(100%-1.5rem)] max-w-md bg-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
           <Thumb p={drop} className="w-14 h-14 rounded-xl shrink-0" />
