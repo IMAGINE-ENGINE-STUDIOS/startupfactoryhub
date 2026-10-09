@@ -553,7 +553,7 @@ export default function PlazaPage() {
       const pub = await r.localParticipant.setScreenShareEnabled(true, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
       const mst = pub?.track?.mediaStreamTrack; if (!mst) return;
       const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.style.cssText = 'position:fixed;right:0;bottom:0;width:4px;height:4px;opacity:0.01;pointer-events:none'; document.body.appendChild(el); el.play().catch(() => {});
-      setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true);
+      setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true); sendTheater({ kind: 'video' });
     } catch { setErr('Screen sharing was cancelled or blocked.'); }
   };
 
