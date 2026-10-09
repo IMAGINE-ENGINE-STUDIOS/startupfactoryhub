@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
     if (gk) {
       const buf = new Uint8Array(await audio.arrayBuffer());
       let bin = ""; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-      const mime = (audio.type || "audio/webm").split(";")[0];
+      let mime = (audio.type || "").split(";")[0];
+      if (!mime.startsWith("audio/")) mime = /\.m4a$/.test(audio.name) ? "audio/mp4" : /\.ogg$/.test(audio.name) ? "audio/ogg" : "audio/webm";
       for (const model of ["gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"]) {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gk}`, {
           method: "POST", headers: { "Content-Type": "application/json" },
