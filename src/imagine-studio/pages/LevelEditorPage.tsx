@@ -1992,6 +1992,20 @@ export default function LevelEditorPage() {
               <MapPin className="w-3.5 h-3.5 mr-1" /> Place on Atlas
             </Button>
           )}
+          {!rigRoomMode && id && (
+            <StudioIntegrations
+              levelId={id}
+              name={name}
+              scene={scene}
+              updateScene={updateScene}
+              selectedId={selectedId}
+              layerId={currentLayerId}
+              canEdit={!!isOwner}
+              compact={isMobile}
+              importFile={(f: File) => runNativeImport(f, DEFAULT_CAD_SETTINGS)}
+              save={() => save({ silent: true })}
+            />
+          )}
           {!isMobile && (
             <span
               className={`text-[11px] ${
