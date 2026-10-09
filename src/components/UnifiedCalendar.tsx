@@ -697,7 +697,7 @@ export default function UnifiedCalendar({
                                 {item.attendees} attending
                                 {item.max_attendees && ` / ${item.max_attendees}`}
                               </div>
-                              {item.location?.includes('whereby.com') && (
+                              {item.location?.includes('/live-video') && (
                                 <Button
                                   size="sm"
                                   variant="outline"

@@ -32,11 +32,20 @@ interface VideoConferencingProps {
   eventId?: string;
 }
 
-// Check if URL is a valid Whereby room URL
-const isValidWherebyUrl = (url?: string): boolean => {
-  if (!url) return false;
-  return url.includes('whereby.com');
+// Convert any meeting link (native or legacy) into a Startup Factory Live Video room path
+const toLiveVideoPath = (url?: string): string | null => {
+  if (!url) return null;
+  if (url.includes('/live-video')) {
+    try { const u = new URL(url, window.location.origin); return `/live-video${u.search}`; } catch { return null; }
+  }
+  if (url.includes('whereby.com')) {
+    const last = url.split('?')[0].split('/').filter(Boolean).pop() || 'main';
+    const room = last.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60) || 'main';
+    return `/live-video?room=${encodeURIComponent(room)}`;
+  }
+  return null;
 };
+const isValidWherebyUrl = (url?: string): boolean => !!toLiveVideoPath(url);
 
 export default function VideoConferencing({
   roomUrl,
@@ -52,8 +61,8 @@ export default function VideoConferencing({
   const [activeRoomUrl, setActiveRoomUrl] = useState(persistentRoomUrl || roomUrl);
 
   const openInNewTab = (url: string) => {
-    const fullUrl = `${url}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal`;
-    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    const path = toLiveVideoPath(url) || '/live-video';
+    window.open(`${window.location.origin}${path}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleJoin = async () => {
