@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocalParticipant } from '@livekit/components-react';
 import { LocalVideoTrack, Track } from 'livekit-client';
 import { BackgroundProcessor, supportsBackgroundProcessors, type BackgroundProcessorWrapper } from '@livekit/track-processors';
-import { Ban, Droplets, ImagePlus, Trash2 } from 'lucide-react';
+import { Ban, Droplets, ImagePlus, Trash2, FlipHorizontal2 } from 'lucide-react';
 import office from '@/assets/live-bg/office.jpg';
 import loft from '@/assets/live-bg/loft.jpg';
 import tech from '@/assets/live-bg/tech.jpg';
 import library from '@/assets/live-bg/library.jpg';
 
-export type BgChoice = { kind: 'none' } | { kind: 'blur'; radius: number } | { kind: 'image'; src: string };
+export type BgChoice = { kind: 'none' } | { kind: 'blur'; radius: number } | { kind: 'image'; src: string; flip?: boolean };
 
 const SAMPLES = [
   { name: 'Office', src: office },
@@ -37,6 +37,22 @@ const toBackground = (file: File): Promise<string> => new Promise((resolve, reje
   img.src = URL.createObjectURL(file);
 });
 
+// Mirrors a background left-to-right (never upside down).
+const mirrored = (src: string): Promise<string> => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d')!;
+    g.translate(c.width, 0); g.scale(-1, 1); g.drawImage(img, 0, 0);
+    resolve(c.toDataURL('image/jpeg', 0.85));
+  };
+  img.onerror = reject;
+  img.src = src;
+});
+
+const sameSrc = (a: BgChoice, b: BgChoice) => a.kind === 'image' && b.kind === 'image' ? a.src === b.src : JSON.stringify(a) === JSON.stringify(b);
 const same = (a: BgChoice, b: BgChoice) => JSON.stringify(a) === JSON.stringify(b);
 
 // Applies the chosen background to this person's camera, so everyone in the call sees it.
@@ -66,7 +82,7 @@ export function BackgroundApplier({ choice, cam }: { choice: BgChoice; cam: bool
         }
         const opts = choice.kind === 'blur'
           ? { mode: 'background-blur' as const, blurRadius: choice.radius }
-          : { mode: 'virtual-background' as const, imagePath: choice.src };
+          : { mode: 'virtual-background' as const, imagePath: choice.flip ? await mirrored(choice.src) : choice.src };
         if (procRef.current) await procRef.current.switchTo(opts);
         else { const p = BackgroundProcessor(opts); procRef.current = p; await track.setProcessor(p); }
       } catch (e) { console.warn('Background effect failed', e); }
@@ -96,14 +112,19 @@ export function BackgroundPicker({ choice, onChoose, onClose }: { choice: BgChoi
     if (choice.kind === 'image' && choice.src === src) pick({ kind: 'none' });
   };
 
-  const ring = (c: BgChoice) => same(choice, c) ? 'ring-2 ring-white' : 'ring-1 ring-white/10 hover:ring-white/40';
+  const ring = (c: BgChoice) => sameSrc(choice, c) ? 'ring-2 ring-white' : 'ring-1 ring-white/10 hover:ring-white/40';
   const tile = 'relative aspect-video rounded-xl overflow-hidden flex items-center justify-center text-[11px] text-zinc-200 bg-zinc-800';
 
   return (
     <div className="absolute bottom-14 z-30 w-[380px] rounded-2xl bg-zinc-900 border border-white/10 p-4 shadow-2xl">
       <div className="flex items-center justify-between mb-3">
         <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-400">BACKGROUND</p>
-        <button onClick={onClose} className="text-xs text-zinc-400 hover:text-white">Done</button>
+        <div className="flex items-center gap-3">
+          {choice.kind === 'image' && (
+            <button onClick={() => pick({ ...choice, flip: !choice.flip })} className={`flex items-center gap-1 text-xs ${choice.flip ? 'text-white' : 'text-zinc-400 hover:text-white'}`}><FlipHorizontal2 className="w-3.5 h-3.5" />{choice.flip ? 'Flipped' : 'Flip left/right'}</button>
+          )}
+          <button onClick={onClose} className="text-xs text-zinc-400 hover:text-white">Done</button>
+        </div>
       </div>
       {!supported && <p className="text-xs text-amber-400 mb-3">This browser can't change backgrounds. Try Chrome or Edge on a computer.</p>}
       <div className="grid grid-cols-3 gap-2">
@@ -111,7 +132,7 @@ export function BackgroundPicker({ choice, onChoose, onClose }: { choice: BgChoi
         <button onClick={() => pick({ kind: 'blur', radius: 6 })} className={`${tile} ${ring({ kind: 'blur', radius: 6 })} flex-col gap-1`}><Droplets className="w-4 h-4" />Light blur</button>
         <button onClick={() => pick({ kind: 'blur', radius: 18 })} className={`${tile} ${ring({ kind: 'blur', radius: 18 })} flex-col gap-1`}><Droplets className="w-5 h-5" />Strong blur</button>
         {SAMPLES.map((s) => (
-          <button key={s.name} title={s.name} onClick={() => pick({ kind: 'image', src: s.src })} className={`${tile} ${ring({ kind: 'image', src: s.src })}`}>
+          <button key={s.name} title={s.name} onClick={() => pick({ kind: 'image', src: s.src, flip: choice.kind === 'image' && choice.src === s.src ? choice.flip : false })} className={`${tile} ${ring({ kind: 'image', src: s.src })}`}>
             <img src={s.src} alt={s.name} loading="lazy" width={1280} height={720} className="absolute inset-0 w-full h-full object-cover" />
           </button>
         ))}
