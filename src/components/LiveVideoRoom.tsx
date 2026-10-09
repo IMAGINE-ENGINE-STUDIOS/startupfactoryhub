@@ -158,15 +158,17 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     const url = new URL(window.location.href);
     let h = url.searchParams.get('host');
     if (h && DEMO_HOST_IDS.includes(h) && user?.id) h = null; // old demo account links never own a room
-    if (!h && user?.id) {
+    // The public conference room ("main") is only ever hosted by a platform admin; other rooms by whoever opens them first.
+    if (!h && user?.id && (name !== 'main' || isAdmin)) {
       h = user.id;
       url.searchParams.set('host', h);
       if (!url.searchParams.get('room')) url.searchParams.set('room', name);
       window.history.replaceState(null, '', url.toString());
     }
     return h;
-  }, [user?.id, name, hostTick]); // eslint-disable-line
-  const isHost = !hostId || hostId === id;
+  }, [user?.id, name, hostTick, isAdmin]); // eslint-disable-line
+  // Guests without an account are never host.
+  const isHost = !!user?.id && (hostId === id || (!hostId && isAdmin));
   const canClaimHost = !!user?.id && isAdmin;
   const claimHost = () => {
     if (!user?.id) return;
