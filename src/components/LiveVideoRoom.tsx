@@ -343,7 +343,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     if (a === 'allow') setAllowed((l) => l.includes(to) ? l : [...l, to]);
     if (a === 'revoke') setAllowed((l) => l.filter((x) => x !== to));
     if (a === 'kick') {
-      if (!window.confirm('Remove this person from the call? They will not be able to rejoin.')) return;
+      if (!window.confirm('Remove this person from the call? They can ask to rejoin and you decide.')) return;
       setBanned((l) => l.includes(to) ? l : [...l, to]);
       if (spotlight === to) setSpotlight(null);
       setNotice('Participant removed');
