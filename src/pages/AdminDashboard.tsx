@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -82,9 +83,15 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || "overview");
+  // People can hold several roles (e.g. startup + admin); check admin directly.
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!user) { setIsAdmin(null); return; }
+    supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' } as any).then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   // Show loading while checking auth and role
-  if (authLoading || roleLoading) {
+  if (authLoading || roleLoading || (user && isAdmin === null)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -101,7 +108,7 @@ const AdminDashboard = () => {
   }
 
   // Block access if not admin - show access denied page
-  if (role !== 'admin') {
+  if (role !== 'admin' && !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md p-8">
