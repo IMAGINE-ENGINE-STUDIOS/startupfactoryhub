@@ -239,6 +239,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     if (m.t === 'present') setPresenting(m.p || null);
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
     if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); }
+    if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
     if (m.t === 'mod' && m.to === idRef.current) {
       if (m.a === 'mute') { setMic(false); setNotice('The host muted your microphone'); }
       if (m.a === 'cam') { setCam(false); setNotice('The host turned your camera off'); }
@@ -482,7 +483,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
             { on: cam, icon: cam ? Video : VideoOff, fn: () => canSpeak ? setCam((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Camera' : 'Camera (host invite needed)', danger: true },
             { on: sharing, icon: MonitorUp, fn: toggleShare, label: 'Share screen' },
             { on: presentOpen || !!presenting, icon: Presentation, fn: () => setPresentOpen((v) => !v), label: 'Present' },
-            { on: hand, icon: Hand, fn: () => setHand((h) => !h), label: 'Raise hand' },
+            { on: hand, icon: Hand, fn: () => { const up = !hand; setHand(up); broadcast({ t: 'hand', id, name: displayName, up }); }, label: 'Raise hand' },
           ].map((b) => (
             <button key={b.label} aria-label={b.label} title={b.label} onClick={b.fn}
               className={`w-10 h-10 rounded-full flex items-center justify-center ${b.danger ? (b.on ? 'bg-zinc-800 text-white' : 'bg-red-500 text-white') : b.on ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`}><b.icon className="w-4 h-4" /></button>
