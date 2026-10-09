@@ -19,10 +19,10 @@ const col = (c) => (Array.isArray(c) ? `rgb(${Math.round(c[0] * 255)},${Math.rou
 function Geo({ shape }) {
   switch (shape) {
     case 'sphere': return <sphereGeometry args={[0.5, 32, 24]} />;
-    case 'cylinder': return <cylinderGeometry args={[0.5, 0.5, 1, 48]} />;
-    case 'cone': return <coneGeometry args={[0.5, 1, 24]} />;
+    case 'cylinder': return <cylinderGeometry args={[0.5, 0.5, 1, 32]} />;
+    case 'cone': return <coneGeometry args={[0.5, 1, 32]} />;
     case 'plane': return <planeGeometry args={[1, 1]} />;
-    case 'torus': return <torusGeometry args={[0.5, 0.004, 8, 96]} />;
+    case 'torus': return <torusGeometry args={[0.5, 0.15, 16, 64]} />;
     default: return <boxGeometry args={[1, 1, 1]} />;
   }
 }

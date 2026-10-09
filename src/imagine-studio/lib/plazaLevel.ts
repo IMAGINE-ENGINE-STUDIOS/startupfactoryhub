@@ -21,7 +21,6 @@ export function buildPlazaScene(): LevelScene {
   const flat = [-Math.PI / 2, 0, 0] as [number, number, number];
   o.push(P("Lawn", "cylinder", [0, -0.05, 0], [90, 0.1, 90], "#6b8f4e"));
   o.push(P("Stone Plaza", "cylinder", [0, 0.01, 0], [56, 0.04, 56], "#cfc6b6", { roughness: 0.9 }));
-  for (const r of [8, 14, 22]) o.push(P(`Ring ${r}m`, "torus", [0, 0.03, 0], [r * 2, r * 2, 0.6], "#a89f8f", { rotation: flat }));
   // Fountain
   o.push(P("Fountain Basin", "cylinder", [0, 0.45, 0], [7.2, 0.9, 7.2], "#9aa0a6"));
   o.push(P("Fountain Water", "cylinder", [0, 0.62, 0], [6.5, 0.9, 6.5], "#2f7fd1", { color: hex("#2f7fd1", 0.7), roughness: 0.1, metalness: 0.2, playBehavior: { collision: "none" } }));
