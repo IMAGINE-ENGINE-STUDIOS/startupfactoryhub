@@ -48,12 +48,12 @@ export default function SketchfabModal({ open, onOpenChange, onSpawn }: { open: 
     setSpawning(m.uid);
     try {
       const d = await call({ action: "download", uid: m.uid });
-      if (d.format !== "glb") throw new Error("This model only offers a zipped glTF. Try another model.");
       const r = await fetch(d.url);
       if (!r.ok) throw new Error("Download failed");
       const blob = await r.blob();
       const safe = m.name.replace(/[^a-zA-Z0-9 _-]/g, "").trim() || "sketchfab-model";
-      await onSpawn(new File([blob], `${safe}.glb`, { type: "model/gltf-binary" }), `${m.name} by ${m.author} (${m.license}) via Sketchfab`);
+      const zip = d.format !== "glb";
+      await onSpawn(new File([blob], `${safe}.${zip ? "zip" : "glb"}`, { type: zip ? "application/zip" : "model/gltf-binary" }), `${m.name} by ${m.author} (${m.license}) via Sketchfab`);
       toast.success(`Added ${m.name}`);
     } catch (e: any) { toast.error(e.message || "Could not add model"); }
     setSpawning(null);

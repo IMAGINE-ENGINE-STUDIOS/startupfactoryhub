@@ -11,7 +11,7 @@ import {
   Unlock, Mountain, Brush, ArrowUp, ArrowDown, Waves, Minus,
   X, ArrowUpRight, User, Camera, Boxes, Link2, Unlink,
 } from "lucide-react";
-import { Spline as SplineIcon, Paintbrush } from "lucide-react";
+import { Spline as SplineIcon, Paintbrush, Tv } from "lucide-react";
 import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CharacterAnimationGallery from "@/imagine-studio/components/level/animations/CharacterAnimationGallery";
@@ -180,6 +180,10 @@ function makePrimitive(shape: PrimitiveObject["shape"]): PrimitiveObject {
     metalness: 0.1,
     roughness: 0.6,
   };
+}
+
+function makeTheater(): PrimitiveObject {
+  return { ...makePrimitive("plane"), name: "Theater Screen", theater: true, position: [0, 3.2, 0], scale: [6, 6, 1], color: [0.05, 0.05, 0.07, 1] } as PrimitiveObject;
 }
 
 function makePolygon(): PolygonObject {
@@ -2118,6 +2122,9 @@ export default function LevelEditorPage() {
               </Button>
               <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makePolygon())} title="Polygon (spline)">
                 <Pencil className="w-3.5 h-3.5" />
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makeTheater())} title="Theater screen (share your screen or a document)">
+                <Tv className="w-3.5 h-3.5" />
               </Button>
               <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makeTrajectory())} title="Trajectory spline">
                 <SplineIcon className="w-3.5 h-3.5" />
