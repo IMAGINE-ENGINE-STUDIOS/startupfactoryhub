@@ -59,21 +59,33 @@ const shrinkImage = (file: File): Promise<string> => new Promise((resolve, rejec
   img.src = URL.createObjectURL(file);
 });
 
-// Sends this person's shared screen (and its sound) to everyone in the room.
-function ScreenPublisher({ stream }: { stream: MediaStream | null }) {
+// Sends this person's shared screen (and its sound) to everyone in the room using LiveKit's native screen share.
+function ScreenPublisher({ on, onStream, onEnd, onFail }: { on: boolean; onStream: (s: MediaStream) => void; onEnd: () => void; onFail: (msg: string) => void }) {
   const { localParticipant } = useLocalParticipant();
   const state = useConnectionState();
+  const cbs = useRef({ onStream, onEnd, onFail }); cbs.current = { onStream, onEnd, onFail };
   useEffect(() => {
-    if (!stream || state !== 'connected') return;
-    const v = stream.getVideoTracks()[0];
-    const a = stream.getAudioTracks()[0];
-    if (v) localParticipant.publishTrack(v, { source: Track.Source.ScreenShare, name: 'screen' }).catch((e) => console.warn('Screen share publish failed', e));
-    if (a) localParticipant.publishTrack(a, { source: Track.Source.ScreenShareAudio, name: 'screen-audio' }).catch(() => {});
-    return () => {
-      if (v) localParticipant.unpublishTrack(v, false).catch(() => {});
-      if (a) localParticipant.unpublishTrack(a, false).catch(() => {});
-    };
-  }, [stream, state, localParticipant]);
+    if (state !== 'connected') return;
+    let cancelled = false;
+    if (on) {
+      localParticipant.setScreenShareEnabled(true, { audio: true, video: { frameRate: 15 } as any, selfBrowserSurface: 'include', systemAudio: 'include' } as any, { simulcast: false, videoEncoding: { maxBitrate: 3_000_000, maxFramerate: 15 } } as any)
+        .then((pub) => {
+          const tr = pub?.track?.mediaStreamTrack;
+          if (!tr) { if (!cancelled) cbs.current.onEnd(); return; }
+          cbs.current.onStream(new MediaStream([tr]));
+          tr.addEventListener('ended', () => cbs.current.onEnd());
+        })
+        .catch((e) => {
+          console.warn('Screen share failed', e);
+          const msg = String(e?.name || e?.message || '');
+          if (!/NotAllowed|Abort|cancel/i.test(msg)) cbs.current.onFail('Screen share failed. Use Chrome or Edge on a computer and allow screen sharing.');
+          cbs.current.onEnd();
+        });
+    } else if (localParticipant.isScreenShareEnabled) {
+      localParticipant.setScreenShareEnabled(false).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [on, state, localParticipant]);
   return null;
 }
 
