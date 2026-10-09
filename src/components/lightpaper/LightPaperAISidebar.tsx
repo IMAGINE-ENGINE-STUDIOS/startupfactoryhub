@@ -21,7 +21,7 @@ const QUICK: { icon: any; label: string; prompt: string }[] = [
   { icon: Wand2, label: "Fix document", prompt: "Proofread and fix the entire document: grammar, spelling, clarity and consistent formatting. Return the full corrected document." },
   { icon: Languages, label: "Translate", prompt: "Translate the entire document to Spanish, keeping all headings, lists and tables intact. Return only the translated document." },
   { icon: Briefcase, label: "Business plan", prompt: "Write a complete investor-ready business plan: executive summary, problem, solution, market analysis, business model, go-to-market, operations, team, financial projections table, funding ask and milestones." },
-  { icon: BookOpen, label: "Write a book", prompt: "Write the first full chapter of a book plus a numbered outline of all chapters. Ask me 2 short questions first about topic and audience." },
+  { icon: BookOpen, label: "Write a book", prompt: "Write a numbered outline of all chapters of a book based on the open document (or a startup-founder guide if it is empty), then write chapter 1 in full." },
   { icon: FileText, label: "Summarize", prompt: "Write a one-page executive summary of the open document." },
 ];
 
