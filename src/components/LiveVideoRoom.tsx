@@ -10,36 +10,32 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { LiveChat, LocalChat } from './LiveChatPanel';
+import LiveStage from './live/LiveStage';
+import { SFH_PACKAGES } from './live/sfhPackages';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
 
-type Product = { id: string; name: string; price: number; tag: string; image: string };
-type CartItem = { id: string; name: string; price: number; qty: number };
+type Product = { id: string; name: string; price: number; tag: string; image: string; pkg?: string; interval?: 'month' | 'year'; perks?: string[] };
+type CartItem = { id: string; name: string; price: number; qty: number; image?: string };
+const absUrl = (u: string) => { try { return u && !u.startsWith('data:') ? new URL(u, window.location.origin).href : u; } catch { return u; } };
+const priceLabel = (p: Product) => `$${p.price.toLocaleString()}${p.interval ? (p.interval === 'year' ? '/yr' : '/mo') : ''}`;
 
 const initials = (n: string) => n.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const REACTIONS = [{ k: 'heart', i: Heart, c: 'text-rose-500' }, { k: 'fire', i: Flame, c: 'text-orange-500' }, { k: 'up', i: ThumbsUp, c: 'text-amber-500' }];
 
 const readCart = (): CartItem[] => {
-  const c = (window as any).__IECart;
-  if (c?.items) { try { return c.items(); } catch { /* ignore */ } }
   try { return JSON.parse(localStorage.getItem('ie-live-cart') || '[]'); } catch { return []; }
 };
 const addToCart = (p: Product) => {
-  const cart = (window as any).__IECart;
-  if (cart?.add) { cart.add({ id: p.id, name: p.name, price: p.price, image: p.image, qty: 1 }); }
-  else {
-    const items = readCart();
-    const found = items.find((i) => i.id === p.id);
-    found ? found.qty++ : items.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
-    localStorage.setItem('ie-live-cart', JSON.stringify(items));
-  }
+  const items = readCart();
+  const found = items.find((i) => i.id === p.id);
+  found ? found.qty++ : items.push({ id: p.id, name: p.name, price: p.price, qty: 1, image: absUrl(p.image) });
+  localStorage.setItem('ie-live-cart', JSON.stringify(items));
   window.dispatchEvent(new CustomEvent('ie-live-cart', { detail: { added: p } }));
 };
 const removeFromCart = (id: string) => {
-  const cart = (window as any).__IECart;
-  if (cart?.remove) cart.remove(id);
-  else localStorage.setItem('ie-live-cart', JSON.stringify(readCart().filter((i) => i.id !== id)));
+  localStorage.setItem('ie-live-cart', JSON.stringify(readCart().filter((i) => i.id !== id)));
   window.dispatchEvent(new CustomEvent('ie-live-cart'));
 };
 
@@ -58,21 +54,6 @@ const shrinkImage = (file: File): Promise<string> => new Promise((resolve, rejec
   img.src = URL.createObjectURL(file);
 });
 
-function RemoteTiles() {
-  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare], { onlySubscribed: true });
-  const remote = tracks.filter((t) => !t.participant.isLocal && t.publication);
-  return (
-    <>
-      {remote.map((t) => (
-        <div key={t.participant.identity + t.source} className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06]">
-          <VideoTrack trackRef={t as any} className="w-full h-full object-cover" />
-          <span className="absolute left-3 bottom-3 font-mono text-xs text-white">{t.participant.name || t.participant.identity}</span>
-        </div>
-      ))}
-    </>
-  );
-}
-
 // Publishes this person's real camera and microphone to everyone in the room, kept in sync with the buttons.
 function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
   const { localParticipant } = useLocalParticipant();
@@ -80,13 +61,6 @@ function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
   useEffect(() => { if (state === 'connected') localParticipant.setCameraEnabled(cam).catch(() => {}); }, [cam, state, localParticipant]);
   useEffect(() => { if (state === 'connected') localParticipant.setMicrophoneEnabled(mic).catch(() => {}); }, [mic, state, localParticipant]);
   return null;
-}
-
-function LocalVideo() {
-  const tracks = useTracks([Track.Source.Camera], { onlySubscribed: false });
-  const mine = tracks.find((t) => t.participant.isLocal && t.publication?.track);
-  if (!mine) return null;
-  return <VideoTrack trackRef={mine as any} className="absolute inset-0 w-full h-full object-cover -scale-x-100" />;
 }
 
 function PeerCount({ onCount }: { onCount: (n: number) => void }) {
@@ -155,12 +129,19 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [left, setLeft] = useState(false);
 
   const [seconds, setSeconds] = useState(0);
-  const [mic, setMic] = useState(true);
-  const [cam, setCam] = useState(true);
+  // Hosts start live; guests start muted with camera off.
+  const [mic, setMic] = useState(isHost);
+  const [cam, setCam] = useState(isHost);
   const [hand, setHand] = useState(false);
   const [rec, setRec] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const [pinned, setPinned] = useState<string | null>(null);
+  const [spotlight, setSpotlight] = useState<string | null>(null); // host pin, seen by everyone
+  const [localPin, setLocalPin] = useState<string | null | undefined>(undefined); // guest's own pin
+  const [allowed, setAllowed] = useState<string[]>([]);
+  const [roomAudience, setRoomAudience] = useState(false);
+  const [notice, setNotice] = useState('');
+  const idRef = useRef(id);
+  idRef.current = id;
   const [floats, setFloats] = useState<{ key: number; icon: any; c: string; x: number }[]>([]);
   const [peerCount, setPeerCount] = useState(1);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -174,7 +155,9 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const unread = Math.max(0, chatCount - seenCount);
   const [userLimit, setUserLimit] = useState(100);
   const [timeLimit, setTimeLimit] = useState(120);
-  const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true });
+  const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true, audience: false, autoFollow: false });
+  const [showPkgs, setShowPkgs] = useState(false);
+  const [paying, setPaying] = useState('');
   const [copied, setCopied] = useState(false);
   const [cartTick, setCartTick] = useState(0);
 
@@ -255,6 +238,13 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
     if (m.t === 'present') setPresenting(m.p || null);
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
+    if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); }
+    if (m.t === 'mod' && m.to === idRef.current) {
+      if (m.a === 'mute') { setMic(false); setNotice('The host muted your microphone'); }
+      if (m.a === 'cam') { setCam(false); setNotice('The host turned your camera off'); }
+      if (m.a === 'allow') setNotice('The host invited you to speak. Turn on your mic or camera.');
+      if (m.a === 'revoke') setNotice('You were moved to the audience');
+    }
   }, []); // eslint-disable-line
 
   const showReaction = (r: typeof REACTIONS[number]) => {
@@ -275,6 +265,45 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     setAdding(false);
   };
   const deleteProduct = (pid: string) => { setCatalog((c) => c.filter((x) => x.id !== pid)); if (drop?.id === pid) setDrop(null); broadcast({ t: 'remove', id: pid }); };
+  const pkgProduct = (k: typeof SFH_PACKAGES[number]): Product => ({ id: `pkg-${k.id}`, pkg: k.id, name: k.name, price: k.price, interval: k.interval, tag: k.tag, perks: k.perks, image: absUrl(k.image) });
+  const addPackage = (k: typeof SFH_PACKAGES[number], push = false) => {
+    const p = pkgProduct(k);
+    setCatalog((c) => c.some((x) => x.id === p.id) ? c : [...c, p]);
+    broadcast({ t: 'product', p });
+    if (push) pushToAll(p);
+  };
+
+  // Stage control: who is on stage, who is pinned, audience mode.
+  const audience = isHost ? rules.audience : roomAudience;
+  const canSpeak = isHost || !audience || allowed.includes(id);
+  const pinned = isHost ? spotlight : (localPin !== undefined ? localPin : spotlight);
+  const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed });
+  roomRef.current = { spot: spotlight, audience: rules.audience, allowed };
+  const syncRoom = useCallback(() => { if (isHost) sendRef.current({ t: 'room', ...roomRef.current }); }, [isHost]);
+  const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
+  const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke') => {
+    if (a === 'allow') setAllowed((l) => l.includes(to) ? l : [...l, to]);
+    if (a === 'revoke') setAllowed((l) => l.filter((x) => x !== to));
+    broadcast({ t: 'mod', to, a });
+  };
+  useEffect(() => { if (!canSpeak) { setMic(false); setCam(false); } }, [canSpeak]);
+  useEffect(() => { if (notice) { const t = setTimeout(() => setNotice(''), 4000); return () => clearTimeout(t); } }, [notice]);
+
+  // Checkout through Startup Factory Hub's Stripe account.
+  const returnUrl = () => { const u = new URL(window.location.href); u.searchParams.delete('checkout'); return u.toString(); };
+  const pay = async (key: string, body: Record<string, unknown>) => {
+    setPaying(key);
+    try {
+      const { data, error } = await supabase.functions.invoke('live-checkout', { body: { ...body, room: name, returnUrl: returnUrl() } });
+      if (error || !data?.url) throw new Error(data?.error || error?.message || 'Checkout failed');
+      window.open(data.url, '_blank', 'noopener');
+    } catch (e: any) { setNotice(e.message || 'Checkout failed'); }
+    setPaying('');
+  };
+  const buy = (p: Product) => p.pkg ? pay(p.id, { pkg: p.pkg }) : (addToCart(p), undefined);
+  useEffect(() => {
+    if (/checkout=success/.test(window.location.search)) { localStorage.removeItem('ie-live-cart'); setCartTick((n) => n + 1); setNotice('Payment complete. Thank you!'); }
+  }, []);
 
   const toggleShare = async () => {
     if (sharing) { (screenRef.current?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop()); setSharing(false); return; }
@@ -347,7 +376,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const cartTotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const totalPeers = token ? peerCount : 1;
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
-  const checkout = () => { const c = (window as any).__IECart; c?.checkout ? c.checkout() : c?.open?.(); };
+  const checkout = () => { if (cartItems.length) pay('cart', { items: cartItems }); };
 
   if (left) {
     return (
@@ -383,47 +412,44 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         {floats.map((f) => <span key={f.key} className="absolute bottom-4 animate-[ie-float_2.6s_ease-out_forwards]" style={{ right: `${f.x}%` }}><f.icon className={`w-10 h-10 fill-current ${f.c}`} /></span>)}
       </div>
       <style>{`@keyframes ie-float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-40px) scale(1.1)}100%{transform:translateY(-420px) scale(1);opacity:0}}`}</style>
-      <div className="h-full overflow-y-auto p-4">
-        {drop && stageOffer && (
-          <div className="sticky top-0 z-20 mb-3 ml-auto w-full max-w-md bg-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
-            <Thumb p={drop} className="w-14 h-14 rounded-xl shrink-0" />
-            <span className="flex-1 min-w-0">
-              <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600"><Radio className="w-3 h-3" />LIVE DROP</span>
-              <span className="block text-[15px] text-zinc-900 truncate">{drop.name}</span>
-              <span className="block font-mono text-xs text-zinc-500">${drop.price}</span>
-            </span>
-            <button onClick={() => addToCart(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm">Add to cart</button>
-            <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
-          </div>
-        )}
-        {(sharing || presenting) && (
-          <div className="relative mb-3 rounded-2xl overflow-hidden border border-white/10 bg-zinc-900 h-[360px]">
-            {sharing ? <video ref={screenRef} autoPlay muted playsInline className="w-full h-full object-contain" />
-              : presenting && (presenting.kind === 'image'
-                ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
-                : presenting.kind === 'video' ? <video src={presenting.url} controls autoPlay className="w-full h-full object-contain" />
-                : presenting.kind === 'pdf' ? <object data={presenting.url} type="application/pdf" className="w-full h-full bg-white"><a href={presenting.url} target="_blank" rel="noreferrer" className="block p-6 text-white underline">Open {presenting.name}</a></object>
-                : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
-            <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else present(null); }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
-          </div>
-        )}
-        <div className="grid grid-cols-3 gap-3">
-          <div onClick={() => setPinned(pinned === 'host' ? null : 'host')} className={`${tileBase} ring-2 ring-white ${pinned === 'host' ? 'col-span-2 row-span-2' : ''}`}>
-            {cam && token ? <LocalVideo /> : cam ? <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
-              : <div className="absolute inset-0 flex items-center justify-center">
-                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
-                    : <span className="w-14 h-14 rounded-full bg-white/10 text-zinc-200 flex items-center justify-center">{initials(displayName)}</span>}
-                </div>}
-            <div className="absolute inset-x-0 bottom-0 p-3 flex items-center bg-gradient-to-t from-black/70 to-transparent">
-              <span className="font-mono text-xs text-white flex items-center gap-1.5">{displayName} (You){isHost && <Crown className="w-3.5 h-3.5 text-amber-400" />}{hand && <Hand className="w-3.5 h-3.5 text-amber-400" />}</span>
-              <span className="ml-auto flex gap-1.5">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center ${mic ? 'bg-white/15' : 'bg-red-500'}`}>{mic ? <Mic className="w-3 h-3 text-white" /> : <MicOff className="w-3 h-3 text-white" />}</span>
-              </span>
-            </div>
-          </div>
-
-          {token && <RemoteTiles />}
+      {notice && <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm shadow-2xl">{notice}</div>}
+      {drop && stageOffer && (
+        <div className="absolute top-3 right-3 z-20 w-[calc(100%-1.5rem)] max-w-md bg-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
+          <Thumb p={drop} className="w-14 h-14 rounded-xl shrink-0" />
+          <span className="flex-1 min-w-0">
+            <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600"><Radio className="w-3 h-3" />LIVE DROP</span>
+            <span className="block text-[15px] text-zinc-900 truncate">{drop.name}</span>
+            <span className="block font-mono text-xs text-zinc-500">{priceLabel(drop)}</span>
+          </span>
+          <button disabled={paying === drop.id} onClick={() => buy(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{drop.pkg ? (paying === drop.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
+          <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
         </div>
+      )}
+      <div className="h-full p-3">
+        {(() => {
+          const hero = (sharing || presenting) ? (
+            <div className="relative w-full h-full">
+              {sharing ? <video ref={screenRef} autoPlay muted playsInline className="w-full h-full object-contain" />
+                : presenting && (presenting.kind === 'image'
+                  ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
+                  : presenting.kind === 'video' ? <video src={presenting.url} controls autoPlay className="w-full h-full object-contain" />
+                  : presenting.kind === 'pdf' ? <object data={presenting.url} type="application/pdf" className="w-full h-full bg-white"><a href={presenting.url} target="_blank" rel="noreferrer" className="block p-6 text-white underline">Open {presenting.name}</a></object>
+                  : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
+              <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else present(null); }} className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
+            </div>
+          ) : null;
+          if (token) return <LiveStage isHost={isHost} hostId={hostId} pinned={pinned} onPin={onPin} autoFollow={rules.autoFollow} audience={audience} allowed={allowed} onMod={onMod} hero={hero} localAvatar={profile?.avatar_url} />;
+          return (
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/[0.06]">
+              {hero || (cam ? <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
+                : <div className="absolute inset-0 flex items-center justify-center">
+                    {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-24 h-24 rounded-full object-cover" />
+                      : <span className="w-20 h-20 rounded-full bg-white/10 text-zinc-200 text-2xl flex items-center justify-center">{initials(displayName)}</span>}
+                  </div>)}
+              {!hero && <span className="absolute left-3 bottom-3 font-mono text-xs text-white flex items-center gap-1.5">{displayName} (You){isHost && <Crown className="w-3.5 h-3.5 text-amber-400" />}</span>}
+            </div>
+          );
+        })()}
       </div>
       </div>
 
