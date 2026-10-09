@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Send, Loader2, Square, Trash2, FileText, Languages, Wand2, BookOpen, Briefcase, CornerDownLeft, Replace, FilePlus2, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Loader2, Square, Trash2, FileText, Languages, Wand2, BookOpen, Briefcase, CornerDownLeft, Replace, FilePlus2, RefreshCw, Mic, MicOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getAIHeaders } from "@/lib/aiAuth";
@@ -36,6 +36,41 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // "Replace selection" flow: asks what to write instead (typed or dictated).
+  const [replaceFor, setReplaceFor] = useState<string | null>(null);
+  const [replaceText, setReplaceText] = useState("");
+  const [listening, setListening] = useState(false);
+  const recRef = useRef<any>(null);
+
+  const stopDictation = () => { try { recRef.current?.stop(); } catch { /* noop */ } recRef.current = null; setListening(false); };
+  const startDictation = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setError("Voice dictation isn't supported in this browser. Type your text instead (Chrome, Edge or Safari support dictation)."); return; }
+    const rec = new SR();
+    rec.continuous = true; rec.interimResults = true; rec.lang = navigator.language || "en-US";
+    const base = replaceText ? replaceText.trimEnd() + " " : "";
+    rec.onresult = (e: any) => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setReplaceText(base + t.trim());
+    };
+    rec.onerror = (e: any) => { if (e?.error === "not-allowed") setError("Microphone access was blocked."); stopDictation(); };
+    rec.onend = () => setListening(false);
+    try { rec.start(); recRef.current = rec; setListening(true); } catch { setListening(false); }
+  };
+  const openReplace = () => {
+    const sel = getDocument().selection?.trim();
+    if (!sel) { setError("Select the text you want to replace in the document first."); return; }
+    setError(""); setReplaceText(""); setReplaceFor(sel);
+  };
+  const closeReplace = () => { stopDictation(); setReplaceFor(null); setReplaceText(""); };
+  const confirmReplace = () => {
+    const t = replaceText.trim();
+    if (!t) return;
+    onApply(markdownToDocumentHtml(t), "selection");
+    closeReplace();
+  };
+  useEffect(() => () => stopDictation(), []);
 
   useEffect(() => {
     try { setMessages(JSON.parse(localStorage.getItem(memKey(docKey)) || "[]")); } catch { setMessages([]); }
@@ -178,7 +213,7 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
                     ["append", FilePlus2, "Append"],
                     ["replace", RefreshCw, "Replace document"],
                   ] as [ApplyMode, any, string][]).map(([mode, Icon, label]) => (
-                    <Button key={mode} variant="outline" size="sm" className="h-6 px-2 text-[10px] gap-1" onClick={() => onApply(markdownToDocumentHtml(m.content), mode)}>
+                    <Button key={mode} variant="outline" size="sm" className="h-6 px-2 text-[10px] gap-1" onClick={() => mode === "selection" ? openReplace() : onApply(markdownToDocumentHtml(m.content), mode)}>
                       <Icon className="h-3 w-3" /> {label}
                     </Button>
                   ))}
@@ -189,6 +224,32 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
         ))}
         {error && <p className="rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1.5 text-xs text-destructive">{error}</p>}
       </div>
+
+      {replaceFor !== null && (
+        <div className="border-t p-2 space-y-2 bg-muted/40">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs font-semibold">What would you like to write instead?</p>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={closeReplace} title="Cancel"><X className="h-3.5 w-3.5" /></Button>
+          </div>
+          <p className="line-clamp-2 text-[11px] text-muted-foreground">Replacing: "{replaceFor}"</p>
+          <Textarea
+            autoFocus
+            value={replaceText}
+            onChange={(e) => setReplaceText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); confirmReplace(); } }}
+            placeholder="Type or press the mic and speak..."
+            className="min-h-[60px] resize-none text-xs"
+          />
+          <div className="flex gap-1.5">
+            <Button size="sm" variant={listening ? "destructive" : "outline"} className="h-7 gap-1 text-[11px]" onClick={listening ? stopDictation : startDictation}>
+              {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />} {listening ? "Stop" : "Dictate"}
+            </Button>
+            <Button size="sm" className="h-7 flex-1 gap-1 text-[11px]" disabled={!replaceText.trim()} onClick={confirmReplace}>
+              <Replace className="h-3.5 w-3.5" /> Replace selection
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="border-t p-2">
         <div className="relative">
