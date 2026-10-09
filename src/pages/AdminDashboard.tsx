@@ -72,6 +72,7 @@ import InvoiceBilling from '@/components/admin/InvoiceBilling';
 import EquityContractsManager from '@/components/admin/EquityContractsManager';
 import MembershipGrants from '@/components/admin/MembershipGrants';
 import LiveGuestsManagement from '@/components/admin/LiveGuestsManagement';
+import LiveSessionLogs from '@/components/admin/LiveSessionLogs';
 import Invoice from '@/pages/Invoice';
 
 
@@ -287,7 +288,7 @@ const AdminDashboard = () => {
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
-          <TabsContent value="live-guests"><LiveGuestsManagement /></TabsContent>
+          <TabsContent value="live-guests"><LiveGuestsManagement /><LiveSessionLogs /></TabsContent>
           <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
           <TabsContent value="workspace-bookings"><WorkspaceBookingsManagement /></TabsContent>
           <TabsContent value="flights"><FlightsManagement /></TabsContent>
