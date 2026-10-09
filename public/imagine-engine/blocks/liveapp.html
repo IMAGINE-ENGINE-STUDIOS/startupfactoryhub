@@ -27,9 +27,22 @@
   var q = new URLSearchParams(location.search), file = q.get("file") || "", kind = q.get("kind") || "react";
   function host() { var w = window; try { while (w.parent && w.parent !== w) { w = w.parent; if (w.__IEFiles) return w; } } catch (e) {} return null; }
   function src() { var h = host(); try { return (h && h.__IEFiles.get(file)) || localStorage.getItem("ie-live:" + file) || ""; } catch (e) { return ""; } }
-  function fail(m) { var e = document.getElementById("ie-err"); e.style.display = "block"; e.textContent = "App error: " + m; try { var h = host(); h && h.__IE && h.__IE.log("Live app " + file + ": " + m, "error"); } catch (x) {} }
-  window.addEventListener("error", function (e) { fail(e.message); });
-  window.addEventListener("unhandledrejection", function (e) { fail((e.reason && e.reason.message) || String(e.reason)); });
+  var lastErr = "";
+  function fail(m, stack) {
+    m = String(m || "Unknown error"); if (m === lastErr) return; lastErr = m;
+    var e = document.getElementById("ie-err"), h = host(); e.style.display = "block"; e.textContent = "App error: " + m;
+    var info = { ie: "liveapp-error", file: file, message: m, stack: String(stack || "").slice(0, 2000) };
+    try { (h || parent).postMessage(info, "*"); } catch (x) {}
+    if (h) {
+      var b = document.createElement("button"); b.textContent = "Auto-repair with AI";
+      b.style.cssText = "display:block;margin-top:8px;font:600 12px system-ui;padding:6px 12px;border-radius:9999px;border:0;background:#3b82f6;color:#fff;cursor:pointer";
+      b.onclick = function () { b.disabled = true; b.textContent = "Repairing…"; try { h.postMessage(Object.assign({}, info, { ie: "liveapp-autoheal" }), "*"); } catch (x) {} };
+      e.appendChild(b);
+    }
+  }
+  window.__IEFail = fail;
+  window.addEventListener("error", function (e) { fail(e.message, e.error && e.error.stack); });
+  window.addEventListener("unhandledrejection", function (e) { fail((e.reason && e.reason.message) || String(e.reason), e.reason && e.reason.stack); });
   function load(u) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = u; s.onload = res; s.onerror = function () { rej(new Error("Could not load " + u)); }; document.head.appendChild(s); }); }
 
   /* ---- Dev-tab module resolver: relative imports load sibling files from the Dev tab ---- */
@@ -39,6 +52,8 @@
     var base = spec.charAt(0) === "@" && spec.charAt(1) === "/" ? spec.slice(2) : join(from, spec);
     var tries = [base, base + ".tsx", base + ".ts", base + ".jsx", base + ".js", base + "/index.tsx", base + "/index.ts"];
     for (var i = 0; i < tries.length; i++) { var c = getFile(tries[i]); if (c != null && c !== "") return { name: tries[i], code: c }; }
+    var kit = /(?:^|\/)(components\/ui\/[\w-]+|lib\/utils)$/.exec(base.replace(/\.(tsx?|jsx?)$/, ""));
+    if (kit && window.__IE_UI && window.__IE_UI[kit[1]]) return { name: "@ui/" + kit[1] + ".tsx", code: window.__IE_UI[kit[1]] };
     return null;
   }
   var deps = {};
