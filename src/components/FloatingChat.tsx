@@ -1,5 +1,7 @@
 import DistrictChatTab from '@/components/DistrictChatTab';
 import { districtChat, type DistrictChatState } from '@/lib/districtChatBus';
+import Studio3DTab from '@/components/Studio3DTab';
+import { studio3d, type Studio3DState } from '@/lib/studio3dBus';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, type LucideIcon } from 'lucide-react';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
