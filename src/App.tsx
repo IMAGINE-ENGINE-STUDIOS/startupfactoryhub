@@ -20,10 +20,10 @@ const InteractiveTour = lazy(() => import("./components/InteractiveTour"));
 const Tracker = lazy(() => import("./components/Tracker"));
 const DJAudioEngine = lazy(() => import("./components/dj/DJAudioEngine"));
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import ProfileSetup from "./pages/ProfileSetup";
-import DashboardRouter from "./components/DashboardRouter";
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ProfileSetup = lazy(() => import("./pages/ProfileSetup"));
+const DashboardRouter = lazy(() => import("./components/DashboardRouter"));
 
 // Code-split heavy pages
 const Tools = lazy(() => import("./pages/Tools"));

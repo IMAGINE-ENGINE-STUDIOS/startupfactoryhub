@@ -337,7 +337,7 @@ const Dashboard = () => {
   // Guest mode
   if (!user) {
     return <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="w-full max-w-none px-4 sm:px-6 xl:px-8 py-6 sm:py-8">
           <GuestPrompt feature="Full Dashboard" description="Create an account to access your personalized dashboard, track progress, connect with mentors, and more." />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             <Card>
@@ -362,7 +362,7 @@ const Dashboard = () => {
   return <div className="min-h-screen bg-background pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
+      <div className="w-full max-w-none px-2 sm:px-4 md:px-6 xl:px-8 pt-2 sm:pt-4 pb-4">
 
         {/* User avatar */}
         <div className="mb-4 sm:mb-6 flex justify-start">
