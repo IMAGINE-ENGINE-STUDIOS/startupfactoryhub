@@ -158,6 +158,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     const url = new URL(window.location.href);
     let h = url.searchParams.get('host');
     if (h && DEMO_HOST_IDS.includes(h) && user?.id) h = null; // old demo account links never own a room
+    // The CEO account always hosts the main conference room, whatever the link says.
+    if (name === 'main' && user?.id && user.email?.toLowerCase() === 'ceo@imagineengine.space' && h !== user.id) h = null;
     // The public conference room ("main") is only ever hosted by a platform admin; other rooms by whoever opens them first.
     if (!h && user?.id && (name !== 'main' || isAdmin)) {
       h = user.id;
