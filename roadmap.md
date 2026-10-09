@@ -91,3 +91,8 @@
 - [x] Host mic/camera/stage controls, audience mode
 - [x] Startup Factory packages in Shop tab with images
 - [x] Direct Stripe checkout for viewers
+
+## Live Video: guests + backgrounds
+- [ ] Guest check-in form (name, email, startup/investor) before joining; saved to database
+- [ ] Admin panel "Live Guests" tab with search, filter, CSV export
+- [ ] Video backgrounds: blur, sample images, custom upload
