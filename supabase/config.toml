@@ -284,3 +284,6 @@ verify_jwt = true
 
 [functions.send-equity-contract]
 verify_jwt = true
+
+[functions.live-transcribe]
+verify_jwt = false
