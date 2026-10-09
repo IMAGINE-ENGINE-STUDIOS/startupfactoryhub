@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon } from 'lucide-react';
+import UserProfileDialog from './UserProfileDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -68,6 +69,7 @@ interface AcceleratorProfile {
 }
 
 export default function MatchingSystem() {
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [mentorMatches, setMentorMatches] = useState<Match[]>([]);
   const [investorMatches, setInvestorMatches] = useState<Match[]>([]);
   const [startupMatches, setStartupMatches] = useState<Match[]>([]);
@@ -1293,6 +1295,18 @@ export default function MatchingSystem() {
           </div>
         )}
         
+        {!/^(legacy|company)-/.test(match.id) && (
+          <div className="flex gap-2 mb-2">
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => setProfileUserId(match.id)}>
+              <UserIcon className="h-4 w-4 mr-2" />
+              View profile
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } }))}>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Message
+            </Button>
+          </div>
+        )}
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={onPass} className="flex-1">
             <X className="h-4 w-4 mr-2" />
@@ -1563,6 +1577,7 @@ export default function MatchingSystem() {
         open={isScannerOpen}
         onOpenChange={setIsScannerOpen}
       />
+      <UserProfileDialog userId={profileUserId} open={!!profileUserId} onOpenChange={(o) => !o && setProfileUserId(null)} />
     </div>
   );
 }
