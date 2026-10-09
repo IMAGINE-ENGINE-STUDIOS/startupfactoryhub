@@ -280,6 +280,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed });
   roomRef.current = { spot: spotlight, audience: rules.audience, allowed };
   const syncRoom = useCallback(() => { if (isHost) sendRef.current({ t: 'room', ...roomRef.current }); }, [isHost]);
+  useEffect(() => { syncRoom(); }, [spotlight, rules.audience, allowed, peerCount, token, syncRoom]);
   const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
   const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke') => {
     if (a === 'allow') setAllowed((l) => l.includes(to) ? l : [...l, to]);
@@ -456,8 +457,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       {catalog.length > 0 && (
         <div className="px-4 pb-3 flex gap-2 overflow-x-auto">
           {catalog.map((p) => (
-            <button key={p.id} onClick={() => addToCart(p)} className="shrink-0 flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white font-mono text-xs text-zinc-800 hover:bg-zinc-100">
-              <Thumb p={p} className="w-8 h-8 rounded-full" />{p.name} • ${p.price}<Plus className="w-3 h-3" />
+            <button key={p.id} onClick={() => buy(p)} className="shrink-0 flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white font-mono text-xs text-zinc-800 hover:bg-zinc-100">
+              <Thumb p={p} className="w-8 h-8 rounded-full" />{p.name} • {priceLabel(p)}<Plus className="w-3 h-3" />
             </button>
           ))}
         </div>
@@ -477,8 +478,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         )}
         <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-zinc-900 border border-white/10">
           {[
-            { on: mic, icon: mic ? Mic : MicOff, fn: () => setMic((v) => !v), label: 'Microphone', danger: true },
-            { on: cam, icon: cam ? Video : VideoOff, fn: () => setCam((v) => !v), label: 'Camera', danger: true },
+            { on: mic, icon: mic ? Mic : MicOff, fn: () => canSpeak ? setMic((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Microphone' : 'Microphone (host invite needed)', danger: true },
+            { on: cam, icon: cam ? Video : VideoOff, fn: () => canSpeak ? setCam((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Camera' : 'Camera (host invite needed)', danger: true },
             { on: sharing, icon: MonitorUp, fn: toggleShare, label: 'Share screen' },
             { on: presentOpen || !!presenting, icon: Presentation, fn: () => setPresentOpen((v) => !v), label: 'Present' },
             { on: hand, icon: Hand, fn: () => setHand((h) => !h), label: 'Raise hand' },
@@ -512,7 +513,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{drop.name}</p>
               <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
-              <button onClick={() => addToCart(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm"><ShoppingBag className="w-4 h-4" />Add to Cart</button>
+              <button disabled={paying === drop.id} onClick={() => buy(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm disabled:opacity-60"><ShoppingBag className="w-4 h-4" />{drop.pkg ? (paying === drop.id ? 'Opening checkout…' : 'Subscribe now') : 'Add to Cart'}</button>
             </div>
           </div>
         </div>
@@ -522,7 +523,36 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
 
       <div className="flex items-center justify-between">
         <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">CATALOG</p>
-        {canSell && !adding && <button onClick={() => setAdding(true)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Plus className="w-3 h-3" />Add product</button>}
+        {canSell && !adding && <span className="flex gap-3">
+          <button onClick={() => setShowPkgs((v) => !v)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Crown className="w-3 h-3" />{showPkgs ? 'Hide packages' : 'Startup Factory packages'}</button>
+          <button onClick={() => setAdding(true)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Plus className="w-3 h-3" />Add product</button>
+        </span>}
+      </div>
+
+      {canSell && showPkgs && (
+        <div className="grid grid-cols-2 gap-2">
+          {SFH_PACKAGES.map((k) => {
+            const inCat = catalog.some((x) => x.id === `pkg-${k.id}`);
+            return (
+              <div key={k.id} className="rounded-2xl border border-zinc-200 overflow-hidden flex flex-col">
+                <div className="relative h-20">
+                  <img src={k.image} alt={k.name} loading="lazy" width={816} height={816} className="w-full h-full object-cover" />
+                  <span className="absolute left-2 top-2 font-mono text-[9px] px-2 py-0.5 rounded-full bg-black/60 text-white">{k.tag}</span>
+                </div>
+                <div className="p-2.5 flex-1 flex flex-col">
+                  <p className="text-[13px] text-zinc-900 leading-tight">{k.name}</p>
+                  <p className="font-mono text-[11px] text-zinc-500 mt-0.5">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
+                  <div className="mt-2 flex gap-1.5">
+                    <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-1 rounded-full border border-zinc-200 text-[11px] text-zinc-800 disabled:opacity-50">{inCat ? 'Added' : 'Add'}</button>
+                    <button onClick={() => addPackage(k, true)} className="flex-1 py-1 rounded-full bg-zinc-900 text-white text-[11px]">Drop</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div className="hidden">
       </div>
 
       {adding && (
@@ -557,9 +587,10 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
               <p className="flex-1 text-[15px] text-zinc-900 truncate">{p.name}</p>
               {canSell && <button aria-label="Delete product" onClick={() => deleteProduct(p.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
             </div>
-            <p className="font-mono text-xs text-zinc-500 mt-1">${p.price}{p.tag && ` • ${p.tag}`}</p>
+            <p className="font-mono text-xs text-zinc-500 mt-1">{priceLabel(p)}{p.tag && ` • ${p.tag}`}</p>
+            {p.perks && <ul className="mt-1 text-[11px] text-zinc-500 space-y-0.5">{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>}
             <div className="mt-2 flex gap-2">
-              <button onClick={() => addToCart(p)} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm">Add</button>
+              <button disabled={paying === p.id} onClick={() => buy(p)} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add'}</button>
               {canSell && <button onClick={() => pushToAll(p)} className="px-4 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">Push to All</button>}
             </div>
           </div>
@@ -641,6 +672,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
               <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
               <Toggle on={rules.hostProducts} onClick={() => setRules((r) => ({ ...r, hostProducts: !r.hostProducts }))} title="Only host can share products" sub="Commerce control" />
+              <Toggle on={rules.audience} onClick={() => setRules((r) => ({ ...r, audience: !r.audience }))} title="Audience mode" sub="Guests watch only until you invite them to speak" />
+              <Toggle on={rules.autoFollow} onClick={() => setRules((r) => ({ ...r, autoFollow: !r.autoFollow }))} title="Auto-follow speaker" sub="Pins whoever is talking for everyone" />
             </div>
           </>
         )}
