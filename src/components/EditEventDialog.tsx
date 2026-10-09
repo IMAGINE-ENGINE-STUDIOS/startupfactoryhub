@@ -66,7 +66,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
         external_registration_url: event.external_registration_url || '',
       });
       
-      setIsOnlineEvent(event.location?.includes('whereby.com') || false);
+      setIsOnlineEvent(!!event.location?.match(/live-video|whereby\.com/));
     }
   }, [event]);
 
@@ -121,7 +121,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
       }
 
       let meetingLocation = formData.location;
-      const wasOnline = event.location?.includes('whereby.com');
+      const wasOnline = event.location?.match(/live-video|whereby\.com/);
       const nowOnline = isOnlineEvent;
       const originalEndDate = new Date(event.end_date);
       const now = new Date();

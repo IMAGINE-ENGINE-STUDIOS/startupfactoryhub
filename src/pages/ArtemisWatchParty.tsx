@@ -252,10 +252,10 @@ const ArtemisWatchParty = () => {
                   </span>
                 </div>
                 <iframe
-                  src="https://startupfactoryhub.whereby.com/artemisabbc13fd-08fc-4667-ac1e-99e603a7db2c"
+                  src="/live-video?room=artemis"
                   allow="camera; microphone; fullscreen; speaker; display-capture"
                   className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
-                  title="Whereby Community Room — 200 Participants"
+                  title="Community Room — 200 Participants"
                 />
                 <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
                   STARTUP FACTORY HUB — LIVE COMMUNITY ROOM (200 MAX CAPACITY)

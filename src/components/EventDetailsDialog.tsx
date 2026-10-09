@@ -221,7 +221,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
-  const isOnlineEvent = event.location?.includes('whereby.com');
+  const isOnlineEvent = event.location?.match(/live-video|whereby\.com/);
   
   const timeData = useMemo(() => {
     const eventStartDate = new Date(event.start_date);
