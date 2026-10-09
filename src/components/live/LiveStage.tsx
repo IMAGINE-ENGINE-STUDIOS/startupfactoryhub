@@ -80,8 +80,22 @@ export default function LiveStage(p: Props) {
             ))}
           </div>
         </div>
+      ) : tiles.length > 4 ? (
+        // More than 4 people: tiles stop shrinking; the first 4 fill the stage, the rest scroll in a slider.
+        <div className="flex h-full gap-3">
+          <div className="grid flex-1 min-w-0 h-full gap-3 grid-cols-2 grid-rows-2">
+            {tiles.slice(0, 4).map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
+          </div>
+          <div className="w-56 shrink-0 h-full overflow-y-auto flex flex-col gap-2 pr-1">
+            {tiles.slice(4).map((t) => (
+              <div key={t.participant.identity} className="aspect-video shrink-0">
+                <Tile t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
-        <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${colsFor(tiles.length)}, minmax(0, 1fr))`, gridAutoRows: '1fr', gridTemplateRows: `repeat(${Math.ceil(Math.max(1, tiles.length) / colsFor(tiles.length))}, minmax(0, 1fr))` }}>
+        <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${colsFor(tiles.length)}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.ceil(Math.max(1, tiles.length) / colsFor(tiles.length))}, minmax(0, 1fr))` }}>
           {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
         </div>
       )}
