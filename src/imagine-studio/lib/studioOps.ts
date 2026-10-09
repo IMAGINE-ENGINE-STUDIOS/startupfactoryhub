@@ -40,6 +40,7 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
         if (o.id) alias.set(String(o.id), id);
         const base = { id, name: String(o.name || "Object").slice(0, 80), position: v3(o.position, [0, 0.5, 0]), rotation: v3(o.rotation, [0, 0, 0]), scale: v3(o.scale, [1, 1, 1]), visible: true, ...(layerId ? { layerId } : {}) };
         if (o.kind === "model" && typeof o.url === "string") s.objects.push({ ...base, kind: "model", url: o.url, fileName: o.fileName });
+        else if (o.kind === "theater") s.objects.push({ ...base, name: String(o.name || "Theater Screen").slice(0, 80), position: v3(o.position, [0, 3, 0]), scale: v3(o.scale, [6, 6, 1]), kind: "primitive", theater: true, shape: "plane", color: [0.05, 0.05, 0.07, 1], metalness: 0, roughness: 1 });
         else s.objects.push({ ...base, kind: "primitive", shape: SHAPES.includes(o.shape) ? o.shape : "box", color: rgba(o.color, [0.8, 0.8, 0.8, 1]), metalness: num(o.metalness, 0), roughness: num(o.roughness, 0.7) });
         newIds.push(id); applied++;
       } else if (op.op === "update") {

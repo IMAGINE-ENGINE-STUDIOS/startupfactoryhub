@@ -374,6 +374,13 @@
     spawn3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "spawn" }, p)) + " spawned " + (p.id || p.shape || "box"); },
     move3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "move" }, p)) + " moved " + p.id; },
     color3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "color" }, p)) + " recolored " + p.id; },
+    scale3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "scale" }, p)) + " scaled " + p.id; },
+    rotate3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "rotate" }, p)) + " rotated " + p.id; },
+    spin3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "spin" }, p)) + " spinning " + p.id; },
+    visible3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "visible" }, p)) + " visibility " + p.id; },
+    camera3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "camera" }, p)) + " camera moved"; },
+    light3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "light" }, p)) + " lights updated"; },
+    theater3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "theater" }, p)) + " theater " + (p.kind || "screen"); },
     remove3D: function (p) { return send3D(Object.assign({ __IE3D: "cmd", op: "remove" }, p)) + " removed " + p.id; },
     on3DEvent: function (p) {
       if (!window.__IEBus || !p.event) throw new Error("Choose an event, e.g. game:over");

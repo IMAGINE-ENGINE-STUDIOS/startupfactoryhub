@@ -10,6 +10,51 @@ import {
   GLTFExporter,
 } from "three-stdlib";
 import DxfParser from "dxf-parser";
+import { unzipSync } from "fflate";
+import { GLTFLoader, MTLLoader } from "three-stdlib";
+
+/** Opens a .zip (Sketchfab glTF zips or user uploads) and imports the model inside. */
+async function importZip(file: File): Promise<string> {
+  const files = unzipSync(new Uint8Array(await readArrayBuffer(file)));
+  const names = Object.keys(files).filter((n) => !n.startsWith("__MACOSX") && !n.endsWith("/"));
+  const mime = (n: string) => (/\.png$/i.test(n) ? "image/png" : /\.jpe?g$/i.test(n) ? "image/jpeg" : /\.webp$/i.test(n) ? "image/webp" : "application/octet-stream");
+  const urls = new Map<string, string>();
+  for (const n of names) urls.set(n.toLowerCase(), URL.createObjectURL(new Blob([files[n]], { type: mime(n) })));
+  const base = (n: string) => n.split("/").pop()!.toLowerCase();
+  const resolve = (from: string, rel: string) => {
+    const clean = decodeURIComponent(rel.replace(/^\.\//, "")).toLowerCase();
+    const dir = from.includes("/") ? from.slice(0, from.lastIndexOf("/") + 1).toLowerCase() : "";
+    return urls.get(dir + clean) || urls.get(clean) || [...urls.entries()].find(([k]) => base(k) === base(clean))?.[1];
+  };
+  const pick = (re: RegExp) => names.filter((n) => re.test(n)).sort((a, b) => a.split("/").length - b.split("/").length)[0];
+  try {
+    const glb = pick(/\.glb$/i);
+    if (glb) return await sceneOrGroupToGLB((await new GLTFLoader().parseAsync(files[glb].buffer.slice(files[glb].byteOffset, files[glb].byteOffset + files[glb].byteLength), "")).scene);
+    const gltf = pick(/\.gltf$/i);
+    if (gltf) {
+      const mgr = new THREE.LoadingManager();
+      mgr.setURLModifier((u) => (u.startsWith("blob:") || u.startsWith("data:") ? u : resolve(gltf, u.replace(/^.*?blob:[^/]*\/[^/]*\//, "")) || u));
+      const text = new TextDecoder().decode(files[gltf]);
+      const res: any = await new Promise((ok, bad) => new GLTFLoader(mgr).parse(text, "", ok, bad));
+      return await sceneOrGroupToGLB(res.scene);
+    }
+    const obj = pick(/\.obj$/i);
+    if (obj) {
+      const loader = new OBJLoader();
+      const mtl = pick(/\.mtl$/i);
+      if (mtl) {
+        const mgr = new THREE.LoadingManager(); mgr.setURLModifier((u) => resolve(mtl, u.split("/").pop() || u) || u);
+        const mats = new MTLLoader(mgr).parse(new TextDecoder().decode(files[mtl]), ""); mats.preload(); loader.setMaterials(mats);
+      }
+      return await sceneOrGroupToGLB(loader.parse(new TextDecoder().decode(files[obj])));
+    }
+    const other = pick(/\.(fbx|stl|dae|3ds|ply)$/i);
+    if (other) return (await importModelFile(new File([files[other]], base(other)))).url;
+    throw new Error("No 3D model found inside the zip (looked for .glb, .gltf, .obj, .fbx, .stl, .dae, .ply).");
+  } finally {
+    setTimeout(() => urls.forEach((u) => URL.revokeObjectURL(u)), 30000);
+  }
+}
 
 /**
  * Re-export USDZ helpers here so callers can `import { downloadAsUsdz }`
@@ -35,6 +80,7 @@ export const NATIVE_FORMATS = [
   "3ds",
   "ply",
   "dxf",
+  "zip",
 ] as const;
 
 export const CAD_FORMATS = [
@@ -175,6 +221,8 @@ function dxfToGroup(parsed: any): THREE.Group {
 export async function importModelFile(file: File): Promise<ImportedModel> {
   const ext = extOf(file.name);
   const base = { fileName: file.name, sourceFormat: ext };
+
+  if (ext === "zip") return { ...base, url: await importZip(file) };
 
   if (ext === "glb" || ext === "gltf") {
     const url = await readDataURL(file);

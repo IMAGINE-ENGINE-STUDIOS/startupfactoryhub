@@ -41,6 +41,7 @@ import PerfSampler from "./perf/PerfSampler";
 import PerfHUD from "./perf/PerfHUD";
 import { buildNaniteLods, updateNanite } from "@/lib/nanite";
 import { Imagine3DBridge } from "./Imagine3DBridge";
+import StudioTheater from "./StudioTheater";
 
 /* ---------- helpers ---------- */
 
@@ -903,6 +904,7 @@ function RenderObject({
   immediatePlayCamera?: boolean;
 }) {
   const selected = selectedId === obj.id;
+  if (obj.kind === "primitive" && (obj as any).theater) return <StudioTheater obj={obj} selected={selected} onSelect={onSelect} />;
   if (obj.kind === "primitive") return <PrimitiveMesh obj={obj} selected={selected} onSelect={onSelect} />;
   if (obj.kind === "polygon") return <PolygonMesh obj={obj} selected={selected} onSelect={onSelect} />;
   if (obj.kind === "model") return <GLTFModelMesh obj={obj} onSelect={onSelect} />;

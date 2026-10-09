@@ -478,7 +478,10 @@ export default function PlazaPage() {
       });
       r.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _pub, p: RemoteParticipant) => {
         if (track.kind === Track.Kind.Video && track.source === Track.Source.ScreenShare) {
-          const el = track.attach() as HTMLVideoElement; el.muted = true; el.playsInline = true; el.style.display = 'none'; document.body.appendChild(el); el.play().catch(() => {});
+          const el = track.attach() as HTMLVideoElement; el.muted = true; el.playsInline = true; el.autoplay = true;
+          // Keep it rendered (not display:none) so the browser keeps decoding and LiveKit keeps sending frames.
+          el.style.cssText = 'position:fixed;left:0;top:0;width:320px;height:180px;opacity:0.01;pointer-events:none;z-index:-1';
+          document.body.appendChild(el); el.play().catch(() => {});
           setTheater({ kind: 'video', el, by: p.name || 'Host' });
           return;
         }
@@ -547,7 +550,7 @@ export default function PlazaPage() {
       stopDoc();
       const pub = await r.localParticipant.setScreenShareEnabled(true, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
       const mst = pub?.track?.mediaStreamTrack; if (!mst) return;
-      const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.play().catch(() => {});
+      const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.style.cssText = 'position:fixed;left:0;top:0;width:320px;height:180px;opacity:0.01;pointer-events:none;z-index:-1'; document.body.appendChild(el); el.play().catch(() => {});
       setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true);
     } catch { setErr('Screen sharing was cancelled or blocked.'); }
   };
