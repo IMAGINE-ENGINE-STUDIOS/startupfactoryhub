@@ -10,7 +10,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { MessageSquare, ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
