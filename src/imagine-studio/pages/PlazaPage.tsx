@@ -46,6 +46,7 @@ function GlbCharacter({ url, yaw, moving, tint }: { url: string; yaw: number; mo
   const { scene, animations } = useGLTF(url);
   const model = useMemo(() => {
     const m = skeletonClone(scene) as THREE.Object3D;
+    m.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(m);
     const h = box.max.y - box.min.y || 1;
     const s = 1.8 / h;
@@ -456,12 +457,16 @@ export default function PlazaPage() {
         const ids = new Set(sp.map((s) => s.identity));
         peers.current.forEach((p, id) => { p.speaking = ids.has(id); });
       });
-      await r.connect(data.url || import.meta.env.VITE_LIVEKIT_URL, data.token);
+      await Promise.race([
+        r.connect(data.url || import.meta.env.VITE_LIVEKIT_URL, data.token),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
+      ]).catch((e) => { r.disconnect(); throw Object.assign(e, { solo: true }); });
       room.current = r;
       setCount(r.remoteParticipants.size + 1);
       setJoined(true);
       try { await r.localParticipant.setMicrophoneEnabled(true); setMic(true); } catch { setErr('Microphone blocked — allow it in your browser to talk.'); }
     } catch (e: any) {
+      if (e?.solo) { setJoined(true); setErr('Voice and chat are unavailable right now — you are exploring solo.'); return; }
       setErr(e?.message || 'Could not join the plaza.');
     } finally { setBusy(false); }
   };
