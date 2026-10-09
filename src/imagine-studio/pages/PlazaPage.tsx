@@ -290,14 +290,18 @@ function TurnButton({ dir, input }: { dir: 1 | -1; input: React.MutableRefObject
 }
 
 /* ---------- Character Room preview ---------- */
-function CharacterPreview({ char, color }: { char: string; color: string }) {
+function Spinner({ children }: { children: React.ReactNode }) {
   const g = useRef<THREE.Group>(null);
   useFrame((_, dt) => { if (g.current) g.current.rotation.y += dt * 0.6; });
+  return <group ref={g} position={[0, -0.6, 0]}>{children}</group>;
+}
+
+function CharacterPreview({ char, color }: { char: string; color: string }) {
   return (
     <Canvas camera={{ position: [0, 1.3, 3.6], fov: 40 }} dpr={[1, 1.5]}>
       <ambientLight intensity={0.8} />
       <directionalLight position={[3, 5, 3]} intensity={1.3} />
-      <group ref={g} position={[0, -0.6, 0]}><Avatar char={char} color={color} name="" moving={false} speaking={false} /></group>
+      <Spinner><Avatar char={char} color={color} name="" moving={false} speaking={false} /></Spinner>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.6, 0]}><circleGeometry args={[1.4, 48]} /><meshStandardMaterial color="#cfc6b6" /></mesh>
     </Canvas>
   );
