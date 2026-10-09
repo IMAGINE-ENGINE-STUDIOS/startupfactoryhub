@@ -5166,6 +5166,36 @@ export type Database = {
         }
         Relationships: []
       }
+      live_session_logs: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          kind: string
+          room_name: string
+          speaker: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          kind?: string
+          room_name: string
+          speaker?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          room_name?: string
+          speaker?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       map_search_history: {
         Row: {
           id: string

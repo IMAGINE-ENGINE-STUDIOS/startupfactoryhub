@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { VideoTrack, useTracks, useSpeakingParticipants, isTrackReference } from '@livekit/components-react';
 import type { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { Track } from 'livekit-client';
-import { Pin, PinOff, Mic, MicOff, VideoOff, Crown, Megaphone, UserX, X } from 'lucide-react';
+import { Pin, PinOff, Mic, MicOff, VideoOff, Crown, Megaphone, UserX, X, Video } from 'lucide-react';
 
 const initials = (n: string) => n.split(/[\s@._-]+/).filter(Boolean).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 
@@ -14,7 +14,7 @@ type Props = {
   autoFollow: boolean;
   audience: boolean;
   allowed: string[];
-  onMod: (to: string, action: 'mute' | 'cam' | 'allow' | 'revoke' | 'kick') => void;
+  onMod: (to: string, action: 'mute' | 'cam' | 'unmute' | 'camon' | 'allow' | 'revoke' | 'kick') => void;
   hero: ReactNode | null;
   localAvatar?: string;
 };
@@ -132,8 +132,12 @@ function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allow
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <TileBtn label={isPinned ? 'Unpin' : isHost ? 'Pin for everyone' : 'Pin'} onClick={() => onPin(isPinned ? null : id)}>{isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}</TileBtn>
         {isHost && !local && <>
-          <TileBtn label="Mute microphone" onClick={() => onMod(id, 'mute')}><MicOff className="w-3.5 h-3.5" /></TileBtn>
-          <TileBtn label="Turn camera off" onClick={() => onMod(id, 'cam')}><VideoOff className="w-3.5 h-3.5" /></TileBtn>
+          {micOn
+            ? <TileBtn label="Mute microphone" onClick={() => onMod(id, 'mute')}><MicOff className="w-3.5 h-3.5" /></TileBtn>
+            : <TileBtn label="Ask to turn mic on" onClick={() => onMod(id, 'unmute')}><Mic className="w-3.5 h-3.5" /></TileBtn>}
+          {pt.isCameraEnabled
+            ? <TileBtn label="Turn camera off" onClick={() => onMod(id, 'cam')}><VideoOff className="w-3.5 h-3.5" /></TileBtn>
+            : <TileBtn label="Ask to turn camera on" onClick={() => onMod(id, 'camon')}><Video className="w-3.5 h-3.5" /></TileBtn>}
           {audience && (onStage
             ? <TileBtn label="Move to audience" onClick={() => onMod(id, 'revoke')}><UserX className="w-3.5 h-3.5" /></TileBtn>
             : <TileBtn label="Invite to speak" onClick={() => onMod(id, 'allow')}><Megaphone className="w-3.5 h-3.5" /></TileBtn>)}
