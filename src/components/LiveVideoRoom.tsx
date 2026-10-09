@@ -843,8 +843,6 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <div className="flex items-center justify-between pt-2"><span className="text-[15px] text-zinc-900">Time limit</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-100 text-zinc-800">{timeLabel}</span></div>
             <input type="range" min={5} max={720} step={5} value={timeLimit} onChange={(e) => setTimeLimit(+e.target.value)} className="w-full accent-zinc-900" />
             <div className="pt-2 space-y-3">
-      <LocalPublisher cam={cam} mic={mic} />
-      <ScreenPublisher on={shareOn} onStream={onShareStream} onEnd={stopShare} onFail={setNotice} />
               <Toggle on={rules.approval} onClick={() => setRules((r) => ({ ...r, approval: !r.approval }))} title="Require approval to join" sub="Host approves lobby" />
               <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
@@ -871,6 +869,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       onError={(e) => setConnError(e.message)} style={{ height: '100vh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
       <LocalPublisher cam={cam} mic={mic} />
+      <ScreenPublisher on={shareOn} onStream={onShareStream} onEnd={stopShare} onFail={setNotice} />
       <BackgroundApplier choice={bg} cam={cam} />
       <PeerCount onCount={setPeerCount} />
       {body}
