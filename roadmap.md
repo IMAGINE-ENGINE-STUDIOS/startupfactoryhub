@@ -87,7 +87,7 @@
 - [ ] Integrate 3D Studio into Imagine Engine (embed level as canvas block; cloud levels table)
 
 ## Live Video upgrade
-- [ ] Full-screen adaptive video layout, pin + speaker suggestion, right-side gallery
-- [ ] Host mic/camera/stage controls, audience mode
-- [ ] Startup Factory packages in Shop tab with images
-- [ ] Direct Stripe checkout for viewers
+- [x] Full-screen adaptive video layout, pin + speaker suggestion, right-side gallery
+- [x] Host mic/camera/stage controls, audience mode
+- [x] Startup Factory packages in Shop tab with images
+- [x] Direct Stripe checkout for viewers
