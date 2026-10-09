@@ -1,3 +1,4 @@
+import { INVESTOR_BENEFITS } from "@/features/investor-plan/config/benefits";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Sparkles, Loader2 } from "lucide-react";
@@ -181,12 +182,13 @@ const acceleratorMemberships: {
   },
 ];
 
-type PlanTabKey = "featured" | "ai" | "startup" | "accelerator";
+type PlanTabKey = "featured" | "ai" | "startup" | "accelerator" | "investor";
 const PLAN_TABS: { key: PlanTabKey; label: string }[] = [
   { key: "featured", label: "Get Started" },
   { key: "ai", label: "Genius AI Plans" },
   { key: "startup", label: "Startup, Student & Advisor" },
   { key: "accelerator", label: "Accelerators & Programs" },
+  { key: "investor", label: "Investors & Funds" },
 ];
 
 const PricingPlansSection = () => {
@@ -526,6 +528,18 @@ const PricingPlansSection = () => {
             {planTab === "startup" && startupMemberships.map(renderStartup)}
             {planTab === "accelerator" && acceleratorMemberships.map(renderAcc)}
           </div>
+          {planTab === "investor" && (
+            <div className="tech-card border-0 mx-auto max-w-3xl rounded-2xl p-6 sm:p-8">
+              <h3 className="text-xl sm:text-2xl font-bold mb-1">Investor Priority</h3>
+              <p className="text-sm text-muted-foreground mb-4">Priority membership for angels, funds and syndicates.</p>
+              <ul className="grid gap-2 sm:grid-cols-2 mb-6">
+                {INVESTOR_BENEFITS.map((b) => (
+                  <li key={b.key} className="flex gap-2 text-sm"><Check className="h-4 w-4 text-primary shrink-0 mt-0.5" /><span><span className="font-medium">{b.label}</span> — <span className="text-muted-foreground">{b.description}</span></span></li>
+                ))}
+              </ul>
+              <button onClick={() => navigate("/investor-plan")} className="w-full sm:w-auto rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">View Investor Plan</button>
+            </div>
+          )}
         </div>
 
 

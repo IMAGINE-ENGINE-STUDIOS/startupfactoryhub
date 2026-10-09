@@ -1,3 +1,4 @@
+import { DeckRequestActions } from '@/components/deck/DeckAccess';
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -201,6 +202,7 @@ export default function NotificationCenter({ className, 'data-tour': dataTour }:
                       <p className="font-medium text-sm">{notification.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {notification.message}
+                        {notification.type === 'pitch_deck_request' && notification.data?.requester_id && <DeckRequestActions requesterId={notification.data.requester_id} />}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatTimestamp(notification.created_at)}

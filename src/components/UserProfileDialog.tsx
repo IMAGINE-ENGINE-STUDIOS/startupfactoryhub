@@ -1,3 +1,4 @@
+import { DeckViewerButton } from '@/components/deck/DeckAccess';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -505,6 +506,10 @@ export default function UserProfileDialog({
 
               <Separator />
 
+              {profile.role !== 'startup' && userId && (
+                <DeckViewerButton ownerId={userId} label={profile.role === 'investor' ? 'Fund Deck' : profile.role === 'accelerator' ? 'Cohort Prospectus' : 'Overview Deck'} />
+              )}
+
               {/* Role-Specific Professional Info */}
               {(profile.role === 'advisor' || profile.role === 'mentor') && (
                 <AdvisorProfileViewPublic userId={userId!} onMessage={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId } }))} />
@@ -563,25 +568,8 @@ export default function UserProfileDialog({
                       )}
                     </div>
 
-                    {roleData.company.pitch_deck_url && (
-                      <>
-                        <Separator />
-                        <div>
-                          <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Pitch Deck
-                          </h4>
-                          <Button
-                            onClick={() => window.open(roleData.company.pitch_deck_url, '_blank')}
-                            variant="outline"
-                            className="w-full gap-2"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            View Pitch Deck
-                          </Button>
-                        </div>
-                      </>
-                    )}
+                    <Separator />
+                    <DeckViewerButton ownerId={userId!} />
                   </CardContent>
                 </Card>
               )}

@@ -1,3 +1,4 @@
+import { DeckAccessSettings } from '@/components/deck/DeckAccess';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -701,6 +702,7 @@ export default function CompanyProfileManager() {
         </TabsContent>
 
         <TabsContent value="deck" className="space-y-4">
+          <DeckAccessSettings showLinkField={false} />
           <PitchDeckUpload 
             companyId={company.id}
             currentDeckUrl={company.pitch_deck_url}

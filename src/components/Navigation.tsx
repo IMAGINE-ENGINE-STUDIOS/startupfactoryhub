@@ -34,6 +34,7 @@ const Navigation = () => {
               </a>
             </Button>
             <Button variant="ghost" onClick={() => navigate("/about")} className="min-h-[44px]">{t('nav.about')}</Button>
+            <Button variant="ghost" onClick={() => navigate("/investor-plan")} className="min-h-[44px]">Investor Plan</Button>
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">{t('nav.dashboard')}</Button>
@@ -65,6 +66,9 @@ const Navigation = () => {
                   </Button>
                   <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => { navigate("/about"); closeMenu(); }}>
                     {t('nav.about')}
+                  </Button>
+                  <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => { navigate("/investor-plan"); closeMenu(); }}>
+                    Investor Plan
                   </Button>
                   {user ? (
                     <>
