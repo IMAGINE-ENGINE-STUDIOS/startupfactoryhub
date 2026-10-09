@@ -127,7 +127,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
         }
 
         const attempt = async () => {
-          if (projectId) {
+          if (projectId && !missingRef.current.has(projectId)) {
             const { data, error } = await supabase
               .from("lightpaper_projects")
               .update({
@@ -137,9 +137,14 @@ export function useLightPaperProjects(projectType?: ProjectType) {
               })
               .eq("id", projectId)
               .select()
-              .single();
+              .maybeSingle();
             if (error) throw error;
-            return data;
+            if (data) return data;
+            // The project was deleted or isn't owned by this user: save as a new copy once.
+            missingRef.current.add(projectId);
+          }
+          if (projectId && replacedRef.current[projectId]) {
+            return { id: replacedRef.current[projectId] } as any;
           }
           const { data, error } = await supabase
             .from("lightpaper_projects")
