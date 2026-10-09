@@ -1,3 +1,5 @@
+import { DeckAccessSettings } from '@/components/deck/DeckAccess';
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
@@ -604,6 +606,16 @@ export default function InvestorDashboard() {
   return <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
       <div className="w-full max-w-none px-4 sm:px-6 xl:px-8 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
+
+        <div className="tech-card border-0 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="font-semibold">Investor Priority</p>
+            <p className="text-sm text-muted-foreground">Proprietary dealflow, priority allocation windows, syndication and direct founder access.</p>
+          </div>
+          <Link to="/investor-plan" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground text-center">View Investor Plan</Link>
+        </div>
+
+        <DeckAccessSettings />
 
         {/* User avatar */}
         <div className="mb-4 sm:mb-6 flex justify-start">
