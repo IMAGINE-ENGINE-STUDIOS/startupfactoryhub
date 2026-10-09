@@ -5,7 +5,7 @@ import { Track } from 'livekit-client';
 import {
   Users, Timer, Crown, Mic, MicOff, Video, VideoOff, Hand, X, Plus, MonitorUp, Presentation,
   Heart, Flame, ThumbsUp, PhoneOff, Upload, Sliders, DollarSign, ShoppingBag, Copy, Check,
-  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2,
+  MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, Sparkles,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,8 @@ import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
 import { SFH_PACKAGES } from './live/sfhPackages';
+import { BackgroundApplier, BackgroundPicker, readBgChoice, type BgChoice } from './live/BackgroundEffects';
+import GuestCheckIn, { readCheckin, type Checkin } from './live/GuestCheckIn';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
 
@@ -104,13 +106,14 @@ function Thumb({ p, className }: { p: Product; className: string }) {
     : <span className={`${className} bg-zinc-200 text-zinc-600 font-mono text-xs flex items-center justify-center`}>{initials(p.name)}</span>;
 }
 
-export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoomProps) {
+function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomProps & { guest?: Checkin | null }) {
   const name = roomName || room || 'live-commerce-room';
   const { user } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const guestId = useMemo(() => `guest-${Math.floor(Math.random() * 100000)}`, []);
   const id = identity || user?.id || guestId;
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Guest';
+  const displayName = profile?.full_name || user?.email?.split('@')[0]
+    || (guest ? `${guest.name} (${guest.role === 'investor' ? 'Investor' : 'Startup'})` : 'Guest');
 
   // Platform admins can always take over as host (e.g. when an old link names someone else).
   const [isAdmin, setIsAdmin] = useState(false);
@@ -152,6 +155,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   // Hosts start live; guests start muted with camera off.
   const [mic, setMic] = useState(isHost);
   const [cam, setCam] = useState(isHost);
+  const [bg, setBg] = useState<BgChoice>(readBgChoice);
+  const [bgOpen, setBgOpen] = useState(false);
   const [hand, setHand] = useState(false);
   const [rec, setRec] = useState(false);
   const [sharing, setSharing] = useState(false);
@@ -537,6 +542,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       )}
 
       <div className="relative mx-4 mb-4 flex justify-center">
+        {bgOpen && <BackgroundPicker choice={bg} onChoose={setBg} onClose={() => setBgOpen(false)} />}
         {presentOpen && (
           <div className="absolute bottom-14 z-30 w-[360px] rounded-2xl bg-zinc-900 border border-white/10 p-3 space-y-2 shadow-2xl">
             <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10">
@@ -552,6 +558,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
           {[
             { on: mic, icon: mic ? Mic : MicOff, fn: () => canSpeak ? setMic((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Microphone' : 'Microphone (host invite needed)', danger: true },
             { on: cam, icon: cam ? Video : VideoOff, fn: () => canSpeak ? setCam((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Camera' : 'Camera (host invite needed)', danger: true },
+            { on: bgOpen || bg.kind !== 'none', icon: Sparkles, fn: () => { setBgOpen((v) => !v); setPresentOpen(false); }, label: 'Background' },
             { on: sharing, icon: MonitorUp, fn: toggleShare, label: 'Share screen' },
             { on: presentOpen || !!presenting, icon: Presentation, fn: () => setPresentOpen((v) => !v), label: 'Present' },
             { on: hand, icon: Hand, fn: () => { const up = !hand; setHand(up); broadcast({ t: 'hand', id, name: displayName, up }); }, label: 'Raise hand' },
@@ -767,9 +774,20 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
       onError={(e) => setConnError(e.message)} style={{ height: '100vh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
       <LocalPublisher cam={cam} mic={mic} />
+      <BackgroundApplier choice={bg} cam={cam} />
       <PeerCount onCount={setPeerCount} />
       {body}
       <RoomAudioRenderer />
     </LiveKitRoom>
   );
+}
+
+// Guests without an account check in with name, email and startup/investor before joining.
+export default function LiveVideoRoom(props: LiveVideoRoomProps) {
+  const { user, loading } = useAuth();
+  const [checkin, setCheckin] = useState<Checkin | null>(readCheckin);
+  const name = props.roomName || props.room || 'live-commerce-room';
+  if (loading) return <div className="w-full h-screen bg-zinc-950" />;
+  if (!user && !checkin) return <GuestCheckIn room={name} onDone={setCheckin} />;
+  return <LiveVideoRoomInner {...props} guest={user ? null : checkin} />;
 }

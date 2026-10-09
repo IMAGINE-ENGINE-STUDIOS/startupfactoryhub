@@ -71,6 +71,7 @@ import InternsManagement from '@/components/admin/InternsManagement';
 import InvoiceBilling from '@/components/admin/InvoiceBilling';
 import EquityContractsManager from '@/components/admin/EquityContractsManager';
 import MembershipGrants from '@/components/admin/MembershipGrants';
+import LiveGuestsManagement from '@/components/admin/LiveGuestsManagement';
 import Invoice from '@/pages/Invoice';
 
 
@@ -203,6 +204,10 @@ const AdminDashboard = () => {
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Subscriptions</span>
             </TabsTrigger>
+            <TabsTrigger value="live-guests" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <Users className="h-4 w-4" />
+              <span className="hidden lg:inline">Live Guests</span>
+            </TabsTrigger>
             <TabsTrigger value="referral-partners" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <Gift className="h-4 w-4" />
               <span className="hidden lg:inline">Referrals</span>
@@ -282,6 +287,7 @@ const AdminDashboard = () => {
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
+          <TabsContent value="live-guests"><LiveGuestsManagement /></TabsContent>
           <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
           <TabsContent value="workspace-bookings"><WorkspaceBookingsManagement /></TabsContent>
           <TabsContent value="flights"><FlightsManagement /></TabsContent>
