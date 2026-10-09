@@ -1218,7 +1218,7 @@ You can help with:
           onClick={() => setIsOpen(true)}
           data-tour="floating-chat"
           aria-label="Open Genius AI"
-          className="genius-bob group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
+          className={`genius-bob group fixed ${location.pathname.startsWith("/live-video") ? "bottom-24" : "bottom-4"} right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer`}
           style={{ contain: 'layout paint' }}
         >
           {/* Pulsing aura (behind everything, contained inside button) */}

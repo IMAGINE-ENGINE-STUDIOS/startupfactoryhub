@@ -17,6 +17,7 @@ type Props = {
   onMod: (to: string, action: 'mute' | 'cam' | 'unmute' | 'camon' | 'allow' | 'revoke' | 'kick') => void;
   hero: ReactNode | null;
   localAvatar?: string;
+  mobile?: boolean;
 };
 
 // Auto-sizing columns so tiles always fill the stage: 1 = full, 2 = halves, 4 = quarters, and so on.
@@ -69,7 +70,25 @@ export default function LiveStage(p: Props) {
         </div>
       )}
 
-      {heroNode ? (
+      {p.mobile && tiles.length > 1 && !heroNode && tiles.length === 2 ? (
+        <div className="grid h-full gap-1.5 grid-rows-2">
+          {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
+        </div>
+      ) : p.mobile && (heroNode || tiles.length > 2) ? (
+        // Phones: one big view on top, everyone else in a sideways swipe row.
+        <div className="flex flex-col h-full gap-1.5">
+          <div className="relative flex-1 min-h-0 rounded-2xl overflow-hidden bg-zinc-900">
+            {heroNode || <Tile t={(speaking[0] && tiles.find((t) => t.participant.identity === speaking[0].identity && !t.participant.isLocal)) || tiles.find((t) => !t.participant.isLocal) || tiles[0]} {...p} speaking big />}
+          </div>
+          <div className="h-28 shrink-0 flex gap-1.5 overflow-x-auto snap-x">
+            {tiles.filter((t) => heroNode ? true : t !== ((speaking[0] && tiles.find((x) => x.participant.identity === speaking[0].identity && !x.participant.isLocal)) || tiles.find((x) => !x.participant.isLocal) || tiles[0])).map((t) => (
+              <div key={t.participant.identity} className="w-24 h-full shrink-0 snap-start">
+                <Tile t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : heroNode ? (
         <div className="flex h-full gap-3">
           <div className="relative flex-1 min-w-0 h-full rounded-2xl overflow-hidden bg-zinc-900">{heroNode}</div>
           <div className="w-56 shrink-0 h-full overflow-y-auto flex flex-col gap-2 pr-1">
@@ -103,7 +122,8 @@ export default function LiveStage(p: Props) {
   );
 }
 
-function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allowed, onMod, localAvatar }: Props & { t: TrackReferenceOrPlaceholder; speaking: boolean; big?: boolean }) {
+function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allowed, onMod, localAvatar, mobile }: Props & { t: TrackReferenceOrPlaceholder; speaking: boolean; big?: boolean }) {
+  const [open, setOpen] = useState(false);
   const pt = t.participant;
   const id = pt.identity;
   const local = pt.isLocal;
@@ -113,7 +133,7 @@ function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allow
   const isPinned = pinned === id;
   const onStage = !audience || id === hostId || allowed.includes(id);
   return (
-    <div onDoubleClick={() => onPin(isPinned ? null : id)}
+    <div onDoubleClick={() => onPin(isPinned ? null : id)} onClick={() => mobile && setOpen((v) => !v)}
       className={`group relative w-full h-full min-h-0 rounded-2xl overflow-hidden bg-gradient-to-b from-zinc-800 to-zinc-900 border transition-shadow ${speaking ? 'border-emerald-400 ring-2 ring-emerald-400/60' : 'border-white/[0.06]'}`}>
       {live
         ? <VideoTrack trackRef={t as any} className={`absolute inset-0 w-full h-full object-cover ${local ? '-scale-x-100' : ''}`} />
@@ -129,7 +149,7 @@ function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allow
         <span className={`ml-auto w-6 h-6 shrink-0 rounded-full flex items-center justify-center ${micOn ? 'bg-white/15' : 'bg-red-500'}`}>{micOn ? <Mic className="w-3 h-3 text-white" /> : <MicOff className="w-3 h-3 text-white" />}</span>
       </div>
 
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={`absolute top-2 right-2 flex flex-wrap justify-end gap-1 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'} group-hover:opacity-100 group-hover:pointer-events-auto`}>
         <TileBtn label={isPinned ? 'Unpin' : isHost ? 'Pin for everyone' : 'Pin'} onClick={() => onPin(isPinned ? null : id)}>{isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}</TileBtn>
         {isHost && !local && <>
           {micOn
