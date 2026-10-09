@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,11 +17,39 @@ const CHUNK_MS = 6000;
 // Whisper sometimes "hears" these in silence.
 const NOISE = /^(thank you\.?|thanks for watching!?|you|\.|bye\.?)$/i;
 
-/** Records the local mic in short chunks and turns them into text with a free Whisper transcriber. */
+const NativeSR: any = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : undefined;
+
+/** Free real-time transcript: browser speech recognition first, server transcriber as fallback. */
 export function useSpeechTranscriber(on: boolean, onFinal: (text: string) => void, onPartial?: (text: string) => void) {
   const cb = useRef({ onFinal, onPartial }); cb.current = { onFinal, onPartial };
+  const [nativeFailed, setNativeFailed] = useState(false);
+  const useNative = !!NativeSR && !nativeFailed;
   useEffect(() => {
-    if (!on || !speechSupported()) return;
+    if (!on || !useNative) return;
+    let stopped = false;
+    let errors = 0;
+    const r = new NativeSR();
+    r.continuous = true; r.interimResults = true; r.lang = navigator.language || 'en-US';
+    r.onresult = (e: any) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = String(e.results[i][0]?.transcript || '').trim();
+        if (!t) continue;
+        if (e.results[i].isFinal) { cb.current.onFinal(t); errors = 0; } else interim += t + ' ';
+      }
+      cb.current.onPartial?.(interim.trim());
+    };
+    r.onerror = (e: any) => {
+      if (['not-allowed', 'service-not-allowed', 'network', 'language-not-supported'].includes(e?.error)) {
+        if (++errors >= 2 || e?.error !== 'network') { stopped = true; setNativeFailed(true); }
+      }
+    };
+    r.onend = () => { if (!stopped) { try { r.start(); } catch { /* ignore */ } } };
+    try { r.start(); } catch { setNativeFailed(true); }
+    return () => { stopped = true; try { r.stop(); } catch { /* ignore */ } cb.current.onPartial?.(''); };
+  }, [on, useNative]);
+  useEffect(() => {
+    if (!on || useNative || !speechSupported()) return;
     let stopped = false;
     let stream: MediaStream | null = null;
     let rec: MediaRecorder | null = null;
@@ -62,7 +90,7 @@ export function useSpeechTranscriber(on: boolean, onFinal: (text: string) => voi
       stream?.getTracks().forEach((t) => t.stop());
       cb.current.onPartial?.('');
     };
-  }, [on]);
+  }, [on, useNative]);
 }
 
 export const downloadTranscript = (room: string, lines: TxLine[]) => {
