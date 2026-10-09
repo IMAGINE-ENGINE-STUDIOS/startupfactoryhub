@@ -67,6 +67,8 @@ const MembersClub = lazy(() => import("./pages/MembersClub"));
 const InvestorPlanBrochure = lazy(() => import("./pages/InvestorPlanBrochure"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
+const DistrictsLab = lazy(() => import("./pages/DistrictsLab"));
+const PlazaPage = lazy(() => import("./imagine-studio/pages/PlazaPage"));
 const ReferralProgram = lazy(() => import("./pages/ReferralProgram"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -202,6 +204,8 @@ const App = () => (
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
                     <Route path="/emails" element={<EmailTemplates />} />
                     <Route path="/district/:districtId" element={<DistrictDashboard />} />
+                    <Route path="/districts-lab" element={<DistrictsLab />} />
+                    <Route path="/plaza" element={<PlazaPage />} />
                     <Route path="/referral" element={<ReferralProgram />} />
                     <Route path="/ref/:code" element={<ReferralRedirect />} />
                     <Route path="/install" element={<InstallApp />} />

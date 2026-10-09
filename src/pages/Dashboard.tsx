@@ -40,7 +40,6 @@ import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCi
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
 import LiveRooms from '@/components/LiveRooms';
-import DistrictRooms from '@/components/DistrictRooms';
 import InvestorCommunity from '@/components/InvestorCommunity';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -685,7 +684,7 @@ const Dashboard = () => {
 
               <LiveRooms />
 
-              <DistrictRooms />
+              {/* Districts hidden from users for now — work on them at /districts-lab */}
 
               {/* Top-level section toggle: Pitches vs Mentorship */}
               <MeetingsTwoLane
