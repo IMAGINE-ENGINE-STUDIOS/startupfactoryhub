@@ -126,3 +126,11 @@ export function updateLocalLevel(id: string, patch: Partial<Omit<LocalLevelRecor
 export function deleteLocalLevel(id: string) {
   writeLocalLevels(readLocalLevels().filter((level) => level.id !== id));
 }
+/** Finds (or seeds) the editable Plaza District level. */
+export function ensurePlazaLevel(build: () => LevelScene, name: string): LocalLevelRecord {
+  const found = readLocalLevels().find((l) => l.name === name);
+  if (found) return found;
+  const lvl = createLocalLevel(build());
+  updateLocalLevel(lvl.id, { name, description: "Editable copy of the live /plaza district" });
+  return { ...lvl, name };
+}

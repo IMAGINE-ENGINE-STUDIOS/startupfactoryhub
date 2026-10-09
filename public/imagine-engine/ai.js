@@ -486,7 +486,42 @@
     var mode = model === "chat" ? "chat" : "build";
     migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); }, 200); });
   }
+  /* 3D Studio route: 3D world/level/scene requests (or any Build while a studio scene is on the page) go to Genius 3D inside the studio frame */
+  var STUDIO3D = /\b(3d|three[- ]?d)\b.*\b(level|world|scene|map|game|environment|studio|plaza|arena|city|room)\b|\b(level|world|scene)\b.*\b3d\b|\bin the (3d )?studio\b/i;
+  function studioFrames() { var out = []; (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { if (/\/imagine-studio/.test(f.getAttribute("src") || "")) out.push(f); else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document); return out; }
+  function send3DStudio(text) {
+    var fr = studioFrames();
+    if (!fr.length) {
+      var ie = window.__IE; if (!ie || !ie.addSection) return false;
+      var s = Date.now().toString(36);
+      ie.addSection({ id: "sec_studio_" + s, type: "section", style: { backgroundColor: "transparent", padding: "0px", overflow: "hidden", borderRadius: "20px", minHeight: "640px" },
+        children: [{ id: "emb_studio_" + s, type: "embed", content: "/imagine-studio?embed=1&genius=" + encodeURIComponent(text), style: { minHeight: "640px" } }] });
+      messages.push({ role: "assistant", content: "Building your 3D level in the 3D Studio. It is fully editable by hand, and its scene file appears in the Dev tab as scenes/level.json." });
+      return true;
+    }
+    fr.forEach(function (f) { try { f.contentWindow.postMessage({ __IEStudio: "genius", prompt: text }, "*"); } catch (e) {} });
+    messages.push({ role: "assistant", content: "Sent to Genius 3D in the 3D Studio. Changes apply to the open level." });
+    return true;
+  }
+  window.addEventListener("message", function (ev) {
+    var d = ev.data; if (!d || !d.__IEStudio) return;
+    if (d.__IEStudio === "scene" && d.json) { try { window.__IEFiles && window.__IEFiles.put("scenes/level.json", d.json, "json"); } catch (e) {} }
+    if (d.__IEStudio === "reply" && d.text) { messages.push({ role: "assistant", content: String(d.text) }); render(); save(); }
+    if (d.__IEStudio === "scene" && d.json) lastStudioJson = d.json;
+  });
+  /* Dev tab -> 3D Studio: hand edits to scenes/level.json reload the open level */
+  var lastStudioJson = null;
+  setInterval(function () {
+    var cur = window.__IEFiles && window.__IEFiles.get("scenes/level.json");
+    if (!cur || lastStudioJson === null || cur === lastStudioJson) return;
+    try { JSON.parse(cur); } catch (e) { return; }
+    lastStudioJson = cur;
+    studioFrames().forEach(function (f) { try { f.contentWindow.postMessage({ __IEStudio: "load", json: cur }, "*"); } catch (e) {} });
+  }, 1500);
   function doSend(t, text, mode) {
+    if (mode !== "chat" && !doSend._retried && (STUDIO3D.test(text) || studioFrames().length && /\b(scene|level|model|object|this|it)\b/i.test(text) && !/\b(page|website|app|dashboard|store)\b/i.test(text))) {
+      if (send3DStudio(text)) { busy = false; render(); save(); return; }
+    }
     var history = messages.filter(function (m) { return !m.error; }).map(function (m) { return { role: m.role, content: m.content }; });
     fetch(FN, {
       method: "POST",

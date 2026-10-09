@@ -106,3 +106,11 @@
 - [ ] Upload models from computer by drag-and-drop into 3D Studio
 - [ ] Imagine AI "Build in 3D" creates an editable 3D Studio level; Dev/Flow wired to it
 - [ ] Genius 3D Copilot button that knows the current scene
+
+## 3D Studio integration
+- [x] Sketchfab model library (search, filters, add to scene)
+- [x] Drop model files onto the 3D Studio
+- [x] Genius 3D tab in the Genius bubble (scene-aware edits, scripts)
+- [x] Imagine AI 3D requests open/drive the 3D Studio; scene syncs to Dev tab scenes/level.json both ways
+- [x] Plaza District editable level + Publish Plaza (admin) / Publish level
+- [ ] Live test Sketchfab downloads, Genius 3D and Plaza publishing after publishing the site
