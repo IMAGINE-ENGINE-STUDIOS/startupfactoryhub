@@ -5029,6 +5029,36 @@ export type Database = {
         }
         Relationships: []
       }
+      live_guest_checkins: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          guest_role: string
+          id: string
+          room_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          guest_role: string
+          id?: string
+          room_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          guest_role?: string
+          id?: string
+          room_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       live_room_participants: {
         Row: {
           id: string
