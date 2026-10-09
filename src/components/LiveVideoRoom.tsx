@@ -288,7 +288,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
     if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
     if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
-    if (m.t === 'present') setPresenting(m.p || null);
+    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); }
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
     if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); setBanned(Array.isArray(m.banned) ? m.banned : []); }
     if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
@@ -773,7 +773,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
             <div className="flex items-center justify-between pt-2"><span className="text-[15px] text-zinc-900">Time limit</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-100 text-zinc-800">{timeLabel}</span></div>
             <input type="range" min={5} max={720} step={5} value={timeLimit} onChange={(e) => setTimeLimit(+e.target.value)} className="w-full accent-zinc-900" />
             <div className="pt-2 space-y-3">
-              <Toggle on={rules.autoEnd} onClick={() => setRules((r) => ({ ...r, autoEnd: !r.autoEnd }))} title="Auto end when time limit" sub="Ends call for all after timer" />
+      <LocalPublisher cam={cam} mic={mic} />
+      <ScreenPublisher stream={screenStream} />
               <Toggle on={rules.approval} onClick={() => setRules((r) => ({ ...r, approval: !r.approval }))} title="Require approval to join" sub="Host approves lobby" />
               <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
