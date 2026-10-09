@@ -414,15 +414,20 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     if (/checkout=success/.test(window.location.search)) { localStorage.removeItem('ie-live-cart'); setCartTick((n) => n + 1); setNotice('Payment complete. Thank you!'); }
   }, []);
 
+  const [shareOn, setShareOn] = useState(false);
+  const stopShare = () => { setShareOn(false); setScreenStream(null); setSharing(false); };
+  const onShareStream = (s: MediaStream) => {
+    setScreenStream(s); setSharing(true);
+    setTimeout(() => { if (screenRef.current) screenRef.current.srcObject = s; }, 0);
+  };
   const toggleShare = async () => {
-    if (sharing) { screenStream?.getTracks().forEach((t) => t.stop()); setScreenStream(null); setSharing(false); return; }
+    if (sharing || shareOn) { if (!token) screenStream?.getTracks().forEach((t) => t.stop()); stopShare(); return; }
+    if (presenting) present(null);
+    if (token) { setShareOn(true); return; } // LiveKit asks for the screen and sends it to everyone
     try {
       const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 15 }, audio: true });
-      if (presenting) present(null);
-      setScreenStream(s);
-      setSharing(true);
-      setTimeout(() => { if (screenRef.current) screenRef.current.srcObject = s; }, 0);
-      s.getVideoTracks()[0].onended = () => { setScreenStream(null); setSharing(false); };
+      onShareStream(s);
+      s.getVideoTracks()[0].onended = stopShare;
     } catch { /* cancelled */ }
   };
   const presentMine = useRef(false);

@@ -24,7 +24,7 @@ const colsFor = (n: number) => (n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4);
 
 export default function LiveStage(p: Props) {
   const cams = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }], { onlySubscribed: false });
-  const shares = useTracks([Track.Source.ScreenShare], { onlySubscribed: true }).filter((t) => !t.participant.isLocal);
+  const shares = useTracks([Track.Source.ScreenShare], { onlySubscribed: false }).filter((t) => !t.participant.isLocal && isTrackReference(t) && !!t.publication?.track);
   const speaking = useSpeakingParticipants();
   const speakingIds = useMemo(() => new Set(speaking.map((s) => s.identity)), [speaking]);
 
