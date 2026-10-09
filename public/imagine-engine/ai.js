@@ -505,7 +505,7 @@
   }
   window.addEventListener("message", function (ev) {
     var d = ev.data; if (!d || !d.__IEStudio) return;
-    if (d.__IEStudio === "scene" && d.json) { try { put("scenes/level.json", d.json, "json"); } catch (e) {} }
+    if (d.__IEStudio === "scene" && d.json) { try { window.__IEFiles && window.__IEFiles.put("scenes/level.json", d.json, "json"); } catch (e) {} }
     if (d.__IEStudio === "reply" && d.text) { messages.push({ role: "assistant", content: String(d.text) }); render(); save(); }
   });
   function doSend(t, text, mode) {
