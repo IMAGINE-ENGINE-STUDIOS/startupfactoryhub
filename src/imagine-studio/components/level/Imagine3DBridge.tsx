@@ -61,6 +61,29 @@ export function Imagine3DBridge() {
         const step = () => { const k = Math.min(1, (performance.now() - t0) / dur), e = k * k * (3 - 2 * k); o.position.set(from.x + (to[0] - from.x) * e, from.y + (to[1] - from.y) * e, from.z + (to[2] - from.z) * e); if (k < 1) requestAnimationFrame(step); };
         step();
         if (d.rotateY != null) o.rotation.y += (+d.rotateY * Math.PI) / 180;
+      } else if (d.op === "scale" || d.op === "rotate") {
+        const o = find(d.id); if (!o) return;
+        const isS = d.op === "scale", tgt = isS ? (d.scale || [1, 1, 1]) : (d.rotation || [0, 0, 0]).map((v: number) => (+v * Math.PI) / 180);
+        const from = isS ? o.scale.clone() : new THREE.Vector3(o.rotation.x, o.rotation.y, o.rotation.z), t0 = performance.now(), dur = Math.max(1, d.duration || 500);
+        const step = () => { const k = Math.min(1, (performance.now() - t0) / dur), e = k * k * (3 - 2 * k); const x = from.x + (tgt[0] - from.x) * e, y = from.y + (tgt[1] - from.y) * e, z = from.z + (tgt[2] - from.z) * e; if (isS) o.scale.set(x, y, z); else o.rotation.set(x, y, z); if (k < 1) requestAnimationFrame(step); };
+        step();
+      } else if (d.op === "spin") {
+        const o: any = find(d.id); if (!o) return;
+        cancelAnimationFrame(o.userData.__spin); const sp = ((+d.speed || 0) * Math.PI) / 180, ax = d.axis === "x" || d.axis === "z" ? d.axis : "y"; let last = performance.now();
+        if (!sp) return;
+        const tick = () => { const now = performance.now(); o.rotation[ax] += sp * (now - last) / 1000; last = now; o.userData.__spin = requestAnimationFrame(tick); };
+        tick();
+      } else if (d.op === "visible") {
+        const o = find(d.id); if (o) o.visible = d.visible !== false;
+      } else if (d.op === "camera") {
+        const to = d.position || [cam.position.x, cam.position.y, cam.position.z], from = cam.position.clone(), t0 = performance.now(), dur = Math.max(1, d.duration || 800);
+        const look = d.lookAt ? new THREE.Vector3(+d.lookAt[0] || 0, +d.lookAt[1] || 0, +d.lookAt[2] || 0) : null;
+        const step = () => { const k = Math.min(1, (performance.now() - t0) / dur), e = k * k * (3 - 2 * k); cam.position.set(from.x + (to[0] - from.x) * e, from.y + (to[1] - from.y) * e, from.z + (to[2] - from.z) * e); if (look) cam.lookAt(look); if (k < 1) requestAnimationFrame(step); };
+        step();
+      } else if (d.op === "light") {
+        scene.traverse((o: any) => { if (!o.isLight || (d.id && o.name !== d.id)) return; if (d.intensity != null) o.intensity = +d.intensity; if (d.color) o.color = new THREE.Color(d.color); });
+      } else if (d.op === "theater") {
+        window.dispatchEvent(new CustomEvent("ie-theater", { detail: { id: d.id, kind: d.kind || "screen", url: d.url, page: d.page, dir: d.dir } }));
       } else if (d.op === "remove") {
         const o = find(d.id); if (o) { o.parent?.remove(o); delete objs.current[d.id]; }
       } else if (d.op === "color") {
