@@ -124,7 +124,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const hostId = useMemo(() => {
     const url = new URL(window.location.href);
     let h = url.searchParams.get('host');
-    if (h && DEMO_HOST_IDS.includes(h)) h = null; // old demo account links never own a room
+    if (h && DEMO_HOST_IDS.includes(h) && user?.id) h = null; // old demo account links never own a room
     if (!h && user?.id) {
       h = user.id;
       url.searchParams.set('host', h);
