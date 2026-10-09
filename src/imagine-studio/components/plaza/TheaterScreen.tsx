@@ -19,14 +19,16 @@ export type TheaterSource =
 export const THEATER_POS: [number, number, number] = [0, 0, -36];
 const W = 16, H = 9;
 
-function useSourceTexture(src: TheaterSource) {
+export function useSourceTexture(src: TheaterSource) {
   const [tex, setTex] = useState<THREE.Texture | null>(null);
   const [pages, setPages] = useState(0);
   useEffect(() => {
     let dead = false; let t: THREE.Texture | null = null;
     if (!src) { setTex(null); return; }
     if (src.kind === 'video') {
-      t = new THREE.VideoTexture(src.el); t.colorSpace = THREE.SRGBColorSpace; setTex(t);
+      const v = src.el; const mk = () => { if (dead || t) return; t = new THREE.VideoTexture(v); t.colorSpace = THREE.SRGBColorSpace; setTex(t); };
+      v.play().catch(() => {});
+      if (v.readyState >= 2) mk(); else { v.addEventListener('loadeddata', mk, { once: true }); v.addEventListener('playing', mk, { once: true }); }
     } else if (src.kind === 'image') {
       new THREE.TextureLoader().load(src.url, (x) => { if (dead) return x.dispose(); x.colorSpace = THREE.SRGBColorSpace; t = x; setTex(x); });
     } else {
