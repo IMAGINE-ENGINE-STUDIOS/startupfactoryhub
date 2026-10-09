@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
     const lang = String(form.get("lang") || "").slice(0, 2);
     const tries: [string, string, string | undefined][] = [
       ["https://api.groq.com/openai/v1/audio/transcriptions", "whisper-large-v3-turbo", Deno.env.get("GROQ_API_KEY")],
+      ["https://api.groq.com/openai/v1/audio/transcriptions", "whisper-large-v3", Deno.env.get("GROQ_API_KEY")],
       ["https://api.openai.com/v1/audio/transcriptions", "whisper-1", Deno.env.get("OPENAI_API_KEY")],
     ];
     let last = "No transcription key configured";
@@ -29,6 +30,24 @@ Deno.serve(async (req) => {
       if (r.ok) { const d = await r.json(); return json({ text: String(d.text || "").trim() }); }
       last = `[${r.status}] ${await r.text()}`;
       console.error("transcribe failed", model, last);
+    }
+    const gk = Deno.env.get("GEMINI_API_KEY");
+    if (gk) {
+      const buf = new Uint8Array(await audio.arrayBuffer());
+      let bin = ""; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      const mime = (audio.type || "audio/webm").split(";")[0];
+      for (const model of ["gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"]) {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gk}`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [
+            { text: "Transcribe the spoken words in this audio exactly, in the language spoken. Return only the words. If there is no speech, return nothing." },
+            { inline_data: { mime_type: mime, data: btoa(bin) } },
+          ] }], generationConfig: { temperature: 0 } }),
+        });
+        if (r.ok) { const d = await r.json(); return json({ text: String(d?.candidates?.[0]?.content?.parts?.map((x: any) => x.text || "").join("") || "").trim() }); }
+        last = `[${r.status}] ${await r.text()}`;
+        console.error("transcribe failed", model, last);
+      }
     }
     return json({ error: last }, 502);
   } catch (e) {
