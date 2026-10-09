@@ -23,6 +23,7 @@ export default function DistrictsLab() {
         <Link to="/dashboard" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="w-5 h-5" /></Link>
         <h1 className="text-xl font-semibold">Districts Lab</h1>
         <span className="text-xs text-muted-foreground">Hidden from members while in development</span>
+        <Link to="/plaza" className="ml-auto text-sm text-primary">Open the Plaza</Link>
       </div>
       <DistrictRooms />
     </div>
