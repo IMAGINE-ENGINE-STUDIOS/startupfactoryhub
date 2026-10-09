@@ -197,7 +197,7 @@ export default function VideoConferencing({
               <div className="flex flex-col gap-3 items-center">
                 <Button size="lg" onClick={handleJoin} className="gap-2 px-8">
                   <Video className="h-5 w-5" />
-                  {activeRoomUrl ? 'Rejoin Meeting' : 'Join Video Call'}
+                  {activeRoomUrl ? 'join Meeting' : 'Join Video Call'}
                 </Button>
                 {activeRoomUrl
 
