@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type TxLine = { id: string; speaker: string; text: string; ts: number };
 
-export const speechSupported = () => typeof window !== 'undefined' && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+export const speechSupported = () => typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 
 export const saveLiveLog = (room: string, kind: 'transcript' | 'chat', speaker: string, content: string, userId?: string | null) => {
   const c = content.trim().slice(0, 5000);
@@ -12,30 +12,56 @@ export const saveLiveLog = (room: string, kind: 'transcript' | 'chat', speaker: 
   supabase.from('live_session_logs' as any).insert({ room_name: room, kind, speaker: speaker.slice(0, 200), content: c, user_id: userId || null } as any).then(() => {});
 };
 
-/** Turns the local microphone's speech into text lines while `on` and the mic is live. */
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/live-transcribe`;
+const CHUNK_MS = 6000;
+// Whisper sometimes "hears" these in silence.
+const NOISE = /^(thank you\.?|thanks for watching!?|you|\.|bye\.?)$/i;
+
+/** Records the local mic in short chunks and turns them into text with a free Whisper transcriber. */
 export function useSpeechTranscriber(on: boolean, onFinal: (text: string) => void, onPartial?: (text: string) => void) {
   const cb = useRef({ onFinal, onPartial }); cb.current = { onFinal, onPartial };
   useEffect(() => {
     if (!on || !speechSupported()) return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const rec = new SR();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = navigator.language || 'en-US';
     let stopped = false;
-    rec.onresult = (e: any) => {
-      let partial = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) { const t = r[0].transcript.trim(); if (t) cb.current.onFinal(t); }
-        else partial += r[0].transcript;
-      }
-      cb.current.onPartial?.(partial.trim());
+    let stream: MediaStream | null = null;
+    let rec: MediaRecorder | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find((m) => MediaRecorder.isTypeSupported(m)) || '';
+    const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+    const send = async (blob: Blob) => {
+      if (blob.size < 2000) return;
+      cb.current.onPartial?.('Writing...');
+      try {
+        const fd = new FormData();
+        fd.append('audio', new File([blob], `chunk.${ext}`, { type: blob.type || mime }));
+        fd.append('lang', (navigator.language || 'en').slice(0, 2));
+        const r = await fetch(FN_URL, { method: 'POST', headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: fd });
+        const d = await r.json().catch(() => ({}));
+        const t = String(d.text || '').trim();
+        if (t && !NOISE.test(t)) cb.current.onFinal(t);
+        else if (!r.ok) console.warn('Transcribe failed', d);
+      } catch (e) { console.warn('Transcribe failed', e); }
+      cb.current.onPartial?.('');
     };
-    rec.onend = () => { if (!stopped) { try { rec.start(); } catch { /* restarting */ } } };
-    rec.onerror = (e: any) => { if (e.error === 'not-allowed') stopped = true; };
-    try { rec.start(); } catch { /* already started */ }
-    return () => { stopped = true; try { rec.stop(); } catch { /* ignore */ } cb.current.onPartial?.(''); };
+    // Each chunk is a fresh recorder so every file is complete on its own.
+    const cycle = () => {
+      if (stopped || !stream) return;
+      const parts: Blob[] = [];
+      rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      rec.ondataavailable = (e) => { if (e.data.size) parts.push(e.data); };
+      rec.onstop = () => { send(new Blob(parts, { type: mime })); cycle(); };
+      rec.start();
+      timer = setTimeout(() => { try { rec?.state === 'recording' && rec.stop(); } catch { /* ignore */ } }, CHUNK_MS);
+    };
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+      .then((s) => { if (stopped) { s.getTracks().forEach((t) => t.stop()); return; } stream = s; cycle(); })
+      .catch((e) => console.warn('Mic for transcript failed', e));
+    return () => {
+      stopped = true; clearTimeout(timer);
+      try { if (rec?.state === 'recording') rec.stop(); } catch { /* ignore */ }
+      stream?.getTracks().forEach((t) => t.stop());
+      cb.current.onPartial?.('');
+    };
   }, [on]);
 }
 
