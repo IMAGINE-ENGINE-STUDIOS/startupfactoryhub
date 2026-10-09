@@ -460,6 +460,7 @@ export default function PlazaPage() {
         try {
           const m = JSON.parse(dec.decode(payload));
           if (m.t === 'theater') {
+            if (m.kind === 'video') { p.trackPublications.forEach((pub: any) => { if (pub.source === Track.Source.ScreenShare && !pub.isSubscribed) pub.setSubscribed(true); }); return; }
             if (m.kind === 'stop') setTheater((cur) => (cur && cur.kind !== 'video' ? null : cur));
             else if ((m.kind === 'image' || m.kind === 'pdf') && typeof m.url === 'string' && /^https:\/\//.test(m.url))
               setTheater(m.kind === 'pdf' ? { kind: 'pdf', url: m.url, name: String(m.name || ''), page: Number(m.page) || 1, by: String(m.by || p.name || 'Host') } : { kind: 'image', url: m.url, name: String(m.name || ''), by: String(m.by || p.name || 'Host') });
