@@ -255,7 +255,8 @@ serve(async (req) => {
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
-    const routed = await routeChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : body.context?.build === "app" ? 16000 : 8000 });
+    const storedKeys: any = (await readJson(admin, "keys.json").catch(() => null)) || {};
+    const routed = await routeChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : body.context?.build === "app" ? 16000 : 8000 }, { groq: storedKeys.groq, gemini: storedKeys.gemini, openai: storedKeys.openai });
     const resp = routed.resp;
     if (!resp.ok) {
       await refund();
