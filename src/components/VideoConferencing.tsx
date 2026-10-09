@@ -69,9 +69,10 @@ export default function VideoConferencing({
     setIsLoading(true);
 
     // Check if we already have a valid persistent room URL
-    if (isValidWherebyUrl(persistentRoomUrl)) {
-      setActiveRoomUrl(persistentRoomUrl);
-      openInNewTab(persistentRoomUrl!);
+    const existing = isValidWherebyUrl(persistentRoomUrl) ? persistentRoomUrl : isValidWherebyUrl(roomUrl) ? roomUrl : undefined;
+    if (existing) {
+      setActiveRoomUrl(existing);
+      openInNewTab(existing);
       setIsLoading(false);
       return;
     }
