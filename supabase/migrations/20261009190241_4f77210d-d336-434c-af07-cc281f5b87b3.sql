@@ -1,0 +1,2 @@
+CREATE POLICY "Live shares upload" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'live-shares');
+CREATE POLICY "Live shares read" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'live-shares');

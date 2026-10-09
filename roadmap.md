@@ -96,3 +96,4 @@
 - [x] Guest check-in form (name, email, startup/investor) before joining; saved to database
 - [x] Admin panel "Live Guests" tab with search, filter, CSV export
 - [x] Video backgrounds: blur, sample images, custom upload
+- [x] Screen share + shared files visible to everyone in Live Video

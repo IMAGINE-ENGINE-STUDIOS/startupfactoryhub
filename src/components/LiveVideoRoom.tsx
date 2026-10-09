@@ -59,6 +59,24 @@ const shrinkImage = (file: File): Promise<string> => new Promise((resolve, rejec
   img.src = URL.createObjectURL(file);
 });
 
+// Sends this person's shared screen (and its sound) to everyone in the room.
+function ScreenPublisher({ stream }: { stream: MediaStream | null }) {
+  const { localParticipant } = useLocalParticipant();
+  const state = useConnectionState();
+  useEffect(() => {
+    if (!stream || state !== 'connected') return;
+    const v = stream.getVideoTracks()[0];
+    const a = stream.getAudioTracks()[0];
+    if (v) localParticipant.publishTrack(v, { source: Track.Source.ScreenShare, name: 'screen' }).catch((e) => console.warn('Screen share publish failed', e));
+    if (a) localParticipant.publishTrack(a, { source: Track.Source.ScreenShareAudio, name: 'screen-audio' }).catch(() => {});
+    return () => {
+      if (v) localParticipant.unpublishTrack(v, false).catch(() => {});
+      if (a) localParticipant.unpublishTrack(a, false).catch(() => {});
+    };
+  }, [stream, state, localParticipant]);
+  return null;
+}
+
 // Publishes this person's real camera and microphone to everyone in the room, kept in sync with the buttons.
 function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
   const { localParticipant } = useLocalParticipant();
@@ -180,6 +198,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
   const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
   const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [tab, setTab] = useState<'shop' | 'chat' | 'money' | 'rules'>('shop');
   const [chatCount, setChatCount] = useState(0);
   const [seenCount, setSeenCount] = useState(0);
@@ -269,7 +288,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
     if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
     if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
-    if (m.t === 'present') setPresenting(m.p || null);
+    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); }
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
     if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); setBanned(Array.isArray(m.banned) ? m.banned : []); }
     if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
@@ -352,33 +371,40 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
   }, []);
 
   const toggleShare = async () => {
-    if (sharing) { (screenRef.current?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop()); setSharing(false); return; }
+    if (sharing) { screenStream?.getTracks().forEach((t) => t.stop()); setScreenStream(null); setSharing(false); return; }
     try {
-      const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 15 }, audio: true });
+      if (presenting) present(null);
+      setScreenStream(s);
       setSharing(true);
       setTimeout(() => { if (screenRef.current) screenRef.current.srcObject = s; }, 0);
-      s.getVideoTracks()[0].onended = () => setSharing(false);
+      s.getVideoTracks()[0].onended = () => { setScreenStream(null); setSharing(false); };
     } catch { /* cancelled */ }
   };
-  const present = (p: typeof presenting, share = true) => { setPresenting(p); if (share) broadcast({ t: 'present', p }); };
+  const presentMine = useRef(false);
+  const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; if (share) broadcast({ t: 'present', p }); };
+  // Re-send what I'm presenting so people who join later see it too.
+  useEffect(() => { if (presentMine.current && presenting) broadcast({ t: 'present', p: presenting }); }, [peerCount, token]); // eslint-disable-line
   const onFiles = async (list: FileList | null) => {
     const f = list?.[0];
     if (!f) return;
     setPresentOpen(false);
-    if (f.type.startsWith('image/')) {
-      // Photos are resized so they can be sent live to everyone in the call.
-      const url = await new Promise<string>((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const s = Math.min(1, 1280 / Math.max(img.width, img.height));
-          const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-          c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL('image/jpeg', 0.7));
-        };
-        img.src = URL.createObjectURL(f);
-      });
-      present({ name: f.name, url, kind: 'image' });
-    } else if (f.type.startsWith('video/')) present({ name: f.name, url: URL.createObjectURL(f), kind: 'video' }, false);
-    else present({ name: f.name, url: URL.createObjectURL(f), kind: 'pdf' }, false);
+    if (sharing) toggleShare();
+    // Files are uploaded so everyone in the call can open the same copy.
+    setNotice(`Uploading ${f.name}...`);
+    const path = `${name.replace(/[^a-zA-Z0-9_-]/g, '_')}/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const { error } = await supabase.storage.from('live-shares').upload(path, f, { contentType: f.type || undefined });
+    if (error) { setNotice('Could not upload the file. Please try again.'); return; }
+    const { data } = await supabase.storage.from('live-shares').createSignedUrl(path, 60 * 60 * 24 * 7);
+    const url = data?.signedUrl;
+    if (!url) { setNotice('Could not share the file. Please try again.'); return; }
+    setNotice('');
+    const lower = f.name.toLowerCase();
+    if (f.type.startsWith('image/')) present({ name: f.name, url, kind: 'image' });
+    else if (f.type.startsWith('video/')) present({ name: f.name, url, kind: 'video' });
+    else if (f.type === 'application/pdf' || lower.endsWith('.pdf')) present({ name: f.name, url, kind: 'pdf' });
+    else if (/\.(pptx?|docx?|xlsx?)$/.test(lower)) present({ name: f.name, url: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`, kind: 'link' });
+    else present({ name: f.name, url, kind: 'link' });
   };
   const toggleRec = async () => {
     if (recRef.current) { if (recRef.current.state !== 'inactive') recRef.current.stop(); return; }
@@ -747,7 +773,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest }: LiveVideoRoomPr
             <div className="flex items-center justify-between pt-2"><span className="text-[15px] text-zinc-900">Time limit</span><span className="font-mono text-sm px-3 py-1 rounded-full bg-zinc-100 text-zinc-800">{timeLabel}</span></div>
             <input type="range" min={5} max={720} step={5} value={timeLimit} onChange={(e) => setTimeLimit(+e.target.value)} className="w-full accent-zinc-900" />
             <div className="pt-2 space-y-3">
-              <Toggle on={rules.autoEnd} onClick={() => setRules((r) => ({ ...r, autoEnd: !r.autoEnd }))} title="Auto end when time limit" sub="Ends call for all after timer" />
+      <LocalPublisher cam={cam} mic={mic} />
+      <ScreenPublisher stream={screenStream} />
               <Toggle on={rules.approval} onClick={() => setRules((r) => ({ ...r, approval: !r.approval }))} title="Require approval to join" sub="Host approves lobby" />
               <Toggle on={rules.muteEntry} onClick={() => setRules((r) => ({ ...r, muteEntry: !r.muteEntry }))} title="Mute on entry" sub="New people start muted" />
               <Toggle on={rules.hideCount} onClick={() => setRules((r) => ({ ...r, hideCount: !r.hideCount }))} title="Hide participant count" sub="Privacy for large rooms" />
