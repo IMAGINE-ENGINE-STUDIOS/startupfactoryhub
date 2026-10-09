@@ -5,10 +5,13 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Html, Sky } from '@react-three/drei';
+import { Html, Sky, useGLTF, useAnimations } from '@react-three/drei';
+import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { Suspense } from 'react';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack } from 'livekit-client';
-import { Mic, MicOff, Loader2, LogOut } from 'lucide-react';
+import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw } from 'lucide-react';
+import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { supabase } from '@/integrations/supabase/client';
 
 const ROOM = 'plaza';
