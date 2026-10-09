@@ -1,3 +1,5 @@
+import DistrictChatTab from '@/components/DistrictChatTab';
+import { districtChat, type DistrictChatState } from '@/lib/districtChatBus';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -236,7 +238,10 @@ export default function FloatingChat() {
   const [showPlans, setShowPlans] = useState(false);
   const { usage: geniusUsage } = useGeniusPlan();
 
-  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('ai');
+  const [activeTab, setActiveTab] = useState<'messages' | 'ai' | 'district'>('ai');
+  const [district, setDistrict] = useState<DistrictChatState>(() => districtChat.get());
+  useEffect(() => districtChat.onState((st) => { setDistrict(st); if (!st) setActiveTab((t) => (t === 'district' ? 'ai' : t)); }), []);
+  useEffect(() => districtChat.onOpen(() => { setIsOpen(true); setIsMinimized(false); setActiveTab('district'); }), []);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -1361,8 +1366,8 @@ You can help with:
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai'); if (v === 'ai') setDocReadyBadge(false); }} className="flex-1 flex flex-col min-h-0">
-                <TabsList className="grid w-full grid-cols-2 mt-2 mb-2 mx-2 shrink-0">
+              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai' | 'district'); if (v === 'ai') setDocReadyBadge(false); }} className="flex-1 flex flex-col min-h-0">
+                <TabsList className={`grid w-full ${district ? 'grid-cols-3' : 'grid-cols-2'} mt-2 mb-2 mx-2 shrink-0`}>
                   <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0 relative">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                     <span className="hidden sm:inline">Messages</span>
@@ -1374,7 +1379,18 @@ You can help with:
                     <img src={geniusAILogo} alt="" className="h-3.5 w-3.5 rounded-full object-cover shrink-0" />
                     <span className="hidden sm:inline">Genius AI</span>
                   </TabsTrigger>
+                  {district && (
+                    <TabsTrigger value="district" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
+                      <Users className="h-3.5 w-3.5 shrink-0" />
+                      <span className="hidden sm:inline">District</span>
+                    </TabsTrigger>
+                  )}
                 </TabsList>
+                {district && (
+                  <TabsContent value="district" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
+                    <DistrictChatTab state={district} />
+                  </TabsContent>
+                )}
 
                 <TabsContent value="messages" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
                   {/* Conversations List */}

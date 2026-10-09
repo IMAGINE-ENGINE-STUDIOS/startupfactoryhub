@@ -10,7 +10,9 @@ import { Html, Sky, useGLTF, useAnimations } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack } from 'livekit-client';
-import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw } from 'lucide-react';
+import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw, MonitorUp, FileUp, ChevronLeft, ChevronRight, Square } from 'lucide-react';
+import { districtChat } from '@/lib/districtChatBus';
+import { TheaterScreen, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { supabase } from '@/integrations/supabase/client';
 import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 
@@ -31,7 +33,7 @@ export const CHARACTERS = [
 type CharId = typeof CHARACTERS[number]['id'];
 const charOf = (id: string) => CHARACTERS.find((c) => c.id === id) ?? CHARACTERS[0];
 
-type Peer = { x: number; z: number; ry: number; moving: boolean; color: string; name: string; char: string; tx: number; tz: number; tr: number; speaking: boolean };
+type Peer = { x: number; z: number; ry: number; moving: boolean; color: string; name: string; char: string; tx: number; tz: number; tr: number; speaking: boolean; seen?: number };
 type ChatMsg = { from: string; text: string; at: number; me?: boolean };
 const enc = new TextEncoder(), dec = new TextDecoder();
 
@@ -135,7 +137,7 @@ function Fountain() {
 }
 
 function PlazaWorld() {
-  const trees = useMemo(() => Array.from({ length: 16 }, (_, i) => { const a = (i / 16) * Math.PI * 2; return [Math.cos(a) * 32, Math.sin(a) * 32] as [number, number]; }), []);
+  const trees = useMemo(() => Array.from({ length: 16 }, (_, i) => { const a = (i / 16) * Math.PI * 2; return [Math.cos(a) * 32, Math.sin(a) * 32] as [number, number]; }).filter(([x, z]) => !(z < -24 && Math.abs(x) < 14)), []);
   const benches = useMemo(() => Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2 + 0.2; return { x: Math.cos(a) * 12, z: Math.sin(a) * 12, r: -a + Math.PI / 2 }; }), []);
   return (
     <group>
@@ -394,6 +396,27 @@ export default function PlazaPage() {
   const mePos = useRef({ x: 0, z: 0 });
   const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0 });
   const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [theater, setTheater] = useState<TheaterSource>(null);
+  const [pdfPages, setPdfPages] = useState(0);
+  const [presenting, setPresenting] = useState(false);
+  const docRef = useRef<{ kind: 'image' | 'pdf'; url: string; name: string; page: number } | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const sendChatRef = useRef<(t: string) => void>(() => {});
+
+  // Expose the plaza chat inside the Genius bubble.
+  useEffect(() => {
+    if (!joined) { districtChat.publish(null); return; }
+    districtChat.publish({ id: ROOM, title: 'Plaza chat', msgs, online: count });
+  }, [joined, msgs, count]);
+  useEffect(() => districtChat.onSend((t) => sendChatRef.current(t)), []);
+  useEffect(() => () => districtChat.publish(null), []);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => setIsAdmin(!!data));
+    });
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -431,28 +454,46 @@ export default function PlazaPage() {
         if (!p) return;
         try {
           const m = JSON.parse(dec.decode(payload));
+          if (m.t === 'theater') {
+            if (m.kind === 'stop') setTheater((cur) => (cur && cur.kind !== 'video' ? null : cur));
+            else if ((m.kind === 'image' || m.kind === 'pdf') && typeof m.url === 'string' && /^https:\/\//.test(m.url))
+              setTheater(m.kind === 'pdf' ? { kind: 'pdf', url: m.url, name: String(m.name || ''), page: Number(m.page) || 1, by: String(m.by || p.name || 'Host') } : { kind: 'image', url: m.url, name: String(m.name || ''), by: String(m.by || p.name || 'Host') });
+            return;
+          }
           if (m.t === 'chat' && typeof m.text === 'string') {
             setMsgs((prev) => [...prev.slice(-199), { from: String(m.n || p.name || 'Guest').slice(0, 40), text: m.text.slice(0, 500), at: Date.now() }]);
-            if (panelRef.current !== 'chat') setUnread((u) => u + 1);
+            setUnread((u) => u + 1);
             return;
           }
           if (m.t !== 'pos' || !Number.isFinite(m.x) || !Number.isFinite(m.z)) return;
           const cur = peers.current.get(p.identity);
-          if (cur) Object.assign(cur, { tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic' });
-          else peers.current.set(p.identity, { x: m.x, z: m.z, ry: m.ry, tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic', speaking: false });
+          if (cur) Object.assign(cur, { seen: Date.now(), tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic' });
+          else peers.current.set(p.identity, { x: m.x, z: m.z, ry: m.ry, tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic', speaking: false, seen: Date.now() });
         } catch { /* ignore */ }
       });
       r.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _pub, p: RemoteParticipant) => {
+        if (track.kind === Track.Kind.Video && track.source === Track.Source.ScreenShare) {
+          const el = track.attach() as HTMLVideoElement; el.muted = true; el.playsInline = true; el.style.display = 'none'; document.body.appendChild(el); el.play().catch(() => {});
+          setTheater({ kind: 'video', el, by: p.name || 'Host' });
+          return;
+        }
         if (track.kind !== Track.Kind.Audio) return;
         const el = track.attach(); el.style.display = 'none'; document.body.appendChild(el);
         audio.current.set(p.identity, { track: track as RemoteAudioTrack, el });
         (track as RemoteAudioTrack).setVolume(0);
       });
       r.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, _pub, p: RemoteParticipant) => {
-        track.detach().forEach((e) => e.remove()); audio.current.delete(p.identity);
+        track.detach().forEach((e) => e.remove());
+        if (track.source === Track.Source.ScreenShare) { setTheater((cur) => (cur?.kind === 'video' ? null : cur)); return; }
+        audio.current.delete(p.identity);
       });
       r.on(RoomEvent.ParticipantDisconnected, (p: RemoteParticipant) => { peers.current.delete(p.identity); setCount(r.remoteParticipants.size + 1); });
-      r.on(RoomEvent.ParticipantConnected, () => setCount(r.remoteParticipants.size + 1));
+      r.on(RoomEvent.ParticipantConnected, () => {
+        setCount(r.remoteParticipants.size + 1);
+        // Late joiners: re-send the document on the theater screen.
+        const d = docRef.current; if (d) r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'theater', ...d, by: meRef.current.name })), { reliable: true }).catch(() => {});
+      });
+      r.on(RoomEvent.LocalTrackUnpublished, (pub) => { if (pub.source === Track.Source.ScreenShare) { setPresenting(false); setTheater((cur) => (cur?.kind === 'video' ? null : cur)); } });
       r.on(RoomEvent.ActiveSpeakersChanged, (sp) => {
         const ids = new Set(sp.map((s) => s.identity));
         peers.current.forEach((p, id) => { p.speaking = ids.has(id); });
@@ -483,12 +524,60 @@ export default function PlazaPage() {
     room.current?.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'chat', text, n: name })), { reliable: true }).catch(() => {});
   };
 
+  sendChatRef.current = sendChat;
+
+  // Drop peers that stopped sending for 8s (closed tab, lost network).
+  useEffect(() => {
+    if (!joined) return;
+    const t = setInterval(() => { const now = Date.now(); peers.current.forEach((p, id) => { if (p.seen && now - p.seen > 8000) peers.current.delete(id); }); }, 2000);
+    return () => clearInterval(t);
+  }, [joined]);
+
+  const sendTheater = (msg: object) => room.current?.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'theater', ...msg, by: meRef.current.name })), { reliable: true }).catch(() => {});
+
+  const shareScreen = async () => {
+    const r = room.current; if (!r) return setErr('Theater sharing needs the live plaza connection.');
+    try {
+      if (presenting) { await r.localParticipant.setScreenShareEnabled(false); setPresenting(false); setTheater(null); return; }
+      stopDoc();
+      const pub = await r.localParticipant.setScreenShareEnabled(true, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
+      const mst = pub?.track?.mediaStreamTrack; if (!mst) return;
+      const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.play().catch(() => {});
+      setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true);
+    } catch { setErr('Screen sharing was cancelled or blocked.'); }
+  };
+
+  const stopDoc = () => { if (docRef.current) { docRef.current = null; sendTheater({ kind: 'stop' }); setTheater(null); } };
+
+  const onDocFile = async (f?: File) => {
+    if (!f) return;
+    const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf && !f.type.startsWith('image/')) return setErr('Share a PDF or an image.');
+    if (presenting) await shareScreen();
+    setErr('Uploading ' + f.name + '...');
+    const path = `plaza/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const { error } = await supabase.storage.from('live-shares').upload(path, f, { contentType: f.type || undefined });
+    if (error) return setErr('Could not upload the file.');
+    const { data } = await supabase.storage.from('live-shares').createSignedUrl(path, 60 * 60 * 24);
+    if (!data?.signedUrl) return setErr('Could not share the file.');
+    setErr('');
+    const d = { kind: (isPdf ? 'pdf' : 'image') as 'pdf' | 'image', url: data.signedUrl, name: f.name, page: 1 };
+    docRef.current = d; sendTheater(d);
+    setTheater(isPdf ? { ...d, kind: 'pdf', by: meRef.current.name } : { kind: 'image', url: d.url, name: d.name, by: meRef.current.name });
+  };
+
+  const turnPage = (dir: number) => {
+    const d = docRef.current; if (!d || d.kind !== 'pdf') return;
+    d.page = Math.min(Math.max(1, d.page + dir), pdfPages || 1);
+    sendTheater(d); setTheater({ ...d, kind: 'pdf', by: meRef.current.name });
+  };
+
   const toggleMic = async () => {
     const r = room.current; if (!r) return;
     try { await r.localParticipant.setMicrophoneEnabled(!mic); setMic(!mic); } catch { setErr('Microphone blocked by the browser.'); }
   };
 
-  const leave = () => { room.current?.disconnect(); room.current = null; peers.current.clear(); audio.current.forEach(({ el }) => el.remove()); audio.current.clear(); setJoined(false); setPanel(null); };
+  const leave = () => { districtChat.publish(null); setTheater(null); setPresenting(false); docRef.current = null; room.current?.disconnect(); room.current = null; peers.current.clear(); audio.current.forEach(({ el }) => el.remove()); audio.current.clear(); setJoined(false); setPanel(null); };
 
   if (!joined) {
     return (
@@ -537,6 +626,7 @@ export default function PlazaPage() {
         <directionalLight position={[30, 40, 20]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} />
         <PlazaWorld />
+        <TheaterScreen source={theater} onPages={setPdfPages} />
         <Game me={{ color, name, char }} peers={peers} input={input} onMove={onMove} />
       </Canvas>
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
@@ -545,7 +635,26 @@ export default function PlazaPage() {
         </div>
       </div>
       {err && <div className="absolute top-12 left-3 rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs z-30">{err}</div>}
-      {panel === 'chat' && <ChatPanel msgs={msgs} onSend={sendChat} onClose={() => setPanel(null)} />}
+      {isAdmin && (
+        <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
+          <div className="flex gap-2">
+            <button onClick={shareScreen} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+              {presenting ? <Square className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}{presenting ? 'Stop sharing' : 'Share screen to theater'}
+            </button>
+            <button onClick={() => (docRef.current ? stopDoc() : fileInput.current?.click())} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+              {docRef.current ? <Square className="w-4 h-4" /> : <FileUp className="w-4 h-4" />}{docRef.current ? 'Stop document' : 'Present document'}
+            </button>
+          </div>
+          {theater?.kind === 'pdf' && docRef.current && (
+            <div className="flex items-center gap-2 rounded-full bg-background/90 px-2 py-1 text-xs">
+              <button onClick={() => turnPage(-1)} aria-label="Previous page"><ChevronLeft className="w-4 h-4" /></button>
+              <span>{theater.page} / {pdfPages || '?'}</span>
+              <button onClick={() => turnPage(1)} aria-label="Next page"><ChevronRight className="w-4 h-4" /></button>
+            </div>
+          )}
+          <input ref={fileInput} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { onDocFile(e.target.files?.[0]); e.target.value = ''; }} />
+        </div>
+      )}
       {panel === 'vote' && <DistrictsPanel onClose={() => setPanel(null)} />}
       {touch && (
         <>
@@ -558,7 +667,7 @@ export default function PlazaPage() {
           className={`w-12 h-12 rounded-full flex items-center justify-center ${mic ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
           {mic ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
         </button>
-        <button onClick={() => { setPanel(panel === 'chat' ? null : 'chat'); setUnread(0); }} aria-label="Chat" className="relative w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
+        <button onClick={() => { districtChat.open(); setUnread(0); }} aria-label="Chat" className="relative w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
           <MessageSquare className="w-5 h-5" />
           {unread > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">{unread}</span>}
         </button>

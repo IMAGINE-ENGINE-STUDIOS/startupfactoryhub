@@ -97,3 +97,12 @@
 - [x] Admin panel "Live Guests" tab with search, filter, CSV export
 - [x] Video backgrounds: blur, sample images, custom upload
 - [x] Screen share + shared files visible to everyone in Live Video
+
+## Plaza / 3D Studio plan (Oct 2026)
+- [x] District chat inside the Genius bubble (Plaza)
+- [x] Multiplayer: idle-player cleanup on top of live LiveKit sync
+- [x] Plaza lawn theater: admin screen share + PDF/image presenter with page turns
+- [ ] Sketchfab library search + spawn in 3D Studio and Imagine Engine (needs a Sketchfab API token)
+- [ ] Upload models from computer by drag-and-drop into 3D Studio
+- [ ] Imagine AI "Build in 3D" creates an editable 3D Studio level; Dev/Flow wired to it
+- [ ] Genius 3D Copilot button that knows the current scene
