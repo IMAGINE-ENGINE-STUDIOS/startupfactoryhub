@@ -66,7 +66,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
         external_registration_url: event.external_registration_url || '',
       });
       
-      setIsOnlineEvent(event.location?.match(/live-video|whereby\.com/) || false);
+      setIsOnlineEvent(!!event.location?.match(/live-video|whereby\.com/));
     }
   }, [event]);
 
