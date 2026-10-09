@@ -101,7 +101,7 @@ function Avatar({ char, color, name, moving, speaking, me }: { char: string; col
         </Suspense>
       ) : <ClassicCharacter color={color} moving={moving} />}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}><circleGeometry args={[0.45, 24]} /><meshBasicMaterial color="#000" transparent opacity={0.25} depthWrite={false} /></mesh>
-      <Html position={[0, 2.3, 0]} center distanceFactor={10} zIndexRange={[10, 0]}>
+      <Html position={[0, 2.05, 0]} center distanceFactor={10} zIndexRange={[10, 0]}>
         <div className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium backdrop-blur ${speaking ? 'bg-emerald-500/90 text-white' : me ? 'bg-primary/90 text-primary-foreground' : 'bg-background/80 text-foreground'}`}>
           {name}
         </div>
