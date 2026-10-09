@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
+import sfhLogo from '@/assets/sfh-logo-emblem.png';
 import { SFH_PACKAGES } from './live/sfhPackages';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
@@ -167,6 +168,7 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const [drop, setDrop] = useState<Product | null>(null);
   const [stageOffer, setStageOffer] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [pkgPick, setPkgPick] = useState(SFH_PACKAGES[0].id);
   const [draft, setDraft] = useState({ name: '', price: '', tag: '', image: '' });
   const [stats, setStats] = useState({ adds: 0, value: 0 });
   useEffect(() => { try { localStorage.setItem(catalogKey, JSON.stringify(catalog)); } catch { /* storage full */ } }, [catalog, catalogKey]);
@@ -281,6 +283,9 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
   const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed });
   roomRef.current = { spot: spotlight, audience: rules.audience, allowed };
   const syncRoom = useCallback(() => { if (isHost) sendRef.current({ t: 'room', ...roomRef.current }); }, [isHost]);
+  const catRef = useRef(catalog); catRef.current = catalog;
+  // Late joiners: host resends the room catalog whenever someone joins.
+  useEffect(() => { if (isHost) catRef.current.forEach((p) => sendRef.current({ t: 'product', p })); }, [peerCount, token, isHost]);
   useEffect(() => { syncRoom(); }, [spotlight, rules.audience, allowed, peerCount, token, syncRoom]);
   const onPin = (who: string | null) => { if (isHost) setSpotlight(who); else setLocalPin(who); };
   const onMod = (to: string, a: 'mute' | 'cam' | 'allow' | 'revoke') => {
@@ -397,6 +402,8 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
     <div className="flex-1 min-w-0 flex flex-col rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950"
       onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}>
       <div className="h-14 bg-white flex items-center gap-4 px-5 font-mono text-[13px] text-zinc-800 border-b border-zinc-200">
+        <img src={sfhLogo} alt="Startup Factory Hub" className="h-8 w-8 object-contain" />
+        <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Timer className="w-3.5 h-3.5" />{fmtTime(seconds)}</span>
         <span className="w-px h-4 bg-zinc-200" />
         <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : `${totalPeers} in call`}</span>
@@ -530,29 +537,30 @@ export default function LiveVideoRoom({ roomName, room, identity }: LiveVideoRoo
         </span>}
       </div>
 
-      {canSell && showPkgs && (
-        <div className="grid grid-cols-2 gap-2">
-          {SFH_PACKAGES.map((k) => {
-            const inCat = catalog.some((x) => x.id === `pkg-${k.id}`);
-            return (
-              <div key={k.id} className="rounded-2xl border border-zinc-200 overflow-hidden flex flex-col">
-                <div className="relative h-20">
-                  <img src={k.image} alt={k.name} loading="lazy" width={816} height={816} className="w-full h-full object-cover" />
-                  <span className="absolute left-2 top-2 font-mono text-[9px] px-2 py-0.5 rounded-full bg-black/60 text-white">{k.tag}</span>
-                </div>
-                <div className="p-2.5 flex-1 flex flex-col">
-                  <p className="text-[13px] text-zinc-900 leading-tight">{k.name}</p>
-                  <p className="font-mono text-[11px] text-zinc-500 mt-0.5">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
-                  <div className="mt-2 flex gap-1.5">
-                    <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-1 rounded-full border border-zinc-200 text-[11px] text-zinc-800 disabled:opacity-50">{inCat ? 'Added' : 'Add'}</button>
-                    <button onClick={() => addPackage(k, true)} className="flex-1 py-1 rounded-full bg-zinc-900 text-white text-[11px]">Drop</button>
-                  </div>
-                </div>
+      {canSell && showPkgs && (() => {
+        const k = SFH_PACKAGES.find((x) => x.id === pkgPick) || SFH_PACKAGES[0];
+        const inCat = catalog.some((x) => x.id === `pkg-${k.id}`);
+        return (
+          <div className="rounded-2xl border border-zinc-200 overflow-hidden">
+            <select value={k.id} onChange={(e) => setPkgPick(e.target.value)} className="w-full text-sm px-3 py-2 border-b border-zinc-200 bg-white text-zinc-900">
+              {SFH_PACKAGES.map((x) => <option key={x.id} value={x.id}>{catalog.some((c) => c.id === `pkg-${x.id}`) ? '(added) ' : ''}{x.name} — ${x.price.toLocaleString()}/{x.interval === 'year' ? 'yr' : 'mo'}</option>)}
+            </select>
+            <div className="relative h-32">
+              <img src={k.image} alt={k.name} className="w-full h-full object-cover" />
+              <span className="absolute left-2 top-2 font-mono text-[9px] px-2 py-0.5 rounded-full bg-black/60 text-white">{k.tag}</span>
+            </div>
+            <div className="p-3">
+              <p className="text-[14px] text-zinc-900">{k.name}</p>
+              <p className="font-mono text-[11px] text-zinc-500">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
+              <ul className="mt-1 text-[11px] text-zinc-500">{k.perks.map((x) => <li key={x}>{x}</li>)}</ul>
+              <div className="mt-2 flex gap-2">
+                <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-800 disabled:opacity-50">{inCat ? 'In catalog' : 'Add to catalog'}</button>
+                <button onClick={() => addPackage(k, true)} className="flex-1 py-1.5 rounded-full bg-zinc-900 text-white text-xs">Drop live now</button>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
+        );
+      })()}
       <div className="hidden">
       </div>
 
