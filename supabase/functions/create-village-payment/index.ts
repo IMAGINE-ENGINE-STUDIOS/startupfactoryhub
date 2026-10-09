@@ -39,7 +39,7 @@ serve(async (req) => {
     const user = userData.user;
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { villageName, villageDescription, villageType, isPrivate, joinFeeCents, govFundCents } = await req.json();
+    const { villageName, villageDescription, villageType, isPrivate, joinFeeCents, govFundCents, coverImageUrl } = await req.json();
     if (!villageName || !villageType) throw new Error("villageName and villageType are required");
     if (!["democratic_republic", "merchant_village"].includes(villageType)) {
       throw new Error("Invalid villageType");
@@ -90,6 +90,7 @@ serve(async (req) => {
         is_private: privateMode ? "true" : "false",
         join_fee_cents: String(joinFeeCents || 100),
         gov_fund_cents: String(govFundCents || 100),
+        cover_image_url: typeof coverImageUrl === "string" && /^https:\/\//.test(coverImageUrl) ? coverImageUrl.slice(0, 480) : "",
       },
     });
 

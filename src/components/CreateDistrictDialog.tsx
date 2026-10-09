@@ -100,6 +100,7 @@ export default function CreateDistrictDialog({ open, onOpenChange }: CreateDistr
     const govFundCents = Math.round((parseFloat(govFundDollars) || 1) * 100);
 
     try {
+      const coverImageUrl = coverFile ? await uploadRoomImage(coverFile, user.id).catch(() => undefined) : undefined;
       const { data, error } = await supabase.functions.invoke('create-village-payment', {
         body: {
           villageName: name.trim(),
@@ -108,6 +109,7 @@ export default function CreateDistrictDialog({ open, onOpenChange }: CreateDistr
           isPrivate: selectedType === 'merchant_village' ? isPrivate : false,
           joinFeeCents: selectedType === 'democratic_republic' ? joinFeeCents : undefined,
           govFundCents: selectedType === 'democratic_republic' ? govFundCents : undefined,
+          coverImageUrl,
         },
       });
 

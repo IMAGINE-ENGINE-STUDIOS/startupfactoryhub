@@ -28,6 +28,7 @@ interface DistrictRoom {
   participant_count: number;
   village_type?: 'democratic_republic' | 'merchant_village' | null;
   is_private?: boolean;
+  cover_image_url?: string | null;
   for_sale?: boolean;
   host?: {
     full_name: string;
@@ -239,6 +240,11 @@ export default function DistrictRooms() {
 
             {/* Top accent bar */}
             <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accent}`} />
+            {room.cover_image_url && (
+              <div className="aspect-[16/7] overflow-hidden">
+                <img src={room.cover_image_url} alt={room.name} className="w-full h-full object-cover" loading="lazy" />
+              </div>
+            )}
 
             <CardHeader className="pb-2 pt-4 px-4 relative">
               <div className="flex items-start justify-between gap-2">
