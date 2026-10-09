@@ -11,6 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { useLiveRooms } from '@/hooks/useLiveRooms';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
+import RoomImagePicker, { uploadRoomImage } from '@/components/live/RoomImagePicker';
+import { useToast } from '@/hooks/use-toast';
 
 import { Plus, Users, Video, Loader2, Radio, X, Globe, Lock, Clock } from 'lucide-react';
 
@@ -21,6 +23,9 @@ const LiveRooms = () => {
   const [roomName, setRoomName] = useState('');
   const [roomDescription, setRoomDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
   const [roomToClose, setRoomToClose] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -28,8 +33,15 @@ const LiveRooms = () => {
   const handleCreate = async () => {
     if (!roomName.trim()) return;
     
-    const room = await createRoom(roomName.trim(), roomDescription.trim() || undefined, isPublic);
+    let cover: string | null = null;
+    if (coverFile && user) {
+      try { setUploading(true); cover = await uploadRoomImage(coverFile, user.id); }
+      catch { toast({ title: 'Image upload failed', description: 'The room will be created without an image.', variant: 'destructive' }); }
+      finally { setUploading(false); }
+    }
+    const room = await createRoom(roomName.trim(), roomDescription.trim() || undefined, isPublic, cover);
     if (room) {
+      setCoverFile(null);
       setRoomName('');
       setRoomDescription('');
       setIsPublic(true);
@@ -117,6 +129,7 @@ const LiveRooms = () => {
                   rows={3}
                 />
               </div>
+              <RoomImagePicker file={coverFile} onChange={setCoverFile} uploading={uploading} />
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div>
                   <Label htmlFor="public-toggle" className="text-sm font-medium">Public Room</Label>
@@ -132,10 +145,10 @@ const LiveRooms = () => {
               </div>
               <Button 
                 onClick={handleCreate} 
-                disabled={!roomName.trim() || creating}
+                disabled={!roomName.trim() || creating || uploading}
                 className="w-full"
               >
-                {creating ? (
+                {creating || uploading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Creating...
@@ -171,7 +184,11 @@ const LiveRooms = () => {
               key={room.id}
               className="border border-border/40 bg-background/30 backdrop-blur-xl shadow-none hover:border-primary/40 transition-colors"
             >
-
+                {room.cover_image_url && (
+                  <div className="aspect-[16/7] overflow-hidden rounded-t-lg">
+                    <img src={room.cover_image_url} alt={room.name} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                )}
                 <CardHeader className="pb-2 pt-3 px-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
