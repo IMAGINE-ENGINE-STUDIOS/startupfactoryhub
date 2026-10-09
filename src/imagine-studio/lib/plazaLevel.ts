@@ -1,0 +1,68 @@
+// @ts-nocheck -- Imagine Studio v2
+// Plaza District as an editable 3D Studio level (mirrors the built-in /plaza world).
+import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
+
+export const PLAZA_LEVEL_NAME = "Plaza District";
+export const PLAZA_PUBLISHED_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/plaza-district.json`;
+
+const hex = (h: string, a = 1): [number, number, number, number] => {
+  const n = parseInt(h.replace("#", ""), 16);
+  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, a];
+};
+let n = 0;
+const P = (name: string, shape: PrimitiveObject["shape"], position, scale, color: string, extra: Partial<PrimitiveObject> = {}): PrimitiveObject => ({
+  id: `plaza_${++n}`, kind: "primitive", name, shape, position, rotation: [0, 0, 0], scale, visible: true,
+  color: hex(color), metalness: 0, roughness: 0.85, ...extra,
+});
+
+export function buildPlazaScene(): LevelScene {
+  n = 0;
+  const o: PrimitiveObject[] = [];
+  const flat = [-Math.PI / 2, 0, 0] as [number, number, number];
+  o.push(P("Lawn", "cylinder", [0, -0.05, 0], [90, 0.1, 90], "#6b8f4e"));
+  o.push(P("Stone Plaza", "cylinder", [0, 0.01, 0], [56, 0.04, 56], "#cfc6b6", { roughness: 0.9 }));
+  for (const r of [8, 14, 22]) o.push(P(`Ring ${r}m`, "torus", [0, 0.03, 0], [r * 2, r * 2, 0.6], "#a89f8f", { rotation: flat }));
+  // Fountain
+  o.push(P("Fountain Basin", "cylinder", [0, 0.45, 0], [7.2, 0.9, 7.2], "#9aa0a6"));
+  o.push(P("Fountain Water", "cylinder", [0, 0.62, 0], [6.5, 0.9, 6.5], "#2f7fd1", { color: hex("#2f7fd1", 0.7), roughness: 0.1, metalness: 0.2, playBehavior: { collision: "none" } }));
+  o.push(P("Fountain Column", "cylinder", [0, 1.4, 0], [0.8, 2.6, 0.8], "#8a9096"));
+  o.push(P("Fountain Tier", "cylinder", [0, 2.2, 0], [2.2, 0.25, 2.2], "#9aa0a6"));
+  o.push(P("Fountain Crown", "sphere", [0, 2.9, 0], [0.9, 0.9, 0.9], "#8a9096"));
+  // Benches
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + 0.2, x = Math.cos(a) * 12, z = Math.sin(a) * 12, ry = -a + Math.PI / 2;
+    o.push(P(`Bench ${i + 1}`, "box", [x, 0.45, z], [2, 0.1, 0.5], "#8b5a2b", { rotation: [0, ry, 0], playBehavior: { collision: "walkable", sittable: { key: "E" }, interactRadius: 1.6 } }));
+    o.push(P(`Bench ${i + 1} Back`, "box", [x - Math.sin(ry) * 0.22 * -1, 0.8, z - Math.cos(ry) * 0.22], [2, 0.5, 0.08], "#8b5a2b", { rotation: [0, ry, 0] }));
+  }
+  // Trees (north gap left open for the theater)
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2, x = Math.cos(a) * 32, z = Math.sin(a) * 32;
+    if (z < -24 && Math.abs(x) < 14) continue;
+    o.push(P(`Tree ${i + 1} Trunk`, "cylinder", [x, 1.2, z], [0.5, 2.4, 0.5], "#6b4423"));
+    o.push(P(`Tree ${i + 1} Crown`, "cone", [x, 3.2, z], [3.2, 3, 3.2], "#2f6b3a"));
+  }
+  // Street lights
+  for (let i = 0; i < 4; i++) {
+    const a = i * Math.PI / 2 + Math.PI / 4, x = Math.cos(a) * 20, z = Math.sin(a) * 20;
+    o.push(P(`Street Light ${i + 1} Pole`, "cylinder", [x, 2, z], [0.18, 4, 0.18], "#222222"));
+    o.push(P(`Street Light ${i + 1} Lamp`, "sphere", [x, 4.1, z], [0.6, 0.6, 0.6], "#fff6d5", { metalness: 0, roughness: 0.2 }));
+  }
+  // Theater on the north lawn (screen content itself is live in /plaza)
+  o.push(P("Theater Screen", "box", [0, 5.5, -36], [16.4, 9.4, 0.3], "#111318", { metalness: 0.3, roughness: 0.4 }));
+  o.push(P("Theater Pylon Left", "box", [-8.6, 5, -36], [0.6, 10, 0.6], "#2a2d33"));
+  o.push(P("Theater Pylon Right", "box", [8.6, 5, -36], [0.6, 10, 0.6], "#2a2d33"));
+  o.push(P("Theater Stage", "box", [0, 0.15, -34.5], [18, 0.3, 4], "#3a3d44"));
+  // Election booth
+  o.push(P("Election Booth", "box", [10, 1.1, -6], [2.4, 2.2, 1.6], "#1f3a8a", { playBehavior: { collision: "walkable", usable: { key: "E", label: "Vote" }, interactRadius: 2.5 } }));
+
+  return {
+    ...EMPTY_SCENE,
+    objects: o,
+    lights: [
+      { id: "plaza_sun", name: "Sun", kind: "directional", position: [20, 30, 10], color: [1, 0.97, 0.9, 1], intensity: 1.4, castShadow: true },
+      { id: "plaza_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.5 },
+      { id: "plaza_theater_bounce", name: "Theater Bounce", kind: "point", position: [0, 3, -30], color: [0.6, 0.75, 1, 1], intensity: 1.2 },
+    ],
+    environment: { ...EMPTY_SCENE.environment, background: "#9ec9ee", ambient: 0.5 },
+  };
+}
