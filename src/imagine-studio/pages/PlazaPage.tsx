@@ -1,55 +1,135 @@
 /**
- * Multiplayer Plaza — every visitor owns a 3D character, walks with WASD/arrows,
- * and talks through the mic. Voices fade with distance (proximity audio).
- * Presence and positions travel over the LiveKit data channel; no user cap.
+ * Multiplayer Plaza — every visitor owns a 3D character (Character Room), walks
+ * with keyboard or the on-screen joystick, talks through the mic (voices fade
+ * with distance), chats, and votes in district elections.
+ * Presence/positions/chat travel over the LiveKit data channel; no user cap.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Html, Sky } from '@react-three/drei';
+import { Html, Sky, useGLTF, useAnimations } from '@react-three/drei';
+import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack } from 'livekit-client';
-import { Mic, MicOff, Loader2, LogOut } from 'lucide-react';
+import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 
 const ROOM = 'plaza';
-const NEAR = 3;    // full volume within 3 m
-const FAR = 25;    // silent beyond 25 m
-const SPEED = 5;
+const NEAR = 3;
+const FAR = 25;
+const SPEED = 4.5;
 const BOUND = 38;
+const TANK_R = 3.6; // fountain tank outer radius (collision)
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
-type Peer = { x: number; z: number; ry: number; moving: boolean; color: string; name: string; tx: number; tz: number; tr: number; speaking: boolean };
+export const CHARACTERS = [
+  { id: 'xbot', label: 'Xbot', url: '/models/plaza/Xbot.glb', yaw: 0 },
+  { id: 'soldier', label: 'Soldier', url: '/models/plaza/Soldier.glb', yaw: Math.PI },
+  { id: 'robot', label: 'Robot', url: '/models/plaza/RobotExpressive.glb', yaw: 0 },
+  { id: 'classic', label: 'Classic', url: '', yaw: 0 },
+] as const;
+type CharId = typeof CHARACTERS[number]['id'];
+const charOf = (id: string) => CHARACTERS.find((c) => c.id === id) ?? CHARACTERS[0];
+
+type Peer = { x: number; z: number; ry: number; moving: boolean; color: string; name: string; char: string; tx: number; tz: number; tr: number; speaking: boolean };
+type ChatMsg = { from: string; text: string; at: number; me?: boolean };
 const enc = new TextEncoder(), dec = new TextDecoder();
 
 function volumeFor(d: number) {
   if (d <= NEAR) return 1;
   if (d >= FAR) return 0;
-  const t = (d - NEAR) / (FAR - NEAR);
-  return Math.pow(1 - t, 2);
+  return Math.pow(1 - (d - NEAR) / (FAR - NEAR), 2);
 }
 
-function Avatar({ color, name, moving, speaking, me }: { color: string; name: string; moving: boolean; speaking: boolean; me?: boolean }) {
+/* ---------- Characters ---------- */
+function GlbCharacter({ url, yaw, moving, tint }: { url: string; yaw: number; moving: boolean; tint: string }) {
+  const { scene, animations } = useGLTF(url);
+  const model = useMemo(() => {
+    const m = skeletonClone(scene) as THREE.Object3D;
+    m.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m);
+    const h = box.max.y - box.min.y || 1;
+    const s = 1.8 / h;
+    m.scale.setScalar(s);
+    m.position.y = -box.min.y * s;
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
+    return m;
+  }, [scene]);
+  const root = useRef<THREE.Group>(null);
+  const { actions, names } = useAnimations(animations, root);
+  useEffect(() => {
+    const walk = names.find((n) => /walk/i.test(n)) ?? names.find((n) => /run/i.test(n));
+    const idle = names.find((n) => /idle/i.test(n)) ?? names[0];
+    const next = moving ? walk : idle;
+    const a = next ? actions[next] : undefined;
+    if (!a) return;
+    a.reset().fadeIn(0.2).play();
+    return () => { a.fadeOut(0.2); };
+  }, [moving, actions, names]);
+  return (
+    <group ref={root} rotation={[0, yaw, 0]}>
+      <primitive object={model} />
+      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.45, 0.55, 32]} /><meshBasicMaterial color={tint} /></mesh>
+    </group>
+  );
+}
+
+function ClassicCharacter({ color, moving }: { color: string; moving: boolean }) {
   const body = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
     if (!body.current) return;
     const t = clock.getElapsedTime();
     body.current.position.y = moving ? Math.abs(Math.sin(t * 10)) * 0.12 : Math.sin(t * 2) * 0.02;
-    body.current.rotation.z = moving ? Math.sin(t * 10) * 0.05 : 0;
   });
   return (
+    <group ref={body}>
+      <mesh position={[0, 0.9, 0]} castShadow><capsuleGeometry args={[0.35, 0.8, 6, 16]} /><meshStandardMaterial color={color} roughness={0.5} /></mesh>
+      <mesh position={[0, 1.75, 0]} castShadow><sphereGeometry args={[0.3, 24, 24]} /><meshStandardMaterial color="#f1d3b3" roughness={0.6} /></mesh>
+      <mesh position={[0.11, 1.8, 0.26]}><sphereGeometry args={[0.045, 12, 12]} /><meshStandardMaterial color="#111" /></mesh>
+      <mesh position={[-0.11, 1.8, 0.26]}><sphereGeometry args={[0.045, 12, 12]} /><meshStandardMaterial color="#111" /></mesh>
+    </group>
+  );
+}
+
+function Avatar({ char, color, name, moving, speaking, me }: { char: string; color: string; name: string; moving: boolean; speaking: boolean; me?: boolean }) {
+  const c = charOf(char);
+  return (
     <group>
-      <group ref={body}>
-        <mesh position={[0, 0.9, 0]} castShadow><capsuleGeometry args={[0.35, 0.8, 6, 16]} /><meshStandardMaterial color={color} roughness={0.5} /></mesh>
-        <mesh position={[0, 1.75, 0]} castShadow><sphereGeometry args={[0.3, 24, 24]} /><meshStandardMaterial color="#f1d3b3" roughness={0.6} /></mesh>
-        <mesh position={[0.11, 1.8, 0.26]}><sphereGeometry args={[0.045, 12, 12]} /><meshStandardMaterial color="#111" /></mesh>
-        <mesh position={[-0.11, 1.8, 0.26]}><sphereGeometry args={[0.045, 12, 12]} /><meshStandardMaterial color="#111" /></mesh>
-      </group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}><circleGeometry args={[0.45, 24]} /><meshBasicMaterial color="#000" transparent opacity={0.25} /></mesh>
-      <Html position={[0, 2.35, 0]} center distanceFactor={10} zIndexRange={[10, 0]}>
+      {c.url ? (
+        <Suspense fallback={<ClassicCharacter color={color} moving={moving} />}>
+          <GlbCharacter url={c.url} yaw={c.yaw} moving={moving} tint={color} />
+        </Suspense>
+      ) : <ClassicCharacter color={color} moving={moving} />}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}><circleGeometry args={[0.45, 24]} /><meshBasicMaterial color="#000" transparent opacity={0.25} depthWrite={false} /></mesh>
+      <Html position={[0, 2.05, 0]} center distanceFactor={10} zIndexRange={[10, 0]}>
         <div className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium backdrop-blur ${speaking ? 'bg-emerald-500/90 text-white' : me ? 'bg-primary/90 text-primary-foreground' : 'bg-background/80 text-foreground'}`}>
           {name}
         </div>
       </Html>
+    </group>
+  );
+}
+
+/* ---------- World ---------- */
+function Fountain() {
+  const water = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => { if (water.current) water.current.position.y = 0.62 + Math.sin(clock.getElapsedTime() * 1.5) * 0.01; });
+  return (
+    <group>
+      {/* Tank: floor, outer + inner walls, rim — a real basin holding the water */}
+      <mesh position={[0, 0.06, 0]} receiveShadow><cylinderGeometry args={[TANK_R, TANK_R, 0.12, 48]} /><meshStandardMaterial color="#7d848b" /></mesh>
+      <mesh position={[0, 0.45, 0]} castShadow receiveShadow><cylinderGeometry args={[TANK_R, TANK_R, 0.9, 48, 1, true]} /><meshStandardMaterial color="#9aa0a6" side={THREE.DoubleSide} /></mesh>
+      <mesh position={[0, 0.45, 0]}><cylinderGeometry args={[TANK_R - 0.3, TANK_R - 0.3, 0.9, 48, 1, true]} /><meshStandardMaterial color="#8a9096" side={THREE.DoubleSide} /></mesh>
+      <mesh position={[0, 0.9, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[TANK_R - 0.3, TANK_R, 48]} /><meshStandardMaterial color="#b4b9be" /></mesh>
+      {/* Water volume — sits below the rim, inside the tank */}
+      <mesh ref={water} position={[0, 0.62, 0]}>
+        <cylinderGeometry args={[TANK_R - 0.32, TANK_R - 0.32, 0.9, 48]} />
+        <meshStandardMaterial color="#2f7fd1" transparent opacity={0.7} roughness={0.1} metalness={0.2} depthWrite={false} />
+      </mesh>
+      {/* Centre column */}
+      <mesh position={[0, 1.4, 0]} castShadow><cylinderGeometry args={[0.3, 0.5, 2.6, 16]} /><meshStandardMaterial color="#8a9096" /></mesh>
+      <mesh position={[0, 2.2, 0]} castShadow><cylinderGeometry args={[1.1, 0.4, 0.25, 24]} /><meshStandardMaterial color="#9aa0a6" /></mesh>
+      <mesh position={[0, 2.9, 0]} castShadow><sphereGeometry args={[0.45, 24, 24]} /><meshStandardMaterial color="#8a9096" /></mesh>
     </group>
   );
 }
@@ -61,14 +141,10 @@ function PlazaWorld() {
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><circleGeometry args={[45, 64]} /><meshStandardMaterial color="#6b8f4e" /></mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow><circleGeometry args={[28, 64]} /><meshStandardMaterial color="#cfc6b6" roughness={0.9} /></mesh>
-      {[6, 14, 22].map((r) => (
+      {[8, 14, 22].map((r) => (
         <mesh key={r} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}><ringGeometry args={[r - 0.15, r, 64]} /><meshStandardMaterial color="#a89f8f" /></mesh>
       ))}
-      {/* Fountain */}
-      <mesh position={[0, 0.3, 0]} castShadow receiveShadow><cylinderGeometry args={[3, 3.2, 0.6, 40]} /><meshStandardMaterial color="#9aa0a6" /></mesh>
-      <mesh position={[0, 0.55, 0]}><cylinderGeometry args={[2.7, 2.7, 0.1, 40]} /><meshStandardMaterial color="#3b82f6" transparent opacity={0.75} metalness={0.3} roughness={0.1} /></mesh>
-      <mesh position={[0, 1.4, 0]} castShadow><cylinderGeometry args={[0.3, 0.5, 2, 16]} /><meshStandardMaterial color="#8a9096" /></mesh>
-      <mesh position={[0, 2.5, 0]} castShadow><sphereGeometry args={[0.6, 24, 24]} /><meshStandardMaterial color="#8a9096" /></mesh>
+      <Fountain />
       {benches.map((b, i) => (
         <group key={i} position={[b.x, 0, b.z]} rotation={[0, b.r, 0]}>
           <mesh position={[0, 0.45, 0]} castShadow><boxGeometry args={[2, 0.1, 0.5]} /><meshStandardMaterial color="#8b5a2b" /></mesh>
@@ -82,7 +158,6 @@ function PlazaWorld() {
           <mesh position={[0, 3.2, 0]} castShadow><coneGeometry args={[1.6, 3, 10]} /><meshStandardMaterial color="#2f6b3a" /></mesh>
         </group>
       ))}
-      {/* Lamp posts */}
       {[0, 1, 2, 3].map((i) => { const a = i * Math.PI / 2 + Math.PI / 4; return (
         <group key={i} position={[Math.cos(a) * 20, 0, Math.sin(a) * 20]}>
           <mesh position={[0, 2, 0]}><cylinderGeometry args={[0.08, 0.1, 4, 8]} /><meshStandardMaterial color="#222" /></mesh>
@@ -92,90 +167,233 @@ function PlazaWorld() {
   );
 }
 
-function Game({ me, peers, onMove }: { me: { color: string; name: string }; peers: React.MutableRefObject<Map<string, Peer>>; onMove: (x: number, z: number, ry: number, moving: boolean) => void }) {
+/* ---------- Player + peers ---------- */
+type Input = { joy: { x: number; y: number }; turn: number };
+
+function Game({ me, peers, input, onMove }: { me: { color: string; name: string; char: string }; peers: React.MutableRefObject<Map<string, Peer>>; input: React.MutableRefObject<Input>; onMove: (x: number, z: number, ry: number, moving: boolean) => void }) {
   const self = useRef<THREE.Group>(null);
   const keys = useRef<Record<string, boolean>>({});
-  const [, force] = useState(0);
+  // Spawn chosen ONCE — re-renders must never move the player.
+  const spawn = useMemo<[number, number, number]>(() => { const a = Math.random() * Math.PI * 2; return [Math.cos(a) * 10, 0, Math.sin(a) * 10]; }, []);
+  const [peerIds, setPeerIds] = useState<string[]>([]);
+  const [peerMoving, setPeerMoving] = useState<Record<string, boolean>>({});
   const [moving, setMoving] = useState(false);
   const { camera } = useThree();
   const groups = useRef(new Map<string, THREE.Group>());
   const lastSend = useRef(0);
-  const camYaw = useRef(0);
+  const camYaw = useRef(Math.atan2(spawn[0], spawn[2]));
+  const camInit = useRef(false);
 
   useEffect(() => {
-    const d = (e: KeyboardEvent) => { if ((e.target as HTMLElement)?.tagName === 'INPUT') return; keys.current[e.key.toLowerCase()] = true; };
+    const d = (e: KeyboardEvent) => { if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return; keys.current[e.key.toLowerCase()] = true; };
     const u = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = false; };
-    window.addEventListener('keydown', d); window.addEventListener('keyup', u);
-    const t = setInterval(() => force((n) => n + 1), 500); // refresh peer list
-    return () => { window.removeEventListener('keydown', d); window.removeEventListener('keyup', u); clearInterval(t); };
-  }, []);
+    const blur = () => { keys.current = {}; };
+    window.addEventListener('keydown', d); window.addEventListener('keyup', u); window.addEventListener('blur', blur);
+    const t = setInterval(() => {
+      const ids = [...peers.current.keys()];
+      setPeerIds((prev) => (prev.join() === ids.join() ? prev : ids));
+      const mv: Record<string, boolean> = {}; peers.current.forEach((p, id) => { mv[id] = p.moving; });
+      setPeerMoving((prev) => (JSON.stringify(prev) === JSON.stringify(mv) ? prev : mv));
+    }, 250);
+    return () => { window.removeEventListener('keydown', d); window.removeEventListener('keyup', u); window.removeEventListener('blur', blur); clearInterval(t); };
+  }, [peers]);
 
-  useFrame((_, dt) => {
+  useFrame((_, raw) => {
+    const dt = Math.min(raw, 0.05);
     const g = self.current; if (!g) return;
-    const k = keys.current;
-    if (k['q']) camYaw.current += dt * 2;
-    if (k['e']) camYaw.current -= dt * 2;
-    let f = 0, s = 0;
+    const k = keys.current, inp = input.current;
+    let turn = inp.turn; if (k['q']) turn += 1; if (k['e']) turn -= 1;
+    camYaw.current += turn * dt * 2;
+    let f = -inp.joy.y, s = inp.joy.x;
     if (k['w'] || k['arrowup']) f += 1;
     if (k['s'] || k['arrowdown']) f -= 1;
     if (k['a'] || k['arrowleft']) s -= 1;
     if (k['d'] || k['arrowright']) s += 1;
-    const mv = f !== 0 || s !== 0;
+    const mag = Math.min(1, Math.hypot(f, s));
+    const mv = mag > 0.15;
     if (mv) {
       const yaw = camYaw.current;
-      const dx = (-Math.sin(yaw) * f + Math.cos(yaw) * s);
-      const dz = (-Math.cos(yaw) * f - Math.sin(yaw) * s);
+      const dx = -Math.sin(yaw) * f + Math.cos(yaw) * s;
+      const dz = -Math.cos(yaw) * f - Math.sin(yaw) * s;
       const len = Math.hypot(dx, dz) || 1;
-      let nx = g.position.x + (dx / len) * SPEED * dt, nz = g.position.z + (dz / len) * SPEED * dt;
+      let nx = g.position.x + (dx / len) * SPEED * mag * dt, nz = g.position.z + (dz / len) * SPEED * mag * dt;
       const r = Math.hypot(nx, nz);
       if (r > BOUND) { nx *= BOUND / r; nz *= BOUND / r; }
-      if (r < 3.4) { nx *= 3.4 / (r || 1); nz *= 3.4 / (r || 1); } // fountain
+      const minR = TANK_R + 0.5;
+      if (r < minR) { nx *= minR / (r || 1); nz *= minR / (r || 1); }
       g.position.x = nx; g.position.z = nz;
-      g.rotation.y = Math.atan2(dx, dz);
+      const target = Math.atan2(dx, dz);
+      let dr = target - g.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
+      g.rotation.y += dr * (1 - Math.exp(-12 * dt));
     }
     if (mv !== moving) setMoving(mv);
-    // Camera follow
     const yaw = camYaw.current;
-    const target = new THREE.Vector3(g.position.x + Math.sin(yaw) * 7, 4.5, g.position.z + Math.cos(yaw) * 7);
-    camera.position.lerp(target, 0.12);
-    camera.lookAt(g.position.x, 1.5, g.position.z);
-    // Peers: interpolate + proximity volume
+    const want = new THREE.Vector3(g.position.x + Math.sin(yaw) * 7, 4.2, g.position.z + Math.cos(yaw) * 7);
+    if (!camInit.current) { camera.position.copy(want); camInit.current = true; }
+    else camera.position.lerp(want, 1 - Math.exp(-6 * dt));
+    camera.lookAt(g.position.x, 1.4, g.position.z);
+    const a = 1 - Math.exp(-10 * dt);
     peers.current.forEach((p, id) => {
-      p.x += (p.tx - p.x) * 0.2; p.z += (p.tz - p.z) * 0.2;
-      let dr = p.tr - p.ry; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); p.ry += dr * 0.2;
+      p.x += (p.tx - p.x) * a; p.z += (p.tz - p.z) * a;
+      let dr = p.tr - p.ry; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); p.ry += dr * a;
       const pg = groups.current.get(id);
       if (pg) { pg.position.set(p.x, 0, p.z); pg.rotation.y = p.ry; }
     });
     const now = performance.now();
-    if (now - lastSend.current > 80) { lastSend.current = now; onMove(g.position.x, g.position.z, g.rotation.y, mv); }
+    if (now - lastSend.current > 100) { lastSend.current = now; onMove(g.position.x, g.position.z, g.rotation.y, mv); }
   });
 
   return (
     <>
-      <group ref={self} position={[(Math.random() - 0.5) * 16, 0, 10 + Math.random() * 6]}>
-        <Avatar color={me.color} name={me.name} moving={moving} speaking={false} me />
+      <group ref={self} position={spawn}>
+        <Avatar char={me.char} color={me.color} name={me.name} moving={moving} speaking={false} me />
       </group>
-      {[...peers.current.entries()].map(([id, p]) => (
-        <group key={id} ref={(el) => { if (el) groups.current.set(id, el); else groups.current.delete(id); }}>
-          <Avatar color={p.color} name={p.name} moving={p.moving} speaking={p.speaking} />
-        </group>
-      ))}
+      {peerIds.map((id) => { const p = peers.current.get(id); if (!p) return null; return (
+        <group key={id} ref={(el) => { if (el) { groups.current.set(id, el); el.position.set(p.x, 0, p.z); } else groups.current.delete(id); }}>
+          <Avatar char={p.char} color={p.color} name={p.name} moving={!!peerMoving[id]} speaking={p.speaking} />
+        </group>); })}
     </>
   );
 }
 
+/* ---------- Mobile joystick ---------- */
+function Joystick({ input }: { input: React.MutableRefObject<Input> }) {
+  const base = useRef<HTMLDivElement>(null);
+  const [knob, setKnob] = useState({ x: 0, y: 0 });
+  const move = (e: React.PointerEvent) => {
+    const b = base.current!.getBoundingClientRect();
+    let x = (e.clientX - (b.left + b.width / 2)) / (b.width / 2);
+    let y = (e.clientY - (b.top + b.height / 2)) / (b.height / 2);
+    const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
+    input.current.joy = { x, y }; setKnob({ x, y });
+  };
+  const end = () => { input.current.joy = { x: 0, y: 0 }; setKnob({ x: 0, y: 0 }); };
+  return (
+    <div ref={base} className="relative w-32 h-32 rounded-full bg-background/40 backdrop-blur border border-border touch-none select-none"
+      onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture(e.pointerId); move(e); }}
+      onPointerMove={(e) => { if (e.buttons || e.pointerType === 'touch') move(e); }}
+      onPointerUp={end} onPointerCancel={end}>
+      <div className="absolute w-12 h-12 rounded-full bg-primary/80 left-1/2 top-1/2 pointer-events-none"
+        style={{ transform: `translate(calc(-50% + ${knob.x * 40}px), calc(-50% + ${knob.y * 40}px))` }} />
+    </div>
+  );
+}
+
+function TurnButton({ dir, input }: { dir: 1 | -1; input: React.MutableRefObject<Input> }) {
+  const Icon = dir === 1 ? RotateCcw : RotateCw;
+  return (
+    <button aria-label={dir === 1 ? 'Turn camera left' : 'Turn camera right'}
+      className="w-12 h-12 rounded-full bg-background/60 backdrop-blur border border-border flex items-center justify-center touch-none select-none"
+      onPointerDown={() => { input.current.turn = dir; }} onPointerUp={() => { input.current.turn = 0; }} onPointerLeave={() => { input.current.turn = 0; }} onPointerCancel={() => { input.current.turn = 0; }}>
+      <Icon className="w-5 h-5" />
+    </button>
+  );
+}
+
+/* ---------- Character Room preview ---------- */
+function Spinner({ children }: { children: React.ReactNode }) {
+  const g = useRef<THREE.Group>(null);
+  useFrame((_, dt) => { if (g.current) g.current.rotation.y += dt * 0.6; });
+  return <group ref={g} position={[0, -0.6, 0]}>{children}</group>;
+}
+
+function CharacterPreview({ char, color }: { char: string; color: string }) {
+  return (
+    <Canvas camera={{ position: [0, 1.3, 3.6], fov: 40 }} dpr={[1, 1.5]}>
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[3, 5, 3]} intensity={1.3} />
+      <Spinner><Avatar char={char} color={color} name="" moving={false} speaking={false} /></Spinner>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.6, 0]}><circleGeometry args={[1.4, 48]} /><meshStandardMaterial color="#cfc6b6" /></mesh>
+    </Canvas>
+  );
+}
+
+/* ---------- Districts voting panel ---------- */
+function DistrictsPanel({ onClose }: { onClose: () => void }) {
+  const [rooms, setRooms] = useState<{ id: string; name: string; active_election?: boolean }[] | null>(null);
+  const [vote, setVote] = useState<{ id: string; name: string } | null>(null);
+  useEffect(() => {
+    supabase.from('live_rooms').select('id,name,active_election').eq('room_category', 'village').eq('is_active', true).order('created_at')
+      .then(({ data }) => setRooms((data as any) ?? []));
+  }, []);
+  return (
+    <div className="absolute right-3 top-14 bottom-24 w-[min(320px,calc(100vw-24px))] rounded-2xl bg-background/95 border border-border flex flex-col overflow-hidden z-20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <span className="font-medium text-sm">District elections</span>
+        <button onClick={onClose} aria-label="Close"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {rooms === null && <Loader2 className="w-4 h-4 animate-spin mx-auto" />}
+        {rooms?.length === 0 && <p className="text-sm text-muted-foreground">No districts yet.</p>}
+        {rooms?.map((r) => (
+          <div key={r.id} className="rounded-lg border border-border p-3 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{r.name}</p>
+              <p className="text-xs text-muted-foreground">{r.active_election ? 'Election open' : 'No election running'}</p>
+            </div>
+            <button onClick={() => setVote({ id: r.id, name: r.name })} className="text-xs rounded-full bg-primary text-primary-foreground px-3 py-1 shrink-0">
+              {r.active_election ? 'Vote' : 'Open'}
+            </button>
+          </div>
+        ))}
+      </div>
+      {vote && <DistrictElectionPanel open onOpenChange={(o) => !o && setVote(null)} roomId={vote.id} roomName={vote.name} />}
+    </div>
+  );
+}
+
+/* ---------- Chat panel ---------- */
+function ChatPanel({ msgs, onSend, onClose }: { msgs: ChatMsg[]; onSend: (t: string) => void; onClose: () => void }) {
+  const [text, setText] = useState('');
+  const end = useRef<HTMLDivElement>(null);
+  useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
+  const send = () => { const t = text.trim(); if (!t) return; onSend(t.slice(0, 500)); setText(''); };
+  return (
+    <div className="absolute left-3 top-14 bottom-24 w-[min(320px,calc(100vw-24px))] rounded-2xl bg-background/95 border border-border flex flex-col overflow-hidden z-20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <span className="font-medium text-sm">Plaza chat</span>
+        <button onClick={onClose} aria-label="Close"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {msgs.length === 0 && <p className="text-sm text-muted-foreground">Say hello to everyone in the Plaza.</p>}
+        {msgs.map((m, i) => (
+          <div key={i} className={`text-sm break-words ${m.me ? 'text-right' : ''}`}>
+            <span className="text-xs text-muted-foreground block">{m.from}</span>
+            <span className={`inline-block rounded-xl px-3 py-1.5 ${m.me ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{m.text}</span>
+          </div>
+        ))}
+        <div ref={end} />
+      </div>
+      <div className="flex gap-2 p-3 border-t border-border">
+        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
+          placeholder="Write a message" className="flex-1 min-w-0 rounded-lg border bg-background px-3 py-2 text-sm" />
+        <button onClick={send} aria-label="Send" className="rounded-lg bg-primary text-primary-foreground px-3"><Send className="w-4 h-4" /></button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Page ---------- */
 export default function PlazaPage() {
   const [name, setName] = useState(() => localStorage.getItem('sfh-plaza-name') || '');
   const [color, setColor] = useState(() => localStorage.getItem('sfh-plaza-color') || COLORS[0]);
+  const [char, setChar] = useState<CharId>(() => (localStorage.getItem('sfh-plaza-char') as CharId) || 'xbot');
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [mic, setMic] = useState(false);
   const [count, setCount] = useState(1);
+  const [panel, setPanel] = useState<'chat' | 'vote' | null>(null);
+  const [msgs, setMsgs] = useState<ChatMsg[]>([]);
+  const [unread, setUnread] = useState(0);
+  const panelRef = useRef(panel); panelRef.current = panel;
+  const touch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, []);
   const room = useRef<Room | null>(null);
   const peers = useRef(new Map<string, Peer>());
   const audio = useRef(new Map<string, { track: RemoteAudioTrack; el: HTMLMediaElement }>());
   const mePos = useRef({ x: 0, z: 0 });
+  const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0 });
+  const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -187,7 +405,6 @@ export default function PlazaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Proximity volume loop
   useEffect(() => {
     if (!joined) return;
     const t = setInterval(() => {
@@ -203,7 +420,7 @@ export default function PlazaPage() {
   const join = async () => {
     if (!name.trim()) return setErr('Please enter your name.');
     setBusy(true); setErr('');
-    localStorage.setItem('sfh-plaza-name', name.trim()); localStorage.setItem('sfh-plaza-color', color);
+    localStorage.setItem('sfh-plaza-name', name.trim()); localStorage.setItem('sfh-plaza-color', color); localStorage.setItem('sfh-plaza-char', char);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const identity = (user?.id || 'guest') + '-' + Math.random().toString(36).slice(2, 8);
@@ -214,10 +431,15 @@ export default function PlazaPage() {
         if (!p) return;
         try {
           const m = JSON.parse(dec.decode(payload));
-          if (m.t !== 'pos') return;
+          if (m.t === 'chat' && typeof m.text === 'string') {
+            setMsgs((prev) => [...prev.slice(-199), { from: String(m.n || p.name || 'Guest').slice(0, 40), text: m.text.slice(0, 500), at: Date.now() }]);
+            if (panelRef.current !== 'chat') setUnread((u) => u + 1);
+            return;
+          }
+          if (m.t !== 'pos' || !Number.isFinite(m.x) || !Number.isFinite(m.z)) return;
           const cur = peers.current.get(p.identity);
-          if (cur) Object.assign(cur, { tx: m.x, tz: m.z, tr: m.ry, moving: m.m, color: m.c, name: m.n });
-          else peers.current.set(p.identity, { x: m.x, z: m.z, ry: m.ry, tx: m.x, tz: m.z, tr: m.ry, moving: m.m, color: m.c, name: m.n, speaking: false });
+          if (cur) Object.assign(cur, { tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic' });
+          else peers.current.set(p.identity, { x: m.x, z: m.z, ry: m.ry, tx: m.x, tz: m.z, tr: m.ry, moving: !!m.m, color: m.c, name: m.n, char: m.ch || 'classic', speaking: false });
         } catch { /* ignore */ }
       });
       r.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _pub, p: RemoteParticipant) => {
@@ -235,12 +457,16 @@ export default function PlazaPage() {
         const ids = new Set(sp.map((s) => s.identity));
         peers.current.forEach((p, id) => { p.speaking = ids.has(id); });
       });
-      await r.connect(data.url || import.meta.env.VITE_LIVEKIT_URL, data.token);
+      await Promise.race([
+        r.connect(data.url || import.meta.env.VITE_LIVEKIT_URL, data.token),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
+      ]).catch((e) => { r.disconnect(); throw Object.assign(e, { solo: true }); });
       room.current = r;
       setCount(r.remoteParticipants.size + 1);
       setJoined(true);
       try { await r.localParticipant.setMicrophoneEnabled(true); setMic(true); } catch { setErr('Microphone blocked — allow it in your browser to talk.'); }
     } catch (e: any) {
+      if (e?.solo) { setJoined(true); setErr('Voice and chat are unavailable right now — you are exploring solo.'); return; }
       setErr(e?.message || 'Could not join the plaza.');
     } finally { setBusy(false); }
   };
@@ -248,7 +474,13 @@ export default function PlazaPage() {
   const onMove = (x: number, z: number, ry: number, m: boolean) => {
     mePos.current = { x, z };
     const r = room.current; if (!r) return;
-    r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'pos', x, z, ry, m, c: color, n: name })), { reliable: false }).catch(() => {});
+    const me = meRef.current;
+    r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'pos', x, z, ry, m, c: me.color, n: me.name, ch: me.char })), { reliable: false }).catch(() => {});
+  };
+
+  const sendChat = (text: string) => {
+    setMsgs((prev) => [...prev.slice(-199), { from: name, text, at: Date.now(), me: true }]);
+    room.current?.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'chat', text, n: name })), { reliable: true }).catch(() => {});
   };
 
   const toggleMic = async () => {
@@ -256,18 +488,28 @@ export default function PlazaPage() {
     try { await r.localParticipant.setMicrophoneEnabled(!mic); setMic(!mic); } catch { setErr('Microphone blocked by the browser.'); }
   };
 
-  const leave = () => { room.current?.disconnect(); room.current = null; peers.current.clear(); audio.current.forEach(({ el }) => el.remove()); audio.current.clear(); setJoined(false); };
+  const leave = () => { room.current?.disconnect(); room.current = null; peers.current.clear(); audio.current.forEach(({ el }) => el.remove()); audio.current.clear(); setJoined(false); setPanel(null); };
 
   if (!joined) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
-        <div className="tech-card border-0 w-full max-w-sm rounded-2xl p-6 space-y-4">
-          <h1 className="text-xl font-semibold">The Plaza</h1>
-          <p className="text-sm text-muted-foreground">Walk around and talk. Voices get quieter the farther away people are.</p>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" maxLength={40}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm" />
+        <div className="tech-card border-0 w-full max-w-md rounded-2xl p-5 space-y-4">
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Character color</p>
+            <h1 className="text-xl font-semibold">The Plaza</h1>
+            <p className="text-sm text-muted-foreground">Pick your character, then walk around and talk. Voices get quieter the farther away people are.</p>
+          </div>
+          <div className="h-56 rounded-xl overflow-hidden bg-muted/40"><CharacterPreview char={char} color={color} /></div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Character room</p>
+            <div className="grid grid-cols-4 gap-2">
+              {CHARACTERS.map((c) => (
+                <button key={c.id} onClick={() => setChar(c.id)}
+                  className={`rounded-lg border px-2 py-2 text-xs ${char === c.id ? 'border-primary bg-primary/10' : 'border-border'}`}>{c.label}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Color</p>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => (
                 <button key={c} onClick={() => setColor(c)} aria-label={`Color ${c}`}
@@ -275,6 +517,8 @@ export default function PlazaPage() {
               ))}
             </div>
           </div>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" maxLength={40}
+            className="w-full rounded-lg border bg-background px-3 py-2 text-sm" />
           {err && <p className="text-sm text-destructive">{err}</p>}
           <button onClick={join} disabled={busy} className="w-full rounded-lg bg-primary text-primary-foreground py-2 text-sm font-medium flex items-center justify-center gap-2">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />} Enter the Plaza
@@ -285,26 +529,44 @@ export default function PlazaPage() {
   }
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-background">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-background select-none">
       <Canvas shadows camera={{ fov: 55, position: [0, 6, 20] }} dpr={[1, 1.75]}>
         <Sky sunPosition={[50, 30, 20]} />
-        <ambientLight intensity={0.55} />
+        <ambientLight intensity={0.6} />
+        <hemisphereLight args={['#dfefff', '#6b8f4e', 0.4]} />
         <directionalLight position={[30, 40, 20]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} />
         <PlazaWorld />
-        <Game me={{ color, name }} peers={peers} onMove={onMove} />
+        <Game me={{ color, name, char }} peers={peers} input={input} onMove={onMove} />
       </Canvas>
-      <div className="absolute top-3 left-3 rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs">
-        {count} in the Plaza · WASD / arrows to walk · Q/E to turn camera
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
+        <div className="rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs pointer-events-auto">
+          {count} in the Plaza{!touch && ' · WASD / arrows to walk · Q/E to turn'}
+        </div>
       </div>
-      {err && <div className="absolute top-12 left-3 rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs">{err}</div>}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3">
+      {err && <div className="absolute top-12 left-3 rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs z-30">{err}</div>}
+      {panel === 'chat' && <ChatPanel msgs={msgs} onSend={sendChat} onClose={() => setPanel(null)} />}
+      {panel === 'vote' && <DistrictsPanel onClose={() => setPanel(null)} />}
+      {touch && (
+        <>
+          <div className="absolute left-4 bottom-24 z-10"><Joystick input={input} /></div>
+          <div className="absolute right-4 bottom-28 z-10 flex gap-2"><TurnButton dir={1} input={input} /><TurnButton dir={-1} input={input} /></div>
+        </>
+      )}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-10">
         <button onClick={toggleMic} aria-label={mic ? 'Mute' : 'Unmute'}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${mic ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
           {mic ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
         </button>
+        <button onClick={() => { setPanel(panel === 'chat' ? null : 'chat'); setUnread(0); }} aria-label="Chat" className="relative w-12 h-12 rounded-full bg-background/90 flex items-center justify-center">
+          <MessageSquare className="w-5 h-5" />
+          {unread > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">{unread}</span>}
+        </button>
+        <button onClick={() => setPanel(panel === 'vote' ? null : 'vote')} aria-label="District elections" className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center"><Vote className="w-5 h-5" /></button>
         <button onClick={leave} aria-label="Leave" className="w-12 h-12 rounded-full bg-background/90 flex items-center justify-center"><LogOut className="w-5 h-5" /></button>
       </div>
     </div>
   );
 }
+
+CHARACTERS.forEach((c) => { if (c.url) useGLTF.preload(c.url); });
