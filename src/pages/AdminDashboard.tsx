@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
   }, [user]);
 
   // Show loading while checking auth and role
-  if (authLoading || (user && isAdmin === null && roleLoading)) {
+  if (authLoading || roleLoading || (user && isAdmin === null)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
