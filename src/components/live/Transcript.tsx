@@ -62,7 +62,7 @@ export function useSpeechTranscriber(on: boolean, onFinal: (text: string) => voi
       stream?.getTracks().forEach((t) => t.stop());
       cb.current.onPartial?.('');
     };
-  }, [on, useNative]);
+  }, [on]);
 }
 
 export const downloadTranscript = (room: string, lines: TxLine[]) => {
