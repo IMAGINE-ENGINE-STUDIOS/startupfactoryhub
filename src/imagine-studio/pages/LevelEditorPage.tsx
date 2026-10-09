@@ -75,8 +75,10 @@ import TerrainGallery from "@/imagine-studio/components/level/terrain/TerrainGal
 import {
   CadImportSettingsDialog,
   UNIT_TO_METERS,
+  DEFAULT_CAD_SETTINGS,
   type CadImportSettings,
 } from "@/imagine-studio/components/level/CadImportSettingsDialog";
+import StudioIntegrations from "@/imagine-studio/components/level/StudioIntegrations";
 import DynamicObjectGallery from "@/imagine-studio/components/level/dynamics/DynamicObjectGallery";
 import FileContextMenu, { type FileLike } from "@/imagine-studio/components/shared/FileContextMenu";
 import ShareDialog from "@/imagine-studio/components/sharing/ShareDialog";
