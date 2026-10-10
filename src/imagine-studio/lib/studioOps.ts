@@ -1,18 +1,20 @@
 // @ts-nocheck -- Imagine Studio v2
 // Applies Genius 3D operations (from the studio-genius function) to a LevelScene.
 import { EMPTY_SCENE, type LevelScene } from "@/imagine-studio/lib/levelTypes";
-import { createLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { createLocalLevel, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { activeProjectLevels, addLevelToProject, getActiveLevel, projectOfLevel } from "@/imagine-studio/lib/localProjects";
 
 /** Finds a project level by id or name, creating an empty one when missing. */
 function ensureLevel(ref: string, ops?: any[]): { id: string; name: string } {
-  const all = listLocalLevels();
+  const all = activeProjectLevels();
   const n = String(ref || "").trim();
   const hit = all.find((l) => l.id === n) || all.find((l) => l.name.trim().toLowerCase() === n.toLowerCase());
   if (hit) {
     if (ops?.length) updateLocalLevel(hit.id, { scene: applyStudioOps(hit.scene, ops).scene });
     return { id: hit.id, name: hit.name };
   }
-  const rec = createLocalLevel(structuredClone(EMPTY_SCENE));
+  const proj = projectOfLevel(getActiveLevel());
+  const rec = proj ? addLevelToProject(proj.id, n.slice(0, 80) || "New Level") : createLocalLevel(structuredClone(EMPTY_SCENE));
   const scene = ops?.length ? applyStudioOps(rec.scene, ops).scene : rec.scene;
   updateLocalLevel(rec.id, { name: n.slice(0, 80) || "New Level", scene });
   return { id: rec.id, name: n || "New Level" };
@@ -38,7 +40,8 @@ export function sceneContext(scene: LevelScene, levelName: string, selectedId: s
     objects: scene.objects.slice(0, 250).map(brief),
     lights: scene.lights.map((l) => ({ id: l.id, kind: l.kind, position: l.position, intensity: l.intensity })),
     environment: scene.environment,
-    projectLevels: (() => { try { return listLocalLevels().slice(0, 40).map((l) => ({ id: l.id, name: l.name })); } catch { return []; } })(),
+    project: (() => { try { return projectOfLevel(getActiveLevel())?.name ?? null; } catch { return null; } })(),
+    projectLevels: (() => { try { return activeProjectLevels().slice(0, 40).map((l) => ({ id: l.id, name: l.name })); } catch { return []; } })(),
     walkLimits: scene.walkLimits ?? null,
   };
 }
