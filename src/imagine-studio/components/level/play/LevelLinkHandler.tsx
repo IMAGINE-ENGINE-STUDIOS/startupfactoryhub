@@ -5,9 +5,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { listLocalLevels } from "@/imagine-studio/lib/localLevels";
+import { activeProjectLevels } from "@/imagine-studio/lib/localProjects";
 
 export function resolveLevelId(ref: { levelId?: string; levelName?: string }): string | null {
-  const all = listLocalLevels();
+  const all = [...activeProjectLevels(), ...listLocalLevels()];
   if (ref.levelId && all.some((l) => l.id === ref.levelId)) return ref.levelId;
   const n = (ref.levelName || ref.levelId || "").trim().toLowerCase();
   const hit = n ? all.find((l) => l.name.trim().toLowerCase() === n) : null;
