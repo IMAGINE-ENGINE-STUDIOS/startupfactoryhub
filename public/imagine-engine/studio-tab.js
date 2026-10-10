@@ -25,7 +25,7 @@
     onTab = on;
     if (on && !ws) {
       ws = document.createElement("div"); ws.id = "ie-studio-ws";
-      ws.innerHTML = '<div class="ie-sbar"><b>3D Studio</b><button data-s="projects">My 3D projects</button><button data-s="new">+ New level</button><span class="sp"></span><button data-s="play" class="pl">Play</button></div>' +
+      ws.innerHTML = '<div class="ie-sbar"><b>3D Studio</b><button data-s="projects">My 3D projects</button><button data-s="newproj">+ New project</button><span class="pj" style="opacity:.75;margin-left:6px"></span><select class="lv" title="Levels in this project" style="height:28px;border-radius:8px;border:1px solid rgba(120,160,255,.3);background:#0b1020;color:inherit;font:inherit;padding:0 6px;display:none"></select><button data-s="new">+ New level</button><span class="sp"></span><button data-s="play" class="pl">Play</button></div>' +
         '<iframe data-ie-3d="1" allow="fullscreen; xr-spatial-tracking" src="/imagine-studio?embedded=1"></iframe>';
       document.body.appendChild(ws);
       var fr = ws.querySelector("iframe");
@@ -33,7 +33,16 @@
         var b = e.target.closest && e.target.closest("button"); if (!b) return; var a = b.getAttribute("data-s");
         if (a === "projects") fr.src = "/levels?embedded=1";
         if (a === "new") fr.src = "/imagine-studio?embedded=1&new=1";
+        if (a === "newproj") fr.src = "/imagine-studio?embedded=1&newProject=1";
         if (a === "play") { try { fr.contentWindow.postMessage({ __IEStudio: "play" }, "*"); } catch (er) {} }
+      });
+      var sel = ws.querySelector(".lv");
+      sel.addEventListener("change", function () { if (sel.value) fr.src = "/imagine-studio/" + sel.value + "?embedded=1"; });
+      addEventListener("message", function (ev) {
+        var d = ev.data; if (!d || d.__IEStudio !== "project") return;
+        ws.querySelector(".pj").textContent = d.project ? d.project.name : "";
+        sel.style.display = d.levels && d.levels.length ? "" : "none";
+        sel.innerHTML = (d.levels || []).map(function (l) { var o = document.createElement("option"); o.value = l.id; o.textContent = l.name; if (l.id === d.current) o.selected = true; return o.outerHTML; }).join("");
       });
       addEventListener("message", function (ev) { var d = ev.data; if (d && d.__IEStudio === "playing") { var p = ws.querySelector(".pl"); if (p) { p.textContent = d.on ? "Stop" : "Play"; p.classList.toggle("on", !!d.on); } } });
     }
