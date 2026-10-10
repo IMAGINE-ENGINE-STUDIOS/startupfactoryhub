@@ -22,7 +22,7 @@ export default function ImagineEngineStudioPage() {
     const latest = [...levels].sort((a: any, b: any) =>
       String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")),
     )[0];
-    // Imagine AI "build in 3D" requests start a fresh level and keep the prompt.
+    // Genius AI "build in 3D" requests start a fresh level and keep the prompt.
     const fresh = new URLSearchParams(location.search).has("genius");
     const target = fresh ? createLocalLevel() : latest ?? createLocalLevel();
     navigate(`/imagine-studio/${target.id}${location.search}`, { replace: true });

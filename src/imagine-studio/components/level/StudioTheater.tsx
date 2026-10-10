@@ -2,7 +2,7 @@
 /**
  * Drop-in theater screen for 3D Studio levels. Shows a screen share, an image
  * or a PDF page on its face. Controls appear when the screen is selected, and
- * Flow / Imagine AI can drive it with a window "ie-theater" event:
+ * Flow / Genius AI can drive it with a window "ie-theater" event:
  *   { id?, kind: "screen" | "image" | "pdf" | "stop", url?, page? }
  */
 import { useEffect, useMemo, useRef, useState } from "react";

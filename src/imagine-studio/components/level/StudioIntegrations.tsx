@@ -1,7 +1,7 @@
 // @ts-nocheck -- Imagine Studio v2
 /**
  * 3D Studio <-> platform wiring: Sketchfab library, file drops onto the
- * viewport, Genius 3D (bubble tab + Imagine AI requests), Dev tab scene
+ * viewport, Genius 3D (bubble tab + Genius AI requests), Dev tab scene
  * sync (scenes/level.json) and publishing.
  */
 import { useEffect, useRef, useState } from "react";
@@ -121,7 +121,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   };
   useEffect(() => studio3d.onSend((t) => runGenius(t)), [canEdit, layerId]);
 
-  // Prompt passed on the URL (Imagine AI "build in 3D" opens the studio with ?genius=)
+  // Prompt passed on the URL (Genius AI "build in 3D" opens the studio with ?genius=)
   const startedRef = useRef(false);
   useEffect(() => {
     if (startedRef.current) return;

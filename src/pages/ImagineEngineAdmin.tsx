@@ -152,14 +152,14 @@ export default function ImagineEngineAdmin() {
             <section className="tech-card border-0 p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold">Imagine AI service</h2>
+                  <h2 className="font-semibold">Genius AI service</h2>
                   <p className="text-sm text-muted-foreground">Turn the AI off for everyone instantly.</p>
                 </div>
                 <Switch checked={cfg.enabled} onCheckedChange={(v) => set("enabled", v)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Message shown to users while the AI is off</Label>
-                <Input value={cfg.maintenance_message} placeholder="Imagine AI is under maintenance. Back soon." onChange={(e) => set("maintenance_message", e.target.value)} />
+                <Input value={cfg.maintenance_message} placeholder="Genius AI is under maintenance. Back soon." onChange={(e) => set("maintenance_message", e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Extra instructions for the AI (optional)</Label>
