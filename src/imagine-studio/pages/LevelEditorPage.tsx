@@ -1988,22 +1988,36 @@ export default function LevelEditorPage() {
           >
             {rigRoomMode ? "Scene Studio" : "Rig Room"}
           </Button>
-          {!isMobile && (
-            <Button size="sm" variant="ghost" onClick={() => setPlaying((p) => !p)} title="Play / Pause">
-              {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            </Button>
+          {!rigRoomMode && (
+            <div className="flex items-center gap-0.5 rounded-md border border-border/40 bg-card/40 p-0.5" title="Gizmo: move (W), rotate (E), scale (R)">
+              {([
+                ["translate", Move3d, "Move (W)"],
+                ["rotate", RotateCw, "Rotate (E)"],
+                ["scale", Scaling, "Scale (R)"],
+              ] as const).map(([m, Icon, label]) => (
+                <Button
+                  key={m}
+                  size="sm"
+                  variant={transformMode === m ? "secondary" : "ghost"}
+                  onClick={() => setTransformMode(m)}
+                  title={label}
+                  className={isMobile ? "h-7 w-7 px-0" : "h-7 w-7 px-0"}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </Button>
+              ))}
+            </div>
           )}
-          {!isMobile && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={openPlaceDialog}
-              disabled={!isOwner}
-              title="Place on Atlas"
-            >
-              <MapPin className="w-3.5 h-3.5 mr-1" /> Place on Atlas
-            </Button>
-          )}
+          <Button
+            size="sm"
+            variant={playing ? "destructive" : "default"}
+            onClick={() => setPlaying((p) => !p)}
+            title={playing ? "Stop simulation" : "Play: simulate your game"}
+            className={isMobile ? "h-7 px-2 text-[11px]" : "h-8"}
+          >
+            {playing ? <Square className="w-3.5 h-3.5 sm:mr-1" /> : <Play className="w-3.5 h-3.5 sm:mr-1" />}
+            <span className="hidden sm:inline">{playing ? "Stop" : "Play"}</span>
+          </Button>
           {!rigRoomMode && id && (
             <StudioIntegrations
               levelId={id}
