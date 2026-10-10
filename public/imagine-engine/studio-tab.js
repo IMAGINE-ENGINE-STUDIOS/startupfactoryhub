@@ -3,7 +3,8 @@
   if (window.__IEStudioTab) return; window.__IEStudioTab = true;
   var css = document.createElement("style");
   css.textContent =
-    "#ie-studio-ws{position:fixed;z-index:60;background:#05070d;display:none}#ie-studio-ws iframe{width:100%;height:100%;border:0}" +
+    "#ie-studio-ws{position:fixed;z-index:60;background:#05070d;display:none}#ie-studio-ws iframe{width:100%;height:calc(100% - 40px);border:0}" +
+    ".ie-sbar{height:40px;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid rgba(120,160,255,.2);font:500 12px system-ui;color:#e6ecff}.ie-sbar b{margin-right:8px}.ie-sbar .sp{flex:1}.ie-sbar button{padding:5px 12px;border-radius:8px;border:1px solid rgba(120,160,255,.3);background:rgba(60,100,255,.1);color:inherit;cursor:pointer;font:inherit}.ie-sbar button:hover{background:rgba(60,100,255,.25)}.ie-sbar .pl{background:rgba(20,184,166,.25);border-color:rgba(20,184,166,.6)}.ie-sbar .pl.on{background:rgba(239,68,68,.3);border-color:rgba(239,68,68,.6)}" +
     "#ie-studio-btn{display:inline-flex;white-space:nowrap;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font:500 12px system-ui;cursor:pointer;border:1px solid rgba(120,160,255,.35);background:rgba(60,100,255,.12);color:inherit;margin-left:6px}" +
     "#ie-studio-btn.on{background:rgba(60,100,255,.45)}" +
     ".ie-bar{position:absolute;top:8px;right:8px;z-index:5;display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(10,14,24,.78);backdrop-filter:blur(8px);opacity:0;transition:opacity .15s;font:500 11px system-ui;color:#e6ecff}" +
@@ -22,8 +23,17 @@
     onTab = on;
     if (on && !ws) {
       ws = document.createElement("div"); ws.id = "ie-studio-ws";
-      ws.innerHTML = '<iframe data-ie-3d="1" allow="fullscreen; xr-spatial-tracking" src="/imagine-studio?embedded=1"></iframe>';
+      ws.innerHTML = '<div class="ie-sbar"><b>3D Studio</b><button data-s="projects">My 3D projects</button><button data-s="new">+ New level</button><span class="sp"></span><button data-s="play" class="pl">Play</button></div>' +
+        '<iframe data-ie-3d="1" allow="fullscreen; xr-spatial-tracking" src="/imagine-studio?embedded=1"></iframe>';
       document.body.appendChild(ws);
+      var fr = ws.querySelector("iframe");
+      ws.querySelector(".ie-sbar").addEventListener("click", function (e) {
+        var b = e.target.closest && e.target.closest("button"); if (!b) return; var a = b.getAttribute("data-s");
+        if (a === "projects") fr.src = "/levels?embedded=1";
+        if (a === "new") fr.src = "/imagine-studio?embedded=1&new=1";
+        if (a === "play") { try { fr.contentWindow.postMessage({ __IEStudio: "play" }, "*"); } catch (er) {} }
+      });
+      addEventListener("message", function (ev) { var d = ev.data; if (d && d.__IEStudio === "playing") { var p = ws.querySelector(".pl"); if (p) { p.textContent = d.on ? "Stop" : "Play"; p.classList.toggle("on", !!d.on); } } });
     }
     if (ws) ws.style.display = on ? "block" : "none";
     if (btn) btn.classList.toggle("on", on);

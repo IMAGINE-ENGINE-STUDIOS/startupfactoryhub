@@ -23,9 +23,11 @@ export default function ImagineEngineStudioPage() {
       String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")),
     )[0];
     // Genius AI "build in 3D" requests start a fresh level and keep the prompt.
-    const fresh = new URLSearchParams(location.search).has("genius");
+    const qs = new URLSearchParams(location.search);
+    const fresh = qs.has("genius") || qs.has("new");
+    qs.delete("new");
     const target = fresh ? createLocalLevel() : latest ?? createLocalLevel();
-    navigate(`/imagine-studio/${target.id}${location.search}`, { replace: true });
+    navigate(`/imagine-studio/${target.id}${qs.toString() ? "?" + qs.toString() : ""}`, { replace: true });
   }, [id, isRigRoom, navigate]);
 
   if (!id && !isRigRoom) {
