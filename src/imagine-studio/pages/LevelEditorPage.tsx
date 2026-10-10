@@ -3275,6 +3275,7 @@ function BehaviorRow({
   );
 }
 
+const ModelOptimizerLazy = lazy(() => import("@/imagine-studio/components/level/ModelOptimizer"));
 function ObjectInspector({
   obj, onPatch, disabled, snap = 0, editing, onToggleEdit, addingPoint, onToggleAddPoint, onDelete,
   projectId, facePaintActive, paintedFaces, onToggleFacePaint, onClearFacePaint,
@@ -3461,6 +3462,11 @@ function ObjectInspector({
             onPatch({ materialOverrides } as any)
           }
         />
+      )}
+      {obj.kind === "model" && (
+        <Suspense fallback={null}>
+          <ModelOptimizerLazy obj={obj} disabled={disabled} onPatch={(p: any) => onPatch(p as any)} />
+        </Suspense>
       )}
       {obj.kind === "character" && (
         <Suspense fallback={
