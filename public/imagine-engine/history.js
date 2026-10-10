@@ -65,12 +65,14 @@
     if (Date.now() - stable < 600) return;
     past.push(cur); if (past.length > MAX) past.shift(); future = []; cur = s; pending = null; paint();
   }, 300);
-  function undo() { if (!past.length) return; var s = snap(); if (s !== cur) { past.push(cur); cur = s; } future.push(cur); cur = past.pop(); busy = true; apply(cur); paint(); }
-  function redo() { if (!future.length) return; past.push(cur); cur = future.pop(); busy = true; apply(cur); paint(); }
+  function studio(cmd) { if (!document.body.classList.contains("ie-studio-on")) return false; try { var f = window.__IEStudio && window.__IEStudio.frame(); f && f.contentWindow.postMessage({ __IEStudio: cmd }, "*"); } catch (e) {} return true; }
+  function undo() { if (studio("undo")) return; if (!past.length) return; var s = snap(); if (s !== cur) { past.push(cur); cur = s; } future.push(cur); cur = past.pop(); busy = true; apply(cur); paint(); }
+  function redo() { if (studio("redo")) return; if (!future.length) return; past.push(cur); cur = future.pop(); busy = true; apply(cur); paint(); }
   document.addEventListener("keydown", function (e) {
     if (!(e.ctrlKey || e.metaKey)) return;
     var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     var k = e.key.toLowerCase();
+    if (document.body.classList.contains("ie-studio-on")) return;
     if (k === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
     else if (k === "y" || (k === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
   });
@@ -126,7 +128,10 @@
   /* ---------- header buttons ---------- */
   var B = "height:28px;min-width:28px;border-radius:9999px;background:#18181b;color:#e4e4e7;border:1px solid #27272a;font:11px system-ui;padding:0 8px;cursor:pointer;white-space:nowrap";
   var u, rd;
+  window.__IEHistPaint = function () { paint(); };
   function paint() {
+    var st = document.body.classList.contains("ie-studio-on");
+    if (st) { if (u) { u.disabled = false; u.style.opacity = "1"; } if (rd) { rd.disabled = false; rd.style.opacity = "1"; } return; }
     if (u) { u.disabled = !past.length; u.style.opacity = past.length ? "1" : ".4"; }
     if (rd) { rd.disabled = !future.length; rd.style.opacity = future.length ? "1" : ".4"; }
   }

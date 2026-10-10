@@ -752,6 +752,12 @@ export default function LevelEditorPage() {
       return next;
     });
   }, []);
+  /* Imagine Engine header Undo/Redo drive the open 3D level */
+  useEffect(() => {
+    const onMsg = (ev: MessageEvent) => { const d = ev.data; if (d?.__IEStudio === "undo") undo(); if (d?.__IEStudio === "redo") redo(); };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [undo, redo]);
 
   // load
   useEffect(() => {
