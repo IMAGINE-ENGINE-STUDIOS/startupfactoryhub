@@ -535,6 +535,13 @@ export default function LevelEditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState(false);
+  /* Imagine Engine header Play/Stop and state echo */
+  useEffect(() => {
+    const onMsg = (ev: MessageEvent) => { const d = ev.data; if (d && d.__IEStudio === "play") setPlaying((p) => (typeof d.on === "boolean" ? d.on : !p)); };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+  useEffect(() => { if (window.parent !== window) window.parent.postMessage({ __IEStudio: "playing", on: playing }, "*"); }, [playing]);
   const [dynamicGalleryOpen, setDynamicGalleryOpen] = useState(false);
   const [saveDynamicOpen, setSaveDynamicOpen] = useState(false);
   // Live rig state surfaced from <RigControllerRoom/> so the left Components
