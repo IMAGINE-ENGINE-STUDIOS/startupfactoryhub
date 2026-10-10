@@ -517,6 +517,12 @@
   function studioFrames() { var out = []; (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { if (/\/imagine-studio/.test(f.getAttribute("src") || "")) out.push(f); else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document); return out; }
   function send3DStudio(text) {
     var fr = studioFrames();
+    if (!fr.length && window.__IEStudio) {
+      /* open the 3D Studio workspace and build there in a fresh level */
+      window.__IEStudio.open();
+      var sf = window.__IEStudio.frame();
+      if (sf) { sf.src = "/imagine-studio?embedded=1&genius=" + encodeURIComponent(text); messages.push({ role: "assistant", content: "Opened the 3D Studio and started building your level there. Everything stays editable by hand, and the scene file appears in the Dev tab as scenes/level.json." }); return true; }
+    }
     if (!fr.length) {
       var ie = window.__IE; if (!ie || !ie.addSection) return false;
       var s = Date.now().toString(36);
