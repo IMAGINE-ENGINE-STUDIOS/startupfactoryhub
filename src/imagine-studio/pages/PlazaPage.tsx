@@ -46,13 +46,38 @@ function setWalkFromScene(scene: any) {
 }
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
-export const CHARACTERS = [
-  { id: 'xbot', label: 'Xbot', url: '/models/plaza/Xbot.glb', yaw: 0 },
-  { id: 'soldier', label: 'Soldier', url: '/models/plaza/Soldier.glb', yaw: Math.PI },
-  { id: 'robot', label: 'Robot', url: '/models/plaza/RobotExpressive.glb', yaw: 0 },
+/* Character room. Each entry carries its rig controller: target height, facing, ground hover,
+ * which clips play for walk/idle, playback speed and an optional skin tint (tints reuse a model, so they add no download). */
+export type CharDef = { id: string; label: string; url: string; yaw: number; height?: number; hover?: number; walk?: RegExp; idle?: RegExp; speed?: number; tint?: string; loopIdle?: boolean };
+const M = '/models/plaza/';
+export const CHARACTERS: CharDef[] = [
+  { id: 'xbot', label: 'Xbot', url: M + 'Xbot.glb', yaw: 0 },
+  { id: 'soldier', label: 'Soldier', url: M + 'Soldier.glb', yaw: Math.PI },
+  { id: 'robot', label: 'Robot', url: M + 'RobotExpressive.glb', yaw: 0 },
   { id: 'classic', label: 'Classic', url: '', yaw: 0 },
-] as const;
-type CharId = typeof CHARACTERS[number]['id'];
+  // new rigged characters
+  { id: 'cesium', label: 'Runner', url: M + 'CesiumMan.glb', yaw: 0, walk: /./ },
+  { id: 'figure', label: 'Mannequin', url: M + 'RiggedFigure.glb', yaw: 0, walk: /./ },
+  { id: 'fox', label: 'Fox', url: M + 'Fox.glb', yaw: 0, height: 0.9, walk: /^walk$/i, idle: /survey/i },
+  { id: 'horse', label: 'Horse', url: M + 'Horse.glb', yaw: 0, height: 1.7, walk: /./, speed: 0.8 },
+  { id: 'flamingo', label: 'Flamingo', url: M + 'Flamingo.glb', yaw: 0, height: 0.9, hover: 1.4, walk: /./, loopIdle: true },
+  { id: 'parrot', label: 'Parrot', url: M + 'Parrot.glb', yaw: 0, height: 0.7, hover: 1.5, walk: /./, loopIdle: true },
+  { id: 'stork', label: 'Stork', url: M + 'Stork.glb', yaw: 0, height: 0.9, hover: 1.5, walk: /./, loopIdle: true },
+  // skins: same rigs, new looks
+  { id: 'xbot-gold', label: 'Gold Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#f5c542' },
+  { id: 'xbot-crimson', label: 'Crimson Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#e0435a' },
+  { id: 'xbot-ice', label: 'Ice Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#8fd8ff' },
+  { id: 'xbot-shadow', label: 'Shadow Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#3a3f4b' },
+  { id: 'soldier-desert', label: 'Desert Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#d8b98a' },
+  { id: 'soldier-arctic', label: 'Arctic Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#e8eef5' },
+  { id: 'soldier-jungle', label: 'Jungle Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#6f9a5a' },
+  { id: 'soldier-urban', label: 'Urban Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#8a8f99' },
+  { id: 'robot-ruby', label: 'Ruby Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#ff5c7a' },
+  { id: 'robot-emerald', label: 'Emerald Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#3ddc97' },
+  { id: 'robot-sapphire', label: 'Sapphire Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#4f8cff' },
+  { id: 'robot-neon', label: 'Neon Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#c86bff' },
+];
+type CharId = string;
 const charOf = (id: string) => CHARACTERS.find((c) => c.id === id) ?? CHARACTERS[0];
 
 type Peer = { x: number; z: number; ry: number; moving: boolean; color: string; name: string; char: string; tx: number; tz: number; tr: number; speaking: boolean; seen?: number };
@@ -66,30 +91,41 @@ function volumeFor(d: number) {
 }
 
 /* ---------- Characters ---------- */
-function GlbCharacter({ url, yaw, moving, tint }: { url: string; yaw: number; moving: boolean; tint: string }) {
+function GlbCharacter({ def, moving, tint }: { def: CharDef; moving: boolean; tint: string }) {
+  const { url, yaw } = def;
   const { scene, animations } = useGLTF(url);
   const model = useMemo(() => {
     const m = skeletonClone(scene) as THREE.Object3D;
     m.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(m);
     const h = box.max.y - box.min.y || 1;
-    const s = 1.8 / h;
+    const s = (def.height ?? 1.8) / h;
     m.scale.setScalar(s);
-    m.position.y = -box.min.y * s;
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
+    m.position.y = -box.min.y * s + (def.hover ?? 0);
+    const skin = def.tint ? new THREE.Color(def.tint) : null;
+    m.traverse((o: any) => {
+      if (!o.isMesh) return;
+      o.castShadow = true; o.frustumCulled = false;
+      if (skin) {
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(skin); return c; });
+        o.material = Array.isArray(o.material) ? next : next[0];
+      }
+    });
     return m;
-  }, [scene]);
+  }, [scene, def]);
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
   useEffect(() => {
-    const walk = names.find((n) => /walk/i.test(n)) ?? names.find((n) => /run/i.test(n));
-    const idle = names.find((n) => /idle/i.test(n)) ?? names[0];
-    const next = moving ? walk : idle;
+    const walk = def.walk ? names.find((n) => def.walk!.test(n)) : names.find((n) => /walk/i.test(n)) ?? names.find((n) => /run/i.test(n));
+    const idle = def.idle ? names.find((n) => def.idle!.test(n)) : names.find((n) => /idle/i.test(n));
+    const next = moving ? walk : idle ?? (def.loopIdle ? walk : undefined);
     const a = next ? actions[next] : undefined;
-    if (!a) return;
+    if (!a) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); return; }
+    a.timeScale = def.speed ?? 1;
     a.reset().fadeIn(0.2).play();
     return () => { a.fadeOut(0.2); };
-  }, [moving, actions, names]);
+  }, [moving, actions, names, def]);
   return (
     <group ref={root} rotation={[0, yaw, 0]}>
       <primitive object={model} />
@@ -121,7 +157,7 @@ function Avatar({ char, color, name, moving, speaking, me }: { char: string; col
     <group>
       {c.url ? (
         <Suspense fallback={<ClassicCharacter color={color} moving={moving} />}>
-          <GlbCharacter url={c.url} yaw={c.yaw} moving={moving} tint={color} />
+          <GlbCharacter def={c} moving={moving} tint={color} />
         </Suspense>
       ) : <ClassicCharacter color={color} moving={moving} />}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}><circleGeometry args={[0.45, 24]} /><meshBasicMaterial color="#000" transparent opacity={0.25} depthWrite={false} /></mesh>
@@ -624,7 +660,7 @@ export default function PlazaPage() {
           <div className="h-56 rounded-xl overflow-hidden bg-muted/40"><CharacterPreview char={char} color={color} /></div>
           <div>
             <p className="text-xs text-muted-foreground mb-2">Character room</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto pr-1">
               {CHARACTERS.map((c) => (
                 <button key={c.id} onClick={() => setChar(c.id)}
                   className={`rounded-lg border px-2 py-2 text-xs ${char === c.id ? 'border-primary bg-primary/10' : 'border-border'}`}>{c.label}</button>
@@ -720,4 +756,5 @@ export default function PlazaPage() {
   );
 }
 
-CHARACTERS.forEach((c) => { if (c.url) useGLTF.preload(c.url); });
+// Only the default rigs preload; other characters download when picked or seen.
+['Xbot', 'Soldier', 'RobotExpressive'].forEach((n) => useGLTF.preload(M + n + '.glb'));
