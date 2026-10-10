@@ -1,37 +1,63 @@
 /**
- * 3D Studio projects list: every saved 3D level, with create, open, duplicate and delete.
+ * 3D Studio projects: every project with its levels. A project holds any
+ * number of levels (separate or linked by portals); one is the start level.
  * Served at /levels (also inside Imagine Engine with ?embedded=1).
  */
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Copy, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createLocalLevel, deleteLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { deleteLocalLevel, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { addLevelToProject, createProject, deleteProject, duplicateProject, levelsOfProject, listProjects, updateProject } from "@/imagine-studio/lib/localProjects";
 
 export default function StudioProjectsPage() {
   const navigate = useNavigate();
   const { search } = useLocation();
   const [q, setQ] = useState("");
   const [tick, setTick] = useState(0);
-  const levels = useMemo(() => listLocalLevels(), [tick]);
-  const shown = levels.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
-  const open = (id: string) => navigate(`/imagine-studio/${id}${search}`);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const projects = useMemo(() => listProjects(), [tick]);
+  const refresh = () => setTick((t) => t + 1);
+  const openLevel = (id: string) => navigate(`/imagine-studio/${id}${search}`);
+  const startOf = (p: (typeof projects)[number]) => p.levels.find((l) => l.id === p.defaultLevelId) ?? p.levels[0];
 
-  const create = () => open(createLocalLevel().id);
-  const duplicate = (id: string) => {
-    const src = levels.find((l) => l.id === id);
-    if (!src) return;
-    const copy = createLocalLevel(src.scene);
-    updateLocalLevel(copy.id, { name: `${src.name} (copy)` });
-    setTick((t) => t + 1);
-  };
-  const remove = (id: string, name: string) => {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    deleteLocalLevel(id);
-    setTick((t) => t + 1);
-  };
+  const current = projects.find((p) => p.id === openId);
+  if (current) {
+    const levels = levelsOfProject(current.id);
+    return (
+      <div className="min-h-screen bg-background text-foreground p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => setOpenId(null)}><ArrowLeft className="w-4 h-4 mr-1" />Projects</Button>
+            <h1 className="text-2xl font-semibold mr-auto">{current.name}</h1>
+            <Button variant="outline" onClick={() => { const n = prompt("Project name", current.name); if (n?.trim()) { updateProject(current.id, { name: n.trim() }); refresh(); } }}><Pencil className="w-4 h-4 mr-1" />Rename</Button>
+            <Button onClick={() => openLevel(addLevelToProject(current.id).id)}><Plus className="w-4 h-4 mr-1" />New level</Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {levels.map((l) => (
+              <div key={l.id} className="tech-card border-0 rounded-xl overflow-hidden flex flex-col">
+                <button onClick={() => openLevel(l.id)} className="h-32 bg-muted flex items-center justify-center">
+                  {l.thumbnail_url ? <img src={l.thumbnail_url} alt={l.name} className="w-full h-full object-cover" /> : <Box className="w-10 h-10 text-muted-foreground" />}
+                </button>
+                <div className="p-3 flex items-center gap-1">
+                  <button onClick={() => openLevel(l.id)} className="text-left mr-auto min-w-0">
+                    <div className="font-medium truncate">{l.name}{current.defaultLevelId === l.id ? " · start" : ""}</div>
+                    <div className="text-xs text-muted-foreground">{l.scene?.objects?.length ?? 0} objects</div>
+                  </button>
+                  <Button size="icon" variant="ghost" title="Make start level" onClick={() => { updateProject(current.id, { defaultLevelId: l.id }); refresh(); }}><Flag className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" title="Rename" onClick={() => { const n = prompt("Level name", l.name); if (n?.trim()) { updateLocalLevel(l.id, { name: n.trim() }); refresh(); } }}><Pencil className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" title="Delete level" onClick={() => { if (confirm(`Delete level "${l.name}"?`)) { deleteLocalLevel(l.id); refresh(); } }}><Trash2 className="w-4 h-4" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  const shown = projects.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
   return (
     <div className="min-h-screen bg-background text-foreground p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -41,31 +67,33 @@ export default function StudioProjectsPage() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search projects" className="pl-9 w-64" />
           </div>
-          <Button onClick={create}><Plus className="w-4 h-4 mr-1" />New 3D project</Button>
+          <Button onClick={() => openLevel(createProject().level.id)}><Plus className="w-4 h-4 mr-1" />New 3D project</Button>
         </div>
         {shown.length === 0 ? (
           <div className="tech-card border-0 rounded-xl p-10 text-center text-muted-foreground">
-            {levels.length ? "No projects match your search." : "You have no 3D projects yet. Create your first one."}
+            {projects.length ? "No projects match your search." : "You have no 3D projects yet. Create your first one."}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {shown.map((l) => (
-              <div key={l.id} className="tech-card border-0 rounded-xl overflow-hidden flex flex-col">
-                <button onClick={() => open(l.id)} className="h-36 bg-muted flex items-center justify-center">
-                  {l.thumbnail_url ? <img src={l.thumbnail_url} alt={l.name} className="w-full h-full object-cover" /> : <Box className="w-10 h-10 text-muted-foreground" />}
-                </button>
-                <div className="p-3 flex items-center gap-2">
-                  <button onClick={() => open(l.id)} className="text-left mr-auto min-w-0">
-                    <div className="font-medium truncate">{l.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {(l.scene?.objects?.length ?? 0)} objects · {new Date(l.updated_at).toLocaleDateString()}
-                    </div>
+            {shown.map((p) => {
+              const start = startOf(p);
+              return (
+                <div key={p.id} className="tech-card border-0 rounded-xl overflow-hidden flex flex-col">
+                  <button onClick={() => setOpenId(p.id)} className="h-36 bg-muted flex items-center justify-center">
+                    {start?.thumbnail_url ? <img src={start.thumbnail_url} alt={p.name} className="w-full h-full object-cover" /> : <Layers className="w-10 h-10 text-muted-foreground" />}
                   </button>
-                  <Button size="icon" variant="ghost" title="Duplicate" onClick={() => duplicate(l.id)}><Copy className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" title="Delete" onClick={() => remove(l.id, l.name)}><Trash2 className="w-4 h-4" /></Button>
+                  <div className="p-3 flex items-center gap-1">
+                    <button onClick={() => setOpenId(p.id)} className="text-left mr-auto min-w-0">
+                      <div className="font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-muted-foreground">{p.levels.length} level{p.levels.length === 1 ? "" : "s"} · {new Date(p.updated_at).toLocaleDateString()}</div>
+                    </button>
+                    {start && <Button size="sm" variant="outline" onClick={() => openLevel(start.id)}>Open</Button>}
+                    <Button size="icon" variant="ghost" title="Duplicate" onClick={() => { duplicateProject(p.id); refresh(); }}><Copy className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Delete" onClick={() => { if (confirm(`Delete "${p.name}" and all its levels? This cannot be undone.`)) { deleteProject(p.id, deleteLocalLevel); refresh(); } }}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
