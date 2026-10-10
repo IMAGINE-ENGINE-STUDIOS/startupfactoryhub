@@ -41,6 +41,18 @@ export interface PlayBehavior {
   usable?: { key: PlayKey; label?: string };
   /** Proximity radius (m) for all key-triggered actions. Default 2.5m. */
   interactRadius?: number;
+  /** Player can enter (E), drive with WASD/arrows, and exit (E). */
+  drivable?: { speed?: number; turnSpeed?: number; key?: PlayKey };
+}
+
+/** Hyperlink to another level of the project (walk into it or press a key). */
+export interface LevelPortal {
+  levelId: string;
+  levelName?: string;
+  trigger: "walk" | "key";
+  key?: string;
+  radius?: number;
+  label?: string;
 }
 
 /**

@@ -33,6 +33,7 @@ import TeleportPickerOverlay from "./play/TeleportPickerOverlay";
 import { characterRegistry } from "./locomotion/locomotionState";
 import InteractionPromptUI from "./locomotion/InteractionPromptUI";
 import NavigationMap from "./locomotion/NavigationMap";
+import PlayExtrasRuntime from "./play/PlayExtrasRuntime";
 import { TrajectoryRender, TrajectoryRunner } from "./trajectory/TrajectoryRuntime";
 import TrainRuntime from "./train/TrainRuntime";
 import GroupRuntime from "./GroupRuntime";
@@ -1492,6 +1493,7 @@ export function LevelSceneContents({
       })()}
       <AnimationRunner tracks={scene.animations} playing={!!playing} groupRef={groupRef} />
       <TrajectoryRunner objects={scene.objects} playing={!!playing} groupRef={groupRef} />
+      {playing && <PlayExtrasRuntime objects={scene.objects} />}
       {scene.trainSystem && (
         <TrainRuntime scene={scene} playing={!!playing} groupRef={groupRef} />
       )}

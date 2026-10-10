@@ -1,6 +1,22 @@
 // @ts-nocheck -- Imagine Studio v2
 // Applies Genius 3D operations (from the studio-genius function) to a LevelScene.
-import type { LevelScene } from "@/imagine-studio/lib/levelTypes";
+import { EMPTY_SCENE, type LevelScene } from "@/imagine-studio/lib/levelTypes";
+import { createLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+
+/** Finds a project level by id or name, creating an empty one when missing. */
+function ensureLevel(ref: string, ops?: any[]): { id: string; name: string } {
+  const all = listLocalLevels();
+  const n = String(ref || "").trim();
+  const hit = all.find((l) => l.id === n) || all.find((l) => l.name.trim().toLowerCase() === n.toLowerCase());
+  if (hit) {
+    if (ops?.length) updateLocalLevel(hit.id, { scene: applyStudioOps(hit.scene, ops).scene });
+    return { id: hit.id, name: hit.name };
+  }
+  const rec = createLocalLevel(structuredClone(EMPTY_SCENE));
+  const scene = ops?.length ? applyStudioOps(rec.scene, ops).scene : rec.scene;
+  updateLocalLevel(rec.id, { name: n.slice(0, 80) || "New Level", scene });
+  return { id: rec.id, name: n || "New Level" };
+}
 
 const num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
 const v3 = (v, d) => (Array.isArray(v) && v.length === 3 ? v.map((x, i) => num(x, d[i])) : d);
@@ -14,7 +30,7 @@ const SHAPES = ["box", "sphere", "plane", "cylinder", "cone", "torus"];
 
 /** Compact context for the AI: level, selection, objects, lights, environment. */
 export function sceneContext(scene: LevelScene, levelName: string, selectedId: string | null) {
-  const brief = (o) => ({ id: o.id, name: o.name, kind: o.kind, shape: o.shape, position: o.position, rotation: o.rotation, scale: o.scale, color: o.color, ...(o.interactions?.length ? { scripts: o.interactions.map((i) => i.name) } : {}) });
+  const brief = (o) => ({ id: o.id, name: o.name, kind: o.kind, shape: o.shape, ...(o.playBehavior ? { behavior: o.playBehavior } : {}), ...(o.portal ? { portal: o.portal } : {}), ...(o.kind === "trajectory" ? { points: o.points, followers: o.followers, speed: o.speed } : {}), position: o.position, rotation: o.rotation, scale: o.scale, color: o.color, ...(o.interactions?.length ? { scripts: o.interactions.map((i) => i.name) } : {}) });
   const sel = scene.objects.find((o) => o.id === selectedId);
   return {
     level: levelName,
@@ -22,6 +38,8 @@ export function sceneContext(scene: LevelScene, levelName: string, selectedId: s
     objects: scene.objects.slice(0, 250).map(brief),
     lights: scene.lights.map((l) => ({ id: l.id, kind: l.kind, position: l.position, intensity: l.intensity })),
     environment: scene.environment,
+    projectLevels: (() => { try { return listLocalLevels().slice(0, 40).map((l) => ({ id: l.id, name: l.name })); } catch { return []; } })(),
+    walkLimits: scene.walkLimits ?? null,
   };
 }
 
@@ -82,6 +100,28 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
           o.actionButtons = [...(o.actionButtons || []), { id: uid("btn"), label: inter.name, pinVisible: inter.trigger !== "onPlayerNear", actionId: inter.id,
             trigger: inter.trigger === "key" ? { kind: "key", keys: [inter.triggerKey || "E"] } : inter.trigger === "onPlayerNear" ? { kind: "proximity", distance: inter.triggerDistance || 2.5 } : { kind: "click" } }];
         }
+        applied++;
+      } else if (op.op === "level" && op.name) {
+        const lv = ensureLevel(String(op.name), Array.isArray(op.ops) ? op.ops : undefined);
+        alias.set(`level:${op.name}`, lv.id); applied++;
+      } else if (op.op === "portal" && op.portal) {
+        const o = s.objects.find((x) => x.id === real(op.id)); if (!o) continue;
+        const ref = String(op.portal.level || op.portal.levelId || "");
+        const lv = alias.get(`level:${ref}`) ? { id: alias.get(`level:${ref}`), name: ref } : ensureLevel(ref);
+        o.portal = { levelId: lv.id, levelName: lv.name, trigger: op.portal.trigger === "key" ? "key" : "walk", key: op.portal.key || "E", radius: op.portal.radius, label: op.portal.label };
+        applied++;
+      } else if (op.op === "trajectory" && Array.isArray(op.points) && op.points.length >= 2) {
+        const id = uid("traj"); if (op.id) alias.set(String(op.id), id);
+        s.objects.push({ id, kind: "trajectory", name: String(op.name || "Path").slice(0, 80), position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1], visible: true,
+          points: op.points.map((p) => v3(p, [0, 0.5, 0])), closed: !!op.closed, tension: 0.5, speed: num(op.speed, 4), sections: [],
+          followers: (op.followers || []).map((f) => real(String(f))), orientToPath: op.orient !== false, loop: op.loop !== false,
+          color: typeof op.color === "string" ? op.color : "#3b82f6", smartPath: !!op.smartPath, maxStepHeight: 0.4, slopeSpeedFactor: 0.6, ...(layerId ? { layerId } : {}) });
+        newIds.push(id); applied++;
+      } else if (op.op === "follow" && op.trajectory) {
+        const t = s.objects.find((x) => x.id === real(op.trajectory) && x.kind === "trajectory"); if (!t) continue;
+        t.followers = Array.from(new Set([...(t.followers || []), ...(op.followers || [op.id]).map((f) => real(String(f)))])); applied++;
+      } else if (op.op === "walkLimits") {
+        if (op.limits === null) delete s.walkLimits; else s.walkLimits = { radius: op.limits?.radius ?? null, noFountainBlock: !!op.limits?.noFountainBlock };
         applied++;
       } else if (op.op === "play" && op.behavior) {
         const o = s.objects.find((x) => x.id === real(op.id)); if (!o) continue;

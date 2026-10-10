@@ -41,6 +41,7 @@ import type { TrajectoryObject, TrajectorySection } from "@/imagine-studio/lib/l
 import LevelScene3D from "@/imagine-studio/components/level/LevelScene3D";
 import KeyCaptureInput from "@/imagine-studio/components/level/KeyCaptureInput";
 import PlayBehaviorRuntime from "@/imagine-studio/components/level/play/PlayBehaviorRuntime";
+import LevelLinkHandler from "@/imagine-studio/components/level/play/LevelLinkHandler";
 import PlayInputManager from "@/imagine-studio/components/level/play/PlayInputManager";
 import PlayHUD from "@/imagine-studio/components/level/play/PlayHUD";
 import MobileTouchControls from "@/imagine-studio/components/level/play/MobileTouchControls";
@@ -1064,7 +1065,7 @@ export default function LevelEditorPage() {
         else groupSelection();
       }
 
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if (!inField && (e.key === "Delete" || e.key === "Backspace")) {
         e.preventDefault();
         const oids = Array.from(selectedIds).filter(
           (oid) => !isObjectLocked(scene.objects.find((o) => o.id === oid)),
@@ -2735,6 +2736,7 @@ export default function LevelEditorPage() {
 
       {/* Play-mode runtime + HUD (mounted only while playing) */}
       <PlayBehaviorRuntime objects={scene.objects} playing={playing} />
+      <LevelLinkHandler inStudio={inStudio} levelId={id} onAutoPlay={() => setPlaying(true)} />
       <PlayInputManager playing={playing} />
       <PlayHUD visible={playing} onExit={() => setPlaying(false)} />
       <MobileTouchControls visible={playing} />

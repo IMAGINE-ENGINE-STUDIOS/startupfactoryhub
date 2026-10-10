@@ -12,6 +12,8 @@ import {
   setInteractionPrompt,
   inputPulse,
   characterRegistry,
+  playerRef,
+  drivingState,
   splineDrivenIds,
   mobileAxes,
   mobileLook,
@@ -491,6 +493,8 @@ export default function PlayableCharacter({
 
   useFrame((_, rawDt) => {
     if (!enabled || !rootRef.current) return;
+    playerRef.current = rootRef.current;
+    if (drivingState.carId) return; // vehicle runtime moves the player + camera
     const dt = Math.min(0.05, rawDt); // clamp to keep physics stable
     // Drain accumulated touch-look deltas into camOrbit (same math as the
     // desktop mousemove handler, just sourced from MobileTouchControls).

@@ -186,3 +186,7 @@ export function subscribeHudCandidate(cb: (c: HudCandidate | null) => void) {
   cb(currentCandidate);
   return () => { candidateListeners = candidateListeners.filter((l) => l !== cb); };
 }
+/** The active player root (set by the enabled PlayableCharacter each frame). */
+export const playerRef: { current: THREE.Object3D | null } = { current: null };
+/** Vehicle the player is currently driving (null when on foot). */
+export const drivingState: { carId: string | null } = { carId: null };

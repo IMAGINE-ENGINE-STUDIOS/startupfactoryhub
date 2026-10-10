@@ -13,7 +13,45 @@ import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
-import { NATIVE_FORMATS, extOf } from "@/imagine-studio/lib/model-import";
+import { NATIVE_FORMATS, extOf, importModelFile } from "@/imagine-studio/lib/model-import";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
+/** Resolves Genius "sketchfab" ops into real model "add" ops (search, download, normalize size). */
+async function resolveSketchfabOps(ops: any[], note: (t: string) => void): Promise<any[]> {
+  const out: any[] = [];
+  for (const op of ops || []) {
+    if (op?.op !== "sketchfab") { out.push(op); continue; }
+    try {
+      const sr = await supabase.functions.invoke("sketchfab-proxy", { body: { action: "search", q: String(op.query || op.name || "model"), maxFaces: op.maxFaces ?? 100000 } });
+      const list = sr.data?.results || [];
+      if (!list.length) throw new Error(`no model for "${op.query}"`);
+      let file: File | null = null, credit = "";
+      for (const m of list.slice(0, 3)) {
+        const d = await supabase.functions.invoke("sketchfab-proxy", { body: { action: "download", uid: m.uid } });
+        if (d.error || d.data?.error || !d.data?.url) continue;
+        const r = await fetch(d.data.url); if (!r.ok) continue;
+        const zip = d.data.format !== "glb";
+        file = new File([await r.blob()], `${(m.name || "model").replace(/[^a-zA-Z0-9 _-]/g, "").trim() || "model"}.${zip ? "zip" : "glb"}`);
+        credit = `${m.name} by ${m.author} (${m.license})`; break;
+      }
+      if (!file) throw new Error(`could not download "${op.query}"`);
+      const imp = await importModelFile(file);
+      const size = typeof op.size === "number" ? op.size : 2;
+      let scale = 1, lift = 0;
+      try {
+        const g = await new GLTFLoader().loadAsync(imp.url);
+        const box = new THREE.Box3().setFromObject(g.scene); const dim = box.getSize(new THREE.Vector3());
+        scale = size / Math.max(dim.x, dim.y, dim.z, 1e-3); lift = -box.min.y * scale;
+      } catch {}
+      const pos = Array.isArray(op.position) ? op.position : [0, 0, 0];
+      out.push({ op: "add", object: { kind: "model", id: op.id, name: op.name || imp.fileName.replace(/\.[^.]+$/, ""), url: imp.url, fileName: imp.fileName, position: [pos[0], (pos[1] || 0) + lift, pos[2]], rotation: op.rotation, scale: [scale, scale, scale] } });
+      if (op.behavior && op.id) out.push({ op: "play", id: op.id, behavior: op.behavior });
+      note(`Added ${credit} via Sketchfab`);
+    } catch (e: any) { note(`Sketchfab: ${e.message || "failed"}`); }
+  }
+  return out;
+}
 
 type Props = {
   levelId: string;
@@ -66,6 +104,10 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       });
       if (error || data?.error) throw new Error(data?.error || error.message);
       let applied = 0;
+      if (data.ops?.some((o: any) => o?.op === "sketchfab")) {
+        setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
+        data.ops = await resolveSketchfabOps(data.ops, (t) => toast.message(t));
+      }
       if (data.ops?.length) {
         updateScene((s) => { const r = applyStudioOps(s, data.ops, layerId); applied = r.applied; return r.scene; });
       }
