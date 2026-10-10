@@ -160,6 +160,7 @@ For a NEW 3D car/racing/driving game (none exists yet) use {"type":"applyTemplat
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  let failRefund: null | (() => Promise<void>) = null;
   try {
     const url = Deno.env.get("SUPABASE_URL")!;
     const authed = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
@@ -255,6 +256,7 @@ serve(async (req) => {
     }
     const grant = async (amt: number, reason: string) => { const { data: b } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: amt, _reason: reason, _ref: reason + ":" + crypto.randomUUID() }); if (b != null) balance = Number(b); };
     const refund = async () => { if (reserve > 0) await grant(reserve, "refund"); };
+    failRefund = refund;
 
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
@@ -301,6 +303,7 @@ serve(async (req) => {
     return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: wantsHeavy && !paid ? "Heavy models are available on paid plans." : undefined });
   } catch (e) {
     console.error("imagine-ai error", e);
+    if (failRefund) { try { await failRefund(); } catch (_) {} }
     return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
