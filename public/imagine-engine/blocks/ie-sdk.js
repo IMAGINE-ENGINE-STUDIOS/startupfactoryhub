@@ -96,4 +96,42 @@
     React.useEffect(function () { var f = function () { s[1](IE.route()); }; addEventListener("hashchange", f); return function () { removeEventListener("hashchange", f); }; }, []);
     return s[0];
   };
+  /* Controllers for games/apps: IE.controls.keyboard(), .joystick(el?), .pointer(el)
+     Every controller returns { x, y, ... , destroy() } with x/y in -1..1 (y up = forward). */
+  IE.controls = {
+    keyboard: function () {
+      var k = {}, st = { x: 0, y: 0, keys: k, jump: false, run: false };
+      function upd() { st.x = (k.KeyD || k.ArrowRight ? 1 : 0) - (k.KeyA || k.ArrowLeft ? 1 : 0); st.y = (k.KeyW || k.ArrowUp ? 1 : 0) - (k.KeyS || k.ArrowDown ? 1 : 0); st.jump = !!k.Space; st.run = !!(k.ShiftLeft || k.ShiftRight); }
+      function d(e) { var t = e.target; if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return; k[e.code] = true; upd(); }
+      function u(e) { k[e.code] = false; upd(); }
+      addEventListener("keydown", d); addEventListener("keyup", u);
+      st.destroy = function () { removeEventListener("keydown", d); removeEventListener("keyup", u); };
+      return st;
+    },
+    joystick: function (opts) {
+      opts = opts || {}; var size = opts.size || 120, st = { x: 0, y: 0, active: false };
+      var base = document.createElement("div"), knob = document.createElement("div");
+      base.style.cssText = "position:fixed;z-index:9999;touch-action:none;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);width:" + size + "px;height:" + size + "px;" + (opts.side === "right" ? "right:24px;" : "left:24px;") + "bottom:24px";
+      knob.style.cssText = "position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.55)";
+      base.appendChild(knob); (opts.parent || document.body).appendChild(base);
+      var id = null;
+      function mv(e) { if (e.pointerId !== id) return; var r = base.getBoundingClientRect(), R = size / 2, dx = e.clientX - r.left - R, dy = e.clientY - r.top - R, l = Math.hypot(dx, dy), c = Math.min(l, R - 10); if (l) { dx = dx / l * c; dy = dy / l * c; } knob.style.transform = "translate(" + dx + "px," + dy + "px)"; st.x = dx / (R - 10); st.y = -dy / (R - 10); }
+      function end(e) { if (e.pointerId !== id) return; id = null; st.active = false; st.x = st.y = 0; knob.style.transform = ""; }
+      base.addEventListener("pointerdown", function (e) { id = e.pointerId; st.active = true; base.setPointerCapture(e.pointerId); mv(e); });
+      base.addEventListener("pointermove", mv); base.addEventListener("pointerup", end); base.addEventListener("pointercancel", end);
+      st.destroy = function () { base.remove(); };
+      return st;
+    },
+    pointer: function (el, onClick) {
+      el = el || document.body; var st = { x: 0, y: 0, down: false, dx: 0, dy: 0 };
+      function m(e) { var r = el.getBoundingClientRect(); st.x = ((e.clientX - r.left) / r.width) * 2 - 1; st.y = -((e.clientY - r.top) / r.height) * 2 + 1; st.dx += e.movementX || 0; st.dy += e.movementY || 0; }
+      function d(e) { st.down = true; m(e); onClick && onClick({ x: st.x, y: st.y }); }
+      function u() { st.down = false; }
+      el.addEventListener("pointermove", m); el.addEventListener("pointerdown", d); addEventListener("pointerup", u);
+      st.lock = function () { el.requestPointerLock && el.requestPointerLock(); };
+      st.take = function () { var r = { dx: st.dx, dy: st.dy }; st.dx = st.dy = 0; return r; };
+      st.destroy = function () { el.removeEventListener("pointermove", m); el.removeEventListener("pointerdown", d); removeEventListener("pointerup", u); };
+      return st;
+    },
+  };
 })();
