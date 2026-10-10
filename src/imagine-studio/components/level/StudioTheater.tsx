@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useSourceTexture, type TheaterSource } from "../plaza/TheaterScreen";
+import { openTheaterFullscreen, closeTheaterFullscreen } from "../plaza/TheaterFullscreen";
 
 const W = 1.6, H = 0.9;
 
@@ -58,6 +59,8 @@ export default function StudioTheater({ obj, selected, onSelect }: { obj: any; s
       else if (d.kind === "image" && d.url) { stop(); setSrc({ kind: "image", url: d.url, name: "image", by: "Flow" }); }
       else if (d.kind === "pdf" && d.url) { stop(); setSrc({ kind: "pdf", url: d.url, name: "document", page: d.page || 1, by: "Flow" }); }
       else if (d.kind === "page") turn(+d.dir || 1);
+      else if (d.kind === "fullscreen") { if (src) openTheaterFullscreen(src); }
+      else if (d.kind === "exitFullscreen") closeTheaterFullscreen();
     };
     window.addEventListener("ie-theater", on);
     return () => { window.removeEventListener("ie-theater", on); };
@@ -81,6 +84,7 @@ export default function StudioTheater({ obj, selected, onSelect }: { obj: any; s
             <button className={btn} onClick={shareScreen}>Share screen</button>
             <button className={btn} onClick={() => fileRef.current?.click()}>Show document</button>
             {src?.kind === "pdf" && <><button className={btn} onClick={() => turn(-1)}>Prev</button><button className={btn} onClick={() => turn(1)}>Next</button></>}
+            {src && <button className={btn} onClick={() => openTheaterFullscreen(src)}>Full screen</button>}
             {src && <button className={btn} onClick={stop}>Stop</button>}
             <input ref={fileRef} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { showFile(e.target.files?.[0]); e.target.value = ""; }} />
           </div>
