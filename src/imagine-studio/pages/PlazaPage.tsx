@@ -26,6 +26,22 @@ const FAR = 25;
 const SPEED = 4.5;
 const BOUND = 38;
 const TANK_R = 3.6; // fountain tank outer radius (collision)
+/** Walk limits derived from the published plaza (edited in 3D Studio). */
+const walk: { bound: number; fountain: boolean; blockers: { x: number; z: number; r: number }[] } = { bound: BOUND, fountain: true, blockers: [] };
+function setWalkFromScene(scene: any) {
+  if (!scene?.objects) { walk.bound = BOUND; walk.fountain = true; walk.blockers = []; return; }
+  const objs = scene.objects.filter((o: any) => o.visible !== false);
+  let ext = 0;
+  for (const o of objs) {
+    if (o.kind === 'trajectory') continue;
+    const sx = Math.abs(o.scale?.[0] ?? 1), sz = Math.abs(o.scale?.[2] ?? 1);
+    if (Math.max(sx, sz) >= 10) ext = Math.max(ext, Math.hypot(Math.abs(o.position[0]) + sx / 2, Math.abs(o.position[2]) + sz / 2) * 0.72);
+  }
+  const lim = scene.walkLimits || {};
+  walk.bound = typeof lim.radius === 'number' ? lim.radius : Math.max(15, Math.min(1000, ext || BOUND));
+  walk.fountain = !lim.noFountainBlock && objs.some((o: any) => /fountain|basin|tank/i.test(o.name || '') && Math.hypot(o.position[0], o.position[2]) < 2);
+  walk.blockers = objs.filter((o: any) => o.playBehavior?.collision === 'blocking').map((o: any) => ({ x: o.position[0], z: o.position[2], r: Math.max(Math.abs(o.scale?.[0] ?? 1), Math.abs(o.scale?.[2] ?? 1)) / 2 + 0.4 }));
+}
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export const CHARACTERS = [
@@ -224,9 +240,14 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
       const len = Math.hypot(dx, dz) || 1;
       let nx = g.position.x + (dx / len) * SPEED * mag * dt, nz = g.position.z + (dz / len) * SPEED * mag * dt;
       const r = Math.hypot(nx, nz);
-      if (r > BOUND) { nx *= BOUND / r; nz *= BOUND / r; }
+      if (r > walk.bound) { nx *= walk.bound / r; nz *= walk.bound / r; }
       const minR = TANK_R + 0.5;
-      if (r < minR) { nx *= minR / (r || 1); nz *= minR / (r || 1); }
+      const r2 = Math.hypot(nx, nz);
+      if (walk.fountain && r2 < minR) { nx *= minR / (r2 || 1); nz *= minR / (r2 || 1); }
+      for (const b of walk.blockers) {
+        const ddx = nx - b.x, ddz = nz - b.z, dd = Math.hypot(ddx, ddz);
+        if (dd < b.r) { nx = b.x + (ddx / (dd || 1)) * b.r; nz = b.z + (ddz / (dd || 1)) * b.r; }
+      }
       g.position.x = nx; g.position.z = nz;
       const target = Math.atan2(dx, dz);
       let dr = target - g.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
@@ -402,6 +423,7 @@ export default function PlazaPage() {
   const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
   const [isAdmin, setIsAdmin] = useState(false);
   const published = usePublishedPlaza();
+  setWalkFromScene(published);
   const [theater, setTheater] = useState<TheaterSource>(null);
   const [pdfPages, setPdfPages] = useState(0);
   const [presenting, setPresenting] = useState(false);
