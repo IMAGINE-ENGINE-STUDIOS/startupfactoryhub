@@ -64,7 +64,7 @@ export default function StudioTheater({ obj, selected, onSelect }: { obj: any; s
     };
     window.addEventListener("ie-theater", on);
     return () => { window.removeEventListener("ie-theater", on); };
-  }, [obj.id, obj.name, pages]); // eslint-disable-line
+  }, [obj.id, obj.name, pages, src]); // eslint-disable-line
   useEffect(() => () => stop(), []); // eslint-disable-line
 
   const btn = "rounded-md bg-background px-2 py-1 text-[11px] border border-border hover:bg-muted";
