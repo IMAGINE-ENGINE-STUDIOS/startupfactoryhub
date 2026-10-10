@@ -123,6 +123,20 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
       } else if (op.op === "walkLimits") {
         if (op.limits === null) delete s.walkLimits; else s.walkLimits = { radius: op.limits?.radius ?? null, noFountainBlock: !!op.limits?.noFountainBlock };
         applied++;
+      } else if (op.op === "controller") {
+        // Configure a character's controller (keyboard/mouse/gamepad/click/patrol + joystick).
+        let o: any = op.id ? s.objects.find((x) => x.id === real(op.id)) : s.objects.find((x: any) => x.kind === "character" && x.playable) || s.objects.find((x) => x.kind === "character");
+        if (!o || o.kind !== "character") continue;
+        const c = op.controller || {};
+        const map: any = { keyboard: "keyboard", mouse: "keyboard", fps: "keyboard", gamepad: "gamepad", both: "both", click: "click", "click-to-move": "click", patrol: "patrol", spline: "patrol" };
+        if (c.scheme) o.controlScheme = map[String(c.scheme)] || "both";
+        if (c.camera) o.cameraMode = c.camera === "first" ? "first" : "third";
+        if (c.joystick) o.mobileJoystick = ["always", "off"].includes(c.joystick) ? c.joystick : "auto";
+        if (c.path) o.patrolPathId = real(String(c.path));
+        o.playable = c.playable !== undefined ? !!c.playable : o.controlScheme !== "patrol";
+        if (c.walkSpeed || c.runSpeed || c.jumpHeight) o.locomotion = { ...(o.locomotion || {}), ...(c.walkSpeed ? { walkSpeed: +c.walkSpeed } : {}), ...(c.runSpeed ? { runSpeed: +c.runSpeed } : {}), ...(c.jumpHeight ? { jumpHeight: +c.jumpHeight } : {}) };
+        if (o.playable) s.objects.forEach((x: any) => { if (x !== o && x.kind === "character" && x.playable) x.playable = false; });
+        applied++;
       } else if (op.op === "play" && op.behavior) {
         const o = s.objects.find((x) => x.id === real(op.id)); if (!o) continue;
         o.playBehavior = { collision: "walkable", ...op.behavior }; applied++;

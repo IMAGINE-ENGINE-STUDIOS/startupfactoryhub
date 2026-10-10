@@ -11,7 +11,7 @@ import {
   Unlock, Mountain, Brush, ArrowUp, ArrowDown, Waves, Minus,
   X, ArrowUpRight, User, Camera, Boxes, Link2, Unlink,
 } from "lucide-react";
-import { Spline as SplineIcon, Paintbrush, Tv } from "lucide-react";
+import { Spline as SplineIcon, Paintbrush, Tv, Gamepad2 } from "lucide-react";
 import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CharacterAnimationGallery from "@/imagine-studio/components/level/animations/CharacterAnimationGallery";
