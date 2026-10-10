@@ -89,9 +89,9 @@ function useInput(scheme: string) {
       const k = keys.current;
       if (k.KeyW || k.ArrowUp) z -= 1;
       if (k.KeyS || k.ArrowDown) z += 1;
-      // Inverted strafe: A/Left moves right, D/Right moves left.
-      if (k.KeyA || k.ArrowLeft) x += 1;
-      if (k.KeyD || k.ArrowRight) x -= 1;
+      // Standard strafe: A/Left moves left, D/Right moves right.
+      if (k.KeyA || k.ArrowLeft) x -= 1;
+      if (k.KeyD || k.ArrowRight) x += 1;
       if (k.Space) jump = true;
       if (k.Shift || k.ShiftLeft || k.ShiftRight) run = true;
     }
@@ -377,10 +377,10 @@ export default function PlayableCharacter({
     };
     const onMove = (e: MouseEvent) => {
       if (!pointerLocked.current) return;
-      // Inverted mouse X to match inverted strafe controls.
-      camOrbit.current.yaw += e.movementX * 0.0025;
-      camOrbit.current.pitch -= e.movementY * 0.0025;
-      camOrbit.current.pitch = Math.max(-1.2, Math.min(1.2, camOrbit.current.pitch));
+      // GTA-style, not inverted: mouse right turns right, mouse up looks up.
+      camOrbit.current.yaw -= e.movementX * 0.0025;
+      camOrbit.current.pitch += e.movementY * 0.0025;
+      camOrbit.current.pitch = Math.max(-0.35, Math.min(1.1, camOrbit.current.pitch));
     };
     const onWheel = (e: WheelEvent) => {
       if (!pointerLocked.current && cameraMode !== "third") return;
@@ -533,9 +533,9 @@ export default function PlayableCharacter({
     // Drain accumulated touch-look deltas into camOrbit (same math as the
     // desktop mousemove handler, just sourced from MobileTouchControls).
     if (mobileLook.dx !== 0 || mobileLook.dy !== 0) {
-      camOrbit.current.yaw += mobileLook.dx * 0.0025;
-      camOrbit.current.pitch -= mobileLook.dy * 0.0025;
-      camOrbit.current.pitch = Math.max(-1.2, Math.min(1.2, camOrbit.current.pitch));
+      camOrbit.current.yaw -= mobileLook.dx * 0.0025;
+      camOrbit.current.pitch += mobileLook.dy * 0.0025;
+      camOrbit.current.pitch = Math.max(-0.35, Math.min(1.1, camOrbit.current.pitch));
       mobileLook.dx = 0;
       mobileLook.dy = 0;
     }
