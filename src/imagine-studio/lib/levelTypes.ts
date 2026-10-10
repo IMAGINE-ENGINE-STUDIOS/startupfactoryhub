@@ -399,7 +399,11 @@ export interface CharacterObject extends BaseObject {
    */
   playable?: boolean;
   /** Input source for the playable character. Default: "both". */
-  controlScheme?: "keyboard" | "gamepad" | "both";
+  controlScheme?: "keyboard" | "gamepad" | "both" | "click" | "patrol";
+  /** On-screen joystick: auto (touch devices), always (also desktop), off. */
+  mobileJoystick?: "auto" | "always" | "off";
+  /** Trajectory id followed when controlScheme is "patrol". */
+  patrolPathId?: string;
   /** Follow camera mode while controlled. Default: "third". */
   cameraMode?: "third" | "first";
   /** Tunable locomotion params. */
