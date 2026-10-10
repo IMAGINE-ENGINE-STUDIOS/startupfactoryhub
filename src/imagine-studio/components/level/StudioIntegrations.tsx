@@ -126,7 +126,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       let applied = 0;
       if (data.ops?.some((o: any) => o?.op === "sketchfab")) {
         setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
-        data.ops = await resolveOptimizeOps(await resolveSketchfabOps(data.ops, (t), scene, (t) => toast.message(t));
+        data.ops = await resolveOptimizeOps(await resolveSketchfabOps(data.ops, (t) => toast.message(t)), scene, (t) => toast.message(t));
       }
       if (data.ops?.length) {
         updateScene((s) => { const r = applyStudioOps(s, data.ops, layerId); applied = r.applied; return r.scene; });

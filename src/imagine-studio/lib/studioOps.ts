@@ -68,6 +68,7 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
         if (p.rotation) o.rotation = v3(p.rotation, o.rotation);
         if (p.scale) o.scale = v3(p.scale, o.scale);
         if (p.name) o.name = String(p.name).slice(0, 80);
+        if (typeof p.url === "string" && (o as any).kind === "model") { (o as any).url = p.url; (o as any).originalUrl = p.originalUrl; (o as any).optimized = p.optimized; }
         if (typeof p.visible === "boolean") o.visible = p.visible;
         if (o.kind === "primitive") {
           if (p.color) o.color = rgba(p.color, o.color);
