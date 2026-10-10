@@ -185,12 +185,47 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   }, [canEdit, importFile]);
 
   /* ---- Publish ---- */
+  const callPublish = async (body: any) => {
+    const { data, error } = await supabase.functions.invoke("studio-publish", { body });
+    if (error) {
+      let msg = error.message;
+      try { const j = await (error as any).context?.json?.(); if (j?.error) msg = j.error; } catch {}
+      if (/non-2xx/i.test(msg)) msg = "Publishing failed. Make sure you are signed in" + (isPlaza ? " with an admin account." : ".");
+      throw new Error(msg);
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+  /** Uploads embedded (data:/blob:) model files so the published scene only holds links. */
+  const hostAssets = async (scene: any) => {
+    const cache = new Map<string, string>();
+    const copy = JSON.parse(JSON.stringify(scene));
+    const walk = async (o: any) => {
+      if (!o || typeof o !== "object") return;
+      for (const k of Object.keys(o)) {
+        const v = o[k];
+        if (typeof v === "string" && (v.startsWith("data:") || v.startsWith("blob:")) && v.length > 64) {
+          if (!cache.has(v)) {
+            const blob = await (await fetch(v)).blob();
+            const ext = /image\/png/.test(blob.type) ? "png" : /image\/jpe?g/.test(blob.type) ? "jpg" : "glb";
+            const a = await callPublish({ action: "asset", ext });
+            const up = await supabase.storage.from("studio-published").uploadToSignedUrl(a.path, a.token, blob, { contentType: blob.type || "model/gltf-binary" });
+            if (up.error) throw new Error(up.error.message);
+            cache.set(v, a.publicUrl);
+          }
+          o[k] = cache.get(v);
+        } else if (v && typeof v === "object") await walk(v);
+      }
+    };
+    await walk(copy);
+    return copy;
+  };
   const publish = async () => {
     setPublishing(true);
     try {
       await save();
-      const { data, error } = await supabase.functions.invoke("studio-publish", { body: { target: isPlaza ? "plaza" : "level", levelId, name, scene: live.current.scene } });
-      if (error || data?.error) throw new Error(data?.error || error.message);
+      const sc = await hostAssets(live.current.scene);
+      const data = await callPublish({ target: isPlaza ? "plaza" : "level", levelId, name, scene: sc });
       toast.success(isPlaza ? "Published. Everyone in /plaza now sees this version." : "Level published", isPlaza ? undefined : { description: data.url });
     } catch (e: any) { toast.error(e.message || "Publish failed"); }
     setPublishing(false);
