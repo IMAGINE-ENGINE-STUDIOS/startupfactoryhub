@@ -290,6 +290,7 @@ serve(async (req) => {
         if (Number(nb) >= 0) balance = Number(nb); else price = reserve;
       }
     }
+    failRefund = null;
     const cost = realCost;
     const charge = price * 0.05;
     try {
