@@ -1992,7 +1992,7 @@ export default function LevelEditorPage() {
             <div className="flex items-center gap-0.5 rounded-md border border-border/40 bg-card/40 p-0.5" title="Gizmo: move (W), rotate (E), scale (R)">
               {([
                 ["translate", Move3d, "Move (W)"],
-                ["rotate", RotateCw, "Rotate (E)"],
+                ["rotate", Rotate3d, "Rotate (E)"],
                 ["scale", Scaling, "Scale (R)"],
               ] as const).map(([m, Icon, label]) => (
                 <Button
