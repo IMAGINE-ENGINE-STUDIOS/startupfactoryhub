@@ -19,10 +19,12 @@ function fpsColor(fps: number): string {
 
 // DOM-overlay performance HUD. Toggle with the backtick (`) key. State persists
 // across reloads via localStorage so it's there next time you need it.
-export default function PerfHUD() {
+export default function PerfHUD({ active = true }: { active?: boolean }) {
+  const [closed, setClosed] = useState(false);
+  useEffect(() => { if (active) setClosed(false); }, [active]);
   const [open, setOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
+    return window.localStorage.getItem(STORAGE_KEY) !== "0";
   });
   const [snap, setSnap] = useState<PerfSnapshot>(getPerfSnapshot());
 
@@ -47,7 +49,7 @@ export default function PerfHUD() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (typeof document === "undefined" || !open) return null;
+  if (typeof document === "undefined" || !open || !active || closed) return null;
 
   return createPortal(
     <div
@@ -67,7 +69,7 @@ export default function PerfHUD() {
         padding: "8px 10px",
         minWidth: 180,
         boxShadow: "0 6px 24px rgba(0,0,0,0.35)",
-        pointerEvents: "none",
+        pointerEvents: "auto",
         userSelect: "none",
         fontVariantNumeric: "tabular-nums",
       }}
@@ -76,6 +78,7 @@ export default function PerfHUD() {
         <span style={{ color: fpsColor(snap.fps), fontWeight: 700, fontSize: 14 }}>
           {snap.fps} fps
         </span>
+        <button onClick={() => setClosed(true)} aria-label="Close FPS" style={{ marginLeft: "auto", background: "transparent", border: 0, color: "#94a3b8", cursor: "pointer", fontSize: 14, lineHeight: 1 }}>✕</button>
         <span style={{ color: "#94a3b8" }}>{snap.ms.toFixed(2)} ms</span>
       </div>
       <Row label="draw calls" value={fmt(snap.calls)} />
