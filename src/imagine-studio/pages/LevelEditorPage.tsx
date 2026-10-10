@@ -228,6 +228,11 @@ function makeCharacter(): CharacterObject {
   };
 }
 
+/** Ready-to-play hero sample: controller, camera and animations pre-wired. */
+function makeHero(): CharacterObject {
+  return { ...makeCharacter(), name: "Hero (playable)", playable: true, controlScheme: "both", cameraMode: "third", mobileJoystick: "auto" };
+}
+
 function makeTrajectory(): TrajectoryObject {
   return {
     id: newId("obj"),
@@ -2127,6 +2132,9 @@ export default function LevelEditorPage() {
               <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makeTheater())} title="Theater screen (share your screen or a document)">
                 <Tv className="w-3.5 h-3.5" />
               </Button>
+              <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makeHero())} title="Playable hero character (controller ready)">
+                <Gamepad2 className="w-3.5 h-3.5" />
+              </Button>
               <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => addObject(makeTrajectory())} title="Trajectory spline">
                 <SplineIcon className="w-3.5 h-3.5" />
               </Button>
@@ -3434,6 +3442,7 @@ function ObjectInspector({
             onPatch={(patch) => onPatch(patch as any)}
             userClips={userClips}
             onOpenGallery={onOpenCharacterGallery}
+            paths={(allObjects || []).filter((o: any) => o.kind === "trajectory")}
           />
         </Suspense>
       )}
@@ -3639,8 +3648,9 @@ function TextureSlot({
 }
 
 function CharacterInspector({
-  obj, disabled, onPatch, userClips, onOpenGallery,
+  obj, disabled, onPatch, userClips, onOpenGallery, paths = [],
 }: {
+  paths?: Array<{ id: string; name: string }>;
   obj: CharacterObject;
   disabled?: boolean;
   onPatch: (patch: Partial<CharacterObject>) => void;
@@ -3694,17 +3704,19 @@ function CharacterInspector({
             </p>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Input</Label>
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Controller</Label>
                 <Select
                   value={obj.controlScheme ?? "both"}
-                  onValueChange={(v) => onPatch({ controlScheme: v as any })}
+                  onValueChange={(v) => onPatch({ controlScheme: v as any, ...(v === "patrol" && !obj.patrolPathId && paths[0] ? { patrolPathId: paths[0].id } : {}) })}
                   disabled={disabled}
                 >
                   <SelectTrigger className="h-7 text-[11px] mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="both" className="text-xs">Keyboard + Gamepad</SelectItem>
-                    <SelectItem value="keyboard" className="text-xs">Keyboard only</SelectItem>
+                    <SelectItem value="both" className="text-xs">Keyboard + Mouse + Gamepad</SelectItem>
+                    <SelectItem value="keyboard" className="text-xs">Keyboard + Mouse look</SelectItem>
                     <SelectItem value="gamepad" className="text-xs">Gamepad only</SelectItem>
+                    <SelectItem value="click" className="text-xs">Click to move (mouse / tap)</SelectItem>
+                    <SelectItem value="patrol" className="text-xs">Follow a path (spline)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -3722,6 +3734,30 @@ function CharacterInspector({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">On-screen joystick</Label>
+                <Select value={obj.mobileJoystick ?? "auto"} onValueChange={(v) => onPatch({ mobileJoystick: v as any })} disabled={disabled}>
+                  <SelectTrigger className="h-7 text-[11px] mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto" className="text-xs">Phones and tablets</SelectItem>
+                    <SelectItem value="always" className="text-xs">Always (also desktop)</SelectItem>
+                    <SelectItem value="off" className="text-xs">Off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {obj.controlScheme === "patrol" && (
+                <div>
+                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Path</Label>
+                  <Select value={obj.patrolPathId ?? ""} onValueChange={(v) => onPatch({ patrolPathId: v })} disabled={disabled || !paths.length}>
+                    <SelectTrigger className="h-7 text-[11px] mt-1"><SelectValue placeholder={paths.length ? "Pick a path" : "Add a trajectory first"} /></SelectTrigger>
+                    <SelectContent>
+                      {paths.map((t) => <SelectItem key={t.id} value={t.id} className="text-xs">{t.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div>
