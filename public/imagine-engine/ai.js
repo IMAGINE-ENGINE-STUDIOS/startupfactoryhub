@@ -513,7 +513,7 @@
     migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); }, 200); });
   }
   /* 3D Studio route: 3D world/level/scene requests (or any Build while a studio scene is on the page) go to Genius 3D inside the studio frame */
-  var STUDIO3D = /\b(3d|three[- ]?d)\b.*\b(level|world|scene|map|game|environment|studio|plaza|arena|city|room)\b|\b(level|world|scene)\b.*\b3d\b|\bin the (3d )?studio\b/i;
+  var STUDIO3D = /\b(3d|three[- ]?d)\b|\bin the (3d )?studio\b|\b(new|another|next|game|playable|sci[- ]?fi|cyberpunk|racing|open[- ]world)\s+(level|world|map|arena)\b|\b(level|world|arena)\b.*\b(character|player|npc|car|vehicle|sketchfab|drivable|walk)|\b(game|simulator|shooter|racer|platformer|rpg)\b.*\b(character|player|level|world|drivable|car|sketchfab)\b|\bsketchfab\b|\bdrivable\b|\bplaza\b/i;
   function studioFrames() { var out = []; (function walk(doc) { try { doc.querySelectorAll("iframe").forEach(function (f) { if (/\/imagine-studio/.test(f.getAttribute("src") || "")) out.push(f); else { try { walk(f.contentDocument); } catch (e) {} } }); } catch (e) {} })(document); return out; }
   function send3DStudio(text) {
     var fr = studioFrames();

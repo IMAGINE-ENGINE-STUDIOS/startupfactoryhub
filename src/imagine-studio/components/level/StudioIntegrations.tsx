@@ -43,11 +43,22 @@ async function resolveSketchfabOps(ops: any[], note: (t: string) => void): Promi
   for (const op of ops || []) {
     if (op?.op !== "sketchfab") { out.push(op); continue; }
     try {
-      const sr = await supabase.functions.invoke("sketchfab-proxy", { body: { action: "search", q: String(op.query || op.name || "model"), maxFaces: op.maxFaces ?? 100000 } });
-      const list = sr.data?.results || [];
-      if (!list.length) throw new Error(`no model for "${op.query}"`);
+      // Try the main query, then the AI's fallbacks, then shorter versions of the query.
+      const base = String(op.query || op.name || "model");
+      const words = base.split(/\s+/).filter(Boolean);
+      const tries = [base, ...(Array.isArray(op.fallback) ? op.fallback.map(String) : []), words.slice(-2).join(" "), words.slice(-1).join(" "), op.name].filter((x, i, a) => x && a.indexOf(x) === i);
+      let list: any[] = [];
+      for (const q of tries) {
+        for (const maxFaces of [op.maxFaces ?? 100000, 300000]) {
+          const sr = await supabase.functions.invoke("sketchfab-proxy", { body: { action: "search", q, maxFaces } });
+          list = sr.data?.results || [];
+          if (list.length) break;
+        }
+        if (list.length) break;
+      }
+      if (!list.length) throw new Error(`no model for "${base}"`);
       let file: File | null = null, credit = "";
-      for (const m of list.slice(0, 3)) {
+      for (const m of list.slice(0, 5)) {
         const d = await supabase.functions.invoke("sketchfab-proxy", { body: { action: "download", uid: m.uid } });
         if (d.error || d.data?.error || !d.data?.url) continue;
         const r = await fetch(d.data.url); if (!r.ok) continue;

@@ -982,7 +982,7 @@ export default function PlayableCharacter({
     );
     const fpTarget = new THREE.Vector3(
       fpEye.x + fwdX * Math.cos(pitch),
-      fpHeadY + Math.sin(pitch),
+      fpHeadY - Math.sin(pitch),
       fpEye.z + fwdZ * Math.cos(pitch),
     );
 
