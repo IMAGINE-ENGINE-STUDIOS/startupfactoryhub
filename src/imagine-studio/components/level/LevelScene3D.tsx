@@ -1712,7 +1712,7 @@ function LevelScene3DInner(
     </Canvas>
     {/* DOM-overlay performance HUD (toggle with `) — rendered as a sibling
         so it sits outside the WebGL canvas and never affects scene state. */}
-    <PerfHUD active={!!playing} />
+    <PerfHUD active={!!rest.playing} />
     </>
   );
 }
