@@ -1,7 +1,7 @@
 // @ts-nocheck -- imported Imagine Studio v2
 import { useEffect, useRef, useState } from "react";
 import { Hand, ArrowUp } from "lucide-react";
-import { mobileAxes, mobileLook, inputPulse } from "@/imagine-studio/components/level/locomotion/locomotionState";
+import { mobileAxes, mobileLook, inputPulse, controllerPrefs } from "@/imagine-studio/components/level/locomotion/locomotionState";
 
 /**
  * On-screen touch controls for Play mode. Rendered only on touch-capable
@@ -22,6 +22,12 @@ export default function MobileTouchControls({ visible }: { visible: boolean }) {
   const lookId = useRef<number | null>(null);
   const lookLast = useRef<{ x: number; y: number } | null>(null);
 
+  const [pref, setPref] = useState(controllerPrefs.mobileJoystick);
+  useEffect(() => {
+    const on = () => setPref(controllerPrefs.mobileJoystick);
+    window.addEventListener("ie-controller-prefs", on);
+    return () => window.removeEventListener("ie-controller-prefs", on);
+  }, []);
   useEffect(() => {
     // Show whenever a touch device or coarse pointer is present.
     const mq = window.matchMedia?.("(pointer: coarse)");
@@ -73,7 +79,7 @@ export default function MobileTouchControls({ visible }: { visible: boolean }) {
     mobileAxes.x = 0; mobileAxes.z = 0;
   };
 
-  if (!visible || !supported) return null;
+  if (!visible || pref === "off" || (!supported && pref !== "always")) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 select-none" style={{ touchAction: "none" }}>

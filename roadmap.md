@@ -120,3 +120,4 @@
 - [x] New Flow 3D steps: scale, rotate, spin, visible, camera, light, theater
 - [x] Zip model reader (Sketchfab zips + uploads)
 - [ ] Studio theater screens are local only (viewers of published levels do not see the share yet)
+- [x] Character controllers: keyboard/mouse, click-to-move, follow-path, on-screen joystick toggle, hero preset, AI controller op, IE.controls SDK

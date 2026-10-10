@@ -60,6 +60,11 @@ export const inputPulse = { interact: false };
  * Virtual axes written by the on-screen mobile controls (joystick + buttons).
  * Additive over keyboard/gamepad in the player controller's sample().
  */
+/** Controller preferences published by the active playable character. */
+export const controllerPrefs: { scheme: string; mobileJoystick: "auto" | "always" | "off" } = { scheme: "both", mobileJoystick: "auto" };
+/** Click-to-move destination (world XZ) for the "click" control scheme. */
+export const clickTarget: { x: number; z: number; active: boolean; at: number } = { x: 0, z: 0, active: false, at: 0 };
+
 export const mobileAxes: { x: number; z: number; jump: boolean; run: boolean } = {
   x: 0, z: 0, jump: false, run: false,
 };

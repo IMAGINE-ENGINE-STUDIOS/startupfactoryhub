@@ -289,7 +289,11 @@ export function TrajectoryRunner({
   const { scene: r3fScene } = useThree();
 
   const trajectories = useMemo(
-    () => objects.filter((o) => o.kind === "trajectory") as TrajectoryObject[],
+    () => (objects.filter((o) => o.kind === "trajectory") as TrajectoryObject[]).map((t) => {
+      // Characters set to "Follow path" in the Object tab patrol this spline.
+      const patrol = objects.filter((o: any) => o.kind === "character" && o.controlScheme === "patrol" && o.patrolPathId === t.id).map((o) => o.id);
+      return patrol.length ? { ...t, followers: Array.from(new Set([...(t.followers || []), ...patrol])) } : t;
+    }),
     [objects],
   );
 

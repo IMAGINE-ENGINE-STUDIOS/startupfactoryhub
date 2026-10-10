@@ -17,6 +17,7 @@ import {
   splineDrivenIds,
   mobileAxes,
   mobileLook,
+  controllerPrefs, clickTarget,
 } from "./locomotionState";
 
 /* ----------------------------- input -------------------------------- */
@@ -35,7 +36,7 @@ export interface PlayCameraPose {
   cameraMode: "third" | "first";
 }
 
-function useInput(scheme: "keyboard" | "gamepad" | "both") {
+function useInput(scheme: string) {
   const axes = useRef<InputAxes>({ x: 0, z: 0, jump: false, run: false });
   const keys = useRef<Record<string, boolean>>({});
 
@@ -234,7 +235,38 @@ export default function PlayableCharacter({
   const radius = cfg.radius ?? 0.32;
   const height = cfg.height ?? 1.7;
   const cameraMode = obj.cameraMode ?? "third";
-  const sample = useInput(obj.controlScheme ?? "both");
+  const scheme = obj.controlScheme ?? "both";
+  const sample = useInput(scheme === "click" || scheme === "patrol" ? "both" : scheme);
+  useEffect(() => {
+    if (!enabled) return;
+    controllerPrefs.scheme = scheme;
+    controllerPrefs.mobileJoystick = obj.mobileJoystick ?? "auto";
+    window.dispatchEvent(new CustomEvent("ie-controller-prefs"));
+  }, [enabled, scheme, obj.mobileJoystick]);
+  // Click-to-move: raycast the ground under the cursor and walk there.
+  useEffect(() => {
+    if (!enabled || scheme !== "click") return;
+    const canvas: HTMLCanvasElement | undefined = gl?.domElement;
+    if (!canvas) return;
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const hit = new THREE.Vector3();
+    const onDown = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      const r = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hits = ray.intersectObjects(threeScene.children, true).filter((h) => {
+        let o: any = h.object; while (o) { if (o === rootRef.current) return false; o = o.parent; }
+        return h.face && h.face.normal.y > -0.2;
+      });
+      if (hits[0]) hit.copy(hits[0].point); else if (!ray.ray.intersectPlane(plane, hit)) return;
+      clickTarget.x = hit.x; clickTarget.z = hit.z; clickTarget.active = true; clickTarget.at = performance.now();
+    };
+    canvas.addEventListener("pointerdown", onDown);
+    return () => { canvas.removeEventListener("pointerdown", onDown); clickTarget.active = false; };
+  }, [enabled, scheme, gl, camera, threeScene]);
 
   // Dynamics
   const velocityY = useRef(0);
@@ -337,6 +369,7 @@ export default function PlayableCharacter({
     const canvas: HTMLCanvasElement | undefined = gl?.domElement;
     if (!canvas) return;
     const onClick = () => {
+      if (scheme === "click") return; // cursor stays free for click-to-move
       if (document.pointerLockElement !== canvas) canvas.requestPointerLock?.();
     };
     const onLockChange = () => {
@@ -364,7 +397,7 @@ export default function PlayableCharacter({
       window.removeEventListener("wheel", onWheel);
       if (document.pointerLockElement === canvas) document.exitPointerLock?.();
     };
-  }, [enabled, cameraMode, gl]);
+  }, [enabled, cameraMode, gl, scheme]);
 
   // Initial position: start at the object's authored position.
   useEffect(() => {
@@ -495,6 +528,7 @@ export default function PlayableCharacter({
     if (!enabled || !rootRef.current) return;
     playerRef.current = rootRef.current;
     if (drivingState.carId) return; // vehicle runtime moves the player + camera
+    if (scheme === "patrol" && splineDrivenIds.has(obj.id)) return; // spline drives this character
     const dt = Math.min(0.05, rawDt); // clamp to keep physics stable
     // Drain accumulated touch-look deltas into camOrbit (same math as the
     // desktop mousemove handler, just sourced from MobileTouchControls).
@@ -554,6 +588,15 @@ export default function PlayableCharacter({
     tmp.move.set(0, 0, 0)
       .addScaledVector(tmp.forward, -inp.z)
       .addScaledVector(tmp.right, inp.x);
+    if (scheme === "click" && clickTarget.active) {
+      if (tmp.move.lengthSq() > 1e-4) clickTarget.active = false; // manual input cancels
+      else {
+        const wp = toWorldPoint(root.position.clone());
+        const dx = clickTarget.x - wp.x, dz = clickTarget.z - wp.z;
+        if (Math.hypot(dx, dz) < 0.25) clickTarget.active = false;
+        else tmp.move.set(dx, 0, dz);
+      }
+    }
     const moving = tmp.move.lengthSq() > 1e-4;
     const speed = inp.run ? runSpeed : walkSpeed;
     if (moving) {
