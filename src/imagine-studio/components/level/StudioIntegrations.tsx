@@ -41,6 +41,7 @@ async function resolveOptimizeOps(ops: any[], scene: any, note: (t: string) => v
 async function resolveSketchfabOps(ops: any[], note: (t: string) => void): Promise<any[]> {
   const out: any[] = [];
   for (const op of ops || []) {
+    if (op?.op === "level" && Array.isArray(op.ops)) { out.push({ ...op, ops: await resolveSketchfabOps(op.ops, note) }); continue; }
     if (op?.op !== "sketchfab") { out.push(op); continue; }
     try {
       // Try the main query, then the AI's fallbacks, then shorter versions of the query.
@@ -135,7 +136,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       });
       if (error || data?.error) throw new Error(data?.error || error.message);
       let applied = 0;
-      if (data.ops?.some((o: any) => o?.op === "sketchfab")) {
+      if (data.ops?.some((o: any) => o?.op === "sketchfab" || o?.op === "optimize" || (o?.op === "level" && o.ops?.some((x: any) => x?.op === "sketchfab")))) {
         setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
         data.ops = await resolveOptimizeOps(await resolveSketchfabOps(data.ops, (t) => toast.message(t)), scene, (t) => toast.message(t));
       }
