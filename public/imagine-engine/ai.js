@@ -1,4 +1,4 @@
-/* Imagine AI — universal builder copilot for Imagine Engine. */
+/* Genius AI — universal builder copilot for Imagine Engine. */
 (function () {
   var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-ai";
   var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
@@ -125,7 +125,7 @@
     var wantsFlow = /\b(flow|automation|automate|workflow|trigger|schedule|webhook|database|query|email|notify)\b/i.test(last);
     if (!hasApp || editsFile || wantsFlow || REBUILD.test(last) || !APPWORDS.test(last)) return list;
     var kept = list.filter(function (a) { return !FLOWTYPES.test(a.type); });
-    if (kept.length !== list.length) { done.push("Skipped Flow scripts that could not reach the running app - ask again and Imagine AI will edit the app file"); needFix = true; }
+    if (kept.length !== list.length) { done.push("Skipped Flow scripts that could not reach the running app - ask again and Genius AI will edit the app file"); needFix = true; }
     return kept;
   }
   var needFix = false;
@@ -437,7 +437,7 @@
   var root = document.createElement("div");
   root.className = "iea";
   root.innerHTML =
-    '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Imagine AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
+    '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Genius AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
     '<div class="iea-att" id="iea-att"></div>' +
     '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>ideas, analysis, plans</small></button><button data-m="build">Build <small>makes the changes</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
@@ -488,7 +488,7 @@
     var t = token();
     messages.push({ role: "user", content: text });
     input.value = "";
-    if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Imagine AI." }); render(); save(); return; }
+    if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Genius AI." }); render(); save(); return; }
     busy = true; render();
     var mode = model === "chat" ? "chat" : "build";
     migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); }, 200); });
@@ -616,7 +616,7 @@
 
   // Floating launcher for Flow / Dev / Database / Deploy (and canvas when AI tab closed)
   var fab = document.createElement("button");
-  fab.className = "iea-fab"; fab.title = "Imagine AI"; fab.innerHTML = '<img src="' + LOGO + '" alt="Imagine AI">';
+  fab.className = "iea-fab"; fab.title = "Genius AI"; fab.innerHTML = '<img src="' + LOGO + '" alt="Genius AI">';
   var drawer = document.createElement("div"); drawer.className = "iea-dr"; drawer.style.display = "none";
   var open = false;
   fab.onclick = function () { open = !open; place(); };

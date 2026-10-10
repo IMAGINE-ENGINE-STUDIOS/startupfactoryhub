@@ -43,7 +43,7 @@ Error generating stack: `+a.message+`
 {cat:"App",kind:"action",subType:"requireAuth",label:"requireAuth",desc:"Stop if the user is not signed in"},
 {cat:"App",kind:"action",subType:"getUser",label:"getUser",desc:"Load the signed-in user into state",p:{stateKey:"user"}},
 {cat:"App",kind:"action",subType:"redirect",label:"redirect",desc:"Open a URL",p:{url:"https://startupfactoryhub.com",newTab:!0}},
-{cat:"App",kind:"action",subType:"aiGenerate",label:"aiGenerate",desc:"Ask Imagine AI, save answer to state",p:{prompt:"Write a tagline",stateKey:"ai"}},
+{cat:"App",kind:"action",subType:"aiGenerate",label:"aiGenerate",desc:"Ask Genius AI, save answer to state",p:{prompt:"Write a tagline",stateKey:"ai"}},
 {cat:"App",kind:"action",subType:"deploy",label:"deploy",desc:"Open the deploy pipeline"},
 {cat:"Data",kind:"action",subType:"liveQuery",label:"liveQuery",desc:"Watch a table, refresh state when rows change",p:{table:"",limit:50,filterColumn:"",op:"eq",filterValue:"",orderBy:"created_at",desc:!0,refreshMs:10000,stateKey:"live"}},
 {cat:"Data",kind:"action",subType:"smartSearch",label:"smartSearch",desc:"Typo-tolerant search over a state list",p:{sourceKey:"rows",query:"",keys:[],limit:20,stateKey:"results"}},

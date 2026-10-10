@@ -1327,22 +1327,24 @@ export default function LevelEditorPage() {
    */
   const measureModelCenter = async (
     url: string,
-  ): Promise<[number, number, number]> => {
+  ): Promise<[number, number, number, number]> => {
     try {
       const buf = await (await fetch(url)).arrayBuffer();
       const loader = new GLTFLoader();
       const gltf = await new Promise<any>((res, rej) =>
         loader.parse(buf, "", res, rej),
       );
+      gltf.scene.updateMatrixWorld(true);
       const box = new THREE.Box3().setFromObject(gltf.scene);
-      if (!isFinite(box.min.x) || !isFinite(box.max.x)) return [0, 0, 0];
+      if (!isFinite(box.min.x) || !isFinite(box.max.x)) return [0, 0, 0, 0];
       const center = new THREE.Vector3();
       box.getCenter(center);
+      const size = box.getSize(new THREE.Vector3());
       // Shift so XZ center → origin, and the model's base sits on y = 0.
-      return [-center.x, -box.min.y, -center.z];
+      return [-center.x, -box.min.y, -center.z, Math.max(size.x, size.y, size.z)];
     } catch (e) {
       console.warn("[LevelEditor] measureModelCenter failed", e);
-      return [0, 0, 0];
+      return [0, 0, 0, 0];
     }
   };
 
@@ -1352,18 +1354,19 @@ export default function LevelEditorPage() {
   ) => {
     const recenter = settings?.recenter ?? true;
     const dropToFloor = settings?.dropToFloor ?? true;
-    let position: [number, number, number] = [0, 0, 0];
-    if (recenter || dropToFloor) {
-      const measured = await measureModelCenter(imported.url);
-      position = [
-        recenter ? measured[0] : 0,
-        dropToFloor ? measured[1] : 0,
-        recenter ? measured[2] : 0,
-      ];
-    }
+    const measured = await measureModelCenter(imported.url);
     // Source units → meters, times user's uniform multiplier.
     const unitFactor = settings ? UNIT_TO_METERS[settings.units] : 1;
-    const s = (settings?.scale ?? 1) * unitFactor;
+    let s = (settings?.scale ?? 1) * unitFactor;
+    // Auto-fit: models exported in cm/mm (Sketchfab often) land as specks,
+    // others are kilometers wide. Bring anything outside 0.3–60 m to ~2 m.
+    const dim = measured[3] * s;
+    if (dim > 0 && (dim < 0.3 || dim > 60)) s = s * (2 / dim);
+    const position: [number, number, number] = [
+      recenter ? measured[0] * s : 0,
+      dropToFloor ? measured[1] * s : 0,
+      recenter ? measured[2] * s : 0,
+    ];
     // Z-up source → Y-up: rotate -90° around X.
     const rotation: [number, number, number] =
       settings?.upAxis === "z" ? [-Math.PI / 2, 0, 0] : [0, 0, 0];
@@ -1380,6 +1383,8 @@ export default function LevelEditorPage() {
       visible: true,
     };
     addObject(obj);
+    setSelectedId?.(obj.id);
+    setTransformMode("scale");
   };
 
   const runNativeImport = async (file: File, settings: CadImportSettings) => {
@@ -1988,22 +1993,36 @@ export default function LevelEditorPage() {
           >
             {rigRoomMode ? "Scene Studio" : "Rig Room"}
           </Button>
-          {!isMobile && (
-            <Button size="sm" variant="ghost" onClick={() => setPlaying((p) => !p)} title="Play / Pause">
-              {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            </Button>
+          {!rigRoomMode && (
+            <div className="flex items-center gap-0.5 rounded-md border border-border/40 bg-card/40 p-0.5" title="Gizmo: move (W), rotate (E), scale (R)">
+              {([
+                ["translate", Move3d, "Move (W)"],
+                ["rotate", Rotate3d, "Rotate (E)"],
+                ["scale", Scaling, "Scale (R)"],
+              ] as const).map(([m, Icon, label]) => (
+                <Button
+                  key={m}
+                  size="sm"
+                  variant={transformMode === m ? "secondary" : "ghost"}
+                  onClick={() => setTransformMode(m)}
+                  title={label}
+                  className={isMobile ? "h-7 w-7 px-0" : "h-7 w-7 px-0"}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </Button>
+              ))}
+            </div>
           )}
-          {!isMobile && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={openPlaceDialog}
-              disabled={!isOwner}
-              title="Place on Atlas"
-            >
-              <MapPin className="w-3.5 h-3.5 mr-1" /> Place on Atlas
-            </Button>
-          )}
+          <Button
+            size="sm"
+            variant={playing ? "destructive" : "default"}
+            onClick={() => setPlaying((p) => !p)}
+            title={playing ? "Stop simulation" : "Play: simulate your game"}
+            className={isMobile ? "h-7 px-2 text-[11px]" : "h-8"}
+          >
+            {playing ? <Square className="w-3.5 h-3.5 sm:mr-1" /> : <Play className="w-3.5 h-3.5 sm:mr-1" />}
+            <span className="hidden sm:inline">{playing ? "Stop" : "Play"}</span>
+          </Button>
           {!rigRoomMode && id && (
             <StudioIntegrations
               levelId={id}

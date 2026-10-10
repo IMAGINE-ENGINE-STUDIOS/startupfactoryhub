@@ -13,6 +13,8 @@ import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrac
 import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw, MonitorUp, FileUp, ChevronLeft, ChevronRight, Square } from 'lucide-react';
 import { districtChat } from '@/lib/districtChatBus';
 import { TheaterScreen, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
+import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
+import { Maximize2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
@@ -667,6 +669,11 @@ export default function PlazaPage() {
         </div>
       </div>
       {err && <div className="absolute top-12 left-3 rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs z-30">{err}</div>}
+      {theater && (
+        <button onClick={() => openTheaterFullscreen(theater)} className="absolute bottom-24 right-4 z-20 rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
+          <Maximize2 className="w-4 h-4" />Watch full screen
+        </button>
+      )}
       {isAdmin && (
         <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           <div className="flex gap-2">

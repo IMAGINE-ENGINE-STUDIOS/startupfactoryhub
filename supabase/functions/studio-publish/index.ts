@@ -18,6 +18,22 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: "Sign in to publish" }, 401);
 
     const body = await req.json().catch(() => ({}));
+    const ensureBucket = async () => {
+      const { data: buckets } = await admin.storage.listBuckets();
+      if (!buckets?.some((b) => b.name === BUCKET)) await admin.storage.createBucket(BUCKET, { public: true });
+    };
+
+    // Model files are uploaded straight from the browser with a signed URL so
+    // the scene JSON stays small (embedded models made publishing fail).
+    if (body.action === "asset") {
+      const ext = String(body.ext || "glb").replace(/[^a-z0-9]/gi, "").slice(0, 8) || "glb";
+      const path = `assets/${user.id}/${crypto.randomUUID()}.${ext}`;
+      await ensureBucket();
+      const { data, error } = await admin.storage.from(BUCKET).createSignedUploadUrl(path);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true, path, token: data.token, publicUrl: admin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl });
+    }
+
     const target = String(body.target || "level");
     const scene = body.scene;
     if (!scene || typeof scene !== "object" || !Array.isArray(scene.objects)) return json({ error: "Invalid scene" }, 400);
@@ -35,8 +51,7 @@ Deno.serve(async (req) => {
       path = `levels/${user.id}/${id}.json`;
     }
 
-    const { data: buckets } = await admin.storage.listBuckets();
-    if (!buckets?.some((b) => b.name === BUCKET)) await admin.storage.createBucket(BUCKET, { public: true });
+    await ensureBucket();
     const { error } = await admin.storage.from(BUCKET).upload(path, new Blob([raw], { type: "application/json" }), { upsert: true, contentType: "application/json", cacheControl: "30" });
     if (error) return json({ error: error.message }, 500);
     const pub = admin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;

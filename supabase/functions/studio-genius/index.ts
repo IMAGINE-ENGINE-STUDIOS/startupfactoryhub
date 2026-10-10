@@ -13,7 +13,7 @@ Reply with ONLY one JSON object, no prose outside it:
 Allowed ops:
 - {"op":"add","object":OBJ}  OBJ primitive: {"kind":"primitive","name":str,"shape":"box|sphere|plane|cylinder|cone|torus","position":[x,y,z],"rotation":[rx,ry,rz],"scale":[sx,sy,sz],"color":[r,g,b,a] (0..1),"metalness":0..1,"roughness":0..1}
   Unit sizes: box 1m cube, sphere radius 0.5, cylinder/cone radius 0.5 height 1, plane 1x1 (lies flat in XY; rotate [-1.5708,0,0] for floors). Use scale to size. Put y = half height so objects rest on the ground.
-  OBJ theater screen (screen sharing + document presenting, for stages, classrooms, conference rooms, cinemas): {"kind":"theater","name":str,"position":[x,y,z],"rotation":[rx,ry,rz],"scale":[s,s,1]} — 16:9 face of 1.6x0.9 m times scale, stands upright facing +Z; place y = 0.45*scale+0.5.
+  OBJ theater screen (screen sharing + document presenting, for stages, classrooms, conference rooms, cinemas): {"kind":"theater","name":str,"position":[x,y,z],"rotation":[rx,ry,rz],"scale":[s,s,1]} — 16:9 face of 1.6x0.9 m times scale, stands upright facing +Z; place y = 0.45*scale+0.5. Viewers can open any theater share full screen (X to close); Flow theater3D kind "fullscreen" opens it.
 - {"op":"update","id":str,"patch":{position?,rotation?,scale?,color?,metalness?,roughness?,name?,visible?}}
 - {"op":"remove","id":str}
 - {"op":"environment","patch":{"background":"#hex","ambient":0..2,"fog":{"color":"#hex","near":n,"far":n}}}
