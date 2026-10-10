@@ -1,6 +1,7 @@
 // @ts-nocheck -- imported Imagine Studio v2
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { getPerfSnapshot, subscribePerf, type PerfSnapshot } from "./perfStore";
 
 const STORAGE_KEY = "level.perfHud.open";
@@ -78,7 +79,7 @@ export default function PerfHUD({ active = true }: { active?: boolean }) {
         <span style={{ color: fpsColor(snap.fps), fontWeight: 700, fontSize: 14 }}>
           {snap.fps} fps
         </span>
-        <button onClick={() => setClosed(true)} aria-label="Close FPS" style={{ marginLeft: "auto", background: "transparent", border: 0, color: "#94a3b8", cursor: "pointer", fontSize: 14, lineHeight: 1 }}>✕</button>
+        <button onClick={() => setClosed(true)} aria-label="Close FPS" style={{ marginLeft: "auto", background: "transparent", border: 0, color: "#94a3b8", cursor: "pointer", fontSize: 14, lineHeight: 1 }}><X size={14} /></button>
         <span style={{ color: "#94a3b8" }}>{snap.ms.toFixed(2)} ms</span>
       </div>
       <Row label="draw calls" value={fmt(snap.calls)} />
