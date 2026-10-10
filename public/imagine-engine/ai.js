@@ -417,7 +417,9 @@
     ".iea-h img{width:26px;height:26px;border-radius:50%;box-shadow:0 0 12px #d946ef66}" +
     ".iea-t{font-weight:600;background:linear-gradient(90deg,#5eead4,#e879f9);-webkit-background-clip:text;color:transparent}" +
     ".iea-s{font-size:10px;color:#71717a}.iea-x{margin-left:auto;background:none;border:0;color:#71717a;cursor:pointer;font-size:11px}" +
-    ".iea-l{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}" +
+    ".iea-l{flex:1 1 0;min-height:0;overflow-y:scroll;overflow-x:hidden;padding:12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#52525b #18181b}.iea-l::-webkit-scrollbar{width:8px}.iea-l::-webkit-scrollbar-track{background:#18181b}.iea-l::-webkit-scrollbar-thumb{background:#52525b;border-radius:8px}.iea-l::-webkit-scrollbar-thumb:hover{background:#71717a}" +
+    "#ie-ai-slot{max-height:calc(100dvh - 60px);position:sticky;top:56px;overflow:hidden}#ie-ai-slot>.iea{height:100%;max-height:calc(100dvh - 60px)}.iea-h,.iea-f,.iea-att{flex-shrink:0}" +
+    ".iea-ph{margin-top:8px;border:1px solid #3f3f46;border-radius:10px;padding:8px 10px;background:#111114}.iea-ph ol{margin:4px 0 6px;padding-left:18px}.iea-ph li.ok{color:#71717a;text-decoration:line-through}" +
     ".iea-u{align-self:flex-end;max-width:88%;background:linear-gradient(135deg,#14b8a6,#a21caf);color:#fff;padding:8px 11px;border-radius:14px 14px 4px 14px}" +
     ".iea-a{max-width:100%;color:#d4d4d8;line-height:1.6}.iea-a p{margin:0 0 8px}.iea-a p:last-child{margin-bottom:0}.iea-a ul,.iea-a ol{margin:4px 0 8px;padding-left:18px}.iea-a li{margin:2px 0}.iea-a li::marker{color:#5eead4}.iea-hd{margin:12px 0 6px;font-weight:600;color:#fafafa;letter-spacing:.01em}h2.iea-hd{font-size:14px}h3.iea-hd{font-size:13px}h4.iea-hd{font-size:12px;color:#a1a1aa;text-transform:uppercase;font-size:10.5px;letter-spacing:.06em}.iea-a h2.iea-hd:first-child,.iea-a h3.iea-hd:first-child{margin-top:0}.iea-a b{color:#fafafa;font-weight:600}.iea-a a{color:#5eead4}.iea-q{border-left:2px solid #5eead4;padding:4px 10px;margin:6px 0;color:#a1a1aa;background:#5eead40d;border-radius:0 6px 6px 0}.iea-hr{border:0;border-top:1px solid #27272a;margin:10px 0}.iea-tb{border-collapse:collapse;margin:6px 0 10px;width:100%;font-size:11px}.iea-tb th,.iea-tb td{border:1px solid #27272a;padding:4px 6px;text-align:left}.iea-tb th{background:#18181b;color:#fafafa}.iea-d{margin-top:6px;font-size:10px;color:#5eead4}" +
     ".iea-pre{background:#18181b;border:1px solid #27272a;border-radius:8px;padding:8px;overflow:auto;font:11px/1.4 ui-monospace,monospace;white-space:pre}" +
@@ -470,13 +472,30 @@
     messages.forEach(function (m, i) {
       if (m.role === "user") h += '<div class="iea-u">' + esc(m.content) + "</div>";
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
-      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
+      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
     });
     if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span></div>';
     list.innerHTML = h;
     list.querySelectorAll(".iea-sug button").forEach(function (b) { b.onclick = b.hasAttribute("data-impl") ? function () { model = "build"; localStorage.setItem("iea-model", model); markModel(); send("Implement the plan you just described. Make surgical changes to the existing project only."); } : function () { send(b.textContent); }; });
+    list.querySelectorAll("[data-ph]").forEach(function (b) { b.onclick = function () { var last = messages[messages.length - 1]; if (last && last.phases) nextPhase(last, b.getAttribute("data-ph") === "all"); }; });
     list.scrollTop = list.scrollHeight;
     go.disabled = busy;
+  }
+  /* Phase plans: Genius builds what fits in one job and splits the rest into at most 4 phases */
+  var autoPhases = false;
+  function parsePhases(text) {
+    var m = /```phases\s*([\s\S]*?)```/.exec(text || ""); if (!m) return null;
+    try { var p = JSON.parse(m[1]); var list = (p.phases || p).slice(0, 4).map(String); if (!list.length) return null; return { list: list, current: Math.max(1, Math.min(list.length, +p.current || 1)) }; } catch (e) { return null; }
+  }
+  function phaseBox(m) {
+    var p = m.phases, left = p.list.length - p.current;
+    return '<div class="iea-ph"><b>Plan in ' + p.list.length + ' phases</b><ol>' + p.list.map(function (x, k) { return '<li class="' + (k < p.current ? "ok" : "") + '">' + esc(x) + "</li>"; }).join("") + "</ol>" +
+      (left > 0 ? '<div class="iea-sug"><button data-ph="all">Auto-build all remaining phases</button><button data-ph="next">Approve phase ' + (p.current + 1) + "</button></div>" : "") + "</div>";
+  }
+  function nextPhase(m, all) {
+    var p = m.phases, n = p.current + 1; autoPhases = !!all;
+    model = "build"; try { localStorage.setItem("iea-model", model); } catch (e) {} markModel();
+    send("Build phase " + n + " of " + p.list.length + ": " + p.list[n - 1] + ". Keep everything already built and edit it surgically. End with the phases block marking current " + n + ".");
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(messages.slice(-60))); } catch (e) {} }
 
@@ -550,7 +569,11 @@
           setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
         }
         var out = runActions(res.j.text || "");
-        messages.push({ role: "assistant", content: res.j.text || "", display: out.text, done: out.done });
+        var ph = parsePhases(res.j.text || "");
+        messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```phases[\s\S]*?```/g, "").trim(), done: out.done, phases: ph });
+        if (res.j.credits && res.j.credits.refunded) messages.push({ role: "assistant", error: true, content: "Genius hit an error, so your credits for that request were returned." });
+        if (ph && autoPhases && ph.current < ph.list.length) { var lastM = messages[messages.length - 1]; setTimeout(function () { nextPhase(lastM, true); }, 600); }
+        else if (!ph || ph.current >= ph.list.length) autoPhases = false;
         if (needFix && !doSend._retried) {
           needFix = false; doSend._retried = true;
           messages.push({ role: "user", content: "Those Flow nodes cannot change the running app. Make the change by editing the existing apps/* file with patchFile (exact find/replace snippets copied from the current file). Do not add Flow nodes." });

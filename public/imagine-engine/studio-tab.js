@@ -31,6 +31,8 @@
   }
   window.__IEStudio = { open: function () { show(true); }, close: function () { show(false); }, frame: function () { return ws && ws.querySelector("iframe"); } };
   addEventListener("resize", place);
+  /* any other workspace mode (Canvas, Flow, Dev, Database, Deploy, Admin) closes the studio so it never sits behind them */
+  document.addEventListener("click", function (e) { if (!onTab) return; var b = e.target && e.target.closest && e.target.closest("button"); if (!b || b === btn) return; if (/^\s*(canvas|flow|dev|database|deploy|admin)\s*$/i.test(b.textContent || "")) show(false); }, true);
 
   function mountBtn() {
     if (document.getElementById("ie-studio-btn")) return;
