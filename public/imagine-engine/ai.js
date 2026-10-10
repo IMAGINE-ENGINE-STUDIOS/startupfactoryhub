@@ -744,7 +744,9 @@
     var n = 0, iv = setInterval(function () { n++; post(SB + "/functions/v1/check-genius-plan", {}).then(function (j) { if (j.balance != null) { state.balance = j.balance; paint(); } }).catch(function () {}); if (n > 20) clearInterval(iv); }, 15000);
   }
   window.__IECredits = { refresh: refresh, openPlans: openPlans, set: function (b) { state.balance = Number(b); paint(); }, get: function () { return state.balance; } };
-  document.addEventListener("click", function (e) { var p = e.target.closest && e.target.closest("[data-ie-credits-pill]"); if (p) openPlans(); });
+  document.addEventListener("click", function (e) { var p = e.target.closest && e.target.closest("[data-ie-credits-pill]"); if (!p) return; if (!token()) { signIn(); return; } openPlans(); });
+  function signIn() { var w = window.top || window; var back = ""; try { back = w.location.pathname + w.location.search; } catch (er) { w = window; back = location.pathname + location.search; } try { w.location.href = "/auth?redirect=" + encodeURIComponent(back); } catch (er) { location.href = "/auth?redirect=" + encodeURIComponent(back); } }
+  window.__IESignIn = signIn;
   // Header pill next to undo/redo
   setInterval(function () {
     var slot = document.getElementById("ie-hist-slot"); if (!slot || slot.querySelector("[data-ie-credits-pill]")) return;
