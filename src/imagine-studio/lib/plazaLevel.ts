@@ -3,6 +3,13 @@
 import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
 
 export const PLAZA_LEVEL_NAME = "Plaza District";
+/** Same bright daylight as the live /plaza game: sky/ground fill, no dark contact-shadow patch. */
+export const PLAZA_ENVIRONMENT: LevelScene["environment"] = {
+  ...EMPTY_SCENE.environment,
+  background: "#9ec9ee",
+  ambient: 0.6,
+  gi: { enabled: true, skyColor: "#dfefff", groundColor: "#6b8f4e", hemisphereIntensity: 0.4, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
+};
 export const PLAZA_PUBLISHED_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/plaza-district.json`;
 
 const hex = (h: string, a = 1): [number, number, number, number] => {
@@ -59,9 +66,9 @@ export function buildPlazaScene(): LevelScene {
     objects: o,
     lights: [
       { id: "plaza_sun", name: "Sun", kind: "directional", position: [20, 30, 10], color: [1, 0.97, 0.9, 1], intensity: 1.4, castShadow: true },
-      { id: "plaza_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.5 },
+      { id: "plaza_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.6 },
       { id: "plaza_theater_bounce", name: "Theater Bounce", kind: "point", position: [0, 3, -30], color: [0.6, 0.75, 1, 1], intensity: 1.2 },
     ],
-    environment: { ...EMPTY_SCENE.environment, background: "#9ec9ee", ambient: 0.5 },
+    environment: PLAZA_ENVIRONMENT,
   };
 }

@@ -8,7 +8,17 @@ import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import LevelEditorPage from "@/imagine-studio/pages/LevelEditorPage";
-import { createLocalLevel, listLocalLevels } from "@/imagine-studio/lib/localLevels";
+import { createLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { PLAZA_ENVIRONMENT, PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
+
+/* One-time fix: older Plaza District copies had a dark contact-shadow "gloom" the live game never shows. */
+try {
+  for (const l of listLocalLevels()) {
+    if (l.name === PLAZA_LEVEL_NAME && (l.scene as any)?.environment?.gi?.contactShadows) {
+      updateLocalLevel(l.id, { scene: { ...l.scene, environment: { ...l.scene.environment, ...PLAZA_ENVIRONMENT, hdri: l.scene.environment?.hdri } } as any });
+    }
+  }
+} catch { /* storage unavailable */ }
 
 export default function ImagineEngineStudioPage() {
   const { id } = useParams<{ id: string }>();

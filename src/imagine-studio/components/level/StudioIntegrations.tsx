@@ -18,6 +18,26 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 /** Resolves Genius "sketchfab" ops into real model "add" ops (search, download, normalize size). */
+/** Resolves Genius "optimize" ops (one id, or "all" heavy models) into lighter model files. */
+async function resolveOptimizeOps(ops: any[], scene: any, note: (t: string) => void): Promise<any[]> {
+  const out: any[] = [];
+  for (const op of ops || []) {
+    if (op?.op !== "optimize") { out.push(op); continue; }
+    const { optimizeModelUrl, OPTIMIZE_LEVELS } = await import("./ModelOptimizer");
+    const ratio = (OPTIMIZE_LEVELS as any)[op.level] ?? OPTIMIZE_LEVELS.lighter;
+    const targets = (scene?.objects || []).filter((o: any) => o.kind === "model" && o.url && (!op.id || op.id === "all" || o.id === op.id || o.name === op.id));
+    for (const o of targets) {
+      try {
+        const r = await optimizeModelUrl(o.url, ratio);
+        if (r.after >= r.before) continue;
+        out.push({ op: "update", id: o.id, patch: { url: r.url, originalUrl: o.originalUrl || o.url, optimized: { level: op.level || "lighter", before: r.before, after: r.after } } });
+        note(`Optimized ${o.name || o.id}: ${r.before.toLocaleString()} to ${r.after.toLocaleString()} triangles`);
+      } catch (e: any) { note(`Optimize ${o.name || o.id}: ${e.message || "failed"}`); }
+    }
+  }
+  return out;
+}
+
 async function resolveSketchfabOps(ops: any[], note: (t: string) => void): Promise<any[]> {
   const out: any[] = [];
   for (const op of ops || []) {
@@ -106,7 +126,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       let applied = 0;
       if (data.ops?.some((o: any) => o?.op === "sketchfab")) {
         setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
-        data.ops = await resolveSketchfabOps(data.ops, (t) => toast.message(t));
+        data.ops = await resolveOptimizeOps(await resolveSketchfabOps(data.ops, (t) => toast.message(t)), scene, (t) => toast.message(t));
       }
       if (data.ops?.length) {
         updateScene((s) => { const r = applyStudioOps(s, data.ops, layerId); applied = r.applied; return r.scene; });

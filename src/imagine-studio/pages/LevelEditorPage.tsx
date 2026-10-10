@@ -1,5 +1,5 @@
 // @ts-nocheck -- imported Imagine Studio v2
-import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft, Save, Plus, Trash2, Box, Circle, Square, Cylinder, Cone,
@@ -752,6 +752,12 @@ export default function LevelEditorPage() {
       return next;
     });
   }, []);
+  /* Imagine Engine header Undo/Redo drive the open 3D level */
+  useEffect(() => {
+    const onMsg = (ev: MessageEvent) => { const d = ev.data; if (d?.__IEStudio === "undo") undo(); if (d?.__IEStudio === "redo") redo(); };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [undo, redo]);
 
   // load
   useEffect(() => {
@@ -3269,6 +3275,7 @@ function BehaviorRow({
   );
 }
 
+const ModelOptimizerLazy = lazy(() => import("@/imagine-studio/components/level/ModelOptimizer"));
 function ObjectInspector({
   obj, onPatch, disabled, snap = 0, editing, onToggleEdit, addingPoint, onToggleAddPoint, onDelete,
   projectId, facePaintActive, paintedFaces, onToggleFacePaint, onClearFacePaint,
@@ -3455,6 +3462,11 @@ function ObjectInspector({
             onPatch({ materialOverrides } as any)
           }
         />
+      )}
+      {obj.kind === "model" && (
+        <Suspense fallback={null}>
+          <ModelOptimizerLazy obj={obj} disabled={disabled} onPatch={(p: any) => onPatch(p as any)} />
+        </Suspense>
       )}
       {obj.kind === "character" && (
         <Suspense fallback={
