@@ -81,8 +81,10 @@
   }
 
   var busyUntil = 0;
-  document.addEventListener("pointerdown", function () { window.__IEDragging = true; }, true);
-  document.addEventListener("pointerup", function () { window.__IEDragging = false; busyUntil = Date.now() + 300; }, true);
+  var dst = document.createElement("style"); dst.textContent = "body.ie-dragging iframe,body.ie-dragging [data-id] *{pointer-events:none!important}"; document.head.appendChild(dst);
+  document.addEventListener("pointerdown", function (e) { window.__IEDragging = true; if (e.target && e.target.closest && e.target.closest("[data-id]") && !e.target.closest("input,textarea,select,[contenteditable]")) document.body.classList.add("ie-dragging"); }, true);
+  document.addEventListener("pointercancel", function () { window.__IEDragging = false; document.body.classList.remove("ie-dragging"); }, true);
+  document.addEventListener("pointerup", function () { window.__IEDragging = false; document.body.classList.remove("ie-dragging"); busyUntil = Date.now() + 300; }, true);
   document.addEventListener("keydown", function () { busyUntil = Date.now() + 500; }, true);
   function tick() { if (document.hidden || window.__IEDragging || Date.now() < busyUntil) return; try { codeToCanvas(); canvasToCode(); } catch (e) {} }
   setInterval(tick, 700);
