@@ -1584,6 +1584,9 @@ export default function MatchingSystem() {
         onOpenChange={setIsScannerOpen}
       />
       <UserProfileDialog userId={profileUserId} open={!!profileUserId} onOpenChange={(o) => !o && setProfileUserId(null)} />
+      {bookTarget && (
+        <BookMeetingDialog open={!!bookTarget} onOpenChange={(o) => !o && setBookTarget(null)} hostId={bookTarget.id} hostName={bookTarget.name} />
+      )}
     </div>
   );
 }

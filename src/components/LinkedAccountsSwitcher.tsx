@@ -9,7 +9,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { ArrowLeftRight, Link2, Unlink, Loader2, Check } from 'lucide-react';
 import { LinkedAccount, linkAccount, listLinkedAccounts, switchToAccount, unlinkCurrentAccount, hasSavedSession } from '@/lib/linkedAccounts';
 
-export default function LinkedAccountsSwitcher() {
+export default function LinkedAccountsSwitcher({ compact = false }: { compact?: boolean } = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -55,11 +55,16 @@ export default function LinkedAccountsSwitcher() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <ArrowLeftRight className="h-4 w-4" /> Switch account
+        <Button
+          variant="ghost"
+          size={compact ? 'icon' : 'sm'}
+          title="Switch account"
+          className={`h-9 ${compact ? 'w-9' : 'px-3 gap-2'} rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-all duration-300`}
+        >
+          <ArrowLeftRight className="h-4 w-4" />{!compact && <span className="text-xs font-medium">Switch account</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 bg-background backdrop-blur-none p-3 space-y-3">
+      <PopoverContent align="end" className="w-80 bg-background backdrop-blur-none p-3 space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Your linked accounts</p>
         {accounts.length === 0 && <p className="text-sm text-muted-foreground">No linked accounts yet.</p>}
         <div className="space-y-1">
