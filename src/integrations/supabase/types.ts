@@ -5861,6 +5861,188 @@ export type Database = {
         }
         Relationships: []
       }
+      net_group_events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          group_id: string
+          id: string
+          location: string | null
+          meeting_url: string | null
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          group_id: string
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          starts_at: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          group_id?: string
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "net_group_events_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "net_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      net_group_invites: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          invited_by: string
+          invited_user_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          invited_by: string
+          invited_user_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          invited_by?: string
+          invited_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "net_group_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "net_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      net_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "net_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "net_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      net_group_messages: {
+        Row: {
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "net_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "net_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      net_groups: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_sends: {
         Row: {
           completed_at: string | null
@@ -9434,6 +9616,10 @@ export type Database = {
         Returns: boolean
       }
       has_membership_access: { Args: { _user_id: string }; Returns: boolean }
+      has_net_group_invite: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -9453,6 +9639,15 @@ export type Database = {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
+      is_net_group_admin: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
+      is_net_group_member: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
+      is_net_group_public: { Args: { _group: string }; Returns: boolean }
       profile_contact_email: { Args: { _owner: string }; Returns: string }
       profile_contact_resume: { Args: { _owner: string }; Returns: string }
       redeem_account_link_code: { Args: { _code: string }; Returns: boolean }
