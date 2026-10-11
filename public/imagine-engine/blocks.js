@@ -43,7 +43,7 @@
     echarts: "https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js",
     plotly: "https://cdn.plot.ly/plotly-2.35.2.min.js",
     cesium: "https://cdn.jsdelivr.net/npm/cesium@1.124.0/Build/Cesium/Cesium.js",
-    mlml5: "https://unpkg.com/ml5@1/dist/ml5.min.js",
+    ml5: "https://unpkg.com/ml5@1/dist/ml5.min.js",
     alpine: "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js",
     jquery: "https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js",
     lottie: "https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js",

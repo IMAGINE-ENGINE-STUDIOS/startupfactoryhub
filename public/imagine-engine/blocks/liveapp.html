@@ -155,7 +155,8 @@
     var fr = document.createElement("iframe");
     fr.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;background:#05060a";
     fr.setAttribute("allow", "autoplay; fullscreen; gamepad; xr-spatial-tracking");
-    var base = '<base href="' + location.origin + '/imagine-engine/blocks/">' + BRIDGE;
+    var IMAP = { imports: { "three": "https://esm.sh/three@" + PINS.three, "three/addons/": "https://esm.sh/three@" + PINS.three + "/examples/jsm/", "cannon-es": "https://esm.sh/cannon-es@0.20.0", "lil-gui": "https://esm.sh/lil-gui@0.20.0", "gsap": "https://esm.sh/gsap@3.12.5", "gsap/": "https://esm.sh/gsap@3.12.5/", "nexusui": "https://esm.sh/nexusui@2.1.6", "tone": "https://esm.sh/tone@15.0.4", "d3": "https://esm.sh/d3@7.9.0", "pixi.js": "https://esm.sh/pixi.js@8.6.6", "ogl": "https://esm.sh/ogl@1.0.11", "@dimforge/rapier3d-compat": "https://esm.sh/@dimforge/rapier3d-compat@0.14.0" } };
+    var base = '<base href="' + location.origin + '/imagine-engine/blocks/">' + (/type=["']importmap/i.test(code) ? "" : '<script type="importmap">' + JSON.stringify(IMAP) + '<\/script>') + BRIDGE;
     var doc = code.replace(/<head([^>]*)>/i, "<head$1>" + base);
     fr.srcdoc = doc === code ? base + code : doc;
     document.getElementById("root").replaceWith(fr);
