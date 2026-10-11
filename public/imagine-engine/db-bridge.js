@@ -114,5 +114,12 @@
   function listen() { apps().forEach(function (a) { if (chans[a.app]) return; try { var bc = new BroadcastChannel("ie-sync:" + a.app); bc.onmessage = function () { clearTimeout(chans._t); chans._t = setTimeout(refresh, 150); }; chans[a.app] = bc; } catch (e) { chans[a.app] = 1; } }); }
   addEventListener("storage", function (e) { if (e.key && /^(ie-app(db|cols):|ie-sbtick$|ie-sbtables:)/.test(e.key)) { listen(); refresh(); } });
   var n = 0, boot = setInterval(function () { if (window.__IE && window.__IE.setTables && window.IE && window.IE.dbFor) { clearInterval(boot); listen(); refresh(); setInterval(push, 700); setInterval(function () { listen(); }, 4000); } else if (++n > 200) clearInterval(boot); }, 150);
+  /* keep connected Supabase tables fresh while the Database tab is open */
+  var lastSb = "";
+  setInterval(function () {
+    var ie = window.__IE, m = ie && (ie.raw ? ie.raw.mode : ie.mode); if (!window.IE || !window.IE.supabase) return;
+    var k = window.IE.supabase.tables().join(","); if (k !== lastSb) { lastSb = k; return refresh(); }
+    if (m === "database" && !busy) refresh();
+  }, 8000);
   window.__IEDataRefresh = function () { listen(); return refresh(); };
 })();

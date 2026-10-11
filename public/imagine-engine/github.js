@@ -33,7 +33,21 @@
       return gh(token, url, { method: "PUT", body: { message: msg, content: b64(content), branch: branch, sha: ex && ex.sha } });
     });
   }
+  function ensureRepo(token, repo, setMsg) {
+    return gh(token, "/repos/" + repo, { allow404: true }).then(function (r) {
+      if (r) return;
+      setMsg("Creating repository " + repo + "...");
+      var parts = repo.split("/");
+      return gh(token, "/user").then(function (me) {
+        var body = { name: parts[1], private: true, auto_init: true, description: "Imagine Engine project" };
+        return gh(token, me.login.toLowerCase() === parts[0].toLowerCase() ? "/user/repos" : "/orgs/" + parts[0] + "/repos", { method: "POST", body: body });
+      }).then(function () { return new Promise(function (ok) { setTimeout(ok, 1500); }); });
+    });
+  }
   function push(token, repo, branch, setMsg) {
+    return ensureRepo(token, repo, setMsg).then(function () { return pushFiles(token, repo, branch, setMsg); });
+  }
+  function pushFiles(token, repo, branch, setMsg) {
     var snap = snapshot(), name = (snap.project && snap.project.name) || "Imagine project";
     var files = [["imagine-project.json", JSON.stringify(snap, null, 2)],
       ["README.md", "# " + name + "\n\nBuilt with Imagine Engine on Startup Factory Hub.\n\n`imagine-project.json` holds the full project (pages, widgets, flows, tables and visual edits). Pull it back into Imagine Engine to keep building.\n"]];
@@ -74,7 +88,11 @@
       if (!t || !/^[\w.-]+\/[\w.-]+$/.test(rp)) { msg.style.color = "#f87171"; msg.textContent = "Enter your token and a repository like owner/name."; return; }
       sessionStorage.setItem("ie-gh-token", t); localStorage.setItem("ie-gh-cfg", JSON.stringify({ repo: rp, branch: b }));
       msg.style.color = "#a1a1aa"; msg.textContent = label + "...";
-      fn(t, rp, b, function (s) { msg.textContent = s; }).then(function () { msg.style.color = "#4ade80"; msg.textContent = label + " finished."; })
+      fn(t, rp, b, function (s) { msg.textContent = s; }).then(function () {
+          msg.style.color = "#4ade80"; msg.textContent = label + " finished. ";
+          var a = h("a", { href: "https://github.com/" + rp + "/tree/" + encodeURIComponent(b), target: "_blank", rel: "noopener", style: "color:#a78bfa;text-decoration:underline" }, ["Open on GitHub"]);
+          msg.appendChild(a);
+        })
         .catch(function (e) { msg.style.color = "#f87171"; msg.textContent = e.message; });
     }
     var ov = h("div", { id: "ie-gh-modal", style: "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:grid;place-items:center", onclick: function (e) { if (e.target === ov) ov.remove(); } }, [
