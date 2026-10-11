@@ -31,5 +31,44 @@
     b[0].classList.toggle("on", has("ie-sbconn:" + p));
     b[1].classList.toggle("on", has("ie-surconn:" + p));
     b[2].classList.toggle("on", has("ie-gh-cfg") && !!sessionStorage.getItem("ie-gh-token"));
+    panelBtn(slot);
   }, 600);
+
+  /* ---------- Content / Design panel: keep on the side, or hide it and open it as a drop menu ---------- */
+  var pcss = document.createElement("style");
+  pcss.textContent = "body.ie-rp-hide .ie-right{display:none!important}" +
+    "body.ie-rp-hide.ie-rp-open .ie-right{display:flex!important;position:fixed!important;top:52px!important;right:10px!important;width:360px!important;max-width:calc(100vw - 20px);height:min(78vh,760px)!important;z-index:80;border:1px solid #3f3f46!important;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.6)}" +
+    "#ie-rp-pin{display:none}body.ie-rp-hide.ie-rp-open #ie-rp-pin{display:block;position:fixed;top:58px;right:378px;z-index:81;height:26px;padding:0 10px;border-radius:9999px;background:#18181b;color:#e4e4e7;border:1px solid #3f3f46;font:11px system-ui;cursor:pointer}" +
+    "#ie-rp-btn{height:28px;border-radius:9999px;background:#18181b;color:#e4e4e7;border:1px solid #27272a;font:11px system-ui;padding:0 10px;cursor:pointer;white-space:nowrap;margin-right:4px;display:inline-flex;align-items:center;gap:5px}#ie-rp-btn.on{background:#e4e4e7;color:#18181b}";
+  document.head.appendChild(pcss);
+  var hidden = localStorage.getItem("ie-rp-hide") === "1";
+  function apply() {
+    document.body.classList.toggle("ie-rp-hide", hidden);
+    if (!hidden) document.body.classList.remove("ie-rp-open");
+    var b = document.getElementById("ie-rp-btn");
+    if (b) { b.title = hidden ? "Open Content & Design" : "Hide Content & Design (open it from here)"; b.lastChild.textContent = hidden ? "Panel \u25BE" : "Hide panel"; b.classList.toggle("on", document.body.classList.contains("ie-rp-open")); }
+  }
+  function panelBtn(slot) {
+    if (document.getElementById("ie-rp-btn")) return;
+    var b = document.createElement("button"); b.id = "ie-rp-btn"; b.type = "button";
+    b.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg><span></span>';
+    b.onclick = function (e) {
+      e.stopPropagation();
+      if (!hidden) { hidden = true; localStorage.setItem("ie-rp-hide", "1"); }
+      else document.body.classList.toggle("ie-rp-open");
+      apply();
+    };
+    slot.insertBefore(b, bar && slot.contains(bar) ? bar : slot.firstChild);
+    var pin = document.createElement("button"); pin.id = "ie-rp-pin"; pin.type = "button"; pin.textContent = "Pin to side";
+    pin.onclick = function () { hidden = false; localStorage.setItem("ie-rp-hide", "0"); apply(); };
+    document.body.appendChild(pin);
+    apply();
+  }
+  /* clicking the canvas closes the drop menu (clicks inside the panel keep it open) */
+  document.addEventListener("mousedown", function (e) {
+    if (!document.body.classList.contains("ie-rp-open")) return;
+    var t = e.target; if (!t.closest) return;
+    if (t.closest(".ie-right") || t.closest("#ie-rp-btn") || t.closest("#ie-rp-pin") || t.closest("[data-id]")) return;
+    document.body.classList.remove("ie-rp-open"); apply();
+  }, true);
 })();
