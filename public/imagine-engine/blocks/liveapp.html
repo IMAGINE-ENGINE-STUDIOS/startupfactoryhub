@@ -118,23 +118,57 @@
     tog.onclick = function (e) { e.stopPropagation(); inspectOn = !inspectOn; tog.textContent = inspectOn ? "Done editing" : "Edit elements"; if (!inspectOn && hoverBox) hoverBox.style.display = "none"; try { (host() || parent).postMessage({ ie: "liveapp-inspect-state", on: inspectOn }, "*"); } catch (x) {} };
     document.body.appendChild(tog);
   }, 300);
+  /* collect exported names so circular imports get a real stub (never an empty data: module) */
+  function exportNames(js) {
+    var names = {}, m, re = /export\s+(?:async\s+)?(?:const|let|var|function\*?|class)\s+([A-Za-z_$][\w$]*)/g;
+    while ((m = re.exec(js))) names[m[1]] = m[1];
+    var re2 = /export\s*\{([^}]*)\}(?!\s*from)/g;
+    while ((m = re2.exec(js))) m[1].split(",").forEach(function (p) { var q = p.trim().split(/\s+as\s+/); if (q[0]) names[(q[1] || q[0]).trim()] = q[0].trim(); });
+    return names;
+  }
+  window.__IEMods = window.__IEMods || {};
+  function lazyStub(name, js) {
+    var ex = exportNames(js), key = JSON.stringify(name), body = "const R=()=>(globalThis.__IEMods[" + key + "]||{});const L=(k)=>function(...a){const v=R()[k];return typeof v==='function'?(new.target?new v(...a):v.apply(this,a)):v;};";
+    Object.keys(ex).forEach(function (n) { if (n !== "default") body += "export const " + n + "=L(" + JSON.stringify(n) + ");"; });
+    body += "export default L('default');";
+    return URL.createObjectURL(new Blob([body], { type: "text/javascript" }));
+  }
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
       : Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), plugins: [locPlugin(name)], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
-    return out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"']+)\2/g, function (m, pre, qt, spec) {
+    if (name !== file && !/\.(css|json)$/.test(name)) {
+      var ex = exportNames(out), keys = Object.keys(ex), hasDef = /export\s+default\b|export\s*\{[^}]*\bas\s+default\b/.test(out);
+      /* default import of a file that only has named exports: fall back to its main export instead of a SyntaxError */
+      if (!hasDef && keys.length) { var base = name.split("/").pop().replace(/\.\w+$/, ""); out += "\nexport default " + (ex[base] ? ex[base] : ex.App ? "App" : ex[keys[0]]) + ";"; hasDef = true; }
+      if (!hasDef) out += "\nexport default undefined;";
+      /* register the module for any circular importer stubs */
+      out += "\nimport * as __ie_self_ns from " + JSON.stringify("ie-self:" + name) + ";";
+    }
+    out = out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"']+)\2/g, function (m, pre, qt, spec) {
       if (/^(\.{1,2}\/|@\/)/.test(spec)) {
         var r = resolve(name, spec); if (!r) throw new Error("Cannot find " + spec + " (imported from " + name + ") in the Dev tab");
+        if (seen[r.name] === "pending") {
+          /* circular import: hand back a lazy stub whose exports forward to the real module once it loads */
+          var pre1 = Babel.transform(r.code, { filename: /\.(tsx|jsx)$/.test(r.name) ? r.name : "x.tsx", presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+          return pre + qt + lazyStub(r.name, pre1) + qt;
+        }
         if (seen[r.name]) return pre + qt + seen[r.name] + qt;
-        seen[r.name] = "data:text/javascript,";
+        seen[r.name] = "pending";
         var url = URL.createObjectURL(new Blob([compile(r.code, r.name, seen)], { type: "text/javascript" }));
         seen[r.name] = url; return pre + qt + url + qt;
       }
+      if (/^ie-self:/.test(spec)) return m;
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
       var pm = /^(@[^/]+\/[^/@]+|[^/@]+)(.*)$/.exec(spec), pkg = pm ? pm[1] : spec, ver = PINS[pkg];
       var q = "?external=react,react-dom" + (SHARE3.test(pkg) ? "&deps=three@" + PINS.three : "");
       return pre + qt + "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + q + qt;
+    });
+    /* replace the self-import marker with a registry write (a module can't import its own blob URL) */
+    return out.replace(/\nimport \* as __ie_self_ns from "ie-self:([^"]*)";/, function (_, n) {
+      var ex = exportNames(out), o = Object.keys(ex).filter(function (k) { return k !== "default"; }).map(function (k) { return JSON.stringify(k) + ":(typeof " + ex[k] + "!=='undefined'?" + ex[k] + ":undefined)"; });
+      return "\nqueueMicrotask(()=>{try{globalThis.__IEMods[" + JSON.stringify(n) + "]=Object.assign(globalThis.__IEMods[" + JSON.stringify(n) + "]||{},{" + o.join(",") + "})}catch(e){}});";
     });
   }
   /* ---- App bridge: Flow ctx.broadcast(action) -> window.__IE_DISPATCH / "ie:action"; IE.emit(event) -> Flow ctx.on ---- */
