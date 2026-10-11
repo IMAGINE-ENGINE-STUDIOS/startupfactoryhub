@@ -74,17 +74,10 @@ const HeroSection = () => {
           animationDelay: '0.3s'
         }}>
             <Button variant="hero" size="xl" className="group w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
-              {user ? "Go to Dashboard" : "Start Your Journey"}
+              {user ? "Start Journey" : "Start Your Journey"}
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            
-            <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-primary/30 hover:border-primary/50" onClick={() => navigate("/about")}>
-              Learn More
-            </Button>
-            
-            <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-primary/30 hover:border-primary/50" onClick={() => navigate("/about#features")}>
-              Explore Features
-            </Button>
+
 
           </div>
           )}
