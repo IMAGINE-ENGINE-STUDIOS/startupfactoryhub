@@ -12,6 +12,8 @@ import UserProfileDialog from '@/components/UserProfileDialog';
 import OfficialBadge from './OfficialBadge';
 import { useNotifications } from '@/hooks/useNotifications';
 import { isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
+import { fetchAccountGroups, unifyLinked } from '@/lib/linkedAccounts';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 interface Connection {
   user_id: string;
@@ -23,6 +25,7 @@ interface Connection {
   is_official_mentor?: boolean;
   venezuela_rebuild?: boolean;
   status?: 'accepted' | 'pending';
+  linked_roles?: string[];
 }
 
 interface PendingRequest extends Connection {
@@ -36,6 +39,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
   const [allMembers, setAllMembers] = useState<Connection[]>([]);
   const [allMembersLoading, setAllMembersLoading] = useState(false);
+  const [accountGroups, setAccountGroups] = useState<Map<string, string>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [vzlaFilter, setVzlaFilter] = useState(false);
   const allCommunity = mode === 'community';
@@ -99,6 +103,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
         if (c.status === 'accepted' || c.status === 'pending') statuses[other] = c.status;
       });
 
+      fetchAccountGroups(userIds).then(setAccountGroups).catch(() => {});
       const seen = new Set<string>();
       setAllMembers(visible
         .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
@@ -544,6 +549,11 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
               <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
                 {getRoleLabel(connection.role)}
               </Badge>
+              {connection.linked_roles?.map(r => (
+                <span key={r} title={`Also a ${getRoleLabel(r)}`}>
+                  <RoleBasedAvatar role={r as any} fallbackText={r} className="h-5 w-5" />
+                </span>
+              ))}
               {connection.venezuela_rebuild && (
                 <Badge className="text-[10px] gap-1 bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/20">
                   <Heart className="h-2.5 w-2.5 fill-current" />
@@ -610,7 +620,12 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
     </Card>
   );
 
-  const applyFilter = <T extends { venezuela_rebuild?: boolean }>(list: T[]): T[] => vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
+  const applyFilter = <T extends { venezuela_rebuild?: boolean }>(list: T[]): T[] => {
+    const base = vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
+    // One card per person across linked accounts (startup accounts stay separate)
+    if (accountGroups.size === 0 || base.some((c: any) => 'connection_id' in c)) return base;
+    return unifyLinked(base as any, accountGroups) as unknown as T[];
+  };
 
   return (
     <div className="space-y-6">

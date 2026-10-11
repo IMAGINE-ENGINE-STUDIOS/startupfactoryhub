@@ -1,3 +1,4 @@
+import LinkedAccountsSwitcher from '@/components/LinkedAccountsSwitcher';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -364,13 +365,14 @@ const Dashboard = () => {
       <div className="w-full max-w-none px-2 sm:px-4 md:px-6 xl:px-8 pt-2 sm:pt-4 pb-4">
 
         {/* User avatar */}
-        <div className="mb-4 sm:mb-6 flex justify-start">
+        <div className="mb-4 sm:mb-6 flex items-center justify-start gap-3">
           <RoleBasedAvatar
             avatarUrl={profileWithRole?.avatar_url}
             role={profileWithRole?.role || 'startup'}
             fallbackText={user?.email || 'U'}
             className="h-14 w-14 sm:h-16 sm:w-16"
           />
+          <LinkedAccountsSwitcher />
         </div>
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
