@@ -145,6 +145,11 @@
   T.dashboard = { name: "Dashboard app", sections: [{ liveFile: "dashboard.tsx", app: "Dashboard", kind: "react" }] };
   ["dashboard","analytics","crm","portal","admin","adminpanel","kpi","metrics"].forEach(function (k) { ALIAS[k] = "dashboard"; });
   ALIAS.aframe = "vr"; ALIAS.webxr = "vr"; ALIAS.metaverse = "vr"; ALIAS.virtual = "vr";
+  T.webglstudio = { name: "WebGL interactive studio", sections: [{ liveFile: "webglstudio.tsx", app: "WebGLStudio", kind: "react" }] };
+  ["r3f","reactthree","webglapp","configurator","productviewer","shader","3dapp"].forEach(function (k) { ALIAS[k] = "webglstudio"; });
+  T.audiovisual = { name: "Audio visualizer with Nexus controls", sections: [{ liveFile: "audiovisual.html", app: "AudioVisualizer", kind: "html" }] };
+  ["audio","visualizer","nexus","nexusui","synth","music","sound"].forEach(function (k) { ALIAS[k] = "audiovisual"; });
+  ["datadash","datadashboard","charts","d3","dataviz"].forEach(function (k) { ALIAS[k] = "dashboard"; });
   var _apply = apply;
   apply = function (key) { var k = String(key || "").toLowerCase(); k = ALIAS[k] || k; var t = T[k]; if (t && t.live && window.__IEFiles) { window.__IEFiles.liveApp(t.live.name, t.live.code, t.live.kind); } return _apply(key); };
   window.__IEBlocks = { apply: apply, list: Object.keys(T).map(function (k) { return { id: k, name: T[k].name }; }) };
