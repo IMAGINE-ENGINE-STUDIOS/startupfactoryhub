@@ -58,7 +58,13 @@
   }
   var deps = {};
   /* pinned versions for the common app libraries so builds stay stable and cache well */
-  var PINS = { "lucide-react": "0.468.0", "recharts": "2.15.0", "framer-motion": "11.15.0", "canvas-confetti": "1.9.3", "clsx": "2.1.1", "tailwind-merge": "2.6.0", "class-variance-authority": "0.7.1", "@tanstack/react-table": "8.20.6", "@tanstack/react-query": "5.62.8", "date-fns": "4.1.0", "zustand": "5.0.2", "react-hook-form": "7.54.2", "zod": "3.24.1" };
+  var PINS = { "lucide-react": "0.468.0", "recharts": "2.15.0", "framer-motion": "11.15.0", "canvas-confetti": "1.9.3", "clsx": "2.1.1", "tailwind-merge": "2.6.0", "class-variance-authority": "0.7.1", "@tanstack/react-table": "8.20.6", "@tanstack/react-query": "5.62.8", "date-fns": "4.1.0", "zustand": "5.0.2", "react-hook-form": "7.54.2", "zod": "3.24.1",
+    /* WebGL / 3D / physics / GUIs */
+    "three": "0.170.0", "@react-three/fiber": "9.1.2", "@react-three/drei": "10.0.6", "postprocessing": "6.36.4", "@react-three/postprocessing": "3.0.4", "cannon-es": "0.20.0", "@dimforge/rapier3d-compat": "0.14.0", "lil-gui": "0.20.0", "tweakpane": "4.0.5", "pixi.js": "8.6.6", "phaser": "3.87.0", "@babylonjs/core": "7.38.0", "@babylonjs/loaders": "7.38.0", "playcanvas": "2.3.3", "matter-js": "0.20.0", "ogl": "1.0.11", "glslify": "7.1.1",
+    /* dynamic UI, motion, state, data viz, audio */
+    "nexusui": "2.1.6", "gsap": "3.12.5", "@gsap/react": "2.1.1", "jotai": "2.11.0", "valtio": "2.1.2", "d3": "7.9.0", "chart.js": "4.4.7", "react-chartjs-2": "5.3.0", "tone": "15.0.4", "howler": "2.2.4", "leaflet": "1.9.4", "react-leaflet": "5.0.0", "@dnd-kit/core": "6.3.1", "@dnd-kit/sortable": "10.0.0", "react-resizable-panels": "2.1.7", "sonner": "1.7.1", "cmdk": "1.0.4", "react-markdown": "9.0.1", "@xyflow/react": "12.3.6", "@tensorflow/tfjs": "4.22.0", "lodash-es": "4.17.21", "nanoid": "5.0.9", "immer": "10.1.1" };
+  /* packages that must share one copy of three/react-three so contexts and instanceof checks work */
+  var SHARE3 = /^(@react-three\/|postprocessing|three-stdlib|@react-spring\/three)/;
   /* ---- Visual inspector: every DOM JSX tag gets data-ie-loc="file:line:col" so Content/Design edits patch the exact source ---- */
   function locPlugin(name) { return function (api) { var t = api.types; return { visitor: { JSXOpeningElement: function (p) {
     var n = p.node; if (!n.loc || n.name.type !== "JSXIdentifier" || !/^[a-z]/.test(n.name.name)) return;
@@ -127,7 +133,8 @@
       }
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
       var pm = /^(@[^/]+\/[^/@]+|[^/@]+)(.*)$/.exec(spec), pkg = pm ? pm[1] : spec, ver = PINS[pkg];
-      return pre + qt + "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + "?external=react,react-dom" + qt;
+      var q = "?external=react,react-dom" + (SHARE3.test(pkg) ? "&deps=three@" + PINS.three : "");
+      return pre + qt + "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + q + qt;
     });
   }
   /* ---- App bridge: Flow ctx.broadcast(action) -> window.__IE_DISPATCH / "ie:action"; IE.emit(event) -> Flow ctx.on ---- */
@@ -148,7 +155,8 @@
     var fr = document.createElement("iframe");
     fr.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;background:#05060a";
     fr.setAttribute("allow", "autoplay; fullscreen; gamepad; xr-spatial-tracking");
-    var base = '<base href="' + location.origin + '/imagine-engine/blocks/">' + BRIDGE;
+    var IMAP = { imports: { "three": "https://esm.sh/three@" + PINS.three, "three/addons/": "https://esm.sh/three@" + PINS.three + "/examples/jsm/", "cannon-es": "https://esm.sh/cannon-es@0.20.0", "lil-gui": "https://esm.sh/lil-gui@0.20.0", "gsap": "https://esm.sh/gsap@3.12.5", "gsap/": "https://esm.sh/gsap@3.12.5/", "nexusui": "https://esm.sh/nexusui@2.1.6", "tone": "https://esm.sh/tone@15.0.4", "d3": "https://esm.sh/d3@7.9.0", "pixi.js": "https://esm.sh/pixi.js@8.6.6", "ogl": "https://esm.sh/ogl@1.0.11", "@dimforge/rapier3d-compat": "https://esm.sh/@dimforge/rapier3d-compat@0.14.0" } };
+    var base = '<base href="' + location.origin + '/imagine-engine/blocks/">' + (/type=["']importmap/i.test(code) ? "" : '<script type="importmap">' + JSON.stringify(IMAP) + '<\/script>') + BRIDGE;
     var doc = code.replace(/<head([^>]*)>/i, "<head$1>" + base);
     fr.srcdoc = doc === code ? base + code : doc;
     document.getElementById("root").replaceWith(fr);

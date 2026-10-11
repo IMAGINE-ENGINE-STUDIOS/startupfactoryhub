@@ -1,0 +1,64 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audio Visualizer</title>
+<style>
+  html,body{margin:0;height:100%;background:#07080c;color:#e7e9ee;font:13px system-ui;overflow:hidden}
+  #gl{position:fixed;inset:0}
+  #panel{position:fixed;left:16px;bottom:16px;padding:14px;border-radius:14px;background:rgba(20,22,30,.82);display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+  .c{display:flex;flex-direction:column;align-items:center;gap:6px}
+  button{background:#4f8cff;color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:600;cursor:pointer}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/nexusui@2.1.6/dist/NexusUI.js"></script>
+</head><body>
+<div id="gl"></div>
+<div id="panel">
+  <button id="play">Start sound</button>
+  <div class="c"><div id="freq"></div>Pitch</div>
+  <div class="c"><div id="vol"></div>Volume</div>
+  <div class="c"><div id="pad"></div>Size / Color</div>
+</div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import * as Tone from "tone";
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.getElementById("gl").appendChild(renderer.domElement);
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+cam.position.set(0, 4, 14);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true;
+
+const N = 6000, pos = new Float32Array(N * 3), base = new Float32Array(N * 3);
+for (let i = 0; i < N; i++) { const r = 4 * Math.cbrt(Math.random()), t = Math.random() * 6.283, p = Math.acos(2 * Math.random() - 1);
+  base[i*3] = r*Math.sin(p)*Math.cos(t); base[i*3+1] = r*Math.cos(p); base[i*3+2] = r*Math.sin(p)*Math.sin(t); }
+pos.set(base);
+const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+const mat = new THREE.PointsMaterial({ size: 0.06, color: 0x4f8cff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+scene.add(new THREE.Points(geo, mat));
+
+const synth = new Tone.Oscillator(220, "sawtooth"), gain = new Tone.Gain(0.3), analyser = new Tone.Analyser("fft", 64);
+synth.chain(gain, analyser, Tone.getDestination());
+let running = false, size = 1, hue = 0.6;
+document.getElementById("play").onclick = async (e) => { await Tone.start(); running ? synth.stop() : synth.start(); running = !running; e.target.textContent = running ? "Stop sound" : "Start sound"; IE.emit && IE.emit(running ? "audio:start" : "audio:stop"); };
+
+const freq = new Nexus.Dial("#freq", { size: [64, 64], min: 60, max: 880, value: 220 });
+const vol = new Nexus.Slider("#vol", { size: [24, 90], min: 0, max: 1, value: 0.3 });
+const pad = new Nexus.Position("#pad", { size: [110, 90] });
+freq.on("change", (v) => synth.frequency.rampTo(v, 0.05));
+vol.on("change", (v) => gain.gain.rampTo(v, 0.05));
+pad.on("change", (v) => { size = 0.5 + v.x * 1.5; hue = v.y; });
+window.__IE_DISPATCH = (a, p) => { if (a === "set" && p) { if (p.pitch) freq.value = p.pitch; if (p.volume != null) vol.value = p.volume; } };
+
+function resize() { renderer.setSize(innerWidth, innerHeight); cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const t = clock.getElapsedTime(), f = running ? analyser.getValue() : null;
+  for (let i = 0; i < N; i++) { const b = f ? Math.max(0, (f[i % 64] + 100) / 70) : 0.2, k = size * (1 + b * 0.35 * Math.sin(t * 2 + i));
+    pos[i*3] = base[i*3]*k; pos[i*3+1] = base[i*3+1]*k; pos[i*3+2] = base[i*3+2]*k; }
+  geo.attributes.position.needsUpdate = true; mat.color.setHSL(hue, 0.8, 0.6);
+  scene.rotation.y = t * 0.1; controls.update(); renderer.render(scene, cam);
+});
+</script>
+</body></html>
