@@ -3,7 +3,10 @@
  * number of levels (separate or linked by portals); one is the start level.
  * Served at /levels (also inside Imagine Engine with ?embedded=1).
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { ensurePlazaLevel } from "@/imagine-studio/lib/localLevels";
+import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, buildPlazaScene } from "@/imagine-studio/lib/plazaLevel";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +22,20 @@ export default function StudioProjectsPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const projects = useMemo(() => listProjects(), [tick]);
   const refresh = () => setTick((t) => t + 1);
+  // Plaza District follows admin accounts to any browser: seed it from the published version.
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      const u = data.user; if (!u) return;
+      const { data: admin } = await supabase.rpc("has_role", { _user_id: u.id, _role: "admin" });
+      if (!admin) return;
+      if (listProjects().some((p) => p.levels.some((l) => l.name === PLAZA_LEVEL_NAME))) return;
+      let published: any = null;
+      try { const r = await fetch(PLAZA_PUBLISHED_URL, { cache: "no-store" }); if (r.ok) published = await r.json(); } catch {}
+      const scene = published?.scene ?? (published?.objects ? published : null);
+      ensurePlazaLevel(() => scene || buildPlazaScene(), PLAZA_LEVEL_NAME);
+      refresh();
+    });
+  }, []);
   const openLevel = (id: string) => navigate(`/imagine-studio/${id}${search}`);
   const startOf = (p: (typeof projects)[number]) => p.levels.find((l) => l.id === p.defaultLevelId) ?? p.levels[0];
 
