@@ -35,7 +35,7 @@ import {
   Star,
   FileText,
   GraduationCap,
-  Megaphone
+  Megaphone,
   ShoppingBag,
 } from 'lucide-react';
 import ProfileSalesManagement from '@/components/admin/ProfileSalesManagement';
