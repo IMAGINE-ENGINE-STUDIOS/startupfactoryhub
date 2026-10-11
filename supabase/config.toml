@@ -290,3 +290,6 @@ verify_jwt = false
 
 [functions.imagine-github]
 verify_jwt = false
+
+[functions.imagine-pack]
+verify_jwt = false

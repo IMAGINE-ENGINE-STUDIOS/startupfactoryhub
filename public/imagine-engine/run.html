@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>App</title>
+<meta name="description" content="App built with Imagine Engine." />
+<script type="importmap">
+{ "imports": {
+  "react": "https://esm.sh/react@19.1.0",
+  "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
+  "react-dom": "https://esm.sh/react-dom@19.1.0?external=react",
+  "react-dom/client": "https://esm.sh/react-dom@19.1.0/client?external=react"
+} }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="/imagine-engine/blocks/ie-sdk.js"></script>
+<style>html,body{margin:0;min-height:100%;background:#0b0b0c;color:#fafafa;font-family:system-ui,sans-serif}#msg{padding:24px;color:#a1a1aa;font-size:13px}</style>
+</head>
+<body>
+<div id="root"><div id="msg">Loading app…</div></div>
+<script>
+(function () {
+  var src = new URLSearchParams(location.search).get("src") || "";
+  var msg = function (t) { var m = document.getElementById("msg"); if (m) m.textContent = t; };
+  if (!/^https:\/\/zqiihhmdsdgwdcwmryym\.supabase\.co\/storage\/v1\/object\/public\/studio-published\/apps\//.test(src)) return msg("This link is not a hosted Imagine Engine app.");
+  fetch(src, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error("App not found"); return r.json(); }).then(function (p) {
+    if (p.name) document.title = p.name;
+    if (p.css) { var s = document.createElement("style"); s.textContent = p.css; document.head.appendChild(s); }
+    var sc = document.createElement("script"); sc.type = "module";
+    sc.src = URL.createObjectURL(new Blob([p.js], { type: "text/javascript" }));
+    document.body.appendChild(sc);
+  }).catch(function (e) { msg(e.message); });
+})();
+</script>
+</body>
+</html>
