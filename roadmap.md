@@ -121,3 +121,9 @@
 - [x] Zip model reader (Sketchfab zips + uploads)
 - [ ] Studio theater screens are local only (viewers of published levels do not see the share yet)
 - [x] Character controllers: keyboard/mouse, click-to-move, follow-path, on-screen joystick toggle, hero preset, AI controller op, IE.controls SDK
+
+## Linked accounts
+- [ ] Merge accounts: from the Switch account button, sign in to each account to link (proof of ownership); startups can be linked
+- [ ] Switch between linked accounts from the dashboard
+- [ ] Search/Network: show one card per linked person (best profile) with an icon per account type; startup accounts stay separate
+- [ ] Email template asking users to finish their profile and add a photo
