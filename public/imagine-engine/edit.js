@@ -582,7 +582,9 @@
     };
     var jc = document.createElement("button"); jc.textContent = "Jump to code"; jc.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #3f3f46;background:transparent;color:#e4e4e7;cursor:pointer;font:12px system-ui";
     jc.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "dev" }); window.__IEFiles && window.__IEFiles.open && window.__IEFiles.open(file); } catch (e) {} };
-    panel.appendChild(ap); panel.appendChild(jc);
+    var ga = document.createElement("button"); ga.textContent = "Ask Genius AI about this"; ga.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #7c3aed;background:transparent;color:#c4b5fd;cursor:pointer;font:600 12px system-ui";
+    ga.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "canvas" }); window.__IEPinSet && window.__IEPinSet(cur); } catch (e) {} close(); };
+    panel.appendChild(ap); panel.appendChild(jc); panel.appendChild(ga);
     panel.querySelector("[data-x]").onclick = close;
     document.body.appendChild(panel);
   }

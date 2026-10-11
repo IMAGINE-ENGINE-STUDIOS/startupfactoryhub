@@ -63,6 +63,7 @@
       budget -= c.length; return { name: f.name, size: f.content.length, content: c };
     });
     var sel = null; try { var s = document.querySelector("[data-ie-selected], .ie-selected"); if (s) sel = { tag: s.tagName, text: (s.textContent || "").trim().slice(0, 120) }; } catch (e) {}
+    var pin = window.__IEPin; if (pin && pin.file) { try { var lines = String((window.__IEFiles && window.__IEFiles.get(pin.file)) || "").split("\n"), ln = +pin.line || 1, a = Math.max(0, ln - 9), b = Math.min(lines.length, ln + 12); sel = { file: pin.file, line: ln, tag: pin.tag, text: (pin.text || "").slice(0, 200), snippet: lines.slice(a, b).map(function (x, i) { return (a + i + 1) + ": " + x; }).join("\n") }; } catch (e) {} }
     return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}), files: fileCtx, selected: sel, legacyBlocks: legacyBlocks() };
   }
   /* static template blocks placed before templates became Dev files */
@@ -510,7 +511,7 @@
     if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Genius AI." }); render(); save(); return; }
     busy = true; render();
     var mode = model === "chat" ? "chat" : "build";
-    migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); }, 200); });
+    migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); if (window.__IEPin) { window.__IEPin = null; drawAtts(); } }, 200); });
   }
   /* 3D Studio route: 3D world/level/scene requests (or any Build while a studio scene is on the page) go to Genius 3D inside the studio frame */
   var STUDIO3D = /\b(3d|three[- ]?d)\b|\bin the (3d )?studio\b|\b(new|another|next|game|playable|sci[- ]?fi|cyberpunk|racing|open[- ]world)\s+(level|world|map|arena)\b|\b(level|world|arena)\b.*\b(character|player|npc|car|vehicle|sketchfab|drivable|walk)|\b(game|simulator|shooter|racer|platformer|rpg)\b.*\b(character|player|level|world|drivable|car|sketchfab)\b|\bsketchfab\b|\bdrivable\b|\bplaza\b/i;
@@ -597,7 +598,13 @@
   root.querySelector("#iea-plus").onclick = function () { menu.classList.toggle("on"); };
   menu.querySelectorAll("[data-m]").forEach(function (b) { b.onclick = function () { model = b.getAttribute("data-m"); localStorage.setItem("iea-model", model); markModel(); menu.classList.remove("on"); }; });
   menu.querySelectorAll("[data-up]").forEach(function (b) { b.onclick = function () { menu.classList.remove("on"); root.querySelector(b.getAttribute("data-up") === "file" ? "#iea-ff" : "#iea-fm").click(); }; });
-  function drawAtts() { var a = root.querySelector("#iea-att"); a.innerHTML = atts.map(function (x, i) { return '<span data-i="' + i + '" title="Remove">' + esc(x.name) + (x.url ? "" : " (uploading)") + " &times;</span>"; }).join(""); a.querySelectorAll("span").forEach(function (sp) { sp.onclick = function () { atts.splice(+sp.getAttribute("data-i"), 1); drawAtts(); }; }); }
+  window.__IEPinSet = function (d) {
+    if (!d) { window.__IEPin = null; drawAtts(); return; }
+    var parts = String(d.loc || "").split(":"); window.__IEPin = { file: parts.slice(0, -2).join(":"), line: parts.slice(-2)[0], tag: d.tag, text: d.text };
+    if (model === "chat") { model = "build"; try { localStorage.setItem("iea-model", model); } catch (e) {} }
+    drawAtts(); try { input.focus(); } catch (e) {}
+  };
+  function drawAtts() { var a = root.querySelector("#iea-att"), pin = window.__IEPin; a.innerHTML = (pin ? '<span data-pin title="Genius AI will edit this exact element. Click to remove.">Selected &lt;' + esc(pin.tag || "el") + "&gt; " + esc(pin.file) + ":" + esc(String(pin.line)) + " &times;</span>" : "") + atts.map(function (x, i) { return '<span data-i="' + i + '" title="Remove">' + esc(x.name) + (x.url ? "" : " (uploading)") + " &times;</span>"; }).join(""); a.querySelectorAll("span").forEach(function (sp) { if (sp.hasAttribute("data-pin")) { sp.onclick = function () { window.__IEPinSet(null); }; return; } sp.onclick = function () { atts.splice(+sp.getAttribute("data-i"), 1); drawAtts(); }; }); }
   function uid(t) { try { return JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub; } catch (e) { return ""; } }
   function upload(files) {
     var t = token(); if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to upload files." }); render(); return; }
