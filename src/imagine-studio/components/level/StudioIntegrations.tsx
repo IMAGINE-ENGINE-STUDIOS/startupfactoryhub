@@ -211,7 +211,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
             return { ...s, objects: s.objects.map((o: any) => ids.includes(o.id) ? { ...o, playBehavior: { ...(o.playBehavior || {}), collision: "walkable" } } : o) };
           });
           const names = live.current.scene.objects.filter((o: any) => ids.includes(o.id)).map((o: any) => o.name).join(", ");
-          runGenius(`Auto trace collisions for the model(s) just added${names ? ` (${names})` : ""}: keep them walkable on floors, and add invisible blocking boxes (playBehavior collision "blocking", hiddenInPlay) around their walls and solid objects so characters cannot walk through them.`);
+          runGenius(`Auto trace collisions for the model(s) just added${names ? ` (${names})` : ""}: keep them walkable on floors, and add invisible blocking boxes (primitive boxes with behavior {"collision":"blocking","invisibleInPlay":true}) around their walls and solid objects so characters cannot walk through them.`);
         },
       },
       cancel: { label: "No", onClick: () => {} },

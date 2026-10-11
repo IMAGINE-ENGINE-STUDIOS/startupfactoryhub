@@ -60,23 +60,10 @@ export const CHARACTERS: CharDef[] = [
   { id: 'cesium', label: 'Runner', url: M + 'CesiumMan.glb', yaw: 0, walk: /./ },
   { id: 'figure', label: 'Mannequin', url: M + 'RiggedFigure.glb', yaw: 0, walk: /./ },
   { id: 'fox', label: 'Fox', url: M + 'Fox.glb', yaw: 0, height: 0.9, walk: /^walk$/i, idle: /survey/i },
-  { id: 'horse', label: 'Horse', url: M + 'Horse.glb', yaw: 0, height: 1.7, walk: /./, speed: 0.8 },
-  { id: 'flamingo', label: 'Flamingo', url: M + 'Flamingo.glb', yaw: 0, height: 0.9, hover: 1.4, walk: /./, loopIdle: true },
-  { id: 'parrot', label: 'Parrot', url: M + 'Parrot.glb', yaw: 0, height: 0.7, hover: 1.5, walk: /./, loopIdle: true },
-  { id: 'stork', label: 'Stork', url: M + 'Stork.glb', yaw: 0, height: 0.9, hover: 1.5, walk: /./, loopIdle: true },
-  // skins: same rigs, new looks
-  { id: 'xbot-gold', label: 'Gold Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#f5c542' },
-  { id: 'xbot-crimson', label: 'Crimson Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#e0435a' },
-  { id: 'xbot-ice', label: 'Ice Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#8fd8ff' },
-  { id: 'xbot-shadow', label: 'Shadow Bot', url: M + 'Xbot.glb', yaw: 0, tint: '#3a3f4b' },
-  { id: 'soldier-desert', label: 'Desert Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#d8b98a' },
-  { id: 'soldier-arctic', label: 'Arctic Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#e8eef5' },
-  { id: 'soldier-jungle', label: 'Jungle Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#6f9a5a' },
-  { id: 'soldier-urban', label: 'Urban Ranger', url: M + 'Soldier.glb', yaw: Math.PI, tint: '#8a8f99' },
-  { id: 'robot-ruby', label: 'Ruby Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#ff5c7a' },
-  { id: 'robot-emerald', label: 'Emerald Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#3ddc97' },
-  { id: 'robot-sapphire', label: 'Sapphire Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#4f8cff' },
-  { id: 'robot-neon', label: 'Neon Robot', url: M + 'RobotExpressive.glb', yaw: 0, tint: '#c86bff' },
+  { id: 'horse', label: 'Horse', url: M + 'Horse.glb', yaw: 0, height: 1.7, hover: -0.12, walk: /./, speed: 1.5 },
+  { id: 'flamingo', label: 'Flamingo', url: M + 'Flamingo.glb', yaw: 0, height: 2.7, hover: 1.4, walk: /./, loopIdle: true },
+  { id: 'parrot', label: 'Parrot', url: M + 'Parrot.glb', yaw: 0, height: 2.1, hover: 1.5, walk: /./, loopIdle: true },
+  { id: 'stork', label: 'Stork', url: M + 'Stork.glb', yaw: 0, height: 2.7, hover: 1.5, walk: /./, loopIdle: true },
 ];
 type CharId = string;
 const charOf = (id: string) => CHARACTERS.find((c) => c.id === id) ?? CHARACTERS[0];
