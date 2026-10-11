@@ -13,10 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import UserProfileDialog from '@/components/UserProfileDialog';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ArrowLeft, MapPin, Globe, Linkedin, MessageCircle, UserPlus, UserCheck, Plus, Loader2, Pencil, Trash2,
-  ShoppingBag, Image as ImageIcon, CalendarDays, Briefcase, FileText, Newspaper, Eye, EyeOff, Upload, Play, Clock,
+  ShoppingBag, Image as ImageIcon, ArrowUp, ArrowDown, UserCog, CalendarDays, Briefcase, FileText, Newspaper, Eye, EyeOff, Upload, Play, Clock,
 } from 'lucide-react';
 
 const db = supabase as any;
@@ -57,6 +59,7 @@ export default function PublicUserPage() {
   const [loading, setLoading] = useState(true);
   const [sectionEdit, setSectionEdit] = useState<any | null>(null);
   const [listingEdit, setListingEdit] = useState<any | null>(null);
+  const [profileEdit, setProfileEdit] = useState(false);
 
   const loadOwned = async () => {
     const [s, l, m] = await Promise.all([
@@ -112,6 +115,13 @@ export default function PublicUserPage() {
 
   const removeSection = async (id: string) => { await db.from('profile_sections').delete().eq('id', id); loadOwned(); };
   const toggleSection = async (s: any) => { await db.from('profile_sections').update({ visible: !s.visible }).eq('id', s.id); loadOwned(); };
+  const moveSection = async (s: any, dir: -1 | 1) => {
+    const list = [...sections]; const i = list.findIndex(x => x.id === s.id); const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    await Promise.all(list.map((x, k) => db.from('profile_sections').update({ position: k }).eq('id', x.id)));
+    loadOwned();
+  };
   const removeListing = async (id: string) => { if (confirm('Delete this item?')) { await db.from('profile_listings').delete().eq('id', id); loadOwned(); } };
   const removeMedia = async (id: string) => { await db.from('profile_media').delete().eq('id', id); loadOwned(); };
   const addMedia = async (files: FileList | null) => {
@@ -195,6 +205,7 @@ export default function PublicUserPage() {
           )}
           {isOwner && (
             <div className="flex flex-wrap gap-2 sm:pb-2">
+              <Button size="sm" variant="outline" onClick={() => setProfileEdit(true)}><UserCog className="mr-1 h-4 w-4" />Edit profile</Button>
               <Button size="sm" variant="outline" onClick={() => setSectionEdit({ kind: 'pitch', title: 'Pitch', body: '', visible: true })}><Plus className="mr-1 h-4 w-4" />Add tab</Button>
               <Button size="sm" onClick={() => setListingEdit({ kind: 'product', title: '', description: '', price: '', images: [], video_url: '', active: true })}><Plus className="mr-1 h-4 w-4" />Add product or service</Button>
             </div>
@@ -213,6 +224,9 @@ export default function PublicUserPage() {
               <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{profile.bio || 'No bio yet.'}</p>
               {profile.industry && <p className="mt-3 text-xs"><span className="text-muted-foreground">Industry: </span>{profile.industry}</p>}
             </div>
+            <div className="mt-6">
+              <UserProfileDialog userId={userId} open onOpenChange={() => {}} embedded />
+            </div>
           </TabsContent>
 
           {sections.filter(s => s.visible || isOwner).map(s => (
@@ -222,6 +236,8 @@ export default function PublicUserPage() {
                   <span className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">{SECTION_KINDS[s.kind] || 'Custom'}</span>
                   {isOwner && (
                     <div className="ml-auto flex gap-1">
+                      <Button size="icon" variant="ghost" className="h-8 w-8" title="Move left" onClick={() => moveSection(s, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8" title="Move right" onClick={() => moveSection(s, 1)}><ArrowDown className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8" title={s.visible ? 'Hide' : 'Show'} onClick={() => toggleSection(s)}>{s.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}</Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8" title="Edit" onClick={() => setSectionEdit(s)}><Pencil className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8" title="Delete" onClick={() => removeSection(s.id)}><Trash2 className="h-4 w-4" /></Button>
@@ -301,20 +317,8 @@ export default function PublicUserPage() {
             {media.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No media yet.</p>}
           </TabsContent>
 
-          <TabsContent value="posts" className="mt-4 space-y-3">
-            {posts.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No posts yet.</p>}
-            {posts.map(p => (
-              <div key={p.id} className="tech-card border-0 p-4">
-                <p className="text-[11px] text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm">{p.content}</p>
-                {Array.isArray(p.media_urls) && p.media_urls.length > 0 && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {p.media_urls.slice(0, 4).map((u: string) => isVideo(u) ? <video key={u} src={u} controls className="w-full rounded-md" /> : <img key={u} src={u} alt="" className="w-full rounded-md object-cover" loading="lazy" />)}
-                  </div>
-                )}
-                <p className="mt-2 text-[11px] text-muted-foreground">{p.likes_count || 0} likes · {p.comments_count || 0} comments</p>
-              </div>
-            ))}
+          <TabsContent value="posts" className="mt-4">
+            <ProfilePostsMosaic userId={userId} isOwnProfile={isOwner} />
           </TabsContent>
 
           <TabsContent value="events" className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -342,6 +346,7 @@ export default function PublicUserPage() {
       </div>
 
       {sectionEdit && <SectionDialog value={sectionEdit} count={sections.length} onClose={() => setSectionEdit(null)} onSaved={loadOwned} />}
+      {profileEdit && <ProfileEditDialog profile={profile} onClose={() => setProfileEdit(false)} onSaved={(p: any) => setProfile({ ...profile, ...p })} />}
       {listingEdit && <ListingDialog value={listingEdit} onClose={() => setListingEdit(null)} onSaved={loadOwned} />}
     </div>
   );
@@ -447,6 +452,54 @@ function ListingDialog({ value, onClose, onSaved }: { value: any; onClose: () =>
           {v.video_url && <p className="flex items-center gap-1 text-xs text-muted-foreground"><Play className="h-3 w-3" />Video attached <button className="text-primary" onClick={() => setV({ ...v, video_url: '' })}>remove</button></p>}
           <div className="flex items-center gap-2"><Switch id="lst-act" checked={v.active} onCheckedChange={c => setV({ ...v, active: c })} /><Label htmlFor="lst-act">Available for sale</Label></div>
           <Button className="w-full" onClick={save} disabled={busy}>{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProfileEditDialog({ profile, onClose, onSaved }: { profile: any; onClose: () => void; onSaved: (p: any) => void }) {
+  const { user } = useAuth();
+  const [v, setV] = useState({
+    full_name: profile.full_name || '', bio: profile.bio || '', location: profile.location || '',
+    website: profile.website || '', linkedin_url: profile.linkedin_url || '', industry: profile.industry || '', avatar_url: profile.avatar_url || '',
+  });
+  const [busy, setBusy] = useState(false);
+  const pickAvatar = async (f?: File) => {
+    if (!f || !user) return;
+    try { setBusy(true); const url = await upload(user.id, f, 'avatar'); setV(x => ({ ...x, avatar_url: url })); }
+    catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+  };
+  const save = async () => {
+    if (!user) return;
+    setBusy(true);
+    const { error } = await supabase.from('profiles').update(v as any).eq('user_id', user.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success('Profile updated'); onSaved(v); onClose();
+  };
+  const field = (k: keyof typeof v, label: string) => (
+    <div className="space-y-1"><Label>{label}</Label><Input value={v[k]} onChange={e => setV({ ...v, [k]: e.target.value })} /></div>
+  );
+  return (
+    <Dialog open onOpenChange={o => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+        <DialogHeader><DialogTitle>Edit profile</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-16 w-16"><AvatarImage src={v.avatar_url || undefined} className="object-cover" /><AvatarFallback>{initials(v.full_name)}</AvatarFallback></Avatar>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+              <Upload className="h-4 w-4" /> Change photo
+              <input type="file" accept="image/*" className="hidden" onChange={e => pickAvatar(e.target.files?.[0])} />
+            </label>
+          </div>
+          {field('full_name', 'Name')}
+          <div className="space-y-1"><Label>Bio</Label><Textarea rows={5} value={v.bio} onChange={e => setV({ ...v, bio: e.target.value })} /></div>
+          {field('location', 'Location')}
+          {field('industry', 'Industry')}
+          {field('website', 'Website')}
+          {field('linkedin_url', 'LinkedIn')}
+          <Button className="w-full" disabled={busy} onClick={save}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}</Button>
         </div>
       </DialogContent>
     </Dialog>
