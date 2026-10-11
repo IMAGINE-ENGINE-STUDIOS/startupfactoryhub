@@ -15,8 +15,21 @@
   function cfg() { try { return JSON.parse(localStorage.getItem("ie-gh-cfg") || "{}"); } catch (e) { return {}; } }
   function b64(str) { var bytes = new TextEncoder().encode(str), s = ""; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
   function unb64(s) { var bin = atob(s.replace(/\n/g, "")), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); }
+  function sess() { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); return t && t.access_token; } catch (e) { return null; } }
+  var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-github";
+  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
+  function server(payload) {
+    return fetch(FN, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + (sess() || ANON), "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.error) throw new Error(j.error || ("Server error " + r.status)); return j; }); });
+  }
+  var serverOk = null;
+  function checkServer() { if (serverOk !== null) return Promise.resolve(serverOk); if (!sess()) return Promise.resolve(false); return server({ status: true }).then(function () { return (serverOk = true); }).catch(function () { return (serverOk = false); }); }
   function gh(token, path, opts) {
     opts = opts || {};
+    if (token === "__server__") return server({ path: path, method: opts.method || "GET", body: opts.body }).then(function (j) {
+      if (j.status >= 400 && !(opts.allow404 && j.status === 404)) throw new Error((j.data && j.data.message) || ("GitHub error " + j.status));
+      return j.status === 404 ? null : j.data;
+    });
     return fetch(API + path, { method: opts.method || "GET", headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "Content-Type": "application/json" }, body: opts.body ? JSON.stringify(opts.body) : undefined })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok && !(opts.allow404 && r.status === 404)) throw new Error(j.message || ("GitHub error " + r.status)); return r.status === 404 ? null : j; }); });
   }
@@ -99,7 +112,8 @@
       h("div", { style: "width:min(380px,92vw);background:#18181b;border:1px solid #3f3f46;border-radius:14px;padding:16px;color:#e4e4e7;font:13px system-ui" }, [
         h("div", { style: "font:600 15px system-ui;margin-bottom:4px" }, ["GitHub sync"]),
         h("div", { style: "font:12px system-ui;color:#a1a1aa;margin-bottom:12px" }, ["Send this project to a repository, or bring it back from one. Your token stays in this browser tab only."]),
-        h("div", { style: L }, ["Token"]), tok,
+        srvNote,
+        h("div", { style: L + ";" + "display:var(--ie-tokdisp,block)", "data-tokl": "1" }, ["Token"]), tok,
         h("div", { style: L }, ["Repository"]), repo,
         h("div", { style: L }, ["Branch"]), br,
         msg,
