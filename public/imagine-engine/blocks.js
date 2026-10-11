@@ -154,6 +154,8 @@
   T.audiovisual = { name: "Audio visualizer with Nexus controls", sections: [{ liveFile: "audiovisual.html", app: "AudioVisualizer", kind: "html" }] };
   ["audio","visualizer","nexus","nexusui","synth","music","sound"].forEach(function (k) { ALIAS[k] = "audiovisual"; });
   ["datadash","datadashboard","charts","d3","dataviz"].forEach(function (k) { ALIAS[k] = "dashboard"; });
+  T.crm = { name: "CRM sales pipeline", sections: [{ liveFile: "crm.tsx", app: "CRM", kind: "react" }] };
+  ["crm","pipeline","sales","deals","leads","salespipeline"].forEach(function (k) { ALIAS[k] = "crm"; });
   var _apply = apply;
   apply = function (key) { var k = String(key || "").toLowerCase(); k = ALIAS[k] || k; var t = T[k]; if (t && t.live && window.__IEFiles) { window.__IEFiles.liveApp(t.live.name, t.live.code, t.live.kind); } return _apply(key); };
   window.__IEBlocks = { apply: apply, list: Object.keys(T).map(function (k) { return { id: k, name: T[k].name }; }) };
