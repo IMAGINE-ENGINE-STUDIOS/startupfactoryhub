@@ -46,19 +46,16 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/sponsorship" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
-                  <Rocket className="h-3 w-3" />
                   {t('nav.sponsorship')}
                 </Link>
               </li>
               <li>
                 <Link to="/partners" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
-                  <Handshake className="h-3 w-3" />
                   {t('nav.partners')}
                 </Link>
               </li>
               <li>
                 <Link to="/referral" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
-                  <Gift className="h-3 w-3" />
                   {t('nav.referral')}
                 </Link>
               </li>

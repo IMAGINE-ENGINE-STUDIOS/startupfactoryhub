@@ -87,9 +87,6 @@ const AboutHero = () => {
                 key={item.title}
                 className="group flex items-center gap-3 rounded-xl border border-primary/20 bg-background/40 p-3 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:bg-background/60 sm:flex-col sm:items-start lg:flex-row lg:items-center"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 group-hover:scale-110">
-                  <item.icon className="h-5 w-5 text-primary" />
-                </div>
                 <div className="min-w-0 text-left sm:text-center lg:text-left">
                   <h3 className="text-sm font-semibold leading-tight">{item.title}</h3>
                   <p className="text-xs text-muted-foreground">{item.desc}</p>

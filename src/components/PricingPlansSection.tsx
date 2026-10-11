@@ -456,7 +456,6 @@ const PricingPlansSection = () => {
         {/* Header */}
         <div className="mb-10 text-center sm:mb-16">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
             Plans & Programs
           </div>
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
