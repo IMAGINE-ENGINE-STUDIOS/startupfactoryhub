@@ -547,9 +547,6 @@ const Dashboard = () => {
               <Tabs defaultValue="connections" className="w-full">
                 <div className="flex flex-col gap-3 border-b border-border/50 pb-4 mb-5 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-9 w-9 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Network className="h-4 w-4 text-primary" />
-                      </div>
                       <div className="min-w-0">
                         <h2 className="text-lg font-semibold">Network</h2>
                         <p className="text-sm text-muted-foreground">

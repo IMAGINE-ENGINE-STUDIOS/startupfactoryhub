@@ -123,18 +123,29 @@ export default function MatchingSystem() {
 
   const fetchAllUsers = async () => {
     if (!user) return;
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, full_name, avatar_url, bio')
-      .neq('user_id', user.id)
-      .limit(100);
-    if (!profiles) return;
+    // Page through every registered profile (no 100-row cap)
+    const profiles: any[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, bio')
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .range(from, from + 999);
+      if (!data || data.length === 0) break;
+      profiles.push(...data);
+      if (data.length < 1000) break;
+    }
+    if (!profiles.length) return;
     const userIds = profiles.map(p => p.user_id);
-    const [{ data: roles }, { data: companies }] = await Promise.all([
+    const chunks: string[][] = [];
+    for (let i = 0; i < userIds.length; i += 100) chunks.push(userIds.slice(i, i + 100));
+    const [{ data: roles }, companyResults] = await Promise.all([
       // RLS on user_roles only exposes self → use security-definer RPC to get every user's role
       supabase.rpc('get_user_roles_batch', { user_ids: userIds }),
-      supabase.from('companies').select('user_id, name, industry').in('user_id', userIds),
+      Promise.all(chunks.map(ids => supabase.from('companies').select('user_id, name, industry').in('user_id', ids))),
     ]);
+    const companies = companyResults.flatMap(r => r.data || []);
     const roleMap = new Map((roles || []).map((r: any) => [r.user_id, r.role]));
     const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
     setAllUsers(profiles.filter(isVisibleCommunityProfile).map(p => {
