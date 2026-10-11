@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FileSignature, Upload } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FilePlus, FileSignature, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
@@ -153,6 +153,18 @@ export default function LightPaper() {
               >
                 <Command className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Quick Nav</span>
+              </Button>
+              <Button
+                onClick={() => {
+                  setSelectedProject(null);
+                  setUploadedContent({ content: "<p><br></p>", title: "Untitled document" });
+                  setActiveTab("document");
+                }}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Create a new document"
+              >
+                <FilePlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">New document</span>
               </Button>
               <Button 
                 variant="outline" 

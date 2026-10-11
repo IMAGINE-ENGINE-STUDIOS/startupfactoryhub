@@ -1,3 +1,4 @@
+import "@/lib/webgpuCompute";
 /**
  * Multiplayer Plaza — every visitor owns a 3D character (Character Room), walks
  * with keyboard or the on-screen joystick, talks through the mic (voices fade

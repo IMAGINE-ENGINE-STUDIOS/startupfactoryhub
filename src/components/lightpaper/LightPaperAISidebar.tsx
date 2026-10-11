@@ -142,6 +142,10 @@ export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Pr
         }
       }
       if (!full.trim()) throw new Error("Genius AI returned an empty answer.");
+      if (full.includes("[[CLEAR_DOCUMENT]]")) {
+        onApply("<p><br></p>", "replace");
+        persist([...history, { role: "assistant", content: "Document erased." }]);
+      }
     } catch (e: any) {
       if (e?.name !== "AbortError") {
         setError(e?.message || "Something went wrong.");
