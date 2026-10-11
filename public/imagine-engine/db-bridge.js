@@ -66,6 +66,7 @@
       b = document.createElement("button"); b.id = "ie-sb-btn"; b.type = "button";
       b.style.cssText = "position:fixed;z-index:60;right:16px;bottom:16px;padding:8px 14px;border-radius:999px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font:600 12px system-ui;cursor:pointer";
       b.onclick = function () {
+        if (window.__IEBackend) return window.__IEBackend.open();
         var c = remote();
         if (c && confirm("Flow is using " + c.url + ". Disconnect it?")) { localStorage.removeItem("ie-sbconn:" + pid()); return paintBtn(b); }
         if (c) return;
@@ -85,7 +86,12 @@
     }
     b.style.display = m === "database" || m === "flow" ? "block" : "none"; paintBtn(b);
   }
-  function paintBtn(b) { var c = remote(); b.textContent = c ? "Supabase: " + c.url.replace(/^https:\/\//, "").split(".")[0] : "Connect Supabase"; }
+  function paintBtn(b) {
+    var c = remote(), s = window.__IEBackend && window.__IEBackend.surreal(), parts = [];
+    if (c) parts.push("Supabase: " + c.url.replace(/^https:\/\//, "").split(".")[0]);
+    if (s) parts.push("SurrealDB: " + s.db);
+    var t = parts.length ? parts.join(" · ") : "Connect backend"; if (b.textContent !== t) b.textContent = t;
+  }
   setInterval(function () { if (window.__IE) connUI(); }, 500);
   window.__IEData = {
     apps: apps, resolve: resolve, refresh: refresh, remote: remote,
