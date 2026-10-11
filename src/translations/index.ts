@@ -174,7 +174,7 @@ const en = {
   'footer.termsOfService': 'Terms of Service',
   'footer.cookiePolicy': 'Cookie Policy',
   'footer.copyright': '© 2026 Imagine Engine Studios Corp. All rights reserved.',
-  'footer.builtWith': 'Built with for innovators',
+  'footer.builtWith': 'Built for innovators',
   'footer.description': 'The ultimate AI-powered social accelerator platform connecting startups, mentors, investors, and students worldwide.',
 
   // About Page
@@ -256,7 +256,7 @@ const es: Record<TranslationKey, string> = {
   'footer.documentation': 'Documentación', 'footer.contactSupport': 'Contactar soporte', 'footer.legal': 'Legal',
   'footer.privacyPolicy': 'Política de privacidad', 'footer.termsOfService': 'Términos de servicio',
   'footer.cookiePolicy': 'Política de cookies', 'footer.copyright': '© 2026 Imagine Engine Studios Corp. Todos los derechos reservados.',
-  'footer.builtWith': 'Hecho con para innovadores', 'footer.description': 'La plataforma de aceleración social impulsada por IA que conecta startups, mentores, inversores y estudiantes en todo el mundo.',
+  'footer.builtWith': 'Hecho para innovadores', 'footer.description': 'La plataforma de aceleración social impulsada por IA que conecta startups, mentores, inversores y estudiantes en todo el mundo.',
   'about.title': 'SOBRE STARTUP FACTORY HUB', 'about.subtitle': 'La primera plataforma de aceleración social impulsada por IA del mundo que conecta todo el ecosistema de startups.',
   'about.ourMission': 'Nuestra Misión', 'about.missionDesc': 'Democratizar el acceso a recursos, mentoría y financiación creando una plataforma donde la innovación prospera.',
   'about.ourVision': 'Nuestra Visión', 'about.visionDesc': 'Convertirnos en el estándar global de aceleración de startups.',
