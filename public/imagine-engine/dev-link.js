@@ -35,11 +35,12 @@
       + '<div style="height:32px;display:flex;align-items:center;gap:6px;padding:0 10px;color:#a1a1aa;font:500 11px system-ui;border-bottom:1px solid #27272a"><span data-n style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Live preview</span>'
       + '<button type="button" data-d="full" style="' + B + '">Desktop</button><button type="button" data-d="768" style="' + B + '">Tablet</button><button type="button" data-d="390" style="' + B + '">Mobile</button>'
       + '<button type="button" data-r style="' + B + '">Reload</button></div>'
-      + '<div data-e style="display:none;align-items:center;gap:8px;padding:6px 10px;background:#450a0a;color:#fecaca;font:12px system-ui;border-bottom:1px solid #7f1d1d"><span data-em style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span><button type="button" data-j style="' + B + ';color:#fecaca;border:1px solid #7f1d1d">Go to line</button><button type="button" data-x style="' + B + ';color:#fecaca">Close</button></div>'
+      + '<div data-e style="display:none;align-items:center;gap:8px;padding:6px 10px;background:#450a0a;color:#fecaca;font:12px system-ui;border-bottom:1px solid #7f1d1d"><span data-em style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span><button type="button" data-j style="' + B + ';color:#fecaca;border:1px solid #7f1d1d">Go to line</button><button type="button" data-g style="' + B + ';color:#fecaca;border:1px solid #7f1d1d">Fix with Genius AI</button><button type="button" data-x style="' + B + ';color:#fecaca">Close</button></div>'
       + '<div data-w style="flex:1;display:flex;justify-content:center;background:#18181b;overflow:auto"><iframe title="Live preview" style="height:100%;border:0;width:100%;background:#fff;transition:width .2s"></iframe></div>';
     pane.querySelector("[data-r]").onclick = function () { var f = pane.querySelector("iframe"); f.src = f.src; hideErr(); };
     pane.querySelectorAll("[data-d]").forEach(function (b) { b.onclick = function () { device = b.getAttribute("data-d"); try { localStorage.setItem("ie-dev-dev", device); } catch (e) {} sizeDevice(); }; });
     pane.querySelector("[data-x]").onclick = hideErr;
+    pane.querySelector("[data-g]").onclick = function () { if (!lastErr) return; try { window.__IEAutoHeal && window.__IEAutoHeal({ ie: "liveapp-autoheal", file: lastErr.app || lastErr.file, message: lastErr.msg, stack: "" }); } catch (e) {} this.textContent = "Repairing…"; };
     pane.querySelector("[data-j]").onclick = function () { if (lastErr) jump(lastErr.file, lastErr.line); };
     var h = pane.querySelector("[data-h]");
     h.onpointerdown = function (e) {
@@ -73,7 +74,7 @@
     if (ev.origin !== location.origin && ev.origin !== "null") return;
     var m = String(d.message || ""), loc = /([\w./@-]+\.(?:tsx|jsx|ts|js|html|css))?\D{0,3}\(?(\d+):(\d+)\)?/.exec(m + " " + (d.stack || ""));
     var fname = (loc && loc[1] && files().some(function (y) { return y.name === loc[1]; })) ? loc[1] : d.file;
-    lastErr = { file: fname, line: loc ? +loc[2] : 0 };
+    lastErr = { file: fname, app: d.file, msg: m, line: loc ? +loc[2] : 0 }; pane.querySelector("[data-g]").textContent = "Fix with Genius AI";
     pane.querySelector("[data-em]").textContent = (fname || "App") + (lastErr.line ? " line " + lastErr.line : "") + ": " + m;
     pane.querySelector("[data-e]").style.display = "flex";
   });

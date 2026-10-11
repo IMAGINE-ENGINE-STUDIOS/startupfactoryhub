@@ -191,7 +191,7 @@
   }
   function compile(source, name, seen) {
     deps[name] = source;
-    var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
+    var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.setAttribute("data-ie-css",' + JSON.stringify(name) + ');s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
       : cachedTransform(source, name);
     if (name !== file && !/\.(css|json)$/.test(name)) {
@@ -284,7 +284,10 @@
     }).catch(function (e) { fail(e.message); });
   }
   /* hot reload when the Dev tab file changes */
-  setInterval(function () { var c = src(); if (c && c !== last) return location.reload(); for (var n in deps) { if (n !== file && n.indexOf("@ui/") !== 0 && (getFile(n) || "") !== deps[n]) return location.reload(); } }, 1200);
+  setInterval(function () { var c = src(); if (c && c !== last) return location.reload(); for (var n in deps) { if (n !== file && n.indexOf("@ui/") !== 0) { var nv = getFile(n) || ""; if (nv === deps[n]) continue;
+    /* style-only change: swap the CSS in place, no reload */
+    if (/\.css$/.test(n)) { var st = document.querySelector('style[data-ie-css="' + n.replace(/"/g, '\\"') + '"]'); if (st) { st.textContent = nv; deps[n] = nv; continue; } }
+    return location.reload(); } } }, 1200);
 })();
 </script>
 </body>
