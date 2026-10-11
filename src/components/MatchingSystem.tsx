@@ -1244,13 +1244,16 @@ export default function MatchingSystem() {
           </Avatar>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{match.name}</h3>
-            <p className="text-xs text-muted-foreground mb-1.5">{match.role}</p>
-            {match.compatibility_score > 0 && (
-              <Badge className="gap-1 bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20">
-                <Sparkles className="h-3 w-3" />
-                {match.compatibility_score}% Match
-              </Badge>
-            )}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              <span className="inline-flex items-center rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+                {normalizeRole(match.role) === 'all' ? 'Member' : (match.role || 'Member')}
+              </span>
+              {match.compatibility_score > 0 && (
+                <span className="inline-flex items-center rounded-md bg-accent/15 border border-accent/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
+                  {match.compatibility_score}% Match
+                </span>
+              )}
+            </div>
             <div className="flex flex-wrap gap-1 mt-2">
               <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
               {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
@@ -1411,9 +1414,9 @@ export default function MatchingSystem() {
     return idx === -1 ? 99 : idx;
   };
 
-  // Startups bucket = real companies + legacy startups (not profiles).
-  // Drop any profile whose role is "startup" so we don't duplicate the company entries.
-  const nonStartupUsers = allUsers.filter(u => normalizeRole(u.role) !== 'startup');
+  // Every registered member is included; company entries share the owner's user_id,
+  // so the id dedupe below keeps one card per person.
+  const nonStartupUsers = allUsers;
 
   const allMatches: Match[] = [
     ...mentorMatches, ...potentialMentors,
