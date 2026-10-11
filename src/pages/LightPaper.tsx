@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FileSignature, Upload } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FilePlus, FileSignature, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
