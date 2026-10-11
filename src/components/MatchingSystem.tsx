@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock, UsersRound } from 'lucide-react';
 import UserProfileDialog from './UserProfileDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1274,7 +1274,7 @@ export default function MatchingSystem() {
 
 
   // ---- Unified relevance-sorted list ----
-  type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
+  type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network' | 'groups';
 
   const filterChips: { key: FilterKey; label: string; icon: any }[] = [
     { key: 'all', label: 'All Community', icon: Users },
@@ -1283,6 +1283,7 @@ export default function MatchingSystem() {
     { key: 'startup', label: 'Startups', icon: Compass },
     { key: 'accelerator', label: 'Accelerators', icon: Landmark },
     { key: 'network', label: 'My Network', icon: Globe },
+    { key: 'groups', label: 'Groups', icon: UsersRound },
   ];
 
   const normalizeRole = (r: string): FilterKey => {
@@ -1384,6 +1385,7 @@ export default function MatchingSystem() {
 
   const countFor = (key: FilterKey) => {
     if (key === 'network') return connections.length;
+    if (key === 'groups') return -1;
     if (key === 'all') return dedupedMatches.length;
     return dedupedMatches.filter(m => normalizeRole(m.role) === key).length;
   };
@@ -1424,7 +1426,9 @@ export default function MatchingSystem() {
         })}
       </div>
 
-      {activeTab === 'network' ? (
+      {activeTab === 'groups' ? (
+        <NetGroups />
+      ) : activeTab === 'network' ? (
         <NetworkBrowser />
       ) : activeTab === 'all' ? (
         <NetworkBrowser mode="community" />
