@@ -310,7 +310,7 @@ serve(async (req) => {
       await refund();
       const t = await resp.text();
       console.error("imagine-ai provider error", routed.provider, routed.model, resp.status, t);
-      if (resp.status === 429) return json({ error: "The AI is busy right now. Please try again in a moment." }, 429);
+      if (resp.status === 429) return json({ error: "All AI providers are at their usage limit right now. Wait about a minute and send again; your credits were refunded." }, 429);
       if (resp.status === 503 && !routed.provider) return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503);
       return json({ error: "The AI provider returned an error." }, resp.status === 403 ? 403 : 502);
     }
