@@ -68,6 +68,13 @@ export default function Auth() {
           return;
         }
         if (user) {
+          const isDemoUser = Object.values(DEMO_ACCOUNTS).some(a => a.email.toLowerCase() === user.email?.toLowerCase());
+          if (!isDemoUser) {
+            // Never sign a real account out just to preview a demo (the session is shared across tabs and frames).
+            toast({ title: 'You are already signed in', description: 'Sign out first or use a private window to try the demo accounts.' });
+            navigate(redirectPath);
+            return;
+          }
           await signOut();
         }
         const { error } = await signIn(demoAccount.email, demoAccount.password);
