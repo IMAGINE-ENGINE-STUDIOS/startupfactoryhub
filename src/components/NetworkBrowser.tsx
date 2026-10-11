@@ -106,9 +106,15 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
 
       fetchAccountGroups(userIds).then(setAccountGroups).catch(() => {});
       const seen = new Set<string>();
-      setAllMembers(visible
+      const unique = visible
         .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
-        .map(p => ({ ...p, role: roles[p.user_id] || null, status: statuses[p.user_id] })));
+        .map(p => ({ ...p, role: roles[p.user_id] || null, status: statuses[p.user_id] }));
+      // Shuffle each time the tab opens so different people surface
+      for (let i = unique.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unique[i], unique[j]] = [unique[j], unique[i]];
+      }
+      setAllMembers(unique);
     } catch (error) {
       console.error('Error fetching all community members:', error);
     } finally {
@@ -531,7 +537,8 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
   };
 
   const renderUserCard = (connection: Connection, isConnected: boolean = false) => {
-    const connected = isConnected || connection.status === 'accepted';
+    const connected = isConnected || connection.status === 'accepted' || connection.status === 'pending';
+    const openPage = () => window.open(`/u/${connection.user_id}`, '_self');
     return (
       <NetMemberCard
         key={connection.user_id}
@@ -540,7 +547,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
         role={connection.role}
         location={connection.location}
         bio={connection.bio}
-        onOpen={() => viewProfile(connection)}
+        onOpen={openPage}
         badges={
           <>
             {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
@@ -555,15 +562,13 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
           </>
         }
         actions={[
-          { icon: Eye, label: 'View profile', onClick: () => viewProfile(connection) },
+          { icon: Eye, label: 'View profile', onClick: openPage },
           ...(!connected ? [{ icon: MessageSquare, label: 'Message', onClick: () => handleMessage(connection.user_id) }] : []),
         ]}
         primary={connected ? (
           <Button size="sm" className="h-8" onClick={() => handleMessage(connection.user_id)}>
             <MessageSquare className="w-3.5 h-3.5 mr-1" /> Message
           </Button>
-        ) : connection.status === 'pending' ? (
-          <Button size="sm" variant="secondary" className="h-8" disabled>Pending</Button>
         ) : (
           <Button size="sm" className="h-8" onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}>
             <UserPlus className="w-3.5 h-3.5 mr-1" /> Connect

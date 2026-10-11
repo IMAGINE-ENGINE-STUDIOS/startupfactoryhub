@@ -88,6 +88,7 @@ const MemberDashboard = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <DashboardTabsNav
+            showProfile={false}
             items={[
               { value: 'social', icon: MessageCircle, label: t('nav.social') },
               { value: 'startups', icon: Building, label: 'My Startups' },

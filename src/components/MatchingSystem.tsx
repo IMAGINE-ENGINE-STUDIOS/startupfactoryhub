@@ -82,7 +82,15 @@ export default function MatchingSystem() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
-  const [activeTab, setActiveTab] = useState('mentors');
+  const [activeTab, setActiveTabRaw] = useState('mentors');
+  // New shuffle seed every time a tab is opened
+  const [shuffleSeed, setShuffleSeed] = useState(() => Math.floor(Math.random() * 1e9));
+  const setActiveTab = (t: string) => { setActiveTabRaw(t); setShuffleSeed(Math.floor(Math.random() * 1e9)); };
+  const shuffleRank = (id: string) => {
+    let h = shuffleSeed ^ 2166136261;
+    for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  };
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
@@ -1226,10 +1234,12 @@ export default function MatchingSystem() {
 
   const MatchCard = ({ match, onConnect, onPass }: { match: Match; onConnect: () => void; onPass: () => void }) => {
     const isPerson = !/^(legacy|company)-/.test(match.id);
+    const requested = requestedIds.has(match.id) || connections.some((c: any) => c.id === match.id || c.user_id === match.id);
+    const openChat = () => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } }));
+    const openPage = () => window.open(`/u/${match.id}`, '_self');
     const actions = isPerson
       ? [
-          { icon: UserIcon, label: 'View profile', onClick: () => setProfileUserId(match.id) },
-          { icon: MessageCircle, label: 'Message', onClick: () => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } })) },
+          { icon: UserIcon, label: 'View profile', onClick: openPage },
           { icon: CalendarClock, label: 'Book a meeting', onClick: () => bookMeeting(match.id, match.name) },
           { icon: X, label: 'Pass', onClick: onPass },
         ]
@@ -1243,12 +1253,21 @@ export default function MatchingSystem() {
         bio={match.description}
         score={match.compatibility_score}
         meta={[match.industry, match.stage]}
-        onOpen={isPerson ? () => setProfileUserId(match.id) : undefined}
+        onOpen={isPerson ? openPage : undefined}
         actions={actions}
-        primary={requestedIds.has(match.id) ? (
-          <Button size="sm" variant="secondary" className="h-8" disabled>
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Requested
+        primary={requested && isPerson ? (
+          <Button size="sm" className="h-8" onClick={openChat}>
+            <MessageCircle className="h-3.5 w-3.5 mr-1" /> Message
           </Button>
+        ) : isPerson ? (
+          <>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={openChat} title="Message" aria-label="Message">
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+            <Button size="sm" className="h-8" onClick={onConnect}>
+              <Heart className="h-3.5 w-3.5 mr-1" /> Connect
+            </Button>
+          </>
         ) : (
           <Button size="sm" className="h-8" onClick={onConnect}>
             <Heart className="h-3.5 w-3.5 mr-1" /> Connect
@@ -1365,6 +1384,8 @@ export default function MatchingSystem() {
     const aHas = (a.compatibility_score || 0) > 0 ? 0 : 1;
     const bHas = (b.compatibility_score || 0) > 0 ? 0 : 1;
     if (aHas !== bHas) return aHas - bHas;
+    // Non-matches are shuffled every time a tab opens so new people surface
+    if (aHas === 1) return shuffleRank(a.id) - shuffleRank(b.id);
     // 2. Relevance by current user's role
     const pa = priorityOf(normalizeRole(a.role));
     const pb = priorityOf(normalizeRole(b.role));
@@ -1458,7 +1479,7 @@ export default function MatchingSystem() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
                 {sorted.map(match => (
                   <MatchCard
                     key={match.id}
