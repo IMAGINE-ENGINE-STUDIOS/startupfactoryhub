@@ -205,7 +205,24 @@
   function safeTable(t) { return /^[A-Za-z_][A-Za-z0-9_]*$/.test(t || "") ? t : null; }
   /* Flow db steps use the same IE.db collections as live apps and the Database tab (table "App.collection" or "collection") */
   function dbMatch(p) { return function (r) { return !p.filterColumn || p.filterValue === "" || p.filterValue == null || String(r[p.filterColumn]) === String(p.filterValue); }; }
+  /* connected user Supabase project (Database tab "Connect Supabase"): plain table names go there */
+  function remoteDb() { var D = window.__IEData; return D && D.remote ? D.remote() : null; }
+  function rq(c, tb, method, qs, body) {
+    var h = { apikey: c.key, Authorization: "Bearer " + c.key, "Content-Type": "application/json", Prefer: "return=representation" };
+    return fetch(c.url + "/rest/v1/" + encodeURIComponent(tb) + "?" + qs, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : []; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("HTTP " + r.status)); return Array.isArray(j) ? j : j ? [j] : []; }); });
+  }
+  function rfilter(p, op) { return p.filterColumn && p.filterValue !== "" && p.filterValue != null ? encodeURIComponent(p.filterColumn) + "=" + encodeURIComponent((op || "eq") + "." + p.filterValue) : ""; }
+  function useRemote(p) { var c = remoteDb(); return c && p.table && String(p.table).indexOf(".") < 0 && safeTable(p.table) ? c : null; }
   function dbq(p, method, body, label) {
+    var c = useRemote(p);
+    if (c) {
+      if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
+      var qs = (method === "GET" ? "select=*&limit=" + (Number(p.limit) || 10) + "&" : "") + rfilter(p);
+      rq(c, p.table, method, qs, body).then(function (rows) { put(p.stateKey, rows); L(label + " " + p.table + " (Supabase): " + rows.length + " rows"); })
+        .catch(function (e) { L(label + " " + p.table + " (Supabase) failed: " + e.message, "error"); });
+      return p.table;
+    }
     var D = window.__IEData, t = D && D.table(p.table, p.app); if (!t) { L(label + ": data is still loading", "error"); return "not ready"; }
     if (!p.table) { L(label + ": choose a table name", "error"); return "missing table"; }
     if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
@@ -354,6 +371,10 @@
     liveQuery: function (p, node) {
       window.__IETimers = window.__IETimers || {}; clearInterval(window.__IETimers[node.id]);
       var tick = function () {
+        var rc = useRemote(p);
+        if (rc) { var qs = "select=*&limit=" + (Number(p.limit) || 50) + (rfilter(p, p.op) ? "&" + rfilter(p, p.op) : "") + (p.orderBy ? "&order=" + encodeURIComponent(p.orderBy) + "." + (p.desc === false ? "asc" : "desc") : "");
+          rq(rc, p.table, "GET", qs).then(function (j) { var prev = JSON.stringify(window.__IEState[p.stateKey || "live"]); if (prev !== JSON.stringify(j)) { (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "live", j); L("liveQuery " + p.table + " (Supabase): " + j.length + " rows (updated)"); } })
+            .catch(function (e) { L("liveQuery " + p.table + " (Supabase) failed: " + e.message, "error"); }); return; }
         var D = window.__IEData, t = D && p.table && D.table(p.table, p.app); if (!t) { L("liveQuery: choose a table name", "error"); return; }
         t.list().then(function (rows) {
           var j = rows.filter(dbMatch(p));

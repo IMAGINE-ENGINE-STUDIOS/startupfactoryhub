@@ -57,8 +57,38 @@
     });
     if (jobs.length) Promise.all(jobs).then(refresh, function (e) { window.__IE.log && window.__IE.log("Database save failed: " + (e && e.message), "error"); refresh(); });
   }
+  /* each project can connect the creator's own Supabase project (address + public anon key, never a service key) */
+  function pid() { var x = window.__IE; return (x && x.raw && x.raw.pid) || "default"; }
+  function remote() { try { var c = JSON.parse(localStorage.getItem("ie-sbconn:" + pid()) || "null"); return c && c.url && c.key ? c : null; } catch (e) { return null; } }
+  function connUI() {
+    var b = document.getElementById("ie-sb-btn"), m = window.__IE && (window.__IE.raw ? window.__IE.raw.mode : window.__IE.mode);
+    if (!b) {
+      b = document.createElement("button"); b.id = "ie-sb-btn"; b.type = "button";
+      b.style.cssText = "position:fixed;z-index:60;right:16px;bottom:16px;padding:8px 14px;border-radius:999px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font:600 12px system-ui;cursor:pointer";
+      b.onclick = function () {
+        var c = remote();
+        if (c && confirm("Flow is using " + c.url + ". Disconnect it?")) { localStorage.removeItem("ie-sbconn:" + pid()); return paintBtn(b); }
+        if (c) return;
+        var url = (prompt("Your Supabase project URL (https://xxxx.supabase.co)") || "").trim().replace(/\/+$/, "");
+        if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url)) { if (url) alert("That doesn't look like a Supabase project URL."); return; }
+        var key = (prompt("Your project's public anon key (Project Settings → API). Never paste the service_role key.") || "").trim();
+        if (!key) return;
+        try { var role = JSON.parse(atob(key.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).role; if (role === "service_role") { alert("That's a service_role key. Use the anon (public) key instead."); return; } } catch (e) {}
+        if (/^sb_secret_/.test(key)) { alert("That's a secret key. Use the publishable/anon key instead."); return; }
+        fetch(url + "/rest/v1/", { headers: { apikey: key, Authorization: "Bearer " + key } }).then(function (r) {
+          if (r.status === 401 || r.status === 403) throw new Error("The key was rejected");
+          localStorage.setItem("ie-sbconn:" + pid(), JSON.stringify({ url: url, key: key })); paintBtn(b);
+          window.__IE.log && window.__IE.log("Connected Supabase " + url + " — Flow data steps now use its tables", "success");
+        }).catch(function (e) { alert("Could not connect: " + e.message); });
+      };
+      document.body.appendChild(b);
+    }
+    b.style.display = m === "database" || m === "flow" ? "block" : "none"; paintBtn(b);
+  }
+  function paintBtn(b) { var c = remote(); b.textContent = c ? "Supabase: " + c.url.replace(/^https:\/\//, "").split(".")[0] : "Connect Supabase"; }
+  setInterval(function () { if (window.__IE) connUI(); }, 500);
   window.__IEData = {
-    apps: apps, resolve: resolve, refresh: refresh,
+    apps: apps, resolve: resolve, refresh: refresh, remote: remote,
     table: function (name, app) { var r = resolve(name, app); return db(r.app, r.col); },
   };
   /* apps saving data anywhere (other frames or tabs) refresh the Database tab */
