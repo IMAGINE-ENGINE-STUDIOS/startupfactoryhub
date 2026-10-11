@@ -2162,32 +2162,29 @@ export function LightPaperDocument({
   };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error("Please select an image file");
-      return;
-    }
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
 
     // Validate file size (max 20MB)
     if (file.size > 20 * 1024 * 1024) {
-      toast.error("Image file size must be less than 20MB");
+      toast.error("File size must be less than 20MB");
       return;
     }
 
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) {
-        toast.error("Please sign in to upload images");
+        toast.error("Please sign in to upload files");
         return;
       }
-      toast.info("Uploading image...");
-      const fileName = `${Date.now()}_${file.name}`;
+      toast.info("Uploading...");
+      const fileName = `${Date.now()}_${file.name.replace(/[^\w.\-]/g, "_")}`;
       const filePath = `${user.id}/${fileName}`;
       const {
         error: uploadError
-      } = await supabase.storage.from('feed-media').upload(filePath, file);
+      } = await supabase.storage.from('feed-media').upload(filePath, file, { contentType: file.type || undefined });
       if (uploadError) {
         console.error("Upload error:", uploadError);
         throw new Error(uploadError.message);
@@ -2196,17 +2193,30 @@ export function LightPaperDocument({
         data
       } = supabase.storage.from('feed-media').getPublicUrl(filePath);
 
-      // Insert image at cursor with strict container constraints
-      const img = document.createElement('img');
-      img.src = data.publicUrl;
+      let img: HTMLElement;
+      if (isImage) {
+        img = document.createElement('img');
+        (img as HTMLImageElement).src = data.publicUrl;
+        img.style.objectFit = 'contain';
+      } else if (isVideo) {
+        img = document.createElement('video');
+        (img as HTMLVideoElement).src = data.publicUrl;
+        (img as HTMLVideoElement).controls = true;
+      } else {
+        img = document.createElement('a');
+        (img as HTMLAnchorElement).href = data.publicUrl;
+        (img as HTMLAnchorElement).target = '_blank';
+        (img as HTMLAnchorElement).rel = 'noopener noreferrer';
+        img.textContent = `📎 ${file.name}`.replace('📎 ', 'Attachment: ');
+      }
       img.style.maxWidth = '100%';
       img.style.width = 'auto';
       img.style.height = 'auto';
-      img.style.objectFit = 'contain';
       img.style.display = 'block';
       img.style.margin = '10px 0';
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
+      if (selection && selection.rangeCount > 0 && editorRef.current?.contains(selection.anchorNode)) {
+
         const range = selection.getRangeAt(0);
         range.insertNode(img);
         range.setStartAfter(img);
