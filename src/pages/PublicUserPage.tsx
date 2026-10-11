@@ -319,7 +319,7 @@ export default function PublicUserPage() {
 
           <TabsContent value="events" className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {events.map(e => (
-              <button key={e.id} onClick={() => navigate(`/events/${e.id}`)} className="tech-card border-0 flex gap-3 p-3 text-left">
+              <button key={e.id} onClick={() => navigate(`/events/${e.id}/register`)} className="tech-card border-0 flex gap-3 p-3 text-left">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-muted">{e.banner_url && <img src={e.banner_url} alt="" className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0">
                   <p className="truncate font-medium">{e.title}</p>
