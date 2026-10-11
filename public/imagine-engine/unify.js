@@ -8,7 +8,12 @@
     ROOT + ">div>[data-id],"+ROOT+">div>[data-id]>*:first-child{box-shadow:none!important}" +
     ROOT + ">div:not(:first-child)>[data-id]{border-top-left-radius:0!important;border-top-right-radius:0!important}" +
     ROOT + ">div:not(:last-child)>[data-id]{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}" +
-    "iframe[data-ie-auto]{transition:height .15s ease}";
+    /* pre-existing widgets (gallery sections, embedded widget frames) follow the same unified logic */
+    "[data-id^='sec_'][data-section-id]{box-shadow:none!important;border-radius:0!important;margin-top:0!important;margin-bottom:0!important}" +
+    "[data-id^='sec_'][data-section-id]+[data-id^='sec_'],div:has(>[data-id^='sec_'][data-section-id])+div:has(>[data-id^='sec_'][data-section-id])>[data-id]{border-top-width:0!important}" +
+    "div:has(>[data-id^='sec_'][data-section-id])+div:has(>[data-id^='sec_'][data-section-id]){margin-top:0!important}" +
+    "[data-id^='sec_'] iframe{display:block;width:100%;border:0}" +
+    "iframe[data-ie-auto]{transition:height .15s ease;overflow:hidden}";
   document.head.appendChild(css);
 
   var MAX = 6000;
