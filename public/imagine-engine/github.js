@@ -96,10 +96,13 @@
     var repo = h("input", { style: INP, placeholder: "owner/repository", value: c.repo || "" });
     var br = h("input", { style: INP, placeholder: "main", value: c.branch || "main" });
     var msg = h("div", { style: "min-height:16px;font:12px system-ui;color:#a1a1aa;margin:6px 0" });
+    var useSrv = false;
+    var srvNote = h("div", { style: "font:12px system-ui;color:#4ade80;margin-bottom:8px;display:none" }, ["Using your secure GitHub connection. No token needed. New repositories are created private."]);
+    checkServer().then(function (ok) { if (!ok) return; useSrv = true; srvNote.style.display = "block"; tok.style.display = "none"; var l = ov.querySelector("[data-tokl]"); if (l) l.style.display = "none"; });
     function run(fn, label) {
-      var t = tok.value.trim(), rp = repo.value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, ""), b = br.value.trim() || "main";
+      var t = useSrv ? "__server__" : tok.value.trim(), rp = repo.value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, ""), b = br.value.trim() || "main";
       if (!t || !/^[\w.-]+\/[\w.-]+$/.test(rp)) { msg.style.color = "#f87171"; msg.textContent = "Enter your token and a repository like owner/name."; return; }
-      sessionStorage.setItem("ie-gh-token", t); localStorage.setItem("ie-gh-cfg", JSON.stringify({ repo: rp, branch: b }));
+      if (!useSrv) sessionStorage.setItem("ie-gh-token", t); localStorage.setItem("ie-gh-cfg", JSON.stringify({ repo: rp, branch: b }));
       msg.style.color = "#a1a1aa"; msg.textContent = label + "...";
       fn(t, rp, b, function (s) { msg.textContent = s; }).then(function () {
           msg.style.color = "#4ade80"; msg.textContent = label + " finished. ";
