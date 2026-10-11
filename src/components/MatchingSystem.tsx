@@ -121,6 +121,21 @@ export default function MatchingSystem() {
     }
   }, [user]);
 
+  // Opens the member's personal booking page; if they have none, start a chat to propose a time
+  const bookMeeting = async (memberId: string, name: string) => {
+    const { data } = await supabase
+      .from('calendar_booking_settings')
+      .select('booking_slug')
+      .eq('user_id', memberId)
+      .maybeSingle();
+    if (data?.booking_slug) {
+      window.open(`/meet/${data.booking_slug}`, '_blank', 'noopener');
+    } else {
+      toast({ title: `${name} hasn't opened booking times yet`, description: 'A chat is opening so you can propose a time.' });
+      window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: memberId } }));
+    }
+  };
+
   const fetchAllUsers = async () => {
     if (!user) return;
     // Page through every registered profile (no 100-row cap)
@@ -1318,6 +1333,12 @@ export default function MatchingSystem() {
             </Button>
           </div>
         )}
+        {!/^(legacy|company)-/.test(match.id) && (
+          <Button variant="outline" size="sm" className="w-full mb-2" onClick={() => bookMeeting(match.id, match.name)}>
+            <CalendarClock className="h-4 w-4 mr-2" />
+            Book a meeting
+          </Button>
+        )}
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={onPass} className="flex-1">
             <X className="h-4 w-4 mr-2" />
@@ -1533,7 +1554,7 @@ export default function MatchingSystem() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sorted.map(match => (
                   <MatchCard
                     key={match.id}
