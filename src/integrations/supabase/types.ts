@@ -6647,6 +6647,173 @@ export type Database = {
           },
         ]
       }
+      profile_listings: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          images: string[]
+          kind: string
+          price_cents: number
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          kind?: string
+          price_cents?: number
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          kind?: string
+          price_cents?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      profile_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profile_sales: {
+        Row: {
+          amount_cents: number
+          buyer_email: string | null
+          buyer_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          listing_id: string | null
+          listing_title: string
+          platform_fee_cents: number
+          quantity: number
+          seller_id: string
+          status: string
+          stripe_session_id: string
+        }
+        Insert: {
+          amount_cents: number
+          buyer_email?: string | null
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          listing_id?: string | null
+          listing_title: string
+          platform_fee_cents: number
+          quantity?: number
+          seller_id: string
+          status?: string
+          stripe_session_id: string
+        }
+        Update: {
+          amount_cents?: number
+          buyer_email?: string | null
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          listing_id?: string | null
+          listing_title?: string
+          platform_fee_cents?: number
+          quantity?: number
+          seller_id?: string
+          status?: string
+          stripe_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_sales_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "profile_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_sections: {
+        Row: {
+          body: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          kind: string
+          position: number
+          title: string
+          updated_at: string
+          user_id: string
+          visible: boolean
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          kind?: string
+          position?: number
+          title: string
+          updated_at?: string
+          user_id: string
+          visible?: boolean
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          kind?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       profile_views: {
         Row: {
           created_at: string | null
