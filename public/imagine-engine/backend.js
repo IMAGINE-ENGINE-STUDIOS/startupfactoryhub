@@ -3,6 +3,7 @@
    SurrealDB: address + namespace + database (localStorage ie-surconn:<pid>), sign-in kept in sessionStorage only.
    window.__IEBackend exposes open(), supabase(), surreal(), schema(), surrealQuery(). */
 (function () {
+  function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
   function pid() { var x = window.__IE; return (x && x.raw && x.raw.pid) || "default"; }
   function rd(s, k) { try { return JSON.parse(s.getItem(k) || "null"); } catch (e) { return null; } }
   function sb() { var c = rd(localStorage, "ie-sbconn:" + pid()); return c && c.url && c.key ? c : null; }
@@ -14,7 +15,7 @@
 
   /* ---------- Supabase ---------- */
   function sbSchema(c) {
-    return fetch(c.url + "/rest/v1/", { headers: { apikey: c.key, Authorization: "Bearer " + c.key, Accept: "application/openapi+json" } })
+    return fetch(c.url + "/rest/v1/", { headers: { apikey: c.key, Authorization: "Bearer " + ieBearer(c), Accept: "application/openapi+json" } })
       .then(function (r) { if (r.status === 401 || r.status === 403) throw new Error("The key was rejected"); return r.json(); })
       .then(function (j) {
         var d = (j && j.definitions) || {};
@@ -118,7 +119,7 @@
     var tables = function (out, list) { out.innerHTML = list && list.length ? list.map(function (t) { return "<div><b>" + esc(t.name) + "</b> <span style='color:#a1a1aa'>" + esc(t.columns.map(function (c) { return c.name; }).join(", ")) + "</span></div>"; }).join("") : "<span style='color:#a1a1aa'>No tables visible with this key.</span>"; };
     var log = function (m, t) { window.__IE && window.__IE.log && window.__IE.log(m, t); };
     if (a) {
-      $("data-sbdis").onclick = function () { localStorage.removeItem("ie-sbconn:" + pid()); cache.supabase = null; paint(box); };
+      $("data-sbdis").onclick = function () { localStorage.removeItem("ie-sbconn:" + pid()); localStorage.setItem("ie-sbplat-off:" + pid(), "1"); cache.supabase = null; paint(box); };
       var showSb = function (f) { $("data-sbout").textContent = "Reading tables…"; schema(f).then(function (s) { tables($("data-sbout"), s.supabase); }); };
       $("data-sbsch").onclick = function () { showSb(true); }; showSb(false);
     } else {
@@ -151,6 +152,20 @@
       };
     }
   }
+
+  /* admins: the Startup Factory Hub Supabase is connected automatically and queried with the admin's own sign-in, so its security rules give admin access */
+  var PLAT = { url: "https://zqiihhmdsdgwdcwmryym.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI", platform: true };
+  function adminAuto() {
+    try {
+      if (localStorage.getItem("ie-sbconn:" + pid()) || localStorage.getItem("ie-sbplat-off:" + pid())) return;
+      var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (!t || !t.access_token || !t.user) return;
+      fetch(PLAT.url + "/rest/v1/rpc/has_role", { method: "POST", headers: { apikey: PLAT.key, Authorization: "Bearer " + t.access_token, "Content-Type": "application/json" }, body: JSON.stringify({ _user_id: t.user.id, _role: "admin" }) })
+        .then(function (r) { return r.json(); }).then(function (ok) {
+          if (ok === true && !localStorage.getItem("ie-sbconn:" + pid())) { localStorage.setItem("ie-sbconn:" + pid(), JSON.stringify(Object.assign({ name: "Startup Factory Hub" }, PLAT))); cache.supabase = null; schema(true); }
+        }).catch(function () {});
+    } catch (e) {}
+  }
+  setTimeout(adminAuto, 1200); setInterval(adminAuto, 10000);
 
   window.__IEBackend = { open: open, supabase: sb, surreal: sr, schema: schema, summary: summary, surrealQuery: surrealQuery, surrealTable: surrealTable };
   setTimeout(function () { if (sb() || sr()) schema(false); }, 1500);

@@ -1,6 +1,7 @@
 /* Imagine Engine app SDK for live apps: IE.auth (real accounts), IE.db (saved cloud data), IE.route (pages).
    Loaded by liveapp.html before the app runs. Data is saved through the imagine-commerce function. */
 (function () {
+  function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
   var URL_ = "https://zqiihhmdsdgwdcwmryym.supabase.co";
   var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
   var IE = (window.IE = window.IE || {});
@@ -29,7 +30,7 @@
   }
   function sbFetch(c, path, opts) {
     opts = opts || {};
-    return fetch(c.url + "/rest/v1/" + path, { method: opts.method || "GET", headers: { apikey: c.key, Authorization: "Bearer " + c.key, "Content-Type": "application/json", Prefer: "return=representation" }, body: opts.body ? JSON.stringify(opts.body) : undefined })
+    return fetch(c.url + "/rest/v1/" + path, { method: opts.method || "GET", headers: { apikey: c.key, Authorization: "Bearer " + ieBearer(c), "Content-Type": "application/json", Prefer: "return=representation" }, body: opts.body ? JSON.stringify(opts.body) : undefined })
       .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("Supabase error " + r.status)); return j; }); });
   }
   function sbTable(name, force) {
