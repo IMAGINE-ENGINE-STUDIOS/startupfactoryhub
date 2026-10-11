@@ -49,7 +49,9 @@ RULES:
 5. DOCUMENT STRUCTURE IS MANDATORY: "# Title" once, then abstract, then "## Section" / "### Sub-section" headings. Full prose paragraphs (3-6 sentences), Markdown tables with header rows for data, lists only for real lists, "> " for quotes. No conversational filler, no emojis, no meta commentary — output document content only.
 6. For very long works (books, 10+ chapters), give a numbered outline first and then write chapter 1 fully in the same answer.
 7. STRICT COMPLIANCE: Follow user instructions EXACTLY. If they say "1 paragraph" write EXACTLY 1 paragraph. If they say "200 words" write EXACTLY 200 words — not one more, not one less. Word counts and paragraph counts are HARD constraints, never approximate.
-8. Do NOT include [IMAGE: description] tags or any image placeholders unless the user explicitly asks for images.`;
+8. Do NOT include [IMAGE: description] tags or any image placeholders unless the user explicitly asks for images.
+9. ERASE: If the user asks to erase, delete, clear, wipe or empty the document, reply with exactly "[[CLEAR_DOCUMENT]]" and nothing else.
+10. NO MOCK DATA: Ground every document in the user's actual topic and details. Never invent fake company names, fake statistics, fake customers, fake prices or fake quotes. Use only well-established, verifiable facts you are confident about; when a specific number is unknown, write "[to confirm: ...]" so the user can fill it in. Prefer researched market context, real frameworks and concrete actionable steps over generic filler.`;
 
     const LANGUAGE_NAMES: Record<string, string> = {
       en: "English", es: "Spanish (Latin American)", pt: "Portuguese (Brazilian)",
