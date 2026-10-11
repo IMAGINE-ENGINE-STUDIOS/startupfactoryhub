@@ -14,6 +14,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 import { fetchAccountGroups, unifyLinked } from '@/lib/linkedAccounts';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import NetMemberCard from '@/components/network/NetMemberCard';
 
 interface Connection {
   user_id: string;
@@ -529,96 +530,48 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
     }
   };
 
-  const renderUserCard = (connection: Connection, isConnected: boolean = false) => (
-    <Card key={connection.user_id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={connection.avatar_url || undefined} alt={connection.full_name || 'User'} />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
-              {connection.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
-              {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
-            </div>
-            <div className="flex items-center gap-1.5 flex-wrap mt-1">
-              <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
-                {getRoleLabel(connection.role)}
-              </Badge>
-              {connection.linked_roles?.map(r => (
-                <span key={r} title={`Also a ${getRoleLabel(r)}`}>
-                  <RoleBasedAvatar role={r as any} fallbackText={r} className="h-5 w-5" />
-                </span>
-              ))}
-              {connection.venezuela_rebuild && (
-                <Badge className="text-[10px] gap-1 bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/20">
-                  <Heart className="h-2.5 w-2.5 fill-current" />
-                  Venezuela Rebuild
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {connection.bio && (
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-            {connection.bio}
-          </p>
-        )}
-
-        {connection.location && (
-          <p className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
-            <MapPin className="h-3 w-3" /> {connection.location}
-          </p>
-        )}
-
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => viewProfile(connection)}
-          >
-            <Eye className="w-4 h-4 mr-1" />
-            View
+  const renderUserCard = (connection: Connection, isConnected: boolean = false) => {
+    const connected = isConnected || connection.status === 'accepted';
+    return (
+      <NetMemberCard
+        key={connection.user_id}
+        name={connection.full_name || 'User'}
+        avatar={connection.avatar_url}
+        role={connection.role}
+        location={connection.location}
+        bio={connection.bio}
+        onOpen={() => viewProfile(connection)}
+        badges={
+          <>
+            {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
+            {connection.linked_roles?.map(r => (
+              <span key={r} title={`Also a ${getRoleLabel(r)}`}>
+                <RoleBasedAvatar role={r as any} fallbackText={r} className="h-4 w-4" />
+              </span>
+            ))}
+            {connection.venezuela_rebuild && (
+              <span title="Venezuela Rebuild Initiative"><Heart className="h-3.5 w-3.5 fill-current text-primary" /></span>
+            )}
+          </>
+        }
+        actions={[
+          { icon: Eye, label: 'View profile', onClick: () => viewProfile(connection) },
+          ...(!connected ? [{ icon: MessageSquare, label: 'Message', onClick: () => handleMessage(connection.user_id) }] : []),
+        ]}
+        primary={connected ? (
+          <Button size="sm" className="h-8" onClick={() => handleMessage(connection.user_id)}>
+            <MessageSquare className="w-3.5 h-3.5 mr-1" /> Message
           </Button>
-          
-          {isConnected || connection.status === 'accepted' ? (
-            <Button 
-              size="sm" 
-              className="flex-1"
-              onClick={() => handleMessage(connection.user_id)}
-            >
-              <MessageSquare className="w-4 h-4 mr-1" />
-              Message
-            </Button>
-          ) : connection.status === 'pending' ? (
-            <Button 
-              size="sm" 
-              variant="secondary"
-              className="flex-1"
-              disabled
-            >
-              Pending
-            </Button>
-          ) : (
-            <Button 
-              size="sm" 
-              className="flex-1 pulse-primary"
-              onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}
-            >
-              <UserPlus className="w-4 h-4 mr-1" />
-              Connect
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        ) : connection.status === 'pending' ? (
+          <Button size="sm" variant="secondary" className="h-8" disabled>Pending</Button>
+        ) : (
+          <Button size="sm" className="h-8" onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}>
+            <UserPlus className="w-3.5 h-3.5 mr-1" /> Connect
+          </Button>
+        )}
+      />
+    );
+  };
 
   const applyFilter = <T extends { venezuela_rebuild?: boolean }>(list: T[]): T[] => {
     const base = vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
