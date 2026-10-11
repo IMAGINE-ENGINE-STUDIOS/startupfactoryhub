@@ -134,6 +134,51 @@
     body += "export default L('default');";
     return URL.createObjectURL(new Blob([body], { type: "text/javascript" }));
   }
+  /* ---- Zero-crash module layer: missing files, missing exports and broken modules never white-screen the app ---- */
+  var EXPORTS = {};
+  function exportList(js) { var n = Object.keys(exportNames(js)); if (/export\s+default\b|export\s*\{[^}]*\bas\s+default\b/.test(js)) n.push("default"); return n; }
+  function wantedBySpec(js) {
+    var map = {}, m, re = /import\s+([^'";]*?)\s+from\s*["']([^"']+)["']/g;
+    while ((m = re.exec(js))) {
+      var clause = m[1].trim(), spec = m[2], list = map[spec] = map[spec] || [];
+      if (/^\*\s+as\s/.test(clause)) continue;
+      var br = /\{([^}]*)\}/.exec(clause), head = clause.replace(/\{[^}]*\}/, "").replace(/,/g, " ").trim();
+      if (head && !/^\*/.test(head)) list.push("default");
+      if (br) br[1].split(",").forEach(function (p) { var k = p.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim(); if (k && /^[A-Za-z_$][\w$]*$/.test(k)) list.push(k); });
+    }
+    return map;
+  }
+  var softSeen = {};
+  function warnSoft(msg, heal) {
+    if (softSeen[msg]) return; softSeen[msg] = 1; try { console.warn("[Imagine Engine] " + msg); } catch (e) {}
+    if (heal) { try { (host() || parent).postMessage({ ie: "liveapp-error", file: file, message: msg, stack: "" }, "*"); } catch (e) {} }
+  }
+  var PH = 'import { createElement as __h, forwardRef as __f } from "react";' +
+    'const __pass = (n) => { const C = __f(function (p, ref) { const { children, className, asChild, ...rest } = p || {}; return __h("div", { ref, className, "data-ie-fallback": n }, children); }); C.displayName = n; return C; };' +
+    'const __ph = (n, why) => { const C = function (p) { return __h("div", { "data-ie-fallback": n, style: { border: "1px dashed #52525b", borderRadius: 12, padding: "10px 12px", margin: 4, color: "#a1a1aa", font: "12px system-ui", background: "rgba(39,39,42,.35)" } }, n + (why ? " (needs repair)" : " (coming soon)"), p && p.children); }; C.displayName = n; return C; };';
+  function valueFor(n, ui, why) {
+    if (n === "cn") return "(...a)=>a.flat(Infinity).filter(Boolean).join(' ')";
+    if (/^use[A-Z]/.test(n)) return "()=>({})";
+    if (/^[A-Z]/.test(n)) return (ui ? "__pass(" : "__ph(") + JSON.stringify(n) + (ui ? ")" : "," + JSON.stringify(why || "") + ")");
+    return "(()=>{const f=function(){return undefined};return f})()";
+  }
+  function virtualModule(spec, want, ui, why) {
+    var base = String(spec).split("/").pop().replace(/\.\w+$/, ""), Name = base.replace(/(^|[-_])(\w)/g, function (_, a, c) { return c.toUpperCase(); }) || "Module";
+    var body = PH, seenN = {};
+    (want || []).forEach(function (n) { if (n === "default" || seenN[n]) return; seenN[n] = 1; body += "export const " + n + "=" + valueFor(n, ui, why) + ";"; });
+    body += "export default " + (ui ? "__pass(" + JSON.stringify(Name) + ")" : "__ph(" + JSON.stringify(Name) + "," + JSON.stringify(why || "") + ")") + ";";
+    return URL.createObjectURL(new Blob([body], { type: "text/javascript" }));
+  }
+  function withMissing(url, want, ui) {
+    var have = EXPORTS[url]; if (!have || !want || !want.length) return url;
+    var miss = want.filter(function (n) { return n !== "default" && have.indexOf(n) < 0; });
+    var needDef = want.indexOf("default") > -1 && have.indexOf("default") < 0;
+    if (!miss.length && !needDef) return url;
+    warnSoft("Filled missing export(s) " + miss.concat(needDef ? ["default"] : []).join(", ") + " with safe fallbacks");
+    var body = PH + "export * from " + JSON.stringify(url) + ";" + (have.indexOf("default") > -1 ? "export { default } from " + JSON.stringify(url) + ";" : "export default __pass('Default');");
+    miss.forEach(function (n) { body += "export const " + n + "=" + valueFor(n, ui) + ";"; });
+    var u = URL.createObjectURL(new Blob([body], { type: "text/javascript" })); EXPORTS[u] = have.concat(miss, ["default"]); return u;
+  }
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
@@ -147,18 +192,27 @@
       /* register the module for any circular importer stubs */
       out += "\nimport * as __ie_self_ns from " + JSON.stringify("ie-self:" + name) + ";";
     }
+    var wanted = wantedBySpec(out);
     out = out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"']+)\2/g, function (m, pre, qt, spec) {
       if (/^(\.{1,2}\/|@\/)/.test(spec)) {
-        var r = resolve(name, spec); if (!r) throw new Error("Cannot find " + spec + " (imported from " + name + ") in the Dev tab");
+        var want = wanted[spec] || [];
+        var r = resolve(name, spec);
+        if (!r) { warnSoft("Missing module " + spec + " (imported from " + name + ") - showing a placeholder"); return pre + qt + virtualModule(spec, want, /components\/ui\/|lib\/utils/.test(spec)) + qt; }
         if (seen[r.name] === "pending") {
           /* circular import: hand back a lazy stub whose exports forward to the real module once it loads */
           var pre1 = Babel.transform(r.code, { filename: /\.(tsx|jsx)$/.test(r.name) ? r.name : "x.tsx", presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
           return pre + qt + lazyStub(r.name, pre1) + qt;
         }
-        if (seen[r.name]) return pre + qt + seen[r.name] + qt;
-        seen[r.name] = "pending";
-        var url = URL.createObjectURL(new Blob([compile(r.code, r.name, seen)], { type: "text/javascript" }));
-        seen[r.name] = url; return pre + qt + url + qt;
+        if (!seen[r.name]) {
+          seen[r.name] = "pending";
+          var compiled = null, cerr = null;
+          try { compiled = compile(r.code, r.name, seen); }
+          catch (err) { cerr = err; warnSoft("Module " + r.name + " failed to compile: " + err.message, true); }
+          var url = compiled == null ? virtualModule(r.name, want, false, cerr && cerr.message) : URL.createObjectURL(new Blob([compiled], { type: "text/javascript" }));
+          if (compiled != null) EXPORTS[url] = exportList(compiled);
+          seen[r.name] = url;
+        }
+        return pre + qt + withMissing(seen[r.name], want, /components\/ui\//.test(r.name)) + qt;
       }
       if (/^ie-self:/.test(spec)) return m;
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
