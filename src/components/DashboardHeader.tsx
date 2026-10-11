@@ -8,6 +8,7 @@ import WalletPasses from "@/components/WalletPasses";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AIRecommendationsPopover from "@/components/AIRecommendationsPopover";
+import LinkedAccountsSwitcher from "@/components/LinkedAccountsSwitcher";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export function DashboardHeader() {
       <div className="fixed top-3 right-3 z-40 flex flex-col items-end gap-1.5">
         {/* Row 1 — primary glanceable items */}
         <div className="flex items-center gap-1.5">
+          <LinkedAccountsSwitcher compact />
           <GlobalClock />
           <Button
             variant="ghost"
@@ -96,6 +98,7 @@ export function DashboardHeader() {
   // Desktop: full toolbar.
   return (
     <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-40 flex items-center gap-1.5 sm:gap-2">
+      <LinkedAccountsSwitcher />
       <GlobalClock />
 
       <Button

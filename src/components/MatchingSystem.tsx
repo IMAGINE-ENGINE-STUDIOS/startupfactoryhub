@@ -15,6 +15,7 @@ import NetworkBrowser from './NetworkBrowser';
 import NetworkSearchEngine from './NetworkSearchEngine';
 import InvestorDirectoryList from './InvestorDirectoryList';
 import BusinessCardScannerDialog from './BusinessCardScannerDialog';
+import BookMeetingDialog from '@/components/BookMeetingDialog';
 import { isVisibleCommunityName, isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 
 interface Match {
@@ -121,20 +122,9 @@ export default function MatchingSystem() {
     }
   }, [user]);
 
-  // Opens the member's personal booking page; if they have none, start a chat to propose a time
-  const bookMeeting = async (memberId: string, name: string) => {
-    const { data } = await supabase
-      .from('calendar_booking_settings')
-      .select('booking_slug')
-      .eq('user_id', memberId)
-      .maybeSingle();
-    if (data?.booking_slug) {
-      window.open(`/meet/${data.booking_slug}`, '_blank', 'noopener');
-    } else {
-      toast({ title: `${name} hasn't opened booking times yet`, description: 'A chat is opening so you can propose a time.' });
-      window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: memberId } }));
-    }
-  };
+  // Opens the Book a meeting form; the request lands in both people's Meetings tab
+  const [bookTarget, setBookTarget] = useState<{ id: string; name: string } | null>(null);
+  const bookMeeting = (memberId: string, name: string) => setBookTarget({ id: memberId, name });
 
   const fetchAllUsers = async () => {
     if (!user) return;
