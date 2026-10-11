@@ -50,12 +50,14 @@ interface UserProfileDialogProps {
   userId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  embedded?: boolean;
 }
 
 export default function UserProfileDialog({
   userId,
   open,
   onOpenChange,
+  embedded = false,
 }: UserProfileDialogProps) {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
@@ -79,7 +81,7 @@ export default function UserProfileDialog({
   } = useConnection(userId);
 
   // Track profile view when dialog opens
-  useProfileViews(open ? userId : null);
+  useProfileViews(open && !embedded ? userId : null);
 
   useEffect(() => {
     if (userId && open) {
@@ -332,174 +334,10 @@ export default function UserProfileDialog({
 
   const isOwnProfile = currentUser?.id === userId;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] overflow-hidden p-0 flex flex-col" aria-describedby={undefined}>
-        <VisuallyHidden>
-          <DialogTitle>{profile?.full_name || 'User Profile'}</DialogTitle>
-        </VisuallyHidden>
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : !profile ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Profile not found</p>
-          </div>
-        ) : (
-          <div className="flex flex-col h-full overflow-hidden">
-            {/* Header Section - Fixed */}
-            <div className="flex-shrink-0 bg-background border-b p-6">
-              <div className="flex items-start gap-4">
-                <Avatar className="h-20 w-20 border-2 border-primary/20">
-                  <AvatarImage src={profile.avatar_url || undefined} />
-                  <AvatarFallback className="text-xl">{profile.full_name?.[0] || profile.full_name?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-2xl font-bold truncate">{profile.full_name || "User"}</h2>
-                    <Badge variant={getRoleBadgeVariant(profile.role)}>
-                      {getRoleLabel(profile.role)}
-                    </Badge>
-                  </div>
-                  
-                  {!isOwnProfile && currentUser && (
-                    <div className="flex items-center gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        variant={isFollowing ? "outline" : "default"}
-                        onClick={handleFollowToggle}
-                        disabled={loadingAction}
-                        className="gap-2"
-                      >
-                        {loadingAction ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : isFollowing ? (
-                          <>
-                            <UserMinus className="h-4 w-4" />
-                            Following
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="h-4 w-4" />
-                            Follow
-                          </>
-                        )}
-                      </Button>
-                      
-                      {connectionStatus === 'none' && (
-                        <Button
-                          onClick={() => handleConnectionAction('send')}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          disabled={loadingAction}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                          Connect
-                        </Button>
-                      )}
-                      {connectionStatus === 'pending_sent' && (
-                        <Button variant="outline" size="sm" disabled className="gap-2">
-                          <Clock className="h-4 w-4" />
-                          Pending
-                        </Button>
-                      )}
-                      {connectionStatus === 'pending_received' && (
-                        <Button
-                          onClick={() => handleConnectionAction('accept')}
-                          variant="default"
-                          size="sm"
-                          className="gap-2"
-                          disabled={loadingAction}
-                        >
-                          <UserCheck className="h-4 w-4" />
-                          Accept
-                        </Button>
-                      )}
-                      {connectionStatus === 'connected' && (
-                        <Button
-                          onClick={() => handleConnectionAction('remove')}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          disabled={loadingAction}
-                        >
-                          <UserCheck className="h-4 w-4" />
-                          Connected
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center gap-6 mt-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{followersCount}</p>
-                  <p className="text-sm text-muted-foreground">Followers</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{followingCount}</p>
-                  <p className="text-sm text-muted-foreground">Following</p>
-                </div>
-                {!isOwnProfile && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="ml-auto tech-card"
-                    onClick={() => {
-                      onOpenChange(false);
-                      setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId } }));
-                      }, 150);
-                    }}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Message
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Content Section - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Overview Section */}
-              <Card className="tech-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    About
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {profile.bio && (
-                    <p className="text-muted-foreground">{profile.bio}</p>
-                  )}
-                  
-                  <div className="flex flex-col gap-2">
-                    {profile.location && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{profile.location}</span>
-                      </div>
-                    )}
-                    {profile.website && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
-                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                          {profile.website}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Separator />
-
+  const renderDetails = () => {
+    if (!profile) return null;
+    return (
+      <>
               {profile.role !== 'startup' && userId && (
                 <DeckViewerButton ownerId={userId} label={profile.role === 'investor' ? 'Fund Deck' : profile.role === 'accelerator' ? 'Cohort Prospectus' : 'Overview Deck'} />
               )}
@@ -824,6 +662,184 @@ export default function UserProfileDialog({
                   <ProfilePostsMosaic userId={userId!} isOwnProfile={isOwnProfile} />
                 </CardContent>
               </Card>
+      </>
+    );
+  };
+
+  if (embedded) {
+    if (loading) return <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <div className="space-y-6">{renderDetails()}</div>;
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl h-[90vh] overflow-hidden p-0 flex flex-col" aria-describedby={undefined}>
+        <VisuallyHidden>
+          <DialogTitle>{profile?.full_name || 'User Profile'}</DialogTitle>
+        </VisuallyHidden>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : !profile ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Profile not found</p>
+          </div>
+        ) : (
+          <div className="flex flex-col h-full overflow-hidden">
+            {/* Header Section - Fixed */}
+            <div className="flex-shrink-0 bg-background border-b p-6">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-20 w-20 border-2 border-primary/20">
+                  <AvatarImage src={profile.avatar_url || undefined} />
+                  <AvatarFallback className="text-xl">{profile.full_name?.[0] || profile.full_name?.[0] || "U"}</AvatarFallback>
+                </Avatar>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-2xl font-bold truncate">{profile.full_name || "User"}</h2>
+                    <Badge variant={getRoleBadgeVariant(profile.role)}>
+                      {getRoleLabel(profile.role)}
+                    </Badge>
+                  </div>
+                  
+                  {!isOwnProfile && currentUser && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        variant={isFollowing ? "outline" : "default"}
+                        onClick={handleFollowToggle}
+                        disabled={loadingAction}
+                        className="gap-2"
+                      >
+                        {loadingAction ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : isFollowing ? (
+                          <>
+                            <UserMinus className="h-4 w-4" />
+                            Following
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4" />
+                            Follow
+                          </>
+                        )}
+                      </Button>
+                      
+                      {connectionStatus === 'none' && (
+                        <Button
+                          onClick={() => handleConnectionAction('send')}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          disabled={loadingAction}
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          Connect
+                        </Button>
+                      )}
+                      {connectionStatus === 'pending_sent' && (
+                        <Button variant="outline" size="sm" disabled className="gap-2">
+                          <Clock className="h-4 w-4" />
+                          Pending
+                        </Button>
+                      )}
+                      {connectionStatus === 'pending_received' && (
+                        <Button
+                          onClick={() => handleConnectionAction('accept')}
+                          variant="default"
+                          size="sm"
+                          className="gap-2"
+                          disabled={loadingAction}
+                        >
+                          <UserCheck className="h-4 w-4" />
+                          Accept
+                        </Button>
+                      )}
+                      {connectionStatus === 'connected' && (
+                        <Button
+                          onClick={() => handleConnectionAction('remove')}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          disabled={loadingAction}
+                        >
+                          <UserCheck className="h-4 w-4" />
+                          Connected
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-6 mt-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{followersCount}</p>
+                  <p className="text-sm text-muted-foreground">Followers</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{followingCount}</p>
+                  <p className="text-sm text-muted-foreground">Following</p>
+                </div>
+                {!isOwnProfile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto tech-card"
+                    onClick={() => {
+                      onOpenChange(false);
+                      setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId } }));
+                      }, 150);
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Content Section - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Overview Section */}
+              <Card className="tech-card border-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    About
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {profile.bio && (
+                    <p className="text-muted-foreground">{profile.bio}</p>
+                  )}
+                  
+                  <div className="flex flex-col gap-2">
+                    {profile.location && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{profile.location}</span>
+                      </div>
+                    )}
+                    {profile.website && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          {profile.website}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Separator />
+
+              {renderDetails()}
             </div>
           </div>
         )}
