@@ -220,11 +220,27 @@
     while ((m = re.exec(out))) { if (seenN[m[1]]) continue; seenN[m[1]] = 1; add += "\ntry{globalThis.__IERR&&__IERR(" + m[1] + "," + JSON.stringify(name + " " + m[1]) + ")}catch(e){}"; }
     return out + add;
   }
+  /* code check before running: JSX components that are used but never imported or declared would crash with
+     a ReferenceError, so they get a visible placeholder and Genius AI is told to fix them */
+  function preCheck(source, name) {
+    if (/\.(css|json)$/.test(name)) return source;
+    var used = {}, m, re = /<([A-Z][\w$]*)(?=[\s>\/])/g;
+    while ((m = re.exec(source))) used[m[1]] = 1;
+    var miss = Object.keys(used).filter(function (n) {
+      var d = new RegExp("(\\b(function|class|const|let|var|type|interface|enum)\\s+" + n + "\\b)|(import[^;]*\\b" + n + "\\b[^;]*from)|([{,]\\s*" + n + "\\s*[,}=:])|(\\(\\s*" + n + "\\s*[,)])");
+      return !d.test(source) && !(n in window);
+    });
+    if (!miss.length) return source;
+    warnSoft("Code check: " + name + " uses " + miss.join(", ") + " but never imports or defines " + (miss.length > 1 ? "them" : "it") + " - showing a placeholder", true);
+    var stub = miss.map(function (n) { return "const " + n + " = (p: any) => <div data-ie-fallback=\"" + n + "\" style={{ border: \"1px dashed #52525b\", borderRadius: 12, padding: \"10px 12px\", margin: 4, color: \"#a1a1aa\", font: \"12px system-ui\" }}>" + n + " (needs repair){p && p.children}</div>;"; }).join(" ");
+    /* append at the end (hoisting isn't needed: components render after module load); keeps line numbers intact */
+    return source + "\n" + stub;
+  }
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.setAttribute("data-ie-css",' + JSON.stringify(name) + ');s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
-      : refreshReg(cachedTransform(source, name), name);
+      : refreshReg(cachedTransform(preCheck(source, name), name), name);
     if (name !== file && !/\.(css|json)$/.test(name)) {
       var ex = exportNames(out), keys = Object.keys(ex), hasDef = /export\s+default\b|export\s*\{[^}]*\bas\s+default\b/.test(out);
       /* default import of a file that only has named exports: fall back to its main export instead of a SyntaxError */
@@ -259,7 +275,8 @@
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
       var pm = /^(@[^/]+\/[^/@]+|[^/@]+)(.*)$/.exec(spec), pkg = pm ? pm[1] : spec, ver = PINS[pkg];
       var q = "?external=react,react-dom" + (SHARE3.test(pkg) ? "&deps=three@" + PINS.three : "");
-      return pre + qt + "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + q + qt;
+      var ext = "https://esm.sh/" + (ver && !/@\d/.test(pm[2]) ? pkg + "@" + ver + pm[2] : spec) + q; extUrls[ext] = 1;
+      return pre + qt + ext + qt;
     });
     /* replace the self-import marker with a registry write (a module can't import its own blob URL) */
     return out.replace(/\nimport \* as __ie_self_ns from "ie-self:([^"]*)";/, function (_, n) {
@@ -279,7 +296,26 @@
   });
   var BRIDGE = '<script src="/imagine-engine/blocks/ie-sdk.js"><\/script><script>window.IE=window.IE||{};IE.emit=function(e,p){parent.postMessage({ieBus:true,event:String(e),payload:p},"*")};addEventListener("message",function(e){var d=e.data;if(!d||!d.__IE_ACTION)return;if(typeof window.__IE_DISPATCH==="function")window.__IE_DISPATCH(d.__IE_ACTION,d.payload);dispatchEvent(new CustomEvent("ie:action",{detail:{action:d.__IE_ACTION,payload:d.payload}}))});<\/script>';
 
+  /* permanent library cache (scoped to live apps only) */
+  try { if ("serviceWorker" in navigator) navigator.serviceWorker.register("/imagine-engine/blocks/ie-cache-sw.js", { scope: "/imagine-engine/blocks/" }).catch(function () {}); } catch (e) {}
+  var PK = "ie-pkg:" + file, pkg = null; try { pkg = JSON.parse(localStorage.getItem(PK) || "null"); } catch (e) {}
+  var extUrls = {};
   var code = src(), last = code;
+  /* instant open: show the last rendered screen and its styles, and start every library download at once */
+  if (code && kind === "react" && pkg && pkg.h === hashStr(code)) {
+    try {
+      (pkg.libs || []).forEach(function (u) { var l = document.createElement("link"); l.rel = "modulepreload"; l.href = u; l.crossOrigin = ""; document.head.appendChild(l); });
+      if (pkg.css) { var st0 = document.createElement("style"); st0.id = "ie-pkg-css"; st0.textContent = pkg.css; document.head.appendChild(st0); }
+      if (pkg.html) { var r0 = document.getElementById("root"); r0.innerHTML = pkg.html; r0.style.pointerEvents = "none"; }
+    } catch (e) {}
+  }
+  function savePkg() {
+    try {
+      var css = ""; document.querySelectorAll("style").forEach(function (x) { if (x.id !== "ie-pkg-css" && !x.hasAttribute("data-ie-css") && /--tw-/.test(x.textContent)) css += x.textContent; });
+      var html = document.getElementById("root").innerHTML; if (html.length > 200000) html = "";
+      localStorage.setItem(PK, JSON.stringify({ h: hashStr(code), libs: Object.keys(extUrls).slice(0, 60), css: css.slice(0, 300000), html: html }));
+    } catch (e) { try { localStorage.removeItem(PK); } catch (x) {} }
+  }
   if (!code) { document.getElementById("root").innerHTML = '<div id="ie-load">No code yet for ' + file + '. Ask the AI to build an app.</div>'; }
   else if (kind === "html") {
     /* full HTML document (games, three.js scenes): run in a child frame, relay 3D/state messages both ways */
@@ -320,7 +356,7 @@
       if (nm) out = out.replace(/export\s+default\s+(async\s+)?function/, "$1function") + "\nconst __ie_default = " + nm[1] + ";";
       else if (/export\s+default\s+/.test(out)) out = out.replace(/export\s+default\s+/, "const __ie_default = ");
       else out += "\nconst __ie_default = (typeof App !== 'undefined' ? App : () => null);";
-      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce, Component as __Cmp } from "react";\nclass __IEBoundary extends __Cmp { constructor(p){super(p);this.state={e:null};} static getDerivedStateFromError(e){return {e:e};} componentDidCatch(e,i){ if (window.__IEHot && Date.now() - window.__IEHot < 4000) { location.reload(); return; } window.__IEFail && window.__IEFail(e && e.message, (e && e.stack || "") + (i && i.componentStack || "")); } render(){ return this.state.e ? __ce("div",{style:{padding:24,color:"#fca5a5",font:"13px system-ui"}},"This app hit an error. Use Auto-repair below or edit it in the Dev tab.") : this.props.children; } }\n__cr(document.getElementById("root")).render(__ce(__IEBoundary,null,__ce(__ie_default)));window.__IEMounted=true;';
+      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce, Component as __Cmp } from "react";\nclass __IEBoundary extends __Cmp { constructor(p){super(p);this.state={e:null};} static getDerivedStateFromError(e){return {e:e};} componentDidCatch(e,i){ if (window.__IEHot && Date.now() - window.__IEHot < 4000) { location.reload(); return; } window.__IEFail && window.__IEFail(e && e.message, (e && e.stack || "") + (i && i.componentStack || "")); } render(){ return this.state.e ? __ce("div",{style:{padding:24,color:"#fca5a5",font:"13px system-ui"}},"This app hit an error. Use Auto-repair below or edit it in the Dev tab.") : this.props.children; } }\n__cr(document.getElementById("root")).render(__ce(__IEBoundary,null,__ce(__ie_default)));window.__IEMounted=true;window.__IEOnMount&&window.__IEOnMount();';
       var s = document.createElement("script"); s.type = "module";
       s.src = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
       document.body.appendChild(s);
@@ -328,6 +364,10 @@
   }
   /* live update: recompile (cached files are instant), import the new modules, then let React Refresh swap
      components in place so the app keeps its state; falls back to a full reload if anything goes wrong */
+  window.__IEOnMount = function () {
+    var r0 = document.getElementById("root"); r0.style.pointerEvents = "";
+    setTimeout(function () { var o = document.getElementById("ie-pkg-css"); if (o) o.remove(); savePkg(); }, 1500);
+  };
   var hotBusy = false;
   function hot(next) {
     if (kind !== "react" || !window.__IERefresh || !window.__IEMounted || hotBusy) return location.reload();
@@ -337,7 +377,7 @@
       var out = compile(next, file, {});
       if (window.__ieNeedBabel && !window.Babel) return location.reload();
       var u = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
-      import(u).then(function () { window.__IEHot = Date.now(); window.__IERefresh.performReactRefresh(); document.getElementById("ie-err").style.display = "none"; lastErr = ""; hotBusy = false; })
+      import(u).then(function () { window.__IEHot = Date.now(); setTimeout(savePkg, 1500); window.__IERefresh.performReactRefresh(); document.getElementById("ie-err").style.display = "none"; lastErr = ""; hotBusy = false; })
         .catch(function () { location.reload(); });
     } catch (e) { location.reload(); }
   }
