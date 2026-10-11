@@ -215,6 +215,19 @@
   function rfilter(p, op) { return p.filterColumn && p.filterValue !== "" && p.filterValue != null ? encodeURIComponent(p.filterColumn) + "=" + encodeURIComponent((op || "eq") + "." + p.filterValue) : ""; }
   function useRemote(p) { var c = remoteDb(); return c && p.table && String(p.table).indexOf(".") < 0 && safeTable(p.table) ? c : null; }
   function dbq(p, method, body, label) {
+    /* "surreal:person" (or plain names when only SurrealDB is connected) go to the project's SurrealDB */
+    var B = window.__IEBackend, tn = String(p.table || "");
+    if (B && B.surreal() && (/^surreal:/.test(tn) || (!remoteDb() && tn && tn.indexOf(".") < 0 && safeTable(tn)))) {
+      var st = B.surrealTable(tn.replace(/^surreal:/, "")), sn = tn.replace(/^surreal:/, "");
+      if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
+      var wh = p.filterColumn && p.filterValue !== "" && p.filterValue != null ? (function () { var o = {}; o[p.filterColumn] = p.filterValue; return o; })() : null, sj;
+      if (method === "GET") sj = st.list({ where: wh, limit: p.limit });
+      else if (method === "POST") sj = st.insert(body || {}).then(function (x) { return [x]; });
+      else sj = st.list({ where: wh, limit: 1000 }).then(function (rows) { return Promise.all(rows.map(function (x) { return method === "PATCH" ? st.update(x.id, body || {}) : st.remove(x.id).then(function () { return x; }); })); });
+      sj.then(function (rows) { put(p.stateKey, rows); L(label + " " + sn + " (SurrealDB): " + rows.length + " rows"); })
+        .catch(function (e) { L(label + " " + sn + " (SurrealDB) failed: " + e.message, "error"); });
+      return sn;
+    }
     var c = useRemote(p);
     if (c) {
       if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
