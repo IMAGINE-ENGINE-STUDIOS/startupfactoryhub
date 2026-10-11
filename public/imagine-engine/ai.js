@@ -13,11 +13,11 @@
       if (/^ie-pack:/.test(k) || /^ie-snap:/.test(k)) { try { var v = JSON.parse(localStorage.getItem(k) || "{}"); if (v && v.at && now - v.at > 7 * 864e5) localStorage.removeItem(k); } catch (e) { localStorage.removeItem(k); } }
     });
     var size = 0; Object.keys(localStorage).forEach(function (k) { size += (localStorage.getItem(k) || "").length; });
-    if (size > 3.5e6) Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|snap|bc)/.test(k)) localStorage.removeItem(k); });
+    if (size > 2.5e6) Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|pkg|snap|bc)/.test(k)) localStorage.removeItem(k); });
     Object.keys(sessionStorage).forEach(function (k) { if (/^ie-bc/.test(k)) sessionStorage.removeItem(k); });
   } catch (e) {}
   window.__IECleanupMemory = function () {
-    try { Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|snap|bc)|^ie-projects-(backup|broken)-/.test(k)) localStorage.removeItem(k); }); } catch (e) {}
+    try { Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|pkg|snap|bc)|^ie-projects-(backup|broken)-/.test(k)) localStorage.removeItem(k); }); } catch (e) {}
     try { if (window.caches) caches.keys().then(function (ks) { ks.forEach(function (k) { if (/^ie-libs-/.test(k)) caches.delete(k); }); }); } catch (e) {}
   };
 })();
