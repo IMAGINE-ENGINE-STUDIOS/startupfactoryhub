@@ -73,22 +73,28 @@ export const useFollow = (userId: string | null) => {
       return;
     }
 
+    if (!/^[0-9a-f-]{36}$/i.test(userId)) {
+      toast.error('This profile can’t be followed');
+      return;
+    }
+
     try {
+      // Upsert so a repeat click (or stale state) never hits the unique constraint
       const { error } = await supabase
         .from('follows')
-        .insert({
-          follower_id: user.id,
-          following_id: userId,
-        });
+        .upsert(
+          { follower_id: user.id, following_id: userId },
+          { onConflict: 'follower_id,following_id', ignoreDuplicates: true },
+        );
 
       if (error) throw error;
 
+      if (!isFollowing) setFollowersCount(prev => prev + 1);
       setIsFollowing(true);
-      setFollowersCount(prev => prev + 1);
-      toast.success('Successfully followed user');
-    } catch (error) {
+      toast.success('Following');
+    } catch (error: any) {
       console.error('Error following user:', error);
-      toast.error('Failed to follow user');
+      toast.error(error?.message ? `Couldn't follow: ${error.message}` : 'Failed to follow user');
     }
   };
 
