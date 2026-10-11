@@ -446,7 +446,6 @@ export default function AIFeaturesHub() {
         <div className="relative flex items-start sm:items-center gap-4 flex-col sm:flex-row">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Founder Workstation
               </span>
@@ -688,7 +687,6 @@ export default function AIFeaturesHub() {
       {/* ── Founder Perks mosaic (draggable & expandable) ───── */}
       <div className="pt-2">
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <Gift className="h-4 w-4 text-amber-500" />
           <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Founder Perks
           </h3>
@@ -817,7 +815,7 @@ function PerkCard({
             />
           </div>
           <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1 mr-16">
-            <Sparkles className="h-2.5 w-2.5" /> Partner
+            Partner
           </span>
         </div>
         <div className="min-w-0">
