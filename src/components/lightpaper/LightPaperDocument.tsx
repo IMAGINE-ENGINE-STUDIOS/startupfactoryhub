@@ -2162,32 +2162,29 @@ export function LightPaperDocument({
   };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error("Please select an image file");
-      return;
-    }
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
 
     // Validate file size (max 20MB)
     if (file.size > 20 * 1024 * 1024) {
-      toast.error("Image file size must be less than 20MB");
+      toast.error("File size must be less than 20MB");
       return;
     }
 
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) {
-        toast.error("Please sign in to upload images");
+        toast.error("Please sign in to upload files");
         return;
       }
-      toast.info("Uploading image...");
-      const fileName = `${Date.now()}_${file.name}`;
+      toast.info("Uploading...");
+      const fileName = `${Date.now()}_${file.name.replace(/[^\w.\-]/g, "_")}`;
       const filePath = `${user.id}/${fileName}`;
       const {
         error: uploadError
-      } = await supabase.storage.from('feed-media').upload(filePath, file);
+      } = await supabase.storage.from('feed-media').upload(filePath, file, { contentType: file.type || undefined });
       if (uploadError) {
         console.error("Upload error:", uploadError);
         throw new Error(uploadError.message);
@@ -2196,28 +2193,42 @@ export function LightPaperDocument({
         data
       } = supabase.storage.from('feed-media').getPublicUrl(filePath);
 
-      // Insert image at cursor with strict container constraints
-      const img = document.createElement('img');
-      img.src = data.publicUrl;
+      let img: HTMLElement;
+      if (isImage) {
+        img = document.createElement('img');
+        (img as HTMLImageElement).src = data.publicUrl;
+        img.style.objectFit = 'contain';
+      } else if (isVideo) {
+        img = document.createElement('video');
+        (img as HTMLVideoElement).src = data.publicUrl;
+        (img as HTMLVideoElement).controls = true;
+      } else {
+        img = document.createElement('a');
+        (img as HTMLAnchorElement).href = data.publicUrl;
+        (img as HTMLAnchorElement).target = '_blank';
+        (img as HTMLAnchorElement).rel = 'noopener noreferrer';
+        img.textContent = `Attachment: ${file.name}`;
+      }
       img.style.maxWidth = '100%';
       img.style.width = 'auto';
       img.style.height = 'auto';
-      img.style.objectFit = 'contain';
       img.style.display = 'block';
       img.style.margin = '10px 0';
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
+      if (selection && selection.rangeCount > 0 && editorRef.current?.contains(selection.anchorNode)) {
         const range = selection.getRangeAt(0);
         range.insertNode(img);
         range.setStartAfter(img);
         range.setEndAfter(img);
         selection.removeAllRanges();
         selection.addRange(range);
+      } else {
+        editorRef.current?.appendChild(img);
       }
-      toast.success("Image uploaded successfully");
+      toast.success("Uploaded");
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
+      toast.error(error.message || "Upload failed");
     }
   };
   const insertCalculatorResult = (value: string) => {
@@ -3432,11 +3443,11 @@ export function LightPaperDocument({
               </Button>
             </div>
 
-            {/* Alignment */}
+            {/* Alignment & Lists */}
             <div className="flex gap-0.5 border-l pl-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Text Alignment">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Alignment & lists">
                     <AlignLeft className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -3453,18 +3464,15 @@ export function LightPaperDocument({
                   <DropdownMenuItem onClick={() => execCommand("justifyFull")} className="gap-2 px-2 py-1.5">
                     <AlignJustify className="h-4 w-4" /> Justify
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => execCommand("insertUnorderedList")} className="gap-2 px-2 py-1.5">
+                    <List className="h-4 w-4" /> Bullet list
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => execCommand("insertOrderedList")} className="gap-2 px-2 py-1.5">
+                    <ListOrdered className="h-4 w-4" /> Numbered list
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-
-            {/* Lists */}
-            <div className="flex gap-0.5 border-l pl-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
-                <List className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
-                <ListOrdered className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Version History Navigation */}
@@ -3497,15 +3505,28 @@ export function LightPaperDocument({
             )}
             
             
-            {/* Image Upload */}
+            {/* Upload (+) */}
             <div className="flex gap-0.5 border-l pl-1">
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => fileInputRef.current?.click()} title="Insert Image">
-                <Image className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowUploadDialog(true)} title="Upload Document (PDF, Word, Google Docs)">
-                <Upload className="h-4 w-4" />
-              </Button>
+              <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleImageUpload} className="hidden" />
+              <input id="lp-any-file-input" type="file" accept="*/*" onChange={handleImageUpload} className="hidden" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Upload">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-44 p-1">
+                  <DropdownMenuItem onClick={() => (document.getElementById("lp-any-file-input") as HTMLInputElement | null)?.click()} className="gap-2 px-2 py-1.5">
+                    <Upload className="h-4 w-4" /> Upload file
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2 px-2 py-1.5">
+                    <Image className="h-4 w-4" /> Upload media
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowUploadDialog(true)} className="gap-2 px-2 py-1.5">
+                    <FileText className="h-4 w-4" /> Import document
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Calculator */}
