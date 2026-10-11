@@ -147,18 +147,27 @@
       /* register the module for any circular importer stubs */
       out += "\nimport * as __ie_self_ns from " + JSON.stringify("ie-self:" + name) + ";";
     }
+    var wanted = wantedBySpec(out);
     out = out.replace(/(from\s*|import\s*\(\s*|import\s+)(["'])([^"']+)\2/g, function (m, pre, qt, spec) {
       if (/^(\.{1,2}\/|@\/)/.test(spec)) {
-        var r = resolve(name, spec); if (!r) throw new Error("Cannot find " + spec + " (imported from " + name + ") in the Dev tab");
+        var want = wanted[spec] || [];
+        var r = resolve(name, spec);
+        if (!r) { warnSoft("Missing module " + spec + " (imported from " + name + ") - showing a placeholder"); return pre + qt + virtualModule(spec, want, /components\/ui\/|lib\/utils/.test(spec)) + qt; }
         if (seen[r.name] === "pending") {
           /* circular import: hand back a lazy stub whose exports forward to the real module once it loads */
           var pre1 = Babel.transform(r.code, { filename: /\.(tsx|jsx)$/.test(r.name) ? r.name : "x.tsx", presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
           return pre + qt + lazyStub(r.name, pre1) + qt;
         }
-        if (seen[r.name]) return pre + qt + seen[r.name] + qt;
-        seen[r.name] = "pending";
-        var url = URL.createObjectURL(new Blob([compile(r.code, r.name, seen)], { type: "text/javascript" }));
-        seen[r.name] = url; return pre + qt + url + qt;
+        if (!seen[r.name]) {
+          seen[r.name] = "pending";
+          var compiled;
+          try { compiled = compile(r.code, r.name, seen); }
+          catch (err) { warnSoft("Module " + r.name + " failed to compile: " + err.message, true); compiled = null; }
+          var url = compiled == null ? virtualModule(r.name, want, false, err && err.message) : URL.createObjectURL(new Blob([compiled], { type: "text/javascript" }));
+          if (compiled != null) EXPORTS[url] = exportList(compiled);
+          seen[r.name] = url;
+        }
+        return pre + qt + withMissing(seen[r.name], want, /components\/ui\//.test(r.name)) + qt;
       }
       if (/^ie-self:/.test(spec)) return m;
       if (/^(react|react-dom)(\/|$)/.test(spec) || /^(https?:|blob:|data:)/.test(spec)) return m;
