@@ -36,7 +36,9 @@ import {
   FileText,
   GraduationCap,
   Megaphone
+  ShoppingBag,
 } from 'lucide-react';
+import ProfileSalesManagement from '@/components/admin/ProfileSalesManagement';
 
 import AutoPostingHub from '@/components/marketing/AutoPostingHub';
 
@@ -212,6 +214,10 @@ const AdminDashboard = () => {
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Subscriptions</span>
             </TabsTrigger>
+            <TabsTrigger value="sales" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <ShoppingBag className="h-4 w-4" />
+              <span className="hidden lg:inline">Sales</span>
+            </TabsTrigger>
             <TabsTrigger value="live-guests" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Live Guests</span>
@@ -295,6 +301,7 @@ const AdminDashboard = () => {
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
+          <TabsContent value="sales"><ProfileSalesManagement /></TabsContent>
           <TabsContent value="live-guests"><LiveGuestsManagement /><LiveSessionLogs /></TabsContent>
           <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
           <TabsContent value="workspace-bookings"><WorkspaceBookingsManagement /></TabsContent>
