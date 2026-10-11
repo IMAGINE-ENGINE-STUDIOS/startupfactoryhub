@@ -52,7 +52,7 @@
     var files = [["imagine-project.json", JSON.stringify(snap, null, 2)],
       ["README.md", "# " + name + "\n\nBuilt with Imagine Engine on Startup Factory Hub.\n\n`imagine-project.json` holds the full project (pages, widgets, flows, tables and visual edits). Pull it back into Imagine Engine to keep building.\n"]];
     var f = snap.files;
-    if (Array.isArray(f)) f.forEach(function (x, i) { if (x && typeof x.content === "string") files.push(["src/" + String(x.name || x.path || ("file-" + i)).replace(/^\/+/, ""), x.content]); });
+    if (Array.isArray(f)) f.forEach(function (x, i) { if (x && typeof x.content === "string") { var nm = String(x.path || x.name || ("file-" + i)).replace(/^\/+/, ""); if (x.folder && nm.indexOf("/") < 0) nm = x.folder + "/" + nm; files.push(["src/" + nm, x.content]); } });
     var msg = "Imagine Engine sync: " + new Date().toLocaleString();
     var i = 0;
     function next() { if (i >= files.length) return Promise.resolve(); var fl = files[i++]; setMsg("Uploading " + fl[0] + " (" + i + "/" + files.length + ")"); return putFile(token, repo, branch, fl[0], fl[1], msg).then(next); }
