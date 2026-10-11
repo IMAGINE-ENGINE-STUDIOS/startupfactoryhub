@@ -30,8 +30,33 @@
     leaflet: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
     tfjs: "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
     babel: "https://unpkg.com/@babel/standalone@7.26.4/babel.min.js",
-    tailwind: "https://cdn.tailwindcss.com"
+    tailwind: "https://cdn.tailwindcss.com",
+    nexus: "https://cdn.jsdelivr.net/npm/nexusui@2.1.6/dist/NexusUI.js",
+    nexusui: "https://cdn.jsdelivr.net/npm/nexusui@2.1.6/dist/NexusUI.js",
+    lilgui: "https://cdn.jsdelivr.net/npm/lil-gui@0.20.0/dist/lil-gui.umd.min.js",
+    tweakpane: "https://cdn.jsdelivr.net/npm/tweakpane@3.1.10/dist/tweakpane.min.js",
+    cannon: "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.cjs.js",
+    scrolltrigger: "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js",
+    draggable: "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Draggable.min.js",
+    p5: "https://cdn.jsdelivr.net/npm/p5@1.11.2/lib/p5.min.js",
+    anime: "https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js",
+    echarts: "https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js",
+    plotly: "https://cdn.plot.ly/plotly-2.35.2.min.js",
+    cesium: "https://cdn.jsdelivr.net/npm/cesium@1.124.0/Build/Cesium/Cesium.js",
+    mlml5: "https://unpkg.com/ml5@1/dist/ml5.min.js",
+    alpine: "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js",
+    jquery: "https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js",
+    lottie: "https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js",
+    hammer: "https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js",
+    fabric: "https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js",
+    konva: "https://cdn.jsdelivr.net/npm/konva@9.3.18/konva.min.js"
   };
+  /* ES module import map for plain HTML apps: <script type="module"> import * as THREE from "three"; import {OrbitControls} from "three/addons/controls/OrbitControls.js" */
+  window.__IEImportMap = { imports: {
+    "three": "https://esm.sh/three@0.170.0", "three/addons/": "https://esm.sh/three@0.170.0/examples/jsm/",
+    "cannon-es": "https://esm.sh/cannon-es@0.20.0", "lil-gui": "https://esm.sh/lil-gui@0.20.0", "gsap": "https://esm.sh/gsap@3.12.5", "gsap/": "https://esm.sh/gsap@3.12.5/",
+    "nexusui": "https://esm.sh/nexusui@2.1.6", "tone": "https://esm.sh/tone@15.0.4", "d3": "https://esm.sh/d3@7.9.0", "pixi.js": "https://esm.sh/pixi.js@8.6.6", "ogl": "https://esm.sh/ogl@1.0.11"
+  } };
   var loaded = {};
   window.__IELoad = function (name) {
     var url = LIBS[name] || (/^https:\/\//.test(name) ? name : null);
