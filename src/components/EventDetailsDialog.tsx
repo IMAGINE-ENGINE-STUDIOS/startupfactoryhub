@@ -48,6 +48,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [attendees, setAttendees] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [externalEmails, setExternalEmails] = useState('');
   const [showVideo, setShowVideo] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -475,6 +476,31 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <Button onClick={inviteUser} disabled={!selectedUser}>
                   <UserPlus className="h-4 w-4 mr-2" />
                   Invite
+                </Button>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <input
+                  type="text"
+                  value={externalEmails}
+                  onChange={(e) => setExternalEmails(e.target.value)}
+                  placeholder="Invite people outside the platform: emails, comma separated"
+                  className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
+                />
+                <Button
+                  variant="outline"
+                  disabled={!externalEmails.trim()}
+                  onClick={() => {
+                    const emails = externalEmails.split(/[\s,;]+/).filter(e => /.+@.+\..+/.test(e));
+                    if (!emails.length) { toast({ title: 'Enter at least one valid email', variant: 'destructive' }); return; }
+                    const link = `https://startupfactoryhub.com/events/${event.id}/register`;
+                    const subject = encodeURIComponent(`You're invited: ${event.title}`);
+                    const body = encodeURIComponent(`You're invited to ${event.title} on ${format(parseISO(event.start_date), 'PPP p')}.\n\nRegister here (no account needed): ${link}`);
+                    window.location.href = `mailto:?bcc=${emails.join(',')}&subject=${subject}&body=${body}`;
+                    setExternalEmails('');
+                  }}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Email invite
                 </Button>
               </div>
             </div>

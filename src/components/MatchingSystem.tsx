@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock } from 'lucide-react';
 import UserProfileDialog from './UserProfileDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -121,20 +121,46 @@ export default function MatchingSystem() {
     }
   }, [user]);
 
+  // Opens the member's personal booking page; if they have none, start a chat to propose a time
+  const bookMeeting = async (memberId: string, name: string) => {
+    const { data } = await supabase
+      .from('calendar_booking_settings')
+      .select('booking_slug')
+      .eq('user_id', memberId)
+      .maybeSingle();
+    if (data?.booking_slug) {
+      window.open(`/meet/${data.booking_slug}`, '_blank', 'noopener');
+    } else {
+      toast({ title: `${name} hasn't opened booking times yet`, description: 'A chat is opening so you can propose a time.' });
+      window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: memberId } }));
+    }
+  };
+
   const fetchAllUsers = async () => {
     if (!user) return;
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, full_name, avatar_url, bio')
-      .neq('user_id', user.id)
-      .limit(100);
-    if (!profiles) return;
+    // Page through every registered profile (no 100-row cap)
+    const profiles: any[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, bio')
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .range(from, from + 999);
+      if (!data || data.length === 0) break;
+      profiles.push(...data);
+      if (data.length < 1000) break;
+    }
+    if (!profiles.length) return;
     const userIds = profiles.map(p => p.user_id);
-    const [{ data: roles }, { data: companies }] = await Promise.all([
+    const chunks: string[][] = [];
+    for (let i = 0; i < userIds.length; i += 100) chunks.push(userIds.slice(i, i + 100));
+    const [{ data: roles }, companyResults] = await Promise.all([
       // RLS on user_roles only exposes self → use security-definer RPC to get every user's role
       supabase.rpc('get_user_roles_batch', { user_ids: userIds }),
-      supabase.from('companies').select('user_id, name, industry').in('user_id', userIds),
+      Promise.all(chunks.map(ids => supabase.from('companies').select('user_id, name, industry').in('user_id', ids))),
     ]);
+    const companies = companyResults.flatMap(r => r.data || []);
     const roleMap = new Map((roles || []).map((r: any) => [r.user_id, r.role]));
     const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
     setAllUsers(profiles.filter(isVisibleCommunityProfile).map(p => {
@@ -1219,12 +1245,12 @@ export default function MatchingSystem() {
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{match.name}</h3>
             <p className="text-xs text-muted-foreground mb-1.5">{match.role}</p>
-            <div className="flex items-center gap-1.5">
-              <Star className={`h-4 w-4 ${getCompatibilityColor(match.compatibility_score)}`} />
-              <span className={`text-sm font-medium ${getCompatibilityColor(match.compatibility_score)}`}>
-                {match.compatibility_score}% • {getCompatibilityLabel(match.compatibility_score)} Match
-              </span>
-            </div>
+            {match.compatibility_score > 0 && (
+              <Badge className="gap-1 bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20">
+                <Sparkles className="h-3 w-3" />
+                {match.compatibility_score}% Match
+              </Badge>
+            )}
             <div className="flex flex-wrap gap-1 mt-2">
               <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
               {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
@@ -1306,6 +1332,12 @@ export default function MatchingSystem() {
               Message
             </Button>
           </div>
+        )}
+        {!/^(legacy|company)-/.test(match.id) && (
+          <Button variant="outline" size="sm" className="w-full mb-2" onClick={() => bookMeeting(match.id, match.name)}>
+            <CalendarClock className="h-4 w-4 mr-2" />
+            Book a meeting
+          </Button>
         )}
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={onPass} className="flex-1">
@@ -1395,41 +1427,22 @@ export default function MatchingSystem() {
   // Compute a real relevance score so the UI never shows "0% Match".
   const myIndustry = (userCompany?.industry || userProfile?.industry || '').toLowerCase();
   const myLocation = (userProfile?.location || '').toLowerCase();
+  // Only real, shared signals count as a match. Everyone else is shown as a
+  // regular community member with no invented score.
   const scoreFallback = (m: Match): Match => {
     if ((m.compatibility_score || 0) > 0) return m;
-    const bucket = normalizeRole(m.role);
-    const reasons: string[] = [...(m.match_reasons || [])];
-    let score = 50;
-
-    const rank = priorityOf(bucket);
-    if (rank === 0) { score += 20; reasons.push(`Top priority connection for your ${userRole || 'profile'}`); }
-    else if (rank === 1) { score += 14; reasons.push('Highly relevant to your goals'); }
-    else if (rank === 2) { score += 8; }
-
+    const reasons: string[] = [];
+    let score = 0;
     const theirIndustry = (m.industry || '').toLowerCase();
-    if (myIndustry && theirIndustry) {
-      if (theirIndustry.includes(myIndustry) || myIndustry.includes(theirIndustry)) {
-        score += 18;
-        reasons.push(`Same industry: ${m.industry}`);
-      } else {
-        score += 4;
-      }
+    if (myIndustry && theirIndustry && (theirIndustry.includes(myIndustry) || myIndustry.includes(theirIndustry))) {
+      score += 60;
+      reasons.push(`Same industry: ${m.industry}`);
     }
-
     if (myLocation && m.location && m.location.toLowerCase().includes(myLocation)) {
-      score += 6;
+      score += 15;
       reasons.push(`Located in ${m.location}`);
     }
-
-    if (m.description && m.description.length > 40) { score += 5; reasons.push('Detailed profile available'); }
-    if (m.avatar) score += 2;
-    if (m.expertise && m.expertise.length > 0) score += 3;
-
-    return {
-      ...m,
-      compatibility_score: Math.max(55, Math.min(score, 92)),
-      match_reasons: reasons.length ? reasons.slice(0, 3) : ['Active member of the Startup Factory network'],
-    };
+    return { ...m, compatibility_score: score, match_reasons: reasons };
   };
 
   // Dedupe by id — earlier entries (real matches) win over later fallback entries
@@ -1541,7 +1554,7 @@ export default function MatchingSystem() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sorted.map(match => (
                   <MatchCard
                     key={match.id}
