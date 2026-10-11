@@ -20,7 +20,7 @@ import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
 import { buildPlazaScene, PLAZA_LEVEL_NAME } from '@/imagine-studio/lib/plazaLevel';
 import { ensurePlazaLevel } from '@/imagine-studio/lib/localLevels';
-import { Box as BoxIcon } from 'lucide-react';
+import { Box as BoxIcon, Sparkles } from 'lucide-react';
 import { PeopleMenu, LevelElectionsPanel, plazaAdmin, type PlazaPerson } from '@/imagine-studio/components/plaza/PlazaModeration';
 
 const ROOM = 'plaza';
@@ -766,6 +766,9 @@ export default function PlazaPage() {
             <button onClick={() => { const l = ensurePlazaLevel(buildPlazaScene, PLAZA_LEVEL_NAME); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
               <BoxIcon className="w-4 h-4" />Edit in 3D Studio
             </button>
+            <button onClick={() => { const p = window.prompt('What should Genius AI change in the Plaza?'); if (!p?.trim()) return; const l = ensurePlazaLevel(buildPlazaScene, PLAZA_LEVEL_NAME); window.location.href = `/imagine-studio/${l.id}?genius=${encodeURIComponent(p.trim())}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4" />Ask Genius AI
+            </button>
             <button onClick={shareScreen} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
               {presenting ? <Square className="w-4 h-4" /> : <MonitorUp className="w-4 h-4" />}{presenting ? 'Stop sharing' : 'Share screen to theater'}
             </button>
@@ -784,12 +787,9 @@ export default function PlazaPage() {
         </div>
       )}
       {panel === 'vote' && <LevelElectionsPanel isAdmin={isAdmin} refreshKey={electionTick} onClose={() => setPanel(null)} onChanged={() => sendMod('election')} />}
-      {touch && (
-        <>
-          <div className="absolute left-4 bottom-24 z-10"><Joystick input={input} /></div>
-          <LookPad input={input} />
-        </>
-      )}
+      {/* Camera look: mouse drag on desktop, finger drag on phones — always centered on the character. */}
+      <LookPad input={input} />
+      {touch && <div className="absolute left-4 bottom-24 z-10"><Joystick input={input} /></div>}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-10">
         <button onClick={toggleMic} aria-label={mic ? 'Mute' : 'Unmute'}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${mic ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
