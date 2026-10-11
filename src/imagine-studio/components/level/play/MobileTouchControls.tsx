@@ -88,7 +88,7 @@ export default function MobileTouchControls({ visible }: { visible: boolean }) {
           Interact still reach them. Transparent, no visible chrome. */}
       <div
         className="pointer-events-auto absolute top-0 right-0 h-full"
-        style={{ width: "45%", touchAction: "none", zIndex: 1 }}
+        style={{ width: "100%", touchAction: "none", zIndex: 0 }}
         onPointerDown={(e) => {
           if (lookId.current !== null) return;
           lookId.current = e.pointerId;
