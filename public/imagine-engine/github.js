@@ -15,8 +15,21 @@
   function cfg() { try { return JSON.parse(localStorage.getItem("ie-gh-cfg") || "{}"); } catch (e) { return {}; } }
   function b64(str) { var bytes = new TextEncoder().encode(str), s = ""; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
   function unb64(s) { var bin = atob(s.replace(/\n/g, "")), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); }
+  function sess() { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); return t && t.access_token; } catch (e) { return null; } }
+  var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-github";
+  var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
+  function server(payload) {
+    return fetch(FN, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + (sess() || ANON), "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.error) throw new Error(j.error || ("Server error " + r.status)); return j; }); });
+  }
+  var serverOk = null;
+  function checkServer() { if (serverOk !== null) return Promise.resolve(serverOk); if (!sess()) return Promise.resolve(false); return server({ status: true }).then(function () { return (serverOk = true); }).catch(function () { return (serverOk = false); }); }
   function gh(token, path, opts) {
     opts = opts || {};
+    if (token === "__server__") return server({ path: path, method: opts.method || "GET", body: opts.body }).then(function (j) {
+      if (j.status >= 400 && !(opts.allow404 && j.status === 404)) throw new Error((j.data && j.data.message) || ("GitHub error " + j.status));
+      return j.status === 404 ? null : j.data;
+    });
     return fetch(API + path, { method: opts.method || "GET", headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "Content-Type": "application/json" }, body: opts.body ? JSON.stringify(opts.body) : undefined })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok && !(opts.allow404 && r.status === 404)) throw new Error(j.message || ("GitHub error " + r.status)); return r.status === 404 ? null : j; }); });
   }
@@ -83,10 +96,13 @@
     var repo = h("input", { style: INP, placeholder: "owner/repository", value: c.repo || "" });
     var br = h("input", { style: INP, placeholder: "main", value: c.branch || "main" });
     var msg = h("div", { style: "min-height:16px;font:12px system-ui;color:#a1a1aa;margin:6px 0" });
+    var useSrv = false;
+    var srvNote = h("div", { style: "font:12px system-ui;color:#4ade80;margin-bottom:8px;display:none" }, ["Using your secure GitHub connection. No token needed. New repositories are created private."]);
+    checkServer().then(function (ok) { if (!ok) return; useSrv = true; srvNote.style.display = "block"; tok.style.display = "none"; var l = ov.querySelector("[data-tokl]"); if (l) l.style.display = "none"; });
     function run(fn, label) {
-      var t = tok.value.trim(), rp = repo.value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, ""), b = br.value.trim() || "main";
+      var t = useSrv ? "__server__" : tok.value.trim(), rp = repo.value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, ""), b = br.value.trim() || "main";
       if (!t || !/^[\w.-]+\/[\w.-]+$/.test(rp)) { msg.style.color = "#f87171"; msg.textContent = "Enter your token and a repository like owner/name."; return; }
-      sessionStorage.setItem("ie-gh-token", t); localStorage.setItem("ie-gh-cfg", JSON.stringify({ repo: rp, branch: b }));
+      if (!useSrv) sessionStorage.setItem("ie-gh-token", t); localStorage.setItem("ie-gh-cfg", JSON.stringify({ repo: rp, branch: b }));
       msg.style.color = "#a1a1aa"; msg.textContent = label + "...";
       fn(t, rp, b, function (s) { msg.textContent = s; }).then(function () {
           msg.style.color = "#4ade80"; msg.textContent = label + " finished. ";
@@ -99,7 +115,8 @@
       h("div", { style: "width:min(380px,92vw);background:#18181b;border:1px solid #3f3f46;border-radius:14px;padding:16px;color:#e4e4e7;font:13px system-ui" }, [
         h("div", { style: "font:600 15px system-ui;margin-bottom:4px" }, ["GitHub sync"]),
         h("div", { style: "font:12px system-ui;color:#a1a1aa;margin-bottom:12px" }, ["Send this project to a repository, or bring it back from one. Your token stays in this browser tab only."]),
-        h("div", { style: L }, ["Token"]), tok,
+        srvNote,
+        h("div", { style: L + ";" + "display:var(--ie-tokdisp,block)", "data-tokl": "1" }, ["Token"]), tok,
         h("div", { style: L }, ["Repository"]), repo,
         h("div", { style: L }, ["Branch"]), br,
         msg,
