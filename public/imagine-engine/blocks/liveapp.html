@@ -224,7 +224,7 @@
      a ReferenceError, so they get a visible placeholder and Genius AI is told to fix them */
   function preCheck(source, name) {
     if (/\.(css|json)$/.test(name)) return source;
-    var used = {}, m, re = /<([A-Z][\w$]*)(?=[\s>\/.])/g;
+    var used = {}, m, re = /<([A-Z][\w$]*)(?=[\s>\/])/g;
     while ((m = re.exec(source))) used[m[1]] = 1;
     var miss = Object.keys(used).filter(function (n) {
       var d = new RegExp("(\\b(function|class|const|let|var|type|interface|enum)\\s+" + n + "\\b)|(import[^;]*\\b" + n + "\\b[^;]*from)|([{,]\\s*" + n + "\\s*[,}=:])|(\\(\\s*" + n + "\\s*[,)])");
