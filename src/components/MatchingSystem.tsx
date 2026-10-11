@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock } from 'lucide-react';
 import UserProfileDialog from './UserProfileDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1230,12 +1230,12 @@ export default function MatchingSystem() {
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{match.name}</h3>
             <p className="text-xs text-muted-foreground mb-1.5">{match.role}</p>
-            <div className="flex items-center gap-1.5">
-              <Star className={`h-4 w-4 ${getCompatibilityColor(match.compatibility_score)}`} />
-              <span className={`text-sm font-medium ${getCompatibilityColor(match.compatibility_score)}`}>
-                {match.compatibility_score}% • {getCompatibilityLabel(match.compatibility_score)} Match
-              </span>
-            </div>
+            {match.compatibility_score > 0 && (
+              <Badge className="gap-1 bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20">
+                <Sparkles className="h-3 w-3" />
+                {match.compatibility_score}% Match
+              </Badge>
+            )}
             <div className="flex flex-wrap gap-1 mt-2">
               <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
               {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
@@ -1406,41 +1406,22 @@ export default function MatchingSystem() {
   // Compute a real relevance score so the UI never shows "0% Match".
   const myIndustry = (userCompany?.industry || userProfile?.industry || '').toLowerCase();
   const myLocation = (userProfile?.location || '').toLowerCase();
+  // Only real, shared signals count as a match. Everyone else is shown as a
+  // regular community member with no invented score.
   const scoreFallback = (m: Match): Match => {
     if ((m.compatibility_score || 0) > 0) return m;
-    const bucket = normalizeRole(m.role);
-    const reasons: string[] = [...(m.match_reasons || [])];
-    let score = 50;
-
-    const rank = priorityOf(bucket);
-    if (rank === 0) { score += 20; reasons.push(`Top priority connection for your ${userRole || 'profile'}`); }
-    else if (rank === 1) { score += 14; reasons.push('Highly relevant to your goals'); }
-    else if (rank === 2) { score += 8; }
-
+    const reasons: string[] = [];
+    let score = 0;
     const theirIndustry = (m.industry || '').toLowerCase();
-    if (myIndustry && theirIndustry) {
-      if (theirIndustry.includes(myIndustry) || myIndustry.includes(theirIndustry)) {
-        score += 18;
-        reasons.push(`Same industry: ${m.industry}`);
-      } else {
-        score += 4;
-      }
+    if (myIndustry && theirIndustry && (theirIndustry.includes(myIndustry) || myIndustry.includes(theirIndustry))) {
+      score += 60;
+      reasons.push(`Same industry: ${m.industry}`);
     }
-
     if (myLocation && m.location && m.location.toLowerCase().includes(myLocation)) {
-      score += 6;
+      score += 15;
       reasons.push(`Located in ${m.location}`);
     }
-
-    if (m.description && m.description.length > 40) { score += 5; reasons.push('Detailed profile available'); }
-    if (m.avatar) score += 2;
-    if (m.expertise && m.expertise.length > 0) score += 3;
-
-    return {
-      ...m,
-      compatibility_score: Math.max(55, Math.min(score, 92)),
-      match_reasons: reasons.length ? reasons.slice(0, 3) : ['Active member of the Startup Factory network'],
-    };
+    return { ...m, compatibility_score: score, match_reasons: reasons };
   };
 
   // Dedupe by id — earlier entries (real matches) win over later fallback entries
