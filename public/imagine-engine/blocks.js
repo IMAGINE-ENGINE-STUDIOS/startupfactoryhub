@@ -144,6 +144,8 @@
   ALIAS.shop = "store"; ALIAS.store = "store"; ALIAS.ecommerce_app = "store"; ALIAS.shopapp = "store";
   T.kanban = { name: "Kanban project board", sections: [{ liveFile: "kanban.tsx", app: "Kanban", kind: "react" }] };
   ["kanban","board","tasks","taskboard","projectmanager","trello","todo"].forEach(function (k) { ALIAS[k] = "kanban"; });
+  T.motionstudio = { name: "Motion studio (NexusUI + GSAP)", sections: [{ liveFile: "motionstudio.tsx", app: "MotionStudio", kind: "react" }] };
+  ["motionstudio","motion","nexus","nexusui","gsap","animationstudio","animator"].forEach(function (k) { ALIAS[k] = "motionstudio"; });
   T.wizard = { name: "Multi-step form wizard", sections: [{ liveFile: "wizard.tsx", app: "Wizard", kind: "react" }] };
   ["wizard","form","multistep","onboarding","application","signupform","survey"].forEach(function (k) { ALIAS[k] = "wizard"; });
   T.dashboard = { name: "Dashboard app", sections: [{ liveFile: "dashboard.tsx", app: "Dashboard", kind: "react" }] };
