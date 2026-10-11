@@ -334,6 +334,15 @@
     var c = cs(tg), isBtn = /^(button|a)$/.test(c.tag) || (tg.kind === "dom" && tg.el.getAttribute("role") === "button");
     var box = h("div", { style: "border-top:1px solid #27272a;padding-top:8px;color:#e4e4e7;font:12px system-ui" });
     box.appendChild(h("div", { style: "font:600 11px system-ui;color:#c4b5fd" }, [(tg.kind === "dom" ? "Widget element" : "Element") + " • " + c.tag + (isBtn ? " (button)" : "")]));
+    if (tg.kind === "native" && tg.node && tg.node.id) {
+      var nid = tg.node.id;
+      box.appendChild(h("button", { type: "button", style: "margin-top:6px;width:100%;padding:7px;border-radius:9px;border:1px solid #3f3f46;background:transparent;color:#e4e4e7;cursor:pointer;font:12px system-ui", onclick: function () {
+        try { window.__IEDevSync && window.__IEDevSync.now(); window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "dev" }); } catch (e) {}
+        setTimeout(function () { var f = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (x) { return x.name === "App.tsx"; })[0]; if (!f) return;
+          var ln = String(f.content || "").split("\n").findIndex(function (l) { return l.indexOf('"id": ' + JSON.stringify(nid)) > -1; });
+          window.__IEJump && window.__IEJump("App.tsx", ln + 1); }, 150);
+      } }, ["View in Dev"]));
+    }
     if (c.text != null) {
       box.appendChild(h("div", { style: L }, [isBtn ? "Button text" : "Text"]));
       var ta = h("textarea", { style: INP + ";height:56px;padding:6px 8px;resize:vertical" }); ta.value = c.text;
@@ -580,8 +589,8 @@
       msg.style = style; try { src.postMessage(msg, "*"); } catch (e) {}
       Object.keys(f).forEach(function (k) { orig[k] = f[k].value; });
     };
-    var jc = document.createElement("button"); jc.textContent = "Jump to code"; jc.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #3f3f46;background:transparent;color:#e4e4e7;cursor:pointer;font:12px system-ui";
-    jc.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "dev" }); window.__IEFiles && window.__IEFiles.open && window.__IEFiles.open(file); } catch (e) {} };
+    var jc = document.createElement("button"); jc.textContent = "View in Dev"; jc.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #3f3f46;background:transparent;color:#e4e4e7;cursor:pointer;font:12px system-ui";
+    jc.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "dev" }); if (window.__IEJump) setTimeout(function () { window.__IEJump(file, +line); }, 150); else if (window.__IEFiles && window.__IEFiles.open) window.__IEFiles.open(file); } catch (e) {} };
     var ga = document.createElement("button"); ga.textContent = "Ask Genius AI about this"; ga.style.cssText = "margin-top:6px;width:100%;padding:8px;border-radius:9px;border:1px solid #7c3aed;background:transparent;color:#c4b5fd;cursor:pointer;font:600 12px system-ui";
     ga.onclick = function () { try { window.__IEX && window.__IEX.setMode && window.__IEX.setMode({ mode: "canvas" }); window.__IEPinSet && window.__IEPinSet(cur); } catch (e) {} close(); };
     panel.appendChild(ap); panel.appendChild(jc); panel.appendChild(ga);
