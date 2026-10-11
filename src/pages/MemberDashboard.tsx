@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -43,7 +44,7 @@ const MemberDashboard = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || 'social');
+  const [activeTab, setActiveTab] = useRememberedTab('member', urlTab, 'social');
 
   useEffect(() => {
     if (urlTab && urlTab !== activeTab) {
@@ -55,7 +56,7 @@ const MemberDashboard = () => {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'member') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
 

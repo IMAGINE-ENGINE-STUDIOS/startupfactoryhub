@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,7 +69,7 @@ const AcceleratorDashboard = () => {
   const { profile: profileWithRole } = useProfileWithRole();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || 'social');
+  const [activeTab, setActiveTab] = useRememberedTab('accelerator', urlTab, 'social');
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -205,7 +206,7 @@ const AcceleratorDashboard = () => {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'accelerator') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
 

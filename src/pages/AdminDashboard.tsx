@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
@@ -84,7 +85,7 @@ const AdminDashboard = () => {
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || "overview");
+  const [activeTab, setActiveTab] = useRememberedTab('admin', searchParams.get('tab'), "overview");
   // People can hold several roles (e.g. startup + admin); check admin directly.
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   useEffect(() => {

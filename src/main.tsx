@@ -222,6 +222,7 @@ function bootstrap() {
     return;
   }
 
+  import('@/lib/tabMemory').then((m) => m.sweepStaleCaches()).catch(() => {});
   createRoot(rootElement).render(<App />);
   // Put the user back at the exact pixels they were at before a reload/crash.
   applyRestorePoint();
