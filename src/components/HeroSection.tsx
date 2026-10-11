@@ -54,7 +54,7 @@ const HeroSection = () => {
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{
           animationDelay: '0.2s'
         }}>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">Startup Factory Hub is building the AI-powered infrastructure layer for the global startup ecosystem.</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">Startup Factory Hub is the AI-powered infrastructure layer for the global startup ecosystem.</p>
           </div>
 
           {/* CTA Buttons */}
