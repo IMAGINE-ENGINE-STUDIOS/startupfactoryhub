@@ -375,8 +375,12 @@ export default function PlayableCharacter({
     const onLockChange = () => {
       pointerLocked.current = document.pointerLockElement === canvas;
     };
+    let dragging = false;
+    const onDown = (e: PointerEvent) => { if (e.target === canvas && (e.pointerType === "mouse" || scheme === "click")) dragging = true; };
+    const onUp = () => { dragging = false; };
     const onMove = (e: MouseEvent) => {
-      if (!pointerLocked.current) return;
+      // Pointer lock, or click-and-drag when the browser refused pointer lock.
+      if (!pointerLocked.current && !dragging) return;
       // GTA-style, not inverted: mouse right turns right, mouse up looks up.
       camOrbit.current.yaw -= e.movementX * 0.0025;
       camOrbit.current.pitch += e.movementY * 0.0025;
@@ -387,11 +391,15 @@ export default function PlayableCharacter({
       camOrbit.current.dist = Math.max(1.5, Math.min(10, camOrbit.current.dist + e.deltaY * 0.005));
     };
     canvas.addEventListener("click", onClick);
+    canvas.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
     document.addEventListener("pointerlockchange", onLockChange);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("wheel", onWheel, { passive: true });
     return () => {
       canvas.removeEventListener("click", onClick);
+      canvas.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointerlockchange", onLockChange);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("wheel", onWheel);

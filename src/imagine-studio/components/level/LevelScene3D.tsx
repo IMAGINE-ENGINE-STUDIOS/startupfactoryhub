@@ -1703,6 +1703,13 @@ function LevelScene3DInner(
         ref={controlsRef}
         makeDefault
         enableDamping
+        enableRotate
+        enablePan
+        enableZoom
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI}
+        mouseButtons={{ LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }}
+        touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
         enabled={!hasActivePlayer(rest)}
       />
       <KeyboardCameraController controlsRef={controlsRef} enabled={!hasActivePlayer(rest)} />

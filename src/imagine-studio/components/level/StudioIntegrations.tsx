@@ -80,6 +80,7 @@ async function resolveSketchfabOps(ops: any[], note: (t: string) => void): Promi
       out.push({ op: "add", object: { kind: "model", id: op.id, name: op.name || imp.fileName.replace(/\.[^.]+$/, ""), url: imp.url, fileName: imp.fileName, position: [pos[0], (pos[1] || 0) + lift, pos[2]], rotation: op.rotation, scale: [scale, scale, scale] } });
       if (op.behavior && op.id) out.push({ op: "play", id: op.id, behavior: op.behavior });
       note(`Added ${credit} via Sketchfab`);
+      if (!op.behavior) setTimeout(() => (window as any).__ieAskCollisions?.(1), 800);
     } catch (e: any) { note(`Sketchfab: ${e.message || "failed"}`); }
   }
   return out;
@@ -195,6 +196,29 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     return () => clearTimeout(t);
   }, [scene]);
 
+  /* ---- After a model lands: offer auto tracing + collisions ---- */
+  const askCollisions = (count: number) => {
+    toast("Make the new model walkable and solid?", {
+      description: "Characters can walk on its floors and are blocked by its walls and objects.",
+      duration: 15000,
+      action: {
+        label: "Yes, auto trace",
+        onClick: () => {
+          let ids: string[] = [];
+          updateScene((s) => {
+            const models = s.objects.filter((o: any) => o.kind === "model").slice(-count);
+            ids = models.map((m: any) => m.id);
+            return { ...s, objects: s.objects.map((o: any) => ids.includes(o.id) ? { ...o, playBehavior: { ...(o.playBehavior || {}), collision: "walkable" } } : o) };
+          });
+          const names = live.current.scene.objects.filter((o: any) => ids.includes(o.id)).map((o: any) => o.name).join(", ");
+          runGenius(`Auto trace collisions for the model(s) just added${names ? ` (${names})` : ""}: keep them walkable on floors, and add invisible blocking boxes (primitive boxes with behavior {"collision":"blocking","invisibleInPlay":true}) around their walls and solid objects so characters cannot walk through them.`);
+        },
+      },
+      cancel: { label: "No", onClick: () => {} },
+    });
+  };
+  if (typeof window !== "undefined") (window as any).__ieAskCollisions = askCollisions;
+
   /* ---- Drag & drop model files onto the viewport ---- */
   useEffect(() => {
     let depth = 0;
@@ -210,6 +234,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       const ok = files.filter((f) => NATIVE_FORMATS.includes(extOf(f.name)));
       if (!ok.length) { toast.error(`Drop a 3D model: ${NATIVE_FORMATS.map((x) => "." + x).join(", ")}`); return; }
       for (const f of ok) await importFile(f);
+      askCollisions(ok.length);
     };
     window.addEventListener("dragenter", enter); window.addEventListener("dragover", over);
     window.addEventListener("dragleave", leave); window.addEventListener("drop", drop);

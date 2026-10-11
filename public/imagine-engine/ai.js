@@ -1,3 +1,26 @@
+/* Storage cleanup on every load: removes old backups, stale app snapshots and build caches so the browser never fills up. */
+(function () {
+  try {
+    var now = Date.now(), keys = Object.keys(localStorage), backups = [];
+    keys.forEach(function (k) {
+      var m = /^ie-projects-(backup|broken)-(\d+)$/.exec(k);
+      if (m) backups.push([k, +m[2]]);
+    });
+    backups.sort(function (a, b) { return b[1] - a[1]; });
+    backups.slice(1).forEach(function (b) { localStorage.removeItem(b[0]); });
+    var files = {}; try { (JSON.parse(localStorage.getItem("ie-projects") || "[]") || []).forEach(function (p) { (p.files || []).forEach(function (f) { files[f.name] = 1; }); }); } catch (e) {}
+    keys.forEach(function (k) {
+      if (/^ie-pack:/.test(k) || /^ie-snap:/.test(k)) { try { var v = JSON.parse(localStorage.getItem(k) || "{}"); if (v && v.at && now - v.at > 7 * 864e5) localStorage.removeItem(k); } catch (e) { localStorage.removeItem(k); } }
+    });
+    var size = 0; Object.keys(localStorage).forEach(function (k) { size += (localStorage.getItem(k) || "").length; });
+    if (size > 2.5e6) Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|pkg|snap|bc)/.test(k)) localStorage.removeItem(k); });
+    Object.keys(sessionStorage).forEach(function (k) { if (/^ie-bc/.test(k)) sessionStorage.removeItem(k); });
+  } catch (e) {}
+  window.__IECleanupMemory = function () {
+    try { Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|pkg|snap|bc)|^ie-projects-(backup|broken)-/.test(k)) localStorage.removeItem(k); }); } catch (e) {}
+    try { if (window.caches) caches.keys().then(function (ks) { ks.forEach(function (k) { if (/^ie-libs-/.test(k)) caches.delete(k); }); }); } catch (e) {}
+  };
+})();
 /* Genius AI — universal builder copilot for Imagine Engine. */
 (function () {
   function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
@@ -481,7 +504,7 @@
     ".iea-t{font-weight:600;background:linear-gradient(90deg,#5eead4,#e879f9);-webkit-background-clip:text;color:transparent}" +
     ".iea-s{font-size:10px;color:#71717a}.iea-x{margin-left:auto;background:none;border:0;color:#71717a;cursor:pointer;font-size:11px}" +
     ".iea-l{flex:1 1 0;min-height:0;overflow-y:scroll;overflow-x:hidden;padding:12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#52525b #18181b}.iea-l::-webkit-scrollbar{width:8px}.iea-l::-webkit-scrollbar-track{background:#18181b}.iea-l::-webkit-scrollbar-thumb{background:#52525b;border-radius:8px}.iea-l::-webkit-scrollbar-thumb:hover{background:#71717a}" +
-    "#ie-ai-slot{max-height:calc(100dvh - 60px);position:sticky;top:56px;overflow:hidden}#ie-ai-slot>.iea{height:100%;max-height:calc(100dvh - 60px)}.iea-h,.iea-f,.iea-att{flex-shrink:0}" +
+    "#ie-ai-slot{height:calc(100dvh - 64px);max-height:calc(100dvh - 64px);position:sticky;top:56px;align-self:flex-start;overflow:hidden}#ie-ai-slot>.iea{display:flex;flex-direction:column}.iea-l{overscroll-behavior:contain}#ie-ai-slot>.iea{height:100%;max-height:calc(100dvh - 60px)}.iea-h,.iea-f,.iea-att{flex-shrink:0}" +
     ".iea-ph{margin-top:8px;border:1px solid #3f3f46;border-radius:10px;padding:8px 10px;background:#111114}.iea-ph ol{margin:4px 0 6px;padding-left:18px}.iea-ph li.ok{color:#71717a;text-decoration:line-through}" +
     ".iea-u{align-self:flex-end;max-width:88%;background:linear-gradient(135deg,#14b8a6,#a21caf);color:#fff;padding:8px 11px;border-radius:14px 14px 4px 14px}" +
     ".iea-a{max-width:100%;color:#d4d4d8;line-height:1.6}.iea-a p{margin:0 0 8px}.iea-a p:last-child{margin-bottom:0}.iea-a ul,.iea-a ol{margin:4px 0 8px;padding-left:18px}.iea-a li{margin:2px 0}.iea-a li::marker{color:#5eead4}.iea-hd{margin:12px 0 6px;font-weight:600;color:#fafafa;letter-spacing:.01em}h2.iea-hd{font-size:14px}h3.iea-hd{font-size:13px}h4.iea-hd{font-size:12px;color:#a1a1aa;text-transform:uppercase;font-size:10.5px;letter-spacing:.06em}.iea-a h2.iea-hd:first-child,.iea-a h3.iea-hd:first-child{margin-top:0}.iea-a b{color:#fafafa;font-weight:600}.iea-a a{color:#5eead4}.iea-q{border-left:2px solid #5eead4;padding:4px 10px;margin:6px 0;color:#a1a1aa;background:#5eead40d;border-radius:0 6px 6px 0}.iea-hr{border:0;border-top:1px solid #27272a;margin:10px 0}.iea-tb{border-collapse:collapse;margin:6px 0 10px;width:100%;font-size:11px}.iea-tb th,.iea-tb td{border:1px solid #27272a;padding:4px 6px;text-align:left}.iea-tb th{background:#18181b;color:#fafafa}.iea-d{margin-top:6px;font-size:10px;color:#5eead4}" +

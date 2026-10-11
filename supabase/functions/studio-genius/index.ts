@@ -38,6 +38,7 @@ SKETCHFAB FIRST (mandatory): every recognizable thing (buildings, towers, houses
 Write short, common Sketchfab search phrases (2-4 words, style word + noun) and set realistic "size" (largest side, meters): car 4.5, truck 8, spaceship 12-30, person 1.8, tree 6, house 10, skyscraper 30-60, crate 1, console 1.5, lamp post 5, rock 2.
 Theme vocabulary examples: sci-fi -> "sci-fi building", "sci-fi tower", "futuristic hover car", "spaceship", "sci-fi crate", "sci-fi console", "sci-fi door", "robot", "space station"; cyberpunk -> "cyberpunk building", "neon sign", "cyberpunk car"; city -> "low poly building", "skyscraper", "sports car", "street lamp", "bench"; nature -> "low poly tree", "rock", "bush"; fantasy -> "medieval house", "castle tower", "dragon".
 Add "fallback":["broader query", ...] to sketchfab ops when the main query is specific. Use up to 8 sketchfab ops per reply (spread them out, no overlaps, buildings 8-15 m apart).
+AUTO TRACING: when asked to trace collisions for a model, read its position/scale from the scene, keep the model collision "walkable", and add primitive box blockers (behavior {"collision":"blocking","invisibleInPlay":true}) matching its outer walls and large solid parts, so characters walk on floors and stop at walls.
 New levels already contain ground and a playable hero; keep the hero (do not remove characters with playable=true) and build around it. For drivable vehicles use a sketchfab car with behavior {"collision":"blocking","drivable":{...}}.`;
 
 Deno.serve(async (req) => {
