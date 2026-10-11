@@ -181,19 +181,50 @@
   }
   /* content-hash transform cache: unchanged files skip Babel on hot reload */
   function hashStr(t) { var h = 2166136261; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + t.length; }
+  /* fast path: Sucrase (sync, ~20x faster than Babel) with a light pass that adds data-ie-loc to lowercase JSX tags;
+     Babel is only downloaded if Sucrase can't handle a file */
+  var PREV = /[(>=?:{},&|;]$/;
+  function tagLoc(src, name) {
+    var lines = src.split("\n");
+    for (var li = 0; li < lines.length; li++) {
+      var L = lines[li], prev = li ? lines[li - 1] : "";
+      lines[li] = L.replace(/<([a-z][\w.:-]*)(?=[\s>\/])/g, function (m, tag, col) {
+        var before = L.slice(0, col).replace(/\s+$/, ""), ctx = before || prev.replace(/\s+$/, "");
+        if (!(PREV.test(ctx) || /\breturn$/.test(ctx) || (!before && !prev.trim()))) return m;
+        if (/data-ie-loc/.test(L.slice(col, col + 200).split(">")[0])) return m;
+        return "<" + tag + ' data-ie-loc="' + name + ":" + (li + 1) + ":" + col + '"';
+      });
+    }
+    return lines.join("\n");
+  }
+  function transformRaw(source, name, loc) {
+    var fn = /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx");
+    if (window.__sucrase && !window.__ieUseBabel) {
+      try { return window.__sucrase.transform(loc ? tagLoc(source, name) : source, { transforms: ["typescript", "jsx"], jsxRuntime: "automatic", production: true, filePath: fn, disableESTransforms: true }).code; }
+      catch (e) { if (!window.Babel) { window.__ieNeedBabel = true; throw e; } }
+    }
+    if (!window.Babel) { window.__ieNeedBabel = true; throw new Error("compiler loading"); }
+    return Babel.transform(source, { filename: fn, plugins: loc ? [locPlugin(name)] : [], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+  }
   function cachedTransform(source, name) {
-    var k = "ie-bc:" + name + ":" + hashStr(source), hit = null;
+    var k = "ie-bc2:" + (window.__ieUseBabel ? "b:" : "s:") + name + ":" + hashStr(source), hit = null;
     try { hit = sessionStorage.getItem(k); } catch (e) {}
     if (hit) return hit;
-    var code = Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), plugins: [locPlugin(name)], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
-    try { sessionStorage.setItem(k, code); } catch (e) { try { Object.keys(sessionStorage).forEach(function (x) { if (x.indexOf("ie-bc:") === 0) sessionStorage.removeItem(x); }); sessionStorage.setItem(k, code); } catch (e2) {} }
+    var code = transformRaw(source, name, true);
+    try { sessionStorage.setItem(k, code); } catch (e) { try { Object.keys(sessionStorage).forEach(function (x) { if (/^ie-bc/.test(x)) sessionStorage.removeItem(x); }); sessionStorage.setItem(k, code); } catch (e2) {} }
     return code;
+  }
+  /* React Refresh registration: every top-level Capitalized declaration becomes a hot-swappable family */
+  function refreshReg(out, name) {
+    var re = /^(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function|const|let|class)\s+([A-Z][\w$]*)/gm, m, seenN = {}, add = "";
+    while ((m = re.exec(out))) { if (seenN[m[1]]) continue; seenN[m[1]] = 1; add += "\ntry{globalThis.__IERR&&__IERR(" + m[1] + "," + JSON.stringify(name + " " + m[1]) + ")}catch(e){}"; }
+    return out + add;
   }
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.setAttribute("data-ie-css",' + JSON.stringify(name) + ');s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
-      : cachedTransform(source, name);
+      : refreshReg(cachedTransform(source, name), name);
     if (name !== file && !/\.(css|json)$/.test(name)) {
       var ex = exportNames(out), keys = Object.keys(ex), hasDef = /export\s+default\b|export\s*\{[^}]*\bas\s+default\b/.test(out);
       /* default import of a file that only has named exports: fall back to its main export instead of a SyntaxError */
@@ -210,7 +241,7 @@
         if (!r) { warnSoft("Missing module " + spec + " (imported from " + name + ") - showing a placeholder"); return pre + qt + virtualModule(spec, want, /components\/ui\/|lib\/utils/.test(spec)) + qt; }
         if (seen[r.name] === "pending") {
           /* circular import: hand back a lazy stub whose exports forward to the real module once it loads */
-          var pre1 = Babel.transform(r.code, { filename: /\.(tsx|jsx)$/.test(r.name) ? r.name : "x.tsx", presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+          var pre1 = transformRaw(r.code, r.name, false);
           return pre + qt + lazyStub(r.name, pre1) + qt;
         }
         if (!seen[r.name]) {
@@ -271,23 +302,50 @@
       var body = /<a-scene[\s\S]*<\/a-scene>/i.exec(code); document.getElementById("root").innerHTML = body ? body[0] : code;
     }).catch(function (e) { fail(e.message); });
   } else {
-    Promise.all([load("https://cdn.tailwindcss.com"), load("https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"), load("/imagine-engine/blocks/ie-sdk.js"), load("/imagine-engine/blocks/ui-kit.js")]).then(function () {
-      var out = compile(code, file, {});
+    var BABEL = "https://unpkg.com/@babel/standalone@7.26.4/babel.min.js";
+    var setupRefresh = import("https://esm.sh/react-refresh@0.17.0/runtime").then(function (m) {
+      var RR = m.default || m; RR.injectIntoGlobalHook(window);
+      window.$RefreshReg$ = function () {}; window.$RefreshSig$ = function () { return function (t) { return t; }; };
+      window.__IERR = function (t, id) { if (typeof t === "function") RR.register(t, id); }; window.__IERefresh = RR;
+    }).catch(function () {});
+    var loadSucrase = import("https://esm.sh/sucrase@3.35.0?bundle").then(function (m) { window.__sucrase = m; }).catch(function () { return load(BABEL); });
+    function build() {
+      window.__ieNeedBabel = false;
+      var o = compile(code, file, {});
+      if (window.__ieNeedBabel && !window.Babel) return load(BABEL).then(function () { window.__ieUseBabel = true; return compile(code, file, {}); });
+      return o;
+    }
+    Promise.all([load("https://cdn.tailwindcss.com"), loadSucrase, setupRefresh, load("/imagine-engine/blocks/ie-sdk.js"), load("/imagine-engine/blocks/ui-kit.js")]).then(build).then(function (out) {
       var nm = /export\s+default\s+(?:async\s+)?function\s+(\w+)/.exec(out);
       if (nm) out = out.replace(/export\s+default\s+(async\s+)?function/, "$1function") + "\nconst __ie_default = " + nm[1] + ";";
       else if (/export\s+default\s+/.test(out)) out = out.replace(/export\s+default\s+/, "const __ie_default = ");
       else out += "\nconst __ie_default = (typeof App !== 'undefined' ? App : () => null);";
-      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce, Component as __Cmp } from "react";\nclass __IEBoundary extends __Cmp { constructor(p){super(p);this.state={e:null};} static getDerivedStateFromError(e){return {e:e};} componentDidCatch(e,i){ window.__IEFail && window.__IEFail(e && e.message, (e && e.stack || "") + (i && i.componentStack || "")); } render(){ return this.state.e ? __ce("div",{style:{padding:24,color:"#fca5a5",font:"13px system-ui"}},"This app hit an error. Use Auto-repair below or edit it in the Dev tab.") : this.props.children; } }\n__cr(document.getElementById("root")).render(__ce(__IEBoundary,null,__ce(__ie_default)));';
+      out += '\nimport { createRoot as __cr } from "react-dom/client"; import { createElement as __ce, Component as __Cmp } from "react";\nclass __IEBoundary extends __Cmp { constructor(p){super(p);this.state={e:null};} static getDerivedStateFromError(e){return {e:e};} componentDidCatch(e,i){ if (window.__IEHot && Date.now() - window.__IEHot < 4000) { location.reload(); return; } window.__IEFail && window.__IEFail(e && e.message, (e && e.stack || "") + (i && i.componentStack || "")); } render(){ return this.state.e ? __ce("div",{style:{padding:24,color:"#fca5a5",font:"13px system-ui"}},"This app hit an error. Use Auto-repair below or edit it in the Dev tab.") : this.props.children; } }\n__cr(document.getElementById("root")).render(__ce(__IEBoundary,null,__ce(__ie_default)));window.__IEMounted=true;';
       var s = document.createElement("script"); s.type = "module";
       s.src = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
       document.body.appendChild(s);
     }).catch(function (e) { fail(e.message); });
   }
+  /* live update: recompile (cached files are instant), import the new modules, then let React Refresh swap
+     components in place so the app keeps its state; falls back to a full reload if anything goes wrong */
+  var hotBusy = false;
+  function hot(next) {
+    if (kind !== "react" || !window.__IERefresh || !window.__IEMounted || hotBusy) return location.reload();
+    hotBusy = true; code = next;
+    try {
+      window.__ieNeedBabel = false;
+      var out = compile(next, file, {});
+      if (window.__ieNeedBabel && !window.Babel) return location.reload();
+      var u = URL.createObjectURL(new Blob([out], { type: "text/javascript" }));
+      import(u).then(function () { window.__IEHot = Date.now(); window.__IERefresh.performReactRefresh(); document.getElementById("ie-err").style.display = "none"; lastErr = ""; hotBusy = false; })
+        .catch(function () { location.reload(); });
+    } catch (e) { location.reload(); }
+  }
   /* hot reload when the Dev tab file changes */
-  setInterval(function () { var c = src(); if (c && c !== last) return location.reload(); for (var n in deps) { if (n !== file && n.indexOf("@ui/") !== 0) { var nv = getFile(n) || ""; if (nv === deps[n]) continue;
+  setInterval(function () { if (hotBusy) return; var c = src(); if (c && c !== last) { last = c; return hot(c); } var changed = false; for (var n in deps) { if (n !== file && n.indexOf("@ui/") !== 0) { var nv = getFile(n) || ""; if (nv === deps[n]) continue;
     /* style-only change: swap the CSS in place, no reload */
     if (/\.css$/.test(n)) { var st = document.querySelector('style[data-ie-css="' + n.replace(/"/g, '\\"') + '"]'); if (st) { st.textContent = nv; deps[n] = nv; continue; } }
-    return location.reload(); } } }, 1200);
+    changed = true; } } if (changed) hot(src() || code); }, 1200);
 })();
 </script>
 </body>
