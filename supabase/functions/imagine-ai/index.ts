@@ -260,7 +260,13 @@ serve(async (req) => {
       if (Number(nb) < 0) return json({ error: "You're out of credits. You get 5 free credits every day, or upgrade to a monthly plan for more.", code: "no_credits" }, 402);
       balance = Number(nb);
     }
-    const grant = async (amt: number, reason: string) => { const { data: b } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: amt, _reason: reason, _ref: reason + ":" + crypto.randomUUID() }); if (b != null) balance = Number(b); };
+    // ai_credits_grant returns a boolean (applied or not), never the balance.
+    const grant = async (amt: number, reason: string) => {
+      const { data: ok } = await admin.rpc("ai_credits_grant", { _user_id: user.id, _amount: amt, _reason: reason, _ref: reason + ":" + crypto.randomUUID() });
+      if (ok !== true) return;
+      if (balance != null) balance = Math.round((balance + amt) * 100) / 100;
+      else { const { data: b } = await admin.rpc("ai_credits_sync", { _user_id: user.id }); if (b != null) balance = Number(b); }
+    };
     const refund = async () => { if (reserve > 0) await grant(reserve, "refund"); };
     failRefund = refund;
 
