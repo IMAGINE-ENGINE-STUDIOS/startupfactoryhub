@@ -1,3 +1,26 @@
+/* Storage cleanup on every load: removes old backups, stale app snapshots and build caches so the browser never fills up. */
+(function () {
+  try {
+    var now = Date.now(), keys = Object.keys(localStorage), backups = [];
+    keys.forEach(function (k) {
+      var m = /^ie-projects-(backup|broken)-(\d+)$/.exec(k);
+      if (m) backups.push([k, +m[2]]);
+    });
+    backups.sort(function (a, b) { return b[1] - a[1]; });
+    backups.slice(1).forEach(function (b) { localStorage.removeItem(b[0]); });
+    var files = {}; try { (JSON.parse(localStorage.getItem("ie-projects") || "[]") || []).forEach(function (p) { (p.files || []).forEach(function (f) { files[f.name] = 1; }); }); } catch (e) {}
+    keys.forEach(function (k) {
+      if (/^ie-pack:/.test(k) || /^ie-snap:/.test(k)) { try { var v = JSON.parse(localStorage.getItem(k) || "{}"); if (v && v.at && now - v.at > 7 * 864e5) localStorage.removeItem(k); } catch (e) { localStorage.removeItem(k); } }
+    });
+    var size = 0; Object.keys(localStorage).forEach(function (k) { size += (localStorage.getItem(k) || "").length; });
+    if (size > 3.5e6) Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|snap|bc)/.test(k)) localStorage.removeItem(k); });
+    Object.keys(sessionStorage).forEach(function (k) { if (/^ie-bc/.test(k)) sessionStorage.removeItem(k); });
+  } catch (e) {}
+  window.__IECleanupMemory = function () {
+    try { Object.keys(localStorage).forEach(function (k) { if (/^ie-(pack|snap|bc)|^ie-projects-(backup|broken)-/.test(k)) localStorage.removeItem(k); }); } catch (e) {}
+    try { if (window.caches) caches.keys().then(function (ks) { ks.forEach(function (k) { if (/^ie-libs-/.test(k)) caches.delete(k); }); }); } catch (e) {}
+  };
+})();
 /* Genius AI — universal builder copilot for Imagine Engine. */
 (function () {
   function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
