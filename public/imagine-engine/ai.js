@@ -642,9 +642,18 @@
     send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : ""));
     return true;
   };
+  // Automatic repair: at most 2 tries per file every 5 minutes, waits while Genius is busy
+  var healTries = {};
+  function autoHeal(d, wait) {
+    var f = String(d.file || ""); if (!f) return;
+    var t = healTries[f] = (healTries[f] || []).filter(function (x) { return Date.now() - x < 300000; });
+    if (t.length >= 2) return;
+    if (busy) { if ((wait || 0) < 20) setTimeout(function () { autoHeal(d, (wait || 0) + 1); }, 3000); return; }
+    if (window.__IEAutoHeal(d)) t.push(Date.now());
+  }
   window.addEventListener("message", function (ev) {
     var d = ev.data; if (!d || typeof d !== "object") return;
-    if (d.ie === "liveapp-error") { try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message, "error"); } catch (e) {} }
+    if (d.ie === "liveapp-error") { try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message + " (Genius AI is repairing it)", "error"); } catch (e) {} setTimeout(function () { autoHeal(d); }, 800); }
     if (d.ie === "liveapp-autoheal") window.__IEAutoHeal(d);
   });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); } });

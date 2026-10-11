@@ -34,7 +34,8 @@
     var info = { ie: "liveapp-error", file: file, message: m, stack: String(stack || "").slice(0, 2000) };
     try { (h || parent).postMessage(info, "*"); } catch (x) {}
     if (h) {
-      var b = document.createElement("button"); b.textContent = "Auto-repair with AI";
+      var nt = document.createElement("div"); nt.textContent = "Genius AI is repairing this automatically…"; nt.style.cssText = "margin-top:6px;font:12px system-ui;opacity:.8"; e.appendChild(nt);
+      var b = document.createElement("button"); b.textContent = "Repair again";
       b.style.cssText = "display:block;margin-top:8px;font:600 12px system-ui;padding:6px 12px;border-radius:9999px;border:0;background:#3b82f6;color:#fff;cursor:pointer";
       b.onclick = function () { b.disabled = true; b.textContent = "Repairing…"; try { h.postMessage(Object.assign({}, info, { ie: "liveapp-autoheal" }), "*"); } catch (x) {} };
       e.appendChild(b);
