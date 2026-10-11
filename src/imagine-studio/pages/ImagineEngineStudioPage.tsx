@@ -1,3 +1,4 @@
+import "@/lib/webgpuCompute";
 // @ts-nocheck -- imported Imagine Studio v2
 /**
  * Imagine Engine Studio — standalone entry to the full 3D level creation suite
