@@ -299,6 +299,7 @@ serve(async (req) => {
     const refund = async () => { if (reserve > 0) await grant(reserve, "refund"); };
     failRefund = refund;
 
+    if (body.context && typeof body.context === "object") body.context.lastUser = lastText.slice(0, 2000);
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
