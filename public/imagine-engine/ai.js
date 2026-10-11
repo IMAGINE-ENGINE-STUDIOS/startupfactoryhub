@@ -611,6 +611,7 @@
     return true;
   }
   window.addEventListener("message", function (ev) {
+    if (ev.origin !== location.origin) return;
     var d = ev.data; if (!d || !d.__IEStudio) return;
     if (d.__IEStudio === "scene" && d.json) { try { window.__IEFiles && window.__IEFiles.put("scenes/level.json", d.json, "json"); } catch (e) {} }
     if (d.__IEStudio === "reply" && d.text) { messages.push({ role: "assistant", content: String(d.text) }); render(); save(); }
@@ -726,6 +727,7 @@
     if (window.__IEAutoHeal(d)) t.push(Date.now());
   }
   window.addEventListener("message", function (ev) {
+    if (ev.origin !== location.origin && ev.origin !== "null") return;
     var d = ev.data; if (!d || typeof d !== "object") return;
     if (d.ie === "liveapp-error") { try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message + " (Genius AI is repairing it)", "error"); } catch (e) {} setTimeout(function () { autoHeal(d); }, 800); }
     if (d.ie === "liveapp-autoheal") window.__IEAutoHeal(d);
