@@ -91,6 +91,32 @@ Write clean, professional prose: short "## " headings, "- " bullet lists, **bold
 Project: sections ${(ctx?.sections || []).join(", ") || "none"}; tables ${(ctx?.tables || []).join(", ") || "none"}; flow nodes ${(ctx?.nodes || []).slice(0, 30).join(", ") || "none"}; state keys ${(ctx?.state || []).join(", ") || "none"}.
 Dev files:${files || " none"}`;
 }
+/* Domain knowledge for complex apps: archetype blueprints + defensive coding rules, injected only for app builds/edits. */
+const ARCHETYPES: { re: RegExp; name: string; plan: string }[] = [
+  { re: /\b(erp|crm|hr|payroll|billing|invoice|inventory|warehouse|logistics|fleet|saas|admin|dashboard|analytics|portal|b2b|procurement|accounting)\b/i, name: "Enterprise / B2B SaaS",
+    plan: "App shell (collapsible sidebar with lucide icons, top bar with search + cmdk command palette on Ctrl/Cmd+K, user menu); Overview page with 4 KPI cards (value, trend chip, recharts sparkline), 1-2 charts with range toggle (7d/30d/90d), recent activity timeline; one list page per core entity with a searchable, sortable, filterable table (@tanstack/react-table or the UI kit Table), status badges, row click opens a Sheet with details and edit form (react-hook-form + zod), create Dialog, delete with confirm; settings page. Entities related by id (e.g. orders.customerId), totals computed from data, never hard-coded." },
+  { re: /\b(kanban|board|task|project management|todo|workflow|pipeline|node editor|flowchart|automation builder|notes|wiki|docs|planner)\b/i, name: "Productivity / workflow",
+    plan: "@dnd-kit/core + @dnd-kit/sortable boards with columns and persistent order (save column + index to IE.db), @xyflow/react for node graphs (nodes/edges saved to IE.db), react-resizable-panels for split views, react-markdown for notes, keyboard shortcuts, inline editing, filters by assignee/tag/due date, empty states per column." },
+  { re: /\b(synth|music|audio|daw|sequencer|beat|drum|visuali[sz]er|animation|motion|creative|generative|shader|particles?)\b/i, name: "Creative / audio / visual",
+    plan: "nexusui dials/sliders/pads (create in useEffect on a ref, destroy() on cleanup), tone.js with await Tone.start() inside the first click handler (never on load), gsap timelines with gsap.context cleanup, canvas/WebGL sized to its container with ResizeObserver; presets saved in IE.db; transport controls (play/stop/BPM)." },
+  { re: /\b(bank|fintech|trading|stock|crypto|wallet|budget|expense|portfolio|loan|payment|shop|store|e-?commerce|marketplace|checkout|booking|reservation)\b/i, name: "Fintech / commerce",
+    plan: "Money as integer cents, formatted with Intl.NumberFormat; transaction register with running balance, category filters, monthly charts; for shops applyTemplate store then patch PRODUCTS; bookings with date-fns slot generation and conflict checks; confirmation states after every action." },
+  { re: /\b(clinic|health|patient|doctor|telehealth|school|lms|course|student|education|gym|fitness|restaurant|menu|real estate|property|hotel|event|ticket)\b/i, name: "Vertical service app",
+    plan: "Role-aware views via IE.auth.role() (owner sees admin pages, members see their own records with { mine: true }), scheduling with date-fns, detail pages via IE.useRoute, intake forms with zod validation, status workflow (pending -> confirmed -> done) as badges, notifications via toast." },
+  { re: /\b(3d|three|webgl|configurator|game|simulator|racing|shooter|platformer|r3f)\b/i, name: "3D / game",
+    plan: "@react-three/fiber Canvas inside a h-screen parent, drei OrbitControls/Environment/ContactShadows, Suspense fallback, useFrame for loops (no setState per frame; use refs), IE.controls for keyboard/joystick, HUD as HTML overlay, dispose on unmount." },
+];
+function knowledge(ctx: any) {
+  const ask = String(ctx?.lastUser || "");
+  if (ctx?.build !== "app" && !/\b(app|dashboard|system|platform|tool|portal|game|crm|erp)\b/i.test(ask)) return "";
+  const hits = ARCHETYPES.filter((a) => a.re.test(ask)).slice(0, 2);
+  return `
+COMPLEX APP KNOWLEDGE:
+${hits.length ? hits.map((h) => `- Blueprint "${h.name}": ${h.plan}`).join("\n") : "- Default blueprint: app shell (sidebar + top bar + content), overview page with KPI cards and a chart, list page with search/filter/table, detail Sheet with edit form, create Dialog, settings page."}
+- Before writing code, decide the data model: 2-5 entities with typed fields in apps/<name>/types.ts, a seed list of 12-20 realistic domain records per main entity (real-sounding names, prices, dates within the last 90 days, varied statuses) in apps/<name>/seed.ts, inserted into IE.db only when the collection is empty.
+- File plan for a new app: types.ts, seed.ts, store.ts (data hooks: load with IE.db.list in useEffect, subscribe for live updates, add/update/remove helpers), components/* (Sidebar, Topbar, KpiCard, DataTable, EntityForm), pages/* (one per screen), then the root apps/<Name>.tsx that wires routes with IE.useRoute. Every file listed must actually be written in this reply.
+DEFENSIVE REACT (never crash): guard every list ((items ?? []).map), optional-chain nested data (a?.b?.c), default every prop, parse dates with a fallback (isNaN check), Number(x) || 0 for math, key every mapped element with a stable id, never call hooks conditionally, wrap async work in try/catch and show an inline error, never access window/document at module top level, only import lucide-react icons that exist (e.g. LayoutDashboard, Users, Package, Truck, Settings, Search, Plus, Trash2, Pencil, ChevronRight, TrendingUp, TrendingDown, Calendar, Bell, DollarSign, BarChart3, Filter, X, Check), clean up intervals/listeners/animations in useEffect returns.`;
+}
 function buildPrompt(tab: string, ctx: any, extra: string) {
   return `You are Imagine AI, the universal builder copilot inside Imagine Engine by Startup Factory Hub.
 You help users build any project: landing pages on the Canvas, automation in Flow, code in Dev, schemas in Database, and releases in Deploy.
@@ -107,7 +133,7 @@ Interface skills to apply: clear layout hierarchy, responsive grids (mobile firs
 Starter templates: webglstudio (React Three Fiber scene + live controls), audiovisual (Three.js particles + Tone.js + NexusUI), motionstudio (React web app: NexusUI dial/slider/pad/toggle controls driving GSAP animations, presets saved in IE.db), dashboard (charts), kanban (task board), wizard (multi-step form), crm (sales pipeline with deals saved in IE.db), store (shop).
 AUTO-REPAIR messages come from the engine when an app crashed: fix the root cause with patchFile only, never rebuild, reply in one sentence.
 MODULE RULES (prevent runtime import errors): every Dev module must have exactly one export default plus any named exports; import named things with { } exactly as exported; never let two files import each other (put shared types/constants in apps/<name>/types.ts); never import from the root apps/<Name>.tsx; only import "@/components/ui/<name>" names listed in the UI kit.
-MODULAR DIFFS: keep each file under 150 lines; when changing code, emit patchFile with the smallest unique find strings copied verbatim; touch only the files involved; never resend unchanged files.
+MODULAR DIFFS: keep each file under 150 lines; when changing code, emit patchFile with the smallest unique find strings copied verbatim; touch only the files involved; never resend unchanged files.${knowledge(ctx)}
 DEV FILES (current source; apps/* files are what the canvas shows live — editing them changes the running app/game): ${(ctx?.files || []).map((f: any) => `\n--- ${f.name} (${f.size} chars)${f.content ? "\n" + f.content : " [content omitted]"}`).join("").slice(0, 40000) || "none"}
 Selected element: ${ctx?.selected ? JSON.stringify(ctx.selected) : "none"}.${ctx?.selected?.file ? " The user clicked this exact element in the running app (file + line + numbered snippet above). Words like this/it/here refer to it: change ONLY that element with patchFile on " + ctx.selected.file + ", copying find text exactly from the snippet (without the line-number prefixes). LIST ITEMS (critical): if that line sits inside a .map() (kanban cards, rows, deals, products), editing the JSX would change EVERY item. Instead change only the one item whose text matches the selected text: patch that item's record in the data constant / seed list, or add a per-item field (e.g. color, badge, style) to that record only and render it with a fallback so other items look exactly as before. Never restyle the shared template for a single-item request." : ""}
 Flow graph right now: ${JSON.stringify(ctx?.graph || {}).slice(0, 4000)}
@@ -273,6 +299,7 @@ serve(async (req) => {
     const refund = async () => { if (reserve > 0) await grant(reserve, "refund"); };
     failRefund = refund;
 
+    if (body.context && typeof body.context === "object") body.context.lastUser = lastText.slice(0, 2000);
     const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
