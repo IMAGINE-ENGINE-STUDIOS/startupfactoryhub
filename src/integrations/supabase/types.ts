@@ -228,6 +228,45 @@ export type Database = {
           },
         ]
       }
+      account_link_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      account_links: {
+        Row: {
+          created_at: string
+          group_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           achievement_type: string
@@ -9262,6 +9301,14 @@ export type Database = {
         }
         Returns: Json
       }
+      create_account_link_code: { Args: never; Returns: string }
+      get_account_groups: {
+        Args: { user_ids: string[] }
+        Returns: {
+          group_id: string
+          user_id: string
+        }[]
+      }
       get_corporate_partners_admin: {
         Args: never
         Returns: {
@@ -9312,6 +9359,17 @@ export type Database = {
           project_id: string
           share_token: string
           view_count: number
+        }[]
+      }
+      get_my_linked_accounts: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          email: string
+          full_name: string
+          is_current: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }[]
       }
       get_official_mentor_invitation_by_token: {
@@ -9397,6 +9455,7 @@ export type Database = {
       }
       profile_contact_email: { Args: { _owner: string }; Returns: string }
       profile_contact_resume: { Args: { _owner: string }; Returns: string }
+      redeem_account_link_code: { Args: { _code: string }; Returns: boolean }
       save_sign_document_by_token: {
         Args: {
           _content_html: string
@@ -9458,6 +9517,7 @@ export type Database = {
         Args: { _guest_identifier: string; _post_id: string }
         Returns: boolean
       }
+      unlink_my_account: { Args: never; Returns: undefined }
       update_user_online_status: {
         Args: { p_is_online: boolean; p_user_id: string }
         Returns: undefined
