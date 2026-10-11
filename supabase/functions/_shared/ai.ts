@@ -73,11 +73,19 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
     if (payload.stream) payload.stream_options = { include_usage: true };
     if (prov === "gemini") delete payload.stream_options;
     try {
-      const resp = await fetch(URLS[prov], {
+      const send = () => fetch(URLS[prov], {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      let resp = await send();
+      // rate limited: wait the provider's suggested time (max 6s) and try the same model once more
+      if (resp.status === 429) {
+        const ra = Number(resp.headers.get("retry-after")) || 2;
+        console.warn(`[ai] ${prov}/${model} 429, retrying in ${Math.min(ra, 6)}s`);
+        await new Promise((r) => setTimeout(r, Math.min(ra, 6) * 1000));
+        resp = await send();
+      }
       if (resp.ok) return { resp, provider: prov, model };
       last = { resp, provider: prov, model };
       if (!RETRY.has(resp.status)) return last;
