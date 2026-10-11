@@ -8,8 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShieldCheck, Cpu, DollarSign, Activity, Loader2, Lock, KeyRound, Plus, Trash2, Layers, Power } from "lucide-react";
+import { ShieldCheck, Cpu, DollarSign, Activity, Loader2, Lock, KeyRound, Plus, Trash2, Layers, Power, Database } from "lucide-react";
 import { toast } from "sonner";
+import PlatformDataGrid from "@/components/admin/PlatformDataGrid";
 import logo from "@/assets/imagine-engine-logo.png.asset.json";
 
 type Plan = { id: string; name: string; price_monthly: number; price_yearly: number; monthly_tokens: number; daily_messages: number };
@@ -146,6 +147,7 @@ export default function ImagineEngineAdmin() {
             <TabsTrigger value="business"><DollarSign className="w-4 h-4 mr-1" />Business & costs</TabsTrigger>
             <TabsTrigger value="plans"><Layers className="w-4 h-4 mr-1" />Paid plans</TabsTrigger>
             <TabsTrigger value="models"><Cpu className="w-4 h-4 mr-1" />AI models & keys</TabsTrigger>
+            <TabsTrigger value="data"><Database className="w-4 h-4 mr-1" />Platform data</TabsTrigger>
           </TabsList>
 
           <TabsContent value="service" className="space-y-4">
@@ -318,6 +320,10 @@ export default function ImagineEngineAdmin() {
                 </div>
               ))}
             </section>
+          </TabsContent>
+
+          <TabsContent value="data" className="space-y-4">
+            <PlatformDataGrid />
           </TabsContent>
         </Tabs>
       </div>
