@@ -273,8 +273,30 @@
       var d = e.data; if (!d || !d.ieBus || !d.event) return;
       window.__IEState["app:" + d.event] = d.payload === undefined ? true : d.payload;
       (subs[d.event] || []).concat(subs["*"] || []).forEach(function (cb) { try { cb(d.payload, d.event); } catch (x) {} });
-      if (window.__IEBus && window.__IEBus.emit) try { window.__IEBus.emit("app:" + d.event, d.payload); } catch (x) {}
+      if (window.__IEBus) try { if (window.__IEBus.set) window.__IEBus.set("app:" + d.event, window.__IEState["app:" + d.event]); else if (window.__IEBus.emit) window.__IEBus.emit("app:" + d.event, d.payload); } catch (x) {}
+      runAppTriggers(d.event, d.payload);
     });
+    /* Flow trigger nodes with params.appEvent (or event) equal to an IE.emit name run their chain */
+    function runAppTriggers(ev, payload) {
+      var raw = window.__IE && window.__IE.raw; if (!raw || !raw.nodes) return;
+      var nodes = raw.nodes || [], links = raw.links || [], byId = {};
+      nodes.forEach(function (n) { byId[n.id] = n; });
+      var starts = nodes.filter(function (n) { var p = n.params || {}; return n.kind === "trigger" && (p.appEvent === ev || p.event === ev || p.appEvent === "*"); });
+      starts.forEach(function (t) {
+        window.__IEState.event = { name: ev, payload: payload };
+        if (window.__IE.log) window.__IE.log("App event " + ev + " → " + (t.label || t.id));
+        var q = [t.id], seen = {}, steps = 0;
+        while (q.length && steps++ < 200) {
+          var id = q.shift(); if (seen[id]) continue; seen[id] = 1; var n = byId[id]; if (!n) continue; var port = null;
+          try {
+            if (n.kind === "customScript" || (n.kind !== "trigger" && n.code)) window.__IEMeta && window.__IEMeta(n.code || (n.params || {}).code || "", n);
+            else if (n.kind === "condition") { var ex = (n.params || {}).expression || (n.params || {}).condition; if (ex) { port = !!Function("state", "event", "payload", "return (" + ex + ")")(window.__IEState, window.__IEState.event, payload) ? "true" : "false"; } }
+            else if (n.kind !== "trigger" && window.__IEX && typeof window.__IEX[n.subType] === "function") window.__IEX[n.subType](Object.assign({}, n.params || {}), n);
+          } catch (e) { if (window.__IE.log) window.__IE.log((n.label || n.id) + ": " + e.message, "error"); continue; }
+          links.forEach(function (l) { if (l.from === id && (!port || !l.fromPort || l.fromPort === port)) q.push(l.to); });
+        }
+      });
+    }
     window.__IEAppBus = {
       broadcast: function (action, payload) { var fs = frames(); fs.forEach(function (f) { try { f.contentWindow.postMessage({ __IE_ACTION: String(action), payload: payload }, "*"); } catch (e) {} }); return fs.length; },
       on: function (event, cb) { (subs[event] = subs[event] || []).push(cb); return function () { subs[event] = (subs[event] || []).filter(function (x) { return x !== cb; }); }; },
