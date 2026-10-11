@@ -168,6 +168,8 @@
     /* replace the self-import marker with a registry write (a module can't import its own blob URL) */
     return out.replace(/\nimport \* as __ie_self_ns from "ie-self:([^"]*)";/, function (_, n) {
       var ex = exportNames(out), o = Object.keys(ex).filter(function (k) { return k !== "default"; }).map(function (k) { return JSON.stringify(k) + ":(typeof " + ex[k] + "!=='undefined'?" + ex[k] + ":undefined)"; });
+      var dm = /export\s+default\s+(?:async\s+)?(?:function|class)\s+([A-Za-z_$][\w$]*)/.exec(out) || /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/.exec(out);
+      if (dm) o.push('"default":(typeof ' + dm[1] + "!=='undefined'?" + dm[1] + ":undefined)");
       return "\nqueueMicrotask(()=>{try{globalThis.__IEMods[" + JSON.stringify(n) + "]=Object.assign(globalThis.__IEMods[" + JSON.stringify(n) + "]||{},{" + o.join(",") + "})}catch(e){}});";
     });
   }
