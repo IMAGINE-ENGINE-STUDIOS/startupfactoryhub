@@ -80,7 +80,11 @@
     try { ie.log && ie.log("Dev: App.tsx applied to the Canvas"); } catch (e) {}
   }
 
-  function tick() { try { codeToCanvas(); canvasToCode(); } catch (e) {} }
+  var busyUntil = 0;
+  document.addEventListener("pointerdown", function () { window.__IEDragging = true; }, true);
+  document.addEventListener("pointerup", function () { window.__IEDragging = false; busyUntil = Date.now() + 300; }, true);
+  document.addEventListener("keydown", function () { busyUntil = Date.now() + 500; }, true);
+  function tick() { if (document.hidden || window.__IEDragging || Date.now() < busyUntil) return; try { codeToCanvas(); canvasToCode(); } catch (e) {} }
   setInterval(tick, 700);
-  window.__IEDevSync = { now: tick, generate: generate };
+  window.__IEDevSync = { now: function () { busyUntil = 0; tick(); }, generate: generate };
 })();

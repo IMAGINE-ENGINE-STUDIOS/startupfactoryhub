@@ -179,11 +179,21 @@
     miss.forEach(function (n) { body += "export const " + n + "=" + valueFor(n, ui) + ";"; });
     var u = URL.createObjectURL(new Blob([body], { type: "text/javascript" })); EXPORTS[u] = have.concat(miss, ["default"]); return u;
   }
+  /* content-hash transform cache: unchanged files skip Babel on hot reload */
+  function hashStr(t) { var h = 2166136261; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + t.length; }
+  function cachedTransform(source, name) {
+    var k = "ie-bc:" + name + ":" + hashStr(source), hit = null;
+    try { hit = sessionStorage.getItem(k); } catch (e) {}
+    if (hit) return hit;
+    var code = Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), plugins: [locPlugin(name)], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+    try { sessionStorage.setItem(k, code); } catch (e) { try { Object.keys(sessionStorage).forEach(function (x) { if (x.indexOf("ie-bc:") === 0) sessionStorage.removeItem(x); }); sessionStorage.setItem(k, code); } catch (e2) {} }
+    return code;
+  }
   function compile(source, name, seen) {
     deps[name] = source;
     var out = /\.css$/.test(name) ? 'const s=document.createElement("style");s.textContent=' + JSON.stringify(source) + ';document.head.appendChild(s);export default {};'
       : /\.json$/.test(name) ? "export default " + source + ";"
-      : Babel.transform(source, { filename: /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx"), plugins: [locPlugin(name)], presets: [["react", { runtime: "automatic" }], "typescript"] }).code;
+      : cachedTransform(source, name);
     if (name !== file && !/\.(css|json)$/.test(name)) {
       var ex = exportNames(out), keys = Object.keys(ex), hasDef = /export\s+default\b|export\s*\{[^}]*\bas\s+default\b/.test(out);
       /* default import of a file that only has named exports: fall back to its main export instead of a SyntaxError */

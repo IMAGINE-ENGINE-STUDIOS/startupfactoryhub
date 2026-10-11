@@ -44,7 +44,7 @@
     }
   }
   setInterval(function () {
-    if (!ie()) return; var m = mode();
+    if (!ie() || document.hidden) return; var m = mode();
     if (m !== "dev") seeCanvas();
     if (m === "dev" && lastMode && lastMode !== "dev") setTimeout(focusApp, 60);
     lastMode = m; paint();
