@@ -23,6 +23,31 @@
   };
   function out(r) { if (r.error) throw new Error(r.error.message); return r.data; }
 
+  /* creator's own connected Supabase (public anon key; their row security rules apply) */
+  function sbConn() {
+    try { var p = q.get("pid") || localStorage.getItem("ie-sbconn-current") || "default"; var c = JSON.parse(localStorage.getItem("ie-sbconn:" + p) || "null"); if (!c || !c.url || !c.key) return null; c.tables = JSON.parse(localStorage.getItem("ie-sbtables:" + p) || "[]"); return c; } catch (e) { return null; }
+  }
+  function sbFetch(c, path, opts) {
+    opts = opts || {};
+    return fetch(c.url + "/rest/v1/" + path, { method: opts.method || "GET", headers: { apikey: c.key, Authorization: "Bearer " + c.key, "Content-Type": "application/json", Prefer: "return=representation" }, body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("Supabase error " + r.status)); return j; }); });
+  }
+  function sbTable(name, force) {
+    var c = sbConn(); if (!c) return null;
+    var t = c.tables.filter(function (x) { return x.name === name; })[0];
+    if (!t && !force) return null;
+    var pk = (t && t.pk) || "id", tn = encodeURIComponent(name);
+    var eq = function (id) { return "?" + encodeURIComponent(pk) + "=eq." + encodeURIComponent(id); };
+    return {
+      pk: pk,
+      list: function (o) { o = o || {}; return sbFetch(c, tn + "?select=*&limit=" + (Number(o.limit) || 500)); },
+      insert: function (r) { return sbFetch(c, tn, { method: "POST", body: r || {} }).then(function (a) { return (a || [])[0] || null; }); },
+      update: function (id, p) { return sbFetch(c, tn + eq(id), { method: "PATCH", body: p || {} }).then(function (a) { return (a || [])[0] || null; }); },
+      remove: function (id) { return sbFetch(c, tn + eq(id), { method: "DELETE" }).then(function () { return true; }); },
+    };
+  }
+  IE.supabase = { connected: function () { return !!sbConn(); }, tables: function () { var c = sbConn(); return c ? c.tables.map(function (t) { return t.name; }) : []; }, from: function (name) { return sbTable(name, true); } };
+  IE.sbTable = sbTable;
   /* every app name gets its own namespace, sync channel and collections; the host engine uses IE.dbFor(app, col) */
   function track(app, col) { try { var k = "ie-appcols:" + app, a = JSON.parse(localStorage.getItem(k) || "[]"); if (a.indexOf(col) < 0) { a.push(col); localStorage.setItem(k, JSON.stringify(a)); } } catch (e) {} }
   var made = {};
@@ -73,7 +98,22 @@
     return o.limit ? r.slice(0, o.limit) : r;
   }
   var dbFn = function (col) {
-    col = String(col || "items").replace(/[^a-zA-Z0-9_-]/g, "_"); track(appName, col);
+    col = String(col || "items").replace(/[^a-zA-Z0-9_-]/g, "_");
+    /* tables that exist in the creator's connected Supabase are saved there */
+    var st = sbTable(col);
+    if (st) {
+      var aft = function (p) { return p.then(function (v) { notify(col); try { localStorage.setItem("ie-sbtick", String(Date.now())); } catch (e) {} return v; }); };
+      var sapi = {
+        list: function (o) { return st.list().then(function (rows) { return query(rows, o); }); },
+        insert: function (r) { return aft(st.insert(r)); },
+        update: function (id, p) { return aft(st.update(id, p)); },
+        remove: function (id) { return aft(st.remove(id)); },
+        subscribe: function (fn, o) { var run = function () { sapi.list(o).then(fn).catch(function () {}); }; (subs[col] = subs[col] || []).push(run); run(); return function () { subs[col] = (subs[col] || []).filter(function (x) { return x !== run; }); }; },
+        source: "supabase",
+      };
+      return sapi;
+    }
+    track(appName, col);
     var after = function (p) { return p.then(function (v) { notify(col); return v; }); };
     var api = {
       list: function (o) { return call("list", col).then(function (rows) { return query(rows, o); }); },

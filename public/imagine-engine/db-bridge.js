@@ -21,37 +21,49 @@
     if (!a) { var all = apps(), hit = all.filter(function (x) { return x.cols.indexOf(c) >= 0; })[0] || all[0]; a = hit ? hit.app : "app"; }
     return { app: a, col: c.replace(/[^a-zA-Z0-9_-]/g, "_") || "items" };
   }
-  var snap = {}, busy = false, last = "";
+  var snap = {}, busy = false, last = "", SBP = "sbdb:", pks = {};
   function cols(rows) { var s = { id: 1 }, o = ["id"]; rows.forEach(function (r) { Object.keys(r || {}).forEach(function (k) { if (!s[k] && k.charAt(0) !== "_") { s[k] = 1; o.push(k); } }); }); return o; }
   function strip(r) { var o = {}; Object.keys(r || {}).forEach(function (k) { if (k !== "id" && k !== "created_at" && k.charAt(0) !== "_") o[k] = r[k]; }); return o; }
   function refresh() {
     var ie = window.__IE; if (!ie || !ie.setTables || !window.IE || !window.IE.dbFor) return Promise.resolve();
     var list = []; apps().forEach(function (a) { a.cols.forEach(function (c) { list.push({ app: a.app, col: c }); }); });
-    return Promise.all(list.map(function (x) { return db(x.app, x.col).list().then(function (rows) { return { x: x, rows: rows || [] }; }).catch(function () { return { x: x, rows: [] }; }); }))
-      .then(function (res) {
+    var sbt = (window.IE.supabase && window.IE.supabase.tables()) || [];
+    var sbJobs = Promise.all(sbt.map(function (n) { var t = window.IE.sbTable(n); return t.list({ limit: 200 }).then(function (rows) { return { n: n, rows: rows || [], pk: t.pk }; }).catch(function () { return null; }); }));
+    return Promise.all([Promise.all(list.map(function (x) { return db(x.app, x.col).list().then(function (rows) { return { x: x, rows: rows || [] }; }).catch(function () { return { x: x, rows: [] }; }); })), sbJobs])
+      .then(function (both) {
+        var res = both[0];
+        var sbLive = both[1].filter(Boolean).map(function (r) {
+          var id = SBP + r.n; pks[id] = r.pk; snap[id] = JSON.parse(JSON.stringify(r.rows));
+          var c = cols(r.rows); if (r.pk !== "id") c = [r.pk].concat(c.filter(function (k) { return k !== "id" && k !== r.pk; }));
+          return { id: id, name: "supabase." + r.n, columns: c, rows: r.rows.map(function (x) { return Object.assign({ id: x[r.pk] }, x); }), live: true };
+        });
         var live = res.map(function (r) {
           var id = PFX + r.x.app + ":" + r.x.col; snap[id] = JSON.parse(JSON.stringify(r.rows));
           return { id: id, name: r.x.app + "." + r.x.col, columns: cols(r.rows), rows: r.rows.map(function (x) { return Object.assign({}, x); }), live: true };
         });
         busy = true;
-        ie.setTables(function (prev) { var own = (prev || []).filter(function (t) { return String(t.id).indexOf(PFX) !== 0; }); return own.concat(live); });
+        ie.setTables(function (prev) { var own = (prev || []).filter(function (t) { return String(t.id).indexOf(PFX) !== 0 && String(t.id).indexOf(SBP) !== 0; }); return own.concat(live, sbLive); });
         setTimeout(function () { busy = false; last = sig(); }, 50);
       });
   }
-  function sig() { try { return JSON.stringify((window.__IE.tableData || []).filter(function (t) { return String(t.id).indexOf(PFX) === 0; })); } catch (e) { return ""; } }
+  function sig() { try { return JSON.stringify((window.__IE.tableData || []).filter(function (t) { return String(t.id).indexOf(PFX) === 0 || String(t.id).indexOf(SBP) === 0; })); } catch (e) { return ""; } }
   /* write Database-tab edits on live tables back to IE.db */
   function push() {
     if (busy || !window.__IE || !window.__IE.tableData) return; var s = sig(); if (s === last) return; last = s;
     var jobs = [];
     window.__IE.tableData.forEach(function (t) {
-      if (String(t.id).indexOf(PFX) !== 0 || !snap[t.id]) return;
-      var p = t.id.slice(PFX.length).split(":"), d = db(p[0], p.slice(1).join(":")); if (!d) return;
+      if (!snap[t.id]) return;
+      var d, isSb = String(t.id).indexOf(SBP) === 0;
+      if (isSb) d = window.IE.sbTable(t.id.slice(SBP.length));
+      else if (String(t.id).indexOf(PFX) === 0) { var p = t.id.slice(PFX.length).split(":"); d = db(p[0], p.slice(1).join(":")); }
+      if (!d) return;
+      var pk = isSb ? pks[t.id] || "id" : "id";
       var old = {}; snap[t.id].forEach(function (r) { old[r.id] = r; });
       var seen = {};
       (t.rows || []).forEach(function (r) {
         var o = r && old[r.id];
-        if (o) { seen[r.id] = 1; var ch = {}, n = 0; Object.keys(r).forEach(function (k) { if (k !== "id" && String(r[k]) !== String(o[k])) { ch[k] = r[k]; n++; } }); if (n) jobs.push(d.update(r.id, ch)); }
-        else if (r) jobs.push(d.insert(strip(r)));
+        if (o) { seen[r.id] = 1; var ch = {}, n = 0; Object.keys(r).forEach(function (k) { if (k !== "id" && k !== pk && String(r[k]) !== String(o[k])) { ch[k] = r[k] === "" ? null : r[k]; n++; } }); if (n) jobs.push(d.update(r.id, ch)); }
+        else if (r) { var nr = strip(r); if (isSb) Object.keys(nr).forEach(function (k) { if (nr[k] === "" || nr[k] == null) delete nr[k]; }); jobs.push(d.insert(nr)); }
       });
       Object.keys(old).forEach(function (id) { if (!seen[id]) jobs.push(d.remove(id)); });
     });
@@ -100,7 +112,14 @@
   /* apps saving data anywhere (other frames or tabs) refresh the Database tab */
   var chans = {};
   function listen() { apps().forEach(function (a) { if (chans[a.app]) return; try { var bc = new BroadcastChannel("ie-sync:" + a.app); bc.onmessage = function () { clearTimeout(chans._t); chans._t = setTimeout(refresh, 150); }; chans[a.app] = bc; } catch (e) { chans[a.app] = 1; } }); }
-  addEventListener("storage", function (e) { if (e.key && /^ie-app(db|cols):/.test(e.key)) { listen(); refresh(); } });
+  addEventListener("storage", function (e) { if (e.key && /^(ie-app(db|cols):|ie-sbtick$|ie-sbtables:)/.test(e.key)) { listen(); refresh(); } });
   var n = 0, boot = setInterval(function () { if (window.__IE && window.__IE.setTables && window.IE && window.IE.dbFor) { clearInterval(boot); listen(); refresh(); setInterval(push, 700); setInterval(function () { listen(); }, 4000); } else if (++n > 200) clearInterval(boot); }, 150);
+  /* keep connected Supabase tables fresh while the Database tab is open */
+  var lastSb = "";
+  setInterval(function () {
+    var ie = window.__IE, m = ie && (ie.raw ? ie.raw.mode : ie.mode); if (!window.IE || !window.IE.supabase) return;
+    var k = window.IE.supabase.tables().join(","); if (k !== lastSb) { lastSb = k; return refresh(); }
+    if (m === "database" && !busy) refresh();
+  }, 8000);
   window.__IEDataRefresh = function () { listen(); return refresh(); };
 })();

@@ -154,4 +154,13 @@
 
   window.__IEBackend = { open: open, supabase: sb, surreal: sr, schema: schema, summary: summary, surrealQuery: surrealQuery, surrealTable: surrealTable };
   setTimeout(function () { if (sb() || sr()) schema(false); }, 1500);
+  /* live apps (iframes) read the open project's Supabase link + table list from these keys */
+  setInterval(function () {
+    try {
+      localStorage.setItem("ie-sbconn-current", pid());
+      if (sb() && cache.supabase) localStorage.setItem("ie-sbtables:" + pid(), JSON.stringify(cache.supabase.map(function (t) { return { name: t.name, pk: (t.columns.filter(function (c) { return c.pk; })[0] || {}).name || "id" }; })));
+      else if (!sb()) localStorage.removeItem("ie-sbtables:" + pid());
+      if (sb() && !cache.supabase) schema(false);
+    } catch (e) {}
+  }, 2000);
 })();
