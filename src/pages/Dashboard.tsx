@@ -1,4 +1,3 @@
-import LinkedAccountsSwitcher from '@/components/LinkedAccountsSwitcher';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -372,7 +371,6 @@ const Dashboard = () => {
             fallbackText={user?.email || 'U'}
             className="h-14 w-14 sm:h-16 sm:w-16"
           />
-          <LinkedAccountsSwitcher />
         </div>
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}

@@ -46,7 +46,12 @@ export const useCalendarBookings = () => {
     }
   };
 
-  useEffect(() => { fetchBookings(); }, [user]);
+  useEffect(() => {
+    fetchBookings();
+    const refresh = () => fetchBookings();
+    window.addEventListener('sfh:bookings-changed', refresh);
+    return () => window.removeEventListener('sfh:bookings-changed', refresh);
+  }, [user]);
 
   const updateBookingStatus = async (id: string, status: string) => {
     try {
