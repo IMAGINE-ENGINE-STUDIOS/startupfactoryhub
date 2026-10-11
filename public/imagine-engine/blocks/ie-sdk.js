@@ -23,6 +23,11 @@
   };
   function out(r) { if (r.error) throw new Error(r.error.message); return r.data; }
 
+  /* every app name gets its own namespace, sync channel and collections; the host engine uses IE.dbFor(app, col) */
+  function track(app, col) { try { var k = "ie-appcols:" + app, a = JSON.parse(localStorage.getItem(k) || "[]"); if (a.indexOf(col) < 0) { a.push(col); localStorage.setItem(k, JSON.stringify(a)); } } catch (e) {} }
+  var made = {};
+  function makeDB(appName) {
+  if (made[appName]) return made[appName];
   /* project namespace: creator id is fixed the first time the app is opened by a signed-in creator */
   function ns() {
     return IE.auth.user().then(function (u) {
@@ -67,8 +72,8 @@
     if (o.page) { var pp = o.perPage || 20; r = r.slice((o.page - 1) * pp, o.page * pp); }
     return o.limit ? r.slice(0, o.limit) : r;
   }
-  IE.db = function (col) {
-    col = String(col || "items").replace(/[^a-zA-Z0-9_-]/g, "_");
+  var dbFn = function (col) {
+    col = String(col || "items").replace(/[^a-zA-Z0-9_-]/g, "_"); track(appName, col);
     var after = function (p) { return p.then(function (v) { notify(col); return v; }); };
     var api = {
       list: function (o) { return call("list", col).then(function (rows) { return query(rows, o); }); },
@@ -84,8 +89,13 @@
     };
     return api;
   };
+  dbFn.ns = ns;
+  return (made[appName] = dbFn);
+  }
+  IE.db = makeDB(appName);
+  IE.dbFor = function (app, col) { return makeDB(String(app || "app").replace(/[^a-zA-Z0-9_-]/g, "_"))(col); };
   /* "owner" = the creator who first opened the app signed in, "member" = other signed-in users, "guest" = signed out */
-  IE.auth.role = function () { return ns().then(function (i) { if (!i.user) return "guest"; return i.ns && i.ns.indexOf(i.user.id + "/") === 0 ? "owner" : "member"; }); };
+  IE.auth.role = function () { return IE.db.ns().then(function (i) { if (!i.user) return "guest"; return i.ns && i.ns.indexOf(i.user.id + "/") === 0 ? "owner" : "member"; }); };
   IE.auth.hasRole = function (r) { return IE.auth.role().then(function (x) { return x === r || (r === "member" && x === "owner"); }); };
 
   /* hash router: IE.route() -> "/settings", IE.navigate("/settings"), IE.useRoute(React) hook */
