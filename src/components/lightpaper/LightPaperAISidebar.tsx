@@ -28,7 +28,11 @@ const QUICK: { icon: any; label: string; prompt: string }[] = [
 const memKey = (k: string) => `lp-ai-mem:${k}`;
 
 export default function LightPaperAISidebar({ docKey, getDocument, onApply }: Props) {
-  const [open, setOpen] = useState(() => localStorage.getItem("lp-ai-open") !== "0");
+  const [open, setOpen] = useState(() => {
+    // Phones: start closed so the document is visible; the panel opens as a full-screen overlay.
+    if (typeof window !== "undefined" && window.innerWidth < 768) return false;
+    return localStorage.getItem("lp-ai-open") !== "0";
+  });
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
