@@ -16,7 +16,6 @@
   <div class="c"><div id="freq"></div>Pitch</div>
   <div class="c"><div id="vol"></div>Volume</div>
   <div class="c"><div id="pad"></div>Size / Color</div>
-  <div class="c"><div id="scope"></div>Wave</div>
 </div>
 <script type="module">
 import * as THREE from "three";
@@ -38,16 +37,14 @@ const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.B
 const mat = new THREE.PointsMaterial({ size: 0.06, color: 0x4f8cff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
 scene.add(new THREE.Points(geo, mat));
 
-const synth = new Tone.Oscillator(220, "sawtooth"), gain = new Tone.Gain(0.3), analyser = new Tone.Analyser("fft", 64), wave = new Tone.Analyser("waveform", 256);
-synth.chain(gain, analyser, Tone.getDestination()); gain.connect(wave);
+const synth = new Tone.Oscillator(220, "sawtooth"), gain = new Tone.Gain(0.3), analyser = new Tone.Analyser("fft", 64);
+synth.chain(gain, analyser, Tone.getDestination());
 let running = false, size = 1, hue = 0.6;
 document.getElementById("play").onclick = async (e) => { await Tone.start(); running ? synth.stop() : synth.start(); running = !running; e.target.textContent = running ? "Stop sound" : "Start sound"; IE.emit && IE.emit(running ? "audio:start" : "audio:stop"); };
 
 const freq = new Nexus.Dial("#freq", { size: [64, 64], min: 60, max: 880, value: 220 });
 const vol = new Nexus.Slider("#vol", { size: [24, 90], min: 0, max: 1, value: 0.3 });
 const pad = new Nexus.Position("#pad", { size: [110, 90] });
-const scope = new Nexus.Oscilloscope("#scope", { size: [160, 90] });
-scope.connect(Tone.getContext().rawContext.createGain ? gain.output || gain : gain);
 freq.on("change", (v) => synth.frequency.rampTo(v, 0.05));
 vol.on("change", (v) => gain.gain.rampTo(v, 0.05));
 pad.on("change", (v) => { size = 0.5 + v.x * 1.5; hue = v.y; });
