@@ -203,20 +203,19 @@
   function hdr() { var t = token(); return { apikey: ANON, Authorization: "Bearer " + (t || ANON), "Content-Type": "application/json" }; }
   function put(k, v) { if (k) window.__IEState[k] = v; }
   function safeTable(t) { return /^[A-Za-z_][A-Za-z0-9_]*$/.test(t || "") ? t : null; }
+  /* Flow db steps use the same IE.db collections as live apps and the Database tab (table "App.collection" or "collection") */
+  function dbMatch(p) { return function (r) { return !p.filterColumn || p.filterValue === "" || p.filterValue == null || String(r[p.filterColumn]) === String(p.filterValue); }; }
   function dbq(p, method, body, label) {
-    var tb = safeTable(p.table); if (!tb) { L(label + ": choose a table name", "error"); return "missing table"; }
-    var q = SB + "/rest/v1/" + tb + "?";
-    if (method === "GET") q += "select=*&limit=" + (Number(p.limit) || 10) + "&";
-    if (p.filterColumn && p.filterValue !== "" && p.filterValue != null) q += encodeURIComponent(p.filterColumn) + "=eq." + encodeURIComponent(p.filterValue);
+    var D = window.__IEData, t = D && D.table(p.table, p.app); if (!t) { L(label + ": data is still loading", "error"); return "not ready"; }
+    if (!p.table) { L(label + ": choose a table name", "error"); return "missing table"; }
     if ((method === "PATCH" || method === "DELETE") && !p.filterColumn) { L(label + ": a filter is required", "error"); return "filter required"; }
-    var h = hdr(); h.Prefer = "return=representation";
-    fetch(q, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (r) {
-        if (!r.ok) { L(label + " " + tb + " failed: " + ((r.j && r.j.message) || "denied"), "error"); return; }
-        put(p.stateKey, r.j); L(label + " " + tb + ": " + (Array.isArray(r.j) ? r.j.length + " rows" : "ok"));
-      }).catch(function () { L(label + " " + tb + " network error", "error"); });
-    return tb;
+    var r = D.resolve(p.table, p.app), name = r.app + "." + r.col, job;
+    if (method === "GET") job = t.list().then(function (rows) { return rows.filter(dbMatch(p)).slice(0, Number(p.limit) || 10); });
+    else if (method === "POST") job = t.insert(body || {}).then(function (x) { return [x]; });
+    else job = t.list().then(function (rows) { var hit = rows.filter(dbMatch(p)); return Promise.all(hit.map(function (x) { return method === "PATCH" ? t.update(x.id, body || {}) : t.remove(x.id).then(function () { return x; }); })); });
+    job.then(function (res) { put(p.stateKey, res); L(label + " " + name + ": " + res.length + " rows"); if (method !== "GET" && window.__IEDataRefresh) window.__IEDataRefresh(); })
+      .catch(function (e) { L(label + " " + name + " failed: " + ((e && e.message) || "error"), "error"); });
+    return name;
   }
   function http(p, method) {
     if (!/^https:\/\//.test(p.url || "")) { L("Request needs an https:// URL", "error"); return "bad url"; }
@@ -333,14 +332,13 @@
     liveQuery: function (p, node) {
       window.__IETimers = window.__IETimers || {}; clearInterval(window.__IETimers[node.id]);
       var tick = function () {
-        var tb = safeTable(p.table); if (!tb) { L("liveQuery: choose a table name", "error"); return; }
-        var q = SB + "/rest/v1/" + tb + "?select=*&limit=" + (Number(p.limit) || 50);
-        if (p.filterColumn && p.filterValue !== "" && p.filterValue != null) q += "&" + encodeURIComponent(p.filterColumn) + "=" + encodeURIComponent((p.op || "eq") + "." + p.filterValue);
-        if (p.orderBy) q += "&order=" + encodeURIComponent(p.orderBy) + "." + (p.desc === false ? "asc" : "desc");
-        fetch(q, { headers: hdr() }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-          .then(function (r) { if (!r.ok) { L("liveQuery " + tb + ": " + ((r.j && r.j.message) || "denied"), "error"); return; }
-            var prev = JSON.stringify(window.__IEState[p.stateKey || "live"]); if (prev !== JSON.stringify(r.j)) { (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "live", r.j); L("liveQuery " + tb + ": " + r.j.length + " rows (updated)"); } })
-          .catch(function () { L("liveQuery network error", "error"); });
+        var D = window.__IEData, t = D && p.table && D.table(p.table, p.app); if (!t) { L("liveQuery: choose a table name", "error"); return; }
+        t.list().then(function (rows) {
+          var j = rows.filter(dbMatch(p));
+          if (p.orderBy) { var dd = p.desc === false ? 1 : -1; j.sort(function (a, b) { return a[p.orderBy] > b[p.orderBy] ? dd : a[p.orderBy] < b[p.orderBy] ? -dd : 0; }); }
+          j = j.slice(0, Number(p.limit) || 50);
+          var prev = JSON.stringify(window.__IEState[p.stateKey || "live"]); if (prev !== JSON.stringify(j)) { (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "live", j); L("liveQuery " + p.table + ": " + j.length + " rows (updated)"); }
+        }).catch(function () { L("liveQuery " + p.table + " failed", "error"); });
       };
       tick(); window.__IETimers[node.id] = setInterval(tick, Math.max(3000, Number(p.refreshMs) || 10000));
       return "watching " + p.table;
