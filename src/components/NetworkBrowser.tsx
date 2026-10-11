@@ -531,7 +531,8 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
   };
 
   const renderUserCard = (connection: Connection, isConnected: boolean = false) => {
-    const connected = isConnected || connection.status === 'accepted';
+    const connected = isConnected || connection.status === 'accepted' || connection.status === 'pending';
+    const openPage = () => window.open(`/u/${connection.user_id}`, '_self');
     return (
       <NetMemberCard
         key={connection.user_id}
@@ -540,7 +541,7 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
         role={connection.role}
         location={connection.location}
         bio={connection.bio}
-        onOpen={() => viewProfile(connection)}
+        onOpen={openPage}
         badges={
           <>
             {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
@@ -555,15 +556,13 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
           </>
         }
         actions={[
-          { icon: Eye, label: 'View profile', onClick: () => viewProfile(connection) },
+          { icon: Eye, label: 'View profile', onClick: openPage },
           ...(!connected ? [{ icon: MessageSquare, label: 'Message', onClick: () => handleMessage(connection.user_id) }] : []),
         ]}
         primary={connected ? (
           <Button size="sm" className="h-8" onClick={() => handleMessage(connection.user_id)}>
             <MessageSquare className="w-3.5 h-3.5 mr-1" /> Message
           </Button>
-        ) : connection.status === 'pending' ? (
-          <Button size="sm" variant="secondary" className="h-8" disabled>Pending</Button>
         ) : (
           <Button size="sm" className="h-8" onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}>
             <UserPlus className="w-3.5 h-3.5 mr-1" /> Connect
