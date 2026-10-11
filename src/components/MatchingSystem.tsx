@@ -1416,11 +1416,13 @@ export default function MatchingSystem() {
             >
               <Icon className="h-4 w-4" />
               <span className="text-xs font-medium">{chip.label}</span>
-              <span className={`inline-flex min-w-5 h-5 items-center justify-center rounded px-1 text-[10px] font-medium ${
-                active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-              }`}>
-                  {count}
-              </span>
+              {count >= 0 && (
+                <span className={`inline-flex min-w-5 h-5 items-center justify-center rounded px-1 text-[10px] font-medium ${
+                  active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                }`}>
+                    {count}
+                </span>
+              )}
             </Button>
           );
         })}
