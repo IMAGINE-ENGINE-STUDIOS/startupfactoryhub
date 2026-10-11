@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +77,7 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useRememberedTab('startup', urlTab, "social");
 
   // Sync URL tab param to activeTab
   useEffect(() => {
@@ -141,7 +142,7 @@ const Dashboard = () => {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'startup') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
 
@@ -324,7 +325,7 @@ const Dashboard = () => {
       setConnectedInvestors(investors);
     }
   };
-  if (loading || analytics.loading) {
+  if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>

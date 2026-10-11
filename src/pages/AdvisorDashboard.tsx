@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import { useState, useEffect } from 'react';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
@@ -69,7 +70,7 @@ export default function AdvisorDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useRememberedTab('advisor', urlTab, "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const {
     user
@@ -121,7 +122,7 @@ export default function AdvisorDashboard() {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'advisor' && role !== 'mentor') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
   const fetchMentorStats = async () => {

@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import { DeckAccessSettings } from '@/components/deck/DeckAccess';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -76,7 +77,7 @@ export default function InvestorDashboard() {
   const [investorProfile, setInvestorProfile] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || 'social');
+  const [activeTab, setActiveTab] = useRememberedTab('investor', urlTab, 'social');
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [pendingPitchesCount, setPendingPitchesCount] = useState(0);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();

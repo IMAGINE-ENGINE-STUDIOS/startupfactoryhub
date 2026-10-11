@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +54,7 @@ export default function StudentDashboard() {
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useRememberedTab('student', urlTab, "social");
   const [learningView, setLearningView] = useState<'courses' | 'rooms'>('courses');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ export default function StudentDashboard() {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'student') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
   return <div className="min-h-screen bg-gradient-hero pb-6 relative">

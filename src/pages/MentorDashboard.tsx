@@ -1,3 +1,4 @@
+import { useRememberedTab } from '@/lib/tabMemory';
 import { useState, useEffect } from 'react';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
@@ -78,7 +79,7 @@ const MentorDashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useRememberedTab('mentor', urlTab, "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const {
     upcomingEvents
@@ -95,7 +96,7 @@ const MentorDashboard = () => {
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'mentor' && role !== 'advisor') {
-      navigate('/dashboard');
+      /* routed by DashboardRouter */
     }
   }, [role, roleLoading, navigate]);
   return <div className="min-h-screen bg-background pb-6 relative">
