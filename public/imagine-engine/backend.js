@@ -119,7 +119,7 @@
     var tables = function (out, list) { out.innerHTML = list && list.length ? list.map(function (t) { return "<div><b>" + esc(t.name) + "</b> <span style='color:#a1a1aa'>" + esc(t.columns.map(function (c) { return c.name; }).join(", ")) + "</span></div>"; }).join("") : "<span style='color:#a1a1aa'>No tables visible with this key.</span>"; };
     var log = function (m, t) { window.__IE && window.__IE.log && window.__IE.log(m, t); };
     if (a) {
-      $("data-sbdis").onclick = function () { localStorage.removeItem("ie-sbconn:" + pid()); cache.supabase = null; paint(box); };
+      $("data-sbdis").onclick = function () { localStorage.removeItem("ie-sbconn:" + pid()); localStorage.setItem("ie-sbplat-off:" + pid(), "1"); cache.supabase = null; paint(box); };
       var showSb = function (f) { $("data-sbout").textContent = "Reading tables…"; schema(f).then(function (s) { tables($("data-sbout"), s.supabase); }); };
       $("data-sbsch").onclick = function () { showSb(true); }; showSb(false);
     } else {
