@@ -632,7 +632,7 @@
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text) }), model: mode === "chat" ? "chat" : model, mode: mode }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode }),
     })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
