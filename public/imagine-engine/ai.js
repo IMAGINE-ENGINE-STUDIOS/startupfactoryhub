@@ -1,5 +1,6 @@
 /* Genius AI — universal builder copilot for Imagine Engine. */
 (function () {
+  function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
   var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-ai";
   var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
   var LOGO = "/__l5e/assets-v1/78c75160-d976-42d1-8c63-d01bef660475/imagine-engine-logo.png";
@@ -208,7 +209,7 @@
   /* connected user Supabase project (Database tab "Connect Supabase"): plain table names go there */
   function remoteDb() { var D = window.__IEData; return D && D.remote ? D.remote() : null; }
   function rq(c, tb, method, qs, body) {
-    var h = { apikey: c.key, Authorization: "Bearer " + c.key, "Content-Type": "application/json", Prefer: "return=representation" };
+    var h = { apikey: c.key, Authorization: "Bearer " + ieBearer(c), "Content-Type": "application/json", Prefer: "return=representation" };
     return fetch(c.url + "/rest/v1/" + encodeURIComponent(tb) + "?" + qs, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : []; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("HTTP " + r.status)); return Array.isArray(j) ? j : j ? [j] : []; }); });
   }
