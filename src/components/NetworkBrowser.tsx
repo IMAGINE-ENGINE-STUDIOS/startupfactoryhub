@@ -106,9 +106,15 @@ export default function NetworkBrowser({ mode = 'network' }: { mode?: 'network' 
 
       fetchAccountGroups(userIds).then(setAccountGroups).catch(() => {});
       const seen = new Set<string>();
-      setAllMembers(visible
+      const unique = visible
         .filter(p => (seen.has(p.user_id) ? false : (seen.add(p.user_id), true)))
-        .map(p => ({ ...p, role: roles[p.user_id] || null, status: statuses[p.user_id] })));
+        .map(p => ({ ...p, role: roles[p.user_id] || null, status: statuses[p.user_id] }));
+      // Shuffle each time the tab opens so different people surface
+      for (let i = unique.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unique[i], unique[j]] = [unique[j], unique[i]];
+      }
+      setAllMembers(unique);
     } catch (error) {
       console.error('Error fetching all community members:', error);
     } finally {

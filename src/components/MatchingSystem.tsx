@@ -82,7 +82,15 @@ export default function MatchingSystem() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
-  const [activeTab, setActiveTab] = useState('mentors');
+  const [activeTab, setActiveTabRaw] = useState('mentors');
+  // New shuffle seed every time a tab is opened
+  const [shuffleSeed, setShuffleSeed] = useState(() => Math.floor(Math.random() * 1e9));
+  const setActiveTab = (t: string) => { setActiveTabRaw(t); setShuffleSeed(Math.floor(Math.random() * 1e9)); };
+  const shuffleRank = (id: string) => {
+    let h = shuffleSeed ^ 2166136261;
+    for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  };
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
@@ -1376,6 +1384,8 @@ export default function MatchingSystem() {
     const aHas = (a.compatibility_score || 0) > 0 ? 0 : 1;
     const bHas = (b.compatibility_score || 0) > 0 ? 0 : 1;
     if (aHas !== bHas) return aHas - bHas;
+    // Non-matches are shuffled every time a tab opens so new people surface
+    if (aHas === 1) return shuffleRank(a.id) - shuffleRank(b.id);
     // 2. Relevance by current user's role
     const pa = priorityOf(normalizeRole(a.role));
     const pb = priorityOf(normalizeRole(b.role));
