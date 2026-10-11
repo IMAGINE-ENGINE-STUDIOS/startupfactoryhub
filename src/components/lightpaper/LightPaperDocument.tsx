@@ -2207,7 +2207,7 @@ export function LightPaperDocument({
         (img as HTMLAnchorElement).href = data.publicUrl;
         (img as HTMLAnchorElement).target = '_blank';
         (img as HTMLAnchorElement).rel = 'noopener noreferrer';
-        img.textContent = `📎 ${file.name}`.replace('📎 ', 'Attachment: ');
+        img.textContent = `Attachment: ${file.name}`;
       }
       img.style.maxWidth = '100%';
       img.style.width = 'auto';
@@ -2216,18 +2216,19 @@ export function LightPaperDocument({
       img.style.margin = '10px 0';
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0 && editorRef.current?.contains(selection.anchorNode)) {
-
         const range = selection.getRangeAt(0);
         range.insertNode(img);
         range.setStartAfter(img);
         range.setEndAfter(img);
         selection.removeAllRanges();
         selection.addRange(range);
+      } else {
+        editorRef.current?.appendChild(img);
       }
-      toast.success("Image uploaded successfully");
+      toast.success("Uploaded");
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error(error.message || "Failed to upload image");
+      toast.error(error.message || "Upload failed");
     }
   };
   const insertCalculatorResult = (value: string) => {
