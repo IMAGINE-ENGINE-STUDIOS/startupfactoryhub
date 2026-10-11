@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Compass, DollarSign, Clock, Globe, GraduationCap, Landmark, ScanLine, MessageCircle, User as UserIcon, Sparkles, CalendarClock, UsersRound } from 'lucide-react';
 import UserProfileDialog from './UserProfileDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,8 @@ import NetworkSearchEngine from './NetworkSearchEngine';
 import InvestorDirectoryList from './InvestorDirectoryList';
 import BusinessCardScannerDialog from './BusinessCardScannerDialog';
 import BookMeetingDialog from '@/components/BookMeetingDialog';
+import NetMemberCard from '@/components/network/NetMemberCard';
+import NetGroups from '@/components/network/NetGroups';
 import { isVisibleCommunityName, isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 
 interface Match {
@@ -1222,136 +1224,39 @@ export default function MatchingSystem() {
     return 'Fair';
   };
 
-  const MatchCard = ({ match, onConnect, onPass }: { match: Match; onConnect: () => void; onPass: () => void }) => (
-    <Card className="tech-card border-0">
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex items-start gap-3 mb-3">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={match.avatar} alt={match.name} />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
-              {match.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground">{match.name}</h3>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1">
-              <span className="inline-flex items-center rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
-                {normalizeRole(match.role) === 'all' ? 'Member' : (match.role || 'Member')}
-              </span>
-              {match.compatibility_score > 0 && (
-                <span className="inline-flex items-center rounded-md bg-accent/15 border border-accent/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-                  {match.compatibility_score}% Match
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-2">
-              <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
-              {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
-            </div>
-          </div>
-        </div>
-        
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{match.description}</p>
-        
-        {/* Accelerator-specific info */}
-        {match.role === 'Accelerator' && (
-          <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
-            {match.funding_offered && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <DollarSign className="h-3 w-3 text-green-500" />
-                ${(match.funding_offered / 1000).toFixed(0)}K funding
-              </div>
-            )}
-            {match.equity_percentage && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                {match.equity_percentage}% equity
-              </div>
-            )}
-            {match.program_duration && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3 text-blue-500" />
-                {match.program_duration}
-              </div>
-            )}
-            {match.location && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Building className="h-3 w-3 text-orange-500" />
-                {match.location}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Match Reasons */}
-        {match.match_reasons && match.match_reasons.length > 0 && (
-          <div className="mb-4 pt-3 border-t border-border/40">
-            <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 text-primary" />
-              Why this match:
-            </p>
-            <ul className="space-y-1">
-              {match.match_reasons.slice(0, 3).map((reason, idx) => (
-                <li key={idx} className="text-xs text-muted-foreground flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-primary/50" />
-                  {reason}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {match.expertise && match.expertise.length > 0 && match.role !== 'Accelerator' && (
-          <div className="mb-4">
-            <p className="text-xs font-medium text-foreground mb-2">Expertise:</p>
-            <div className="flex flex-wrap gap-1">
-              {match.expertise.slice(0, 3).map((skill, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {!/^(legacy|company)-/.test(match.id) && (
-          <div className="flex gap-2 mb-2">
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => setProfileUserId(match.id)}>
-              <UserIcon className="h-4 w-4 mr-2" />
-              View profile
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } }))}>
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Message
-            </Button>
-          </div>
-        )}
-        {!/^(legacy|company)-/.test(match.id) && (
-          <Button variant="outline" size="sm" className="w-full mb-2" onClick={() => bookMeeting(match.id, match.name)}>
-            <CalendarClock className="h-4 w-4 mr-2" />
-            Book a meeting
+  const MatchCard = ({ match, onConnect, onPass }: { match: Match; onConnect: () => void; onPass: () => void }) => {
+    const isPerson = !/^(legacy|company)-/.test(match.id);
+    const actions = isPerson
+      ? [
+          { icon: UserIcon, label: 'View profile', onClick: () => setProfileUserId(match.id) },
+          { icon: MessageCircle, label: 'Message', onClick: () => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } })) },
+          { icon: CalendarClock, label: 'Book a meeting', onClick: () => bookMeeting(match.id, match.name) },
+          { icon: X, label: 'Pass', onClick: onPass },
+        ]
+      : [{ icon: X, label: 'Pass', onClick: onPass }];
+    return (
+      <NetMemberCard
+        name={match.name}
+        avatar={match.avatar}
+        role={normalizeRole(match.role) === 'all' ? 'Member' : match.role}
+        location={match.location}
+        bio={match.description}
+        score={match.compatibility_score}
+        meta={[match.industry, match.stage]}
+        onOpen={isPerson ? () => setProfileUserId(match.id) : undefined}
+        actions={actions}
+        primary={requestedIds.has(match.id) ? (
+          <Button size="sm" variant="secondary" className="h-8" disabled>
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Requested
+          </Button>
+        ) : (
+          <Button size="sm" className="h-8" onClick={onConnect}>
+            <Heart className="h-3.5 w-3.5 mr-1" /> Connect
           </Button>
         )}
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={onPass} className="flex-1">
-            <X className="h-4 w-4 mr-2" />
-            Pass
-          </Button>
-          {requestedIds.has(match.id) ? (
-            <Button size="sm" variant="secondary" className="flex-1" disabled>
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Requested
-            </Button>
-          ) : (
-            <Button size="sm" onClick={onConnect} className="flex-1 pulse-primary">
-              <Heart className="h-4 w-4 mr-2" />
-              Connect
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+      />
+    );
+  };
 
   // Show loading state while role is being fetched
   if (roleLoading) {
@@ -1369,7 +1274,7 @@ export default function MatchingSystem() {
 
 
   // ---- Unified relevance-sorted list ----
-  type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
+  type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network' | 'groups';
 
   const filterChips: { key: FilterKey; label: string; icon: any }[] = [
     { key: 'all', label: 'All Community', icon: Users },
@@ -1378,6 +1283,7 @@ export default function MatchingSystem() {
     { key: 'startup', label: 'Startups', icon: Compass },
     { key: 'accelerator', label: 'Accelerators', icon: Landmark },
     { key: 'network', label: 'My Network', icon: Globe },
+    { key: 'groups', label: 'Groups', icon: UsersRound },
   ];
 
   const normalizeRole = (r: string): FilterKey => {
@@ -1479,6 +1385,7 @@ export default function MatchingSystem() {
 
   const countFor = (key: FilterKey) => {
     if (key === 'network') return connections.length;
+    if (key === 'groups') return -1;
     if (key === 'all') return dedupedMatches.length;
     return dedupedMatches.filter(m => normalizeRole(m.role) === key).length;
   };
@@ -1509,17 +1416,21 @@ export default function MatchingSystem() {
             >
               <Icon className="h-4 w-4" />
               <span className="text-xs font-medium">{chip.label}</span>
-              <span className={`inline-flex min-w-5 h-5 items-center justify-center rounded px-1 text-[10px] font-medium ${
-                active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-              }`}>
-                  {count}
-              </span>
+              {count >= 0 && (
+                <span className={`inline-flex min-w-5 h-5 items-center justify-center rounded px-1 text-[10px] font-medium ${
+                  active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                }`}>
+                    {count}
+                </span>
+              )}
             </Button>
           );
         })}
       </div>
 
-      {activeTab === 'network' ? (
+      {activeTab === 'groups' ? (
+        <NetGroups />
+      ) : activeTab === 'network' ? (
         <NetworkBrowser />
       ) : activeTab === 'all' ? (
         <NetworkBrowser mode="community" />

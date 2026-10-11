@@ -265,15 +265,9 @@ export default function UserProfileDialog({
   const handleFollowToggle = async () => {
     setLoadingAction(true);
     try {
-      if (isFollowing) {
-        await unfollowUser();
-        toast({ description: 'Unfollowed successfully' });
-      } else {
-        await followUser();
-        toast({ description: 'Following user' });
-      }
-    } catch (error) {
-      toast({ description: 'Action failed', variant: 'destructive' });
+      // useFollow shows its own success/error message
+      if (isFollowing) await unfollowUser();
+      else await followUser();
     } finally {
       setLoadingAction(false);
     }

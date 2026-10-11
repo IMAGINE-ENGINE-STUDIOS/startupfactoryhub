@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.is_net_group_member(uuid, uuid), public.is_net_group_admin(uuid, uuid), public.is_net_group_public(uuid), public.has_net_group_invite(uuid, uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.net_group_add_owner(), public.net_group_notify_invite() FROM PUBLIC, anon, authenticated;
