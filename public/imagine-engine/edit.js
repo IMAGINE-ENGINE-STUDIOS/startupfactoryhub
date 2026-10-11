@@ -545,7 +545,7 @@
     }).catch(function () {});
   }
   window.__IEElRefresh = function () { render(true); };
-  setInterval(function () { render(false); }, 400);
+  setInterval(function () { if (document.hidden || window.__IEDragging) return; render(false); }, 400);
 })();
 
 /* ---------- Live app inspector: edit text/styles of elements inside React live apps; edits patch apps/*.tsx source ---------- */
