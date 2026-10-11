@@ -91,13 +91,20 @@
   function extractActions(text) {
     var found = [], clean = String(text || ""), roots = [];
     var tryParse = function (s) { try { var v = JSON.parse(s.trim()); var arr = Array.isArray(v) ? v : (v && Array.isArray(v.actions) ? v.actions : [v]); return arr.filter(function (a) { return a && typeof a === "object" && typeof a.type === "string"; }); } catch (e) { return null; } };
-    /* Source files arrive as plain code fences: ```tsx file=apps/Name.tsx ... ``` (no JSON escaping, so big apps never break). */
-    clean = clean.replace(/```[\w-]*[ \t]+(?:file=|path=|name=)?["']?((?:apps|components|lib|src|styles|custom-scripts)\/[\w\-./]+\.(?:tsx|ts|jsx|js|html|css|json))["']?[^\n]*\n([\s\S]*?)```/gi, function (all, path, body) {
-      var code = body.replace(/\s+$/, "") + "\n";
+    /* Source files arrive as plain code fences (no JSON escaping, so big apps never break). Accepted forms:
+       ```tsx file=apps/Name.tsx | ```tsx:apps/Name.tsx | ```tsx apps/Name.tsx | ```tsx title="apps/Name.tsx" | first line "// file: apps/Name.tsx" */
+    var PATH = "(?:\\./|/)?((?:apps|components|lib|src|styles|custom-scripts|hooks|pages|scenes)\\/[\\w\\-./]+\\.(?:tsx|ts|jsx|js|html|css|json))";
+    var addSrc = function (path, body) {
+      path = path.replace(/^src\/(?=apps\/)/, "");
+      var code = String(body).replace(/^\s*(?:\/\/|<!--|\/\*)\s*(?:file|path)\s*[:=]\s*[^\n]*\n/i, "").replace(/\s+$/, "") + "\n";
+      if (!code.trim()) return;
+      var hit = function (a) { return a.name === path || (a.type === "addLiveApp" && "apps/" + a.name === path.replace(/\.\w+$/, "")); };
+      roots = roots.filter(function (a) { return !hit(a); }); found = found.filter(function (a) { return !hit(a); }); /* last copy of a file wins */
       if (/^apps\/[^/]+\.(tsx|jsx|html)$/i.test(path)) roots.push({ type: "addLiveApp", name: path.replace(/^apps\//, "").replace(/\.\w+$/, ""), kind: /\.html$/i.test(path) ? "html" : "react", code: code });
       else found.push({ type: "addFile", name: path, content: code });
-      return "";
-    });
+    };
+    clean = clean.replace(new RegExp("```[\\w-]*(?:[ \\t]*:[ \\t]*|[ \\t]+)(?:(?:file|path|name|title|filename)\\s*=\\s*)?[\"']?" + PATH + "[\"']?[^\\n]*\\n([\\s\\S]*?)(?:```|$(?![\\s\\S]))", "gi"), function (all, path, body) { addSrc(path, body); return ""; });
+    clean = clean.replace(new RegExp("```[\\w-]*[ \\t]*\\n[ \\t]*(?:\\/\\/|<!--|\\/\\*)[ \\t]*(?:file|path)?[ \\t]*[:=]?[ \\t]*" + PATH + "[^\\n]*\\n([\\s\\S]*?)```", "gi"), function (all, path, body) { addSrc(path, body); return ""; });
     clean = clean.replace(/```(actions|json|javascript|js)?\s*([\s\S]*?)```/gi, function (all, lang, body) { var r = tryParse(body); if (r && r.length) { found = found.concat(r); return ""; } return lang === "actions" ? "" : all; });
     // Bare JSON arrays / objects with "type" outside fences
     var i = 0;
