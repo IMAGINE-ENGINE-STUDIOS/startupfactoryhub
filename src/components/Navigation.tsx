@@ -29,7 +29,6 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" asChild className="min-h-[44px] text-red-500 hover:text-red-400 hover:bg-red-500/10">
               <a href="https://terremotovenezuela.app" target="_blank" rel="noopener noreferrer">
-                <Siren className="h-4 w-4 mr-2" />
                 Emergency Response
               </a>
             </Button>
@@ -60,7 +59,6 @@ const Navigation = () => {
                 <div className="flex flex-col space-y-4 mt-8 px-2">
                   <Button variant="outline" asChild className="w-full min-h-[48px] text-base text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400">
                     <a href="https://terremotovenezuela.app" target="_blank" rel="noopener noreferrer" onClick={closeMenu}>
-                      <Siren className="h-4 w-4 mr-2" />
                       Emergency Response
                     </a>
                   </Button>
