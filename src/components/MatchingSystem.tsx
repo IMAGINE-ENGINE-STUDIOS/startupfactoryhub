@@ -1226,10 +1226,12 @@ export default function MatchingSystem() {
 
   const MatchCard = ({ match, onConnect, onPass }: { match: Match; onConnect: () => void; onPass: () => void }) => {
     const isPerson = !/^(legacy|company)-/.test(match.id);
+    const requested = requestedIds.has(match.id) || connections.some((c: any) => c.id === match.id || c.user_id === match.id);
+    const openChat = () => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } }));
+    const openPage = () => window.open(`/u/${match.id}`, '_self');
     const actions = isPerson
       ? [
-          { icon: UserIcon, label: 'View profile', onClick: () => setProfileUserId(match.id) },
-          { icon: MessageCircle, label: 'Message', onClick: () => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: match.id } })) },
+          { icon: UserIcon, label: 'View profile', onClick: openPage },
           { icon: CalendarClock, label: 'Book a meeting', onClick: () => bookMeeting(match.id, match.name) },
           { icon: X, label: 'Pass', onClick: onPass },
         ]
@@ -1243,12 +1245,21 @@ export default function MatchingSystem() {
         bio={match.description}
         score={match.compatibility_score}
         meta={[match.industry, match.stage]}
-        onOpen={isPerson ? () => setProfileUserId(match.id) : undefined}
+        onOpen={isPerson ? openPage : undefined}
         actions={actions}
-        primary={requestedIds.has(match.id) ? (
-          <Button size="sm" variant="secondary" className="h-8" disabled>
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Requested
+        primary={requested && isPerson ? (
+          <Button size="sm" className="h-8" onClick={openChat}>
+            <MessageCircle className="h-3.5 w-3.5 mr-1" /> Message
           </Button>
+        ) : isPerson ? (
+          <>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={openChat} title="Message" aria-label="Message">
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+            <Button size="sm" className="h-8" onClick={onConnect}>
+              <Heart className="h-3.5 w-3.5 mr-1" /> Connect
+            </Button>
+          </>
         ) : (
           <Button size="sm" className="h-8" onClick={onConnect}>
             <Heart className="h-3.5 w-3.5 mr-1" /> Connect
