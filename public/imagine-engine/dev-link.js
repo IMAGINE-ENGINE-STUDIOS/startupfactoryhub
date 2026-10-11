@@ -67,6 +67,7 @@
       var lh = parseFloat(getComputedStyle(ta).lineHeight) || 18; ta.scrollTop = Math.max(0, (line - 5) * lh);
     }, 120);
   }
+  window.__IEJump = jump;
   window.addEventListener("message", function (ev) {
     var d = ev.data; if (!d || d.ie !== "liveapp-error" || !pane) return;
     if (ev.origin !== location.origin && ev.origin !== "null") return;
