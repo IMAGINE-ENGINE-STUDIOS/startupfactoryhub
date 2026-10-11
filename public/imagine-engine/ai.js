@@ -469,6 +469,16 @@
     deploy: ["Pre-launch checklist", "How do I deploy this?", "Review my project for issues"],
     admin: ["How should I price AI for my users?", "Compare flat fee vs per token", "Suggest paid plan tiers"],
   };
+  /* Live progress: shows what Genius is doing while a build runs, and the files it wrote afterwards */
+  var stageAt = 0, stageKind = "edit";
+  var STAGES = { app: ["Understanding your request", "Planning the data and screens", "Writing the app files", "Linking the pieces together", "Starting your app"], edit: ["Reading your project", "Finding the exact place to change", "Writing the change", "Applying it"], chat: ["Thinking"], site: ["Planning the page", "Writing the sections", "Placing them on the canvas"] };
+  function stageText() { var l = STAGES[stageKind] || STAGES.edit, i = Math.min(l.length - 1, Math.floor((Date.now() - stageAt) / 6000)); return l[i] + "..."; }
+  setInterval(function () { var el = document.getElementById("iea-stage"); if (el && busy) el.textContent = stageText(); }, 1000);
+  function fileChips(done) {
+    var files = (done || []).map(function (d) { var m = /^(?:Live app|File|Updated|Edited)\s+(\S+)/.exec(d); return m && /[\/.]/.test(m[1]) ? m[1] : null; }).filter(Boolean);
+    if (!files.length) return "";
+    return '<div class="iea-sug" style="margin-top:6px">' + files.slice(0, 12).map(function (f) { return '<button data-file="' + esc(f) + '" title="Open in Dev">' + esc(f) + "</button>"; }).join("") + "</div>";
+  }
   function render() {
     var tab = currentTab();
     root.querySelector("#iea-tab").textContent = "Helping on " + tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -480,11 +490,12 @@
     messages.forEach(function (m, i) {
       if (m.role === "user") h += '<div class="iea-u">' + esc(m.content) + "</div>";
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
-      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
+      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + fileChips(m.done) + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
     });
-    if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span></div>';
+    if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span> <span id="iea-stage" style="color:#a1a1aa;font-size:11px">' + esc(stageText()) + '</span></div>';
     list.innerHTML = h;
-    list.querySelectorAll(".iea-sug button").forEach(function (b) { b.onclick = b.hasAttribute("data-impl") ? function () { model = "build"; localStorage.setItem("iea-model", model); markModel(); send("Implement the plan you just described. Make surgical changes to the existing project only."); } : function () { send(b.textContent); }; });
+    list.querySelectorAll("[data-file]").forEach(function (b) { b.onclick = function () { try { window.__IE && window.__IE.setMode("dev"); } catch (e) {} }; });
+    list.querySelectorAll(".iea-sug button:not([data-file])").forEach(function (b) { b.onclick = b.hasAttribute("data-impl") ? function () { model = "build"; localStorage.setItem("iea-model", model); markModel(); send("Implement the plan you just described. Make surgical changes to the existing project only."); } : function () { send(b.textContent); }; });
     list.querySelectorAll("[data-ph]").forEach(function (b) { b.onclick = function () { var last = messages[messages.length - 1]; if (last && last.phases) nextPhase(last, b.getAttribute("data-ph") === "all"); }; });
     list.scrollTop = list.scrollHeight;
     go.disabled = busy;
@@ -516,8 +527,9 @@
     messages.push({ role: "user", content: text });
     input.value = "";
     if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Genius AI." }); render(); save(); return; }
-    busy = true; render();
     var mode = model === "chat" ? "chat" : "build";
+    stageAt = Date.now(); stageKind = mode === "chat" ? "chat" : buildKind(text);
+    busy = true; render();
     migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); if (window.__IEPin) { window.__IEPin = null; drawAtts(); } }, 200); });
   }
   /* 3D Studio route: 3D world/level/scene requests (or any Build while a studio scene is on the page) go to Genius 3D inside the studio frame */
