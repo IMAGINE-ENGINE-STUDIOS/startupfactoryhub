@@ -287,3 +287,6 @@ verify_jwt = true
 
 [functions.live-transcribe]
 verify_jwt = false
+
+[functions.imagine-github]
+verify_jwt = false
