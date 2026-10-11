@@ -651,7 +651,7 @@ export default function UserProfileDialog({
               )}
 
               {/* Posts Section */}
-              <Card className="tech-card border-0">
+              {!embedded && <Card className="tech-card border-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileText className="h-5 w-5 text-primary" />
@@ -661,7 +661,7 @@ export default function UserProfileDialog({
                 <CardContent>
                   <ProfilePostsMosaic userId={userId!} isOwnProfile={isOwnProfile} />
                 </CardContent>
-              </Card>
+              </Card>}
       </>
     );
   };
