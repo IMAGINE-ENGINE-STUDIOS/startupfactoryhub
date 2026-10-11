@@ -21,6 +21,7 @@ import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/p
 import { buildPlazaScene, PLAZA_LEVEL_NAME } from '@/imagine-studio/lib/plazaLevel';
 import { ensurePlazaLevel } from '@/imagine-studio/lib/localLevels';
 import { Box as BoxIcon } from 'lucide-react';
+import { PeopleMenu, LevelElectionsPanel, plazaAdmin, type PlazaPerson } from '@/imagine-studio/components/plaza/PlazaModeration';
 
 const ROOM = 'plaza';
 const NEAR = 3;
@@ -228,7 +229,7 @@ function PlazaWorld() {
 }
 
 /* ---------- Player + peers ---------- */
-type Input = { joy: { x: number; y: number }; turn: number };
+type Input = { joy: { x: number; y: number }; turn: number; look: { dx: number; dy: number } };
 
 function Game({ me, peers, input, onMove }: { me: { color: string; name: string; char: string }; peers: React.MutableRefObject<Map<string, Peer>>; input: React.MutableRefObject<Input>; onMove: (x: number, z: number, ry: number, moving: boolean) => void }) {
   const self = useRef<THREE.Group>(null);
@@ -242,6 +243,7 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
   const groups = useRef(new Map<string, THREE.Group>());
   const lastSend = useRef(0);
   const camYaw = useRef(Math.atan2(spawn[0], spawn[2]));
+  const camPitch = useRef(0.45);
   const camInit = useRef(false);
 
   useEffect(() => {
@@ -264,6 +266,12 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
     const k = keys.current, inp = input.current;
     let turn = inp.turn; if (k['q']) turn += 1; if (k['e']) turn -= 1;
     camYaw.current += turn * dt * 2;
+    // Finger drag look: right/left orbits, up/down tilts — always centered on the character.
+    if (inp.look.dx || inp.look.dy) {
+      camYaw.current -= inp.look.dx * 0.006;
+      camPitch.current = Math.max(-0.1, Math.min(1.2, camPitch.current + inp.look.dy * 0.004));
+      inp.look.dx = 0; inp.look.dy = 0;
+    }
     let f = -inp.joy.y, s = inp.joy.x;
     if (k['w'] || k['arrowup']) f += 1;
     if (k['s'] || k['arrowdown']) f -= 1;
@@ -293,7 +301,8 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
     }
     if (mv !== moving) setMoving(mv);
     const yaw = camYaw.current;
-    const want = new THREE.Vector3(g.position.x + Math.sin(yaw) * 7, 4.2, g.position.z + Math.cos(yaw) * 7);
+    const pit = camPitch.current, dist = 7.5;
+    const want = new THREE.Vector3(g.position.x + Math.sin(yaw) * dist * Math.cos(pit), 1.4 + dist * Math.sin(pit), g.position.z + Math.cos(yaw) * dist * Math.cos(pit));
     if (!camInit.current) { camera.position.copy(want); camInit.current = true; }
     else camera.position.lerp(want, 1 - Math.exp(-6 * dt));
     camera.lookAt(g.position.x, 1.4, g.position.z);
@@ -344,14 +353,15 @@ function Joystick({ input }: { input: React.MutableRefObject<Input> }) {
   );
 }
 
-function TurnButton({ dir, input }: { dir: 1 | -1; input: React.MutableRefObject<Input> }) {
-  const Icon = dir === 1 ? RotateCcw : RotateCw;
+/** Full-screen finger drag area for the camera (sits under all buttons). */
+function LookPad({ input }: { input: React.MutableRefObject<Input> }) {
+  const last = useRef<{ id: number; x: number; y: number } | null>(null);
   return (
-    <button aria-label={dir === 1 ? 'Turn camera left' : 'Turn camera right'}
-      className="w-12 h-12 rounded-full bg-background/60 backdrop-blur border border-border flex items-center justify-center touch-none select-none"
-      onPointerDown={() => { input.current.turn = dir; }} onPointerUp={() => { input.current.turn = 0; }} onPointerLeave={() => { input.current.turn = 0; }} onPointerCancel={() => { input.current.turn = 0; }}>
-      <Icon className="w-5 h-5" />
-    </button>
+    <div className="absolute inset-0 z-[1] touch-none"
+      onPointerDown={(e) => { if (last.current) return; last.current = { id: e.pointerId, x: e.clientX, y: e.clientY }; (e.target as Element).setPointerCapture(e.pointerId); }}
+      onPointerMove={(e) => { const l = last.current; if (!l || l.id !== e.pointerId) return; input.current.look.dx += e.clientX - l.x; input.current.look.dy += e.clientY - l.y; l.x = e.clientX; l.y = e.clientY; }}
+      onPointerUp={(e) => { if (last.current?.id === e.pointerId) last.current = null; }}
+      onPointerCancel={() => { last.current = null; }} />
   );
 }
 
@@ -457,9 +467,13 @@ export default function PlazaPage() {
   const peers = useRef(new Map<string, Peer>());
   const audio = useRef(new Map<string, { track: RemoteAudioTrack; el: HTMLMediaElement }>());
   const mePos = useRef({ x: 0, z: 0 });
-  const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0 });
+  const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0, look: { dx: 0, dy: 0 } });
   const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
   const [isAdmin, setIsAdmin] = useState(false);
+  const [admins, setAdmins] = useState<string[]>([]);
+  const [adminTick, setAdminTick] = useState(0);
+  const [electionTick, setElectionTick] = useState(0);
+  const [people, setPeople] = useState<PlazaPerson[]>([]);
   const published = usePublishedPlaza();
   setWalkFromScene(published);
   const [theater, setTheater] = useState<TheaterSource>(null);
@@ -467,6 +481,7 @@ export default function PlazaPage() {
   const [presenting, setPresenting] = useState(false);
   const docRef = useRef<{ kind: 'image' | 'pdf'; url: string; name: string; page: number } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const camTrack = useRef<any>(null);
   const sendChatRef = useRef<(t: string) => void>(() => {});
 
   // Expose the plaza chat inside the Genius bubble.
@@ -479,9 +494,11 @@ export default function PlazaPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
-      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => setIsAdmin(!!data));
+      plazaAdmin('whoami').then((d) => { setIsAdmin(!!d.isAdmin); setAdmins(d.admins || []); }).catch(() => {
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => setIsAdmin(!!data));
+      });
     });
-  }, []);
+  }, [adminTick]);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -526,6 +543,7 @@ export default function PlazaPage() {
               setTheater(m.kind === 'pdf' ? { kind: 'pdf', url: m.url, name: String(m.name || ''), page: Number(m.page) || 1, by: String(m.by || p.name || 'Host') } : { kind: 'image', url: m.url, name: String(m.name || ''), by: String(m.by || p.name || 'Host') });
             return;
           }
+          if (m.t === 'mod') { if (m.kind === 'role') setAdminTick((n) => n + 1); if (m.kind === 'election') setElectionTick((n) => n + 1); return; }
           if (m.t === 'chat' && typeof m.text === 'string') {
             setMsgs((prev) => [...prev.slice(-199), { from: String(m.n || p.name || 'Guest').slice(0, 40), text: m.text.slice(0, 500), at: Date.now() }]);
             setUnread((u) => u + 1);
@@ -573,6 +591,10 @@ export default function PlazaPage() {
         new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
       ]).catch((e) => { r.disconnect(); throw Object.assign(e, { solo: true }); });
       room.current = r;
+      r.on(RoomEvent.Disconnected, (reason?: unknown) => {
+        if (room.current !== r) return;
+        if (String(reason) === '4' || /PARTICIPANT_REMOVED/i.test(String(reason))) { setJoined(false); setErr('An admin removed you from the Plaza.'); room.current = null; }
+      });
       setCount(r.remoteParticipants.size + 1);
       setJoined(true);
       try { await r.localParticipant.setMicrophoneEnabled(true); setMic(true); } catch { setErr('Microphone blocked — allow it in your browser to talk.'); }
@@ -608,14 +630,43 @@ export default function PlazaPage() {
   const shareScreen = async () => {
     const r = room.current; if (!r) return setErr('Theater sharing needs the live plaza connection.');
     try {
-      if (presenting) { await r.localParticipant.setScreenShareEnabled(false); setPresenting(false); setTheater(null); return; }
+      if (presenting) {
+        if (camTrack.current) { await r.localParticipant.unpublishTrack(camTrack.current); camTrack.current.stop(); camTrack.current = null; sendTheater({ kind: 'stop' }); }
+        else await r.localParticipant.setScreenShareEnabled(false);
+        setPresenting(false); setTheater(null); return;
+      }
       stopDoc();
-      const pub = await r.localParticipant.setScreenShareEnabled(true, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
+      if (!navigator.mediaDevices?.getDisplayMedia) {
+        // Phones (iPhone, most Android browsers) don't allow sharing the screen from a web page.
+        // Share the phone camera to the theater instead.
+        if (!confirm('This phone does not allow screen sharing from the browser. Share your camera to the theater instead?')) return;
+        const cam = await (await import('livekit-client')).createLocalVideoTrack({ facingMode: 'environment' });
+        await r.localParticipant.publishTrack(cam, { source: Track.Source.ScreenShare, name: 'screen' });
+        const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([cam.mediaStreamTrack]); el.style.cssText = 'position:fixed;right:0;bottom:0;width:4px;height:4px;opacity:0.01;pointer-events:none'; document.body.appendChild(el); el.play().catch(() => {});
+        camTrack.current = cam;
+        setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true); sendTheater({ kind: 'video' });
+        return;
+      }
+      const pub = await r.localParticipant.setScreenShareEnabled(true, touch ? { audio: false } : { audio: false, resolution: { width: 1920, height: 1080, frameRate: 30 } });
       const mst = pub?.track?.mediaStreamTrack; if (!mst) return;
       const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.srcObject = new MediaStream([mst]); el.style.cssText = 'position:fixed;right:0;bottom:0;width:4px;height:4px;opacity:0.01;pointer-events:none'; document.body.appendChild(el); el.play().catch(() => {});
       setTheater({ kind: 'video', el, by: meRef.current.name }); setPresenting(true); sendTheater({ kind: 'video' });
-    } catch { setErr('Screen sharing was cancelled or blocked.'); }
+    } catch (e: any) { setErr(/NotAllowed|Abort/i.test(String(e?.name)) ? 'Screen sharing was cancelled.' : 'Screen sharing is blocked on this device. Try Present document, or allow screen recording for the browser.'); }
   };
+
+  const sendMod = (kind: string) => room.current?.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'mod', kind })), { reliable: true }).catch(() => {});
+
+  // People list for the admin dropdown.
+  useEffect(() => {
+    if (!joined) return;
+    const t = setInterval(() => {
+      const r = room.current; if (!r) return;
+      const list: PlazaPerson[] = [{ identity: r.localParticipant.identity, name: meRef.current.name, me: true }];
+      r.remoteParticipants.forEach((p) => list.push({ identity: p.identity, name: p.name || peers.current.get(p.identity)?.name || 'Guest' }));
+      setPeople((prev) => (JSON.stringify(prev) === JSON.stringify(list) ? prev : list));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [joined]);
 
   const stopDoc = () => { if (docRef.current) { docRef.current = null; sendTheater({ kind: 'stop' }); setTheater(null); } };
 
@@ -700,9 +751,8 @@ export default function PlazaPage() {
         <Game me={{ color, name, char }} peers={peers} input={input} onMove={onMove} />
       </Canvas>
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
-        <div className="rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs pointer-events-auto">
-          {count} in the Plaza{!touch && ' · WASD / arrows to walk · Q/E to turn'}
-        </div>
+        <PeopleMenu count={count} people={people} isAdmin={isAdmin} admins={admins} selfIdentity={room.current?.localParticipant.identity || ''}
+          onNotice={setErr} onChanged={() => { setAdminTick((n) => n + 1); sendMod('role'); }} />
       </div>
       {err && <div className="absolute top-12 left-3 rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs z-30">{err}</div>}
       {theater && (
@@ -733,11 +783,11 @@ export default function PlazaPage() {
           <input ref={fileInput} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { onDocFile(e.target.files?.[0]); e.target.value = ''; }} />
         </div>
       )}
-      {panel === 'vote' && <DistrictsPanel onClose={() => setPanel(null)} />}
+      {panel === 'vote' && <LevelElectionsPanel isAdmin={isAdmin} refreshKey={electionTick} onClose={() => setPanel(null)} onChanged={() => sendMod('election')} />}
       {touch && (
         <>
           <div className="absolute left-4 bottom-24 z-10"><Joystick input={input} /></div>
-          <div className="absolute right-4 bottom-28 z-10 flex gap-2"><TurnButton dir={1} input={input} /><TurnButton dir={-1} input={input} /></div>
+          <LookPad input={input} />
         </>
       )}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-10">
