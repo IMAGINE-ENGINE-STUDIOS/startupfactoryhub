@@ -1,5 +1,12 @@
 # Roadmap
 
+## Net + public profiles (current)
+- [x] Net cards: large photo, Message replaces Connect when connected/requested, shuffle per tab, responsive grid
+- [x] Profile icon moved from header into the dashboard tab bar (far right)
+- [ ] Public user page /u/:id with owner-chosen tabs (pitch, mandate, business plan, products, services, media, custom), posts, events, jobs
+- [ ] Products/services sold through platform Stripe (10% fee), sales recorded
+- [ ] Admin dashboard Sales tab tracking every seller's sales
+
 ## Membership (live)
 - [x] Basic membership brochure at /basic-plan and /membership
 - [x] Stripe subscription checkout: $50/month or $480/year (20% off)
