@@ -31,6 +31,7 @@ export type PageBg = {
   kind: BgKind; opacity: number; blend: 'normal' | 'screen' | 'multiply';
   c1?: string; c2?: string; speed?: number; // animation colors and speed
   fill?: 'none' | 'solid' | 'gradient' | 'animated'; f1?: string; f2?: string; angle?: number; deep?: boolean; // page color
+  hue?: number; sat?: number; bright?: number; text?: string; // recolor the page's own design
 };
 
 export type BrochureDoc = {

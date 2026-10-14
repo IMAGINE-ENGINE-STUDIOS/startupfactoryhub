@@ -514,6 +514,15 @@ function StudioEditor() {
             {curBg.fill !== 'solid' && <Lbl t="Direction"><Stepper v={curBg.angle ?? 160} set={(v) => setBg({ angle: v })} step={5} min={0} max={360} fmt={(n) => `${n}°`} /></Lbl>}
             <button className={btn} style={curBg.deep ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBg({ deep: !curBg.deep })}>Also recolor the page's own panel</button>
           </>}
+          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#67e8f9' }}>PAGE DESIGN COLORS</span>
+          <Lbl t="Color shift"><Stepper v={curBg.hue ?? 0} set={(v) => setBg({ hue: v })} step={10} min={-180} max={180} fmt={(n) => `${n}°`} /></Lbl>
+          <Lbl t="Color strength"><Stepper v={curBg.sat ?? 1} set={(v) => setBg({ sat: v })} step={0.1} min={0} max={3} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+          <Lbl t="Brightness"><Stepper v={curBg.bright ?? 1} set={(v) => setBg({ bright: v })} step={0.05} min={0.3} max={2} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+          <div className="flex items-end gap-2">
+            <Lbl t="All text color"><ColorField value={curBg.text || '#ffffff'} onChange={(v) => setBg({ text: v })} /></Lbl>
+            {curBg.text && <button className={btn} style={soft} onClick={() => setBg({ text: undefined })}>Original</button>}
+          </div>
+          <button className={btn} style={soft} onClick={() => setBg({ hue: 0, sat: 1, bright: 1, text: undefined, fill: 'none', deep: false })}>Reset page colors</button>
         </div>
       )}
 
