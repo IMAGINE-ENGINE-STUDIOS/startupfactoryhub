@@ -17,7 +17,7 @@ import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 import { EditorialPage, FEATURES } from './apex/ApexEditorial';
 import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
-import { MentorsPage } from './apex/MentorsPage';
+import { TechFeaturePage } from './apex/TechFeaturePage';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -232,7 +232,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       </Frame>
     ),
   },
-  ...FEATURES.map((f, i) => ({ key: `feature-${f.no}-${i}`, node: f.no === '02' ? <MentorsPage f={f} total={TOTAL} /> : <EditorialPage f={f} total={TOTAL} /> })),
+  ...FEATURES.map((f, i) => ({ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> })),
   {
     key: 'how',
     node: (
