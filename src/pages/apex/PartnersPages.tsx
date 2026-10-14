@@ -22,7 +22,7 @@ const BASE_W = 842;
 const BASE_H = 1190;
 
 /** Lays out an 842x1190 design and scales it to fill the book page. */
-const ScaledA4 = ({ children }: { children: React.ReactNode }) => {
+export const ScaledA4 = ({ children }: { children: React.ReactNode }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
   useEffect(() => {
