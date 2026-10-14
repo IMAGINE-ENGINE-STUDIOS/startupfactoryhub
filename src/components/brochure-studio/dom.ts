@@ -101,11 +101,15 @@ export function applyFills(doc: BrochureDoc) {
     const b = doc.bgs[String(pg)] || doc.bgs.all;
     const page = (root.closest('.stf__item') as HTMLElement | null) || root;
     page.dataset.bsFill = String(pg); root.dataset.bsFill = String(pg);
-    if (!b || !b.fill || b.fill === 'none') continue;
+    if (!b) continue;
+    const filt = [b.hue ? `hue-rotate(${b.hue}deg)` : '', b.sat != null && b.sat !== 1 ? `saturate(${b.sat})` : '', b.bright != null && b.bright !== 1 ? `brightness(${b.bright})` : ''].filter(Boolean).join(' ');
+    if (filt) css += `[data-bp-root][data-bs-fill="${pg}"]{filter:${filt}}`;
+    if (b.text) css += `[data-bs-fill="${pg}"] :is(h1,h2,h3,h4,p,li,span,div):not([data-bs-ui] *){color:${b.text}!important;-webkit-text-fill-color:${b.text}!important}`;
+    if (!b.fill || b.fill === 'none') continue;
     const f1 = b.f1 || '#0b1220', f2 = b.f2 || '#4c1d95', a = b.angle ?? 160;
     const val = b.fill === 'solid' ? f1 : `linear-gradient(${a}deg, ${f1}, ${f2}${b.fill === 'animated' ? `, ${f1}` : ''})`;
     const anim = b.fill === 'animated' ? 'background-size:300% 300%!important;animation:bs-flow 12s ease infinite!important;' : '';
-    const sel = `[data-bs-fill="${pg}"]` + (b.deep ? `, [data-bs-fill="${pg}"] > div:first-child, [data-bs-fill="${pg}"] > div:first-child > div:first-child` : '');
+    const sel = `[data-bs-fill="${pg}"]` + (b.deep ? `, [data-bs-fill="${pg}"] > div:first-child, [data-bs-fill="${pg}"] > div:first-child > div:first-child, [data-bs-fill="${pg}"] section` : '');
     css += `${sel}{background:${val}!important;${anim}}`;
   }
   let st = document.getElementById('bs-fills') as HTMLStyleElement | null;
