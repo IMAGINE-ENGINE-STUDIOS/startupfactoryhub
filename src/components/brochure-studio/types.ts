@@ -9,7 +9,7 @@ export type Hover = '' | 'lift' | 'grow' | 'glow' | 'tilt';
 export type ElEdit = {
   text?: string; color?: string; bg?: string; hidden?: boolean;
   dx?: number; dy?: number; scale?: number; rot?: number;
-  fontSize?: number; opacity?: number; radius?: number; anim?: Anim; z?: number; hover?: Hover;
+  fontSize?: number; opacity?: number; radius?: number; anim?: Anim; z?: number; hover?: Hover; font?: string;
 };
 
 export type ItemType = 'image' | 'text' | 'icon' | 'model' | 'shape' | 'page';
@@ -23,7 +23,7 @@ export type Item = {
   x: number; y: number; w: number; // percent of the page
   rot?: number; opacity?: number; radius?: number; anim?: Anim; z?: number; hover?: Hover;
   src?: string; text?: string; color?: string; bg?: string; size?: number; weight?: number;
-  icon?: string; ar?: boolean; autoRotate?: boolean; metal?: boolean;
+  icon?: string; font?: string; ar?: boolean; autoRotate?: boolean; metal?: boolean;
 };
 
 export type BgKind = 'none' | 'tree' | 'lab' | 'grid' | 'stars' | 'particles' | 'aurora' | 'waves' | 'matrix';

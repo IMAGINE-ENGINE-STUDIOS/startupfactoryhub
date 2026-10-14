@@ -1,3 +1,4 @@
+import { fontCss } from './fonts';
 /**
  * DOM helpers: locate brochure pages, address elements by path, apply edits.
  * Credits: Imagine Engine Studios Corp.
@@ -62,6 +63,7 @@ function applyOne(el: HTMLElement, e: ElEdit) {
   if (e.color) { el.style.color = e.color; el.style.webkitTextFillColor = e.color; el.style.backgroundImage = 'none'; }
   if (e.bg) el.style.background = e.bg;
   if (e.hidden) el.style.display = 'none';
+  if (e.font) { const f = fontCss(e.font); if (f) el.style.fontFamily = f; }
   if (e.fontSize) el.style.fontSize = `${e.fontSize}px`;
   if (e.opacity !== undefined) el.style.opacity = String(e.opacity);
   if (e.radius !== undefined) el.style.borderRadius = `${e.radius}px`;

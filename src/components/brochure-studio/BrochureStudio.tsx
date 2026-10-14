@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
-  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,10 @@ import { PageBackground, BG_OPTIONS } from './Backgrounds';
 import { ICONS } from './icons';
 import { PageLibrary } from './PageLibrary';
 import EmbedPage from './EmbedPage';
+import { ColorField } from './ColorField';
+import { FontPicker } from './FontPicker';
+import { ReaderBar } from './ReaderBar';
+import { THEMES } from './themes';
 import { isEmbed } from './library';
 import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg, type PageRef, type Hover } from './types';
 
@@ -300,7 +304,7 @@ function StudioEditor() {
   }) : null;
 
   if (!active) return null;
-  if (!isAdmin) return <>{portals}</>;
+  if (!isAdmin) return <>{portals}<ReaderBar roots={roots} /></>;
 
   /* ---- inspector data ---- */
   const selEl = (() => {
@@ -356,6 +360,7 @@ function StudioEditor() {
     <>
       <style>{STUDIO_CSS}</style>
       {portals}
+      {!editing && <ReaderBar roots={roots} />}
       <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] overflow-x-auto rounded-xl px-2 py-1.5 flex items-center gap-1.5" style={glass}>
         <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? '#7c3aed' : 'rgba(255,255,255,0.08)' }}>
           <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
@@ -398,9 +403,15 @@ function StudioEditor() {
           <Lbl t="Strength"><Stepper v={curBg.opacity} set={(v) => setBg({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
           <Lbl t="Blend"><select className="rounded-md p-1.5 text-[12px]" style={field} value={curBg.blend} onChange={(e) => setBg({ blend: e.target.value as PageBg['blend'] })}>
             <option value="normal" style={{ background: '#0f172a' }}>Normal</option><option value="screen" style={{ background: '#0f172a' }}>Glow (dark pages)</option><option value="multiply" style={{ background: '#0f172a' }}>Ink (light pages)</option></select></Lbl>
+          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#c4b5fd' }}>THEME</span>
+          <div className="grid grid-cols-2 gap-1.5">
+            {THEMES.map((t) => <button key={t.id} className={btn} style={soft} title={t.name} onClick={() => setBg({ fill: 'gradient', f1: t.f1, f2: t.f2, c1: t.c1, c2: t.c2, angle: 135 })}>
+              <span className="h-3 w-3 rounded-full" style={{ background: `linear-gradient(135deg,${t.f2},${t.c1})` }} />{t.name}</button>)}
+            <button className={btn} style={soft} onClick={() => { const t = THEMES[Math.floor(Math.random() * THEMES.length)]; setBg({ fill: 'gradient', f1: t.f1, f2: t.f2, c1: t.c1, c2: t.c2, angle: 135 }); }}><Shuffle className="h-4 w-4" />Shuffle</button>
+          </div>
           <div className="flex gap-3">
-            <Lbl t="Animation color 1"><input type="color" value={curBg.c1 || '#22d3ee'} onChange={(e) => setBg({ c1: e.target.value })} /></Lbl>
-            <Lbl t="Color 2"><input type="color" value={curBg.c2 || '#a855f7'} onChange={(e) => setBg({ c2: e.target.value })} /></Lbl>
+            <Lbl t="Animation color 1"><ColorField value={curBg.c1 || '#22d3ee'} onChange={(v) => setBg({ c1: v })} /></Lbl>
+            <Lbl t="Color 2"><ColorField value={curBg.c2 || '#a855f7'} onChange={(v) => setBg({ c2: v })} /></Lbl>
           </div>
           <Lbl t="Speed"><Stepper v={curBg.speed ?? 1} set={(v) => setBg({ speed: v })} step={0.1} min={0.1} max={4} fmt={(n) => `${n}x`} /></Lbl>
           <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#c4b5fd' }}>PAGE COLOR</span>
@@ -411,8 +422,8 @@ function StudioEditor() {
           </div>
           {curBg.fill && curBg.fill !== 'none' && <>
             <div className="flex gap-3">
-              <Lbl t="Color 1"><input type="color" value={curBg.f1 || '#0b1220'} onChange={(e) => setBg({ f1: e.target.value })} /></Lbl>
-              {curBg.fill !== 'solid' && <Lbl t="Color 2"><input type="color" value={curBg.f2 || '#4c1d95'} onChange={(e) => setBg({ f2: e.target.value })} /></Lbl>}
+              <Lbl t="Color 1"><ColorField value={curBg.f1 || '#0b1220'} onChange={(v) => setBg({ f1: v })} /></Lbl>
+              {curBg.fill !== 'solid' && <Lbl t="Color 2"><ColorField value={curBg.f2 || '#4c1d95'} onChange={(v) => setBg({ f2: v })} /></Lbl>}
             </div>
             {curBg.fill !== 'solid' && <Lbl t="Direction"><Stepper v={curBg.angle ?? 160} set={(v) => setBg({ angle: v })} step={5} min={0} max={360} fmt={(n) => `${n}°`} /></Lbl>}
             <button className={btn} style={curBg.deep ? { background: '#7c3aed' } : soft} onClick={() => setBg({ deep: !curBg.deep })}>Also recolor the page's own panel</button>
@@ -433,10 +444,11 @@ function StudioEditor() {
                 ? <Lbl t="Text"><textarea rows={3} className="rounded-md p-2 text-[13px]" style={field} value={selEdit.text ?? selEl?.dataset.bpOrig ?? selEl?.textContent ?? ''} onChange={(e) => setEdit({ text: e.target.value })} /></Lbl>
                 : <span className="text-[11px]" style={{ color: '#94a3b8' }}>This is a group. Click a word to change its text.</span>}
               <div className="flex gap-3">
-                <Lbl t="Text color"><input type="color" value={selEdit.color || '#ffffff'} onChange={(e) => setEdit({ color: e.target.value })} /></Lbl>
-                <Lbl t="Fill"><input type="color" value={selEdit.bg || '#1e293b'} onChange={(e) => setEdit({ bg: e.target.value })} /></Lbl>
+                <Lbl t="Text color"><ColorField value={selEdit.color || '#ffffff'} onChange={(v) => setEdit({ color: v })} /></Lbl>
+                <Lbl t="Fill"><ColorField value={selEdit.bg || '#1e293b'} onChange={(v) => setEdit({ bg: v })} /></Lbl>
               </div>
               <Lbl t="Size (pictures and blocks)"><Stepper v={selEdit.scale ?? 1} set={(v) => setEdit({ scale: v })} step={0.05} min={0.2} max={3} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+              {canText && <Lbl t="Font"><FontPicker value={selEdit.font} onChange={(f) => setEdit({ font: f })} /></Lbl>}
               {canText && <Lbl t="Font size"><Stepper v={selEdit.fontSize ?? baseFont} set={(v) => setEdit({ fontSize: v })} step={1} min={8} max={120} /></Lbl>}
               <Lbl t="Rotate"><Stepper v={selEdit.rot ?? 0} set={(v) => setEdit({ rot: v })} step={1} min={-180} max={180} fmt={(n) => `${n}°`} /></Lbl>
               <Lbl t="Opacity"><Stepper v={selEdit.opacity ?? 1} set={(v) => setEdit({ opacity: v })} step={0.05} min={0} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
@@ -460,10 +472,11 @@ function StudioEditor() {
             <>
               {selItem.type === 'text' && <>
                 <Lbl t="Text"><textarea rows={3} className="rounded-md p-2 text-[13px]" style={field} value={selItem.text || ''} onChange={(e) => setItem({ text: e.target.value })} /></Lbl>
+                <Lbl t="Font"><FontPicker value={selItem.font} onChange={(f) => setItem({ font: f })} /></Lbl>
                 <Lbl t="Font size"><Stepper v={selItem.size || 22} set={(v) => setItem({ size: v })} step={1} min={8} max={140} /></Lbl>
                 <Lbl t="Weight"><Stepper v={selItem.weight || 700} set={(v) => setItem({ weight: v })} step={100} min={300} max={900} /></Lbl>
                 <div className="flex items-end gap-3">
-                  <Lbl t="Color"><input type="color" value={selItem.color || '#f1f5f9'} onChange={(e) => setItem({ color: e.target.value, metal: false })} /></Lbl>
+                  <Lbl t="Color"><ColorField value={selItem.color || '#f1f5f9'} onChange={(v) => setItem({ color: v, metal: false })} /></Lbl>
                   <button className={btn} style={selItem.metal ? { background: '#7c3aed' } : soft} onClick={() => setItem({ metal: !selItem.metal })}>Metallic</button>
                 </div>
               </>}
@@ -474,11 +487,11 @@ function StudioEditor() {
                   ))}
                 </div>
                 <div className="flex gap-3">
-                  <Lbl t="Icon color"><input type="color" value={selItem.color || '#e9d5ff'} onChange={(e) => setItem({ color: e.target.value })} /></Lbl>
-                  <Lbl t="Badge"><input type="color" value={selItem.bg?.startsWith('#') ? selItem.bg : '#2e1065'} onChange={(e) => setItem({ bg: e.target.value })} /></Lbl>
+                  <Lbl t="Icon color"><ColorField value={selItem.color || '#e9d5ff'} onChange={(v) => setItem({ color: v })} /></Lbl>
+                  <Lbl t="Badge"><ColorField value={selItem.bg?.startsWith('#') ? selItem.bg : '#2e1065'} onChange={(v) => setItem({ bg: v })} /></Lbl>
                 </div>
               </>}
-              {selItem.type === 'shape' && <Lbl t="Fill"><input type="color" value={selItem.bg?.startsWith('#') ? selItem.bg : '#312e81'} onChange={(e) => setItem({ bg: e.target.value })} /></Lbl>}
+              {selItem.type === 'shape' && <Lbl t="Fill"><ColorField value={selItem.bg?.startsWith('#') ? selItem.bg : '#312e81'} onChange={(v) => setItem({ bg: v })} /></Lbl>}
               {selItem.type === 'image' && <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', 'image/*', selItem.id)}><ImagePlus className="h-4 w-4" />Replace picture</button>}
               {selItem.type === 'model' && <>
                 <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,.gltf,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
