@@ -25,6 +25,11 @@ export default function EmbedPage() {
     let sent = false;
     const fit = () => {
       if (!target) return;
+      // Off-screen flipbook pages have no size; borrow it from a shown page.
+      if (!target.offsetWidth) {
+        const ref = Array.from(document.querySelectorAll('.stf__item')).find((n) => (n as HTMLElement).offsetWidth > 0) as HTMLElement | undefined;
+        if (ref) { target.style.setProperty('width', `${ref.offsetWidth}px`, 'important'); target.style.setProperty('height', `${ref.offsetHeight}px`, 'important'); }
+      }
       const w = target.offsetWidth || 1, h = target.offsetHeight || 1;
       const s = Math.min(window.innerWidth / w, window.innerHeight / h);
       target.style.setProperty('left', '0px', 'important');
