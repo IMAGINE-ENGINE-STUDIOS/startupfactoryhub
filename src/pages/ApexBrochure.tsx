@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import { useBrochureEditor, BrochureEditorPanel, AddedImages, selectAddedImage } from '@/components/brochure-editor/BrochureEditor';
 import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
@@ -488,6 +489,8 @@ export default function ApexBrochure() {
   const bookRef = useRef<any>(null);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState({ w: 560, h: 792, spread: true });
+  const ed = useBrochureEditor('apex');
+  const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = 'APEX Accelerators × Startup Factory Hub';
@@ -525,16 +528,18 @@ export default function ApexBrochure() {
         <button onClick={() => navigate('/')} className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ color: C.ink, background: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 700 }}>
           <Home className="h-4 w-4" />Home
         </button>
+        <BrochureEditorPanel ed={ed} slug="apex" boxRef={boxRef} page={page} />
         <span className="font-mono" style={{ color: '#cbd5e1', fontSize: 14, fontWeight: 700, letterSpacing: '0.2em' }}>{page + 1} / {PAGES.length}</span>
       </div>
       <div className="flex-1 flex items-center justify-center w-full gap-3 px-2">
         <button aria-label="Previous page" onClick={() => go(-1)} className="hidden sm:flex h-11 w-11 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.9)', color: C.ink }}>
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <div style={{ width: size.spread ? size.w * 2 : size.w, maxWidth: '100%' }}>
+        <div ref={boxRef} style={{ width: size.spread ? size.w * 2 : size.w, maxWidth: '100%' }}>
           {/* @ts-expect-error react-pageflip typing requires every prop */}
           <HTMLFlipBook
-            key={`${size.spread}-${size.w}`}
+            key={`${size.spread}-${size.w}-${ed.editing}`}
+            useMouseEvents={!ed.editing}
             ref={bookRef}
             width={size.w}
             height={size.h}
@@ -547,9 +552,12 @@ export default function ApexBrochure() {
             disableFlipByClick
             onFlip={(e: any) => setPage(e.data)}
           >
-            {PAGES.map((p) => (
+            {PAGES.map((p, i) => (
               <BookPage key={p.key}>
-                <div className="relative w-full h-full">{p.node}</div>
+                <div className="relative w-full h-full">
+                  <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
+                  <AddedImages ed={ed} page={i} selected={null} onSelect={selectAddedImage} />
+                </div>
               </BookPage>
             ))}
           </HTMLFlipBook>
