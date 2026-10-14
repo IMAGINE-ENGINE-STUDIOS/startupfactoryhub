@@ -142,12 +142,12 @@ const JourneyBlock = ({ th }: { th: Theme }) => (
             <div className="mt-2" style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.15, color: '#ffffff' }}>{s.name}</div>
             <ul className="mt-1.5 flex flex-col gap-0.5">
               {s.milestones.map((m) => (
-                <li key={m} className="flex items-start gap-1.5" style={{ fontSize: 12, lineHeight: 1.35, color: '#cbd5e1' }}>
+                <li key={m} className="flex items-start gap-1.5" style={{ fontSize: 14, lineHeight: 1.3, color: '#cbd5e1' }}>
                   <ListChecks className="h-3 w-3 mt-[2px] shrink-0" style={{ color: c }} />{m}
                 </li>
               ))}
             </ul>
-            <div className="mt-2 pt-1.5" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 10, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
+            <div className="mt-2 pt-1.5" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
           </div>
         );
       })}
@@ -174,7 +174,7 @@ const AdminDashboard = ({ th }: { th: Theme }) => {
       <div className="flex-1 min-h-0 grid" style={{ gridTemplateColumns: '170px 1fr' }}>
         <aside className="p-3 flex flex-col gap-1" style={{ borderRight: BORDER, background: 'rgba(15,23,42,0.6)' }}>
           {nav.map(([Icon, l], i) => (
-            <div key={l} className="flex items-center gap-2 rounded-md px-2.5 py-2" style={{ fontSize: 12.5, color: i === 0 ? '#ffffff' : DIM, background: i === 0 ? `${th.a}1f` : 'transparent', border: i === 0 ? `1px solid ${th.a}44` : '1px solid transparent' }}>
+            <div key={l} className="flex items-center gap-2 rounded-md px-2.5 py-2" style={{ fontSize: 14, color: i === 0 ? '#ffffff' : DIM, background: i === 0 ? `${th.a}1f` : 'transparent', border: i === 0 ? `1px solid ${th.a}44` : '1px solid transparent' }}>
               <Icon className="h-3.5 w-3.5" style={{ color: i === 0 ? th.a : FAINT }} />{l}
             </div>
           ))}
@@ -307,7 +307,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
                 <span className="ml-auto rounded-full" style={{ width: 7, height: 7, background: th.a, boxShadow: `0 0 8px ${th.a}` }} />
               </div>
               <div className="p-4">
-                <div style={{ fontFamily: MONO, fontSize: 12, color: DIM }}><span style={{ color: th.a }}>$</span> {th.cmd}</div>
+                <div style={{ fontFamily: MONO, fontSize: 14, color: DIM }}><span style={{ color: th.a }}>$</span> {th.cmd}</div>
                 <div className="mt-3 rounded-lg p-4" style={{ background: th.panel, border: BORDER }}>
                   <div className="flex items-center gap-2" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: th.b, textTransform: 'uppercase' }}><Icon className="h-3.5 w-3.5" />{f.section}</div>
                   <p className="mt-2" style={{ fontSize: 18, lineHeight: 1.5, color: TEXT }}>{f.lead || f.deck}</p>
