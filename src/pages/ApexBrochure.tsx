@@ -155,30 +155,21 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
     node: (
-      <section className="absolute inset-0 flex flex-col items-center justify-center text-center px-[8%] overflow-hidden" style={{ background: `radial-gradient(ellipse at 50% 30%, ${C.teal}26 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, ${C.navy}22 0%, transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#e8eef6 100%)` }}>
-        <HudBackdrop accent={C.teal} />
-        {[340, 470, 600].map((d, i) => (
-          <div key={d} className="absolute rounded-full pointer-events-none" style={{
-            width: d, height: d, left: '50%', top: '42%', transform: 'translate(-50%,-50%)',
-            border: `1px ${i === 1 ? 'dashed' : 'solid'} ${C.teal}${i === 0 ? '40' : '22'}`,
-          }} />
+      <section className="absolute inset-0 flex flex-col items-center justify-between text-center py-[9%] px-[8%] overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 40%, #7c3aed55 0%, transparent 55%), radial-gradient(ellipse at 15% 100%, #a855f733 0%, transparent 50%), radial-gradient(ellipse at 90% 0%, #c4b5fd22 0%, transparent 45%), linear-gradient(160deg,#07050f 0%,#140b2b 50%,#05040b 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#a78bfa14 1px, transparent 1px), linear-gradient(90deg, #a78bfa14 1px, transparent 1px)', backgroundSize: '36px 36px', maskImage: 'radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%)' }} />
+        {[300, 420, 560].map((d, i) => (
+          <div key={d} className="absolute rounded-full pointer-events-none" style={{ width: d, height: d, left: '50%', top: '44%', transform: 'translate(-50%,-50%)', border: `1px ${i === 1 ? 'dashed' : 'solid'} ${i === 0 ? '#c4b5fd66' : '#a78bfa2e'}`, boxShadow: i === 0 ? '0 0 60px #7c3aed55, inset 0 0 60px #7c3aed33' : undefined }} />
         ))}
-        <div className="absolute top-[5%] left-[7%] right-[7%] flex justify-between font-mono uppercase" style={{ fontSize: 12, letterSpacing: '0.3em', color: C.teal, fontWeight: 700 }}>
-          <span>SEC // 00</span><span style={{ color: C.muted }}>Proposal · 2026</span>
+        <div className="relative font-mono uppercase" style={{ fontSize: 12, letterSpacing: '0.4em', color: '#c4b5fd', fontWeight: 700 }}>SEC // 00</div>
+        <div className="relative flex flex-col items-center">
+          <div className="relative rounded-full p-8" style={{ background: 'radial-gradient(circle, #ffffff 0%, #ede9fe 60%, #c4b5fd 100%)', boxShadow: '0 0 0 1px #ffffff55, 0 0 80px #7c3aedaa, 0 20px 60px #000a' }}>
+            <img src={APEX_LOGO} alt="APEX Accelerators" className="h-28 w-28 object-contain" />
+          </div>
+          <h1 className="mt-10 font-futuristic" style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.05, letterSpacing: '0.04em', paddingBottom: 6, background: 'linear-gradient(180deg,#ffffff 0%,#e5e7eb 35%,#9ca3af 50%,#f5f3ff 65%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 18px #7c3aed88)' }}>APEX</h1>
+          <div className="mt-3 h-[2px] w-40 rounded-full" style={{ background: 'linear-gradient(90deg, transparent, #a855f7, #e9d5ff, #a855f7, transparent)', boxShadow: '0 0 14px #a855f7' }} />
+          <div className="mt-4 font-mono uppercase font-bold" style={{ fontSize: 15, letterSpacing: '0.42em', color: '#ddd6fe' }}>Powered by Startup Factory</div>
         </div>
-        <div className="relative flex items-center gap-6 mb-10">
-          <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" />
-          <span style={{ color: C.muted, fontSize: 28, fontWeight: 300 }}>×</span>
-          <img src={APEX_LOGO} alt="APEX Accelerators" className="h-14 w-auto object-contain" />
-        </div>
-        <div className="relative font-mono uppercase font-bold" style={{ color: C.teal, fontSize: 14, letterSpacing: '0.34em' }}>Partnership Proposal</div>
-        <h1 className="relative mt-4 font-futuristic" style={{ fontSize: 46, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.01em', paddingBottom: 6, ...PLATINUM }}>
-          Apex's Innovation Platform
-        </h1>
-        <p className="relative mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
-          One place where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, and where Apex manages and measures the whole program.
-        </p>
-        <div className="relative mt-10 font-mono uppercase" style={{ color: C.muted, fontSize: 12.5, letterSpacing: '0.18em' }}>Startup Factory Hub · Orlando, Florida</div>
+        <img src={sfhLogo} alt="Startup Factory Hub" className="relative h-12 w-auto object-contain" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 0 10px #a855f7aa)' }} />
       </section>
     ),
   },
@@ -244,7 +235,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
         <div>
           <div className="h-[3px] w-16 mb-4 rounded-full" style={{ background: `linear-gradient(90deg, ${C.teal}, ${C.navy})`, boxShadow: `0 0 12px ${C.teal}66` }} />
           <h2 className="font-futuristic" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.1, paddingBottom: 4, ...PLATINUM }}>Acceleration at scale</h2>
-          <p className="mt-3" style={{ color: C.body, fontSize: 20, lineHeight: 1.55 }}>Apex accelerates startups, but acceleration at scale depends on three things. Startup Factory Hub is a single platform that does all three.</p>
+          <p className="mt-3" style={{ color: C.body, fontSize: 20, lineHeight: 1.55 }}>Apex accelerates startups, but acceleration at scale depends on three things. Startup Factory Hub is a single platform that does all three: Apex's Innovation Platform, where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, and where Apex manages and measures the whole program.</p>
         </div>
         {([[FolderOpen, 'Right resources, right time', 'Getting the right resource to the right founder at the right moment.', C.teal], [Users, 'The right people', 'Connecting founders with the mentors, advisors and investors who can help.', C.emerald], [BarChart3, 'Knowing what works', 'Clear visibility into progress, resource use and outcomes.', C.navy]] as const).map(([Icon, t, d, a]) => (
           <div key={t} className="relative rounded-2xl p-5 flex gap-4 items-center" style={glass}>
