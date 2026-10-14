@@ -21,7 +21,7 @@ export const EmbeddedPage = ({ route, page, title }: { route: string; page: numb
     <iframe
       src={`${route}?bsEmbed=${page}`}
       title={title}
-      loading="lazy"
+      loading="eager"
       className="absolute inset-0 w-full h-full border-0"
       style={{ pointerEvents: 'none' }}
     />
