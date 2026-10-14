@@ -96,7 +96,7 @@ const Title = ({ children, sub, accent = C.teal }: { children: React.ReactNode; 
   <div>
     <div className="h-[3px] w-14 mb-3 rounded-full" style={{ background: `linear-gradient(90deg, ${accent}, ${C.navy})`, boxShadow: `0 0 12px ${accent}66` }} />
     <h2 className="font-futuristic" style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.01em', paddingBottom: 4, ...PLATINUM }}>{children}</h2>
-    {sub && <p className="mt-2" style={{ color: C.body, fontSize: 16.5, lineHeight: 1.55 }}>{sub}</p>}
+    {sub && <p className="mt-2" style={{ color: C.body, fontSize: 19, lineHeight: 1.5 }}>{sub}</p>}
   </div>
 );
 
@@ -352,10 +352,10 @@ export default function ApexBrochure() {
     document.title = 'APEX Accelerators × Startup Factory Hub';
     const calc = () => {
       const vw = window.innerWidth;
-      const vh = window.innerHeight - 140;
+      const vh = window.innerHeight - 72;
       const spread = vw >= 1100;
-      const maxW = spread ? (vw - 80) / 2 : vw - 24;
-      const w = Math.floor(Math.min(maxW, vh / 1.414, 620));
+      const maxW = spread ? (vw - 140) / 2 : vw - 24;
+      const w = Math.floor(Math.min(maxW, vh / 1.414, 760));
       setSize({ w: Math.max(300, w), h: Math.max(424, Math.floor(Math.max(300, w) * 1.414)), spread });
     };
     calc();
@@ -380,7 +380,7 @@ export default function ApexBrochure() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(14,116,144,0.18) 0%, transparent 60%), linear-gradient(180deg,#0b1220 0%,#111a2e 100%)' }}>
-      <div className="w-full flex items-center justify-between px-4 py-3">
+      <div className="w-full flex items-center justify-between px-4 py-1.5">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ color: C.ink, background: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 700 }}>
           <Home className="h-4 w-4" />Home
         </button>
