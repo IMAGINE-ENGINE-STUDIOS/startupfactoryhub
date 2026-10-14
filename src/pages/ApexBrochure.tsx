@@ -13,6 +13,7 @@ import {
   Building2, Rocket, Check, Mail, FolderOpen, Settings, Globe, TrendingUp, Coins, Award,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 import { EditorialPage, EmbeddedPage, FEATURES } from './apex/ApexEditorial';
 
@@ -180,22 +181,33 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     node: (
       <Frame code="03" label="Executive Summary">
         <div>
-          <div className="h-[3px] w-16 mb-4 rounded-full" style={{ background: `linear-gradient(90deg, ${C.teal}, ${C.navy})`, boxShadow: `0 0 12px ${C.teal}66` }} />
-          <h2 className="font-futuristic" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.1, paddingBottom: 4, ...PLATINUM }}>Acceleration at scale</h2>
-          <p className="mt-3" style={{ color: C.body, fontSize: 20, lineHeight: 1.55 }}>Apex accelerates startups, but acceleration at scale depends on three things. Startup Factory Hub is a single platform that does all three: Apex's Innovation Platform, where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, and where Apex manages and measures the whole program.</p>
+          <div className="h-[3px] w-16 mb-3 rounded-full" style={{ background: `linear-gradient(90deg, ${C.teal}, ${C.navy})`, boxShadow: `0 0 12px ${C.teal}66` }} />
+          <h2 className="font-futuristic" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, paddingBottom: 4, ...PLATINUM }}>Acceleration at scale</h2>
+          <p className="mt-2" style={{ color: C.body, fontSize: 15.5, lineHeight: 1.5 }}>Acceleration at scale depends on three things. Startup Factory Hub is one platform that does all three: Apex's Innovation Platform, where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while Apex manages and measures the whole program.</p>
         </div>
-        {([[FolderOpen, 'Right resources, right time', 'Getting the right resource to the right founder at the right moment.', C.teal], [Users, 'The right people', 'Connecting founders with the mentors, advisors and investors who can help.', C.emerald], [BarChart3, 'Knowing what works', 'Clear visibility into progress, resource use and outcomes.', C.navy]] as const).map(([Icon, t, d, a]) => (
-          <div key={t} className="relative rounded-2xl p-5 flex gap-4 items-center" style={glass}>
-            <span className="absolute top-0 left-6 right-6 h-px" style={{ background: `linear-gradient(90deg, transparent, ${a}, transparent)` }} />
-            <div className="shrink-0 h-14 w-14 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${a}30, ${a}08)`, border: `1px solid ${a}55`, boxShadow: `0 0 16px ${a}33`, color: a }}>
-              <Icon className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 style={{ color: C.ink, fontSize: 21, fontWeight: 800, lineHeight: 1.2 }}>{t}</h3>
-              <p className="mt-1" style={{ color: C.body, fontSize: 17.5, lineHeight: 1.5 }}>{d}</p>
-            </div>
+        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
+          <div className="col-span-6 flex flex-col gap-2.5 min-h-0">
+            {([['Right resources, right time', 'The right resource to the right founder at the right moment.', C.teal], ['The right people', 'Founders connected with mentors, advisors and investors who can help.', C.emerald], ['Knowing what works', 'Clear visibility into progress, resource use and outcomes.', C.navy]] as const).map(([t, d, a]) => (
+              <div key={t} className="relative rounded-xl px-4 py-3" style={{ ...glass, borderLeft: `3px solid ${a}` }}>
+                <h3 style={{ color: C.ink, fontSize: 16, fontWeight: 800, lineHeight: 1.2 }}>{t}</h3>
+                <p className="mt-1" style={{ color: C.body, fontSize: 13.5, lineHeight: 1.45 }}>{d}</p>
+              </div>
+            ))}
           </div>
-        ))}
+          <div className="col-span-6 relative rounded-2xl overflow-hidden min-h-0" style={{ background: '#020812', boxShadow: '0 30px 60px -30px rgba(15,23,42,0.5)' }}>
+            <SFHNetworkGlobe accent="#0ea5b7" />
+            <div className="absolute top-3 left-3 font-mono uppercase font-bold" style={{ fontSize: 10, letterSpacing: '0.24em', color: '#67e8f9' }}>Ecosystem reach</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-5 rounded-xl overflow-hidden" style={{ background: 'rgba(2,6,23,0.92)' }}>
+          {[['5,800', 'Office locations'], ['130', 'Countries'], ['1,500', 'U.S. locations'], ['350+', 'Network members'], ['04', 'Global hubs']].map(([v, l], i) => (
+            <div key={l} className="px-3 py-2.5" style={{ borderLeft: i ? '1px solid rgba(255,255,255,0.1)' : undefined }}>
+              <div className="font-extrabold" style={{ fontSize: 19, lineHeight: 1, color: '#fff' }}>{v}</div>
+              <div className="h-[2px] w-5 my-1" style={{ background: '#22d3ee' }} />
+              <div className="uppercase font-bold leading-tight" style={{ fontSize: 9.5, letterSpacing: '0.1em', color: '#94a3b8' }}>{l}</div>
+            </div>
+          ))}
+        </div>
       </Frame>
     ),
   },
