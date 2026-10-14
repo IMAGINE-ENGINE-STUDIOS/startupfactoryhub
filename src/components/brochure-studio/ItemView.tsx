@@ -1,3 +1,4 @@
+import { fontCss } from './fonts';
 /**
  * Renders one added Studio item (picture, text, icon, 3D/AR model, card shape).
  * Credits: Imagine Engine Studios Corp.
@@ -27,7 +28,7 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
   let body: React.ReactNode = null;
   if (it.type === 'image') body = <img src={it.src} alt="" draggable={false} style={{ width: '100%', display: 'block', borderRadius: it.radius ?? 10 }} />;
   if (it.type === 'text') body = (
-    <div style={{ fontSize: it.size || 22, fontWeight: it.weight || 700, color: it.color || '#f1f5f9', lineHeight: 1.2, whiteSpace: 'pre-wrap', ...(it.metal ? METAL : {}) }}
+    <div style={{ fontSize: it.size || 22, fontWeight: it.weight || 700, color: it.color || '#f1f5f9', lineHeight: 1.2, whiteSpace: 'pre-wrap', fontFamily: fontCss(it.font), ...(it.metal ? METAL : {}) }}
       className={it.metal ? 'font-futuristic' : undefined}>{it.text || 'Your text'}</div>
   );
   if (it.type === 'icon') {
