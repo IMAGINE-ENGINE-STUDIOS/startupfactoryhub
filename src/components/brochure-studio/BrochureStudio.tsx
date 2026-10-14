@@ -476,7 +476,7 @@ function StudioEditor() {
       </div>
 
       {editing && bgOpen && (
-        <div className="fixed left-4 bottom-20 z-[70] w-64 rounded-xl p-4 flex flex-col gap-3" style={glass}>
+        <div className="fixed left-4 bottom-20 z-[70] w-64 max-h-[calc(100vh-110px)] overflow-y-auto overscroll-contain [&>*]:shrink-0 rounded-xl p-4 flex flex-col gap-3" style={glass}>
           <div className="flex items-center justify-between"><span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>BACKGROUND</span>
             <button aria-label="Close" onClick={() => setBgOpen(false)}><X className="h-4 w-4" /></button></div>
           <div className="flex gap-1.5">
@@ -518,7 +518,7 @@ function StudioEditor() {
       )}
 
       {editing && (selEdit || selItem) && (
-        <div className="fixed right-4 top-16 z-[70] w-72 max-h-[calc(100vh-150px)] overflow-y-auto rounded-xl p-4 flex flex-col gap-3" style={glass}>
+        <div className="fixed right-4 top-16 z-[70] w-72 max-h-[calc(100vh-150px)] overflow-y-auto overscroll-contain [&>*]:shrink-0 rounded-xl p-4 flex flex-col gap-3" style={glass}>
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>{selItem ? selItem.type.toUpperCase() : 'ELEMENT'}</span>
             <button aria-label="Close" onClick={() => setSel(null)}><X className="h-4 w-4" /></button>
