@@ -8,6 +8,7 @@ import { X, LayoutTemplate, FilePlus2, GripVertical } from 'lucide-react';
 import { LAYOUTS, LAYOUT_GROUPS, LAYOUT_MIME, type Layout } from './layouts';
 import { ICONS } from './icons';
 import { fontCss } from './fonts';
+import { APEX_PAGES, APEX_KIT, pageKit, KIT_MIME, type Kit } from './kits';
 
 export function Thumb({ l }: { l: Layout }) {
   return (
@@ -22,8 +23,8 @@ export function Thumb({ l }: { l: Layout }) {
   );
 }
 
-export function LayoutGallery({ onUse, onNewPage, onClose, canAddPage }: {
-  onUse: (l: Layout) => void; onNewPage: (l: Layout) => void; onClose: () => void; canAddPage: boolean;
+export function LayoutGallery({ onUse, onNewPage, onClose, canAddPage, onKit }: {
+  onUse: (l: Layout) => void; onNewPage: (l: Layout) => void; onClose: () => void; canAddPage: boolean; onKit: (k: Kit) => void;
 }) {
   const [group, setGroup] = useState<string>('All');
   const list = LAYOUTS.filter((l) => group === 'All' || l.group === group);
@@ -35,11 +36,27 @@ export function LayoutGallery({ onUse, onNewPage, onClose, canAddPage }: {
         <button aria-label="Close" onClick={onClose}><X className="h-4 w-4" /></button>
       </div>
       <div className="flex flex-wrap gap-1 px-3 py-2">
-        {['All', ...LAYOUT_GROUPS].map((g) => (
+        {['All', ...LAYOUT_GROUPS, 'APEX'].map((g) => (
           <button key={g} className="rounded-md px-2 py-1 text-[11px] font-bold" style={{ background: group === g ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} onClick={() => setGroup(g)}>{g}</button>
         ))}
       </div>
-      <p className="px-3 pb-2 text-[11px]" style={{ color: '#94a3b8' }}>Drag a layout onto a page, or press Use for the current page.</p>
+      <p className="px-3 pb-2 text-[11px]" style={{ color: '#94a3b8' }}>{group === 'APEX' ? 'Every APEX page, saved with its design. Drag one onto a page to insert it after, or press Add.' : 'Drag a layout onto a page, or press Use for the current page.'}</p>
+      {group === 'APEX' ? (
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 flex flex-col gap-2">
+          <button className="rounded-md py-2 text-[11px] font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }} onClick={() => onKit(APEX_KIT)}>Add all {APEX_PAGES.length} APEX pages</button>
+          <div className="grid grid-cols-2 gap-3 content-start">
+            {APEX_PAGES.map((label, i) => { const k = pageKit('/apex', i, `APEX · ${label}`); return (
+              <div key={k.id} draggable onDragStart={(e) => { e.dataTransfer.setData(KIT_MIME, k.id); e.dataTransfer.effectAllowed = 'copy'; }} className="flex flex-col gap-1.5 cursor-grab active:cursor-grabbing">
+                <div className="relative w-full rounded-lg flex flex-col justify-between p-2" style={{ aspectRatio: '1 / 1.414', background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.3), transparent 60%), linear-gradient(180deg,#0b1220,#111a2e)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                  <span className="font-mono text-[9px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>APEX // {String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-[12px] font-bold leading-tight" style={{ color: '#f1f5f9' }}>{label}</span>
+                  <GripVertical className="absolute right-1 top-1 h-3.5 w-3.5 opacity-60" />
+                </div>
+                <button className="rounded-md py-1 text-[10px] font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }} onClick={() => onKit(k)}>Add</button>
+              </div>); })}
+          </div>
+        </div>
+      ) : (
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 grid grid-cols-2 gap-3 content-start">
         {list.map((l) => (
           <div key={l.id} draggable onDragStart={(e) => { e.dataTransfer.setData(LAYOUT_MIME, l.id); e.dataTransfer.effectAllowed = 'copy'; }}
@@ -55,6 +72,7 @@ export function LayoutGallery({ onUse, onNewPage, onClose, canAddPage }: {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

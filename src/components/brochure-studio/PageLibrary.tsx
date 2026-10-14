@@ -9,7 +9,7 @@ import { X, Plus, FilePlus2, Library, BookCopy, GripVertical } from 'lucide-reac
 import { BROCHURES, countUrl, embedUrl } from './library';
 import { LAYOUTS, type Layout } from './layouts';
 import { Thumb } from './LayoutGallery';
-import { STARTER_KITS, brochureKit, readCounts, saveCounts, KIT_MIME, type Kit } from './kits';
+import { STARTER_KITS, APEX_KIT, brochureKit, readCounts, saveCounts, KIT_MIME, type Kit } from './kits';
 
 const ACCENT = 'linear-gradient(135deg,#06b6d4,#1d4ed8)';
 const ACTIVE = 'linear-gradient(135deg,#0e7490,#1d4ed8)';
@@ -53,7 +53,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
   const isLay = route === 'layouts', isKits = route === 'kits';
   const name = isKits ? 'Brochure templates' : isLay ? 'Page templates' : BROCHURES.find((b) => b.route === route)?.name || '';
   const glass: React.CSSProperties = { background: 'linear-gradient(160deg,rgba(11,18,32,0.97),rgba(17,26,46,0.97))', border: '1px solid rgba(34,211,238,0.28)', color: '#e2e8f0', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' };
-  const kits: Kit[] = [...STARTER_KITS, ...BROCHURES.filter((b) => counts[b.route]).map((b) => brochureKit(b.route, counts[b.route]))];
+  const kits: Kit[] = [...STARTER_KITS, APEX_KIT, ...BROCHURES.filter((b) => counts[b.route]).map((b) => brochureKit(b.route, counts[b.route]))];
   const tab = (on: boolean): React.CSSProperties => ({ background: on ? ACTIVE : 'transparent' });
 
   return (
