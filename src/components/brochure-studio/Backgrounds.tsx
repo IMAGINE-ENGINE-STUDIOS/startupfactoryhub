@@ -12,7 +12,9 @@ function TreeBg() {
   return <GrowthTree3D stage={stage} accent="#a855f7" accent2="#22d3ee" className="w-full h-full" />;
 }
 
-function CanvasBg({ kind }: { kind: PageBg['kind'] }) {
+const rgba = (hex: string, a: number) => { const n = parseInt(hex.replace('#', ''), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
+
+function CanvasBg({ kind, c1 = '#22d3ee', c2 = '#a855f7', speed = 1 }: { kind: PageBg['kind']; c1?: string; c2?: string; speed?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const c = ref.current; if (!c) return;
@@ -23,11 +25,11 @@ function CanvasBg({ kind }: { kind: PageBg['kind'] }) {
     const ro = new ResizeObserver(fit); ro.observe(c);
     const pts = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), vx: (Math.random() - 0.5) * 0.0015, vy: (Math.random() - 0.5) * 0.0015, z: Math.random() }));
     const draw = () => {
-      const W = c.width, H = c.height; t += 0.016;
+      const W = c.width, H = c.height; t += 0.016 * speed;
       g.clearRect(0, 0, W, H);
       if (kind === 'lab') {
         // hex lattice + scanning beam + molecule links
-        g.strokeStyle = 'rgba(34,211,238,0.18)'; g.lineWidth = 1;
+        g.strokeStyle = rgba(c1, 0.18); g.lineWidth = 1;
         const r = 22, h = r * Math.sqrt(3);
         for (let y = 0; y < H + h; y += h) for (let x = 0; x < W + r * 3; x += r * 3) {
           for (const ox of [0, r * 1.5]) {
@@ -39,11 +41,11 @@ function CanvasBg({ kind }: { kind: PageBg['kind'] }) {
         }
         const by = ((t * 0.18) % 1) * H;
         const grad = g.createLinearGradient(0, by - 60, 0, by + 6);
-        grad.addColorStop(0, 'rgba(168,85,247,0)'); grad.addColorStop(1, 'rgba(168,85,247,0.45)');
+        grad.addColorStop(0, rgba(c2, 0)); grad.addColorStop(1, rgba(c2, 0.45));
         g.fillStyle = grad; g.fillRect(0, by - 60, W, 66);
       }
       if (kind === 'grid') {
-        g.strokeStyle = 'rgba(168,85,247,0.35)'; g.lineWidth = 1;
+        g.strokeStyle = rgba(c2, 0.35); g.lineWidth = 1;
         const hz = H * 0.45;
         for (let i = -20; i <= 20; i++) { g.beginPath(); g.moveTo(W / 2 + i * 8, hz); g.lineTo(W / 2 + i * W * 0.12, H); g.stroke(); }
         for (let i = 0; i < 18; i++) {
@@ -66,15 +68,43 @@ function CanvasBg({ kind }: { kind: PageBg['kind'] }) {
         }
         for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
           const dx = (pts[i].x - pts[j].x) * W, dy = (pts[i].y - pts[j].y) * H, d = Math.hypot(dx, dy);
-          if (d < 90) { g.strokeStyle = `rgba(34,211,238,${(1 - d / 90) * 0.5})`; g.beginPath(); g.moveTo(pts[i].x * W, pts[i].y * H); g.lineTo(pts[j].x * W, pts[j].y * H); g.stroke(); }
+          if (d < 90) { g.strokeStyle = rgba(c1, (1 - d / 90) * 0.5); g.beginPath(); g.moveTo(pts[i].x * W, pts[i].y * H); g.lineTo(pts[j].x * W, pts[j].y * H); g.stroke(); }
         }
-        for (const p of pts) { g.fillStyle = 'rgba(168,85,247,0.9)'; g.beginPath(); g.arc(p.x * W, p.y * H, 2.2, 0, 7); g.fill(); }
+        for (const p of pts) { g.fillStyle = rgba(c2, 0.9); g.beginPath(); g.arc(p.x * W, p.y * H, 2.2, 0, 7); g.fill(); }
+      }
+      if (kind === 'aurora') {
+        for (let k = 0; k < 3; k++) {
+          const g2 = g.createLinearGradient(0, 0, W, H);
+          g2.addColorStop(0, rgba(k % 2 ? c2 : c1, 0)); g2.addColorStop(0.5, rgba(k % 2 ? c2 : c1, 0.35)); g2.addColorStop(1, rgba(k % 2 ? c1 : c2, 0));
+          g.fillStyle = g2; g.beginPath(); g.moveTo(0, H);
+          for (let x = 0; x <= W; x += 12) g.lineTo(x, H * (0.35 + 0.12 * k) + Math.sin(x / (90 + k * 40) + t * (0.6 + k * 0.3)) * H * 0.12);
+          g.lineTo(W, H); g.closePath(); g.fill();
+        }
+      }
+      if (kind === 'waves') {
+        g.lineWidth = 1.4;
+        for (let k = 0; k < 14; k++) {
+          g.strokeStyle = rgba(k % 2 ? c1 : c2, 0.15 + k * 0.03); g.beginPath();
+          for (let x = 0; x <= W; x += 8) g.lineTo(x, H * 0.3 + k * H * 0.04 + Math.sin(x / 70 + t * 1.2 + k * 0.5) * 18);
+          g.stroke();
+        }
+      }
+      if (kind === 'matrix') {
+        g.font = '13px monospace';
+        const cols = Math.ceil(W / 14);
+        for (let i = 0; i < cols; i++) {
+          const head = ((t * (40 + (i * 37) % 60) + i * 97) % (H + 200)) - 100;
+          for (let k = 0; k < 14; k++) {
+            g.fillStyle = rgba(k === 0 ? c2 : c1, Math.max(0, 0.9 - k * 0.07));
+            g.fillText(String.fromCharCode(0x30a0 + ((i * 7 + k * 13 + Math.floor(t * 6)) % 96)), i * 14, head - k * 15);
+          }
+        }
       }
       raf = requestAnimationFrame(draw);
     };
     draw();
     return () => { cancelAnimationFrame(raf); ro.disconnect(); };
-  }, [kind]);
+  }, [kind, c1, c2, speed]);
   return <canvas ref={ref} className="w-full h-full block" />;
 }
 
@@ -82,7 +112,7 @@ export function PageBackground({ bg }: { bg: PageBg }) {
   if (!bg || bg.kind === 'none') return null;
   return (
     <div style={{ position: 'absolute', inset: 0, opacity: bg.opacity, mixBlendMode: bg.blend, pointerEvents: 'none' }}>
-      {bg.kind === 'tree' ? <TreeBg /> : <CanvasBg kind={bg.kind} />}
+      {bg.kind === 'tree' ? <TreeBg /> : <CanvasBg kind={bg.kind} c1={bg.c1} c2={bg.c2} speed={bg.speed} />}
     </div>
   );
 }
@@ -94,4 +124,7 @@ export const BG_OPTIONS: { kind: PageBg['kind']; label: string }[] = [
   { kind: 'grid', label: 'HUD grid' },
   { kind: 'stars', label: 'Deep space' },
   { kind: 'particles', label: 'Network' },
+  { kind: 'aurora', label: 'Aurora' },
+  { kind: 'waves', label: 'Waves' },
+  { kind: 'matrix', label: 'Matrix rain' },
 ];
