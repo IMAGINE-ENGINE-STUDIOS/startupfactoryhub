@@ -128,7 +128,7 @@ const STAGES: { name: string; trl: string; icon: LucideIcon; milestones: string[
 
 const JourneyBlock = ({ th }: { th: Theme }) => (
   <div className="flex-1 min-h-0 flex flex-col">
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2">
       {STAGES.map((s, i) => {
         const c = [th.a, th.b, th.c][i % 3];
         const Icon = s.icon;
@@ -147,7 +147,7 @@ const JourneyBlock = ({ th }: { th: Theme }) => (
                 </li>
               ))}
             </ul>
-            <div className="mt-2 pt-1.5" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
+            <div className="mt-1.5 pt-1" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
           </div>
         );
       })}
@@ -360,7 +360,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
           )}
 
           {special && (
-            <div className={`${special === 'map' ? 'mt-6' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
+            <div className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
               {special === 'map' && <><Kicker color={DIM}>Resource map // {String(f.map!.length).padStart(2, '0')} categories</Kicker><div className="mt-3 flex-1 min-h-0 flex flex-col"><ResourceMap f={f} th={th} /></div></>}
               {special === 'journey' && <JourneyBlock th={th} />}
               {special === 'admin' && <AdminDashboard th={th} />}
