@@ -299,7 +299,7 @@ function StudioEditor() {
   const isCustomSlug = slug.startsWith('b-');
   const pagesOf = (d: BrochureDoc): PageRef[] => d.pages ?? Array.from({ length: d.pageCount || 4 }, () => ({}));
   const insertPage = (src: string | null, label: string) => {
-    const at = libAt ?? curPage() + 1;
+    const at = libAt !== null && libAt >= 0 ? libAt : curPage() + 1;
     setLibAt(null);
     if (isCustomSlug) {
       update((d) => { const pages = [...pagesOf(d)]; pages.splice(at, 0, src ? { src, label } : {}); return { ...shiftPages(d, at, 1), pages, pageCount: pages.length }; });
@@ -607,7 +607,7 @@ function StudioEditor() {
       )}
       {editing && modelsOpen && <ModelLibrary models={models} setModels={setModels} upload={upload} save={async (m) => { await call({ action: 'models', models: m }); }} onAdd={(m) => placeModel(m, curPage())} onClose={() => setModelsOpen(false)} />}
       {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} />}
-      {libAt !== null && <PageLibrary allowBlank={isCustom} onKit={(k) => applyKit(k, libAt !== null && libAt >= 0 ? libAt : undefined)} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt ?? undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
+      {libAt !== null && <PageLibrary allowBlank={isCustom} onKit={(k) => applyKit(k, libAt !== null && libAt >= 0 ? libAt : undefined)} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt !== null && libAt >= 0 ? libAt : undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
     </>
   );
 }
