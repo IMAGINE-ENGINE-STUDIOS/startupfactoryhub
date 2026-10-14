@@ -7,7 +7,7 @@
  * Credits: Imagine Engine Studios Corp.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { BookCopy, createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
@@ -20,6 +20,7 @@ import { applyEdits, applyFills, byPath, findRoots, layerHost, pageOf, pathOf, S
 import { ItemView } from './ItemView';
 import { PageBackground, BG_OPTIONS } from './Backgrounds';
 import { ICONS } from './icons';
+import { KIT_MIME, STARTER_KITS, brochureKit, readCounts, type Kit } from './kits';
 import { PageLibrary } from './PageLibrary';
 import EmbedPage from './EmbedPage';
 import { ColorField } from './ColorField';
@@ -326,6 +327,29 @@ function StudioEditor() {
     lastPage.current = at;
     toast.success(`${l.name} added as page ${at + 1}`);
   };
+  /* ---- brochure templates: add every page of a whole brochure design ---- */
+  const kitDoc = (d: BrochureDoc, k: Kit, at: number): BrochureDoc => {
+    const pages = [...pagesOf(d)]; pages.splice(at, 0, ...k.pages.map((p) => (p.src ? { src: p.src, label: p.label } : { label: p.label })));
+    const n = shiftPages(d, at, k.pages.length);
+    const items = k.pages.flatMap((p, i) => (p.layout ? p.layout.pieces.map((x) => ({ ...x, id: crypto.randomUUID(), page: at + i } as Item)) : []));
+    return { ...n, pages, pageCount: pages.length, items: [...n.items, ...items] };
+  };
+  const applyKit = (k: Kit, where?: number) => {
+    setLibAt(null);
+    if (isCustomSlug) {
+      const at = where ?? curPage() + 1;
+      update((d) => kitDoc(d, k, at)); lastPage.current = at;
+      toast.success(`${k.name} added: ${k.pages.length} pages from page ${at + 1}`);
+      return;
+    }
+    const name = window.prompt(`Name for the new brochure made from "${k.name}"`);
+    const s = (name || '').toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    if (!s) return;
+    const fresh = kitDoc({ edits: {}, items: [], bgs: {}, pages: [] }, k, 0);
+    try { localStorage.setItem(draftKey(slugFromPath(`/b/${s}`)), JSON.stringify(fresh)); } catch { /* ignore */ }
+    navigate(`/b/${s}`);
+  };
+  const findKit = (id: string) => STARTER_KITS.find((k) => k.id === id) || (id.startsWith('kit-copy:') ? (() => { const r = id.slice(9); const c = readCounts()[r]; return c ? brochureKit(r, c) : undefined; })() : undefined);
   const placeModel = (m: LibModel, page: number) => {
     const id = crypto.randomUUID();
     update((d) => ({ ...d, items: [...d.items, { id, page, type: 'model', src: m.src, iosSrc: m.iosSrc, x: 28, y: 28, w: 45, ar: true } as Item] }));
@@ -333,14 +357,16 @@ function StudioEditor() {
     toast.success(`${m.name} added to page ${page + 1}`);
   };
   useEffect(() => {
-    if (!editing || (!layoutsOpen && !modelsOpen)) return;
+    if (!editing) return;
     const pageAt = (e: DragEvent) => {
       const el = (document.elementsFromPoint(e.clientX, e.clientY) as HTMLElement[]).find((n) => !n.closest('[data-bs-ui]') && n.closest('[data-bp-root], .stf__item'));
       const root = el ? roots.find((r) => r.contains(el) || el.closest('.stf__item')?.contains(r)) : undefined;
       return root ? pageOf(root, roots) : null;
     };
-    const over = (e: DragEvent) => { if ((e.dataTransfer?.types.includes(LAYOUT_MIME) || e.dataTransfer?.types.includes(MODEL_MIME)) && pageAt(e) !== null) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } };
+    const over = (e: DragEvent) => { if ((e.dataTransfer?.types.includes(LAYOUT_MIME) || e.dataTransfer?.types.includes(KIT_MIME) || e.dataTransfer?.types.includes(MODEL_MIME)) && pageAt(e) !== null) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } };
     const drop = (e: DragEvent) => {
+      const kid = e.dataTransfer?.getData(KIT_MIME);
+      if (kid) { const pg = pageAt(e); const k = findKit(kid); if (pg === null || !k) return; e.preventDefault(); e.stopPropagation(); applyKit(k, pg + 1); return; }
       const mid = e.dataTransfer?.getData(MODEL_MIME);
       if (mid) { const pg = pageAt(e); const m = models.find((x) => x.id === mid); if (pg === null || !m) return; e.preventDefault(); e.stopPropagation(); placeModel(m, pg); return; }
       const id = e.dataTransfer?.getData(LAYOUT_MIME); if (!id) return;
@@ -350,7 +376,7 @@ function StudioEditor() {
     };
     document.addEventListener('dragover', over, true); document.addEventListener('drop', drop, true);
     return () => { document.removeEventListener('dragover', over, true); document.removeEventListener('drop', drop, true); };
-  }, [editing, layoutsOpen, modelsOpen, models, roots]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editing, layoutsOpen, modelsOpen, models, roots, doc]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const removePage = () => {
     const at = curPage();
@@ -439,6 +465,7 @@ function StudioEditor() {
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
             <button className={btn} style={layoutsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setLayoutsOpen((o) => !o); setModelsOpen(false); }}><LayoutTemplate className="h-4 w-4" />Layouts</button>
+            <button className={btn} style={soft} onClick={() => setLibAt(-1)}><BookCopy className="h-4 w-4" />Brochure templates</button>
             <button className={btn} style={modelsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setModelsOpen((o) => !o); setLayoutsOpen(false); }}><Box className="h-4 w-4" />3D library</button>
             <button className={btn} style={soft} onClick={newBrochure}><BookPlus className="h-4 w-4" />New brochure</button>
             <button className={btn} style={soft} onClick={discard}><RotateCcw className="h-4 w-4" />Discard</button>
@@ -580,7 +607,7 @@ function StudioEditor() {
       )}
       {editing && modelsOpen && <ModelLibrary models={models} setModels={setModels} upload={upload} save={async (m) => { await call({ action: 'models', models: m }); }} onAdd={(m) => placeModel(m, curPage())} onClose={() => setModelsOpen(false)} />}
       {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} />}
-      {libAt !== null && <PageLibrary allowBlank={isCustom} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt ?? undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
+      {libAt !== null && <PageLibrary allowBlank={isCustom} onKit={(k) => applyKit(k, libAt !== null && libAt >= 0 ? libAt : undefined)} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt ?? undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
     </>
   );
 }

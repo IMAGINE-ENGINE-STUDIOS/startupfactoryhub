@@ -33,6 +33,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
   const [route, setRoute] = useState(onKit ? 'kits' : onLayout ? 'layouts' : BROCHURES[0].route);
   const [counts, setCounts] = useState<Record<string, number>>(readCounts);
   const [done, setDone] = useState(0);
+  const [drag, setDrag] = useState(false);
   useEffect(() => setDone(0), [route]);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
   const tab = (on: boolean): React.CSSProperties => ({ background: on ? ACTIVE : 'transparent' });
 
   return (
-    <div data-bs-ui className="fixed inset-0 z-[80] flex items-center justify-center p-4" style={{ background: 'rgba(2,6,23,0.7)' }} onClick={onClose}>
+    <div data-bs-ui className="fixed inset-0 z-[80] flex items-center justify-center p-4" style={{ background: drag ? 'transparent' : 'rgba(2,6,23,0.7)', pointerEvents: drag ? 'none' : 'auto', opacity: drag ? 0.12 : 1 }} onClick={onClose}>
       {missing && <iframe key={missing} title="count" src={countUrl(missing)} className="fixed w-px h-px opacity-0 pointer-events-none" style={{ left: -10, top: -10 }} />}
       <div className="w-full max-w-5xl h-[82vh] rounded-2xl flex overflow-hidden" style={glass} onClick={(e) => e.stopPropagation()}>
         <aside className="w-56 shrink-0 p-3 flex flex-col gap-1 overflow-y-auto" style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}>
@@ -86,12 +87,12 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
                 <p className="pb-3 text-[12px]" style={{ color: '#94a3b8' }}>Use a whole brochure design at once, or drag it onto a page. Its pages are added after the current page.</p>
                 <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))' }}>
                   {kits.map((k) => (
-                    <div key={k.id} draggable onDragStart={(e) => { e.dataTransfer.setData(KIT_MIME, k.id); e.dataTransfer.effectAllowed = 'copy'; onClose(); }}
+                    <div key={k.id} draggable onDragStart={(e) => { e.dataTransfer.setData(KIT_MIME, k.id); e.dataTransfer.effectAllowed = 'copy'; setTimeout(() => setDrag(true), 0); }} onDragEnd={() => { setDrag(false); onClose(); }}
                       className="rounded-xl p-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
                       <div className="flex gap-1.5 overflow-hidden">
-                        {k.pages.slice(0, 3).map((p, i) => (
+                        {k.pages.slice(0, k.pages[0]?.layout ? 3 : 1).map((p, i) => (
                           <div key={i} className="w-1/3 shrink-0 relative rounded-md overflow-hidden" style={{ aspectRatio: '1 / 1.414', background: '#0b1220', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            {p.layout ? <Thumb l={p.layout} /> : <LivePage src={p.src!} title={p.label} go={i < 3 && k.pages.length > 0 && kits.indexOf(k) < STARTER_KITS.length + done + 1} onDone={() => setDone((d) => d + 1)} />}
+                            {p.layout ? <Thumb l={p.layout} /> : <LivePage src={p.src!} title={p.label} go={kits.indexOf(k) - STARTER_KITS.length < done + PARALLEL} onDone={() => setDone((d) => d + 1)} />}
                           </div>
                         ))}
                       </div>
