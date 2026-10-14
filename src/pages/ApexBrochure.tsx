@@ -154,14 +154,24 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
     node: (
-      <section className="absolute inset-0 flex flex-col items-center justify-center text-center px-[8%]" style={{ background: 'linear-gradient(180deg,#ffffff 0%,#eef3f8 100%)' }}>
-        <div className="flex items-center gap-6 mb-10">
+      <section className="absolute inset-0 flex flex-col items-center justify-center text-center px-[8%] overflow-hidden" style={{ background: `radial-gradient(ellipse at 50% 30%, ${C.teal}26 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, ${C.navy}22 0%, transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#e8eef6 100%)` }}>
+        <HudBackdrop accent={C.teal} />
+        {[340, 470, 600].map((d, i) => (
+          <div key={d} className="absolute rounded-full pointer-events-none" style={{
+            width: d, height: d, left: '50%', top: '42%', transform: 'translate(-50%,-50%)',
+            border: `1px ${i === 1 ? 'dashed' : 'solid'} ${C.teal}${i === 0 ? '40' : '22'}`,
+          }} />
+        ))}
+        <div className="absolute top-[5%] left-[7%] right-[7%] flex justify-between font-mono uppercase" style={{ fontSize: 12, letterSpacing: '0.3em', color: C.teal, fontWeight: 700 }}>
+          <span>SEC // 00</span><span style={{ color: C.muted }}>Proposal · 2026</span>
+        </div>
+        <div className="relative flex items-center gap-6 mb-10">
           <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" />
           <span style={{ color: C.muted, fontSize: 28, fontWeight: 300 }}>×</span>
           <img src={APEX_LOGO} alt="APEX Accelerators" className="h-14 w-auto object-contain" />
         </div>
-        <div className="uppercase font-bold" style={{ color: C.teal, fontSize: 14, letterSpacing: '0.22em' }}>Partnership Proposal</div>
-        <h1 className="mt-4" style={{ color: C.ink, fontSize: 44, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em' }}>
+        <div className="relative font-mono uppercase font-bold" style={{ color: C.teal, fontSize: 14, letterSpacing: '0.34em' }}>Partnership Proposal</div>
+        <h1 className="relative mt-4 font-futuristic" style={{ fontSize: 46, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.01em', paddingBottom: 6, ...PLATINUM }}>
           Apex's Innovation Platform
         </h1>
         <p className="mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
