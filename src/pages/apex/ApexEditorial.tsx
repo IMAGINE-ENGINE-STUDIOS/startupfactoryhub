@@ -226,24 +226,24 @@ export const EditorialPage = ({ f, total }: { f: Feature; total: string }) => (
     {/* Headline */}
     <div className="relative mt-5">
       <div className="font-mono uppercase font-bold" style={{ fontSize: 11, letterSpacing: '0.32em', color: TEAL }}>{f.section}</div>
-      <h2 className="mt-2" style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.05, color: INK, letterSpacing: '-0.015em' }}>{f.headline}</h2>
-      <p className="mt-3 italic" style={{ fontFamily: SERIF, fontSize: 18, lineHeight: 1.45, color: MUTED }}>{f.deck}</p>
+      <h2 className="mt-2" style={{ fontFamily: SERIF, fontSize: 31, fontWeight: 800, lineHeight: 1.05, color: INK, letterSpacing: '-0.015em' }}>{f.headline}</h2>
+      <p className="mt-3 italic" style={{ fontFamily: SERIF, fontSize: 15.5, lineHeight: 1.4, color: MUTED }}>{f.deck}</p>
       <div className="mt-4 h-[2px] w-24" style={{ background: `linear-gradient(90deg, ${PURPLE}, ${TEAL})` }} />
     </div>
 
     {/* Columns */}
-    <div className="relative mt-4 grid grid-cols-2 gap-6 flex-1 min-h-0" style={{ fontFamily: SANS }}>
+    <div className="relative mt-4 grid grid-cols-2 gap-6 flex-1 min-h-0 overflow-hidden" style={{ fontFamily: SANS }}>
       <div className="min-w-0">
-        <p style={{ fontSize: 15.5, lineHeight: 1.6, color: INK, fontWeight: 600 }}>
-          <span className="float-left mr-2" style={{ fontFamily: SERIF, fontSize: 58, lineHeight: 0.85, fontWeight: 900, color: PURPLE }}>{f.lead[0]}</span>
+        <p style={{ fontSize: 14, lineHeight: 1.5, color: INK, fontWeight: 600 }}>
+          <span className="float-left mr-2" style={{ fontFamily: SERIF, fontSize: 48, lineHeight: 0.85, fontWeight: 900, color: PURPLE }}>{f.lead[0]}</span>
           {f.lead.slice(1)}
         </p>
-        <p className="mt-3 clear-both" style={{ fontSize: 15, lineHeight: 1.6 }}>{f.body[0]}</p>
+        <p className="mt-3 clear-both" style={{ fontSize: 13.5, lineHeight: 1.5 }}>{f.body[0]}</p>
       </div>
       <div className="min-w-0 pl-6" style={{ borderLeft: '1px solid rgba(11,16,32,0.18)' }}>
-        <p style={{ fontSize: 15, lineHeight: 1.6 }}>{f.body[1]}</p>
+        <p style={{ fontSize: 13.5, lineHeight: 1.5 }}>{f.body[1]}</p>
         <blockquote className="mt-4 py-3" style={{ borderTop: `2px solid ${INK}`, borderBottom: '1px solid rgba(11,16,32,0.25)' }}>
-          <p style={{ fontFamily: SERIF, fontSize: 21, lineHeight: 1.3, fontWeight: 700, fontStyle: 'italic', color: INK }}>&ldquo;{f.quote}&rdquo;</p>
+          <p style={{ fontFamily: SERIF, fontSize: 17, lineHeight: 1.3, fontWeight: 700, fontStyle: 'italic', color: INK }}>&ldquo;{f.quote}&rdquo;</p>
         </blockquote>
       </div>
     </div>
@@ -252,7 +252,7 @@ export const EditorialPage = ({ f, total }: { f: Feature; total: string }) => (
     <div className="relative grid grid-cols-3 mt-3" style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
       {f.facts.map(([v, l], i) => (
         <div key={l} className="py-3 px-3" style={{ borderLeft: i ? '1px solid rgba(11,16,32,0.18)' : undefined }}>
-          <div style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 900, lineHeight: 1, color: i === 1 ? PURPLE : INK }}>{v}</div>
+          <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 900, lineHeight: 1, color: i === 1 ? PURPLE : INK }}>{v}</div>
           <div className="mt-1 font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.18em', color: MUTED }}>{l}</div>
         </div>
       ))}
