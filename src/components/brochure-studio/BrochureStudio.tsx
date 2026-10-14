@@ -16,14 +16,14 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
-import { applyEdits, byPath, findRoots, layerHost, pageOf, pathOf, STUDIO_CSS } from './dom';
+import { applyEdits, applyFills, byPath, findRoots, layerHost, pageOf, pathOf, STUDIO_CSS } from './dom';
 import { ItemView } from './ItemView';
 import { PageBackground, BG_OPTIONS } from './Backgrounds';
 import { ICONS } from './icons';
 import { PageLibrary } from './PageLibrary';
 import EmbedPage from './EmbedPage';
 import { isEmbed } from './library';
-import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg, type PageRef } from './types';
+import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg, type PageRef, type Hover } from './types';
 
 const SUPA_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const publishedUrl = (slug: string) => `${SUPA_URL}/storage/v1/object/public/studio-published/brochures/${slug}.json`;
@@ -40,9 +40,11 @@ export const slugFromPath = (path: string) => {
 export const fetchPublished = (slug: string) =>
   fetch(`${publishedUrl(slug)}?t=${Date.now()}`).then((r) => (r.ok ? r.json() : null)).then(normalizeDoc).catch(() => normalizeDoc(null));
 
+const HOVERS: { v: Hover; l: string }[] = [{ v: '', l: 'None' }, { v: 'lift', l: 'Lift' }, { v: 'grow', l: 'Grow' }, { v: 'glow', l: 'Glow' }, { v: 'tilt', l: 'Tilt' }];
 const ANIMS: { v: Anim; l: string }[] = [
   { v: '', l: 'None' }, { v: 'fade', l: 'Fade in' }, { v: 'up', l: 'Slide up' }, { v: 'reveal', l: 'Cyber reveal' },
-  { v: 'pulse', l: 'Pulse' }, { v: 'float', l: 'Float' }, { v: 'glow', l: 'Neon glow' }, { v: 'spin', l: 'Spin' },
+  { v: 'zoom', l: 'Zoom in' }, { v: 'pulse', l: 'Pulse' }, { v: 'float', l: 'Float' }, { v: 'glow', l: 'Neon glow' }, { v: 'spin', l: 'Spin' },
+  { v: 'bounce', l: 'Bounce' }, { v: 'swing', l: 'Swing' }, { v: 'shimmer', l: 'Shimmer' }, { v: 'hue', l: 'Color cycle' }, { v: 'shake', l: 'Shake' },
 ];
 
 type Sel = { kind: 'el'; key: string } | { kind: 'item'; id: string } | null;
@@ -113,7 +115,7 @@ function StudioEditor() {
   }, [slug, isAdmin]);
 
   useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
-  useEffect(() => { if (active) { const t = setTimeout(() => applyEdits(doc), 30); return () => clearTimeout(t); } }, [doc, roots, active]);
+  useEffect(() => { if (active) { const t = setTimeout(() => { applyEdits(doc); applyFills(doc); }, 30); return () => clearTimeout(t); } }, [doc, roots, active]);
 
   const commit = useCallback((n: BrochureDoc) => {
     try { localStorage.setItem(draftKey(slug), JSON.stringify(n)); } catch { /* ignore */ }
@@ -341,6 +343,10 @@ function StudioEditor() {
       <button className={btn} style={soft} title="Send to back" onClick={() => set(Math.min(...zs()) - 1)}><ArrowDownToLine className="h-4 w-4" />Back</button>
     </div></Lbl>
   );
+  const HoverSel = ({ v, set }: { v?: Hover; set: (h: Hover) => void }) => (
+    <Lbl t="When the mouse is over it"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Hover)}>
+      {HOVERS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
+  );
   const AnimSel = ({ v, set }: { v?: Anim; set: (a: Anim) => void }) => (
     <Lbl t="Animation"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Anim)}>
       {ANIMS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
@@ -392,6 +398,25 @@ function StudioEditor() {
           <Lbl t="Strength"><Stepper v={curBg.opacity} set={(v) => setBg({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
           <Lbl t="Blend"><select className="rounded-md p-1.5 text-[12px]" style={field} value={curBg.blend} onChange={(e) => setBg({ blend: e.target.value as PageBg['blend'] })}>
             <option value="normal" style={{ background: '#0f172a' }}>Normal</option><option value="screen" style={{ background: '#0f172a' }}>Glow (dark pages)</option><option value="multiply" style={{ background: '#0f172a' }}>Ink (light pages)</option></select></Lbl>
+          <div className="flex gap-3">
+            <Lbl t="Animation color 1"><input type="color" value={curBg.c1 || '#22d3ee'} onChange={(e) => setBg({ c1: e.target.value })} /></Lbl>
+            <Lbl t="Color 2"><input type="color" value={curBg.c2 || '#a855f7'} onChange={(e) => setBg({ c2: e.target.value })} /></Lbl>
+          </div>
+          <Lbl t="Speed"><Stepper v={curBg.speed ?? 1} set={(v) => setBg({ speed: v })} step={0.1} min={0.1} max={4} fmt={(n) => `${n}x`} /></Lbl>
+          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#c4b5fd' }}>PAGE COLOR</span>
+          <div className="grid grid-cols-2 gap-1.5">
+            {([['none', 'Original'], ['solid', 'Solid'], ['gradient', 'Gradient'], ['animated', 'Moving gradient']] as const).map(([v, l]) => (
+              <button key={v} className={btn} style={(curBg.fill || 'none') === v ? { background: '#7c3aed' } : soft} onClick={() => setBg({ fill: v })}>{l}</button>
+            ))}
+          </div>
+          {curBg.fill && curBg.fill !== 'none' && <>
+            <div className="flex gap-3">
+              <Lbl t="Color 1"><input type="color" value={curBg.f1 || '#0b1220'} onChange={(e) => setBg({ f1: e.target.value })} /></Lbl>
+              {curBg.fill !== 'solid' && <Lbl t="Color 2"><input type="color" value={curBg.f2 || '#4c1d95'} onChange={(e) => setBg({ f2: e.target.value })} /></Lbl>}
+            </div>
+            {curBg.fill !== 'solid' && <Lbl t="Direction"><Stepper v={curBg.angle ?? 160} set={(v) => setBg({ angle: v })} step={5} min={0} max={360} fmt={(n) => `${n}°`} /></Lbl>}
+            <button className={btn} style={curBg.deep ? { background: '#7c3aed' } : soft} onClick={() => setBg({ deep: !curBg.deep })}>Also recolor the page's own panel</button>
+          </>}
         </div>
       )}
 
@@ -417,6 +442,7 @@ function StudioEditor() {
               <Lbl t="Opacity"><Stepper v={selEdit.opacity ?? 1} set={(v) => setEdit({ opacity: v })} step={0.05} min={0} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
               <Lbl t="Corners"><Stepper v={selEdit.radius ?? 0} set={(v) => setEdit({ radius: v })} step={1} min={0} max={80} /></Lbl>
               <AnimSel v={selEdit.anim} set={(anim) => setEdit({ anim })} />
+              <HoverSel v={selEdit.hover} set={(hover) => setEdit({ hover })} />
               <LayerCtl z={selEdit.z ?? 0} set={(z) => setEdit({ z })} />
               <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Scroll the mouse wheel over it to grow or shrink.</span>
               <div className="flex gap-2 flex-wrap">
@@ -468,6 +494,7 @@ function StudioEditor() {
               <Lbl t="Opacity"><Stepper v={selItem.opacity ?? 1} set={(v) => setItem({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
               {selItem.type !== 'text' && selItem.type !== 'model' && <Lbl t="Corners"><Stepper v={selItem.radius ?? 10} set={(v) => setItem({ radius: v })} step={1} min={0} max={200} /></Lbl>}
               <AnimSel v={selItem.anim} set={(anim) => setItem({ anim })} />
+              <HoverSel v={selItem.hover} set={(hover) => setItem({ hover })} />
               <LayerCtl z={selItem.z ?? 1} set={(z) => setItem({ z })} />
               <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Drag the purple corner or scroll the mouse wheel to resize.</span>
               <div className="flex gap-2 flex-wrap">

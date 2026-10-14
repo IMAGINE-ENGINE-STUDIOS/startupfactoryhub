@@ -43,11 +43,12 @@ export const byPath = (root: Element, path: string) => {
   return (n as HTMLElement) || null;
 };
 
-const ONCE = new Set(['fade', 'up', 'reveal']);
+const ONCE = new Set(['fade', 'up', 'reveal', 'zoom']);
 export const animCss = (a?: string) =>
-  !a ? '' : `bs-${a} ${ONCE.has(a) ? '1s ease both' : a === 'spin' ? '8s linear infinite' : '2.4s ease-in-out infinite'}`;
+  !a ? '' : `bs-${a} ${ONCE.has(a) ? '1s ease both' : a === 'spin' || a === 'hue' ? '8s linear infinite' : a === 'shimmer' ? '3s linear infinite' : a === 'shake' ? '0.6s ease-in-out infinite' : '2.4s ease-in-out infinite'}`;
 
 function restore(el: HTMLElement) {
+  delete el.dataset.bsHover;
   if (el.dataset.bsCss !== undefined) el.style.cssText = el.dataset.bsCss;
   if (el.dataset.bpOrig !== undefined && el.childElementCount === 0) el.textContent = el.dataset.bpOrig;
 }
@@ -72,6 +73,7 @@ function applyOne(el: HTMLElement, e: ElEdit) {
   if (t) { el.style.transform = t; el.style.transformOrigin = 'center'; }
   if (e.z !== undefined) { if (getComputedStyle(el).position === 'static') el.style.position = 'relative'; el.style.zIndex = String(e.z); }
   if (e.anim) el.style.animation = animCss(e.anim);
+  if (e.hover) el.dataset.bsHover = e.hover; else delete el.dataset.bsHover;
 }
 
 export function applyEdits(doc: BrochureDoc) {
@@ -88,7 +90,40 @@ export function applyEdits(doc: BrochureDoc) {
   }
 }
 
+/** Page color fills live in one stylesheet because flipbooks rewrite page inline styles. */
+export function applyFills(doc: BrochureDoc) {
+  const all = findRoots();
+  let css = '';
+  for (const root of all) {
+    const pg = pageOf(root, all);
+    const b = doc.bgs[String(pg)] || doc.bgs.all;
+    const page = (root.closest('.stf__item') as HTMLElement | null) || root;
+    page.dataset.bsFill = String(pg); root.dataset.bsFill = String(pg);
+    if (!b || !b.fill || b.fill === 'none') continue;
+    const f1 = b.f1 || '#0b1220', f2 = b.f2 || '#4c1d95', a = b.angle ?? 160;
+    const val = b.fill === 'solid' ? f1 : `linear-gradient(${a}deg, ${f1}, ${f2}${b.fill === 'animated' ? `, ${f1}` : ''})`;
+    const anim = b.fill === 'animated' ? 'background-size:300% 300%!important;animation:bs-flow 12s ease infinite!important;' : '';
+    const sel = `[data-bs-fill="${pg}"]` + (b.deep ? `, [data-bs-fill="${pg}"] > div:first-child, [data-bs-fill="${pg}"] > div:first-child > div:first-child` : '');
+    css += `${sel}{background:${val}!important;${anim}}`;
+  }
+  let st = document.getElementById('bs-fills') as HTMLStyleElement | null;
+  if (!st) { st = document.createElement('style'); st.id = 'bs-fills'; document.head.appendChild(st); }
+  st.textContent = css;
+}
+
 export const STUDIO_CSS = `
+@keyframes bs-zoom{from{opacity:0;scale:.6}to{opacity:1;scale:1}}
+@keyframes bs-bounce{0%,100%{translate:0 0}40%{translate:0 -14px}60%{translate:0 -6px}}
+@keyframes bs-swing{50%{rotate:6deg}0%,100%{rotate:-6deg}}
+@keyframes bs-shimmer{0%{filter:brightness(1)}50%{filter:brightness(1.6) drop-shadow(0 0 8px rgba(255,255,255,.6))}100%{filter:brightness(1)}}
+@keyframes bs-hue{to{filter:hue-rotate(360deg)}}
+@keyframes bs-shake{0%,100%{translate:0 0}25%{translate:-3px 0}75%{translate:3px 0}}
+@keyframes bs-flow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+[data-bs-hover]{transition:translate .3s,scale .3s,filter .3s,rotate .3s}
+[data-bs-hover="lift"]:hover{translate:0 -6px}
+[data-bs-hover="grow"]:hover{scale:1.06}
+[data-bs-hover="glow"]:hover{filter:drop-shadow(0 0 16px rgba(168,85,247,.9))}
+[data-bs-hover="tilt"]:hover{rotate:-3deg}
 @keyframes bs-fade{from{opacity:0}to{opacity:1}}
 @keyframes bs-up{from{opacity:0;translate:0 26px}to{opacity:1;translate:0 0}}
 @keyframes bs-reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}

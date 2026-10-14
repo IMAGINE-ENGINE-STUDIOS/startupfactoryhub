@@ -56,7 +56,7 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
       </div>
     );
   return (
-    <div data-bs-item={it.id} style={wrap}>
+    <div data-bs-item={it.id} data-bs-hover={it.hover || undefined} style={wrap}>
       {body}
       {editing && selected && (
         <div data-bs-handle={it.id} style={{ position: 'absolute', right: -7, bottom: -7, width: 14, height: 14, borderRadius: 4, background: '#a855f7', border: '2px solid #fff', cursor: 'nwse-resize' }} />
