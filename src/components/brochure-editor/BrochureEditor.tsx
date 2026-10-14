@@ -103,7 +103,7 @@ export function AddedImages({ ed, page, selected, onSelect }: {
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
   return (
-    <div className="absolute inset-0" style={{ pointerEvents: 'none', zIndex: 30 }}>
+    <div data-bp-added className="absolute inset-0" style={{ pointerEvents: 'none', zIndex: 30 }}>
       {imgs.map((img) => (
         <img key={img.id} src={img.src} alt="" draggable={false} onPointerDown={(e) => drag(e, img)}
           style={{ position: 'absolute', left: `${img.x}%`, top: `${img.y}%`, width: `${img.w}%`, pointerEvents: ed.editing ? 'auto' : 'none',
@@ -122,7 +122,7 @@ export function BrochureEditorPanel({ ed, slug, boxRef, page }: {
   const fileRef = useRef<HTMLInputElement>(null);
   const { doc, update, editing } = ed;
 
-  useEffect(() => { const t = setTimeout(() => applyEdits(boxRef.current, doc), 30); return () => clearTimeout(t); }, [doc, page, boxRef]);
+  useEffect(() => { const t = setTimeout(() => applyEdits(boxRef.current, doc), 30); return () => clearTimeout(t); }, [doc, page, boxRef, editing]);
 
   // Select / drag elements while editing (capture phase so pages don't flip).
   useEffect(() => {
