@@ -21,6 +21,21 @@ export const STARTER_KITS: Kit[] = [
     pages: ['cover-center', 'features', 'steps', 'cta'].map(L) },
 ];
 
+/** Every APEX proposal page, saved as reusable templates (live copies keep design, 3D and edits). */
+export const APEX_PAGES = ['Cover', 'About Startup Factory Hub', 'Where the ecosystem meets', 'Acceleration at scale', 'The opportunity',
+  'Resource Hubs I', 'Resource Hubs II', 'Mentors and Advisors', 'Strategic Intelligence', 'Journey Mapping', 'Administrator Management',
+  'Corporate Partner Resources', 'Data Analytics', 'National and International Expansion', 'Investor Network', 'Grant and Funding Matching',
+  'Global Soft-Landing', 'Impact Reporting', 'White-Label Branding', 'How it works', 'Expected outcomes', 'Implementation', 'Next steps', 'Our team', 'Conclusion'];
+export const pageKit = (route: string, i: number, label: string): Kit =>
+  ({ id: `kit-page:${route}:${i}`, name: label, note: '1 page', pages: [{ label, src: embedUrl(route, i) }] });
+export const APEX_KIT: Kit = { id: 'kit-apex', name: 'APEX proposal', note: `${APEX_PAGES.length} pages: cover, ecosystem, 13 capabilities, plan and team`,
+  pages: APEX_PAGES.map((label, i) => ({ label: `APEX · ${label}`, src: embedUrl('/apex', i) })) };
+export const findSavedKit = (id: string): Kit | undefined => {
+  if (id === APEX_KIT.id) return APEX_KIT;
+  const m = id.match(/^kit-page:(.+):(\d+)$/); if (!m) return undefined;
+  const i = +m[2]; return pageKit(m[1], i, m[1] === '/apex' ? `APEX · ${APEX_PAGES[i] ?? `P/${i + 1}`}` : `P/${i + 1}`);
+};
+
 /** A whole existing brochure as a template (needs its page count). */
 export const brochureKit = (route: string, n: number): Kit => {
   const name = BROCHURES.find((b) => b.route === route)?.name || route;

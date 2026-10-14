@@ -20,7 +20,7 @@ import { applyEdits, applyFills, byPath, findRoots, layerHost, pageOf, pathOf, S
 import { ItemView } from './ItemView';
 import { PageBackground, BG_OPTIONS } from './Backgrounds';
 import { ICONS } from './icons';
-import { KIT_MIME, STARTER_KITS, brochureKit, readCounts, type Kit } from './kits';
+import { KIT_MIME, STARTER_KITS, brochureKit, readCounts, findSavedKit, type Kit } from './kits';
 import { PageLibrary } from './PageLibrary';
 import EmbedPage from './EmbedPage';
 import { ColorField } from './ColorField';
@@ -349,7 +349,7 @@ function StudioEditor() {
     try { localStorage.setItem(draftKey(slugFromPath(`/b/${s}`)), JSON.stringify(fresh)); } catch { /* ignore */ }
     navigate(`/b/${s}`);
   };
-  const findKit = (id: string) => STARTER_KITS.find((k) => k.id === id) || (id.startsWith('kit-copy:') ? (() => { const r = id.slice(9); const c = readCounts()[r]; return c ? brochureKit(r, c) : undefined; })() : undefined);
+  const findKit = (id: string) => STARTER_KITS.find((k) => k.id === id) || findSavedKit(id) || (id.startsWith('kit-copy:') ? (() => { const r = id.slice(9); const c = readCounts()[r]; return c ? brochureKit(r, c) : undefined; })() : undefined);
   const placeModel = (m: LibModel, page: number) => {
     const id = crypto.randomUUID();
     update((d) => ({ ...d, items: [...d.items, { id, page, type: 'model', src: m.src, iosSrc: m.iosSrc, x: 28, y: 28, w: 45, ar: true } as Item] }));
@@ -606,7 +606,7 @@ function StudioEditor() {
         </div>
       )}
       {editing && modelsOpen && <ModelLibrary models={models} setModels={setModels} upload={upload} save={async (m) => { await call({ action: 'models', models: m }); }} onAdd={(m) => placeModel(m, curPage())} onClose={() => setModelsOpen(false)} />}
-      {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} />}
+      {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} onKit={(k) => applyKit(k)} />}
       {libAt !== null && <PageLibrary allowBlank={isCustom} onKit={(k) => applyKit(k, libAt !== null && libAt >= 0 ? libAt : undefined)} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt !== null && libAt >= 0 ? libAt : undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
     </>
   );
