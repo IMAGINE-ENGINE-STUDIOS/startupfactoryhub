@@ -7,11 +7,12 @@ import React, { forwardRef, useEffect, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { useParams } from 'react-router-dom';
 import { fetchPublished, slugFromPath } from '@/components/brochure-studio/BrochureStudio';
-import type { BrochureDoc } from '@/components/brochure-studio/types';
+import type { BrochureDoc, PageRef } from '@/components/brochure-studio/types';
 
-const Page = forwardRef<HTMLDivElement, { n: number }>(({ n }, ref) => (
+const Page = forwardRef<HTMLDivElement, { n: number; src?: string }>(({ n, src }, ref) => (
   <div ref={ref} className="overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.25), transparent 60%), linear-gradient(180deg,#0b1220,#111a2e)' }}>
     <div data-bp-root={n} className="relative w-full h-full">
+      {src && <iframe title={`Page ${n + 1}`} src={src} className="absolute inset-0 w-full h-full border-0" />}
       <div className="absolute bottom-4 right-5 font-mono text-[11px] tracking-[0.2em]" style={{ color: '#64748b' }}>P/{String(n + 1).padStart(2, '0')}</div>
     </div>
   </div>
@@ -21,12 +22,14 @@ Page.displayName = 'StudioPage';
 export default function StudioBrochure() {
   const { slug = '' } = useParams();
   const key = slugFromPath(`/b/${slug}`);
-  const [count, setCount] = useState(4);
+  const [pages, setPages] = useState<PageRef[]>([{}, {}, {}, {}]);
   const [w, setW] = useState(480);
+  const apply = (d: BrochureDoc) => { if (d.pages?.length) setPages(d.pages); else if (d.pageCount) setPages(Array.from({ length: d.pageCount }, () => ({}))); };
+  const sig = pages.map((p) => p.src || '-').join('|');
 
-  useEffect(() => { fetchPublished(key).then((d) => d.pageCount && setCount(d.pageCount)); document.title = `${slug} · Startup Factory Hub`; }, [key, slug]);
+  useEffect(() => { fetchPublished(key).then(apply); document.title = `${slug} · Startup Factory Hub`; }, [key, slug]);
   useEffect(() => {
-    const on = (e: Event) => { const { slug: s, doc } = (e as CustomEvent<{ slug: string; doc: BrochureDoc }>).detail; if (s === key && doc.pageCount) setCount(doc.pageCount); };
+    const on = (e: Event) => { const { slug: s, doc } = (e as CustomEvent<{ slug: string; doc: BrochureDoc }>).detail; if (s === key) apply(doc); };
     window.addEventListener('bs:doc', on);
     return () => window.removeEventListener('bs:doc', on);
   }, [key]);
@@ -39,8 +42,8 @@ export default function StudioBrochure() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6" style={{ background: 'linear-gradient(180deg,#060a14,#0b1220)' }}>
       {/* @ts-expect-error react-pageflip typing requires every prop */}
-      <HTMLFlipBook key={`${count}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
-        {Array.from({ length: count }, (_, i) => <Page key={i} n={i} />)}
+      <HTMLFlipBook key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
+        {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
       </HTMLFlipBook>
     </div>
   );

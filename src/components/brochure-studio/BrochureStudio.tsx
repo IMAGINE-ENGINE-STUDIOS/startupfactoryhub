@@ -20,7 +20,10 @@ import { applyEdits, byPath, findRoots, layerHost, pageOf, pathOf, STUDIO_CSS } 
 import { ItemView } from './ItemView';
 import { PageBackground, BG_OPTIONS } from './Backgrounds';
 import { ICONS } from './icons';
-import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg } from './types';
+import { PageLibrary } from './PageLibrary';
+import EmbedPage from './EmbedPage';
+import { isEmbed } from './library';
+import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg, type PageRef } from './types';
 
 const SUPA_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const publishedUrl = (slug: string) => `${SUPA_URL}/storage/v1/object/public/studio-published/brochures/${slug}.json`;
@@ -45,6 +48,21 @@ const ANIMS: { v: Anim; l: string }[] = [
 type Sel = { kind: 'el'; key: string } | { kind: 'item'; id: string } | null;
 
 export default function BrochureStudio() {
+  return isEmbed() ? <EmbedPage /> : <StudioEditor />;
+}
+
+/** Moves every page-indexed thing at or after `at` by `by` (insert = +1, remove = -1). */
+function shiftPages(d: BrochureDoc, at: number, by: number): BrochureDoc {
+  const mv = (p: number) => (p >= at ? p + by : p);
+  const edits: BrochureDoc['edits'] = {};
+  for (const [k, v] of Object.entries(d.edits)) { const [p, path] = k.split(':'); if (by < 0 && Number(p) === at) continue; edits[`${mv(Number(p))}:${path}`] = v; }
+  const bgs: BrochureDoc['bgs'] = {};
+  for (const [k, v] of Object.entries(d.bgs)) { if (k === 'all') { bgs.all = v; continue; } if (by < 0 && Number(k) === at) continue; bgs[String(mv(Number(k)))] = v; }
+  const items = d.items.filter((i) => !(by < 0 && i.page === at)).map((i) => ({ ...i, page: mv(i.page) }));
+  return { ...d, edits, bgs, items };
+}
+
+function StudioEditor() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const slug = useMemo(() => slugFromPath(pathname), [pathname]);
@@ -61,6 +79,7 @@ export default function BrochureStudio() {
   const [busy, setBusy] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
   const [bgAll, setBgAll] = useState(false);
+  const [libAt, setLibAt] = useState<number | null>(null);
   const lastPage = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace'; id?: string }>({ mode: 'new-image' });
@@ -119,7 +138,7 @@ export default function BrochureStudio() {
   useEffect(() => {
     if (!editing || !active) return;
     document.body.classList.add('bs-editing');
-    const inBook = (t: HTMLElement) => t.closest('[data-bp-root], .stf__item, [data-bs-layer]') as HTMLElement | null;
+    const inBook = (t: HTMLElement) => t.closest('[data-bs-ui]') ? null : t.closest('[data-bp-root], .stf__item, [data-bs-layer]') as HTMLElement | null;
     const down = (e: PointerEvent) => {
       const t = e.target as HTMLElement;
       if (!inBook(t)) return;
@@ -234,16 +253,45 @@ export default function BrochureStudio() {
     if (s) navigate(`/b/${s}`);
   };
 
+  /* ---- page library: insert pages from any brochure ---- */
+  const isCustomSlug = slug.startsWith('b-');
+  const pagesOf = (d: BrochureDoc): PageRef[] => d.pages ?? Array.from({ length: d.pageCount || 4 }, () => ({}));
+  const insertPage = (src: string | null, label: string) => {
+    const at = libAt ?? curPage() + 1;
+    setLibAt(null);
+    if (isCustomSlug) {
+      update((d) => { const pages = [...pagesOf(d)]; pages.splice(at, 0, src ? { src, label } : {}); return { ...shiftPages(d, at, 1), pages, pageCount: pages.length }; });
+      lastPage.current = at;
+      toast.success(`Inserted ${label} as page ${at + 1}`);
+    } else if (src) {
+      addItem({ type: 'page', src, x: 0, y: 0, w: 100 });
+      toast.success(`${label} placed on this page`);
+    }
+  };
+  const removePage = () => {
+    const at = curPage();
+    update((d) => { const pages = pagesOf(d).filter((_, i) => i !== at); if (!pages.length) return d; return { ...shiftPages(d, at, -1), pages, pageCount: pages.length }; });
+    lastPage.current = null;
+  };
+
   /* ---- portals: backgrounds + added items on every page ---- */
   const portals = active ? roots.map((root) => {
     const pg = pageOf(root, roots);
     const bg = doc.bgs[String(pg)] || doc.bgs.all;
     const items = doc.items.filter((i) => i.page === pg);
-    if (!bg && !items.length) return null;
+    const plus = editing && isAdmin && isCustomSlug;
+    if (!bg && !items.length && !plus) return null;
     return createPortal(
       <>
         {bg && <PageBackground bg={bg} />}
         {items.map((it) => <ItemView key={it.id} it={it} editing={editing} selected={sel?.kind === 'item' && sel.id === it.id} />)}
+        {plus && (
+          <button data-bs-ui aria-label="Insert page after this one" title="Insert a page here" onClick={() => setLibAt(pg + 1)}
+            style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 40, height: 40, borderRadius: 999, pointerEvents: 'auto', zIndex: 999,
+              display: 'grid', placeItems: 'center', color: '#fff', background: 'linear-gradient(135deg,#7c3aed,#0e7490)', boxShadow: '0 0 20px rgba(168,85,247,0.6)', border: '2px solid rgba(255,255,255,0.7)' }}>
+            <Plus className="h-5 w-5" />
+          </button>
+        )}
       </>,
       layerHost(root), `bs-${pg}`,
     );
@@ -266,7 +314,6 @@ export default function BrochureStudio() {
   const canText = !!selEl && selEl.childElementCount === 0;
   const baseFont = selEl ? Math.round(parseFloat(getComputedStyle(selEl).fontSize) || 16) : 16;
 
-  const pageCount = doc.pageCount || 0;
   const isCustom = slug.startsWith('b-');
   const bgKey = bgAll ? 'all' : String(curPage());
   const curBg: PageBg = doc.bgs[bgKey] || { kind: 'none', opacity: 0.45, blend: 'normal' };
@@ -317,12 +364,12 @@ export default function BrochureStudio() {
             <button className={btn} style={soft} onClick={() => addItem({ type: 'shape', w: 50 })}><Square className="h-4 w-4" />Card</button>
             <button className={btn} style={{ background: bgOpen ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
             {isCustom && <>
-              <button className={btn} style={soft} onClick={() => update((d) => ({ ...d, pageCount: (d.pageCount || 4) + 1 }))}><FilePlus2 className="h-4 w-4" />Page</button>
-              <button className={btn} style={soft} disabled={(pageCount || 4) <= 1} onClick={() => update((d) => ({ ...d, pageCount: Math.max(1, (d.pageCount || 4) - 1) }))}><FileMinus2 className="h-4 w-4" /></button>
+              <button className={btn} style={soft} title="Remove the current page" aria-label="Remove page" disabled={pagesOf(doc).length <= 1} onClick={removePage}><FileMinus2 className="h-4 w-4" /></button>
             </>}
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
             <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
+            <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
             <button className={btn} style={soft} onClick={newBrochure}><BookPlus className="h-4 w-4" />New brochure</button>
             <button className={btn} style={soft} onClick={discard}><RotateCcw className="h-4 w-4" />Discard</button>
             <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />Publish</button>
@@ -431,6 +478,7 @@ export default function BrochureStudio() {
           )}
         </div>
       )}
+      {libAt !== null && <PageLibrary allowBlank={isCustom} onClose={() => setLibAt(null)} onPick={insertPage} />}
     </>
   );
 }
