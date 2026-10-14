@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
-  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,6 +57,7 @@ export default function BrochureStudio() {
   const past = useRef<BrochureDoc[]>([]); const future = useRef<BrochureDoc[]>([]);
   const [editing, setEditing] = useState(false);
   const [sel, setSel] = useState<Sel>(null);
+  const selRef = useRef<Sel>(null); selRef.current = sel;
   const [busy, setBusy] = useState(false);
   const [bgOpen, setBgOpen] = useState(false);
   const [bgAll, setBgAll] = useState(false);
@@ -156,11 +157,22 @@ export default function BrochureStudio() {
       const up = () => { window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', up, true); };
       window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', up, true);
     };
+    // Mouse wheel over the selected piece makes it bigger / smaller.
+    const wheel = (e: WheelEvent) => {
+      const t = e.target as HTMLElement; if (!inBook(t)) return;
+      const s = selRef.current; if (!s) return;
+      e.preventDefault(); e.stopPropagation();
+      const k = e.deltaY < 0 ? 1 : -1;
+      if (s.kind === 'item') update((d) => ({ ...d, items: d.items.map((i) => i.id === s.id ? { ...i, w: Math.max(3, Math.min(150, i.w + k * 2)) } : i) }));
+      else update((d) => { const c = d.edits[s.key] || {}; return { ...d, edits: { ...d.edits, [s.key]: { ...c, scale: Math.max(0.2, Math.min(3, +((c.scale ?? 1) + k * 0.05).toFixed(2))) } } }; });
+    };
+    window.addEventListener('wheel', wheel, { capture: true, passive: false });
     const block = (e: Event) => { if (inBook(e.target as HTMLElement)) { e.stopPropagation(); if (e.type === 'click') e.preventDefault(); } };
     window.addEventListener('pointerdown', down, true);
     ['mousedown', 'touchstart', 'click'].forEach((n) => window.addEventListener(n, block, true));
     return () => {
       document.body.classList.remove('bs-editing');
+      window.removeEventListener('wheel', wheel, true);
       window.removeEventListener('pointerdown', down, true);
       ['mousedown', 'touchstart', 'click'].forEach((n) => window.removeEventListener(n, block, true));
     };
@@ -273,6 +285,15 @@ export default function BrochureStudio() {
       <span className="w-10 text-right font-mono text-[11px]">{fmt ? fmt(v) : v}</span>
     </div>
   );
+  const zs = () => [...doc.items.map((i) => i.z ?? 1), ...Object.values(doc.edits).map((e) => e.z ?? 0)];
+  const LayerCtl = ({ z, set }: { z: number; set: (n: number) => void }) => (
+    <Lbl t={`Layer (${z})`}><div className="flex gap-1.5">
+      <button className={btn} style={soft} title="Bring to front" onClick={() => set(Math.max(...zs()) + 1)}><ArrowUpToLine className="h-4 w-4" />Front</button>
+      <button className={btn} style={soft} aria-label="Move forward" title="Move forward" onClick={() => set(z + 1)}><ChevronUp className="h-4 w-4" /></button>
+      <button className={btn} style={soft} aria-label="Move backward" title="Move backward" onClick={() => set(z - 1)}><ChevronDown className="h-4 w-4" /></button>
+      <button className={btn} style={soft} title="Send to back" onClick={() => set(Math.min(...zs()) - 1)}><ArrowDownToLine className="h-4 w-4" />Back</button>
+    </div></Lbl>
+  );
   const AnimSel = ({ v, set }: { v?: Anim; set: (a: Anim) => void }) => (
     <Lbl t="Animation"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Anim)}>
       {ANIMS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
@@ -349,7 +370,8 @@ export default function BrochureStudio() {
               <Lbl t="Opacity"><Stepper v={selEdit.opacity ?? 1} set={(v) => setEdit({ opacity: v })} step={0.05} min={0} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
               <Lbl t="Corners"><Stepper v={selEdit.radius ?? 0} set={(v) => setEdit({ radius: v })} step={1} min={0} max={80} /></Lbl>
               <AnimSel v={selEdit.anim} set={(anim) => setEdit({ anim })} />
-              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag it on the page to move it.</span>
+              <LayerCtl z={selEdit.z ?? 0} set={(z) => setEdit({ z })} />
+              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Scroll the mouse wheel over it to grow or shrink.</span>
               <div className="flex gap-2 flex-wrap">
                 <button className={btn} style={soft} onClick={() => setEdit({ hidden: !selEdit.hidden })}>
                   {selEdit.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}{selEdit.hidden ? 'Show' : 'Delete'}
@@ -399,7 +421,8 @@ export default function BrochureStudio() {
               <Lbl t="Opacity"><Stepper v={selItem.opacity ?? 1} set={(v) => setItem({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
               {selItem.type !== 'text' && selItem.type !== 'model' && <Lbl t="Corners"><Stepper v={selItem.radius ?? 10} set={(v) => setItem({ radius: v })} step={1} min={0} max={200} /></Lbl>}
               <AnimSel v={selItem.anim} set={(anim) => setItem({ anim })} />
-              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Drag the purple corner to resize.</span>
+              <LayerCtl z={selItem.z ?? 1} set={(z) => setItem({ z })} />
+              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Drag the purple corner or scroll the mouse wheel to resize.</span>
               <div className="flex gap-2 flex-wrap">
                 <button className={btn} style={soft} onClick={() => { const id = crypto.randomUUID(); update((d) => ({ ...d, items: [...d.items, { ...selItem, id, x: selItem.x + 3, y: selItem.y + 3 }] })); setSel({ kind: 'item', id }); }}><Copy className="h-4 w-4" />Duplicate</button>
                 <button className={btn} style={{ background: 'rgba(239,68,68,0.25)' }} onClick={() => { update((d) => ({ ...d, items: d.items.filter((i) => i.id !== selItem.id) })); setSel(null); }}><Trash2 className="h-4 w-4" />Delete</button>

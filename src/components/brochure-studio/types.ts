@@ -8,7 +8,7 @@ export type Anim = '' | 'fade' | 'up' | 'reveal' | 'pulse' | 'float' | 'glow' | 
 export type ElEdit = {
   text?: string; color?: string; bg?: string; hidden?: boolean;
   dx?: number; dy?: number; scale?: number; rot?: number;
-  fontSize?: number; opacity?: number; radius?: number; anim?: Anim;
+  fontSize?: number; opacity?: number; radius?: number; anim?: Anim; z?: number;
 };
 
 export type ItemType = 'image' | 'text' | 'icon' | 'model' | 'shape';
@@ -17,7 +17,7 @@ export type ItemType = 'image' | 'text' | 'icon' | 'model' | 'shape';
 export type Item = {
   id: string; page: number; type: ItemType;
   x: number; y: number; w: number; // percent of the page
-  rot?: number; opacity?: number; radius?: number; anim?: Anim;
+  rot?: number; opacity?: number; radius?: number; anim?: Anim; z?: number;
   src?: string; text?: string; color?: string; bg?: string; size?: number; weight?: number;
   icon?: string; ar?: boolean; autoRotate?: boolean; metal?: boolean;
 };

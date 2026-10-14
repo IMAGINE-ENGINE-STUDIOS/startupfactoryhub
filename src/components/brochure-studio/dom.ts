@@ -70,6 +70,7 @@ function applyOne(el: HTMLElement, e: ElEdit) {
     e.rot ? `rotate(${e.rot}deg)` : '',
   ].filter(Boolean).join(' ');
   if (t) { el.style.transform = t; el.style.transformOrigin = 'center'; }
+  if (e.z !== undefined) { if (getComputedStyle(el).position === 'static') el.style.position = 'relative'; el.style.zIndex = String(e.z); }
   if (e.anim) el.style.animation = animCss(e.anim);
 }
 
