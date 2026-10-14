@@ -23,23 +23,20 @@ export default function EmbedPage() {
     if (!count) { document.head.appendChild(style); document.documentElement.classList.add('bs-embed'); }
     let target: HTMLElement | null = null;
     let sent = false;
+    // The flipbook rewrites page inline styles, so placement lives in a stylesheet rule.
+    const place = document.createElement('style');
+    if (!count) document.head.appendChild(place);
     const fit = () => {
       if (!target) return;
-      // Off-screen flipbook pages have no size; borrow it from a shown page.
-      if (!target.offsetWidth) {
-        const ref = Array.from(document.querySelectorAll('.stf__item')).find((n) => (n as HTMLElement).offsetWidth > 0) as HTMLElement | undefined;
-        if (ref) { target.style.setProperty('width', `${ref.offsetWidth}px`, 'important'); target.style.setProperty('height', `${ref.offsetHeight}px`, 'important'); }
-      }
-      const w = target.offsetWidth || 1, h = target.offsetHeight || 1;
+      const book = target.closest('.stf__parent') as HTMLElement | null;
+      const bw = book?.offsetWidth || 600, bh = book?.offsetHeight || 848;
+      const w = bw / bh > 1 ? bw / 2 : bw, h = bh;
       const s = Math.min(window.innerWidth / w, window.innerHeight / h);
-      target.style.setProperty('left', '0px', 'important');
-      target.style.setProperty('top', '0px', 'important');
-      target.style.setProperty('transform', `scale(${s})`, 'important');
+      const set = (l: number, t: number) => { place.textContent = `html.bs-embed .bs-embed-target{width:${w}px!important;height:${h}px!important;left:${l}px!important;top:${t}px!important;transform:scale(${s})!important}`; };
+      set(0, 0);
       // Correct for transformed ancestors that re-anchor fixed positioning.
       const r = target.getBoundingClientRect();
-      const ox = (window.innerWidth - w * s) / 2 - r.left, oy = (window.innerHeight - h * s) / 2 - r.top;
-      target.style.setProperty('left', `${ox}px`, 'important');
-      target.style.setProperty('top', `${oy}px`, 'important');
+      set((window.innerWidth - w * s) / 2 - r.left, (window.innerHeight - h * s) / 2 - r.top);
     };
     const tick = () => {
       const roots = findRoots();
@@ -58,7 +55,7 @@ export default function EmbedPage() {
     };
     const iv = setInterval(tick, 400); tick();
     window.addEventListener('resize', fit);
-    return () => { clearInterval(iv); window.removeEventListener('resize', fit); style.remove(); document.documentElement.classList.remove('bs-embed'); };
+    return () => { clearInterval(iv); window.removeEventListener('resize', fit); style.remove(); place.remove(); document.documentElement.classList.remove('bs-embed'); };
   }, []);
   return null;
 }
