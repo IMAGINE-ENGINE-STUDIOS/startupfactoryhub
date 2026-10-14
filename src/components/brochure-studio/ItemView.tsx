@@ -20,7 +20,7 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
   useEffect(() => { if (it.type === 'model') loadModelViewer(); }, [it.type]);
   const wrap: React.CSSProperties = {
     position: 'absolute', left: `${it.x}%`, top: `${it.y}%`, width: `${it.w}%`,
-    transform: it.rot ? `rotate(${it.rot}deg)` : undefined, opacity: it.opacity ?? 1,
+    transform: it.rot ? `rotate(${it.rot}deg)` : undefined, opacity: it.opacity ?? 1, zIndex: it.z ?? 1,
     animation: animCss(it.anim), pointerEvents: editing || it.type === 'model' ? 'auto' : 'none',
     cursor: editing ? 'move' : undefined, outline: selected ? '2px solid #a855f7' : undefined, outlineOffset: 2,
   };
