@@ -158,16 +158,20 @@ export const PartnersAboutPage = () => (
           </div>
         </div>
 
-        {/* Partner logos: static row (no infinite animation, so flipping stays smooth) */}
         <div className="mt-7 pt-5 border-t relative overflow-hidden" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
-          <div className="grid grid-cols-5 gap-x-6 gap-y-3 items-center">
-            {PARTNERS.map((p) => (
-              <div key={p.n} className="partner-logo-card h-10 flex items-center justify-center">
-                <img src={p.l} alt={p.n} decoding="async" className="max-h-9 max-w-[120px] object-contain opacity-80 grayscale"
+          <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
+          <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
+          <div className="flex items-center apex-partners-track" style={{ width: 'max-content' }}>
+            {[...PARTNERS, ...PARTNERS].map((p, i) => (
+              <div key={i} className="partner-logo-card flex-shrink-0 px-10 h-18 flex items-center justify-center">
+                <img src={p.l} alt={p.n} decoding="async" className="max-h-16 max-w-[200px] object-contain opacity-80 grayscale"
                   onError={(e) => { const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null; if (card) card.style.display = 'none'; }} />
               </div>
             ))}
           </div>
+          <style>{`@keyframes apex-partners-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+            .apex-partners-track { animation: apex-partners-scroll 60s linear infinite; will-change: transform; }
+            .apex-flipping .apex-partners-track { animation-play-state: paused; }`}</style>
         </div>
       </div>
     </section>
