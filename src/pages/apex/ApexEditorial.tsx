@@ -54,11 +54,20 @@ export const FEATURES: Feature[] = [
       ['Technology transfer programs', ['University tech transfer offices', 'Federal lab licensing', 'Patent and IP licensing', 'Research commercialization grants']],
       ['Banks and lenders', ['Business banking', 'SBA-backed loans', 'Venture debt', 'Revenue-based financing']],
       ['Grants and public funding', ['SBIR and STTR', 'Federal agency grants', 'State and local economic development', 'Foundation grants']],
+    ],
+    facts: [['9', 'Resource categories'], ['3', 'Filters: industry, stage, need'], ['1', 'Searchable hub']],
+  },
+  {
+    no: '01', title: 'Centralized Resource Hubs', section: 'Resources',
+    headline: 'Contracting, training and perks, in the same hub',
+    deck: 'The second half of our resource map: what founders need to sell to government, build skills and lower costs.',
+    lead: '', body: [], quote: '',
+    map: [
       ['Government contracting', ['SAM.gov registration', 'Contract opportunities', 'Certifications and set-asides', 'Proposal preparation']],
       ['Programs and training', ['Courses and workshops', 'Pitch and investor readiness', 'Legal and financial guides', 'Templates and toolkits']],
       ['Partner perks', ['Cloud and software credits', 'Legal and accounting services', 'Marketing and sales tools', 'Workspace discounts']],
     ],
-    facts: [['9', 'Resource categories'], ['3', 'Filters: industry, stage, need'], ['1', 'Searchable hub']],
+    facts: [],
   },
   {
     no: '02', title: 'Network of Mentors and Advisors', section: 'Mentorship',

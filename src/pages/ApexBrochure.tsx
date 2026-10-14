@@ -151,7 +151,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '24';
+const TOTAL = '25';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
@@ -230,7 +230,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       </Frame>
     ),
   },
-  ...FEATURES.map((f) => ({ key: `feature-${f.no}`, node: <EditorialPage f={f} total={TOTAL} /> })),
+  ...FEATURES.map((f, i) => ({ key: `feature-${f.no}-${i}`, node: <EditorialPage f={f} total={TOTAL} /> })),
   {
     key: 'how',
     node: (
