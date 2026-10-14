@@ -23,7 +23,7 @@ export const STARTER_KITS: Kit[] = [
 
 /** Every APEX proposal page, saved as reusable templates (live copies keep design, 3D and edits). */
 export const APEX_PAGES = ['Cover', 'About Startup Factory Hub', 'Where the ecosystem meets', 'Acceleration at scale', 'The opportunity',
-  'Resource Hubs I', 'Resource Hubs II', 'Mentors and Advisors', 'Strategic Intelligence', 'Journey Mapping', 'Administrator Management',
+  'Resource Hubs I', 'Resource Hubs II', 'Mentors and Advisors', 'Strategic Intelligence', 'Journey Mapping', 'Journey Mapping stages', 'Administrator Management', 'Admin dashboard',
   'Corporate Partner Resources', 'Data Analytics', 'National and International Expansion', 'Investor Network', 'Grant and Funding Matching',
   'Global Soft-Landing', 'Impact Reporting', 'White-Label Branding', 'How it works', 'Expected outcomes', 'Implementation', 'Next steps', 'Our team', 'Conclusion'];
 export const pageKit = (route: string, i: number, label: string): Kit =>

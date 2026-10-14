@@ -124,9 +124,9 @@ const STAGES: { name: string; trl: string; icon: LucideIcon; milestones: string[
   { name: 'Growth', trl: 'Scale', icon: LineChart, milestones: ['Hiring and operations', 'New markets', 'Partner programs'], support: 'Workspace network, soft-landing' },
 ];
 
-const JourneyBlock = ({ th }: { th: Theme }) => (
+const JourneyBlock = ({ th, wide }: { th: Theme; wide?: boolean }) => (
   <div className="flex-1 min-h-0 flex flex-col">
-    <div className="grid grid-cols-3 gap-2">
+    <div className={`grid ${wide ? 'grid-cols-2 gap-3' : 'grid-cols-3 gap-2'}`}>
       {STAGES.map((s, i) => {
         const c = [th.a, th.b, th.c][i % 3];
         const Icon = s.icon;
@@ -254,12 +254,14 @@ const MODULE_ICONS: LucideIcon[][] = [
 ];
 const MENTOR_TAGS = ['PROFILES_AND_BOOKING', 'RECORDS_AND_FEEDBACK'];
 
-export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number; total: string }) => {
+export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: number; total: string; part?: 'main' | 'detail' }) => {
   const th = THEMES[index] ?? THEMES[2];
   const Icon = th.icon;
   const accents = [th.a, th.b];
   const factIcons = [ListChecks, Star, Activity];
-  const special = f.map ? 'map' : f.no === '04' ? 'journey' : f.no === '05' ? 'admin' : f.no === '07' ? 'analytics' : null;
+  const rawSpecial = f.map ? 'map' : f.no === '04' ? 'journey' : f.no === '05' ? 'admin' : f.no === '07' ? 'analytics' : null;
+  const special = part === 'main' ? null : rawSpecial;
+  const detail = part === 'detail';
   const tags = f.no === '02' ? MENTOR_TAGS : ['HOW_IT_WORKS', 'WHAT_APEX_GAINS'];
   const compact = special === 'journey' || special === 'admin' || special === 'analytics';
 
@@ -288,6 +290,10 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
         </header>
 
         <div className="relative flex-1 min-h-0 flex flex-col" style={{ padding: '26px 48px 24px' }}>
+          {detail && (
+            <div className="min-w-0"><Kicker color={th.b}>{f.section} // continued</Kicker><Title f={f} th={th} /></div>
+          )}
+          {!detail && <>
           {/* Hero */}
           <div className="grid gap-8" style={{ gridTemplateColumns: '1.1fr 1fr' }}>
             <div className="min-w-0">
@@ -357,16 +363,17 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
             </>
           )}
 
+          </>}
           {special && (
-            <div className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
+            <div style={detail ? { zoom: special === 'journey' ? 1.3 : 1.1 } : undefined} className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
               {special === 'map' && <><Kicker color={DIM}>Resource map // {String(f.map!.length).padStart(2, '0')} categories</Kicker><div className="mt-3 flex-1 min-h-0 flex flex-col"><ResourceMap f={f} th={th} /></div></>}
-              {special === 'journey' && <JourneyBlock th={th} />}
+              {special === 'journey' && <JourneyBlock th={th} wide={detail} />}
               {special === 'admin' && <AdminDashboard th={th} />}
               {special === 'analytics' && <AnalyticsBlock th={th} />}
             </div>
           )}
 
-          {special !== 'journey' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
+          {special !== 'journey' && special !== 'analytics' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
             <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 30, height: 30, background: th.a }}><ListChecks className="h-4 w-4" style={{ color: '#050a12' }} /></div>
             <p style={{ fontFamily: MONO, fontSize: 16, letterSpacing: '0.02em', color: TEXT, lineHeight: 1.45 }}>{f.quote || th.status}</p>
           </div>}
