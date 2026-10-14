@@ -54,6 +54,29 @@ const ANIMS: { v: Anim; l: string }[] = [
   { v: 'bounce', l: 'Bounce' }, { v: 'swing', l: 'Swing' }, { v: 'shimmer', l: 'Shimmer' }, { v: 'hue', l: 'Color cycle' }, { v: 'shake', l: 'Shake' },
 ];
 
+/* Form helpers live at module scope so inputs keep focus while typing. */
+const soft: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' };
+const field: React.CSSProperties = { background: 'rgba(8,47,73,0.35)', color: '#f1f5f9', border: '1px solid rgba(34,211,238,0.22)' };
+const Lbl = ({ t, children }: { t: string; children: React.ReactNode }) => <label className="flex flex-col gap-1 text-[11px] font-semibold" style={{ color: '#cbd5e1' }}>{t}{children}</label>;
+const Stepper = ({ v, set, step, min, max, fmt }: { v: number; set: (n: number) => void; step: number; min: number; max: number; fmt?: (n: number) => string }) => (
+    <div className="flex items-center gap-2">
+      <button className="rounded-md p-1" style={soft} aria-label="Smaller" onClick={() => set(Math.max(min, +(v - step).toFixed(2)))}><Minus className="h-3.5 w-3.5" /></button>
+      <input type="range" className="flex-1" min={min} max={max} step={step} value={v} onChange={(e) => set(Number(e.target.value))} />
+      <button className="rounded-md p-1" style={soft} aria-label="Bigger" onClick={() => set(Math.min(max, +(v + step).toFixed(2)))}><Plus className="h-3.5 w-3.5" /></button>
+      <span className="w-10 text-right font-mono text-[11px]">{fmt ? fmt(v) : v}</span>
+    </div>
+  );
+const HoverSel = ({ v, set }: { v?: Hover; set: (h: Hover) => void }) => (
+    <Lbl t="When the mouse is over it"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Hover)}>
+      {HOVERS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
+  );
+const AnimSel = ({ v, set }: { v?: Anim; set: (a: Anim) => void }) => (
+    <Lbl t="Animation"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Anim)}>
+      {ANIMS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
+  );
+
+
+const btn = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold tracking-wide text-slate-100 transition-colors hover:bg-white/10 disabled:opacity-40 whitespace-nowrap';
 type Sel = { kind: 'el'; key: string } | { kind: 'item'; id: string } | null;
 
 export default function BrochureStudio() {
@@ -349,7 +372,7 @@ function StudioEditor() {
         {plus && (
           <button data-bs-ui aria-label="Insert page after this one" title="Insert a page here" onClick={() => setLibAt(pg + 1)}
             style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 40, height: 40, borderRadius: 999, pointerEvents: 'auto', zIndex: 999,
-              display: 'grid', placeItems: 'center', color: '#fff', background: 'linear-gradient(135deg,#7c3aed,#0e7490)', boxShadow: '0 0 20px rgba(168,85,247,0.6)', border: '2px solid rgba(255,255,255,0.7)' }}>
+              display: 'grid', placeItems: 'center', color: '#fff', background: 'linear-gradient(135deg,#06b6d4,#1d4ed8)', boxShadow: '0 0 20px rgba(34,211,238,0.5)', border: '2px solid rgba(255,255,255,0.7)' }}>
             <Plus className="h-5 w-5" />
           </button>
         )}
@@ -380,19 +403,7 @@ function StudioEditor() {
   const curBg: PageBg = doc.bgs[bgKey] || { kind: 'none', opacity: 0.45, blend: 'normal' };
   const setBg = (p: Partial<PageBg>) => update((d) => ({ ...d, bgs: { ...d.bgs, [bgKey]: { ...curBg, ...p } } }));
 
-  const btn = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-bold disabled:opacity-40 whitespace-nowrap';
-  const soft: React.CSSProperties = { background: 'rgba(255,255,255,0.08)' };
-  const glass: React.CSSProperties = { background: 'rgba(15,23,42,0.94)', border: '1px solid rgba(168,85,247,0.45)', color: '#e2e8f0', backdropFilter: 'blur(10px)' };
-  const field: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.15)' };
-  const Lbl = ({ t, children }: { t: string; children: React.ReactNode }) => <label className="flex flex-col gap-1 text-[11px] font-semibold" style={{ color: '#cbd5e1' }}>{t}{children}</label>;
-  const Stepper = ({ v, set, step, min, max, fmt }: { v: number; set: (n: number) => void; step: number; min: number; max: number; fmt?: (n: number) => string }) => (
-    <div className="flex items-center gap-2">
-      <button className="rounded-md p-1" style={soft} aria-label="Smaller" onClick={() => set(Math.max(min, +(v - step).toFixed(2)))}><Minus className="h-3.5 w-3.5" /></button>
-      <input type="range" className="flex-1" min={min} max={max} step={step} value={v} onChange={(e) => set(Number(e.target.value))} />
-      <button className="rounded-md p-1" style={soft} aria-label="Bigger" onClick={() => set(Math.min(max, +(v + step).toFixed(2)))}><Plus className="h-3.5 w-3.5" /></button>
-      <span className="w-10 text-right font-mono text-[11px]">{fmt ? fmt(v) : v}</span>
-    </div>
-  );
+    const glass: React.CSSProperties = { background: 'linear-gradient(160deg,rgba(11,18,32,0.96),rgba(17,26,46,0.96))', border: '1px solid rgba(34,211,238,0.28)', boxShadow: '0 12px 40px rgba(0,0,0,0.45), 0 0 24px rgba(34,211,238,0.08)', color: '#e2e8f0', backdropFilter: 'blur(10px)' };
   const zs = () => [...doc.items.map((i) => i.z ?? 1), ...Object.values(doc.edits).map((e) => e.z ?? 0)];
   const LayerCtl = ({ z, set }: { z: number; set: (n: number) => void }) => (
     <Lbl t={`Layer (${z})`}><div className="flex gap-1.5">
@@ -402,22 +413,13 @@ function StudioEditor() {
       <button className={btn} style={soft} title="Send to back" onClick={() => set(Math.min(...zs()) - 1)}><ArrowDownToLine className="h-4 w-4" />Back</button>
     </div></Lbl>
   );
-  const HoverSel = ({ v, set }: { v?: Hover; set: (h: Hover) => void }) => (
-    <Lbl t="When the mouse is over it"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Hover)}>
-      {HOVERS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
-  );
-  const AnimSel = ({ v, set }: { v?: Anim; set: (a: Anim) => void }) => (
-    <Lbl t="Animation"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Anim)}>
-      {ANIMS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
-  );
-
   return (
     <>
       <style>{STUDIO_CSS}</style>
       {portals}
       {!editing && <ReaderBar roots={roots} />}
       <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] overflow-x-auto rounded-xl px-2 py-1.5 flex items-center gap-1.5" style={glass}>
-        <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? '#7c3aed' : 'rgba(255,255,255,0.08)' }}>
+        <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }}>
           <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
         </button>
         {editing && (
@@ -428,7 +430,7 @@ function StudioEditor() {
             <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-image', 'image/*')}><ImagePlus className="h-4 w-4" />Picture</button>
             <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-model', '.glb,model/gltf-binary')}><Box className="h-4 w-4" />3D / AR</button>
             <button className={btn} style={soft} onClick={() => addItem({ type: 'shape', w: 50 })}><Square className="h-4 w-4" />Card</button>
-            <button className={btn} style={{ background: bgOpen ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
+            <button className={btn} style={{ background: bgOpen ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
             {isCustom && <>
               <button className={btn} style={soft} title="Remove the current page" aria-label="Remove page" disabled={pagesOf(doc).length <= 1} onClick={removePage}><FileMinus2 className="h-4 w-4" /></button>
             </>}
@@ -436,11 +438,11 @@ function StudioEditor() {
             <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
-            <button className={btn} style={layoutsOpen ? { background: '#7c3aed' } : soft} onClick={() => { setLayoutsOpen((o) => !o); setModelsOpen(false); }}><LayoutTemplate className="h-4 w-4" />Layouts</button>
-            <button className={btn} style={modelsOpen ? { background: '#7c3aed' } : soft} onClick={() => { setModelsOpen((o) => !o); setLayoutsOpen(false); }}><Box className="h-4 w-4" />3D library</button>
+            <button className={btn} style={layoutsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setLayoutsOpen((o) => !o); setModelsOpen(false); }}><LayoutTemplate className="h-4 w-4" />Layouts</button>
+            <button className={btn} style={modelsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setModelsOpen((o) => !o); setLayoutsOpen(false); }}><Box className="h-4 w-4" />3D library</button>
             <button className={btn} style={soft} onClick={newBrochure}><BookPlus className="h-4 w-4" />New brochure</button>
             <button className={btn} style={soft} onClick={discard}><RotateCcw className="h-4 w-4" />Discard</button>
-            <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />Publish</button>
+            <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#06b6d4,#1d4ed8)' }}><Upload className="h-4 w-4" />Publish</button>
           </>
         )}
         <input ref={fileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }} />
@@ -448,19 +450,19 @@ function StudioEditor() {
 
       {editing && bgOpen && (
         <div className="fixed left-4 bottom-20 z-[70] w-64 rounded-xl p-4 flex flex-col gap-3" style={glass}>
-          <div className="flex items-center justify-between"><span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#c4b5fd' }}>BACKGROUND</span>
+          <div className="flex items-center justify-between"><span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>BACKGROUND</span>
             <button aria-label="Close" onClick={() => setBgOpen(false)}><X className="h-4 w-4" /></button></div>
           <div className="flex gap-1.5">
-            <button className={btn} style={!bgAll ? { background: '#7c3aed' } : soft} onClick={() => setBgAll(false)}>This page</button>
-            <button className={btn} style={bgAll ? { background: '#7c3aed' } : soft} onClick={() => setBgAll(true)}>All pages</button>
+            <button className={btn} style={!bgAll ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBgAll(false)}>This page</button>
+            <button className={btn} style={bgAll ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBgAll(true)}>All pages</button>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
-            {BG_OPTIONS.map((o) => <button key={o.kind} className={btn} style={curBg.kind === o.kind ? { background: '#7c3aed' } : soft} onClick={() => setBg({ kind: o.kind })}>{o.label}</button>)}
+            {BG_OPTIONS.map((o) => <button key={o.kind} className={btn} style={curBg.kind === o.kind ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBg({ kind: o.kind })}>{o.label}</button>)}
           </div>
           <Lbl t="Strength"><Stepper v={curBg.opacity} set={(v) => setBg({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
           <Lbl t="Blend"><select className="rounded-md p-1.5 text-[12px]" style={field} value={curBg.blend} onChange={(e) => setBg({ blend: e.target.value as PageBg['blend'] })}>
             <option value="normal" style={{ background: '#0f172a' }}>Normal</option><option value="screen" style={{ background: '#0f172a' }}>Glow (dark pages)</option><option value="multiply" style={{ background: '#0f172a' }}>Ink (light pages)</option></select></Lbl>
-          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#c4b5fd' }}>THEME</span>
+          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#67e8f9' }}>THEME</span>
           <div className="grid grid-cols-2 gap-1.5">
             {THEMES.map((t) => <button key={t.id} className={btn} style={soft} title={t.name} onClick={() => setBg({ fill: 'gradient', f1: t.f1, f2: t.f2, c1: t.c1, c2: t.c2, angle: 135 })}>
               <span className="h-3 w-3 rounded-full" style={{ background: `linear-gradient(135deg,${t.f2},${t.c1})` }} />{t.name}</button>)}
@@ -471,10 +473,10 @@ function StudioEditor() {
             <Lbl t="Color 2"><ColorField value={curBg.c2 || '#a855f7'} onChange={(v) => setBg({ c2: v })} /></Lbl>
           </div>
           <Lbl t="Speed"><Stepper v={curBg.speed ?? 1} set={(v) => setBg({ speed: v })} step={0.1} min={0.1} max={4} fmt={(n) => `${n}x`} /></Lbl>
-          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#c4b5fd' }}>PAGE COLOR</span>
+          <span className="font-mono text-[11px] tracking-[0.2em] pt-1" style={{ color: '#67e8f9' }}>PAGE COLOR</span>
           <div className="grid grid-cols-2 gap-1.5">
             {([['none', 'Original'], ['solid', 'Solid'], ['gradient', 'Gradient'], ['animated', 'Moving gradient']] as const).map(([v, l]) => (
-              <button key={v} className={btn} style={(curBg.fill || 'none') === v ? { background: '#7c3aed' } : soft} onClick={() => setBg({ fill: v })}>{l}</button>
+              <button key={v} className={btn} style={(curBg.fill || 'none') === v ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBg({ fill: v })}>{l}</button>
             ))}
           </div>
           {curBg.fill && curBg.fill !== 'none' && <>
@@ -483,7 +485,7 @@ function StudioEditor() {
               {curBg.fill !== 'solid' && <Lbl t="Color 2"><ColorField value={curBg.f2 || '#4c1d95'} onChange={(v) => setBg({ f2: v })} /></Lbl>}
             </div>
             {curBg.fill !== 'solid' && <Lbl t="Direction"><Stepper v={curBg.angle ?? 160} set={(v) => setBg({ angle: v })} step={5} min={0} max={360} fmt={(n) => `${n}°`} /></Lbl>}
-            <button className={btn} style={curBg.deep ? { background: '#7c3aed' } : soft} onClick={() => setBg({ deep: !curBg.deep })}>Also recolor the page's own panel</button>
+            <button className={btn} style={curBg.deep ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setBg({ deep: !curBg.deep })}>Also recolor the page's own panel</button>
           </>}
         </div>
       )}
@@ -491,7 +493,7 @@ function StudioEditor() {
       {editing && (selEdit || selItem) && (
         <div className="fixed right-4 top-16 z-[70] w-72 max-h-[calc(100vh-150px)] overflow-y-auto rounded-xl p-4 flex flex-col gap-3" style={glass}>
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#c4b5fd' }}>{selItem ? selItem.type.toUpperCase() : 'ELEMENT'}</span>
+            <span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>{selItem ? selItem.type.toUpperCase() : 'ELEMENT'}</span>
             <button aria-label="Close" onClick={() => setSel(null)}><X className="h-4 w-4" /></button>
           </div>
 
@@ -534,13 +536,13 @@ function StudioEditor() {
                 <Lbl t="Weight"><Stepper v={selItem.weight || 700} set={(v) => setItem({ weight: v })} step={100} min={300} max={900} /></Lbl>
                 <div className="flex items-end gap-3">
                   <Lbl t="Color"><ColorField value={selItem.color || '#f1f5f9'} onChange={(v) => setItem({ color: v, metal: false })} /></Lbl>
-                  <button className={btn} style={selItem.metal ? { background: '#7c3aed' } : soft} onClick={() => setItem({ metal: !selItem.metal })}>Metallic</button>
+                  <button className={btn} style={selItem.metal ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ metal: !selItem.metal })}>Metallic</button>
                 </div>
               </>}
               {selItem.type === 'icon' && <>
                 <div className="grid grid-cols-8 gap-1">
                   {Object.entries(ICONS).map(([n, I]) => (
-                    <button key={n} title={n} aria-label={n} className="rounded-md p-1 grid place-items-center" style={selItem.icon === n ? { background: '#7c3aed' } : soft} onClick={() => setItem({ icon: n })}><I className="h-4 w-4" /></button>
+                    <button key={n} title={n} aria-label={n} className="rounded-md p-1 grid place-items-center" style={selItem.icon === n ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ icon: n })}><I className="h-4 w-4" /></button>
                   ))}
                 </div>
                 <div className="flex gap-3">
@@ -554,8 +556,8 @@ function StudioEditor() {
                 <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
                 <Lbl t="Or model link (.glb)"><input className="rounded-md p-1.5 text-[12px]" style={field} defaultValue={selItem.src || ''} onBlur={(e) => setItem({ src: e.target.value.trim() })} placeholder="https://…/model.glb" /></Lbl>
                 <div className="flex gap-2">
-                  <button className={btn} style={selItem.ar ? { background: '#7c3aed' } : soft} onClick={() => setItem({ ar: !selItem.ar })}>AR view</button>
-                  <button className={btn} style={selItem.autoRotate !== false ? { background: '#7c3aed' } : soft} onClick={() => setItem({ autoRotate: selItem.autoRotate === false })}>Auto-rotate</button>
+                  <button className={btn} style={selItem.ar ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ ar: !selItem.ar })}>AR view</button>
+                  <button className={btn} style={selItem.autoRotate !== false ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ autoRotate: selItem.autoRotate === false })}>Auto-rotate</button>
                 </div>
                 <button className={btn} style={soft} disabled={busy} onClick={() => pick('ios', '.usdz,model/vnd.usdz+zip', selItem.id)}><Box className="h-4 w-4" />{selItem.iosSrc ? 'Replace iPhone file' : 'iPhone file (.usdz, optional)'}</button>
                 <span className="text-[11px]" style={{ color: '#94a3b8' }}>With AR view on, visitors get a "View in your room" button. Phones place the model on the floor; computers show a QR code to open it on a phone.</span>
