@@ -79,7 +79,7 @@ export const MentorsPage = ({ f, total }: { f: Feature; total: string }) => {
             </div>
 
             {/* Terminal panel */}
-            <div className="relative rounded-xl overflow-hidden self-start" style={{ background: '#0b1526', border: BORDER, boxShadow: '0 30px 60px -30px rgba(0,0,0,0.8), 0 0 40px rgba(34,211,238,0.06)' }}>
+            <div className="relative rounded-xl self-start" style={{ background: '#0b1526', border: BORDER, boxShadow: '0 30px 60px -30px rgba(0,0,0,0.8), 0 0 40px rgba(34,211,238,0.06)' }}>
               <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: BORDER }}>
                 {['#ef4444', '#f59e0b', '#22c55e'].map((c) => <span key={c} className="rounded-full" style={{ width: 9, height: 9, background: c }} />)}
                 <span className="ml-3" style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.08em' }}>mentor_network://overview</span>
@@ -95,7 +95,7 @@ export const MentorsPage = ({ f, total }: { f: Feature; total: string }) => {
                   <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.18em', color: GREEN }}>&#8627; MANAGED · VISIBLE · MEASURED</div>
                 </div>
               </div>
-              <div className="absolute -bottom-0 right-4 translate-y-[-8px] rotate-[-2deg] rounded-full px-3 py-1" style={{ background: AMBER, color: '#1c1206', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em' }}>APEX-READY</div>
+              <div className="absolute bottom-[-10px] left-4 rotate-[-2deg] z-10 rounded-full px-3 py-1" style={{ background: AMBER, color: '#1c1206', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em' }}>APEX-READY</div>
             </div>
           </div>
 
@@ -127,7 +127,7 @@ export const MentorsPage = ({ f, total }: { f: Feature; total: string }) => {
                     <span style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '0.14em', color: c }}>{tags[i] ?? ''}</span>
                     <span className="ml-auto rounded-full" style={{ width: 7, height: 7, background: c, boxShadow: `0 0 8px ${c}` }} />
                   </div>
-                  <p className="mt-4" style={{ fontFamily: MONO, fontSize: 13.5, lineHeight: 1.65, color: '#cbd5e1' }}>{p}</p>
+                  <p className="mt-5" style={{ fontSize: 21, lineHeight: 1.5, color: '#e2e8f0' }}>{p}</p>
                 </div>
               );
             })}
