@@ -85,7 +85,7 @@ export function ModelLibrary({ models, setModels, upload, save, onAdd, onClose }
       </div>
       <p className="px-3 pb-2 text-[11px]" style={{ color: '#94a3b8' }}>Drag a model onto a page, or press Add for the current page.</p>
 
-      <div className="flex-1 overflow-y-auto px-3 pb-3 grid grid-cols-2 gap-3 content-start">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 grid grid-cols-2 gap-3 content-start">
         {!list.length && <p className="col-span-2 text-[12px] py-6 text-center" style={{ color: '#94a3b8' }}>No models yet. Upload your first .glb above.</p>}
         {list.map((m) => (
           <div key={m.id} draggable={editId !== m.id} onDragStart={(e) => { e.dataTransfer.setData(MODEL_MIME, m.id); e.dataTransfer.effectAllowed = 'copy'; }}

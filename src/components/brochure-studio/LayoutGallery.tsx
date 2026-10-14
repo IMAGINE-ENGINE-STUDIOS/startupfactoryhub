@@ -40,7 +40,7 @@ export function LayoutGallery({ onUse, onNewPage, onClose, canAddPage }: {
         ))}
       </div>
       <p className="px-3 pb-2 text-[11px]" style={{ color: '#94a3b8' }}>Drag a layout onto a page, or press Use for the current page.</p>
-      <div className="flex-1 overflow-y-auto px-3 pb-3 grid grid-cols-2 gap-3 content-start">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 grid grid-cols-2 gap-3 content-start">
         {list.map((l) => (
           <div key={l.id} draggable onDragStart={(e) => { e.dataTransfer.setData(LAYOUT_MIME, l.id); e.dataTransfer.effectAllowed = 'copy'; }}
             className="group flex flex-col gap-1.5 cursor-grab active:cursor-grabbing">

@@ -81,7 +81,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
             <span className="text-[14px] font-bold">{name}{!isKits && !isLay ? ' pages' : ''}</span>
             <button aria-label="Close" onClick={onClose}><X className="h-5 w-5" /></button>
           </header>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4">
             {isKits && onKit ? (
               <>
                 <p className="pb-3 text-[12px]" style={{ color: '#94a3b8' }}>Use a whole brochure design at once, or drag it onto a page. Its pages are added after the current page.</p>
