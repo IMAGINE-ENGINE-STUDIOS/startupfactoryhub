@@ -21,7 +21,7 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
   const wrap: React.CSSProperties = {
     position: 'absolute', left: `${it.x}%`, top: `${it.y}%`, width: `${it.w}%`,
     transform: it.rot ? `rotate(${it.rot}deg)` : undefined, opacity: it.opacity ?? 1, zIndex: it.z ?? 1,
-    animation: animCss(it.anim), pointerEvents: editing || it.type === 'model' ? 'auto' : 'none',
+    animation: animCss(it.anim), pointerEvents: editing || it.type === 'model' || it.type === 'page' ? 'auto' : 'none',
     cursor: editing ? 'move' : undefined, outline: selected ? '2px solid #a855f7' : undefined, outlineOffset: 2,
   };
   let body: React.ReactNode = null;
@@ -40,6 +40,9 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
   }
   if (it.type === 'shape') body = (
     <div style={{ aspectRatio: '1.6', borderRadius: it.radius ?? 18, background: it.bg || 'linear-gradient(135deg,rgba(124,58,237,0.35),rgba(14,116,144,0.35))', border: '1px solid rgba(255,255,255,0.18)', backdropFilter: 'blur(10px)' }} />
+  );
+  if (it.type === 'page') body = (
+    <iframe title="Page template" src={it.src} style={{ width: '100%', aspectRatio: '1 / 1.414', border: 0, display: 'block', pointerEvents: editing ? 'none' : 'auto' }} />
   );
   if (it.type === 'model') body = it.src
     ? React.createElement('model-viewer', {

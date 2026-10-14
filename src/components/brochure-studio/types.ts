@@ -11,7 +11,10 @@ export type ElEdit = {
   fontSize?: number; opacity?: number; radius?: number; anim?: Anim; z?: number;
 };
 
-export type ItemType = 'image' | 'text' | 'icon' | 'model' | 'shape';
+export type ItemType = 'image' | 'text' | 'icon' | 'model' | 'shape' | 'page';
+
+/** A page of a Studio-made brochure: blank, or a live copy of another brochure's page. */
+export type PageRef = { src?: string; label?: string };
 
 /** Something added on top of a page from the Studio palette. */
 export type Item = {
@@ -30,6 +33,7 @@ export type BrochureDoc = {
   items: Item[];
   bgs: Record<string, PageBg>; // key = page index or "all"
   pageCount?: number; // only for brochures created in the Studio
+  pages?: PageRef[]; // ordered pages of a Studio-made brochure
   title?: string;
 };
 
@@ -46,6 +50,7 @@ export function normalizeDoc(d: any): BrochureDoc {
     items: [...(Array.isArray(d.items) ? d.items : []), ...legacy],
     bgs: d.bgs || {},
     pageCount: d.pageCount,
+    pages: Array.isArray(d.pages) ? d.pages : undefined,
     title: d.title,
   };
 }
