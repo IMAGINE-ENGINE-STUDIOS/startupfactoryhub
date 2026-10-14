@@ -1,0 +1,413 @@
+/**
+ * Brochure Studio — one admin editing tool for every flipbook brochure.
+ * Mounted once in App; it finds the brochure pages on screen, applies the
+ * published edits for visitors, and gives admins a full editor
+ * (text, colors, sizes, moving, deleting, pictures, icons, 3D/AR models,
+ * animations, animated backgrounds, new pages / new brochures) with publish.
+ * Credits: Imagine Engine Studios Corp.
+ */
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useUserRole } from '@/hooks/useUserRole';
+import { applyEdits, byPath, findRoots, layerHost, pageOf, pathOf, STUDIO_CSS } from './dom';
+import { ItemView } from './ItemView';
+import { PageBackground, BG_OPTIONS } from './Backgrounds';
+import { ICONS } from './icons';
+import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg } from './types';
+
+const SUPA_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const publishedUrl = (slug: string) => `${SUPA_URL}/storage/v1/object/public/studio-published/brochures/${slug}.json`;
+const draftKey = (slug: string) => `sfh-brochure-draft:${slug}`;
+const ALIAS: Record<string, string> = { acceleratorbrochure: 'forpartners', membership: 'basic-plan', 'investor-priority': 'investor-plan' };
+
+export const slugFromPath = (path: string) => {
+  const p = path.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (p.startsWith('b/')) return `b-${p.slice(2)}`.replace(/[^a-z0-9_-]/g, '').slice(0, 60);
+  const s = p.replace(/[^a-z0-9_-]/g, '-').slice(0, 60);
+  return ALIAS[s] || s;
+};
+
+export const fetchPublished = (slug: string) =>
+  fetch(`${publishedUrl(slug)}?t=${Date.now()}`).then((r) => (r.ok ? r.json() : null)).then(normalizeDoc).catch(() => normalizeDoc(null));
+
+const ANIMS: { v: Anim; l: string }[] = [
+  { v: '', l: 'None' }, { v: 'fade', l: 'Fade in' }, { v: 'up', l: 'Slide up' }, { v: 'reveal', l: 'Cyber reveal' },
+  { v: 'pulse', l: 'Pulse' }, { v: 'float', l: 'Float' }, { v: 'glow', l: 'Neon glow' }, { v: 'spin', l: 'Spin' },
+];
+
+type Sel = { kind: 'el'; key: string } | { kind: 'item'; id: string } | null;
+
+export default function BrochureStudio() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const slug = useMemo(() => slugFromPath(pathname), [pathname]);
+  const { role } = useUserRole();
+  const isAdmin = role === 'admin';
+
+  const [roots, setRoots] = useState<HTMLElement[]>([]);
+  const [doc, setDoc] = useState<BrochureDoc>(EMPTY_DOC);
+  const docRef = useRef(doc); docRef.current = doc;
+  const past = useRef<BrochureDoc[]>([]); const future = useRef<BrochureDoc[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [sel, setSel] = useState<Sel>(null);
+  const [busy, setBusy] = useState(false);
+  const [bgOpen, setBgOpen] = useState(false);
+  const [bgAll, setBgAll] = useState(false);
+  const lastPage = useRef<number | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace'; id?: string }>({ mode: 'new-image' });
+
+  /* ---- find pages on screen ---- */
+  useEffect(() => {
+    setRoots([]); setEditing(false); setSel(null);
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const scan = () => {
+      const r = findRoots();
+      setRoots((prev) => (prev.length === r.length && prev.every((p, i) => p === r[i]) ? prev : r));
+    };
+    const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(scan, 150); });
+    mo.observe(document.body, { childList: true, subtree: true });
+    scan();
+    return () => { mo.disconnect(); clearTimeout(t); };
+  }, [pathname]);
+  const active = roots.length > 0;
+
+  /* ---- load published + admin draft ---- */
+  useEffect(() => {
+    let off = false;
+    past.current = []; future.current = [];
+    fetchPublished(slug).then((pub) => {
+      if (off) return;
+      let d = pub;
+      if (isAdmin) { try { const s = localStorage.getItem(draftKey(slug)); if (s) d = normalizeDoc(JSON.parse(s)); } catch { /* ignore */ } }
+      setDoc(d);
+    });
+    return () => { off = true; };
+  }, [slug, isAdmin]);
+
+  useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
+  useEffect(() => { if (active) { const t = setTimeout(() => applyEdits(doc), 30); return () => clearTimeout(t); } }, [doc, roots, active]);
+
+  const commit = useCallback((n: BrochureDoc) => {
+    try { localStorage.setItem(draftKey(slug), JSON.stringify(n)); } catch { /* ignore */ }
+    return n;
+  }, [slug]);
+  const update = useCallback((fn: (d: BrochureDoc) => BrochureDoc, record = true) => {
+    setDoc((d) => {
+      if (record) { past.current = [...past.current.slice(-60), d]; future.current = []; }
+      return commit(fn(d));
+    });
+  }, [commit]);
+  const undo = () => { const p = past.current.pop(); if (!p) return; future.current.push(docRef.current); setDoc(commit(p)); };
+  const redo = () => { const f = future.current.pop(); if (!f) return; past.current.push(docRef.current); setDoc(commit(f)); };
+
+  const curPage = () => {
+    if (lastPage.current !== null) return lastPage.current;
+    const vis = roots.find((r) => { const b = r.getBoundingClientRect(); return b.width > 0 && getComputedStyle(r).display !== 'none'; });
+    return vis ? pageOf(vis, roots) : 0;
+  };
+
+  /* ---- pointer editing (capture phase so flipbooks don't turn pages) ---- */
+  useEffect(() => {
+    if (!editing || !active) return;
+    document.body.classList.add('bs-editing');
+    const inBook = (t: HTMLElement) => t.closest('[data-bp-root], .stf__item, [data-bs-layer]') as HTMLElement | null;
+    const down = (e: PointerEvent) => {
+      const t = e.target as HTMLElement;
+      if (!inBook(t)) return;
+      e.stopPropagation(); e.preventDefault();
+      const all = findRoots();
+      const sx = e.clientX, sy = e.clientY;
+      const handle = t.closest('[data-bs-handle]') as HTMLElement | null;
+      const itemEl = t.closest('[data-bs-item]') as HTMLElement | null;
+      let onMove: (dx: number, dy: number) => void;
+      let started = false;
+      if (handle || itemEl) {
+        const id = (handle?.dataset.bsHandle || itemEl!.dataset.bsItem)!;
+        const it = docRef.current.items.find((i) => i.id === id); if (!it) return;
+        lastPage.current = it.page;
+        setSel({ kind: 'item', id });
+        const host = (itemEl || handle)!.closest('[data-bs-layer]')!.getBoundingClientRect();
+        onMove = (dx, dy) => update((d) => ({ ...d, items: d.items.map((i) => i.id !== id ? i : handle
+          ? { ...i, w: Math.max(3, Math.min(150, it.w + (dx / host.width) * 100)) }
+          : { ...i, x: it.x + (dx / host.width) * 100, y: it.y + (dy / host.height) * 100 }) }), !started);
+      } else {
+        const root = t.closest('[data-bp-root], .stf__item') as HTMLElement | null;
+        if (!root || t === root) return;
+        const path = pathOf(t, root); if (path === null) return;
+        const pg = pageOf(root, all); lastPage.current = pg;
+        const key = `${pg}:${path}`;
+        setSel({ kind: 'el', key });
+        const cur = docRef.current.edits[key] || {};
+        onMove = (dx, dy) => update((d) => ({ ...d, edits: { ...d.edits, [key]: { ...d.edits[key], dx: Math.round((cur.dx || 0) + dx), dy: Math.round((cur.dy || 0) + dy) } } }), !started);
+      }
+      const move = (m: PointerEvent) => {
+        const dx = m.clientX - sx, dy = m.clientY - sy;
+        if (!started && Math.hypot(dx, dy) < 4) return;
+        onMove(dx, dy); started = true;
+      };
+      const up = () => { window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', up, true); };
+      window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', up, true);
+    };
+    const block = (e: Event) => { if (inBook(e.target as HTMLElement)) { e.stopPropagation(); if (e.type === 'click') e.preventDefault(); } };
+    window.addEventListener('pointerdown', down, true);
+    ['mousedown', 'touchstart', 'click'].forEach((n) => window.addEventListener(n, block, true));
+    return () => {
+      document.body.classList.remove('bs-editing');
+      window.removeEventListener('pointerdown', down, true);
+      ['mousedown', 'touchstart', 'click'].forEach((n) => window.removeEventListener(n, block, true));
+    };
+  }, [editing, active, update]);
+
+  /* ---- selection outline ---- */
+  useEffect(() => {
+    document.querySelectorAll('.bs-sel').forEach((n) => n.classList.remove('bs-sel'));
+    if (!editing || sel?.kind !== 'el') return;
+    const [p, path] = sel.key.split(':');
+    const root = roots.find((r) => pageOf(r, roots) === Number(p));
+    root && byPath(root, path)?.classList.add('bs-sel');
+  }, [sel, editing, doc, roots]);
+
+  /* ---- server calls ---- */
+  const call = async (body: Record<string, unknown>) => {
+    const { data, error } = await supabase.functions.invoke('brochure-publish', { body: { slug, ...body } });
+    if (error || data?.error) throw new Error(data?.error || error?.message);
+    return data;
+  };
+  const upload = async (f: File) => {
+    const ext = (f.name.split('.').pop() || 'png').toLowerCase();
+    const a = await call({ action: 'asset', ext });
+    const up = await supabase.storage.from('studio-published').uploadToSignedUrl(a.path, a.token, f, { contentType: f.type || (ext === 'glb' ? 'model/gltf-binary' : undefined) });
+    if (up.error) throw up.error;
+    return a.publicUrl as string;
+  };
+  const onFile = async (f: File) => {
+    setBusy(true);
+    try {
+      const src = await upload(f);
+      const tgt = uploadTarget.current;
+      if (tgt.mode === 'replace' && tgt.id) update((d) => ({ ...d, items: d.items.map((i) => (i.id === tgt.id ? { ...i, src } : i)) }));
+      else addItem(tgt.mode === 'new-model' ? { type: 'model', src, w: 45, ar: true } : { type: 'image', src, w: 55, radius: 10 });
+    } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
+    setBusy(false);
+  };
+  const pick = (mode: 'new-image' | 'new-model' | 'replace', accept: string, id?: string) => {
+    uploadTarget.current = { mode, id };
+    if (fileRef.current) { fileRef.current.accept = accept; fileRef.current.click(); }
+  };
+
+  const addItem = (p: Partial<Item>) => {
+    const id = crypto.randomUUID();
+    update((d) => ({ ...d, items: [...d.items, { id, page: curPage(), type: 'text', x: 20, y: 30, w: 50, ...p } as Item] }));
+    setSel({ kind: 'item', id });
+  };
+
+  const publish = async () => {
+    setBusy(true);
+    try { await call({ doc }); localStorage.removeItem(draftKey(slug)); toast.success('Published — everyone now sees this version'); }
+    catch (e) { toast.error(`Publish failed: ${(e as Error).message}`); }
+    setBusy(false);
+  };
+  const discard = () => { localStorage.removeItem(draftKey(slug)); window.location.reload(); };
+  const newBrochure = () => {
+    const name = window.prompt('Name for the new brochure (letters, numbers, dashes)');
+    const s = (name || '').toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    if (s) navigate(`/b/${s}`);
+  };
+
+  /* ---- portals: backgrounds + added items on every page ---- */
+  const portals = active ? roots.map((root) => {
+    const pg = pageOf(root, roots);
+    const bg = doc.bgs[String(pg)] || doc.bgs.all;
+    const items = doc.items.filter((i) => i.page === pg);
+    if (!bg && !items.length) return null;
+    return createPortal(
+      <>
+        {bg && <PageBackground bg={bg} />}
+        {items.map((it) => <ItemView key={it.id} it={it} editing={editing} selected={sel?.kind === 'item' && sel.id === it.id} />)}
+      </>,
+      layerHost(root), `bs-${pg}`,
+    );
+  }) : null;
+
+  if (!active) return null;
+  if (!isAdmin) return <>{portals}</>;
+
+  /* ---- inspector data ---- */
+  const selEl = (() => {
+    if (sel?.kind !== 'el') return null;
+    const [p, path] = sel.key.split(':');
+    const root = roots.find((r) => pageOf(r, roots) === Number(p));
+    return root ? byPath(root, path) : null;
+  })();
+  const selEdit: ElEdit | null = sel?.kind === 'el' ? doc.edits[sel.key] || {} : null;
+  const selItem = sel?.kind === 'item' ? doc.items.find((i) => i.id === sel.id) || null : null;
+  const setEdit = (patch: Partial<ElEdit>) => sel?.kind === 'el' && update((d) => ({ ...d, edits: { ...d.edits, [sel.key]: { ...d.edits[sel.key], ...patch } } }));
+  const setItem = (patch: Partial<Item>) => selItem && update((d) => ({ ...d, items: d.items.map((i) => (i.id === selItem.id ? { ...i, ...patch } : i)) }));
+  const canText = !!selEl && selEl.childElementCount === 0;
+  const baseFont = selEl ? Math.round(parseFloat(getComputedStyle(selEl).fontSize) || 16) : 16;
+
+  const pageCount = doc.pageCount || 0;
+  const isCustom = slug.startsWith('b-');
+  const bgKey = bgAll ? 'all' : String(curPage());
+  const curBg: PageBg = doc.bgs[bgKey] || { kind: 'none', opacity: 0.45, blend: 'normal' };
+  const setBg = (p: Partial<PageBg>) => update((d) => ({ ...d, bgs: { ...d.bgs, [bgKey]: { ...curBg, ...p } } }));
+
+  const btn = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-bold disabled:opacity-40 whitespace-nowrap';
+  const soft: React.CSSProperties = { background: 'rgba(255,255,255,0.08)' };
+  const glass: React.CSSProperties = { background: 'rgba(15,23,42,0.94)', border: '1px solid rgba(168,85,247,0.45)', color: '#e2e8f0', backdropFilter: 'blur(10px)' };
+  const field: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.15)' };
+  const Lbl = ({ t, children }: { t: string; children: React.ReactNode }) => <label className="flex flex-col gap-1 text-[11px] font-semibold" style={{ color: '#cbd5e1' }}>{t}{children}</label>;
+  const Stepper = ({ v, set, step, min, max, fmt }: { v: number; set: (n: number) => void; step: number; min: number; max: number; fmt?: (n: number) => string }) => (
+    <div className="flex items-center gap-2">
+      <button className="rounded-md p-1" style={soft} aria-label="Smaller" onClick={() => set(Math.max(min, +(v - step).toFixed(2)))}><Minus className="h-3.5 w-3.5" /></button>
+      <input type="range" className="flex-1" min={min} max={max} step={step} value={v} onChange={(e) => set(Number(e.target.value))} />
+      <button className="rounded-md p-1" style={soft} aria-label="Bigger" onClick={() => set(Math.min(max, +(v + step).toFixed(2)))}><Plus className="h-3.5 w-3.5" /></button>
+      <span className="w-10 text-right font-mono text-[11px]">{fmt ? fmt(v) : v}</span>
+    </div>
+  );
+  const AnimSel = ({ v, set }: { v?: Anim; set: (a: Anim) => void }) => (
+    <Lbl t="Animation"><select className="rounded-md p-1.5 text-[12px]" style={field} value={v || ''} onChange={(e) => set(e.target.value as Anim)}>
+      {ANIMS.map((a) => <option key={a.v} value={a.v} style={{ background: '#0f172a' }}>{a.l}</option>)}</select></Lbl>
+  );
+
+  return (
+    <>
+      <style>{STUDIO_CSS}</style>
+      {portals}
+      <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] overflow-x-auto rounded-xl px-2 py-1.5 flex items-center gap-1.5" style={glass}>
+        <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? '#7c3aed' : 'rgba(255,255,255,0.08)' }}>
+          <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
+        </button>
+        {editing && (
+          <>
+            <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
+            <button className={btn} style={soft} onClick={() => addItem({ type: 'text', text: 'New headline', size: 28, w: 60, metal: true })}><Type className="h-4 w-4" />Text</button>
+            <button className={btn} style={soft} onClick={() => addItem({ type: 'icon', icon: 'Rocket', w: 14 })}><Shapes className="h-4 w-4" />Icon</button>
+            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-image', 'image/*')}><ImagePlus className="h-4 w-4" />Picture</button>
+            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-model', '.glb,.gltf,model/gltf-binary')}><Box className="h-4 w-4" />3D / AR</button>
+            <button className={btn} style={soft} onClick={() => addItem({ type: 'shape', w: 50 })}><Square className="h-4 w-4" />Card</button>
+            <button className={btn} style={{ background: bgOpen ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
+            {isCustom && <>
+              <button className={btn} style={soft} onClick={() => update((d) => ({ ...d, pageCount: (d.pageCount || 4) + 1 }))}><FilePlus2 className="h-4 w-4" />Page</button>
+              <button className={btn} style={soft} disabled={(pageCount || 4) <= 1} onClick={() => update((d) => ({ ...d, pageCount: Math.max(1, (d.pageCount || 4) - 1) }))}><FileMinus2 className="h-4 w-4" /></button>
+            </>}
+            <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
+            <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
+            <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
+            <button className={btn} style={soft} onClick={newBrochure}><BookPlus className="h-4 w-4" />New brochure</button>
+            <button className={btn} style={soft} onClick={discard}><RotateCcw className="h-4 w-4" />Discard</button>
+            <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />Publish</button>
+          </>
+        )}
+        <input ref={fileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }} />
+      </div>
+
+      {editing && bgOpen && (
+        <div className="fixed left-4 bottom-20 z-[70] w-64 rounded-xl p-4 flex flex-col gap-3" style={glass}>
+          <div className="flex items-center justify-between"><span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#c4b5fd' }}>BACKGROUND</span>
+            <button aria-label="Close" onClick={() => setBgOpen(false)}><X className="h-4 w-4" /></button></div>
+          <div className="flex gap-1.5">
+            <button className={btn} style={!bgAll ? { background: '#7c3aed' } : soft} onClick={() => setBgAll(false)}>This page</button>
+            <button className={btn} style={bgAll ? { background: '#7c3aed' } : soft} onClick={() => setBgAll(true)}>All pages</button>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {BG_OPTIONS.map((o) => <button key={o.kind} className={btn} style={curBg.kind === o.kind ? { background: '#7c3aed' } : soft} onClick={() => setBg({ kind: o.kind })}>{o.label}</button>)}
+          </div>
+          <Lbl t="Strength"><Stepper v={curBg.opacity} set={(v) => setBg({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+          <Lbl t="Blend"><select className="rounded-md p-1.5 text-[12px]" style={field} value={curBg.blend} onChange={(e) => setBg({ blend: e.target.value as PageBg['blend'] })}>
+            <option value="normal" style={{ background: '#0f172a' }}>Normal</option><option value="screen" style={{ background: '#0f172a' }}>Glow (dark pages)</option><option value="multiply" style={{ background: '#0f172a' }}>Ink (light pages)</option></select></Lbl>
+        </div>
+      )}
+
+      {editing && (selEdit || selItem) && (
+        <div className="fixed right-4 top-16 z-[70] w-72 max-h-[calc(100vh-150px)] overflow-y-auto rounded-xl p-4 flex flex-col gap-3" style={glass}>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] tracking-[0.2em]" style={{ color: '#c4b5fd' }}>{selItem ? selItem.type.toUpperCase() : 'ELEMENT'}</span>
+            <button aria-label="Close" onClick={() => setSel(null)}><X className="h-4 w-4" /></button>
+          </div>
+
+          {selEdit && (
+            <>
+              {canText
+                ? <Lbl t="Text"><textarea rows={3} className="rounded-md p-2 text-[13px]" style={field} value={selEdit.text ?? selEl?.dataset.bpOrig ?? selEl?.textContent ?? ''} onChange={(e) => setEdit({ text: e.target.value })} /></Lbl>
+                : <span className="text-[11px]" style={{ color: '#94a3b8' }}>This is a group. Click a word to change its text.</span>}
+              <div className="flex gap-3">
+                <Lbl t="Text color"><input type="color" value={selEdit.color || '#ffffff'} onChange={(e) => setEdit({ color: e.target.value })} /></Lbl>
+                <Lbl t="Fill"><input type="color" value={selEdit.bg || '#1e293b'} onChange={(e) => setEdit({ bg: e.target.value })} /></Lbl>
+              </div>
+              <Lbl t="Size (pictures and blocks)"><Stepper v={selEdit.scale ?? 1} set={(v) => setEdit({ scale: v })} step={0.05} min={0.2} max={3} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+              {canText && <Lbl t="Font size"><Stepper v={selEdit.fontSize ?? baseFont} set={(v) => setEdit({ fontSize: v })} step={1} min={8} max={120} /></Lbl>}
+              <Lbl t="Rotate"><Stepper v={selEdit.rot ?? 0} set={(v) => setEdit({ rot: v })} step={1} min={-180} max={180} fmt={(n) => `${n}°`} /></Lbl>
+              <Lbl t="Opacity"><Stepper v={selEdit.opacity ?? 1} set={(v) => setEdit({ opacity: v })} step={0.05} min={0} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+              <Lbl t="Corners"><Stepper v={selEdit.radius ?? 0} set={(v) => setEdit({ radius: v })} step={1} min={0} max={80} /></Lbl>
+              <AnimSel v={selEdit.anim} set={(anim) => setEdit({ anim })} />
+              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag it on the page to move it.</span>
+              <div className="flex gap-2 flex-wrap">
+                <button className={btn} style={soft} onClick={() => setEdit({ hidden: !selEdit.hidden })}>
+                  {selEdit.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}{selEdit.hidden ? 'Show' : 'Delete'}
+                </button>
+                <button className={btn} style={soft} onClick={() => update((d) => { const e = { ...d.edits }; delete e[(sel as { key: string }).key]; return { ...d, edits: e }; })}>
+                  <RotateCcw className="h-4 w-4" />Reset
+                </button>
+              </div>
+            </>
+          )}
+
+          {selItem && (
+            <>
+              {selItem.type === 'text' && <>
+                <Lbl t="Text"><textarea rows={3} className="rounded-md p-2 text-[13px]" style={field} value={selItem.text || ''} onChange={(e) => setItem({ text: e.target.value })} /></Lbl>
+                <Lbl t="Font size"><Stepper v={selItem.size || 22} set={(v) => setItem({ size: v })} step={1} min={8} max={140} /></Lbl>
+                <Lbl t="Weight"><Stepper v={selItem.weight || 700} set={(v) => setItem({ weight: v })} step={100} min={300} max={900} /></Lbl>
+                <div className="flex items-end gap-3">
+                  <Lbl t="Color"><input type="color" value={selItem.color || '#f1f5f9'} onChange={(e) => setItem({ color: e.target.value, metal: false })} /></Lbl>
+                  <button className={btn} style={selItem.metal ? { background: '#7c3aed' } : soft} onClick={() => setItem({ metal: !selItem.metal })}>Metallic</button>
+                </div>
+              </>}
+              {selItem.type === 'icon' && <>
+                <div className="grid grid-cols-8 gap-1">
+                  {Object.entries(ICONS).map(([n, I]) => (
+                    <button key={n} title={n} aria-label={n} className="rounded-md p-1 grid place-items-center" style={selItem.icon === n ? { background: '#7c3aed' } : soft} onClick={() => setItem({ icon: n })}><I className="h-4 w-4" /></button>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <Lbl t="Icon color"><input type="color" value={selItem.color || '#e9d5ff'} onChange={(e) => setItem({ color: e.target.value })} /></Lbl>
+                  <Lbl t="Badge"><input type="color" value={selItem.bg?.startsWith('#') ? selItem.bg : '#2e1065'} onChange={(e) => setItem({ bg: e.target.value })} /></Lbl>
+                </div>
+              </>}
+              {selItem.type === 'shape' && <Lbl t="Fill"><input type="color" value={selItem.bg?.startsWith('#') ? selItem.bg : '#312e81'} onChange={(e) => setItem({ bg: e.target.value })} /></Lbl>}
+              {selItem.type === 'image' && <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', 'image/*', selItem.id)}><ImagePlus className="h-4 w-4" />Replace picture</button>}
+              {selItem.type === 'model' && <>
+                <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,.gltf,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
+                <Lbl t="Or model link (.glb)"><input className="rounded-md p-1.5 text-[12px]" style={field} defaultValue={selItem.src || ''} onBlur={(e) => setItem({ src: e.target.value.trim() })} placeholder="https://…/model.glb" /></Lbl>
+                <div className="flex gap-2">
+                  <button className={btn} style={selItem.ar ? { background: '#7c3aed' } : soft} onClick={() => setItem({ ar: !selItem.ar })}>AR view</button>
+                  <button className={btn} style={selItem.autoRotate !== false ? { background: '#7c3aed' } : soft} onClick={() => setItem({ autoRotate: selItem.autoRotate === false })}>Auto-rotate</button>
+                </div>
+                <span className="text-[11px]" style={{ color: '#94a3b8' }}>Visitors can spin the model; on phones, AR view places it in the room.</span>
+              </>}
+              <Lbl t="Size"><Stepper v={Math.round(selItem.w)} set={(v) => setItem({ w: v })} step={1} min={3} max={150} fmt={(n) => `${n}%`} /></Lbl>
+              <Lbl t="Rotate"><Stepper v={selItem.rot ?? 0} set={(v) => setItem({ rot: v })} step={1} min={-180} max={180} fmt={(n) => `${n}°`} /></Lbl>
+              <Lbl t="Opacity"><Stepper v={selItem.opacity ?? 1} set={(v) => setItem({ opacity: v })} step={0.05} min={0.05} max={1} fmt={(n) => `${Math.round(n * 100)}%`} /></Lbl>
+              {selItem.type !== 'text' && selItem.type !== 'model' && <Lbl t="Corners"><Stepper v={selItem.radius ?? 10} set={(v) => setItem({ radius: v })} step={1} min={0} max={200} /></Lbl>}
+              <AnimSel v={selItem.anim} set={(anim) => setItem({ anim })} />
+              <span className="text-[11px]" style={{ color: '#94a3b8' }}>Drag to move. Drag the purple corner to resize.</span>
+              <div className="flex gap-2 flex-wrap">
+                <button className={btn} style={soft} onClick={() => { const id = crypto.randomUUID(); update((d) => ({ ...d, items: [...d.items, { ...selItem, id, x: selItem.x + 3, y: selItem.y + 3 }] })); setSel({ kind: 'item', id }); }}><Copy className="h-4 w-4" />Duplicate</button>
+                <button className={btn} style={{ background: 'rgba(239,68,68,0.25)' }} onClick={() => { update((d) => ({ ...d, items: d.items.filter((i) => i.id !== selItem.id) })); setSel(null); }}><Trash2 className="h-4 w-4" />Delete</button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

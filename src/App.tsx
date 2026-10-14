@@ -100,6 +100,8 @@ const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const AcceleratorBrochure = lazy(() => import("./pages/AcceleratorBrochure"));
 const ApexBrochure = lazy(() => import("./pages/ApexBrochure"));
+const StudioBrochure = lazy(() => import("./pages/StudioBrochure"));
+const BrochureStudio = lazy(() => import("./components/brochure-studio/BrochureStudio"));
 const MVPBrochure = lazy(() => import("./pages/MVPBrochure"));
 const SociosBrochure = lazy(() => import("./pages/SociosBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
@@ -240,6 +242,7 @@ const App = () => (
                     <Route path="/forpartners" element={<AcceleratorBrochure />} />
                     <Route path="/apex" element={<ApexBrochure />} />
                     <Route path="/APEX" element={<ApexBrochure />} />
+                    <Route path="/b/:slug" element={<StudioBrochure />} />
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
                      <Route path="/forstartups" element={<MVPBrochure />} />
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
@@ -265,6 +268,7 @@ const App = () => (
 
                   </Routes>
                 </Suspense>
+                <Suspense fallback={null}><BrochureStudio /></Suspense>
                 <WebsiteTracker />
                 <ViewportPersistence />
                 <CampaignClickTracking />
