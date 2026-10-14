@@ -365,7 +365,7 @@ export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: 
 
           </>}
           {special && (
-            <div style={detail ? { zoom: special === 'journey' ? 1.3 : 1.28 } : undefined} className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
+            <div style={detail ? { zoom: special === 'journey' ? 1.3 : 1.1 } : undefined} className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
               {special === 'map' && <><Kicker color={DIM}>Resource map // {String(f.map!.length).padStart(2, '0')} categories</Kicker><div className="mt-3 flex-1 min-h-0 flex flex-col"><ResourceMap f={f} th={th} /></div></>}
               {special === 'journey' && <JourneyBlock th={th} wide={detail} />}
               {special === 'admin' && <AdminDashboard th={th} />}
@@ -373,7 +373,7 @@ export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: 
             </div>
           )}
 
-          {special !== 'journey' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
+          {special !== 'journey' && special !== 'analytics' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
             <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 30, height: 30, background: th.a }}><ListChecks className="h-4 w-4" style={{ color: '#050a12' }} /></div>
             <p style={{ fontFamily: MONO, fontSize: 16, letterSpacing: '0.02em', color: TEXT, lineHeight: 1.45 }}>{f.quote || th.status}</p>
           </div>}
