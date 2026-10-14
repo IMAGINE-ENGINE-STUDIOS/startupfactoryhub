@@ -91,7 +91,7 @@ const Frame = ({ code, label, accent = C.teal, children }: {
 const Title = ({ children, sub, accent = C.teal }: { children: React.ReactNode; sub?: string; accent?: string }) => (
   <div>
     <div className="h-[3px] w-14 mb-3 rounded-full" style={{ background: `linear-gradient(90deg, ${accent}, ${C.navy})`, boxShadow: `0 0 12px ${accent}66` }} />
-    <h2 className="font-futuristic" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.01em', paddingBottom: 4, ...PLATINUM }}>{children}</h2>
+    <h2 className="font-futuristic" style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.01em', paddingBottom: 4, ...PLATINUM }}>{children}</h2>
     {sub && <p className="mt-2" style={{ color: C.body, fontSize: 16.5, lineHeight: 1.55 }}>{sub}</p>}
   </div>
 );
