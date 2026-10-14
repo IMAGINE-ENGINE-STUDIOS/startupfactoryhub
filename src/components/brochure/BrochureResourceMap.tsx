@@ -30,6 +30,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
     let map: mapboxgl.Map;
     let frame = 0;
     let visible = true;
+    let flipping = false;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -129,6 +130,14 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
     io.observe(container);
     const onVisibility = () => { visible = document.visibilityState === 'visible'; };
     document.addEventListener('visibilitychange', onVisibility);
+    // flipbooks announce page turns: pause the drift while a page animates,
+    // then re-measure and repaint once so the globe never shows a stale frame
+    const onFlipState = (e: Event) => {
+      const next = !!(e as CustomEvent<{ flipping: boolean }>).detail?.flipping;
+      if (flipping && !next) { lastW = 0; lastH = 0; scheduleSync(); map.triggerRepaint(); }
+      flipping = next;
+    };
+    window.addEventListener('sfh:flip-state', onFlipState);
 
     map.on('load', () => {
       try {
@@ -148,7 +157,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
       const drift = (now: number) => {
         const dt = Math.min(now - last, 64);
         last = now;
-        if (!interactedRef.current && visible && !map.isMoving()) {
+        if (!interactedRef.current && visible && !flipping && !map.isMoving()) {
           const c = map.getCenter();
           c.lng -= DEG_PER_MS * dt;
           map.jumpTo({ center: c });
@@ -164,6 +173,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
       ro.disconnect();
       io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('sfh:flip-state', onFlipState);
       timers.forEach(window.clearTimeout);
       map.remove();
       mapRef.current = null;

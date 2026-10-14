@@ -15,7 +15,8 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
-import { EditorialPage, EmbeddedPage, FEATURES } from './apex/ApexEditorial';
+import { EditorialPage, FEATURES } from './apex/ApexEditorial';
+import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -174,8 +175,8 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       </section>
     ),
   },
-  { key: 'about', node: <EmbeddedPage route="/forpartners" page={1} title="About Startup Factory Hub" /> },
-  { key: 'ecosystem', node: <EmbeddedPage route="/forpartners" page={2} title="Where the ecosystem meets" /> },
+  { key: 'about', node: <PartnersAboutPage /> },
+  { key: 'ecosystem', node: <PartnersEcosystemPage /> },
   {
     key: 'summary',
     node: (
@@ -403,6 +404,11 @@ export default function ApexBrochure() {
             flippingTime={550}
             disableFlipByClick
             onFlip={(e: any) => setPage(e.data)}
+            onChangeState={(e: any) => {
+              const flipping = e.data !== 'read';
+              boxRef.current?.classList.toggle('apex-flipping', flipping);
+              window.dispatchEvent(new CustomEvent('sfh:flip-state', { detail: { flipping } }));
+            }}
           >
             {PAGES.map((p, i) => (
               <BookPage key={p.key}>
