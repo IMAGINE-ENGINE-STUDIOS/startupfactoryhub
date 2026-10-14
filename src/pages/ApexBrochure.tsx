@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -149,7 +150,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '17';
+const TOTAL = '18';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
@@ -182,22 +183,88 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     ),
   },
   {
+    key: 'about',
+    node: (
+      <Frame code="01" label="About Startup Factory Hub">
+        <style>{`@keyframes apex-partners-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+        <div className="flex-1 grid grid-cols-12 gap-0 min-h-0">
+          <div className="col-span-7 flex flex-col justify-center pr-6 min-w-0">
+            <span className="font-mono uppercase font-bold mb-3" style={{ fontSize: 13, letterSpacing: '0.3em', color: C.teal }}>About Startup Factory Hub</span>
+            <h1 className="font-extrabold tracking-tight mb-5" style={{ fontSize: 34, lineHeight: 1.06, color: C.ink, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+              The Operating System for the Next{' '}
+              <span style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.navy} 55%, ${C.emerald} 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Generation</span>{' '}of Founders.
+            </h1>
+            <div className="flex gap-4">
+              <div className="w-[5px] rounded-full shrink-0" style={{ background: `linear-gradient(180deg, ${C.teal}, ${C.navy}, ${C.emerald})` }} />
+              <div>
+                <p className="mb-4" style={{ fontSize: 17, lineHeight: 1.55, color: C.body }}>
+                  Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI era, connecting <b style={{ color: C.ink }}>founders, investors, mentors, advisors, accelerators</b> and <b style={{ color: C.ink }}>students</b> through an integrated AI-powered acceleration platform, strategic capital and a globally connected innovation network.
+                </p>
+                <div className="p-4 border-l-4" style={{ borderColor: C.ink, background: 'rgba(241,245,249,0.85)' }}>
+                  <p className="italic font-medium" style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, lineHeight: 1.4, color: C.ink }}>
+                    "Infrastructure is the new intellectual property. The platforms that accompany the founder's journey will define the future of innovation."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-span-5 relative rounded-2xl overflow-hidden" style={{ boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}>
+            <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.55) 70%, rgba(15,23,42,0.92) 100%), radial-gradient(ellipse at 70% 20%, ${C.teal}30 0%, transparent 55%)` }} />
+            <div className="absolute inset-x-3 bottom-3 p-3 backdrop-blur-xl border rounded-xl" style={{ background: 'rgba(2,6,23,0.88)', borderColor: 'rgba(255,255,255,0.1)' }}>
+              <div className="font-bold uppercase mb-2" style={{ fontSize: 10.5, letterSpacing: '0.22em', color: '#94a3b8' }}>The Platform by the Numbers</div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                {[['200+', 'Members', '#10b981'], ['40+', 'Startups Accelerated', '#22d3ee'], ['350+', 'Network Members', '#93c5fd'], ['04', 'Global Hubs', '#2dd4bf']].map(([v, l, c]) => (
+                  <div key={l}>
+                    <div className="font-extrabold" style={{ fontSize: 18, lineHeight: 1, color: '#fff' }}>{v}</div>
+                    <div className="h-[2px] w-6 my-1" style={{ background: c }} />
+                    <div className="uppercase font-bold leading-tight" style={{ fontSize: 10, letterSpacing: '0.1em', color: '#94a3b8' }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="relative overflow-hidden pt-3 border-t" style={{ borderColor: C.line }}>
+          <div className="flex items-center" style={{ width: 'max-content', animation: 'apex-partners-scroll 50s linear infinite' }}>
+            {[0, 1].flatMap((k) => [
+              ['NASA', '/partners/nasa-logo.png'], ['NASA T2', '/partners/nasa-t2-logo.webp'], ['NVIDIA Inception', '/partners/nvidia-inception-logo.png'],
+              ['GitHub', '/github-logo.png'], ['Nasdaq', '/nasdaq-logo.png'], ['IWG', '/partners/iwg-logo.png'], ['HSBC', '/partners/hsbc-logo.png'],
+              ['Lehigh University', '/lehigh-university-logo.png'], ['MongoDB', '/mongodb-logo.webp'], ['F6S', '/partners/f6s-logo.png'],
+            ].map(([n, l]) => <img key={k + n} src={l} alt={n} className="h-7 w-auto object-contain mx-6 opacity-80" />))}
+          </div>
+        </div>
+      </Frame>
+    ),
+  },
+  {
     key: 'summary',
     node: (
-      <Frame code="01" label="Executive Summary">
-        <Title sub="Apex accelerates startups, but acceleration at scale depends on three things. Startup Factory Hub is a single platform that does all three.">
-          Acceleration at scale
-        </Title>
-        <Card icon={FolderOpen} title="Right resources, right time" text="Getting the right resource to the right founder at the right moment." />
-        <Card icon={Users} title="The right people" text="Connecting founders with the mentors, advisors and investors who can help." accent={C.emerald} />
-        <Card icon={BarChart3} title="Knowing what works" text="Clear visibility into progress, resource use and outcomes." accent={C.navy} />
+      <Frame code="02" label="Executive Summary">
+        <div>
+          <div className="h-[3px] w-16 mb-4 rounded-full" style={{ background: `linear-gradient(90deg, ${C.teal}, ${C.navy})`, boxShadow: `0 0 12px ${C.teal}66` }} />
+          <h2 className="font-futuristic" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.1, paddingBottom: 4, ...PLATINUM }}>Acceleration at scale</h2>
+          <p className="mt-3" style={{ color: C.body, fontSize: 20, lineHeight: 1.55 }}>Apex accelerates startups, but acceleration at scale depends on three things. Startup Factory Hub is a single platform that does all three.</p>
+        </div>
+        {([[FolderOpen, 'Right resources, right time', 'Getting the right resource to the right founder at the right moment.', C.teal], [Users, 'The right people', 'Connecting founders with the mentors, advisors and investors who can help.', C.emerald], [BarChart3, 'Knowing what works', 'Clear visibility into progress, resource use and outcomes.', C.navy]] as const).map(([Icon, t, d, a]) => (
+          <div key={t} className="relative rounded-2xl p-5 flex gap-4 items-center" style={glass}>
+            <span className="absolute top-0 left-6 right-6 h-px" style={{ background: `linear-gradient(90deg, transparent, ${a}, transparent)` }} />
+            <div className="shrink-0 h-14 w-14 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${a}30, ${a}08)`, border: `1px solid ${a}55`, boxShadow: `0 0 16px ${a}33`, color: a }}>
+              <Icon className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 style={{ color: C.ink, fontSize: 21, fontWeight: 800, lineHeight: 1.2 }}>{t}</h3>
+              <p className="mt-1" style={{ color: C.body, fontSize: 17.5, lineHeight: 1.5 }}>{d}</p>
+            </div>
+          </div>
+        ))}
       </Frame>
     ),
   },
   {
     key: 'opportunity',
     node: (
-      <Frame code="02" label="The Opportunity" accent={C.navy}>
+      <Frame code="03" label="The Opportunity" accent={C.navy}>
         <Title sub="Most accelerators run on fragmented tools: resources in shared drives, mentors scheduled over email, progress tracked in spreadsheets, and partner offers startups never find. This creates four problems.">
           The cost of fragmented tools
         </Title>
@@ -213,7 +280,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c1-2',
     node: (
-      <Frame code="03" label="Capabilities 1 · 2">
+      <Frame code="04" label="Capabilities 1 · 2">
         <Title sub="Thirteen capabilities, one platform.">Resources and mentors</Title>
         <Card icon={FolderOpen} title="1. Centralized Resource Hubs" text="Templates, toolkits, training, legal and financial guides, tools and funding information in one searchable hub, organized by industry, stage and need." />
         <Card icon={Users} title="2. Network of Mentors and Advisors" text="Profiles with expertise, industry and availability; built-in scheduling and calendars; meeting records and follow-ups; ratings and feedback so Apex sees which relationships create value." accent={C.emerald} />
@@ -223,7 +290,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c3',
     node: (
-      <Frame code="04" label="Capability 3" accent={C.emerald}>
+      <Frame code="05" label="Capability 3" accent={C.emerald}>
         <Title sub="Guidance matched to where each startup actually is.">AI-Powered Business and Strategic Intelligence</Title>
         <Card icon={Brain} title="Profile-aware AI" text="The AI analyzes each startup's profile and stage, across every industry, and suggests concrete next actions and strategies." accent={C.emerald} />
         <div className="grid grid-cols-2 gap-3">
@@ -242,7 +309,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c4',
     node: (
-      <Frame code="05" label="Capability 4 · Journey Mapping">
+      <Frame code="06" label="Capability 4 · Journey Mapping">
         <Title sub="Each stage has clear milestones, recommended resources and suggested mentors.">From idea to growth</Title>
         {[
           ['Idea', 'Problem validation, market research, concept definition'],
@@ -266,7 +333,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c5-6',
     node: (
-      <Frame code="06" label="Capabilities 5 · 6" accent={C.navy}>
+      <Frame code="07" label="Capabilities 5 · 6" accent={C.navy}>
         <Title>Run the program, with partners built in</Title>
         <Card icon={Settings} title="5. Administrator Management" text="A control center to add and update resources, manage mentors and advisors, onboard cohorts, assign startups to pathways and oversee activity, without technical support." accent={C.navy} />
         <Card icon={Handshake} title="6. Embedded Corporate Partner Resources" text="Partner offers, tools, credits and programs already integrated. Startups see them in context, at the stage where they matter. No integration work for Apex or partners." />
@@ -276,7 +343,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c7',
     node: (
-      <Frame code="07" label="Capability 7 · Data Analytics" accent={C.emerald}>
+      <Frame code="08" label="Capability 7 · Data Analytics" accent={C.emerald}>
         <Title sub="A live view of the ecosystem and the program, to guide decisions, report to stakeholders and show impact.">Data Analytics</Title>
         <Bullets items={[
           'Industry growth trends',
@@ -291,7 +358,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c8-11',
     node: (
-      <Frame code="08" label="Capabilities 8 · 11">
+      <Frame code="09" label="Capabilities 8 · 11">
         <Title sub="5,800 locations in 130 countries, including 1,500 in the United States.">Physical space and global soft-landing</Title>
         <Card icon={Building2} title="8. Space for national and international expansion" text="Open Apex hubs in new cities through one partner instead of site-by-site arrangements, and run the same program everywhere." />
         <Card icon={Globe} title="11. Global Soft-Landing" text="A startup can test and enter a new country from inside the Apex program, with local space and the same platform, mentors and resources." accent={C.emerald} />
@@ -301,7 +368,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c9-10',
     node: (
-      <Frame code="09" label="Capabilities 9 · 10" accent={C.navy}>
+      <Frame code="10" label="Capabilities 9 · 10" accent={C.navy}>
         <Title>Investors and non-dilutive funding</Title>
         <Card icon={TrendingUp} title="9. Investor Network" text="Investor profiles with focus areas and stage preferences. Startups that reach the investment stage are connected to relevant investors, and Apex tracks introductions and outcomes." accent={C.navy} />
         <Card icon={Coins} title="10. AI Grant and Funding Matching" text="AI matches each startup to grants and non-dilutive funding by industry, stage and technology readiness. Apex sees how much funding startups pursue and win." />
@@ -311,7 +378,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'c12-13',
     node: (
-      <Frame code="10" label="Capabilities 12 · 13" accent={C.emerald}>
+      <Frame code="11" label="Capabilities 12 · 13" accent={C.emerald}>
         <Title>Show impact, under Apex's brand</Title>
         <Card icon={FileText} title="12. Impact Reporting" text="Exportable reports for sponsors, government partners and investors: jobs created, capital raised, startups commercialized. No compiling data by hand." accent={C.emerald} />
         <Card icon={Award} title="13. White-Label Branding" text="The platform carries Apex's own branding, so startups, mentors and partners experience it as Apex's innovation platform." accent={C.navy} />
@@ -321,7 +388,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'how',
     node: (
-      <Frame code="11" label="How It Works for Apex">
+      <Frame code="12" label="How It Works for Apex">
         <Title>Value for everyone in the program</Title>
         <Card icon={Rocket} title="Startups" text="One login: a personalized journey, relevant resources, mentors and AI-suggested next steps." />
         <Card icon={GraduationCap} title="Mentors and advisors" text="Simple scheduling, clear context on each startup, recognition through ratings." accent={C.emerald} />
@@ -333,7 +400,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'outcomes',
     node: (
-      <Frame code="12" label="Expected Outcomes" accent={C.emerald}>
+      <Frame code="13" label="Expected Outcomes" accent={C.emerald}>
         <Title>What Apex can expect</Title>
         <Bullets items={[
           'Faster progression of startups through stages',
@@ -349,7 +416,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'implementation',
     node: (
-      <Frame code="13" label="Proposed Implementation" accent={C.navy}>
+      <Frame code="14" label="Proposed Implementation" accent={C.navy}>
         <Title sub="Timelines, scope and commercial terms to be defined together with Apex.">Four phases</Title>
         {[
           ['Setup', 'Configure Apex branding, resource library, mentor network and journey stages'],
@@ -371,7 +438,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'next',
     node: (
-      <Frame code="14" label="Next Steps">
+      <Frame code="15" label="Next Steps">
         <Title>Getting started</Title>
         <Bullets accent={C.teal} items={[
           'Discovery session with the Apex team to confirm priorities and current resources',
@@ -385,7 +452,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'team',
     node: (
-      <Frame code="15" label="Our Team" accent={C.emerald}>
+      <Frame code="16" label="Our Team" accent={C.emerald}>
         <Title sub="Who you will work with.">Startup Factory Hub leadership</Title>
         {[
           ['Khalia Padilla', 'Chief Executive Officer'],
@@ -405,7 +472,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'conclusion',
     node: (
-      <Frame code="16" label="Conclusion">
+      <Frame code="17" label="Conclusion">
         <Title sub="Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.">
           One unified innovation platform
         </Title>
