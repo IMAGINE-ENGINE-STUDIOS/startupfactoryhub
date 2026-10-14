@@ -152,20 +152,6 @@ const JourneyBlock = ({ th }: { th: Theme }) => (
         );
       })}
     </div>
-    {/* TRL track */}
-    <div className="mt-3 rounded-xl px-4 py-3" style={{ background: th.panel, border: BORDER }}>
-      <div className="flex items-center justify-between" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em', color: DIM }}>
-        <span>TECHNOLOGY READINESS LEVEL</span><span style={{ color: th.a }}>TRL 1 → 9</span>
-      </div>
-      <div className="mt-2 grid grid-cols-9 gap-1">
-        {Array.from({ length: 9 }, (_, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <div className="w-full rounded-sm" style={{ height: 8, background: `linear-gradient(90deg, ${th.a}, ${th.b})`, opacity: 0.35 + i * 0.07 }} />
-            <span style={{ fontFamily: MONO, fontSize: 9.5, color: TEXT }}>{i + 1}</span>
-          </div>
-        ))}
-      </div>
-    </div>
   </div>
 );
 
@@ -175,7 +161,7 @@ const AdminDashboard = ({ th }: { th: Theme }) => {
   const stages = [['Idea', 9], ['MVP', 12], ['Tech readiness', 8], ['Commercial', 10], ['Investment', 6], ['Growth', 3]] as const;
   const feed: [LucideIcon, string, string][] = [
     [GraduationCap, 'Spring cohort onboarded', '12 startups'], [Users, 'Mentor added', 'Aerospace · Propulsion'],
-    [Route, 'Pathway assigned', 'Commercialization'], [Layers, 'Resource published', 'SBIR Phase I guide'],
+    [Route, 'Pathway assigned', 'Commercialization'],
   ];
   const max = Math.max(...stages.map((s) => s[1]));
   return (
@@ -210,7 +196,7 @@ const AdminDashboard = ({ th }: { th: Theme }) => {
                 {stages.map(([l, v], i) => (
                   <div key={l} className="flex-1 flex flex-col items-center gap-1">
                     <span style={{ fontFamily: MONO, fontSize: 9.5, color: TEXT }}>{v}</span>
-                    <div className="w-full rounded-t" style={{ height: `${(v / max) * 92}px`, background: `linear-gradient(180deg, ${[th.a, th.b, th.c][i % 3]}, ${[th.a, th.b, th.c][i % 3]}33)` }} />
+                    <div className="w-full rounded-t" style={{ height: `${(v / max) * 64}px`, background: `linear-gradient(180deg, ${[th.a, th.b, th.c][i % 3]}, ${[th.a, th.b, th.c][i % 3]}33)` }} />
                     <span style={{ fontSize: 8.5, color: DIM, textAlign: 'center', lineHeight: 1.1 }}>{l}</span>
                   </div>
                 ))}
@@ -334,7 +320,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
             </div>
           </div>
 
-          {f.facts.length > 0 && (
+          {f.facts.length > 0 && special !== 'journey' && (
             <div className="mt-6 grid grid-cols-3 gap-3">
               {f.facts.map(([v, l], i) => {
                 const FI = factIcons[i] ?? ListChecks;
