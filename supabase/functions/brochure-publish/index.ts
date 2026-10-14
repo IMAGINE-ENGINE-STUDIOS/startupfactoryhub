@@ -30,6 +30,24 @@ Deno.serve(async (req) => {
       return json({ path, token: data.token, publicUrl: admin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl });
     }
 
+    // Shared 3D model library (admin-managed list, public to read).
+    if (body.action === "models") {
+      const list = Array.isArray(body.models) ? body.models.slice(0, 500).map((m: Record<string, unknown>) => ({
+        id: String(m.id || crypto.randomUUID()).slice(0, 64),
+        name: String(m.name || "Model").slice(0, 80),
+        category: String(m.category || "General").slice(0, 40),
+        src: String(m.src || "").slice(0, 600),
+        iosSrc: m.iosSrc ? String(m.iosSrc).slice(0, 600) : undefined,
+        addedAt: String(m.addedAt || new Date().toISOString()),
+      })).filter((m: { src: string }) => /^https:\/\//.test(m.src)) : null;
+      if (!list) return json({ error: "Invalid library" }, 400);
+      const { error } = await admin.storage.from(BUCKET).upload("brochures/library/models.json",
+        new Blob([JSON.stringify({ models: list, updatedAt: new Date().toISOString() })], { type: "application/json" }),
+        { upsert: true, contentType: "application/json", cacheControl: "10" });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true, models: list });
+    }
+
     const doc = body.doc;
     if (!doc || typeof doc !== "object") return json({ error: "Invalid edits" }, 400);
     const raw = JSON.stringify({ ...doc, publishedAt: new Date().toISOString(), by: user.id });
