@@ -99,6 +99,7 @@ const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const AcceleratorBrochure = lazy(() => import("./pages/AcceleratorBrochure"));
+const ApexBrochure = lazy(() => import("./pages/ApexBrochure"));
 const MVPBrochure = lazy(() => import("./pages/MVPBrochure"));
 const SociosBrochure = lazy(() => import("./pages/SociosBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
@@ -237,6 +238,8 @@ const App = () => (
                     <Route path="/BDVbrochure" element={<BDVBrochure />} />
                     <Route path="/bdvbrochure" element={<BDVBrochure />} />
                     <Route path="/forpartners" element={<AcceleratorBrochure />} />
+                    <Route path="/apex" element={<ApexBrochure />} />
+                    <Route path="/APEX" element={<ApexBrochure />} />
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
                      <Route path="/forstartups" element={<MVPBrochure />} />
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
