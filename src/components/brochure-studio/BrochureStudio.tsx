@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
-  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle, LayoutTemplate,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,8 @@ import { ColorField } from './ColorField';
 import { FontPicker } from './FontPicker';
 import { ReaderBar } from './ReaderBar';
 import { THEMES } from './themes';
+import { LayoutGallery } from './LayoutGallery';
+import { LAYOUTS, LAYOUT_MIME, type Layout } from './layouts';
 import { isEmbed } from './library';
 import { EMPTY_DOC, normalizeDoc, type Anim, type BrochureDoc, type ElEdit, type Item, type PageBg, type PageRef, type Hover } from './types';
 
@@ -86,6 +88,7 @@ function StudioEditor() {
   const [bgOpen, setBgOpen] = useState(false);
   const [bgAll, setBgAll] = useState(false);
   const [libAt, setLibAt] = useState<number | null>(null);
+  const [layoutsOpen, setLayoutsOpen] = useState(false);
   const lastPage = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace'; id?: string }>({ mode: 'new-image' });
@@ -274,6 +277,40 @@ function StudioEditor() {
       toast.success(`${label} placed on this page`);
     }
   };
+  /* ---- layout gallery: drop a template's pieces onto a page ---- */
+  const placeLayout = (l: Layout, page: number) => {
+    update((d) => ({ ...d, items: [...d.items, ...l.pieces.map((p) => ({ ...p, id: crypto.randomUUID(), page } as Item))] }));
+    lastPage.current = page;
+    toast.success(`${l.name} added to page ${page + 1}`);
+  };
+  const layoutAsPage = (l: Layout) => {
+    const at = curPage() + 1;
+    update((d) => {
+      const pages = [...pagesOf(d)]; pages.splice(at, 0, { label: l.name });
+      const n = shiftPages(d, at, 1);
+      return { ...n, pages, pageCount: pages.length, items: [...n.items, ...l.pieces.map((p) => ({ ...p, id: crypto.randomUUID(), page: at } as Item))] };
+    });
+    lastPage.current = at;
+    toast.success(`${l.name} added as page ${at + 1}`);
+  };
+  useEffect(() => {
+    if (!editing || !layoutsOpen) return;
+    const pageAt = (e: DragEvent) => {
+      const el = (document.elementsFromPoint(e.clientX, e.clientY) as HTMLElement[]).find((n) => !n.closest('[data-bs-ui]') && n.closest('[data-bp-root], .stf__item'));
+      const root = el ? roots.find((r) => r.contains(el) || el.closest('.stf__item')?.contains(r)) : undefined;
+      return root ? pageOf(root, roots) : null;
+    };
+    const over = (e: DragEvent) => { if (e.dataTransfer?.types.includes(LAYOUT_MIME) && pageAt(e) !== null) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } };
+    const drop = (e: DragEvent) => {
+      const id = e.dataTransfer?.getData(LAYOUT_MIME); if (!id) return;
+      const pg = pageAt(e); const l = LAYOUTS.find((x) => x.id === id);
+      if (pg === null || !l) return;
+      e.preventDefault(); e.stopPropagation(); placeLayout(l, pg);
+    };
+    document.addEventListener('dragover', over, true); document.addEventListener('drop', drop, true);
+    return () => { document.removeEventListener('dragover', over, true); document.removeEventListener('drop', drop, true); };
+  }, [editing, layoutsOpen, roots]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const removePage = () => {
     const at = curPage();
     update((d) => { const pages = pagesOf(d).filter((_, i) => i !== at); if (!pages.length) return d; return { ...shiftPages(d, at, -1), pages, pageCount: pages.length }; });
@@ -381,6 +418,7 @@ function StudioEditor() {
             <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
+            <button className={btn} style={layoutsOpen ? { background: '#7c3aed' } : soft} onClick={() => setLayoutsOpen((o) => !o)}><LayoutTemplate className="h-4 w-4" />Layouts</button>
             <button className={btn} style={soft} onClick={newBrochure}><BookPlus className="h-4 w-4" />New brochure</button>
             <button className={btn} style={soft} onClick={discard}><RotateCcw className="h-4 w-4" />Discard</button>
             <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />Publish</button>
@@ -518,6 +556,7 @@ function StudioEditor() {
           )}
         </div>
       )}
+      {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={layoutAsPage} />}
       {libAt !== null && <PageLibrary allowBlank={isCustom} onClose={() => setLibAt(null)} onPick={insertPage} />}
     </>
   );
