@@ -13,7 +13,7 @@ import {
   Building2, Rocket, Check, Mail, FolderOpen, Settings, Globe, TrendingUp, Coins, Award,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
+import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 import { EditorialPage, EmbeddedPage, FEATURES } from './apex/ApexEditorial';
 
@@ -179,36 +179,38 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'summary',
     node: (
-      <Frame code="03" label="Executive Summary">
-        <div>
-          <div className="h-[3px] w-16 mb-3 rounded-full" style={{ background: `linear-gradient(90deg, ${C.teal}, ${C.navy})`, boxShadow: `0 0 12px ${C.teal}66` }} />
-          <h2 className="font-futuristic" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, paddingBottom: 4, ...PLATINUM }}>Acceleration at scale</h2>
-          <p className="mt-2" style={{ color: C.body, fontSize: 15.5, lineHeight: 1.5 }}>Acceleration at scale depends on three things. Startup Factory Hub is one platform that does all three: Apex's Innovation Platform, where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while Apex manages and measures the whole program.</p>
+      <section className="absolute inset-0 overflow-hidden" style={{ background: 'linear-gradient(155deg,#050b16 0%,#08182a 45%,#04121b 100%)' }}>
+        <div className="absolute inset-0 z-0">
+          <BrochureResourceMap />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(3,8,18,0.92) 0%, rgba(3,8,18,0.55) 34%, rgba(3,8,18,0.05) 55%, rgba(3,8,18,0.25) 78%, rgba(3,8,18,0.9) 100%)' }} />
         </div>
-        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
-          <div className="col-span-6 flex flex-col gap-2.5 min-h-0">
-            {([['Right resources, right time', 'The right resource to the right founder at the right moment.', C.teal], ['The right people', 'Founders connected with mentors, advisors and investors who can help.', C.emerald], ['Knowing what works', 'Clear visibility into progress, resource use and outcomes.', C.navy]] as const).map(([t, d, a]) => (
-              <div key={t} className="relative rounded-xl px-4 py-3" style={{ ...glass, borderLeft: `3px solid ${a}` }}>
-                <h3 style={{ color: C.ink, fontSize: 16, fontWeight: 800, lineHeight: 1.2 }}>{t}</h3>
-                <p className="mt-1" style={{ color: C.body, fontSize: 13.5, lineHeight: 1.45 }}>{d}</p>
+        <div className="relative z-10 h-full flex flex-col justify-between pointer-events-none" style={{ padding: '6% 6% 4%' }}>
+          <div>
+            <div className="flex items-center justify-between font-mono uppercase" style={{ fontSize: 11, letterSpacing: '0.3em', color: '#67e8f9' }}>
+              <span>SEC // 03 · Executive Summary</span>
+              <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
+            </div>
+            <h2 className="mt-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 38, fontWeight: 800, lineHeight: 1.04, color: '#f8fafc' }}>Acceleration at scale</h2>
+            <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for Apex: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while Apex manages and measures the whole program.</p>
+            <div className="mt-4 grid grid-cols-3" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
+              {[['Right resources, right time', 'The right resource to the right founder at the right moment.'], ['The right people', 'Mentors, advisors and investors who can help.'], ['Knowing what works', 'Visibility into progress, resource use and outcomes.']].map(([t, d], i) => (
+                <div key={t} className="pt-2.5 pr-3" style={{ paddingLeft: i ? 12 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 800, color: '#f8fafc', lineHeight: 1.2 }}>{t}</div>
+                  <div className="mt-1" style={{ fontSize: 11.5, lineHeight: 1.4, color: '#94a3b8' }}>{d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-5" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
+            {[['5,800', 'Office locations'], ['130', 'Countries'], ['1,500', 'U.S. locations'], ['350+', 'Network members'], ['04', 'Global hubs']].map(([v, l], i) => (
+              <div key={l} className="pt-2.5" style={{ paddingLeft: i ? 10 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>
+                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 22, fontWeight: 800, lineHeight: 1, color: '#f8fafc' }}>{v}</div>
+                <div className="mt-1 font-mono uppercase" style={{ fontSize: 9, letterSpacing: '0.16em', color: '#67e8f9' }}>{l}</div>
               </div>
             ))}
           </div>
-          <div className="col-span-6 relative rounded-2xl overflow-hidden min-h-0" style={{ background: '#020812', boxShadow: '0 30px 60px -30px rgba(15,23,42,0.5)' }}>
-            <SFHNetworkGlobe accent="#0ea5b7" />
-            <div className="absolute top-3 left-3 font-mono uppercase font-bold" style={{ fontSize: 10, letterSpacing: '0.24em', color: '#67e8f9' }}>Ecosystem reach</div>
-          </div>
         </div>
-        <div className="grid grid-cols-5 rounded-xl overflow-hidden" style={{ background: 'rgba(2,6,23,0.92)' }}>
-          {[['5,800', 'Office locations'], ['130', 'Countries'], ['1,500', 'U.S. locations'], ['350+', 'Network members'], ['04', 'Global hubs']].map(([v, l], i) => (
-            <div key={l} className="px-3 py-2.5" style={{ borderLeft: i ? '1px solid rgba(255,255,255,0.1)' : undefined }}>
-              <div className="font-extrabold" style={{ fontSize: 19, lineHeight: 1, color: '#fff' }}>{v}</div>
-              <div className="h-[2px] w-5 my-1" style={{ background: '#22d3ee' }} />
-              <div className="uppercase font-bold leading-tight" style={{ fontSize: 9.5, letterSpacing: '0.1em', color: '#94a3b8' }}>{l}</div>
-            </div>
-          ))}
-        </div>
-      </Frame>
+      </section>
     ),
   },
   {
