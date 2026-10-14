@@ -30,6 +30,8 @@ export const EmbeddedPage = ({ route, page, title }: { route: string; page: numb
 
 export interface Feature {
   no: string;
+  title: string;
+  map?: [string, string[]][];
   section: string;
   headline: string;
   deck: string;
@@ -41,19 +43,25 @@ export interface Feature {
 
 export const FEATURES: Feature[] = [
   {
-    no: '01', section: 'Resources',
-    headline: 'One library for every founder in the program',
-    deck: 'Templates, toolkits, training, legal and financial guides and funding information, organized by industry, stage and need.',
-    lead: 'Small businesses lose weeks searching shared drives, inboxes and partner portals for the document they need. The Centralized Resource Hub ends that search.',
-    body: [
-      'Every resource Apex owns or licenses lives in one searchable hub. Founders filter by industry, stage and need, and see what is relevant to them first.',
-      'Administrators publish once and every cohort benefits. Usage is measured, so Apex knows which materials create value and which can be retired.',
+    no: '01', title: 'Centralized Resource Hubs', section: 'Resources',
+    headline: 'Every resource a startup needs, mapped in one hub',
+    deck: 'We map capital, programs, infrastructure and perks by industry, stage and need, so each founder sees what applies to them.',
+    lead: '', body: [], quote: '',
+    map: [
+      ['Venture capital', ['Pre-seed and seed funds', 'Series A and growth funds', 'Corporate venture arms', 'Defense and dual-use funds']],
+      ['Angels and syndicates', ['Angel networks', 'Investor syndicates', 'Family offices', 'Crowdfunding platforms']],
+      ['Incubators', ['University incubators', 'Regional and county incubators', 'Innovation districts', 'Maker and hardware labs']],
+      ['Accelerators', ['Cohort accelerators', 'Corporate accelerators', 'Industry-specific programs', 'International soft-landing programs']],
+      ['Banks and lenders', ['Business banking', 'SBA-backed loans', 'Venture debt', 'Revenue-based financing']],
+      ['Grants and public funding', ['SBIR and STTR', 'Federal agency grants', 'State and local economic development', 'Foundation grants']],
+      ['Government contracting', ['SAM.gov registration', 'Contract opportunities', 'Certifications and set-asides', 'Proposal preparation']],
+      ['Programs and training', ['Courses and workshops', 'Pitch and investor readiness', 'Legal and financial guides', 'Templates and toolkits']],
+      ['Partner perks', ['Cloud and software credits', 'Legal and accounting services', 'Marketing and sales tools', 'Workspace discounts']],
     ],
-    quote: 'The right resource, for the right founder, at the right moment.',
-    facts: [['1', 'Searchable hub'], ['3', 'Filters: industry, stage, need'], ['0', 'Shared drives required']],
+    facts: [['9', 'Resource categories'], ['3', 'Filters: industry, stage, need'], ['1', 'Searchable hub']],
   },
   {
-    no: '02', section: 'Mentorship',
+    no: '02', title: 'Network of Mentors and Advisors', section: 'Mentorship',
     headline: 'A mentor network that shows its value',
     deck: 'Profiles with expertise, industry and availability, scheduling built in, and feedback that proves which relationships work.',
     lead: 'Mentorship is the most valuable asset an accelerator has, and the hardest to measure. The platform turns it into a managed, visible program.',
@@ -65,7 +73,7 @@ export const FEATURES: Feature[] = [
     facts: [['Built-in', 'Scheduling and calendars'], ['Rated', 'Mentor feedback'], ['Tracked', 'Follow-ups']],
   },
   {
-    no: '03', section: 'Intelligence',
+    no: '03', title: 'AI-Powered Business and Strategic Intelligence', section: 'Intelligence',
     headline: 'Strategy that knows where each company stands',
     deck: 'AI that reads each startup\u2019s profile and stage, across every industry, and suggests concrete next actions.',
     lead: 'Generic advice serves no one. A pre-seed hardware team and a growth-stage fintech need entirely different guidance, and the platform knows the difference.',
@@ -77,7 +85,7 @@ export const FEATURES: Feature[] = [
     facts: [['Every', 'Industry covered'], ['Stage', 'Aware recommendations'], ['24/7', 'Availability']],
   },
   {
-    no: '04', section: 'Journey',
+    no: '04', title: 'Journey Mapping', section: 'Journey',
     headline: 'A clear path from idea to growth',
     deck: 'Six stages, each with milestones, recommended resources and suggested mentors.',
     lead: 'Founders progress faster when they know what comes next. Journey Mapping makes the path explicit, from first idea to scaled operations.',
@@ -89,7 +97,7 @@ export const FEATURES: Feature[] = [
     facts: [['6', 'Journey stages'], ['TRL', 'Readiness tracking'], ['1', 'Shared roadmap']],
   },
   {
-    no: '05', section: 'Administration',
+    no: '05', title: 'Administrator Management', section: 'Administration',
     headline: 'A control center for the whole program',
     deck: 'Add resources, manage mentors, onboard cohorts and assign pathways, without technical support.',
     lead: 'Program staff should run programs, not software. Administrator Management gives Apex one place to operate everything.',
@@ -101,7 +109,7 @@ export const FEATURES: Feature[] = [
     facts: [['1', 'Control center'], ['0', 'Developers required'], ['All', 'Cohorts in one view']],
   },
   {
-    no: '06', section: 'Partners',
+    no: '06', title: 'Embedded Corporate Partner Resources', section: 'Partners',
     headline: 'Corporate partner value, delivered in context',
     deck: 'Partner offers, tools, credits and programs integrated where founders need them.',
     lead: 'Partner perks often go unused because founders never find them. On the platform, they appear at the stage where they matter.',
@@ -113,7 +121,7 @@ export const FEATURES: Feature[] = [
     facts: [['Embedded', 'Partner offers'], ['0', 'Integration work'], ['Measured', 'Engagement']],
   },
   {
-    no: '07', section: 'Analytics',
+    no: '07', title: 'Data Analytics', section: 'Analytics',
     headline: 'A live view of the ecosystem',
     deck: 'Data that guides decisions, informs stakeholders and demonstrates impact.',
     lead: 'Decisions about public programs deserve current data. Analytics gives Apex a continuous picture of the ecosystem and its own performance.',
@@ -125,7 +133,7 @@ export const FEATURES: Feature[] = [
     facts: [['5', 'Core indicators'], ['Live', 'Dashboards'], ['Ready', 'For stakeholders']],
   },
   {
-    no: '08', section: 'Expansion',
+    no: '08', title: 'Space for National and International Expansion', section: 'Expansion',
     headline: 'Space for national and international growth',
     deck: '5,800 locations in 130 countries, including 1,500 in the United States.',
     lead: 'Opening a new hub usually means site-by-site negotiation. Through one partner, Apex can operate in new cities and run the same program everywhere.',
@@ -137,7 +145,7 @@ export const FEATURES: Feature[] = [
     facts: [['5,800', 'Locations'], ['130', 'Countries'], ['1,500', 'In the United States']],
   },
   {
-    no: '09', section: 'Capital',
+    no: '09', title: 'Investor Network', section: 'Capital',
     headline: 'Investor-ready companies, matched to the right investors',
     deck: 'Investor profiles by focus area and stage, with introductions and outcomes tracked.',
     lead: 'When a company reaches the investment stage, the right introduction is decisive. The Investor Network makes that match deliberate.',
@@ -149,7 +157,7 @@ export const FEATURES: Feature[] = [
     facts: [['Focus', 'Matched profiles'], ['Stage', 'Preferences respected'], ['Tracked', 'Introductions']],
   },
   {
-    no: '10', section: 'Funding',
+    no: '10', title: 'AI Grant and Funding Matching', section: 'Funding',
     headline: 'Non-dilutive funding, matched by AI',
     deck: 'Grants and non-dilutive programs matched by industry, stage and technology readiness.',
     lead: 'Grant opportunities are numerous and fragmented. AI matching puts the right programs in front of the right companies.',
@@ -161,7 +169,7 @@ export const FEATURES: Feature[] = [
     facts: [['AI', 'Grant matching'], ['TRL', 'Aware filters'], ['Visible', 'Funding won']],
   },
   {
-    no: '11', section: 'Global',
+    no: '11', title: 'Global Soft-Landing', section: 'Global',
     headline: 'A soft landing in any market',
     deck: 'Test and enter a new country from inside the Apex program.',
     lead: 'International expansion is risky for small companies. Global Soft-Landing lowers that risk by keeping founders inside a familiar program.',
@@ -173,7 +181,7 @@ export const FEATURES: Feature[] = [
     facts: [['130', 'Countries reachable'], ['Same', 'Platform abroad'], ['Local', 'Workspace']],
   },
   {
-    no: '12', section: 'Impact',
+    no: '12', title: 'Impact Reporting', section: 'Impact',
     headline: 'Impact reports, ready for sponsors and government',
     deck: 'Jobs created, capital raised and companies commercialized, exported on demand.',
     lead: 'Public programs answer to sponsors and government partners. Impact Reporting turns program activity into clear, exportable evidence.',
@@ -185,7 +193,7 @@ export const FEATURES: Feature[] = [
     facts: [['Jobs', 'Created'], ['Capital', 'Raised'], ['Export', 'On demand']],
   },
   {
-    no: '13', section: 'Brand',
+    no: '13', title: 'White-Label Branding', section: 'Brand',
     headline: 'Apex\u2019s own innovation platform',
     deck: 'Full white-label branding for startups, mentors and partners.',
     lead: 'The platform carries the Apex name. Founders, mentors and partners experience it as Apex\u2019s innovation platform, end to end.',
@@ -211,7 +219,7 @@ export const EditorialPage = ({ f, total }: { f: Feature; total: string }) => (
     {/* Masthead */}
     <header className="relative">
       <div className="flex items-end justify-between pb-2">
-        <div style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 22, color: INK, letterSpacing: '-0.01em' }}>The Apex Briefing</div>
+        <div style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 21, color: INK, letterSpacing: '-0.01em', lineHeight: 1.1 }}>{f.title}</div>
         <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" />
       </div>
       <div style={{ height: 3, background: RULE }} />
@@ -224,14 +232,25 @@ export const EditorialPage = ({ f, total }: { f: Feature; total: string }) => (
     </header>
 
     {/* Headline */}
-    <div className="relative mt-5">
+    <div className={f.map ? 'relative mt-3' : 'relative mt-5'}>
       <div className="font-mono uppercase font-bold" style={{ fontSize: 11, letterSpacing: '0.32em', color: TEAL }}>{f.section}</div>
-      <h2 className="mt-2" style={{ fontFamily: SERIF, fontSize: 31, fontWeight: 800, lineHeight: 1.05, color: INK, letterSpacing: '-0.015em' }}>{f.headline}</h2>
-      <p className="mt-3 italic" style={{ fontFamily: SERIF, fontSize: 15.5, lineHeight: 1.4, color: MUTED }}>{f.deck}</p>
+      <h2 className="mt-2" style={{ fontFamily: SERIF, fontSize: f.map ? 25 : 31, fontWeight: 800, lineHeight: 1.05, color: INK, letterSpacing: '-0.015em' }}>{f.headline}</h2>
+      <p className="mt-3 italic" style={{ fontFamily: SERIF, fontSize: f.map ? 13.5 : 15.5, lineHeight: 1.4, color: MUTED }}>{f.deck}</p>
       <div className="mt-4 h-[2px] w-24" style={{ background: `linear-gradient(90deg, ${PURPLE}, ${TEAL})` }} />
     </div>
 
-    {/* Columns */}
+    {f.map ? (
+      <div className="relative mt-4 grid grid-cols-3 gap-x-5 gap-y-2.5 flex-1 min-h-0 overflow-hidden" style={{ fontFamily: SANS }}>
+        {f.map.map(([cat, items], i) => (
+          <div key={cat} className="pt-2" style={{ borderTop: `2px solid ${i % 3 === 1 ? PURPLE : INK}` }}>
+            <div style={{ fontFamily: SERIF, fontSize: 15, fontWeight: 800, color: INK, lineHeight: 1.15 }}>{cat}</div>
+            <ul className="mt-1.5 flex flex-col">
+              {items.map((t) => <li key={t} style={{ fontSize: 11.5, lineHeight: 1.3, color: BODY }}>{t}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    ) : (
     <div className="relative mt-4 grid grid-cols-2 gap-6 flex-1 min-h-0 overflow-hidden" style={{ fontFamily: SANS }}>
       <div className="min-w-0">
         <p style={{ fontSize: 14, lineHeight: 1.5, color: INK, fontWeight: 600 }}>
@@ -247,16 +266,17 @@ export const EditorialPage = ({ f, total }: { f: Feature; total: string }) => (
         </blockquote>
       </div>
     </div>
+    )}
 
     {/* Data strip */}
-    <div className="relative grid grid-cols-3 mt-3" style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
+    {!f.map && <div className="relative grid grid-cols-3 mt-3" style={{ borderTop: `1px solid ${RULE}`, borderBottom: `1px solid ${RULE}` }}>
       {f.facts.map(([v, l], i) => (
         <div key={l} className="py-3 px-3" style={{ borderLeft: i ? '1px solid rgba(11,16,32,0.18)' : undefined }}>
           <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 900, lineHeight: 1, color: i === 1 ? PURPLE : INK }}>{v}</div>
           <div className="mt-1 font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.18em', color: MUTED }}>{l}</div>
         </div>
       ))}
-    </div>
+    </div>}
 
     <footer className="relative flex justify-between font-mono uppercase pt-2" style={{ fontSize: 10, letterSpacing: '0.22em', color: MUTED }}>
       <span>Startup Factory Hub × APEX Accelerators</span>
