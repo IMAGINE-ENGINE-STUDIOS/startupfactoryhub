@@ -174,10 +174,10 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
         <h1 className="relative mt-4 font-futuristic" style={{ fontSize: 46, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.01em', paddingBottom: 6, ...PLATINUM }}>
           Apex's Innovation Platform
         </h1>
-        <p className="mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
+        <p className="relative mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
           One place where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, and where Apex manages and measures the whole program.
         </p>
-        <div className="mt-10 uppercase" style={{ color: C.muted, fontSize: 12.5, letterSpacing: '0.18em' }}>Startup Factory Hub · Orlando, Florida</div>
+        <div className="relative mt-10 font-mono uppercase" style={{ color: C.muted, fontSize: 12.5, letterSpacing: '0.18em' }}>Startup Factory Hub · Orlando, Florida</div>
       </section>
     ),
   },
@@ -462,12 +462,12 @@ export default function ApexBrochure() {
   }, [go]);
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center" style={{ background: 'linear-gradient(180deg,#e9eef5 0%,#dfe6ef 100%)' }}>
+    <div className="min-h-screen w-full flex flex-col items-center" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(14,116,144,0.18) 0%, transparent 60%), linear-gradient(180deg,#0b1220 0%,#111a2e 100%)' }}>
       <div className="w-full flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ color: C.ink, background: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 700 }}>
           <Home className="h-4 w-4" />Home
         </button>
-        <span style={{ color: C.muted, fontSize: 14, fontWeight: 700 }}>{page + 1} / {PAGES.length}</span>
+        <span className="font-mono" style={{ color: '#cbd5e1', fontSize: 14, fontWeight: 700, letterSpacing: '0.2em' }}>{page + 1} / {PAGES.length}</span>
       </div>
       <div className="flex-1 flex items-center justify-center w-full gap-3 px-2">
         <button aria-label="Previous page" onClick={() => go(-1)} className="hidden sm:flex h-11 w-11 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.9)', color: C.ink }}>
