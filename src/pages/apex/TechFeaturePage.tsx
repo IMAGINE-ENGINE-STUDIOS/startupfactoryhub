@@ -79,7 +79,7 @@ const splitTitle = (title: string): [string, string] => {
 const Title = ({ f, th }: { f: Feature; th: Theme }) => {
   const [l1, l2] = splitTitle(f.title);
   const second: React.CSSProperties =
-    th.title === 'outline' ? { color: 'transparent', WebkitTextStroke: `1.5px ${th.a}`, textShadow: `0 0 22px ${th.a}55` }
+    th.title === 'outline' ? { color: th.a, textShadow: `0 0 18px ${th.a}88, 0 0 40px ${th.a}44` }
       : th.title === 'gradient' ? { background: `linear-gradient(90deg, ${th.a}, ${th.b})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
         : { color: th.a, textShadow: `0 0 18px ${th.a}88, 0 0 40px ${th.a}44` };
   return (
