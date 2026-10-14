@@ -78,14 +78,12 @@ const splitTitle = (title: string): [string, string] => {
 
 const Title = ({ f, th }: { f: Feature; th: Theme }) => {
   const [l1, l2] = splitTitle(f.title);
-  const longest = Math.max(l1.length, l2.length);
-  const fs = Math.min(50, Math.floor(400 / (longest * 0.62)));
   const second: React.CSSProperties =
     th.title === 'outline' ? { color: 'transparent', WebkitTextStroke: `1.5px ${th.a}`, textShadow: `0 0 22px ${th.a}55` }
       : th.title === 'gradient' ? { background: `linear-gradient(90deg, ${th.a}, ${th.b})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
         : { color: th.a, textShadow: `0 0 18px ${th.a}88, 0 0 40px ${th.a}44` };
   return (
-    <h1 className="mt-4" style={{ fontWeight: 700, fontSize: fs, lineHeight: 1, letterSpacing: '-0.01em', textTransform: 'uppercase' }}>
+    <h1 className="mt-4" style={{ fontWeight: 700, fontSize: 34, lineHeight: 1.05, letterSpacing: '-0.01em', textTransform: 'uppercase' }}>
       <span style={{ color: '#ffffff' }}>{l1}</span><br /><span style={second}>{l2}</span>
     </h1>
   );
