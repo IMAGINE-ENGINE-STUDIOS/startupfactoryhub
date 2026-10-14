@@ -7,9 +7,9 @@
  * Credits: Imagine Engine Studios Corp.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookCopy, createPortal } from 'react-dom';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
+import { BookCopy,
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
   Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle, LayoutTemplate,
 } from 'lucide-react';
