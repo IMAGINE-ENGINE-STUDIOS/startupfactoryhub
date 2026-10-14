@@ -38,7 +38,12 @@ export default function EmbedPage() {
       const r = target.getBoundingClientRect();
       set((window.innerWidth - w * s) / 2 - r.left, (window.innerHeight - h * s) / 2 - r.top);
     };
+    // Previews and inserted pages stay silent: no brochure music.
+    const hush = () => document.querySelectorAll('audio, video').forEach((m) => { const el = m as HTMLMediaElement; el.muted = true; if (el.tagName === 'AUDIO' && !el.paused) el.pause(); });
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) { this.muted = true; if (this.tagName === 'AUDIO') return Promise.resolve(); return play.call(this); };
     const tick = () => {
+      hush();
       const roots = findRoots();
       if (!roots.length) return;
       if (count) {
