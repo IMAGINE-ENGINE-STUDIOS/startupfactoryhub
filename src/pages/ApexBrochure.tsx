@@ -36,38 +36,83 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 ));
 BookPage.displayName = 'BookPage';
 
+// Platinum / carbon-fiber headline treatment shared with /forpartners.
+const PLATINUM: React.CSSProperties = {
+  backgroundImage: `
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+    linear-gradient(180deg, #64748b 0%, #1f2937 45%, #0f172a 60%, #334155 100%)`,
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.18))',
+};
+
+const HudBackdrop = ({ accent }: { accent: string }) => (
+  <>
+    <div className="absolute inset-0 pointer-events-none" style={{
+      backgroundImage: `linear-gradient(${accent}12 1px, transparent 1px), linear-gradient(90deg, ${accent}12 1px, transparent 1px)`,
+      backgroundSize: '40px 40px',
+      maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 80%)',
+      WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 80%)',
+    }} />
+    <div className="absolute pointer-events-none" style={{
+      inset: 14, borderRadius: 24, border: '1px solid rgba(255,255,255,0.75)',
+      boxShadow: '0 0 0 1px rgba(15,23,42,0.05), 0 30px 80px -30px rgba(15,23,42,0.25), inset 0 1px 0 rgba(255,255,255,0.9)',
+    }} />
+  </>
+);
+
 const Frame = ({ code, label, accent = C.teal, children }: {
   code: string; label: string; accent?: string; children: React.ReactNode;
 }) => (
-  <section className="absolute inset-0 flex flex-col" style={{ background: 'linear-gradient(180deg,#ffffff 0%,#f6f8fb 100%)', color: C.body }}>
-    <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${accent}, ${C.navy})` }} />
-    <header className="flex items-center justify-between px-[6%] pt-[4%] pb-[2%]">
-      <div className="flex items-center gap-3">
-        <span className="font-mono font-bold" style={{ color: accent, fontSize: 15, letterSpacing: '0.12em' }}>{code}</span>
-        <span className="font-bold uppercase" style={{ color: C.muted, fontSize: 13, letterSpacing: '0.16em' }}>{label}</span>
+  <section className="absolute inset-0 flex flex-col overflow-hidden" style={{
+    background: `radial-gradient(ellipse at 15% 0%, ${accent}22 0%, transparent 55%), radial-gradient(ellipse at 85% 100%, ${C.navy}1c 0%, transparent 55%), linear-gradient(180deg,#fbfcfe 0%,#eef2f8 100%)`,
+    color: C.body,
+  }}>
+    <HudBackdrop accent={accent} />
+    <header className="relative z-10 flex items-center justify-between px-[6%] pt-[4.5%] pb-[2%] font-mono uppercase" style={{ fontSize: 12.5, letterSpacing: '0.28em' }}>
+      <div className="flex items-center gap-2" style={{ color: accent, fontWeight: 700 }}>
+        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
+        SEC // {code}
       </div>
-      <img src={APEX_LOGO} alt="APEX Accelerators" className="h-7 w-auto object-contain" />
+      <span style={{ color: C.muted, fontWeight: 600 }}>{label}</span>
+      <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" />
     </header>
-    <div className="flex-1 px-[6%] pb-[3%] flex flex-col gap-4 overflow-hidden">{children}</div>
-    <footer className="flex items-center justify-between px-[6%] py-[2.5%] border-t" style={{ borderColor: C.line, fontSize: 12, color: C.muted }}>
-      <span>Startup Factory Hub × APEX Accelerators</span>
-      <span className="font-mono">{code} / {TOTAL}</span>
+    <div className="relative z-10 flex-1 px-[6%] pb-[2%] flex flex-col gap-4 overflow-hidden">{children}</div>
+    <footer className="relative z-10 px-[6%] pb-[3.5%] pt-2 font-mono uppercase" style={{ fontSize: 10.5, letterSpacing: '0.22em', color: C.muted }}>
+      <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}66, transparent)` }} />
+      <div className="flex items-center justify-between">
+        <span>Startup Factory Hub × APEX Accelerators</span>
+        <span style={{ color: accent, fontWeight: 700 }}>P/{code} · {TOTAL}</span>
+      </div>
     </footer>
   </section>
 );
 
-const Title = ({ children, sub }: { children: React.ReactNode; sub?: string }) => (
+const Title = ({ children, sub, accent = C.teal }: { children: React.ReactNode; sub?: string; accent?: string }) => (
   <div>
-    <h2 style={{ color: C.ink, fontSize: 30, fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.015em' }}>{children}</h2>
+    <div className="h-[3px] w-14 mb-3 rounded-full" style={{ background: `linear-gradient(90deg, ${accent}, ${C.navy})`, boxShadow: `0 0 12px ${accent}66` }} />
+    <h2 className="font-futuristic" style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.01em', paddingBottom: 4, ...PLATINUM }}>{children}</h2>
     {sub && <p className="mt-2" style={{ color: C.body, fontSize: 16.5, lineHeight: 1.55 }}>{sub}</p>}
   </div>
 );
 
+const glass: React.CSSProperties = {
+  background: 'linear-gradient(140deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.62) 100%)',
+  backdropFilter: 'blur(18px) saturate(140%)',
+  WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+  border: '1px solid rgba(255,255,255,0.9)',
+  boxShadow: '0 1px 0 rgba(255,255,255,0.9) inset, 0 24px 50px -28px rgba(15,23,42,0.28), 0 0 0 1px rgba(15,23,42,0.05)',
+};
+
 const Card = ({ icon: Icon, title, text, accent = C.teal }: {
   icon: React.ElementType; title: string; text: string; accent?: string;
 }) => (
-  <div className="rounded-xl p-4 flex gap-3" style={{ background: C.card, border: `1px solid ${C.line}`, boxShadow: '0 4px 16px -10px rgba(15,23,42,0.25)' }}>
-    <div className="shrink-0 h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: `${accent}14`, color: accent }}>
+  <div className="relative rounded-2xl p-4 flex gap-3" style={glass}>
+    <span className="absolute top-0 left-6 right-6 h-px" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
+    <div className="shrink-0 h-11 w-11 rounded-xl flex items-center justify-center" style={{
+      background: `linear-gradient(135deg, ${accent}30, ${accent}08)`, border: `1px solid ${accent}55`,
+      boxShadow: `0 0 16px ${accent}33, inset 0 0 10px ${accent}1a`, color: accent,
+    }}>
       <Icon className="h-5 w-5" />
     </div>
     <div>
@@ -78,13 +123,13 @@ const Card = ({ icon: Icon, title, text, accent = C.teal }: {
 );
 
 const NeedSolve = ({ need, solve }: { need: string; solve: string }) => (
-  <div className="grid grid-cols-2 gap-3 rounded-xl p-3.5" style={{ background: C.card, border: `1px solid ${C.line}` }}>
+  <div className="relative grid grid-cols-2 gap-3 rounded-2xl p-3.5" style={glass}>
     <div>
-      <div className="uppercase font-bold" style={{ fontSize: 11.5, letterSpacing: '0.14em', color: C.muted }}>APEX need</div>
+      <div className="font-mono uppercase font-bold" style={{ fontSize: 11, letterSpacing: '0.2em', color: C.muted }}>// APEX need</div>
       <p className="mt-1" style={{ fontSize: 15, lineHeight: 1.45, color: C.ink, fontWeight: 600 }}>{need}</p>
     </div>
-    <div className="pl-3 border-l" style={{ borderColor: C.line }}>
-      <div className="uppercase font-bold" style={{ fontSize: 11.5, letterSpacing: '0.14em', color: C.emerald }}>How we solve it</div>
+    <div className="pl-3" style={{ borderLeft: `2px solid ${C.emerald}55` }}>
+      <div className="font-mono uppercase font-bold" style={{ fontSize: 11, letterSpacing: '0.2em', color: C.emerald }}>// How we solve it</div>
       <p className="mt-1" style={{ fontSize: 15, lineHeight: 1.45, color: C.body }}>{solve}</p>
     </div>
   </div>
@@ -93,8 +138,10 @@ const NeedSolve = ({ need, solve }: { need: string; solve: string }) => (
 const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: string }) => (
   <ul className="flex flex-col gap-2.5">
     {items.map((t) => (
-      <li key={t} className="flex gap-2.5" style={{ fontSize: 15.5, lineHeight: 1.5, color: C.body }}>
-        <Check className="h-5 w-5 shrink-0 mt-0.5" style={{ color: accent }} />
+      <li key={t} className="flex gap-2.5 items-start" style={{ fontSize: 15.5, lineHeight: 1.5, color: C.body }}>
+        <span className="shrink-0 mt-0.5 h-5 w-5 rounded-md flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}55` }}>
+          <Check className="h-3.5 w-3.5" style={{ color: accent }} />
+        </span>
         <span>{t}</span>
       </li>
     ))}
@@ -107,20 +154,30 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
     node: (
-      <section className="absolute inset-0 flex flex-col items-center justify-center text-center px-[8%]" style={{ background: 'linear-gradient(180deg,#ffffff 0%,#eef3f8 100%)' }}>
-        <div className="flex items-center gap-6 mb-10">
+      <section className="absolute inset-0 flex flex-col items-center justify-center text-center px-[8%] overflow-hidden" style={{ background: `radial-gradient(ellipse at 50% 30%, ${C.teal}26 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, ${C.navy}22 0%, transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#e8eef6 100%)` }}>
+        <HudBackdrop accent={C.teal} />
+        {[340, 470, 600].map((d, i) => (
+          <div key={d} className="absolute rounded-full pointer-events-none" style={{
+            width: d, height: d, left: '50%', top: '42%', transform: 'translate(-50%,-50%)',
+            border: `1px ${i === 1 ? 'dashed' : 'solid'} ${C.teal}${i === 0 ? '40' : '22'}`,
+          }} />
+        ))}
+        <div className="absolute top-[5%] left-[7%] right-[7%] flex justify-between font-mono uppercase" style={{ fontSize: 12, letterSpacing: '0.3em', color: C.teal, fontWeight: 700 }}>
+          <span>SEC // 00</span><span style={{ color: C.muted }}>Proposal · 2026</span>
+        </div>
+        <div className="relative flex items-center gap-6 mb-10">
           <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" />
           <span style={{ color: C.muted, fontSize: 28, fontWeight: 300 }}>×</span>
           <img src={APEX_LOGO} alt="APEX Accelerators" className="h-14 w-auto object-contain" />
         </div>
-        <div className="uppercase font-bold" style={{ color: C.teal, fontSize: 14, letterSpacing: '0.22em' }}>Partnership Proposal</div>
-        <h1 className="mt-4" style={{ color: C.ink, fontSize: 44, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em' }}>
+        <div className="relative font-mono uppercase font-bold" style={{ color: C.teal, fontSize: 14, letterSpacing: '0.34em' }}>Partnership Proposal</div>
+        <h1 className="relative mt-4 font-futuristic" style={{ fontSize: 46, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.01em', paddingBottom: 6, ...PLATINUM }}>
           Apex's Innovation Platform
         </h1>
-        <p className="mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
+        <p className="relative mt-5 max-w-[85%]" style={{ color: C.body, fontSize: 18, lineHeight: 1.55 }}>
           One place where startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, and where Apex manages and measures the whole program.
         </p>
-        <div className="mt-10 uppercase" style={{ color: C.muted, fontSize: 12.5, letterSpacing: '0.18em' }}>Startup Factory Hub · Orlando, Florida</div>
+        <div className="relative mt-10 font-mono uppercase" style={{ color: C.muted, fontSize: 12.5, letterSpacing: '0.18em' }}>Startup Factory Hub · Orlando, Florida</div>
       </section>
     ),
   },
@@ -405,12 +462,12 @@ export default function ApexBrochure() {
   }, [go]);
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center" style={{ background: 'linear-gradient(180deg,#e9eef5 0%,#dfe6ef 100%)' }}>
+    <div className="min-h-screen w-full flex flex-col items-center" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(14,116,144,0.18) 0%, transparent 60%), linear-gradient(180deg,#0b1220 0%,#111a2e 100%)' }}>
       <div className="w-full flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ color: C.ink, background: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 700 }}>
           <Home className="h-4 w-4" />Home
         </button>
-        <span style={{ color: C.muted, fontSize: 14, fontWeight: 700 }}>{page + 1} / {PAGES.length}</span>
+        <span className="font-mono" style={{ color: '#cbd5e1', fontSize: 14, fontWeight: 700, letterSpacing: '0.2em' }}>{page + 1} / {PAGES.length}</span>
       </div>
       <div className="flex-1 flex items-center justify-center w-full gap-3 px-2">
         <button aria-label="Previous page" onClick={() => go(-1)} className="hidden sm:flex h-11 w-11 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.9)', color: C.ink }}>
