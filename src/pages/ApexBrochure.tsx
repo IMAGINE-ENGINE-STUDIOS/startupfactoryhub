@@ -180,8 +180,9 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     key: 'summary',
     node: (
       <section className="absolute inset-0 overflow-hidden" style={{ background: 'linear-gradient(155deg,#050b16 0%,#08182a 45%,#04121b 100%)' }}>
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 apex-globe">
           <BrochureResourceMap />
+          <style>{`.apex-globe .mapboxgl-ctrl{display:none!important}`}</style>
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(3,8,18,0.92) 0%, rgba(3,8,18,0.55) 34%, rgba(3,8,18,0.05) 55%, rgba(3,8,18,0.25) 78%, rgba(3,8,18,0.9) 100%)' }} />
         </div>
         <div className="relative z-10 h-full flex flex-col justify-between pointer-events-none" style={{ padding: '6% 6% 4%' }}>
