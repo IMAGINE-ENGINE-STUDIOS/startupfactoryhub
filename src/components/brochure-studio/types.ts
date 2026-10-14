@@ -23,7 +23,7 @@ export type Item = {
   x: number; y: number; w: number; // percent of the page
   rot?: number; opacity?: number; radius?: number; anim?: Anim; z?: number; hover?: Hover;
   src?: string; text?: string; color?: string; bg?: string; size?: number; weight?: number;
-  icon?: string; font?: string; ar?: boolean; autoRotate?: boolean; metal?: boolean;
+  icon?: string; font?: string; iosSrc?: string; ar?: boolean; autoRotate?: boolean; metal?: boolean;
 };
 
 export type BgKind = 'none' | 'tree' | 'lab' | 'grid' | 'stars' | 'particles' | 'aurora' | 'waves' | 'matrix';

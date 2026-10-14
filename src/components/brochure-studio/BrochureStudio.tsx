@@ -91,7 +91,7 @@ function StudioEditor() {
   const [layoutsOpen, setLayoutsOpen] = useState(false);
   const lastPage = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace'; id?: string }>({ mode: 'new-image' });
+  const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace' | 'ios'; id?: string }>({ mode: 'new-image' });
 
   /* ---- find pages on screen ---- */
   useEffect(() => {
@@ -231,14 +231,19 @@ function StudioEditor() {
   const onFile = async (f: File) => {
     setBusy(true);
     try {
-      const src = await upload(f);
       const tgt = uploadTarget.current;
-      if (tgt.mode === 'replace' && tgt.id) update((d) => ({ ...d, items: d.items.map((i) => (i.id === tgt.id ? { ...i, src } : i)) }));
+      const ext = (f.name.split('.').pop() || '').toLowerCase();
+      if ((tgt.mode === 'new-model' || (tgt.mode === 'replace' && docRef.current.items.find((i) => i.id === tgt.id)?.type === 'model')) && ext !== 'glb') throw new Error('Please upload a single .glb 3D file');
+      if (tgt.mode === 'ios' && ext !== 'usdz') throw new Error('Please upload a .usdz file for iPhone');
+      if (f.size > 50 * 1024 * 1024) throw new Error('3D files must be under 50 MB');
+      const src = await upload(f);
+      if (tgt.mode === 'ios' && tgt.id) update((d) => ({ ...d, items: d.items.map((i) => (i.id === tgt.id ? { ...i, iosSrc: src } : i)) }));
+      else if (tgt.mode === 'replace' && tgt.id) update((d) => ({ ...d, items: d.items.map((i) => (i.id === tgt.id ? { ...i, src } : i)) }));
       else addItem(tgt.mode === 'new-model' ? { type: 'model', src, w: 45, ar: true } : { type: 'image', src, w: 55, radius: 10 });
     } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
     setBusy(false);
   };
-  const pick = (mode: 'new-image' | 'new-model' | 'replace', accept: string, id?: string) => {
+  const pick = (mode: 'new-image' | 'new-model' | 'replace' | 'ios', accept: string, id?: string) => {
     uploadTarget.current = { mode, id };
     if (fileRef.current) { fileRef.current.accept = accept; fileRef.current.click(); }
   };
@@ -409,7 +414,7 @@ function StudioEditor() {
             <button className={btn} style={soft} onClick={() => addItem({ type: 'text', text: 'New headline', size: 28, w: 60, metal: true })}><Type className="h-4 w-4" />Text</button>
             <button className={btn} style={soft} onClick={() => addItem({ type: 'icon', icon: 'Rocket', w: 14 })}><Shapes className="h-4 w-4" />Icon</button>
             <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-image', 'image/*')}><ImagePlus className="h-4 w-4" />Picture</button>
-            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-model', '.glb,.gltf,model/gltf-binary')}><Box className="h-4 w-4" />3D / AR</button>
+            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-model', '.glb,model/gltf-binary')}><Box className="h-4 w-4" />3D / AR</button>
             <button className={btn} style={soft} onClick={() => addItem({ type: 'shape', w: 50 })}><Square className="h-4 w-4" />Card</button>
             <button className={btn} style={{ background: bgOpen ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
             {isCustom && <>
@@ -533,13 +538,14 @@ function StudioEditor() {
               {selItem.type === 'shape' && <Lbl t="Fill"><ColorField value={selItem.bg?.startsWith('#') ? selItem.bg : '#312e81'} onChange={(v) => setItem({ bg: v })} /></Lbl>}
               {selItem.type === 'image' && <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', 'image/*', selItem.id)}><ImagePlus className="h-4 w-4" />Replace picture</button>}
               {selItem.type === 'model' && <>
-                <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,.gltf,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
+                <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
                 <Lbl t="Or model link (.glb)"><input className="rounded-md p-1.5 text-[12px]" style={field} defaultValue={selItem.src || ''} onBlur={(e) => setItem({ src: e.target.value.trim() })} placeholder="https://…/model.glb" /></Lbl>
                 <div className="flex gap-2">
                   <button className={btn} style={selItem.ar ? { background: '#7c3aed' } : soft} onClick={() => setItem({ ar: !selItem.ar })}>AR view</button>
                   <button className={btn} style={selItem.autoRotate !== false ? { background: '#7c3aed' } : soft} onClick={() => setItem({ autoRotate: selItem.autoRotate === false })}>Auto-rotate</button>
                 </div>
-                <span className="text-[11px]" style={{ color: '#94a3b8' }}>Visitors can spin the model; on phones, AR view places it in the room.</span>
+                <button className={btn} style={soft} disabled={busy} onClick={() => pick('ios', '.usdz,model/vnd.usdz+zip', selItem.id)}><Box className="h-4 w-4" />{selItem.iosSrc ? 'Replace iPhone file' : 'iPhone file (.usdz, optional)'}</button>
+                <span className="text-[11px]" style={{ color: '#94a3b8' }}>With AR view on, visitors get a "View in your room" button. Phones place the model on the floor; computers show a QR code to open it on a phone.</span>
               </>}
               <Lbl t="Size"><Stepper v={Math.round(selItem.w)} set={(v) => setItem({ w: v })} step={1} min={3} max={150} fmt={(n) => `${n}%`} /></Lbl>
               <Lbl t="Rotate"><Stepper v={selItem.rot ?? 0} set={(v) => setItem({ rot: v })} step={1} min={-180} max={180} fmt={(n) => `${n}°`} /></Lbl>
