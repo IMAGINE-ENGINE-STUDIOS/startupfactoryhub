@@ -103,10 +103,10 @@ const ResourceMap = ({ f, th }: { f: Feature; th: Theme }) => (
             <span>{String(i + 1).padStart(2, '0')} //</span>
             <span className="ml-auto rounded-full" style={{ width: 6, height: 6, background: c, boxShadow: `0 0 8px ${c}` }} />
           </div>
-          <div className="mt-2" style={{ fontWeight: 700, fontSize: 17, lineHeight: 1.15, color: '#ffffff' }}>{cat}</div>
+          <div className="mt-2" style={{ fontWeight: 700, fontSize: 19, lineHeight: 1.15, color: '#ffffff' }}>{cat}</div>
           <ul className="mt-2.5 flex flex-col gap-1">
             {items.map((t) => (
-              <li key={t} className="flex items-start gap-2" style={{ fontSize: 13, lineHeight: 1.35, color: '#cbd5e1' }}>
+              <li key={t} className="flex items-start gap-2" style={{ fontSize: 15.5, lineHeight: 1.3, color: '#e2e8f0' }}>
                 <span className="mt-[6px] shrink-0" style={{ width: 5, height: 5, background: c, borderRadius: 1 }} />{t}
               </li>
             ))}
@@ -208,7 +208,7 @@ const AdminDashboard = ({ th }: { th: Theme }) => {
                 {feed.map(([Icon, t, d]) => (
                   <div key={t} className="flex items-center gap-2">
                     <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 24, height: 24, background: `${th.a}18` }}><Icon className="h-3 w-3" style={{ color: th.a }} /></div>
-                    <div className="min-w-0"><div style={{ fontSize: 11.5, color: '#ffffff', lineHeight: 1.2 }}>{t}</div><div style={{ fontSize: 10, color: DIM }}>{d}</div></div>
+                    <div className="min-w-0"><div style={{ fontSize: 14, color: '#ffffff', lineHeight: 1.2 }}>{t}</div><div style={{ fontSize: 12.5, color: DIM }}>{d}</div></div>
                   </div>
                 ))}
               </div>
@@ -239,7 +239,7 @@ const AnalyticsBlock = ({ th }: { th: Theme }) => (
       return (
         <div key={l} className="flex items-center gap-3">
           <span style={{ fontFamily: MONO, fontSize: 10, color: c, width: 22 }}>{String(i + 1).padStart(2, '0')}</span>
-          <span className="flex-1" style={{ fontSize: 14, color: '#ffffff' }}>{l}</span>
+          <span className="flex-1" style={{ fontSize: 17, color: '#ffffff' }}>{l}</span>
           <svg width="160" height="32" viewBox="0 0 160 32"><path d={path} fill="none" stroke={c} strokeWidth="2" /><path d={`${path} L160,32 L0,32 Z`} fill={`${c}22`} /></svg>
         </div>
       );
@@ -295,8 +295,8 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
             <div className="min-w-0">
               <Kicker color={th.b}>{f.section}</Kicker>
               <Title f={f} th={th} />
-              <p className="mt-4" style={{ fontSize: 15.5, lineHeight: 1.55, color: '#cbd5e1' }}>{f.deck}</p>
-              <div className="mt-4 inline-flex items-center gap-3 rounded-full px-4 py-2" style={{ border: `1px solid ${th.a}55`, background: `${th.a}12`, fontFamily: MONO, fontSize: 12, color: th.a }}>
+              <p className="mt-4" style={{ fontSize: 20, lineHeight: 1.5, color: '#e2e8f0' }}>{f.deck}</p>
+              <div className="mt-4 inline-flex items-center gap-3 rounded-full px-4 py-2" style={{ border: `1px solid ${th.a}55`, background: `${th.a}12`, fontFamily: MONO, fontSize: 14.5, color: th.a }}>
                 <span style={{ color: DIM }}>&gt;</span>{f.headline}
               </div>
             </div>
@@ -310,7 +310,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
                 <div style={{ fontFamily: MONO, fontSize: 12, color: DIM }}><span style={{ color: th.a }}>$</span> {th.cmd}</div>
                 <div className="mt-3 rounded-lg p-4" style={{ background: th.panel, border: BORDER }}>
                   <div className="flex items-center gap-2" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: th.b, textTransform: 'uppercase' }}><Icon className="h-3.5 w-3.5" />{f.section}</div>
-                  <p className="mt-2" style={{ fontSize: 14.5, lineHeight: 1.55, color: TEXT }}>{f.lead || f.deck}</p>
+                  <p className="mt-2" style={{ fontSize: 18, lineHeight: 1.5, color: TEXT }}>{f.lead || f.deck}</p>
                 </div>
                 <div className="mt-3 rounded-lg p-3" style={{ background: `${th.a}10`, border: `1px solid ${th.a}40` }}>
                   <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.18em', color: th.a }}>&#8627; {th.status}</div>
@@ -351,7 +351,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
                         <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: c }}>{String(i + 1).padStart(2, '0')} // {tags[i] ?? ''}</span>
                         <span className="ml-auto rounded-full" style={{ width: 7, height: 7, background: c, boxShadow: `0 0 8px ${c}` }} />
                       </div>
-                      <p className={compact ? 'mt-2.5' : 'mt-5'} style={{ fontSize: compact ? 14 : 21, lineHeight: 1.5, color: TEXT }}>{p}</p>
+                      <p className={compact ? 'mt-2.5' : 'mt-5'} style={{ fontSize: compact ? 17.5 : 23, lineHeight: 1.45, color: TEXT }}>{p}</p>
                     </div>
                   );
                 })}
@@ -370,7 +370,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
 
           <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
             <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 30, height: 30, background: th.a }}><ListChecks className="h-4 w-4" style={{ color: '#050a12' }} /></div>
-            <p style={{ fontFamily: MONO, fontSize: 13, letterSpacing: '0.04em', color: TEXT, lineHeight: 1.5 }}>{f.quote || th.status}</p>
+            <p style={{ fontFamily: MONO, fontSize: 16, letterSpacing: '0.02em', color: TEXT, lineHeight: 1.45 }}>{f.quote || th.status}</p>
           </div>
 
           <footer className="mt-4 pt-3 flex justify-between" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 10, letterSpacing: '0.22em', color: FAINT, textTransform: 'uppercase' }}>
