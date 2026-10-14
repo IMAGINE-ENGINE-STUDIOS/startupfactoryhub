@@ -128,12 +128,12 @@ const STAGES: { name: string; trl: string; icon: LucideIcon; milestones: string[
 
 const JourneyBlock = ({ th }: { th: Theme }) => (
   <div className="flex-1 min-h-0 flex flex-col">
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2">
       {STAGES.map((s, i) => {
         const c = [th.a, th.b, th.c][i % 3];
         const Icon = s.icon;
         return (
-          <div key={s.name} className="relative rounded-xl p-3.5" style={{ background: th.panel, border: BORDER }}>
+          <div key={s.name} className="relative rounded-xl p-3" style={{ background: th.panel, border: BORDER }}>
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center rounded-md" style={{ width: 28, height: 28, border: `1px solid ${c}55`, background: `${c}14` }}><Icon className="h-3.5 w-3.5" style={{ color: c }} /></div>
               <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.14em', color: c }}>STAGE {String(i + 1).padStart(2, '0')}</span>
@@ -142,12 +142,12 @@ const JourneyBlock = ({ th }: { th: Theme }) => (
             <div className="mt-2" style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.15, color: '#ffffff' }}>{s.name}</div>
             <ul className="mt-1.5 flex flex-col gap-0.5">
               {s.milestones.map((m) => (
-                <li key={m} className="flex items-start gap-1.5" style={{ fontSize: 14, lineHeight: 1.3, color: '#cbd5e1' }}>
+                <li key={m} className="flex items-start gap-1.5" style={{ fontSize: 13.5, lineHeight: 1.25, color: '#cbd5e1' }}>
                   <ListChecks className="h-3 w-3 mt-[2px] shrink-0" style={{ color: c }} />{m}
                 </li>
               ))}
             </ul>
-            <div className="mt-2 pt-1.5" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
+            <div className="mt-1.5 pt-1" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
           </div>
         );
       })}
@@ -360,7 +360,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
           )}
 
           {special && (
-            <div className={`${special === 'map' ? 'mt-6' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
+            <div className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
               {special === 'map' && <><Kicker color={DIM}>Resource map // {String(f.map!.length).padStart(2, '0')} categories</Kicker><div className="mt-3 flex-1 min-h-0 flex flex-col"><ResourceMap f={f} th={th} /></div></>}
               {special === 'journey' && <JourneyBlock th={th} />}
               {special === 'admin' && <AdminDashboard th={th} />}
@@ -368,10 +368,10 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
             </div>
           )}
 
-          <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
+          {special !== 'journey' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
             <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 30, height: 30, background: th.a }}><ListChecks className="h-4 w-4" style={{ color: '#050a12' }} /></div>
             <p style={{ fontFamily: MONO, fontSize: 16, letterSpacing: '0.02em', color: TEXT, lineHeight: 1.45 }}>{f.quote || th.status}</p>
-          </div>
+          </div>}
 
           <footer className="mt-4 pt-3 flex justify-between" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 10, letterSpacing: '0.22em', color: FAINT, textTransform: 'uppercase' }}>
             <span><span style={{ color: th.a }}>startupfactoryhub.com</span> · Startup Factory Hub × APEX Accelerators</span>
