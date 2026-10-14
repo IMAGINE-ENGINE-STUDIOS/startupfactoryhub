@@ -9,7 +9,7 @@ import { LAYOUTS, LAYOUT_GROUPS, LAYOUT_MIME, type Layout } from './layouts';
 import { ICONS } from './icons';
 import { fontCss } from './fonts';
 
-function Thumb({ l }: { l: Layout }) {
+export function Thumb({ l }: { l: Layout }) {
   return (
     <div className="relative w-full overflow-hidden rounded-lg" style={{ aspectRatio: '1 / 1.414', background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.3), transparent 60%), linear-gradient(180deg,#0b1220,#111a2e)', containerType: 'inline-size' } as React.CSSProperties}>
       {l.pieces.map((p, i) => {

@@ -283,8 +283,9 @@ function StudioEditor() {
     lastPage.current = page;
     toast.success(`${l.name} added to page ${page + 1}`);
   };
-  const layoutAsPage = (l: Layout) => {
-    const at = curPage() + 1;
+  const layoutAsPage = (l: Layout, where?: number) => {
+    const at = where ?? curPage() + 1;
+    setLibAt(null);
     update((d) => {
       const pages = [...pagesOf(d)]; pages.splice(at, 0, { label: l.name });
       const n = shiftPages(d, at, 1);
@@ -556,8 +557,8 @@ function StudioEditor() {
           )}
         </div>
       )}
-      {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={layoutAsPage} />}
-      {libAt !== null && <PageLibrary allowBlank={isCustom} onClose={() => setLibAt(null)} onPick={insertPage} />}
+      {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} />}
+      {libAt !== null && <PageLibrary allowBlank={isCustom} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt ?? undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
     </>
   );
 }
