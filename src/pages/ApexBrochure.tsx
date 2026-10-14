@@ -169,7 +169,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
           <div className="mt-3 h-[2px] w-40 rounded-full" style={{ background: 'linear-gradient(90deg, transparent, #a855f7, #e9d5ff, #a855f7, transparent)', boxShadow: '0 0 14px #a855f7' }} />
           <div className="mt-4 font-mono uppercase font-bold" style={{ fontSize: 15, letterSpacing: '0.42em', color: '#ddd6fe' }}>Powered by Startup Factory</div>
         </div>
-        <img src={sfhLogo} alt="Startup Factory Hub" className="relative h-12 w-auto object-contain" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 0 10px #a855f7aa)' }} />
+        <div className="relative rounded-2xl px-6 py-3" style={{ background: 'linear-gradient(180deg,#ffffff,#ede9fe)', boxShadow: '0 0 0 1px #ffffff66, 0 0 40px #7c3aed88' }}><img src={sfhLogo} alt="Startup Factory Hub" className="h-10 w-auto object-contain" /></div>
       </section>
     ),
   },
