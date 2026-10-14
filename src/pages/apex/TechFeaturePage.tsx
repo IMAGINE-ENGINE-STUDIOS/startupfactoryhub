@@ -320,7 +320,7 @@ export const TechFeaturePage = ({ f, index, total }: { f: Feature; index: number
             </div>
           </div>
 
-          {f.facts.length > 0 && special !== 'journey' && (
+          {f.facts.length > 0 && special !== 'journey' && special !== 'map' && (
             <div className="mt-6 grid grid-cols-3 gap-3">
               {f.facts.map(([v, l], i) => {
                 const FI = factIcons[i] ?? ListChecks;
