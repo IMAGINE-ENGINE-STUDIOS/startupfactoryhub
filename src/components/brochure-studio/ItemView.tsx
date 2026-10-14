@@ -3,9 +3,10 @@ import { fontCss } from './fonts';
  * Renders one added Studio item (picture, text, icon, 3D/AR model, card shape).
  * Credits: Imagine Engine Studios Corp.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box } from 'lucide-react';
 import { ICONS } from './icons';
+import { ModelAR } from './ModelAR';
 import { animCss } from './dom';
 import type { Item } from './types';
 
@@ -14,11 +15,8 @@ const METAL: React.CSSProperties = {
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
 };
 
-let mvLoaded = false;
-const loadModelViewer = () => { if (!mvLoaded) { mvLoaded = true; import('@google/model-viewer').catch(() => { mvLoaded = false; }); } };
 
 export function ItemView({ it, editing, selected }: { it: Item; editing: boolean; selected: boolean }) {
-  useEffect(() => { if (it.type === 'model') loadModelViewer(); }, [it.type]);
   const wrap: React.CSSProperties = {
     position: 'absolute', left: `${it.x}%`, top: `${it.y}%`, width: `${it.w}%`,
     transform: it.rot ? `rotate(${it.rot}deg)` : undefined, opacity: it.opacity ?? 1, zIndex: it.z ?? 1,
@@ -46,11 +44,7 @@ export function ItemView({ it, editing, selected }: { it: Item; editing: boolean
     <iframe title="Page template" src={it.src} style={{ width: '100%', aspectRatio: '1 / 1.414', border: 0, display: 'block', pointerEvents: editing ? 'none' : 'auto' }} />
   );
   if (it.type === 'model') body = it.src
-    ? React.createElement('model-viewer', {
-        src: it.src, 'camera-controls': true, 'auto-rotate': it.autoRotate === false ? undefined : true,
-        ar: it.ar ? true : undefined, 'ar-modes': 'webxr scene-viewer quick-look', 'shadow-intensity': '1',
-        exposure: '1.1', style: { width: '100%', aspectRatio: '1', background: 'transparent', pointerEvents: editing ? 'none' : 'auto' },
-      })
+    ? <ModelAR src={it.src} iosSrc={it.iosSrc} ar={it.ar} autoRotate={it.autoRotate} editing={editing} />
     : (
       <div style={{ aspectRatio: '1', display: 'grid', placeItems: 'center', borderRadius: 16, border: '1px dashed rgba(168,85,247,0.7)', color: '#c4b5fd', fontSize: 12, textAlign: 'center', padding: 8 }}>
         <div><Box className="h-8 w-8 mx-auto mb-1" />Upload a 3D model (.glb) from the panel</div>
