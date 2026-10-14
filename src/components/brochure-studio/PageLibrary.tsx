@@ -5,11 +5,13 @@
 import React, { useEffect, useState } from 'react';
 import { X, Plus, FilePlus2, Library } from 'lucide-react';
 import { BROCHURES, countUrl, embedUrl } from './library';
+import { LAYOUTS, type Layout } from './layouts';
+import { Thumb } from './LayoutGallery';
 
-export function PageLibrary({ onPick, onClose, allowBlank }: {
-  onPick: (src: string | null, label: string) => void; onClose: () => void; allowBlank: boolean;
+export function PageLibrary({ onPick, onClose, allowBlank, onLayout }: {
+  onPick: (src: string | null, label: string) => void; onClose: () => void; allowBlank: boolean; onLayout?: (l: Layout) => void;
 }) {
-  const [route, setRoute] = useState(BROCHURES[0].route);
+  const [route, setRoute] = useState(onLayout ? 'layouts' : BROCHURES[0].route);
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -23,7 +25,8 @@ export function PageLibrary({ onPick, onClose, allowBlank }: {
   }, []);
 
   const n = counts[route];
-  const name = BROCHURES.find((b) => b.route === route)?.name || '';
+  const isLay = route === 'layouts';
+  const name = isLay ? 'Page templates' : BROCHURES.find((b) => b.route === route)?.name || '';
   const glass: React.CSSProperties = { background: 'rgba(15,23,42,0.97)', border: '1px solid rgba(168,85,247,0.45)', color: '#e2e8f0' };
 
   return (
@@ -35,6 +38,9 @@ export function PageLibrary({ onPick, onClose, allowBlank }: {
             <button className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-bold text-left" style={{ background: 'rgba(124,58,237,0.25)' }} onClick={() => onPick(null, 'Blank')}>
               <FilePlus2 className="h-4 w-4" />Blank page
             </button>
+          )}
+          {onLayout && (
+            <button className="rounded-lg px-3 py-2 text-[13px] font-semibold text-left" style={{ background: isLay ? '#7c3aed' : 'transparent' }} onClick={() => setRoute('layouts')}>Page templates <span className="opacity-60">· {LAYOUTS.length}</span></button>
           )}
           {BROCHURES.map((b) => (
             <button key={b.route} className="rounded-lg px-3 py-2 text-[13px] font-semibold text-left"
@@ -49,7 +55,19 @@ export function PageLibrary({ onPick, onClose, allowBlank }: {
             <button aria-label="Close" onClick={onClose}><X className="h-5 w-5" /></button>
           </header>
           <div className="flex-1 overflow-y-auto p-4">
-            {n === undefined ? (
+            {isLay && onLayout ? (
+              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))' }}>
+                {LAYOUTS.map((l) => (
+                  <div key={l.id} className="group relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <Thumb l={l} />
+                    <span className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(15,23,42,0.85)' }}>{l.name}</span>
+                    <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(124,58,237,0.35)' }} onClick={() => onLayout(l)}>
+                      <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold" style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Plus className="h-4 w-4" />Insert</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : n === undefined ? (
               <div className="text-[13px]" style={{ color: '#94a3b8' }}>Loading pages…
                 <iframe key={route} title="count" src={countUrl(route)} className="w-px h-px opacity-0 absolute pointer-events-none" />
               </div>
