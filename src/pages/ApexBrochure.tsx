@@ -21,6 +21,7 @@ import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 import { EcosystemOrbit } from './apex/EcosystemOrbit';
 import { ValueForEveryonePage } from './apex/ValueForEveryonePage';
+import { ExpectedOutcomesPage } from './apex/ExpectedOutcomesPage';
 import { UnifiedPlatformPage } from './apex/UnifiedPlatformPage';
 import { ApexPerksPage } from './apex/PerksPage';
 import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
@@ -250,19 +251,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   },
   {
     key: 'outcomes',
-    node: (
-      <Frame code="19" label="Expected Outcomes" accent={C.emerald}>
-        <Title>What Apex can expect</Title>
-        <Bullets items={[
-          'Faster progression of startups through stages',
-          'Higher resource utilization and partner engagement',
-          'More effective, better-measured mentor engagement',
-          'Better-prepared startups at the investment stage',
-          'Clear, data-backed reporting on program impact',
-          'Less administrative effort for Apex staff',
-        ]} />
-      </Frame>
-    ),
+    node: <ExpectedOutcomesPage />,
   },
   {
     key: 'implementation',
