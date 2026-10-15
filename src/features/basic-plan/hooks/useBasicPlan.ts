@@ -8,7 +8,7 @@ import type { BasicPlanConfig, Entitlement } from "../types";
 
 const FALLBACK: BasicPlanConfig = {
   key: "basic",
-  name: "Basic Plan",
+  name: "Venture Network",
   monthly_price_cents: 5000,
   yearly_price_cents: 48000,
   currency: "usd",
