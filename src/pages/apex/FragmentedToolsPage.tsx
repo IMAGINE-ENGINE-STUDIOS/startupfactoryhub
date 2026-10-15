@@ -60,7 +60,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
   loadFlipFonts(['Inter', 'JetBrains Mono', 'Space Grotesk']);
   return (
     <ScaledA4>
-      <div className="absolute inset-0 flex flex-col" style={{ background: '#FFFFFF', fontFamily: BODY }}>
+      <div className="absolute inset-0 flex flex-col [&>*]:shrink-0" style={{ background: '#FFFFFF', fontFamily: BODY }}>
         <div style={{ height: 3, background: 'linear-gradient(90deg,#7C3AED,#3B82F6,#06B6D4)' }} />
         <div className="flex items-center justify-between" style={{ padding: '22px 40px 0' }}>
           <span className="flex items-center gap-[8px]" style={mono(10)}><span className="rounded-full" style={{ width: 6, height: 6, background: '#A78BFA' }} />System audit — fragmentation</span>
@@ -72,21 +72,21 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
           </span>
         </div>
 
-        <div style={{ padding: '30px 52px 0' }}>
-          <h2 style={{ fontFamily: HEAD, fontSize: 56, fontWeight: 600, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#0A0A0A' }}>The cost of<br />fragmented tools</h2>
+        <div style={{ padding: '24px 52px 0' }}>
+          <h2 style={{ fontFamily: HEAD, fontSize: 52, fontWeight: 600, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#0A0A0A' }}>The cost of<br />fragmented tools</h2>
           <p style={{ marginTop: 18, maxWidth: '58ch', fontSize: 18, lineHeight: 1.6, color: '#3F3F46' }}>
             Most accelerators run on fragmented tools: resources in shared drives, mentors scheduled over email, progress tracked in spreadsheets, and partner offers startups never find. This creates four problems.
           </p>
         </div>
 
         {/* Disconnected tools diagram */}
-        <div className="relative mx-[30px] rounded-[20px]" style={{ marginTop: 24, height: 300, background: '#FAFAF8', border: '1px solid #ECECEA', backgroundImage: 'radial-gradient(#E4E4E0 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
+        <div className="relative mx-[30px] rounded-[20px]" style={{ marginTop: 20, height: 262, background: '#FAFAF8', border: '1px solid #ECECEA', backgroundImage: 'radial-gradient(#E4E4E0 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
           <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
             <line x1="200" y1="80" x2="580" y2="80" stroke="#D4D4D0" strokeDasharray="5 5" />
-            <line x1="200" y1="225" x2="580" y2="225" stroke="#D4D4D0" strokeDasharray="5 5" />
+            <line x1="200" y1="196" x2="580" y2="196" stroke="#D4D4D0" strokeDasharray="5 5" />
           </svg>
           <Tool icon={FolderOpen} label="Drive" tint="#7C3AED" rot={-1.2} style={{ left: 40, top: 24 }}>{bar('80%')}{bar('55%')}</Tool>
-          <Tool icon={FileSpreadsheet} label="Sheets" tint="#16A34A" rot={1.2} style={{ left: 40, top: 168 }}>
+          <Tool icon={FileSpreadsheet} label="Sheets" tint="#16A34A" rot={1.2} style={{ left: 40, top: 140 }}>
             <div className="grid grid-cols-3 gap-[4px]">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded" style={{ height: 10, background: '#F1F1EF', border: '1px solid #E8E8E6' }} />)}</div>
             <span className="absolute rounded" style={{ right: 12, bottom: 12, padding: '2px 6px', background: '#FEF3C7', ...mono(8.5, '#92400E', { letterSpacing: '0.04em', textTransform: 'none' }) }}>v4_final.xlsx</span>
           </Tool>
@@ -94,33 +94,33 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
             <span className="absolute rounded-full" style={{ right: 12, top: 14, padding: '1px 7px', background: '#FFF7ED', border: '1px solid #FED7AA', ...mono(9, '#C2410C', { letterSpacing: 0 }) }}>12</span>
             {bar('70%')}{bar('45%')}
           </Tool>
-          <Tool icon={Gift} label="Offers" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 168 }}>
+          <Tool icon={Gift} label="Offers" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 140 }}>
             {['Hidden offer', 'Hidden offer'].map((h, i) => <div key={i} className="rounded text-center mb-[4px]" style={{ padding: '3px 0', border: '1px dashed #E0E0DC', ...mono(8, '#A1A1AA') }}>{h}</div>)}
           </Tool>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full" style={{ width: 92, height: 92, border: '1px dashed #E0E0DC' }}>
             <div className="flex items-center justify-center rounded-full" style={{ width: 54, height: 54, background: '#EEF2FF', border: '1px solid #E0E7FF' }}><Triangle size={18} color="#0A0A0A" /></div>
           </div>
           <NoSync style={{ left: '50%', top: 68, transform: 'translateX(-50%)' }} />
-          <NoSync style={{ left: '50%', top: 213, transform: 'translateX(-50%)' }} />
-          <NoSync vertical style={{ left: 120, top: 116 }} />
-          <NoSync vertical style={{ right: 120, top: 116 }} />
+          <NoSync style={{ left: '50%', top: 184, transform: 'translateX(-50%)' }} />
+          <NoSync vertical style={{ left: 120, top: 98 }} />
+          <NoSync vertical style={{ right: 120, top: 98 }} />
         </div>
 
         {/* Four problems */}
-        <div className="flex items-center gap-[12px]" style={{ padding: '22px 34px 12px' }}>
+        <div className="flex items-center gap-[12px]" style={{ padding: '18px 34px 10px' }}>
           <span style={mono(9.5)}>Identified friction</span>
           <span className="flex-1" style={{ height: 1, background: '#E8E8E6' }} />
           <span className="rounded-full" style={{ padding: '3px 10px', border: '1px solid #DDD6FE', background: '#F5F3FF', ...mono(9, V) }}>4 issues</span>
         </div>
         <div className="grid grid-cols-2 gap-[12px]" style={{ padding: '0 34px' }}>
           {PROBLEMS.map(({ icon: I, tint, title, text }, i) => (
-            <div key={title} className="rounded-[14px] bg-white" style={{ padding: '16px 20px', border: '1px solid #E8E8E6' }}>
+            <div key={title} className="rounded-[14px] bg-white" style={{ padding: '14px 20px', border: '1px solid #E8E8E6' }}>
               <div className="flex items-center gap-[10px]">
                 <span className="flex items-center justify-center rounded-[8px]" style={{ width: 30, height: 30, background: `${tint}14`, color: tint }}><I size={14} /></span>
                 <span style={mono(10.5, V)}>0{i + 1}</span>
                 <ArrowUpRight size={13} color="#C4C4C0" className="ml-auto" />
               </div>
-              <div style={{ marginTop: 12, fontFamily: HEAD, fontSize: 17, fontWeight: 600, color: '#0A0A0A' }}>{title}</div>
+              <div style={{ marginTop: 10, fontFamily: HEAD, fontSize: 17, fontWeight: 600, color: '#0A0A0A' }}>{title}</div>
               <p style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, color: '#3F3F46' }}>{text}</p>
               <div style={{ marginTop: 12, height: 2, background: 'linear-gradient(90deg,#C4B5FD,transparent)' }} />
             </div>
