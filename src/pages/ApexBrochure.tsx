@@ -299,10 +299,10 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
         <Title sub="Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.">
           One unified innovation platform
         </Title>
-        <div className="my-3"><EcosystemOrbit logo={sfhLogo} size={290} /></div>
+        <div className="my-2"><EcosystemOrbit logo={sfhLogo} size={250} /></div>
         <div className="flex items-center gap-4 rounded-xl p-4" style={{ background: C.card, border: `1px solid ${C.line}` }}>
           <div className="p-2 rounded-lg" style={{ background: '#ffffff', border: `1px solid ${C.line}` }}>
-            <QRCodeSVG value={CONTACT_URL} size={110} />
+            <QRCodeSVG value={CONTACT_URL} size={72} />
           </div>
           <div className="flex flex-col gap-2">
             <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>Scan to open this proposal</span>
