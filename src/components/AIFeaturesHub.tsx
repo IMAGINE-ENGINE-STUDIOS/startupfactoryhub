@@ -219,7 +219,7 @@ const TOOLS: DeskTool[] = [
   },
 ];
 
-interface Perk {
+export interface Perk {
   name: string;
   description: string;
   badge: string;
@@ -231,7 +231,7 @@ interface Perk {
   secondaryLabel?: string;
 }
 
-const PERKS: Perk[] = [
+export const PERKS: Perk[] = [
   {
     name: "Flippa",
     description: "Buy & sell digital businesses, apps and online assets.",
