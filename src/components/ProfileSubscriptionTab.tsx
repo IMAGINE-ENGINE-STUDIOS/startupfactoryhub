@@ -55,7 +55,7 @@ const PLANS: PlanCard[] = [
     description: 'Direct digital access into our global venture builder community, co-founder network, and startup ecosystem.',
     bestFor: 'Early-stage founders, operators and advisors (advisors $250/mo)',
     features: [
-      'Venture builder community feed, deal flow & resource map',
+      'Venture builder community feed, investor access & resource map',
       'IP & technology access, tools and certified masterclasses',
       'Investor network introductions & mentor interaction',
       'Talent, internships, volunteering & partner perks',
@@ -86,7 +86,7 @@ const PLANS: PlanCard[] = [
     glow: 'shadow-purple-500/20',
     description: 'Global venture builder tier with worldwide private office presence and international investor access.',
     bestFor: 'Scaling startups, cross-border founders and venture partners',
-    features: ['All Venture Resident features included', 'Private office & global hub access in 130+ countries (5,800+ locations)', 'Executive mentorship & direct investor deal flow', 'International soft landing & cross-border expansion support', 'Priority demo day pitching & co-investment opportunities'],
+    features: ['All Venture Resident features included', 'Private office & global hub access in 130+ countries (5,800+ locations)', 'Executive mentorship & priority investor access', 'International soft landing & cross-border expansion support', 'Priority demo day pitching & co-investment opportunities'],
     monthly: MEMBERSHIP_TIERS.global_access.price,
     yearly: MEMBERSHIP_TIERS.global_access.yearly_price,
     action: 'legacy',
