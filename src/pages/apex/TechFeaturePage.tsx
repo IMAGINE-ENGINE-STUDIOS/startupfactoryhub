@@ -11,8 +11,8 @@ import React from 'react';
 import {
   Layers, Users, Brain, Route, LayoutDashboard, Handshake, LineChart, Globe2, Landmark,
   BadgeDollarSign, PlaneLanding, FileBarChart, Boxes, ListChecks, Sparkles, Target, Activity,
-  CalendarCheck, MessagesSquare, Star, Gauge, Building2, GraduationCap, FolderKanban, type LucideIcon,
-, Code2 } from 'lucide-react';
+  CalendarCheck, MessagesSquare, Star, Gauge, Building2, GraduationCap, FolderKanban, Code2, type LucideIcon,
+} from 'lucide-react';
 import type { Feature } from './ApexEditorial';
 import { ScaledA4 } from './PartnersPages';
 
