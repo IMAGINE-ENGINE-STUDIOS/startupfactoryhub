@@ -87,7 +87,7 @@ const GLOBAL_ACCESS_FEATURES = [
 ];
 
 const CORPORATE_FEATURES = [
-  "All Global Access features included",
+  "All Global Venture Partner features included",
   "Team dashboard & management",
   "Unlimited travel (11 countries)",
   "Global coworking access",
@@ -130,10 +130,10 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
   planTemplate({
     id: "global-access-monthly",
     group: "Membership – Monthly",
-    name: "Global Access – Monthly ($950/mo)",
-    title: "Global Access Membership — Monthly",
+    name: "Global Venture Partner – Monthly ($950/mo)",
+    title: "Global Venture Partner Membership — Monthly",
     description: "Unlimited Global office access across 130+ countries.",
-    planLabel: "Global Access Membership (Monthly)",
+    planLabel: "Global Venture Partner Membership (Monthly)",
     price: 950,
     billing: "monthly",
     features: GLOBAL_ACCESS_FEATURES,
@@ -176,10 +176,10 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
   planTemplate({
     id: "global-access-yearly",
     group: "Membership – Yearly (Save 10%)",
-    name: "Global Access – Yearly ($10,260/yr)",
-    title: "Global Access Membership — Annual",
+    name: "Global Venture Partner – Yearly ($10,260/yr)",
+    title: "Global Venture Partner Membership — Annual",
     description: "Annual plan, billed yearly. Save 10% vs monthly.",
-    planLabel: "Global Access Membership (Annual — Save 10%)",
+    planLabel: "Global Venture Partner Membership (Annual — Save 10%)",
     price: 10260,
     billing: "yearly",
     features: GLOBAL_ACCESS_FEATURES,

@@ -22,6 +22,6 @@ export const SFH_PACKAGES: SfhPackage[] = [
   { id: 'imagine-studio', name: 'Imagine Studio', price: 60, interval: 'month', tag: 'AI CREDITS', image: ai, perks: ['1,400 AI credits every month', 'Best value per credit'] },
   { id: 'community', name: 'Community', price: 350, interval: 'month', tag: 'ACCELERATOR', image: office, perks: ['Community accelerator access', 'Mentors and programs'] },
   { id: 'self-paced-office', name: 'Venture Resident', price: 550, interval: 'month', tag: 'ACCELERATOR', image: desk, perks: ['Venture studio acceleration', 'Dedicated desk'] },
-  { id: 'global-access', name: 'Global Access + Office', price: 950, interval: 'month', tag: 'ACCELERATOR', image: globalImg, perks: ['Global hub access', 'Private office'] },
+  { id: 'global-access', name: 'Global Venture Partner', price: 950, interval: 'month', tag: 'ACCELERATOR', image: globalImg, perks: ['Global hub access', 'Private office'] },
   { id: 'corporate', name: 'Corporate', price: 1500, interval: 'month', tag: 'ACCELERATOR', image: corporate, perks: ['Team accelerator seats', 'Corporate innovation support'] },
 ];
