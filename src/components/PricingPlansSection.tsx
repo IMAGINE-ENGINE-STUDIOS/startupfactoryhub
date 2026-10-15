@@ -45,7 +45,7 @@ const startupMemberships: {
     tagline: "Direct digital access into our global venture builder community, co-founder network, and startup ecosystem.",
     bestFor: "Early-stage founders, startup operators, advisors & builders joining the community",
     features: [
-      "Venture builder community feed, deal flow & resource map",
+      "Venture builder community feed, investor access & resource map",
       "IP & technology access, tools and certified masterclasses",
       "Investor network introductions & mentor interaction",
       "Talent, internships, volunteering & partner perks",
@@ -74,7 +74,7 @@ const startupMemberships: {
     features: [
       "All Venture Resident features included",
       "Private office & global hub access in 130+ countries (5,800+ locations)",
-      "Executive mentorship & direct investor deal flow",
+      "Executive mentorship & priority investor access",
       "International soft landing & cross-border expansion support",
       "Priority demo day pitching & co-investment opportunities",
     ],
