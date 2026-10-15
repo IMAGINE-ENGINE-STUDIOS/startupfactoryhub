@@ -39,7 +39,7 @@ export const EcosystemOrbit = ({ logo, size = 300 }: { logo: string; size?: numb
     return () => cancelAnimationFrame(raf);
   }, [c, r]);
   return (
-    <div className="relative mx-auto shrink-0" style={{ width: size, height: size }}>
+    <div data-bs-lock="" className="relative mx-auto shrink-0" style={{ width: size, height: size }}>
       <style>{`@keyframes eo-spin{to{transform:rotate(360deg)}}@keyframes eo-unspin{to{transform:translate(-50%,-50%) rotate(-360deg)}}`}</style>
       <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle, rgba(14,165,183,0.35) 0%, rgba(15,23,42,0.95) 62%)', border: '1px solid rgba(94,234,212,0.25)' }} />
       <div className="absolute rounded-full" style={{ inset: size * 0.12, border: '1px dashed rgba(94,234,212,0.35)', animation: 'eo-spin 60s linear infinite' }} />

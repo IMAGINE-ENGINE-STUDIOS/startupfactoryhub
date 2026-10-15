@@ -87,7 +87,7 @@ export function applyEdits(doc: BrochureDoc) {
       const [p, path] = key.split(':');
       if (Number(p) !== pg) continue;
       const el = byPath(root, path);
-      if (el) applyOne(el, e);
+      if (el && !el.closest("[data-bs-lock]")) applyOne(el, e); // locked widgets (e.g. animated diagrams) ignore stale edits
     }
   }
 }
