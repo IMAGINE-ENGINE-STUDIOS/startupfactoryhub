@@ -105,7 +105,7 @@ export const PartnersAboutPage = () => (
         <div className="flex-1 grid grid-cols-12 gap-0 min-h-0">
           <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
             <span className="text-[16px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>About Startup Factory Hub</span>
-            <h1 className="font-extrabold tracking-tight text-slate-900 mb-8" style={{ fontSize: '46px', lineHeight: '1.04', fontFamily: SANS }}>
+            <h1 className="font-extrabold tracking-tight text-slate-900 mb-8" style={{ fontSize: '46px', lineHeight: '1.04', fontFamily: SERIF }}>
               The Operating System<br />for the Next{' '}
               <span className="font-extrabold" style={gradText(`linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`)}>Generation</span>
               <br />of Founders.
@@ -218,7 +218,7 @@ export const PartnersEcosystemPage = () => {
               <span className="text-[44px] font-light tracking-tighter italic" style={{ fontFamily: SERIF, color: 'rgba(15,23,42,0.18)', textDecoration: 'underline', textDecorationColor: accent, textUnderlineOffset: '8px' }}>P/03</span>
             </div>
 
-            <h1 className="font-extrabold tracking-tight text-slate-900 mb-5" style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: SANS }}>
+            <h1 className="font-extrabold tracking-tight text-slate-900 mb-5" style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: SERIF }}>
               Where the{' '}
               <span className="font-extrabold" style={gradText(`linear-gradient(135deg, ${NEON.magenta} 0%, ${NEON.cyan} 60%, ${NEON.lime} 100%)`)}>ecosystem meets.</span>
             </h1>
