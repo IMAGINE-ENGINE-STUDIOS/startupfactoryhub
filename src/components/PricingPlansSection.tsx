@@ -58,7 +58,7 @@ const startupMemberships: {
     tagline: "Adds local Startup Factory HUB Desk coworking access all locations.",
     bestFor: "Founders needing flexible workspace + virtual resources",
     features: [
-      "All community features",
+      "All Venture Network features",
       "Local Startup Factory HUB Desk coworking access all locations",
       "Earth Intelligence satellite data access",
       "Eligible for Accelerated Tier",
@@ -336,8 +336,8 @@ const PricingPlansSection = () => {
                       Popular
                     </Badge>
                   )}
-                  <PlanMedia src={plan.image} alt={plan.basic ? "Basic Plan" : tier!.name} />
-                  <h4 className="text-sm font-semibold">{plan.basic ? "Basic Plan" : tier!.name}</h4>
+                  <PlanMedia src={plan.image} alt={plan.basic ? "Venture Network" : tier!.name} />
+                  <h4 className="text-sm font-semibold">{plan.basic ? "Venture Network" : tier!.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.contactSales ? (
                       <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
@@ -378,7 +378,7 @@ const PricingPlansSection = () => {
                     {checkoutKey === plan.key ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : plan.basic ? (
-                      "View Basic Plan"
+                      "View Venture Network"
                     ) : plan.contactSales ? (
                       "Contact Sales"
                     ) : user ? (
@@ -506,7 +506,7 @@ const PricingPlansSection = () => {
 
           {planTab === "startup" && (
             <p className="mx-auto mb-6 max-w-2xl text-center text-xs sm:text-sm text-muted-foreground">
-              Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo.
+              Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join Venture Network at $250/mo.
             </p>
           )}
           {planTab === "accelerator" && (

@@ -18,7 +18,7 @@ export const MEMBERSHIP_TIERS = {
     yearly_price_id: "price_1T7RV3K5N1RcUVuYMhTIZLSV",
   },
   self_paced_office: {
-    name: "Self-Paced + Desk",
+    name: "Venture Resident",
     price: 550,
     product_id: "prod_U3oENLbFqHIiRA",
     price_id: "price_1T5gbrK5N1RcUVuYcLTffimY",
@@ -27,7 +27,7 @@ export const MEMBERSHIP_TIERS = {
     yearly_price_id: "price_1T7RVKK5N1RcUVuYitID8wLL",
   },
   global_access: {
-    name: "Global Access + Office",
+    name: "Global Venture Partner",
     price: 950,
     product_id: "prod_U5cjB9wci6HRRg",
     price_id: "price_1T7RUQK5N1RcUVuYcgiZRLiH",

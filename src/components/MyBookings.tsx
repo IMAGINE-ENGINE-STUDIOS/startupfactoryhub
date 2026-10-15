@@ -29,7 +29,7 @@ const TIER_CONFIG: Record<string, { label: string; icon: React.ReactNode; spaceT
     badgeClass: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   },
   self_paced: {
-    label: 'Self-Paced + Desk',
+    label: 'Venture Resident',
     icon: <Monitor className="h-3.5 w-3.5" />,
     spaceType: 'Desk Access',
     badgeClass: 'bg-violet-500/10 text-violet-600 border-violet-500/20',
