@@ -20,6 +20,7 @@ import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 import { EcosystemOrbit } from './apex/EcosystemOrbit';
+import { ValueForEveryonePage } from './apex/ValueForEveryonePage';
 import { UnifiedPlatformPage } from './apex/UnifiedPlatformPage';
 import { ApexPerksPage } from './apex/PerksPage';
 import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
@@ -245,15 +246,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
   {
     key: 'how',
-    node: (
-      <Frame code="18" label="How It Works for Apex">
-        <Title>Value for everyone in the program</Title>
-        <Card icon={Rocket} title="Startups" text="One login: a personalized journey, relevant resources, mentors and AI-suggested next steps." />
-        <Card icon={GraduationCap} title="Mentors and advisors" text="Simple scheduling, clear context on each startup, recognition through ratings." accent={C.emerald} />
-        <Card icon={Settings} title="Apex administrators" text="One place to run the program, manage resources and see what is working." accent={C.navy} />
-        <Card icon={Handshake} title="Corporate partners" text="Visibility and engagement with startups, with no integration work." />
-      </Frame>
-    ),
+    node: <ValueForEveryonePage />,
   },
   {
     key: 'outcomes',
