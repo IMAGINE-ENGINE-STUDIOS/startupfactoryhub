@@ -385,7 +385,7 @@ export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; 
                         <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: c }}>{String(i + 1).padStart(2, '0')} // {tags[i] ?? ''}</span>
                         <span className="ml-auto rounded-full" style={{ width: 7, height: 7, background: c, boxShadow: `0 0 8px ${c}` }} />
                       </div>
-                      <p className={compact ? 'mt-2.5' : 'mt-5'} style={{ fontSize: compact ? 17.5 : 23, lineHeight: 1.45, color: TEXT }}>{p}</p>
+                      <p data-bs-lock="" className={compact ? 'mt-2.5' : 'mt-5'} style={{ fontSize: compact ? 17.5 : 23, lineHeight: 1.45, color: TEXT }}>{p}</p>
                     </div>
                   );
                 })}
