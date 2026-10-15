@@ -128,7 +128,7 @@ const acceleratorMemberships: {
     features: [
       "Full accelerator infrastructure",
       "Dedicated partnership manager",
-      "Earth Intelligence & data suite access",
+      "Strategic Business Intelligence suite access",
       "Global office & coworking network access",
     ],
     highlight: true,

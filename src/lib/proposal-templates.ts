@@ -73,7 +73,7 @@ const COMMUNITY_FEATURES = [
 const SELF_PACED_FEATURES = [
   "All Community features included",
   "Local Startup Factory HUB coworking access (1 country)",
-  "Earth Intelligence satellite data access",
+  "Strategic Business Intelligence suite",
   "Eligible for Accelerated Tier",
 ];
 
@@ -82,7 +82,7 @@ const GLOBAL_ACCESS_FEATURES = [
   "Global office access across Startup Factory Hub network",
   "130+ countries, 5,600+ sites",
   "Mentor + event access",
-  "Earth Intelligence satellite data access",
+  "Strategic Business Intelligence suite",
   "Eligible for Accelerated Tier",
 ];
 
