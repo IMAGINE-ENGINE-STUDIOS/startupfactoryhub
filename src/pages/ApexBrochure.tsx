@@ -157,7 +157,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '27';
+const TOTAL = '26';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
@@ -226,7 +226,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       <FragmentedToolsPage total={TOTAL} />
     ),
   },
-  ...FEATURES.flatMap((f, i) => f.no === '04' || f.no === '05'
+  ...FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="main" /> },
        { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
