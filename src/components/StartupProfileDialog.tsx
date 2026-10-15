@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { openDeckUrl, normalizeDeckUrl } from '@/lib/deckUrl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -258,7 +259,7 @@ export default function StartupProfileDialog({
                   </div>
                 </div>
                 <Button 
-                  onClick={() => window.open(company.pitch_deck_url, '_blank')}
+                  onClick={() => openDeckUrl(company.pitch_deck_url)}
                   className="w-full"
                   size="lg"
                 >

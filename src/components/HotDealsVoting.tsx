@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { normalizeDeckUrl } from '@/lib/deckUrl';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -398,7 +399,7 @@ const HotDealsVoting = () => {
                         <div className="flex items-center gap-3 flex-wrap">
                           {s.pitch_deck_url && (
                             <a
-                              href={s.pitch_deck_url}
+                              href={normalizeDeckUrl(s.pitch_deck_url) || undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"

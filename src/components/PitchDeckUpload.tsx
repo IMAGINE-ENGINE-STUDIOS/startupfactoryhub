@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { Upload, FileText, Trash2, ExternalLink, Loader2, Link2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { normalizeDeckUrl, openDeckUrl } from '@/lib/deckUrl';
 
 interface PitchDeckUploadProps {
   companyId: string;
@@ -16,6 +18,28 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [link, setLink] = useState('');
+  const [savingLink, setSavingLink] = useState(false);
+  const isStored = !!currentDeckUrl && currentDeckUrl.includes('/storage/v1/object/public/pitch-decks/');
+
+  const saveLink = async () => {
+    const url = normalizeDeckUrl(link);
+    if (!url) return;
+    try { new URL(url); } catch { toast({ title: 'Invalid link', description: 'Paste a full web address.', variant: 'destructive' }); return; }
+    setSavingLink(true);
+    try {
+      if (isStored) {
+        await supabase.storage.from('pitch-decks').remove([currentDeckUrl!.split('/').slice(-2).join('/')]);
+      }
+      const { error } = await supabase.from('companies').update({ pitch_deck_url: url }).eq('id', companyId);
+      if (error) throw error;
+      onUploadComplete(url);
+      setLink('');
+      toast({ title: 'Link saved', description: 'Your pitch deck now opens this link.' });
+    } catch (error: any) {
+      toast({ title: 'Could not save link', description: error.message, variant: 'destructive' });
+    } finally { setSavingLink(false); }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,7 +69,7 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
 
     try {
       // Delete old deck if exists
-      if (currentDeckUrl) {
+      if (currentDeckUrl && isStored) {
         const oldPath = currentDeckUrl.split('/').slice(-2).join('/');
         await supabase.storage.from('pitch-decks').remove([oldPath]);
       }
@@ -100,12 +124,11 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
 
     try {
       // Delete from storage
-      const path = currentDeckUrl.split('/').slice(-2).join('/');
-      const { error: deleteError } = await supabase.storage
-        .from('pitch-decks')
-        .remove([path]);
-
-      if (deleteError) throw deleteError;
+      if (isStored) {
+        const path = currentDeckUrl.split('/').slice(-2).join('/');
+        const { error: deleteError } = await supabase.storage.from('pitch-decks').remove([path]);
+        if (deleteError) throw deleteError;
+      }
 
       // Update company record
       const { error: updateError } = await supabase
@@ -134,9 +157,7 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
   };
 
   const openDeck = () => {
-    if (companyId) {
-      window.open(`/pitch-deck/${companyId}`, '_blank');
-    }
+    openDeckUrl(currentDeckUrl);
   };
 
   return (
@@ -156,8 +177,8 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
             <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
               <FileText className="h-8 w-8 text-primary" />
               <div className="flex-1">
-                <p className="font-medium">Pitch Deck.pdf</p>
-                <p className="text-sm text-muted-foreground">PDF Document</p>
+                <p className="font-medium">{isStored ? 'Pitch Deck.pdf' : 'External pitch deck'}</p>
+                <p className="text-sm text-muted-foreground truncate max-w-[16rem]">{isStored ? 'PDF Document' : currentDeckUrl}</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -222,6 +243,15 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
             />
           </div>
         )}
+        <div className="space-y-2 pt-2 border-t border-border/50">
+          <Label className="flex items-center gap-2 text-sm"><Link2 className="h-4 w-4 text-primary" />Or use an external link</Label>
+          <div className="flex gap-2">
+            <Input placeholder="Docsend, Google Drive, Pitch.com, Canva..." value={link} onChange={(e) => setLink(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveLink()} />
+            <Button variant="outline" onClick={saveLink} disabled={savingLink || !link.trim()}>
+              {savingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save link'}
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

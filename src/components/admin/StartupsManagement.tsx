@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { openDeckUrl, normalizeDeckUrl } from '@/lib/deckUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -834,7 +835,7 @@ const StartupsManagement = () => {
                   {selectedCompany.pitch_deck_url && (
                     <div>
                       <h4 className="text-sm font-medium mb-2">Pitch Deck</h4>
-                      <Button variant="outline" size="sm" onClick={() => window.open(selectedCompany.pitch_deck_url!, '_blank')}>
+                      <Button variant="outline" size="sm" onClick={() => openDeckUrl(selectedCompany.pitch_deck_url!)}>
                         <FileText className="h-4 w-4 mr-2" />
                         View Pitch Deck
                       </Button>

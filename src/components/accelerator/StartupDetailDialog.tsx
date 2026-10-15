@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { normalizeDeckUrl } from '@/lib/deckUrl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -238,7 +239,7 @@ export const StartupDetailDialog = ({
               )}
               {startup.company?.pitch_deck_url && (
                 <Button variant="outline" size="sm" asChild>
-                  <a href={startup.company.pitch_deck_url} target="_blank" rel="noopener noreferrer">
+                  <a href={normalizeDeckUrl(startup.company.pitch_deck_url) || undefined} target="_blank" rel="noopener noreferrer">
                     <FileText className="w-4 h-4 mr-2" />
                     Pitch Deck
                   </a>
