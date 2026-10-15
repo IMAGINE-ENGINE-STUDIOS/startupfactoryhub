@@ -84,19 +84,19 @@ export const ApexRoadmapPage = () => (
       Implementation <span style={{ background: `linear-gradient(90deg, ${CY}, ${PU})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>roadmap</span>
     </h2>
     <p className="mt-1" style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.35 }}>From a single-state pilot to nationwide adoption. Timelines, scope and commercial terms to be defined together with Apex.</p>
-    <div className="relative mt-3 flex-1 min-h-0 flex flex-col justify-between gap-1.5">
+    <div className="relative mt-3 flex-1 min-h-0 flex flex-col gap-2">
       <div className="absolute top-3 bottom-3" style={{ left: 17, width: 2, background: `linear-gradient(180deg, ${CY}, ${PU})`, boxShadow: `0 0 12px ${CY}` }} />
       {PHASES.map((p, i) => (
-        <div key={p.t} className="relative flex gap-3 items-stretch min-h-0">
+        <div key={p.t} className="relative flex-1 flex gap-3 items-stretch min-h-0">
           <div className="relative z-10 shrink-0 h-9 w-9 rounded-full flex items-center justify-center" style={{ background: '#050914', border: `2px solid ${i % 2 ? PU : CY}`, boxShadow: `0 0 14px ${i % 2 ? PU : CY}88`, fontFamily: MONO, fontSize: 13, fontWeight: 700, color: i % 2 ? PU : CY }}>0{i + 1}</div>
-          <div className="flex-1 min-w-0 rounded-xl px-3 py-1.5" style={{ background: 'rgba(15,23,42,0.65)', border: '1px solid rgba(148,163,184,0.2)' }}>
+          <div className="flex-1 min-w-0 min-h-0 overflow-hidden rounded-xl px-3.5 py-2 flex flex-col justify-center" style={{ background: 'rgba(15,23,42,0.65)', border: '1px solid rgba(148,163,184,0.2)' }}>
             <div className="flex items-baseline justify-between gap-2">
-              <span style={{ fontSize: 15, fontWeight: 800, color: '#f8fafc' }}>{p.t}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.16em', color: i % 2 ? PU : CY, textTransform: 'uppercase' }}>Phase {i + 1} · {p.tag}</span>
+              <span style={{ fontSize: 18, fontWeight: 800, color: '#f8fafc' }}>{p.t}</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.16em', color: i % 2 ? PU : CY, textTransform: 'uppercase' }}>Phase {i + 1} · {p.tag}</span>
             </div>
-            <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.3, marginTop: 1 }}>{p.d}</div>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {p.out.map((o) => <span key={o} className="rounded-full px-2 py-px" style={{ fontSize: 10, color: '#e2e8f0', background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.2)' }}>{o}</span>)}
+            <div style={{ fontSize: 14.5, color: '#cbd5e1', lineHeight: 1.35, marginTop: 3 }}>{p.d}</div>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {p.out.map((o) => <span key={o} className="rounded-full px-2.5 py-0.5" style={{ fontSize: 12, color: '#e2e8f0', background: 'rgba(148,163,184,0.12)', border: '1px solid rgba(148,163,184,0.2)' }}>{o}</span>)}
             </div>
           </div>
         </div>
