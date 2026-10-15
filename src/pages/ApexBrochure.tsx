@@ -21,6 +21,7 @@ import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 import { EcosystemOrbit } from './apex/EcosystemOrbit';
 import { ApexPerksPage } from './apex/PerksPage';
+import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
 import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
 import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
 
@@ -158,7 +159,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '27';
+const TOTAL = '28';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
@@ -232,7 +233,8 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
        { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" /> }]
     : f.no === '06'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} /> },
-       { key: 'perks', node: <ApexPerksPage /> }]
+       { key: 'perks', node: <ApexPerksPage /> },
+       { key: 'imagine-engine', node: <ApexImagineEnginePage /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
   {
     key: 'how',
