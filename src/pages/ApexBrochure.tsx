@@ -19,6 +19,7 @@ import { EditorialPage, FEATURES } from './apex/ApexEditorial';
 import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
+import { EcosystemOrbit } from './apex/EcosystemOrbit';
 import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
 import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
 
@@ -298,7 +299,8 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
         <Title sub="Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.">
           One unified innovation platform
         </Title>
-        <div className="flex items-center gap-5 rounded-xl p-5" style={{ background: C.card, border: `1px solid ${C.line}` }}>
+        <div className="my-3"><EcosystemOrbit logo={sfhLogo} size={290} /></div>
+        <div className="flex items-center gap-4 rounded-xl p-4" style={{ background: C.card, border: `1px solid ${C.line}` }}>
           <div className="p-2 rounded-lg" style={{ background: '#ffffff', border: `1px solid ${C.line}` }}>
             <QRCodeSVG value={CONTACT_URL} size={110} />
           </div>
