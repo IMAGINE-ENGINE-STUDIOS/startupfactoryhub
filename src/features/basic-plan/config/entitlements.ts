@@ -69,8 +69,8 @@ export const DEFAULT_ENTITLEMENTS: Entitlement[] = [
   },
   {
     key: "tech_transfer",
-    label: "Technology Transfer",
-    description: "Participate in technology transfer programs",
+    label: "IP & Technology Access",
+    description: "Access IP and technologies available for licensing",
     icon: "ArrowLeftRight",
     actionLabel: "Explore transfers",
   },
