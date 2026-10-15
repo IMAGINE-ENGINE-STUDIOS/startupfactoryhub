@@ -656,7 +656,7 @@ const DigitalPlatformDemo = () => {
 };
 
 
-const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
+const PageTitle = ({ kicker, title, accent = NEON.cyan, serif }: { kicker: string; title: React.ReactNode; accent?: string; serif?: boolean }) => (
   <div className="mb-5">
     <div className="flex items-center gap-3 mb-3">
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
@@ -668,6 +668,7 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
       paddingBottom: '6px',
       ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
+      ...(serif ? { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 800, letterSpacing: '-0.03em' } : null),
     }}>
       {title}
     </h2>
@@ -855,7 +856,7 @@ BatchRequestForm.displayName = 'BatchRequestForm';
 export const PartnersNasdaqPage = () => (
                 <A4Wrapper>
                   <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} serif />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -960,7 +961,7 @@ export const PartnersNasdaqPage = () => (
 export const PartnersARPage = () => (
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
-                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} serif />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
