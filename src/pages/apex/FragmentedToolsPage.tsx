@@ -86,7 +86,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
             <line x1="200" y1="196" x2="580" y2="196" stroke="#D4D4D0" strokeDasharray="5 5" />
           </svg>
           <Tool icon={FolderOpen} label="Drive" tint="#7C3AED" rot={-1.2} style={{ left: 40, top: 24 }}>{bar('80%')}{bar('55%')}</Tool>
-          <Tool icon={FileSpreadsheet} label="Sheets" tint="#16A34A" rot={1.2} style={{ left: 40, top: 140 }}>
+          <Tool icon={FileSpreadsheet} label="Sheets" tint="#16A34A" rot={1.2} style={{ left: 40, top: 130 }}>
             <div className="grid grid-cols-3 gap-[4px]">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded" style={{ height: 10, background: '#F1F1EF', border: '1px solid #E8E8E6' }} />)}</div>
             <span className="absolute rounded" style={{ right: 12, bottom: 12, padding: '2px 6px', background: '#FEF3C7', ...mono(8.5, '#92400E', { letterSpacing: '0.04em', textTransform: 'none' }) }}>v4_final.xlsx</span>
           </Tool>
@@ -94,7 +94,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
             <span className="absolute rounded-full" style={{ right: 12, top: 14, padding: '1px 7px', background: '#FFF7ED', border: '1px solid #FED7AA', ...mono(9, '#C2410C', { letterSpacing: 0 }) }}>12</span>
             {bar('70%')}{bar('45%')}
           </Tool>
-          <Tool icon={Gift} label="Offers" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 140 }}>
+          <Tool icon={Gift} label="Offers" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 130 }}>
             {['Hidden offer', 'Hidden offer'].map((h, i) => <div key={i} className="rounded text-center mb-[4px]" style={{ padding: '3px 0', border: '1px dashed #E0E0DC', ...mono(8, '#A1A1AA') }}>{h}</div>)}
           </Tool>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full" style={{ width: 92, height: 92, border: '1px dashed #E0E0DC' }}>
@@ -102,8 +102,8 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
           </div>
           <NoSync style={{ left: '50%', top: 68, transform: 'translateX(-50%)' }} />
           <NoSync style={{ left: '50%', top: 184, transform: 'translateX(-50%)' }} />
-          <NoSync vertical style={{ left: 120, top: 98 }} />
-          <NoSync vertical style={{ right: 120, top: 98 }} />
+          <NoSync vertical style={{ left: 120, top: 92 }} />
+          <NoSync vertical style={{ right: 120, top: 92 }} />
         </div>
 
         {/* Four problems */}
