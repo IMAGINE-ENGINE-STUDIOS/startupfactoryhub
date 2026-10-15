@@ -19,6 +19,7 @@ import { EditorialPage, FEATURES } from './apex/ApexEditorial';
 import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
+import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -258,23 +259,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'implementation',
     node: (
-      <Frame code="20" label="Proposed Implementation" accent={C.navy}>
-        <Title sub="Timelines, scope and commercial terms to be defined together with Apex.">Four phases</Title>
-        {[
-          ['Setup', 'Configure Apex branding, resource library, mentor network and journey stages'],
-          ['Pilot', 'Launch with an initial cohort, gather feedback, tune the AI recommendations'],
-          ['Rollout', 'Extend to all Apex startups, mentors and partners'],
-          ['Optimize', 'Use analytics to refine the program and expand capabilities'],
-        ].map(([t, d], i) => (
-          <div key={t} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-            <span className="shrink-0 h-9 w-9 rounded-full flex items-center justify-center font-bold" style={{ background: `${C.navy}14`, color: C.navy, fontSize: 16 }}>{i + 1}</span>
-            <div>
-              <div style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>{t}</div>
-              <div style={{ fontSize: 14.5, color: C.body, lineHeight: 1.45 }}>{d}</div>
-            </div>
-          </div>
-        ))}
-      </Frame>
+      <ApexRoadmapPage />
     ),
   },
   {
@@ -294,21 +279,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'team',
     node: (
-      <Frame code="22" label="Our Team" accent={C.emerald}>
-        <Title sub="Who you will work with.">Startup Factory Hub leadership</Title>
-        {[
-          ['Khalia Padilla', 'Chief Executive Officer'],
-          ['Ricardo Font', 'Chief Operating Officer'],
-          ['James Stuber', 'Legal'],
-          ['Dominic Catrambone', 'Chief Financial Officer'],
-          ['N. MacDonnell Ulsch', 'Senior Advisor'],
-        ].map(([n, r]) => (
-          <div key={n} className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-            <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>{n}</span>
-            <span style={{ fontSize: 14.5, color: C.muted, fontWeight: 600 }}>{r}</span>
-          </div>
-        ))}
-      </Frame>
+      <ApexTeamPage />
     ),
   },
   {
