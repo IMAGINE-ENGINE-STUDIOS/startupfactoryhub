@@ -48,6 +48,7 @@ export const THEMES: Theme[] = [
   T('radial-gradient(ellipse at 0% 0%, rgba(163,230,53,0.16) 0%, transparent 50%), linear-gradient(180deg,#071a0e 0%,#030d07 100%)', 'rgba(16,52,28,0.7)', '#a3e635', '#4ade80', '#facc15', 'diagonal', 'outline', BadgeDollarSign, 'genius grants --trl --industry', 'funding_ai://grants', 'NON-DILUTIVE · AI MATCHED'),
   T('radial-gradient(circle at 80% 10%, rgba(244,114,182,0.18) 0%, transparent 45%), radial-gradient(circle at 0% 100%, rgba(99,102,241,0.18) 0%, transparent 50%), linear-gradient(180deg,#120c2c 0%,#090617 100%)', 'rgba(40,28,84,0.66)', '#f472b6', '#818cf8', '#fcd34d', 'rings', 'glow', PlaneLanding, 'sfh softlanding --country', 'soft_landing://markets', 'NEW MARKET · SAME SUPPORT'),
   T('radial-gradient(ellipse at 100% 100%, rgba(52,211,153,0.16) 0%, transparent 50%), linear-gradient(180deg,#0e1512 0%,#070b09 100%)', 'rgba(24,40,33,0.78)', '#34d399', '#fb923c', '#e2e8f0', 'lines', 'gradient', FileBarChart, 'sfh impact --export', 'impact_report://export', 'COLLECTED LIVE · EXPORT READY'),
+  T('radial-gradient(ellipse at 15% 0%, rgba(192,132,252,0.20) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(203,213,225,0.10) 0%, transparent 55%), linear-gradient(180deg,#140a24 0%,#08050f 100%)', 'rgba(38,22,64,0.72)', '#c084fc', '#e2e8f0', '#22d3ee', 'diagonal', 'gradient', Sparkles, 'sfh brand --tenant apex', 'apex.innovation://journey', 'APEX BRANDED · SFH POWERED'),
   T('radial-gradient(ellipse at 85% 0%, rgba(167,139,250,0.22) 0%, transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(232,121,249,0.14) 0%, transparent 55%), linear-gradient(180deg,#160a2e 0%,#0a0518 100%)', 'rgba(46,22,92,0.72)', '#a78bfa', '#e879f9', '#fbbf24', 'grid', 'gradient', Code2, 'imagine build --app', 'imagine_engine://builder', 'PROMPT · BUILD · PUBLISH'),
 ];
 
@@ -259,16 +260,39 @@ const MODULE_ICONS: LucideIcon[][] = [
 ];
 const MENTOR_TAGS = ['PROFILES_AND_BOOKING', 'RECORDS_AND_FEEDBACK'];
 
+
+/** Mock of the platform's Journey tab as Apex would see it, white-labeled. */
+const BrandedJourney = ({ th }: { th: Theme }) => (
+  <div className="flex-1 min-h-0 flex flex-col rounded-xl overflow-hidden" style={{ background: 'rgba(5,8,18,0.82)', border: BORDER, boxShadow: `0 30px 60px -30px rgba(0,0,0,0.8), 0 0 40px ${th.a}18` }}>
+    <div className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: BORDER, background: `linear-gradient(90deg, ${th.a}22, transparent)` }}>
+      <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
+      <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.18em', color: DIM }}>INNOVATION PLATFORM</span>
+      <span className="ml-auto rounded-full px-2.5 py-0.5" style={{ fontFamily: MONO, fontSize: 9.5, color: th.a, border: `1px solid ${th.a}55` }}>apex.innovation</span>
+    </div>
+    <div className="flex items-center gap-1.5 px-4 py-2" style={{ borderBottom: BORDER }}>
+      {['Home', 'Journey', 'Resources', 'Mentors', 'Investors', 'Events'].map((t) => (
+        <span key={t} className="rounded-full px-3 py-1" style={{ fontSize: 11.5, fontWeight: 600, color: t === 'Journey' ? '#0b0614' : DIM, background: t === 'Journey' ? th.a : 'transparent', border: t === 'Journey' ? 'none' : BORDER }}>{t}</span>
+      ))}
+    </div>
+    <div className="flex-1 min-h-0 flex flex-col p-3">
+      <JourneyBlock th={th} wide />
+    </div>
+    <div className="px-4 py-2 flex justify-between" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.18em', color: FAINT }}>
+      <span>APEX ACCELERATORS · STARTUP JOURNEY</span><span style={{ color: th.a }}>POWERED BY STARTUP FACTORY HUB</span>
+    </div>
+  </div>
+);
+
 export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string }) => {
   const th = THEMES[index] ?? THEMES[2];
   const Icon = th.icon;
   const accents = [th.a, th.b];
   const factIcons = [ListChecks, Star, Activity];
-  const rawSpecial = f.map ? 'map' : f.no === '04' ? 'journey' : f.no === '05' ? 'admin' : f.no === '07' ? 'analytics' : null;
+  const rawSpecial = f.map ? 'map' : f.no === '04' ? 'journey' : f.no === '05' ? 'admin' : f.no === '07' ? 'analytics' : f.no === '13' ? 'brand' : null;
   const special = part === 'main' ? null : rawSpecial;
   const detail = part === 'detail';
   const tags = f.no === '02' ? MENTOR_TAGS : ['HOW_IT_WORKS', 'WHAT_APEX_GAINS'];
-  const compact = special === 'journey' || special === 'admin' || special === 'analytics';
+  const compact = special === 'brand' || special === 'journey' || special === 'admin' || special === 'analytics';
 
   return (
     <ScaledA4>
@@ -376,10 +400,11 @@ export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; 
               {special === 'journey' && <JourneyBlock th={th} wide={detail} />}
               {special === 'admin' && <AdminDashboard th={th} />}
               {special === 'analytics' && <AnalyticsBlock th={th} />}
+              {special === 'brand' && <BrandedJourney th={th} />}
             </div>
           )}
 
-          {special !== 'journey' && special !== 'analytics' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
+          {special !== 'journey' && special !== 'analytics' && special !== 'brand' && <div className="mt-5 flex items-center gap-4 rounded-xl px-5 py-3.5" style={{ background: `${th.a}0f`, border: `1px solid ${th.a}40` }}>
             <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 30, height: 30, background: th.a }}><ListChecks className="h-4 w-4" style={{ color: '#050a12' }} /></div>
             <p style={{ fontFamily: MONO, fontSize: 16, letterSpacing: '0.02em', color: TEXT, lineHeight: 1.45 }}>{f.quote || th.status}</p>
           </div>}

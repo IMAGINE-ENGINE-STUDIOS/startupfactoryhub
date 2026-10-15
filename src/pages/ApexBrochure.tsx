@@ -233,7 +233,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     key: 'conclusion',
     node: <UnifiedPlatformPage logo={sfhLogo} url={CONTACT_URL} />,
   },
-  ...FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05'
+  ...FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05' || f.no === '13'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="main" /> },
        { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" /> }]
     : f.no === '12'
