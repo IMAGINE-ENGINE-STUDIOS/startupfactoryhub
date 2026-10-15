@@ -30,39 +30,42 @@ const Shell = ({ code, label, children }: { code: string; label: string; childre
 );
 
 const TEAM = [
-  { n: 'Khalia Padilla', r: 'Chief Executive Officer', img: khalia.url },
-  { n: 'Ricardo Font', r: 'Chief Operating Officer', img: ricardo.url },
-  { n: 'Dominic Catrambone', r: 'Chief Financial Officer', img: catrambone.url },
-  { n: 'James Stuber', r: 'Legal', img: stuber.url },
-  { n: 'N. MacDonnell Ulsch', r: 'Senior Advisor', img: ulsch.url },
+  { n: 'Khalia Padilla', r: 'Chief Executive Officer', img: khalia.url, li: 'https://www.linkedin.com/in/khaliapadilla/', h: 'linkedin.com/in/khaliapadilla', bio: 'Founder & CEO, Imagine Engine venture studio. CEO & Co-Founder, Lightware Technologies (photonic networks). VC investor building AI-powered accelerators; former advisor, USF Muma Design Thinking Program.' },
+  { n: 'Ricardo Font', r: 'Chief Operating Officer', img: ricardo.url, li: 'https://www.linkedin.com/in/ricardo-font-952034248/', h: 'linkedin.com/in/ricardo-font', bio: 'Chairman of the Board, Startup Factory Hub. Managing Partner, Decahedron Ventures. Business Advisor, Startupbootcamp. Physicist and inventor in photonics, aerospace and fintech.' },
+  { n: 'Dominic Catrambone', r: 'Chief Financial Officer', img: catrambone.url, li: 'https://www.linkedin.com/in/dom-catrambone/', h: 'linkedin.com/in/dom-catrambone', bio: '40+ years of executive leadership in financial services, banking and investment management. Former CEO and President; founded an NYSE-listed ETF organization. Senior Strategy Consultant, Pathfinder.' },
+  { n: 'James Stuber', r: 'Legal', img: stuber.url, li: 'https://www.linkedin.com/in/jamesstuber', h: 'linkedin.com/in/jamesstuber', bio: 'Attorney and entrepreneur, 40+ years. Founding Managing Partner, Security Capital Partners. Legislative Counsel, Coalition for a Prosperous America. Former Hogan & Hartson; Georgetown J.D.' },
+  { n: 'N. MacDonnell Ulsch', r: 'Senior Advisor', img: ulsch.url, li: 'https://www.linkedin.com/in/n-macdonnell-ulsch-38abb21', h: 'linkedin.com/in/n-macdonnell-ulsch', bio: 'Cybersecurity and national security expert, 30+ years. Former Senior Managing Director, PwC; founder & CEO, ZeroPoint Risk Research. Guest Lecturer, West Point; Research Fellow, Boston College.' },
 ];
 
-const Member = ({ m, i, big }: { m: typeof TEAM[number]; i: number; big?: boolean }) => (
-  <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(148,163,184,0.22)', background: 'rgba(15,23,42,0.6)', boxShadow: '0 20px 40px -20px rgba(34,211,238,0.35)' }}>
-    <div className="relative" style={{ aspectRatio: big ? '4 / 4.2' : '4 / 4.4' }}>
+const Member = ({ m, i }: { m: typeof TEAM[number]; i: number }) => (
+  <div className="relative flex-1 min-h-0 flex rounded-xl overflow-hidden" style={{ border: '1px solid rgba(148,163,184,0.22)', background: 'rgba(15,23,42,0.62)', boxShadow: '0 14px 30px -18px rgba(34,211,238,0.4)' }}>
+    <div className="relative shrink-0 h-full" style={{ aspectRatio: '1 / 1' }}>
       <img src={m.img} alt={m.n} decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 45%, rgba(5,9,20,0.95))' }} />
-      <span className="absolute top-2 left-2 rounded px-1.5 py-0.5" style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.15em', color: CY, background: 'rgba(5,9,20,0.7)', border: `1px solid ${CY}55` }}>ID-0{i + 1}</span>
-      <div className="absolute inset-x-3 bottom-2.5">
-        <div style={{ fontSize: big ? 17 : 14.5, fontWeight: 800, color: '#f8fafc', lineHeight: 1.15 }}>{m.n}</div>
-        <div style={{ fontFamily: MONO, fontSize: big ? 10.5 : 9.5, letterSpacing: '0.12em', color: PU, marginTop: 3, textTransform: 'uppercase' }}>{m.r}</div>
-      </div>
+      <div className="absolute inset-y-0 right-0 w-[3px]" style={{ background: `linear-gradient(180deg, ${CY}, ${PU})` }} />
     </div>
-    <div className="h-[3px]" style={{ background: `linear-gradient(90deg, ${CY}, ${PU})` }} />
+    <div className="min-w-0 flex-1 flex flex-col justify-center px-4 py-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <span style={{ fontSize: 17, fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>{m.n}</span>
+        <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.15em', color: CY }}>ID-0{i + 1}</span>
+      </div>
+      <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.12em', color: PU, marginTop: 2, textTransform: 'uppercase' }}>{m.r}</div>
+      <p style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4, marginTop: 4 }}>{m.bio}</p>
+      <a href={m.li} target="_blank" rel="noopener noreferrer" onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className="mt-1.5 inline-flex items-center gap-1.5 self-start" style={{ fontSize: 11, color: CY, textDecoration: 'none' }}>
+        <span className="inline-flex items-center justify-center rounded-[3px]" style={{ width: 15, height: 15, background: CY, color: '#050914', fontSize: 9.5, fontWeight: 800 }}>in</span>
+        <span style={{ fontFamily: MONO }}>{m.h}</span>
+      </a>
+    </div>
   </div>
 );
 
 export const ApexTeamPage = () => (
   <Shell code="22" label="Our Team">
-    <h2 className="mt-5" style={{ fontFamily: SERIF, fontSize: 40, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#f8fafc' }}>
-      Startup Factory Hub<br /><span style={{ background: `linear-gradient(90deg, ${CY}, ${PU})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>leadership</span>
+    <h2 className="mt-4" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#f8fafc' }}>
+      Startup Factory Hub <span style={{ background: `linear-gradient(90deg, ${CY}, ${PU})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>leadership</span>
     </h2>
-    <p className="mt-2" style={{ fontSize: 15.5, color: '#94a3b8' }}>Who you will work with.</p>
-    <div className="mt-5 grid grid-cols-2 gap-3">
-      {TEAM.slice(0, 2).map((m, i) => <Member key={m.n} m={m} i={i} big />)}
-    </div>
-    <div className="mt-3 grid grid-cols-3 gap-3">
-      {TEAM.slice(2).map((m, i) => <Member key={m.n} m={m} i={i + 2} />)}
+    <p className="mt-1" style={{ fontSize: 14.5, color: '#94a3b8' }}>Who you will work with.</p>
+    <div className="mt-3 flex-1 min-h-0 flex flex-col gap-2">
+      {TEAM.map((m, i) => <Member key={m.n} m={m} i={i} />)}
     </div>
   </Shell>
 );
