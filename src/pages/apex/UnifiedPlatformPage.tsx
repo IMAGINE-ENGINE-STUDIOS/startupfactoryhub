@@ -24,7 +24,7 @@ export const UnifiedPlatformPage = ({ logo, url }: { logo: string; url: string }
 
     <div className="relative z-10 flex flex-col h-full px-[7%] pt-[6%] pb-[5%]">
       <div className="flex items-center justify-between" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.26em', color: NEO }}>
-        <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEO, boxShadow: `0 0 8px ${NEO}` }} />SFH://CONCLUSION</span>
+        <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEO, boxShadow: `0 0 8px ${NEO}` }} />SFH://PLATFORM</span>
         <span style={{ color: '#4ade80aa' }}>SYSTEM ONLINE</span>
       </div>
       <h2 className="mt-4" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 30, fontWeight: 700, lineHeight: 1.08, color: '#f0fdf4' }}>
