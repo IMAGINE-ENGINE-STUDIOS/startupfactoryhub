@@ -39,18 +39,18 @@ const TEAM = [
 
 const Member = ({ m, i }: { m: typeof TEAM[number]; i: number }) => (
   <div className="relative flex-1 min-h-0 flex rounded-xl overflow-hidden" style={{ border: '1px solid rgba(148,163,184,0.22)', background: 'rgba(15,23,42,0.62)', boxShadow: '0 14px 30px -18px rgba(34,211,238,0.4)' }}>
-    <div className="relative shrink-0 h-full" style={{ aspectRatio: '1 / 1' }}>
+    <div className="relative shrink-0 h-full" style={{ width: 84 }}>
       <img src={m.img} alt={m.n} decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
       <div className="absolute inset-y-0 right-0 w-[3px]" style={{ background: `linear-gradient(180deg, ${CY}, ${PU})` }} />
     </div>
-    <div className="min-w-0 flex-1 flex flex-col justify-center px-4 py-2">
+    <div className="min-w-0 flex-1 flex flex-col justify-center px-3 py-1 overflow-hidden">
       <div className="flex items-baseline justify-between gap-2">
-        <span style={{ fontSize: 17, fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>{m.n}</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>{m.n}</span>
         <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.15em', color: CY }}>ID-0{i + 1}</span>
       </div>
-      <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.12em', color: PU, marginTop: 2, textTransform: 'uppercase' }}>{m.r}</div>
-      <p style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4, marginTop: 4 }}>{m.bio}</p>
-      <a href={m.li} target="_blank" rel="noopener noreferrer" onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className="mt-1.5 inline-flex items-center gap-1.5 self-start" style={{ fontSize: 11, color: CY, textDecoration: 'none' }}>
+      <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.12em', color: PU, marginTop: 1, textTransform: 'uppercase' }}>{m.r}</div>
+      <p style={{ fontSize: 10.5, color: '#cbd5e1', lineHeight: 1.3, marginTop: 2, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{m.bio}</p>
+      <a href={m.li} target="_blank" rel="noopener noreferrer" onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className="mt-1 inline-flex items-center gap-1.5 self-start" style={{ fontSize: 10, color: CY, textDecoration: 'none' }}>
         <span className="inline-flex items-center justify-center rounded-[3px]" style={{ width: 15, height: 15, background: CY, color: '#050914', fontSize: 9.5, fontWeight: 800 }}>in</span>
         <span style={{ fontFamily: MONO }}>{m.h}</span>
       </a>
@@ -60,11 +60,11 @@ const Member = ({ m, i }: { m: typeof TEAM[number]; i: number }) => (
 
 export const ApexTeamPage = () => (
   <Shell code="22" label="Our Team">
-    <h2 className="mt-4" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#f8fafc' }}>
+    <h2 className="mt-3" style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#f8fafc' }}>
       Startup Factory Hub <span style={{ background: `linear-gradient(90deg, ${CY}, ${PU})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>leadership</span>
     </h2>
-    <p className="mt-1" style={{ fontSize: 14.5, color: '#94a3b8' }}>Who you will work with.</p>
-    <div className="mt-3 flex-1 min-h-0 flex flex-col gap-2">
+    <p className="mt-0.5" style={{ fontSize: 12.5, color: '#94a3b8' }}>Who you will work with.</p>
+    <div className="mt-2 flex-1 min-h-0 flex flex-col gap-1.5">
       {TEAM.map((m, i) => <Member key={m.n} m={m} i={i} />)}
     </div>
   </Shell>
