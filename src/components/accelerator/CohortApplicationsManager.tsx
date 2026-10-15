@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { openDeckUrl, normalizeDeckUrl } from '@/lib/deckUrl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -387,7 +388,7 @@ export const CohortApplicationsManager = ({
                           variant="ghost" 
                           size="icon"
                           className="h-8 w-8"
-                          onClick={(e) => { e.stopPropagation(); window.open(app.pitch_deck_url!, '_blank'); }}
+                          onClick={(e) => { e.stopPropagation(); openDeckUrl(app.pitch_deck_url!); }}
                         >
                           <FileText className="w-4 h-4" />
                         </Button>
@@ -511,7 +512,7 @@ export const CohortApplicationsManager = ({
                   </div>
                   <div className="flex items-center gap-1">
                     {app.pitch_deck_url && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(app.pitch_deck_url!, '_blank')}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openDeckUrl(app.pitch_deck_url!)}>
                         <FileText className="w-3 h-3" />
                       </Button>
                     )}
@@ -600,7 +601,7 @@ export const CohortApplicationsManager = ({
                       </Button>
                     )}
                     {app.pitch_deck_url && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(app.pitch_deck_url!, '_blank')}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openDeckUrl(app.pitch_deck_url!)}>
                         <FileText className="w-3 h-3" />
                       </Button>
                     )}
@@ -735,7 +736,7 @@ export const CohortApplicationsManager = ({
                           variant="ghost" 
                           size="icon"
                           className="h-8 w-8"
-                          onClick={(e) => { e.stopPropagation(); window.open(app.pitch_deck_url!, '_blank'); }}
+                          onClick={(e) => { e.stopPropagation(); openDeckUrl(app.pitch_deck_url!); }}
                         >
                           <FileText className="w-4 h-4" />
                         </Button>

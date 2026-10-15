@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { normalizeDeckUrl } from '@/lib/deckUrl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -222,7 +223,7 @@ export const PortfolioStartupDialog = ({
                 )}
                 {startup.company?.pitch_deck_url && (
                   <Button variant="outline" size="sm" asChild>
-                    <a href={startup.company.pitch_deck_url} target="_blank" rel="noopener noreferrer">
+                    <a href={normalizeDeckUrl(startup.company.pitch_deck_url) || undefined} target="_blank" rel="noopener noreferrer">
                       <FileText className="w-4 h-4 mr-2" />
                       Pitch Deck
                       <ExternalLink className="w-3 h-3 ml-1" />

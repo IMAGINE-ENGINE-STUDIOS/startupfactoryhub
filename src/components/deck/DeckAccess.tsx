@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { openDeckUrl, normalizeDeckUrl } from '@/lib/deckUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,7 @@ export function DeckViewerButton({ ownerId, label = 'Pitch Deck' }: { ownerId: s
     <div>
       <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><FileText className="h-4 w-4" />{label}</h4>
       {s.deck_url ? (
-        <Button onClick={() => window.open(s.deck_url!, '_blank')} variant="outline" className="w-full gap-2">
+        <Button onClick={() => openDeckUrl(s.deck_url!)} variant="outline" className="w-full gap-2">
           <ExternalLink className="h-4 w-4" /> View {label}
         </Button>
       ) : s.pending ? (
