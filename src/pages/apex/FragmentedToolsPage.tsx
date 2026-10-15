@@ -3,7 +3,7 @@
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
-import { ArrowUpRight, Check, Coins, Compass, EyeOff, FileSpreadsheet, FolderOpen, Gift, GraduationCap, Handshake, Library, Mail, Search, Triangle, Users } from 'lucide-react';
+import { Building2, Rocket, ArrowUpRight, Check, Coins, Compass, EyeOff, FileSpreadsheet, FolderOpen, Gift, GraduationCap, Handshake, Library, Mail, Search, Triangle, Users } from 'lucide-react';
 import { ScaledA4 } from './PartnersPages';
 import { loadFlipFonts } from '@/components/brochure-studio/fonts';
 
@@ -43,10 +43,10 @@ const Tool = ({ icon: I, label, tint, style, children, rot }: { icon: typeof Mai
 const bar = (w: string) => <div className="rounded-full mb-[5px]" style={{ height: 4, width: w, background: '#ECECEA' }} />;
 
 const PROBLEMS = [
-  { icon: Search, tint: V, title: 'Search debt', text: 'Founders lose time searching for resources and guidance instead of building.' },
-  { icon: Users, tint: '#2563EB', title: 'Invisible mentorship', text: 'Mentor relationships are hard to manage, and their impact is hard to see.' },
-  { icon: Compass, tint: '#D97706', title: 'Generic guidance', text: "Guidance is generic rather than tailored to a startup's industry and stage." },
-  { icon: EyeOff, tint: '#DC2626', title: 'No visibility', text: 'Apex has limited visibility into startup progress, resource use and outcomes.' },
+  { icon: Search, tint: V, title: 'Missed connections', text: 'Founders struggle to find the right investors, mentors and partners for their stage.' },
+  { icon: Users, tint: '#2563EB', title: 'Isolated players', text: 'Investors, mentors and corporates each work in their own circle, unaware of each other.' },
+  { icon: Compass, tint: '#D97706', title: 'Duplicated effort', text: 'Programs and partners repeat work because no one sees what others already offer.' },
+  { icon: EyeOff, tint: '#DC2626', title: 'No shared view', text: 'Apex cannot see how players interact, or which connections drive outcomes.' },
 ];
 
 const PILLARS = [
@@ -63,7 +63,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
       <div className="absolute inset-0 flex flex-col [&>*]:shrink-0" style={{ background: '#FFFFFF', fontFamily: BODY }}>
         <div style={{ height: 3, background: 'linear-gradient(90deg,#7C3AED,#3B82F6,#06B6D4)' }} />
         <div className="flex items-center justify-between" style={{ padding: '22px 40px 0' }}>
-          <span className="flex items-center gap-[8px]" style={mono(10)}><span className="rounded-full" style={{ width: 6, height: 6, background: '#A78BFA' }} />System audit — fragmentation</span>
+          <span className="flex items-center gap-[8px]" style={mono(10)}><span className="rounded-full" style={{ width: 6, height: 6, background: '#A78BFA' }} />Ecosystem audit — fragmentation</span>
           <span style={mono(10)}>04 / {total} · The opportunity</span>
         </div>
         <div className="flex justify-center" style={{ marginTop: 18 }}>
@@ -75,7 +75,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
         <div style={{ padding: '24px 52px 0' }}>
           <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 52, fontWeight: 800, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#0A0A0A' }}>The cost of<br />fragmented ecosystems</h2>
           <p style={{ marginTop: 18, maxWidth: '58ch', fontSize: 18, lineHeight: 1.6, color: '#3F3F46' }}>
-            Most accelerators run on fragmented tools: resources in shared drives, mentors scheduled over email, progress tracked in spreadsheets, and partner offers startups never find. This creates four problems.
+            Startups, investors, mentors, corporates, government and support programs all work toward the same goal, but rarely connect with each other. Each player operates in its own silo. This creates four problems.
           </p>
         </div>
 
@@ -85,18 +85,10 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
             <line x1="200" y1="80" x2="580" y2="80" stroke="#D4D4D0" strokeDasharray="5 5" />
             <line x1="200" y1="196" x2="580" y2="196" stroke="#D4D4D0" strokeDasharray="5 5" />
           </svg>
-          <Tool icon={FolderOpen} label="Drive" tint="#7C3AED" rot={-1.2} style={{ left: 40, top: 24 }}>{bar('80%')}{bar('55%')}</Tool>
-          <Tool icon={FileSpreadsheet} label="Sheets" tint="#16A34A" rot={1.2} style={{ left: 40, top: 130 }}>
-            <div className="grid grid-cols-3 gap-[4px]">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded" style={{ height: 10, background: '#F1F1EF', border: '1px solid #E8E8E6' }} />)}</div>
-            <span className="absolute rounded" style={{ right: 12, bottom: 12, padding: '2px 6px', background: '#FEF3C7', ...mono(8.5, '#92400E', { letterSpacing: '0.04em', textTransform: 'none' }) }}>v4_final.xlsx</span>
-          </Tool>
-          <Tool icon={Mail} label="Email" tint="#2563EB" rot={1.4} style={{ right: 40, top: 24 }}>
-            <span className="absolute rounded-full" style={{ right: 12, top: 14, padding: '1px 7px', background: '#FFF7ED', border: '1px solid #FED7AA', ...mono(9, '#C2410C', { letterSpacing: 0 }) }}>12</span>
-            {bar('70%')}{bar('45%')}
-          </Tool>
-          <Tool icon={Gift} label="Offers" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 130 }}>
-            {['Hidden offer', 'Hidden offer'].map((h, i) => <div key={i} className="rounded text-center mb-[4px]" style={{ padding: '3px 0', border: '1px dashed #E0E0DC', ...mono(8, '#A1A1AA') }}>{h}</div>)}
-          </Tool>
+          <Tool icon={Rocket} label="Startups" tint="#7C3AED" rot={-1.2} style={{ left: 40, top: 24 }}>{bar('80%')}{bar('55%')}</Tool>
+          <Tool icon={Coins} label="Investors" tint="#16A34A" rot={1.2} style={{ left: 40, top: 130 }}>{bar('65%')}{bar('40%')}</Tool>
+          <Tool icon={GraduationCap} label="Mentors" tint="#2563EB" rot={1.4} style={{ right: 40, top: 24 }}>{bar('70%')}{bar('45%')}</Tool>
+          <Tool icon={Building2} label="Corporates" tint="#EF4444" rot={-1.5} style={{ right: 40, top: 130 }}>{bar('60%')}{bar('35%')}</Tool>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full" style={{ width: 92, height: 92, border: '1px dashed #E0E0DC' }}>
             <div className="flex items-center justify-center rounded-full" style={{ width: 54, height: 54, background: '#EEF2FF', border: '1px solid #E0E7FF' }}><Triangle size={18} color="#0A0A0A" /></div>
           </div>
@@ -131,7 +123,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
         <div className="mt-auto" style={{ background: 'linear-gradient(135deg,#0B0B12,#111827 60%,#0B1A1F)', borderTop: '1px solid #7C3AED', padding: '20px 34px 18px' }}>
           <div className="flex items-center gap-[12px]">
             <span className="flex items-center gap-[8px] rounded-full" style={{ padding: '5px 12px', border: '1px solid rgba(255,255,255,0.15)', ...mono(9.5, '#E5E7EB') }}><span className="rounded-full" style={{ width: 5, height: 5, background: '#22D3EE' }} />Integrated platform</span>
-            <span style={mono(9.5, '#6B7280', { textTransform: 'none', letterSpacing: '0.04em' })}>— Unified system that fixes fragmentation</span>
+            <span style={mono(9.5, '#6B7280', { textTransform: 'none', letterSpacing: '0.04em' })}>— Connects every ecosystem player</span>
           </div>
           <div className="grid grid-cols-4" style={{ marginTop: 18 }}>
             {PILLARS.map(({ icon: I, t, d }) => (
@@ -144,7 +136,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
           </div>
           <div className="flex items-center gap-[12px]" style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <span className="flex items-center justify-center rounded-full" style={{ width: 18, height: 18, background: '#3B82F6' }}><Check size={11} color="#fff" /></span>
-            <span style={{ fontSize: 13, color: '#E5E7EB' }}>Single source of truth for accelerators and founders</span>
+            <span style={{ fontSize: 13, color: '#E5E7EB' }}>One connected ecosystem for every player</span>
           </div>
         </div>
         <div className="flex items-center justify-between" style={{ padding: '12px 34px', background: '#FCFCFA', borderTop: '1px solid #E8E8E6' }}>
