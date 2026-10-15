@@ -48,7 +48,7 @@ const startupMemberships: {
       "Post on the social feed & resource map",
       "Full resource library access",
       "Internships & volunteering roles",
-      "Technology transfer & certified courses",
+      "IP & technology access, certified courses",
     ],
   },
 
