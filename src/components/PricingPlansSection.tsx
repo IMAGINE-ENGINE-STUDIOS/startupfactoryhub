@@ -92,6 +92,19 @@ const startupMemberships: {
       "Strategic Business Intelligence & live security monitoring on the global map",
     ],
   },
+  {
+    key: "advisor",
+    image: imgPlanGlobal,
+    tagline: "A dedicated membership for advisors who guide, introduce and invest alongside our venture builder community.",
+    bestFor: "Senior operators, exited founders, venture partners and fractional executives",
+    features: [
+      "500+ partner perks, tools and ecosystem benefits",
+      "25% commission on referrals and program fees",
+      "Introduce startups directly to our Investment Committee",
+      "Speaking opportunities at Startup Factory Hub events",
+      "Advisor profile, mentor matching and booking tools",
+    ],
+  },
 ];
 
 /**
@@ -508,7 +521,7 @@ const PricingPlansSection = () => {
 
           {planTab === "startup" && (
             <p className="mx-auto mb-6 max-w-2xl text-center text-xs sm:text-sm text-muted-foreground">
-              Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join Venture Network at $250/mo.
+              Subscriptions for startups, students and advisors in the ecosystem — community, workspace, global office access and the dedicated Venture Advisor membership.
             </p>
           )}
           {planTab === "accelerator" && (
