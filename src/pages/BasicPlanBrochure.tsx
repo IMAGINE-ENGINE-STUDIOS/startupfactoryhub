@@ -250,7 +250,7 @@ const PageFrame = ({
       style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
       <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
       <div className="flex items-center justify-between gap-6 font-mono text-[11px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
-        <span className="text-slate-500 truncate">Startup Factory Hub · Membership Program</span>
+        <span className="text-slate-500 truncate">Startup Factory Hub · Venture Network</span>
         <span className="shrink-0" style={{ color: accent }}>MEMBERSHIP · MONTHLY</span>
       </div>
     </div>
@@ -439,7 +439,7 @@ const CheckoutPanel = ({
         background: 'linear-gradient(140deg, rgba(103,232,249,0.22), rgba(255,255,255,0.06))',
         border: '1px solid rgba(103,232,249,0.55)',
       }}>
-        <div className="font-mono text-[12px] uppercase tracking-[0.3em] text-white/70">Membership · monthly</div>
+        <div className="font-mono text-[12px] uppercase tracking-[0.3em] text-white/70">Venture Network · monthly</div>
         <div className="flex items-end gap-3 mt-2">
           <span className="text-[72px] leading-none font-black text-white">{monthly}</span>
           <span className="text-white/60 mb-3 text-lg">/ month</span>
@@ -449,7 +449,7 @@ const CheckoutPanel = ({
 
       <div className="mt-6 space-y-3 text-[15px] text-white/75">
         <div className="flex items-center justify-between">
-          <span>Startup Factory Hub · Membership</span>
+          <span>Startup Factory Hub · Venture Network</span>
           <span className="font-bold text-white">{monthly}</span>
         </div>
         <div className="flex items-center justify-between">
@@ -553,14 +553,14 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
             <Frame />
             <div className="absolute inset-0 z-10 flex flex-col justify-center px-16">
               <div className="font-mono text-[15px] tracking-[0.45em] uppercase mb-6" style={{ color: '#67e8f9' }}>
-                Startup Factory Hub · Membership
+                Startup Factory Hub · Venture Network
               </div>
               <h1 className="font-black tracking-tight text-white" style={{
                 fontSize: 'clamp(54px, 9vw, 96px)', lineHeight: 0.94,
                 textShadow: `0 0 60px ${NEON.cyan}55`,
               }}>
-                ONE<br />MEMBERSHIP.<br />
-                <span style={{ color: '#67e8f9' }}>THE WHOLE<br />ECOSYSTEM.</span>
+                ONE<br />NETWORK.<br />
+                <span style={{ color: '#67e8f9' }}>THE WHOLE<br />VENTURE ECOSYSTEM.</span>
               </h1>
               <motion.div
                 className="mt-8 h-[3px]"
@@ -568,8 +568,8 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 initial={{ width: 0 }} animate={{ width: 360 }} transition={{ duration: 1.2, ease: 'easeOut' }}
               />
               <p className="mt-8 text-[23px] text-white/85 max-w-2xl leading-relaxed">
-                Feed, resource map, acceleration programs, events,
-                investor access, internships, volunteering and certified courses —
+                Join our venture builder community: feed, resource map, acceleration programs, events,
+                investor access, IP & technology access, internships, volunteering and certified courses —
                 unlocked with a single membership.
               </p>
 
@@ -577,7 +577,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 <div className="inline-block rounded-2xl px-10 py-7" style={{
                   background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(16px)',
                 }}>
-                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Membership</div>
+                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Venture Network</div>
                   <div className="text-[72px] leading-none font-black text-white mt-1">{monthly}</div>
                   <div className="text-white/60 text-base mt-2">per month · cancel anytime</div>
                 </div>
@@ -896,7 +896,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                   { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                   { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
                   { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
-                  { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
+                  { img: eventPlugAndPlay, kicker: 'Investor Access', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
                 ].map((e, i) => (
                   <motion.div
                     key={e.title}
@@ -1233,7 +1233,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               <div className="grid grid-cols-1 gap-5 flex-1">
                 {[
                   { i: Rocket, t: 'Accelerator Operations', b: 'End-to-end program design, batch management, founder support and results reporting.' },
-                  { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary operating system for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
+                  { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary operating system for members, founders, mentors and investors. Live investor access. Strategic Business Intelligence.' },
                   { i: GraduationCap, t: 'Mentor & Expert Network', b: '150+ active mentors. 300+ investors. A directory of 1,500+ investors. A relationship-building machine.' },
                   { i: DollarSign, t: 'Investor & Capital Relationships', b: 'Curated capital pipelines and demo-day infrastructure tuned from Series A through growth stages.' },
                   { i: Users, t: 'Community Access', b: 'Plug into a curated network of founders, mentors, investors and corporate partners — built for introductions, not impressions.' },
