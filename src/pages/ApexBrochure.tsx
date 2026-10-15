@@ -167,7 +167,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
     node: (
-      <section className="absolute inset-0 flex flex-col items-center justify-between text-center py-[9%] px-[8%] overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 40%, #7c3aed55 0%, transparent 55%), radial-gradient(ellipse at 15% 100%, #a855f733 0%, transparent 50%), radial-gradient(ellipse at 90% 0%, #c4b5fd22 0%, transparent 45%), linear-gradient(160deg,#07050f 0%,#140b2b 50%,#05040b 100%)' }}>
+      <section data-bs-lock="" className="absolute inset-0 flex flex-col items-center justify-between text-center py-[9%] px-[8%] overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 40%, #7c3aed55 0%, transparent 55%), radial-gradient(ellipse at 15% 100%, #a855f733 0%, transparent 50%), radial-gradient(ellipse at 90% 0%, #c4b5fd22 0%, transparent 45%), linear-gradient(160deg,#07050f 0%,#140b2b 50%,#05040b 100%)' }}>
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#a78bfa14 1px, transparent 1px), linear-gradient(90deg, #a78bfa14 1px, transparent 1px)', backgroundSize: '36px 36px', maskImage: 'radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 45%, black 20%, transparent 75%)' }} />
         {[300, 420, 560].map((d, i) => (
           <div key={d} className="absolute rounded-full pointer-events-none" style={{ width: d, height: d, left: '50%', top: '44%', transform: 'translate(-50%,-50%)', border: `1px ${i === 1 ? 'dashed' : 'solid'} ${i === 0 ? '#c4b5fd66' : '#a78bfa2e'}`, boxShadow: i === 0 ? '0 0 60px #7c3aed55, inset 0 0 60px #7c3aed33' : undefined }} />
