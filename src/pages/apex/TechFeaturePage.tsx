@@ -287,7 +287,7 @@ export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; 
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: DIM, lineHeight: 1.7 }}>
-              <div>CAPABILITY {f.no} / 13 // {f.section.toUpperCase()}</div>
+              <div>CAPABILITY {f.no} / 14 // {f.section.toUpperCase()}</div>
               <div style={{ color: FAINT }}>EDITION 2026</div>
             </div>
             <img src={APEX_LOGO} alt="APEX Accelerators" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
