@@ -274,8 +274,8 @@ const BrandedJourney = ({ th }: { th: Theme }) => (
         <span key={t} className="rounded-full px-3 py-1" style={{ fontSize: 11.5, fontWeight: 600, color: t === 'Journey' ? '#0b0614' : DIM, background: t === 'Journey' ? th.a : 'transparent', border: t === 'Journey' ? 'none' : BORDER }}>{t}</span>
       ))}
     </div>
-    <div className="flex-1 min-h-0 flex flex-col p-3" style={{ zoom: 0.92 }}>
-      <JourneyBlock th={th} />
+    <div className="flex-1 min-h-0 flex flex-col p-3">
+      <JourneyBlock th={th} wide />
     </div>
     <div className="px-4 py-2 flex justify-between" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.18em', color: FAINT }}>
       <span>APEX ACCELERATORS · STARTUP JOURNEY</span><span style={{ color: th.a }}>POWERED BY STARTUP FACTORY HUB</span>
