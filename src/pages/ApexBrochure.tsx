@@ -38,8 +38,8 @@ const C = {
 };
 
 /* ---------- Building blocks ---------- */
-const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
-  <div ref={ref} className="overflow-hidden" style={{ background: '#ffffff' }}>{children}</div>
+const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode; hard?: boolean }>(({ children, hard }, ref) => (
+  <div ref={ref} data-density={hard ? 'hard' : 'soft'} className="overflow-hidden" style={{ background: '#ffffff' }}>{children}</div>
 ));
 BookPage.displayName = 'BookPage';
 
