@@ -20,6 +20,7 @@ import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 import { EcosystemOrbit } from './apex/EcosystemOrbit';
+import { UnifiedPlatformPage } from './apex/UnifiedPlatformPage';
 import { ApexPerksPage } from './apex/PerksPage';
 import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
 import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
@@ -300,23 +301,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   },
   {
     key: 'conclusion',
-    node: (
-      <Frame code="23" label="Conclusion">
-        <Title sub="Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.">
-          One unified innovation platform
-        </Title>
-        <div className="my-2"><EcosystemOrbit logo={sfhLogo} size={250} /></div>
-        <div className="flex items-center gap-4 rounded-xl p-4" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-          <div className="p-2 rounded-lg" style={{ background: '#ffffff', border: `1px solid ${C.line}` }}>
-            <QRCodeSVG value={CONTACT_URL} size={72} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>Scan to open this proposal</span>
-            <span className="flex items-center gap-2" style={{ fontSize: 15, color: C.body }}><Mail className="h-4 w-4" style={{ color: C.teal }} />startupfactoryhub.com</span>
-          </div>
-        </div>
-      </Frame>
-    ),
+    node: <UnifiedPlatformPage logo={sfhLogo} url={CONTACT_URL} />,
   },
 ];
 /** Back hard cover: same design as the front cover. */
