@@ -48,7 +48,7 @@ type PlanCard = {
 const PLANS: PlanCard[] = [
   {
     key: 'basic',
-    name: 'Basic Plan',
+    name: 'Venture Network',
     icon: Zap,
     gradient: 'from-blue-500 to-cyan-500',
     glow: 'shadow-blue-500/20',
@@ -72,7 +72,7 @@ const PLANS: PlanCard[] = [
     glow: 'shadow-primary/20',
     description: 'Adds local Startup Factory HUB Desk coworking access across all locations.',
     bestFor: 'Founders needing flexible workspace + virtual resources',
-    features: ['All Basic Plan features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
+    features: ['All Venture Network features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
     monthly: MEMBERSHIP_TIERS.self_paced_office.price,
     yearly: MEMBERSHIP_TIERS.self_paced_office.yearly_price,
     action: 'legacy',
