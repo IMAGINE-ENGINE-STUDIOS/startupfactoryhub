@@ -48,6 +48,7 @@ export const THEMES: Theme[] = [
   T('radial-gradient(ellipse at 0% 0%, rgba(163,230,53,0.16) 0%, transparent 50%), linear-gradient(180deg,#071a0e 0%,#030d07 100%)', 'rgba(16,52,28,0.7)', '#a3e635', '#4ade80', '#facc15', 'diagonal', 'outline', BadgeDollarSign, 'genius grants --trl --industry', 'funding_ai://grants', 'NON-DILUTIVE · AI MATCHED'),
   T('radial-gradient(circle at 80% 10%, rgba(244,114,182,0.18) 0%, transparent 45%), radial-gradient(circle at 0% 100%, rgba(99,102,241,0.18) 0%, transparent 50%), linear-gradient(180deg,#120c2c 0%,#090617 100%)', 'rgba(40,28,84,0.66)', '#f472b6', '#818cf8', '#fcd34d', 'rings', 'glow', PlaneLanding, 'sfh softlanding --country', 'soft_landing://markets', 'NEW MARKET · SAME SUPPORT'),
   T('radial-gradient(ellipse at 100% 100%, rgba(52,211,153,0.16) 0%, transparent 50%), linear-gradient(180deg,#0e1512 0%,#070b09 100%)', 'rgba(24,40,33,0.78)', '#34d399', '#fb923c', '#e2e8f0', 'lines', 'gradient', FileBarChart, 'sfh impact --export', 'impact_report://export', 'COLLECTED LIVE · EXPORT READY'),
+  T('radial-gradient(ellipse at 85% 0%, rgba(167,139,250,0.22) 0%, transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(232,121,249,0.14) 0%, transparent 55%), linear-gradient(180deg,#160a2e 0%,#0a0518 100%)', 'rgba(46,22,92,0.72)', '#a78bfa', '#e879f9', '#fbbf24', 'grid', 'gradient', Code2, 'imagine build --app', 'imagine_engine://builder', 'PROMPT · BUILD · PUBLISH'),
 ];
 
 const patternStyle = (p: Pattern, color: string): React.CSSProperties => {
@@ -258,7 +259,7 @@ const MODULE_ICONS: LucideIcon[][] = [
 ];
 const MENTOR_TAGS = ['PROFILES_AND_BOOKING', 'RECORDS_AND_FEEDBACK'];
 
-export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: number; total: string; part?: 'main' | 'detail' }) => {
+export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string }) => {
   const th = THEMES[index] ?? THEMES[2];
   const Icon = th.icon;
   const accents = [th.a, th.b];
@@ -318,6 +319,7 @@ export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: 
                 <div style={{ fontFamily: MONO, fontSize: 14, color: DIM }}><span style={{ color: th.a }}>$</span> {th.cmd}</div>
                 <div className="mt-3 rounded-lg p-4" style={{ background: th.panel, border: BORDER }}>
                   <div className="flex items-center gap-2" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: th.b, textTransform: 'uppercase' }}><Icon className="h-3.5 w-3.5" />{f.section}</div>
+                  {image && <img src={image} alt="" className="mt-3 mx-auto rounded-full" style={{ width: 120, height: 120, boxShadow: `0 0 30px ${th.a}88` }} />}
                   <p className="mt-2" style={{ fontSize: 18, lineHeight: 1.5, color: TEXT }}>{f.lead || f.deck}</p>
                 </div>
                 <div className="mt-3 rounded-lg p-3" style={{ background: `${th.a}10`, border: `1px solid ${th.a}40` }}>
@@ -391,3 +393,6 @@ export const TechFeaturePage = ({ f, index, total, part }: { f: Feature; index: 
     </ScaledA4>
   );
 };
+
+/** Theme index for the Imagine Engine page (last theme). */
+export const IMAGINE_THEME_INDEX = THEMES.length - 1;
