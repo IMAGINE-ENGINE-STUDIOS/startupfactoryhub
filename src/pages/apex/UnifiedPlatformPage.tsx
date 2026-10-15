@@ -34,10 +34,10 @@ export const UnifiedPlatformPage = ({ logo, url }: { logo: string; url: string }
         Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.
       </p>
       <div className="flex-1 min-h-0 flex items-center justify-center my-2">
-        <EcosystemOrbit logo={logo} size={250} />
+        <EcosystemOrbit logo={logo} size={340} />
       </div>
       <div className="flex items-center gap-4 rounded-lg p-3" style={{ background: 'rgba(2,20,12,0.8)', border: `1px solid ${NEO}55`, boxShadow: `0 0 24px ${NEO}22` }}>
-        <div className="p-1.5 rounded" style={{ background: '#f0fdf4' }}><QRCodeSVG value={url} size={68} /></div>
+        <div className="p-1.5 rounded" style={{ background: '#f0fdf4' }}><QRCodeSVG value={url} size={60} /></div>
         <div className="flex flex-col gap-1">
           <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: NEO }}>&gt; SCAN_TO_OPEN</span>
           <span style={{ fontSize: 16, fontWeight: 700, color: '#f0fdf4' }}>Open this proposal</span>
