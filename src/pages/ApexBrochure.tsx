@@ -232,11 +232,13 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   ...FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="main" /> },
        { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" /> }]
+    : f.no === '12'
+    ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} /> },
+       { key: 'imagine-engine', node: <ApexImagineEnginePage total={TOTAL} /> }]
     : f.no === '06'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} /> },
        { key: 'perks', node: <ApexPerksPage /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
-  { key: 'imagine-engine', node: <ApexImagineEnginePage total={TOTAL} /> },
   {
     key: 'how',
     node: (
