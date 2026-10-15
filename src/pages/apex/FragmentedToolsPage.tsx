@@ -1,5 +1,5 @@
 /**
- * APEX brochure page 04 — "The cost of fragmented tools" (system-audit design).
+ * APEX brochure page 04 — "The cost of fragmented ecosystems" (system-audit design).
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
@@ -73,7 +73,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
         </div>
 
         <div style={{ padding: '24px 52px 0' }}>
-          <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 52, fontWeight: 800, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#0A0A0A' }}>The cost of<br />fragmented tools</h2>
+          <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 52, fontWeight: 800, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#0A0A0A' }}>The cost of<br />fragmented ecosystems</h2>
           <p style={{ marginTop: 18, maxWidth: '58ch', fontSize: 18, lineHeight: 1.6, color: '#3F3F46' }}>
             Most accelerators run on fragmented tools: resources in shared drives, mentors scheduled over email, progress tracked in spreadsheets, and partner offers startups never find. This creates four problems.
           </p>
