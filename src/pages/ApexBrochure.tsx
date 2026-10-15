@@ -23,7 +23,7 @@ import { EcosystemOrbit } from './apex/EcosystemOrbit';
 import { UnifiedPlatformPage } from './apex/UnifiedPlatformPage';
 import { ApexPerksPage } from './apex/PerksPage';
 import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
-import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
+import { ApexTeamPage, ApexRoadmapPage, ApexNextStepsPage } from './apex/TeamRoadmapPages';
 import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
@@ -279,17 +279,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   },
   {
     key: 'next',
-    node: (
-      <Frame code="21" label="Next Steps">
-        <Title>Getting started</Title>
-        <Bullets accent={C.teal} items={[
-          'Discovery session with the Apex team to confirm priorities and current resources',
-          'Live platform demonstration',
-          'Agree on the pilot scope and success metrics',
-          'Finalize the partnership terms',
-        ]} />
-      </Frame>
-    ),
+    node: <ApexNextStepsPage />,
   },
   {
     key: 'team',

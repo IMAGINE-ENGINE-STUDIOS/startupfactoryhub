@@ -103,3 +103,49 @@ export const ApexRoadmapPage = () => (
     </div>
   </Shell>
 );
+
+const NEXT_STEPS = [
+  { t: 'Discovery', tag: 'Align', d: 'Discovery session with the Apex team to confirm priorities and current resources.' },
+  { t: 'Demo', tag: 'See it live', d: 'Live platform demonstration of the full Startup Factory Hub experience.' },
+  { t: 'Scope', tag: 'Define', d: 'Agree on the setup scope and success metrics.' },
+  { t: 'Agreement', tag: 'Sign', d: 'Finalize the partnership terms.' },
+];
+const EM = '#059669';
+const IN = '#6366f1';
+
+/** Light-themed "Getting started" page, same structure as the roadmap. */
+export const ApexNextStepsPage = () => (
+  <section className="absolute inset-0 flex flex-col overflow-hidden px-[7%] pt-[6%] pb-[5%]" style={{
+    background: 'radial-gradient(ellipse at 90% 0%, rgba(99,102,241,0.14) 0%, transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(16,185,129,0.14) 0%, transparent 55%), linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%)',
+    color: '#1e293b',
+  }}>
+    <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `linear-gradient(${IN}0d 1px, transparent 1px), linear-gradient(90deg, ${IN}0d 1px, transparent 1px)`, backgroundSize: '28px 28px' }} />
+    <div className="relative z-10 flex flex-col h-full">
+      <div className="flex items-center justify-between" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.26em', color: EM, fontWeight: 700 }}>
+        <span>SEC // 21 · NEXT STEPS</span><span style={{ color: IN }}>APEX × SFH</span>
+      </div>
+      <h2 className="mt-3" style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#0f172a' }}>
+        Getting <span style={{ background: `linear-gradient(90deg, ${EM}, ${IN})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>started</span>
+      </h2>
+      <p className="mt-1" style={{ fontSize: 13, color: '#475569', lineHeight: 1.35 }}>Four simple steps to bring Startup Factory Hub to Apex.</p>
+      <div className="relative mt-3 flex-1 min-h-0 flex flex-col gap-2">
+        <div className="absolute top-3 bottom-3" style={{ left: 17, width: 2, background: `linear-gradient(180deg, ${EM}, ${IN})` }} />
+        {NEXT_STEPS.map((p, i) => {
+          const c = i % 2 ? IN : EM;
+          return (
+            <div key={p.t} className="relative flex-1 flex gap-3 items-stretch min-h-0">
+              <div className="relative z-10 shrink-0 h-9 w-9 rounded-full flex items-center justify-center" style={{ background: '#ffffff', border: `2px solid ${c}`, boxShadow: `0 0 12px ${c}44`, fontFamily: MONO, fontSize: 13, fontWeight: 700, color: c }}>0{i + 1}</div>
+              <div className="flex-1 min-w-0 min-h-0 overflow-hidden rounded-xl px-3.5 py-2 flex flex-col justify-center" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(99,102,241,0.18)', boxShadow: '0 8px 24px -16px rgba(15,23,42,0.25)' }}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>{p.t}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.16em', color: c, textTransform: 'uppercase' }}>Step {i + 1} · {p.tag}</span>
+                </div>
+                <div style={{ fontSize: 16, color: '#334155', lineHeight: 1.4, marginTop: 3 }}>{p.d}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+);
