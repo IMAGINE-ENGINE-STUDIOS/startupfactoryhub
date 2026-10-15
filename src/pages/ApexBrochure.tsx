@@ -17,6 +17,7 @@ import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 import { EditorialPage, FEATURES } from './apex/ApexEditorial';
 import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
+import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
@@ -219,17 +220,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'opportunity',
     node: (
-      <Frame code="04" label="The Opportunity" accent={C.navy}>
-        <Title sub="Most accelerators run on fragmented tools: resources in shared drives, mentors scheduled over email, progress tracked in spreadsheets, and partner offers startups never find. This creates four problems.">
-          The cost of fragmented tools
-        </Title>
-        <Bullets accent={C.navy} items={[
-          'Founders lose time searching for resources and guidance instead of building.',
-          'Mentor relationships are hard to manage, and their impact is hard to see.',
-          'Guidance is generic rather than tailored to a startup\'s industry and stage.',
-          'Apex has limited visibility into startup progress, resource use and outcomes.',
-        ]} />
-      </Frame>
+      <FragmentedToolsPage total={TOTAL} />
     ),
   },
   ...FEATURES.flatMap((f, i) => f.no === '04' || f.no === '05'
