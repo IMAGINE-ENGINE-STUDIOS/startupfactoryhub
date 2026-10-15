@@ -15,6 +15,14 @@ const TIER_MAP: Record<string, string> = {
   // Basic Plan (monthly + yearly billing of the same tier)
   "prod_VBmemZuuco0yOB": "basic",
   "prod_VBmgE3TZ1f0O7F": "basic",
+  // Venture Advisor (monthly + yearly)
+  "prod_VRmbmRgvi4SxOH": "advisor",
+  "prod_VRmbX0aH067NJx": "advisor",
+  // Current-catalog products
+  "prod_U3oDmSPMy4Lher": "community",
+  "prod_U3oENLbFqHIiRA": "self_paced_office",
+  "prod_U5cjB9wci6HRRg": "global_access",
+  "prod_U5ck4Q7g8fNZ9L": "corporate",
 };
 
 serve(async (req) => {
@@ -124,7 +132,16 @@ serve(async (req) => {
               .eq("is_official", true)
               .maybeSingle();
 
-            const commissionRate = officialStatus ? (officialStatus.referral_commission_rate || 0.25) : 0.2;
+            // Active Venture Advisor members earn 25% on referrals.
+            const { data: referrerSub } = await supabaseClient
+              .from("user_subscriptions")
+              .select("tier, status")
+              .eq("user_id", referrerAccount.user_id)
+              .maybeSingle();
+            const isAdvisorMember = referrerSub?.tier === "advisor" && referrerSub?.status === "active";
+            const commissionRate = officialStatus
+              ? (officialStatus.referral_commission_rate || 0.25)
+              : isAdvisorMember ? 0.25 : 0.2;
             
             // Calculate subscription amount from price
             const priceAmount = sub.items.data[0].price.unit_amount || 0;

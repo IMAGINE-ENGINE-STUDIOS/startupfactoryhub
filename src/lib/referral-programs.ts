@@ -51,8 +51,8 @@ export const REFERRAL_PROGRAMS: ReferralProgramDefinition[] = [
       "Refer an advisor to the platform. Commission is paid on their first paid month.",
     buildUrl: (code) => `${BASE}/auth?ref=${code}&program=advisor`,
     commissionCents: 0,
-    commissionLabel: "20% of first month",
-    programValueLabel: "Advisor membership",
+    commissionLabel: "20% of first month (25% for Venture Advisor members)",
+    programValueLabel: "Venture Advisor membership · $550/mo",
   },
   {
     id: "subscription",

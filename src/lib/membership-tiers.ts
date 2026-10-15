@@ -44,7 +44,21 @@ export const MEMBERSHIP_TIERS = {
     yearly_product_id: "prod_U5clTYgMxNAnYI",
     yearly_price_id: "price_1T7RVuK5N1RcUVuY3vVk6mWC",
   },
+  // Separate advisor membership — 25% referral commission, Investment
+  // Committee introductions and event speaking opportunities.
+  advisor: {
+    name: "Venture Advisor",
+    price: 550,
+    product_id: "prod_VRmbmRgvi4SxOH",
+    price_id: "price_1UQt2SK5N1RcUVuY0JWxLe4S",
+    yearly_price: 5940,
+    yearly_product_id: "prod_VRmbX0aH067NJx",
+    yearly_price_id: "price_1UQt2lK5N1RcUVuYJ2yPwA8C",
+  },
 } as const;
+
+/** Referral commission rate earned by an active Venture Advisor member. */
+export const ADVISOR_REFERRAL_RATE = 0.25;
 
 export type MembershipTier = keyof typeof MEMBERSHIP_TIERS;
 
