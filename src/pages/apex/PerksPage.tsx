@@ -17,21 +17,21 @@ export const ApexPerksPage = () => (
       backgroundImage: `linear-gradient(${AMBER}10 1px, transparent 1px), linear-gradient(90deg, ${AMBER}10 1px, transparent 1px)`,
       backgroundSize: '28px 28px',
     }} />
-    <div className="relative z-10 flex flex-col h-full px-[6%] pt-[5%] pb-[4%]">
+    <div className="relative z-10 flex flex-col h-full px-[5%] pt-[4%] pb-[3%]">
       <div className="flex items-center justify-between font-mono uppercase" style={{ fontSize: 11, letterSpacing: '0.28em' }}>
         <span style={{ color: AMBER, fontWeight: 700 }}>partner_perks://network</span>
         <span style={{ color: '#f5d0fe', opacity: 0.8 }}>{PERKS.length} live perks</span>
       </div>
-      <h2 className="mt-3" style={{ fontSize: 26, fontWeight: 900, lineHeight: 1.1, color: '#fff' }}>
+      <h2 className="mt-3" style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.1, color: '#fff' }}>
         Perks already in the network
       </h2>
-      <p className="mt-1.5" style={{ fontSize: 14, lineHeight: 1.4, color: '#fbd5e2' }}>
+      <p className="mt-1.5" style={{ fontSize: 12.5, lineHeight: 1.35, color: '#fbd5e2' }}>
         Credits, discounts and partner programs every founder can use today from the Tools tab.
       </p>
       <div className="mt-3 h-[2px] w-16 rounded-full" style={{ background: `linear-gradient(90deg, ${AMBER}, ${ROSE})` }} />
-      <div className="mt-3 flex-1 min-h-0 grid grid-cols-3 gap-1.5 content-start">
+      <div className="mt-2 flex-1 min-h-0 grid grid-cols-3 gap-1.5" style={{ gridTemplateRows: `repeat(${Math.ceil(PERKS.length / 3)}, minmax(0, 1fr))` }}>
         {PERKS.map((p) => (
-          <div key={p.name} className="flex gap-2 rounded-lg p-2 min-w-0" style={{
+          <div key={p.name} className="flex items-center gap-2 rounded-lg px-2 py-1 min-w-0 min-h-0 overflow-hidden" style={{
             background: 'rgba(74,18,40,0.62)', border: `1px solid ${AMBER}33`,
           }}>
             <img
