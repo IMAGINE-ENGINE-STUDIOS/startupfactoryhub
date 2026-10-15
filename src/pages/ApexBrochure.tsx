@@ -157,7 +157,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '27';
+const TOTAL = '26';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
