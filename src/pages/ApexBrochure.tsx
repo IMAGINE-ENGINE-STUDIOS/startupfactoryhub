@@ -234,7 +234,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     : f.no === '06'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} /> },
        { key: 'perks', node: <ApexPerksPage /> },
-       { key: 'imagine-engine', node: <ApexImagineEnginePage /> }]
+       { key: 'imagine-engine', node: <ApexImagineEnginePage total={TOTAL} /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
   {
     key: 'how',
