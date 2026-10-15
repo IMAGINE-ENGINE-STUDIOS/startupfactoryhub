@@ -229,6 +229,10 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       <FragmentedToolsPage total={TOTAL} />
     ),
   },
+  {
+    key: 'conclusion',
+    node: <UnifiedPlatformPage logo={sfhLogo} url={CONTACT_URL} />,
+  },
   ...FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05'
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="main" /> },
        { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" /> }]
@@ -300,10 +304,6 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'nasdaq',
     node: (<div className="relative w-full h-full overflow-hidden bg-white"><PartnersNasdaqPage /></div>),
-  },
-  {
-    key: 'conclusion',
-    node: <UnifiedPlatformPage logo={sfhLogo} url={CONTACT_URL} />,
   },
 ];
 /** Back hard cover: same design as the front cover. */
