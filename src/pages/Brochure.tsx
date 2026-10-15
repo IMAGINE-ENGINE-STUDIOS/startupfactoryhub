@@ -822,8 +822,8 @@ export default function Brochure() {
               {[
                 { icon: Star, name: "Free", target: "Entry-level founders", color: "slate", features: ["Limited platform access", "Self-paced resources", "Community forums", "Monthly newsletter"] },
                 { icon: Zap, name: "Community", target: "Early MVP-stage founders", color: "cyan", features: ["Full digital platform", "Virtual events & workshops", "Mentor interactions", "AI tools (limited)", "HUB coworking (1 country)"] },
-                { icon: Building2, name: "Self-Paced + Office", target: "Founders needing workspace", color: "teal", popular: true, features: ["All Community features", "Local HUB coworking access", "Earth Intelligence data", "Eligible for Accelerated Tier"] },
-                { icon: Crown, name: "Global Access", target: "Globally distributed teams", color: "purple", features: ["All platform features", "Global office (130+ countries)", "5,600+ coworking sites", "Mentor + event access", "Earth Intelligence data"] },
+                { icon: Building2, name: "Venture Resident", target: "Founders building on-site", color: "teal", popular: true, features: ["All Venture Network benefits", "Dedicated hub desks, all locations", "Venture studio acceleration", "Strategic Business Intelligence", "Accelerated Tier priority"] },
+                { icon: Crown, name: "Global Venture Partner", target: "Scaling, cross-border founders", color: "purple", features: ["All Venture Resident features", "Private office in 130+ countries", "Investor deal flow & mentorship", "International soft landing", "Co-investment opportunities"] },
                 { icon: Users, name: "Corporate", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option"] },
                 { icon: Rocket, name: "In-Person Cohort", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
               ].map((tier, i) => (
