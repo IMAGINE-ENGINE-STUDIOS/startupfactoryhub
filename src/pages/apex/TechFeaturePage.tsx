@@ -153,8 +153,10 @@ const JourneyBlock = ({ th, wide }: { th: Theme; wide?: boolean }) => (
   </div>
 );
 
+// Mirrors the real Startup Factory Hub admin console: glass top bar, pill tab
+// strip with the platform's admin sections, KPI tiles, stage chart and feed.
 const AdminDashboard = ({ th }: { th: Theme }) => {
-  const nav: [LucideIcon, string][] = [[LayoutDashboard, 'Overview'], [Layers, 'Resources'], [Users, 'Mentors & advisors'], [GraduationCap, 'Cohorts'], [Route, 'Pathways'], [Activity, 'Activity']];
+  const tabs = ['Overview', 'Users', 'Investors', 'Startups', 'Accelerators', 'Partners', 'Resources', 'Events', 'Jobs', 'Moderation', 'Analytics', 'Subscriptions', 'Sales', 'Emails', 'Districts', 'Referral partners', 'Workspace bookings', 'Soft landing', 'VC intros'];
   const kpis: [string, string, string][] = [['Active startups', '48', th.a], ['Mentors', '126', th.b], ['Cohorts', '3', th.c], ['Resources', '640', th.a]];
   const stages = [['Idea', 9], ['MVP', 12], ['Tech readiness', 8], ['Commercial', 10], ['Investment', 6], ['Growth', 3]] as const;
   const feed: [LucideIcon, string, string][] = [
@@ -162,54 +164,56 @@ const AdminDashboard = ({ th }: { th: Theme }) => {
     [Route, 'Pathway assigned', 'Commercialization'],
   ];
   const max = Math.max(...stages.map((s) => s[1]));
+  const glass = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' } as const;
   return (
-    <div className="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col" style={{ background: '#0b111c', border: BORDER, boxShadow: '0 30px 60px -30px rgba(0,0,0,0.8)' }}>
-      <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: BORDER }}>
-        {['#ef4444', '#f59e0b', '#22c55e'].map((c) => <span key={c} className="rounded-full" style={{ width: 8, height: 8, background: c }} />)}
-        <span className="ml-3" style={{ fontFamily: MONO, fontSize: 10.5, color: DIM }}>apex.startupfactoryhub.com/admin</span>
-        <span className="ml-auto rounded-full px-2 py-0.5" style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: th.c, border: `1px solid ${th.c}55` }}>SAMPLE VIEW</span>
+    <div className="mx-auto w-[86%] rounded-2xl overflow-hidden flex flex-col" style={{ background: 'linear-gradient(180deg,#0b1222,#070b15)', border: BORDER, boxShadow: '0 24px 50px -28px rgba(0,0,0,0.8)' }}>
+      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: BORDER }}>
+        {['#ef4444', '#f59e0b', '#22c55e'].map((c) => <span key={c} className="rounded-full" style={{ width: 6, height: 6, background: c }} />)}
+        <span className="ml-2" style={{ fontFamily: MONO, fontSize: 9, color: DIM }}>startupfactoryhub.com/admin</span>
+        <span className="ml-auto rounded-full px-2 py-0.5" style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: th.c, border: `1px solid ${th.c}55` }}>SAMPLE VIEW</span>
       </div>
-      <div className="flex-1 min-h-0 grid" style={{ gridTemplateColumns: '170px 1fr' }}>
-        <aside className="p-3 flex flex-col gap-1" style={{ borderRight: BORDER, background: 'rgba(15,23,42,0.6)' }}>
-          {nav.map(([Icon, l], i) => (
-            <div key={l} className="flex items-center gap-2 rounded-md px-2.5 py-2" style={{ fontSize: 14, color: i === 0 ? '#ffffff' : DIM, background: i === 0 ? `${th.a}1f` : 'transparent', border: i === 0 ? `1px solid ${th.a}44` : '1px solid transparent' }}>
-              <Icon className="h-3.5 w-3.5" style={{ color: i === 0 ? th.a : FAINT }} />{l}
+      <div className="px-3 pt-2.5 flex items-center gap-2">
+        <LayoutDashboard className="h-3.5 w-3.5" style={{ color: th.a }} />
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#ffffff' }}>Admin Dashboard</span>
+        <span style={{ fontSize: 9.5, color: DIM }}>Manage the platform, users and programs</span>
+      </div>
+      <div className="mx-3 mt-2 rounded-xl p-1 flex flex-wrap gap-1" style={glass}>
+        {tabs.map((t, i) => (
+          <span key={t} className="rounded-lg px-1.5 py-0.5" style={{ fontSize: 8.5, color: i === 0 ? '#ffffff' : DIM, background: i === 0 ? 'rgba(255,255,255,0.10)' : 'transparent', boxShadow: i === 0 ? `0 0 12px ${th.a}33` : 'none' }}>{t}</span>
+        ))}
+      </div>
+      <div className="p-3 flex flex-col gap-2">
+        <div className="grid grid-cols-4 gap-2">
+          {kpis.map(([l, v, c]) => (
+            <div key={l} className="rounded-lg p-2" style={glass}>
+              <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.12em', color: DIM, textTransform: 'uppercase' }}>{l}</div>
+              <div className="mt-0.5" style={{ fontFamily: MONO, fontSize: 16, fontWeight: 700, color: '#ffffff' }}>{v}</div>
+              <div className="mt-1 h-[2px] rounded-full" style={{ background: c, width: '60%' }} />
             </div>
           ))}
-        </aside>
-        <div className="p-4 flex flex-col gap-3 min-h-0">
-          <div className="grid grid-cols-4 gap-2">
-            {kpis.map(([l, v, c]) => (
-              <div key={l} className="rounded-lg p-2.5" style={{ background: 'rgba(30,41,59,0.6)', border: BORDER }}>
-                <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', color: DIM, textTransform: 'uppercase' }}>{l}</div>
-                <div className="mt-1" style={{ fontFamily: MONO, fontSize: 20, fontWeight: 700, color: '#ffffff' }}>{v}</div>
-                <div className="mt-1 h-[3px] rounded-full" style={{ background: c, width: '60%' }} />
-              </div>
-            ))}
-          </div>
-          <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
-            <div className="rounded-lg p-3 flex flex-col" style={{ background: 'rgba(30,41,59,0.6)', border: BORDER }}>
-              <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.16em', color: DIM }}>STARTUPS BY JOURNEY STAGE</div>
-              <div className="mt-2 flex-1 flex items-end gap-2">
-                {stages.map(([l, v], i) => (
-                  <div key={l} className="flex-1 flex flex-col items-center gap-1">
-                    <span style={{ fontFamily: MONO, fontSize: 9.5, color: TEXT }}>{v}</span>
-                    <div className="w-full rounded-t" style={{ height: `${(v / max) * 64}px`, background: `linear-gradient(180deg, ${[th.a, th.b, th.c][i % 3]}, ${[th.a, th.b, th.c][i % 3]}33)` }} />
-                    <span style={{ fontSize: 8.5, color: DIM, textAlign: 'center', lineHeight: 1.1 }}>{l}</span>
-                  </div>
-                ))}
-              </div>
+        </div>
+        <div className="grid gap-2" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+          <div className="rounded-lg p-2.5 flex flex-col" style={glass}>
+            <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '0.14em', color: DIM }}>STARTUPS BY JOURNEY STAGE</div>
+            <div className="mt-2 flex items-end gap-1.5" style={{ height: 70 }}>
+              {stages.map(([l, v], i) => (
+                <div key={l} className="flex-1 flex flex-col items-center gap-0.5">
+                  <span style={{ fontFamily: MONO, fontSize: 8.5, color: TEXT }}>{v}</span>
+                  <div className="w-full rounded-t" style={{ height: `${(v / max) * 42}px`, background: `linear-gradient(180deg, ${[th.a, th.b, th.c][i % 3]}, ${[th.a, th.b, th.c][i % 3]}33)` }} />
+                  <span style={{ fontSize: 7.5, color: DIM, textAlign: 'center', lineHeight: 1.1 }}>{l}</span>
+                </div>
+              ))}
             </div>
-            <div className="rounded-lg p-3" style={{ background: 'rgba(30,41,59,0.6)', border: BORDER }}>
-              <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.16em', color: DIM }}>PROGRAM ACTIVITY</div>
-              <div className="mt-2 flex flex-col gap-2">
-                {feed.map(([Icon, t, d]) => (
-                  <div key={t} className="flex items-center gap-2">
-                    <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 24, height: 24, background: `${th.a}18` }}><Icon className="h-3 w-3" style={{ color: th.a }} /></div>
-                    <div className="min-w-0"><div style={{ fontSize: 14, color: '#ffffff', lineHeight: 1.2 }}>{t}</div><div style={{ fontSize: 12.5, color: DIM }}>{d}</div></div>
-                  </div>
-                ))}
-              </div>
+          </div>
+          <div className="rounded-lg p-2.5" style={glass}>
+            <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '0.14em', color: DIM }}>PROGRAM ACTIVITY</div>
+            <div className="mt-2 flex flex-col gap-1.5">
+              {feed.map(([Icon, t, d]) => (
+                <div key={t} className="flex items-center gap-2">
+                  <div className="flex items-center justify-center rounded-md shrink-0" style={{ width: 20, height: 20, background: `${th.a}18` }}><Icon className="h-3 w-3" style={{ color: th.a }} /></div>
+                  <div className="min-w-0"><div style={{ fontSize: 11, color: '#ffffff', lineHeight: 1.2 }}>{t}</div><div style={{ fontSize: 9.5, color: DIM }}>{d}</div></div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
