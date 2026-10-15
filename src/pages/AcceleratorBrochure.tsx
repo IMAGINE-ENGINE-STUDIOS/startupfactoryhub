@@ -851,6 +851,257 @@ BatchRequestForm.displayName = 'BatchRequestForm';
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
+/** Shared with the APEX brochure. */
+export const PartnersNasdaqPage = () => (
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
+                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.7, ease: 'easeOut' }}
+                      className="relative flex-1 rounded-3xl overflow-hidden"
+                      style={{
+                        border: `1px solid ${NEON.lime}55`,
+                        boxShadow: `0 0 60px ${NEON.lime}25, inset 0 0 40px rgba(0,0,0,0.6)`,
+                      }}
+                    >
+                      {/* Full-bleed hero image */}
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `url(${nasdaqFeature})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }} />
+                      <div className="absolute inset-0" style={{
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.10) 0%, rgba(255,255,255,0.55) 42%, rgba(255,255,255,0.93) 72%, rgba(255,255,255,0.97) 100%)`,
+                      }} />
+                      <div className="absolute inset-0" style={{
+                        background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
+                      }} />
+                      <Scanlines />
+
+                      {/* Top-left live badge */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.25, duration: 0.5 }}
+                        className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
+                        style={{
+                          background: 'rgba(255,255,255,0.92)',
+                          backdropFilter: 'blur(8px)',
+                          border: `1px solid ${DEEP_LIME}55`,
+                          boxShadow: `0 6px 20px rgba(2,4,10,0.35)`,
+                        }}
+                      >
+                        <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
+                        <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
+                      </motion.div>
+
+                      {/* Bottom content panel */}
+                      <div className="absolute inset-x-0 bottom-0 z-10 px-8 pb-7 pt-6">
+                        <motion.div
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
+                        >
+                          <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// FEATURED</div>
+                          <h3 className="font-futuristic font-black leading-[1.05] mb-3" style={{
+                            fontSize: '34px',
+                            ...PLATINUM_TITLE,
+                            textShadow: 'none',
+                          }}>
+                            Startup Factory Hub<br />
+                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>on the Nasdaq Tower</span>
+                          </h3>
+                          <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
+                            Live broadcast in Times Square, New York — the ecosystem's brand projected on the Nasdaq Tower screen in front of millions.
+                          </p>
+                        </motion.div>
+
+                        {/* Inline metric strip */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.55, duration: 0.6, staggerChildren: 0.08 }}
+                          className="grid grid-cols-4 gap-3"
+                        >
+                          {[
+                            { k: '350K+', l: 'Daily viewers' },
+                            { k: 'NYC', l: 'Times Square' },
+                            { k: 'Global', l: 'Media reach' },
+                            { k: '24/7', l: 'Brand presence' },
+                          ].map((m, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, y: 16 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
+                              className="rounded-xl px-2.5 py-2.5 min-w-0"
+                              style={{
+                                background: 'rgba(255,255,255,0.9)',
+                                backdropFilter: 'blur(10px)',
+                                border: `1px solid ${DEEP_LIME}35`,
+                                boxShadow: `0 6px 18px rgba(2,4,10,0.18)`,
+                              }}
+                            >
+                              <div className="font-futuristic font-black text-base leading-none whitespace-nowrap" style={{ color: DEEP_LIME }}>{m.k}</div>
+                              <div className="font-mono text-[16px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+
+                  </PageFrame>
+                </A4Wrapper>
+);
+
+export const PartnersARPage = () => (
+                <A4Wrapper>
+                  <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
+                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+
+                    <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
+                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
+                      <MatrixLayer density={0.18} columns={30} tone="magenta" />
+
+                      <div className="absolute inset-0 flex flex-col justify-between p-8">
+                        <div className="flex justify-between items-start gap-6">
+                          <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>VR · LIVE EVENTS</span>
+                            </div>
+                            <div className="text-base text-slate-900 leading-relaxed font-medium">
+                              Our platform hosts any accelerator event in Virtual Reality: Demo Days, investor rounds, masterclasses and talent fairs in 3D venues with avatars, holographic stages and spatial networking. Attendees join from their browser or headset — no installs, no travel.
+                            </div>
+
+                          </GlassCard>
+                          <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
+                            <div>GLOBAL</div>
+                            <div>REMOTE + ON-SITE</div>
+                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
+                            Every accelerator event,<br /><span style={{ color: '#f9a8d4' }}>an immersive experience.</span>
+                          </h3>
+
+
+                          {/* AR ROVER VIEWPORT */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.7, ease: 'easeOut' }}
+                            className="relative rounded-2xl overflow-hidden mb-5"
+                            style={{
+                              height: '230px',
+                              border: `1px solid ${NEON.cyan}60`,
+                              boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
+                            }}
+                          >
+                            {/* @ts-ignore */}
+                            <model-viewer
+                              src={ROVER_GLB}
+                              ar
+                              ar-modes="webxr scene-viewer quick-look"
+                              ar-placement="floor"
+                              xr-environment
+                              camera-controls
+                              interaction-prompt="none"
+                              auto-rotate
+                              auto-rotate-delay="0"
+                              rotation-per-second="20deg"
+                              touch-action="none"
+                              exposure="1"
+                              shadow-intensity="1"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
+                            />
+                            <a
+                              href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
+                              style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
+                            >
+                              <Smartphone className="h-4 w-4" /> Launch Google XR
+                            </a>
+                            <div className="absolute inset-0 pointer-events-none" style={{
+                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
+                              zIndex: 11,
+                            }} />
+
+
+                            {/* AR reticle / HUD */}
+                            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
+                              {[
+                                'top-4 left-4 border-t-2 border-l-2',
+                                'top-4 right-4 border-t-2 border-r-2',
+                                'bottom-4 left-4 border-b-2 border-l-2',
+                                'bottom-4 right-4 border-b-2 border-r-2',
+                              ].map((cls, i) => (
+                                <div key={i} className={`absolute w-8 h-8 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                              ))}
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, inset 0 0 18px ${NEON.cyan}50` }} />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
+                            </div>
+
+                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
+                              background: 'rgba(255,255,255,0.55)',
+                              backdropFilter: 'blur(6px)',
+                              border: `1px solid ${NEON.cyan}70`,
+                              zIndex: 12,
+                            }}>
+                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
+                            </div>
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
+                              <div>OBJ · NASA ROVER</div>
+                              <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
+                            </div>
+                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
+
+                              <div>
+                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEW</div>
+                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
+                                  Mars Rover · Scanning
+                                </div>
+                              </div>
+                              <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
+                                <div>LAT −4.5°  LON 137.4°</div>
+                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          <div className="grid grid-cols-4 gap-4">
+                            {[
+                              { i: Smartphone, l: 'VR Demo Day', s: '3D stage, no install required' },
+                              { i: Box, l: 'Startup Pavilions', s: 'Navigable virtual booths' },
+                              { i: Globe2, l: 'Global Audience', s: 'Investors joining from anywhere' },
+                              { i: Sparkles, l: 'Holographic Speakers', s: 'Networking with avatars' },
+                            ].map((p, i) => (
+
+                              <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
+                                <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
+                                <div className="relative">
+                                  <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
+                                  <div className="font-futuristic font-black text-base text-slate-900 leading-tight">{p.l}</div>
+                                  <div className="font-mono text-[16px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
+                                </div>
+                              </GlassCard>
+                            ))}
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+);
+
 export default function AcceleratorBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
@@ -2031,256 +2282,14 @@ export default function AcceleratorBrochure() {
                    PAGE 10 — AR / IMMERSIVE
                   ==================================================== */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
-                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
-
-                    <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
-                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
-                      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
-                      <MatrixLayer density={0.18} columns={30} tone="magenta" />
-
-                      <div className="absolute inset-0 flex flex-col justify-between p-8">
-                        <div className="flex justify-between items-start gap-6">
-                          <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
-                            <div className="flex items-center gap-3 mb-3">
-                              <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>VR · LIVE EVENTS</span>
-                            </div>
-                            <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Our platform hosts any accelerator event in Virtual Reality: Demo Days, investor rounds, masterclasses and talent fairs in 3D venues with avatars, holographic stages and spatial networking. Attendees join from their browser or headset — no installs, no travel.
-                            </div>
-
-                          </GlassCard>
-                          <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
-                            <div>GLOBAL</div>
-                            <div>REMOTE + ON-SITE</div>
-                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
-                            Every accelerator event,<br /><span style={{ color: '#f9a8d4' }}>an immersive experience.</span>
-                          </h3>
-
-
-                          {/* AR ROVER VIEWPORT */}
-                          <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.7, ease: 'easeOut' }}
-                            className="relative rounded-2xl overflow-hidden mb-5"
-                            style={{
-                              height: '230px',
-                              border: `1px solid ${NEON.cyan}60`,
-                              boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
-                            }}
-                          >
-                            {/* @ts-ignore */}
-                            <model-viewer
-                              src={ROVER_GLB}
-                              ar
-                              ar-modes="webxr scene-viewer quick-look"
-                              ar-placement="floor"
-                              xr-environment
-                              camera-controls
-                              interaction-prompt="none"
-                              auto-rotate
-                              auto-rotate-delay="0"
-                              rotation-per-second="20deg"
-                              touch-action="none"
-                              exposure="1"
-                              shadow-intensity="1"
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
-                            />
-                            <a
-                              href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
-                              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
-                              style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
-                            >
-                              <Smartphone className="h-4 w-4" /> Launch Google XR
-                            </a>
-                            <div className="absolute inset-0 pointer-events-none" style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
-                              zIndex: 11,
-                            }} />
-
-
-                            {/* AR reticle / HUD */}
-                            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
-                              {[
-                                'top-4 left-4 border-t-2 border-l-2',
-                                'top-4 right-4 border-t-2 border-r-2',
-                                'bottom-4 left-4 border-b-2 border-l-2',
-                                'bottom-4 right-4 border-b-2 border-r-2',
-                              ].map((cls, i) => (
-                                <div key={i} className={`absolute w-8 h-8 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
-                              ))}
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, inset 0 0 18px ${NEON.cyan}50` }} />
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
-                            </div>
-
-                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
-                              background: 'rgba(255,255,255,0.55)',
-                              backdropFilter: 'blur(6px)',
-                              border: `1px solid ${NEON.cyan}70`,
-                              zIndex: 12,
-                            }}>
-                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
-                            </div>
-                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
-                              <div>OBJ · NASA ROVER</div>
-                              <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
-                            </div>
-                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
-
-                              <div>
-                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEW</div>
-                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
-                                  Mars Rover · Scanning
-                                </div>
-                              </div>
-                              <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
-                                <div>LAT −4.5°  LON 137.4°</div>
-                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
-                              </div>
-                            </div>
-                          </motion.div>
-
-                          <div className="grid grid-cols-4 gap-4">
-                            {[
-                              { i: Smartphone, l: 'VR Demo Day', s: '3D stage, no install required' },
-                              { i: Box, l: 'Startup Pavilions', s: 'Navigable virtual booths' },
-                              { i: Globe2, l: 'Global Audience', s: 'Investors joining from anywhere' },
-                              { i: Sparkles, l: 'Holographic Speakers', s: 'Networking with avatars' },
-                            ].map((p, i) => (
-
-                              <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
-                                <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
-                                <div className="relative">
-                                  <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
-                                  <div className="font-futuristic font-black text-base text-slate-900 leading-tight">{p.l}</div>
-                                  <div className="font-mono text-[16px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
-                                </div>
-                              </GlassCard>
-                            ))}
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
+                <PartnersARPage />
               </BookPage>
 
               {/* ====================================================
                    PAGE 12 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, ease: 'easeOut' }}
-                      className="relative flex-1 rounded-3xl overflow-hidden"
-                      style={{
-                        border: `1px solid ${NEON.lime}55`,
-                        boxShadow: `0 0 60px ${NEON.lime}25, inset 0 0 40px rgba(0,0,0,0.6)`,
-                      }}
-                    >
-                      {/* Full-bleed hero image */}
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `url(${nasdaqFeature})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }} />
-                      <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.10) 0%, rgba(255,255,255,0.55) 42%, rgba(255,255,255,0.93) 72%, rgba(255,255,255,0.97) 100%)`,
-                      }} />
-                      <div className="absolute inset-0" style={{
-                        background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
-                      }} />
-                      <Scanlines />
-
-                      {/* Top-left live badge */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -16 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.25, duration: 0.5 }}
-                        className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
-                        style={{
-                          background: 'rgba(255,255,255,0.92)',
-                          backdropFilter: 'blur(8px)',
-                          border: `1px solid ${DEEP_LIME}55`,
-                          boxShadow: `0 6px 20px rgba(2,4,10,0.35)`,
-                        }}
-                      >
-                        <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
-                        <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
-                      </motion.div>
-
-                      {/* Bottom content panel */}
-                      <div className="absolute inset-x-0 bottom-0 z-10 px-8 pb-7 pt-6">
-                        <motion.div
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
-                        >
-                          <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// FEATURED</div>
-                          <h3 className="font-futuristic font-black leading-[1.05] mb-3" style={{
-                            fontSize: '34px',
-                            ...PLATINUM_TITLE,
-                            textShadow: 'none',
-                          }}>
-                            Startup Factory Hub<br />
-                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>on the Nasdaq Tower</span>
-                          </h3>
-                          <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
-                            Live broadcast in Times Square, New York — the ecosystem's brand projected on the Nasdaq Tower screen in front of millions.
-                          </p>
-                        </motion.div>
-
-                        {/* Inline metric strip */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.55, duration: 0.6, staggerChildren: 0.08 }}
-                          className="grid grid-cols-4 gap-3"
-                        >
-                          {[
-                            { k: '350K+', l: 'Daily viewers' },
-                            { k: 'NYC', l: 'Times Square' },
-                            { k: 'Global', l: 'Media reach' },
-                            { k: '24/7', l: 'Brand presence' },
-                          ].map((m, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, y: 16 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
-                              className="rounded-xl px-2.5 py-2.5 min-w-0"
-                              style={{
-                                background: 'rgba(255,255,255,0.9)',
-                                backdropFilter: 'blur(10px)',
-                                border: `1px solid ${DEEP_LIME}35`,
-                                boxShadow: `0 6px 18px rgba(2,4,10,0.18)`,
-                              }}
-                            >
-                              <div className="font-futuristic font-black text-base leading-none whitespace-nowrap" style={{ color: DEEP_LIME }}>{m.k}</div>
-                              <div className="font-mono text-[16px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      </div>
-                    </motion.div>
-
-                  </PageFrame>
-                </A4Wrapper>
+                <PartnersNasdaqPage />
               </BookPage>
 
               {/* ====================================================

@@ -20,6 +20,7 @@ import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
 import { FragmentedToolsPage } from './apex/FragmentedToolsPage';
 import { TechFeaturePage } from './apex/TechFeaturePage';
 import { ApexTeamPage, ApexRoadmapPage } from './apex/TeamRoadmapPages';
+import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -281,6 +282,14 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     node: (
       <ApexTeamPage />
     ),
+  },
+  {
+    key: 'ar-events',
+    node: (<div className="relative w-full h-full overflow-hidden bg-white"><PartnersARPage /></div>),
+  },
+  {
+    key: 'nasdaq',
+    node: (<div className="relative w-full h-full overflow-hidden bg-white"><PartnersNasdaqPage /></div>),
   },
   {
     key: 'conclusion',
