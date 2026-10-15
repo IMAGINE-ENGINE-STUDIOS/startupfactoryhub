@@ -72,7 +72,7 @@ export const ApexTeamPage = () => (
 
 const PHASES = [
   { t: 'Setup', tag: 'Configure', d: 'Apex branding, resource library, mentor network and journey stages configured on the platform.', out: ['White-label platform', 'Resources loaded', 'Mentors onboarded'] },
-  { t: 'Pilot', tag: 'One state', d: 'Launch in a single state with an initial cohort to validate the model in the field.', out: ['First cohort live', 'Feedback loop', 'AI recommendations tuned'] },
+  { t: 'Pilot', tag: 'One state', d: 'Launch the platform in a single state to validate the model in the field with local startups, mentors and partners.', out: ['Live in one state', 'Feedback loop', 'AI recommendations tuned'] },
   { t: 'Scale', tag: 'All Apex', d: 'Extend to every Apex program, startup, mentor and partner.', out: ['All Apex centers', 'Shared reporting', 'Partner perks unlocked'] },
   { t: 'Nationwide', tag: 'Full adoption', d: 'Full nationwide adaptation across states and regions.', out: ['National coverage', 'Regional hubs', 'Unified analytics'] },
   { t: 'Optimize', tag: 'Continuous', d: 'Ongoing optimization and adjustment based on feedback and program data.', out: ['Impact reviews', 'Feature refinements', 'Expanded capabilities'] },
