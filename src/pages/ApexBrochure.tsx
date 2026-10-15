@@ -311,6 +311,8 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     ),
   },
 ];
+/** Back hard cover: same design as the front cover. */
+PAGES.push({ key: 'back-cover', node: PAGES[0].node });
 
 
 /* ---------- Page ---------- */
@@ -386,7 +388,7 @@ export default function ApexBrochure() {
             }}
           >
             {PAGES.map((p, i) => (
-              <BookPage key={p.key}>
+              <BookPage key={p.key} hard={i === 0 || i === PAGES.length - 1}>
                 <div className="relative w-full h-full">
                   <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
                 </div>
