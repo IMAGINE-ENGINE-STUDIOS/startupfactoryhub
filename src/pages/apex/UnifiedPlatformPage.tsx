@@ -27,8 +27,8 @@ export const UnifiedPlatformPage = ({ logo, url }: { logo: string; url: string }
         <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEO, boxShadow: `0 0 8px ${NEO}` }} />SFH://PLATFORM</span>
         <span style={{ color: '#4ade80aa' }}>SYSTEM ONLINE</span>
       </div>
-      <h2 className="mt-4" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 30, fontWeight: 700, lineHeight: 1.08, color: '#f0fdf4' }}>
-        One unified <span style={{ color: NEO, textShadow: `0 0 18px ${NEO}88` }}>innovation platform</span>
+      <h2 className="mt-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 52, fontWeight: 800, lineHeight: 0.98, letterSpacing: '-0.03em', color: '#f0fdf4' }}>
+        One unified<br /><span style={{ color: NEO, textShadow: `0 0 18px ${NEO}88` }}>innovation platform</span>
       </h2>
       <p className="mt-2" style={{ fontSize: 15, lineHeight: 1.5, color: '#a7f3d0cc' }}>
         Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.
