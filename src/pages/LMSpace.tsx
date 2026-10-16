@@ -102,11 +102,11 @@ export default function LMSpace() {
                 </div>
                 <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(18px,3vh,30px)", color: "#f2f7ff", marginTop: 6, lineHeight: 1.1 }}>{e.name}</div>
                 <div style={{ fontFamily: MONO, fontSize: "clamp(10px,1.4vh,14px)", color: e.color, marginTop: 2, marginBottom: "clamp(6px,1.4vh,14px)" }}>{e.tag}</div>
-                <div className="flex flex-col" style={{ gap: "clamp(5px,1.1vh,12px)" }}>
+                <div className="flex flex-col flex-1 justify-around" style={{ gap: "clamp(5px,1.1vh,12px)" }}>
                   {e.rows.map(([k, v]) => (
                     <div key={k} style={{ borderLeft: `2px solid ${e.color}`, paddingLeft: 10 }}>
-                      <div style={{ fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8aa3bd" }}>{k}</div>
-                      <div style={{ fontSize: "clamp(11px,1.65vh,16px)", lineHeight: 1.35, color: "#e4eef8" }}>{v}</div>
+                      <div style={{ fontFamily: MONO, fontSize: "clamp(8px,1.2vh,12px)", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8aa3bd" }}>{k}</div>
+                      <div style={{ fontSize: "clamp(11px,2.1vh,19px)", lineHeight: 1.35, color: "#e4eef8" }}>{v}</div>
                     </div>
                   ))}
                 </div>
