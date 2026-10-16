@@ -1,53 +1,59 @@
 /**
  * Lockheed Martin Space partnership brochure (/LMSpace) — single horizontal
- * screen, print-ready landscape PDF. Presents the 3-Engine System.
+ * screen, animated "engine mind map": IP owner -> 3-Engine System -> Lockheed
+ * Martin Space ecosystem. Print-ready landscape PDF.
  * Credits: Imagine Engine Studios Corp.
  */
-import { Download, Lightbulb, Users, TrendingUp, ArrowRight, Building2 } from "lucide-react";
+import { Download, Lightbulb, Users, TrendingUp, Building2, Rocket } from "lucide-react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import sfhLogo from "@/assets/sfh-main-logo.png.asset.json";
 
 const G = "#39ff88";
 const CY = "#22d3ee";
 const LM = "#4aa8ff";
+const VI = "#b28cff";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
 const SERIF = "'Playfair Display', Georgia, serif";
 
-const ENGINES = [
-  {
-    n: "01", name: "Imagine Engine", tag: "IP → Product", icon: Lightbulb, color: "#b28cff",
-    rows: [
-      ["Entry", "University or corporate IP at TRL 1–6"],
-      ["What we do", "De-risk, validate, IP packaging"],
-      ["Exit", "Commercial product at TRL 6–10"],
-    ],
-    note: "Where raw research becomes a buildable product.",
-  },
-  {
-    n: "02", name: "Startup Factory Hub", tag: "Team & Incubation", icon: Users, color: G,
-    rows: [
-      ["Teams", "Create teams around the product or match existing teams"],
-      ["The factory", "Incubator / Accelerator platform"],
-      ["Nurture with", "Human Capital, Professional Space, Lab Access, Mentorship, Advisory, Strategic Guidance, Platform"],
-    ],
-    note: "",
-  },
-  {
-    n: "03", name: "Decahedron Ventures", tag: "Growth & Capital", icon: TrendingUp, color: CY,
-    rows: [
-      ["Journey", "Ideation → Growth → Maturity"],
-      ["Traction", "We find the first commercial clients for the tech"],
-      ["Readiness", "Make it Investor-Ready"],
-      ["Then", "Angels, Family Offices, Early-Stage Investors, or direct investment through your Private Equity firm"],
-    ],
-    note: "",
-  },
+type Node = {
+  id: string; x: number; y: number; w: string; color: string; icon: typeof Lightbulb;
+  label: string; name: string; tag: string; rows: [string, string][]; note?: string; dashed?: boolean;
+};
+
+const NODES: Node[] = [
+  { id: "src", x: 10, y: 50, w: "15vw", color: LM, icon: Building2, dashed: true, label: "START", name: "University or Corporation", tag: "IP Owner",
+    rows: [["Input", "Holds IP it wants to commercialize"]], note: "Then the engines plug in." },
+  { id: "e1", x: 30.5, y: 27, w: "20vw", color: VI, icon: Lightbulb, label: "ENGINE 01", name: "Imagine Engine", tag: "IP → Product",
+    rows: [["Entry", "University or corporate IP at TRL 1–6"], ["What we do", "De-risk, validate, IP packaging"], ["Exit", "Commercial product at TRL 6–10"]] },
+  { id: "e2", x: 50, y: 72, w: "21vw", color: G, icon: Users, label: "ENGINE 02", name: "Startup Factory Hub", tag: "Team & Incubation",
+    rows: [["Teams", "Create teams around the product or match existing teams"], ["The factory", "Incubator / Accelerator platform"], ["Nurture with", "Human Capital, Professional Space, Lab Access, Mentorship, Advisory, Strategic Guidance, Platform"]] },
+  { id: "e3", x: 69.5, y: 27, w: "20vw", color: CY, icon: TrendingUp, label: "ENGINE 03", name: "Decahedron Ventures", tag: "Growth & Capital",
+    rows: [["Journey", "Ideation → Growth → Maturity"], ["Traction", "First commercial clients for the tech"], ["Readiness", "Make it Investor-Ready"], ["Then", "Angels, Family Offices, Early-Stage Investors, or your Private Equity firm"]] },
+  { id: "lm", x: 90, y: 50, w: "15vw", color: LM, icon: Rocket, label: "OUTPUT", name: "Lockheed Martin Space", tag: "Ecosystem",
+    rows: [["Plug-in", "Validated, investable ventures connect to the Lockheed Martin Space ecosystem"]] },
 ];
+
+// Links in a 1000x600 space (x% * 10, y% * 6)
+const P = (id: string) => { const n = NODES.find((k) => k.id === id)!; return [n.x * 10, n.y * 6]; };
+const CORE = [500, 165];
+const LINKS: { a: number[]; b: number[]; color: string; dur: number }[] = [
+  { a: P("src"), b: P("e1"), color: LM, dur: 3 },
+  { a: P("e1"), b: P("e2"), color: VI, dur: 3.2 },
+  { a: P("e2"), b: P("e3"), color: G, dur: 3.2 },
+  { a: P("e3"), b: P("lm"), color: CY, dur: 3 },
+  { a: CORE, b: P("e1"), color: VI, dur: 4 },
+  { a: CORE, b: P("e2"), color: G, dur: 4 },
+  { a: CORE, b: P("e3"), color: CY, dur: 4 },
+];
+const curve = (a: number[], b: number[]) => {
+  const mx = (a[0] + b[0]) / 2;
+  return `M${a[0]},${a[1]} C${mx},${a[1]} ${mx},${b[1]} ${b[0]},${b[1]}`;
+};
 
 export default function LMSpace() {
   usePageSeo({
     title: "Lockheed Martin Space Partnership — Startup Factory Hub",
-    description: "Partnership opportunity with Lockheed Martin Space: the 3-Engine System taking IP to product, teams and capital.",
+    description: "Partnership opportunity with Lockheed Martin Space: the 3-Engine System that turns IP into validated, investable ventures.",
     path: "/LMSpace",
   });
 
@@ -55,6 +61,15 @@ export default function LMSpace() {
     <div className="lm-root" style={{ width: "100vw", height: "100vh", overflow: "hidden", background: "#01060e", color: "#dbe8f5", fontFamily: "'Inter', system-ui, sans-serif", position: "relative" }}>
       <style>{`
         @page { size: A4 landscape; margin: 0; }
+        @keyframes lmFlow { to { stroke-dashoffset: -88; } }
+        @keyframes lmSpin { to { transform: rotate(360deg); } }
+        @keyframes lmSpinR { to { transform: rotate(-360deg); } }
+        @keyframes lmPulse { 0%,100% { box-shadow: 0 0 24px rgba(57,255,136,.25), inset 0 0 18px rgba(57,255,136,.15); } 50% { box-shadow: 0 0 48px rgba(57,255,136,.5), inset 0 0 28px rgba(57,255,136,.3); } }
+        @keyframes lmFloat { 0%,100% { transform: translate(-50%,-50%); } 50% { transform: translate(-50%,calc(-50% - 5px)); } }
+        @keyframes lmScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+        @keyframes lmBlink { 50% { opacity: .25; } }
+        .lm-node { animation: lmFloat 6s ease-in-out infinite; transition: border-color .3s, box-shadow .3s; }
+        .lm-node:hover { box-shadow: 0 0 34px var(--c); border-color: var(--c) !important; }
         @media print {
           html, body, #root { background: #01060e !important; }
           .lm-root { width: 297mm !important; height: 210mm !important; }
@@ -62,20 +77,25 @@ export default function LMSpace() {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}</style>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 100% 0%, rgba(74,168,255,0.18), transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(57,255,136,0.10), transparent 45%)` }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.08, backgroundImage: `linear-gradient(${LM} 1px, transparent 1px), linear-gradient(90deg, ${LM} 1px, transparent 1px)`, backgroundSize: "40px 40px" }} />
 
-      <div className="relative h-full flex flex-col" style={{ padding: "clamp(14px,2.4vh,28px) clamp(18px,3vw,48px)", gap: "clamp(8px,1.8vh,20px)" }}>
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 35%, rgba(57,255,136,0.10), transparent 45%), radial-gradient(ellipse at 100% 50%, rgba(74,168,255,0.16), transparent 40%), radial-gradient(ellipse at 0% 50%, rgba(74,168,255,0.10), transparent 40%)` }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.07, backgroundImage: `linear-gradient(${LM} 1px, transparent 1px), linear-gradient(90deg, ${LM} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
+      <div className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 120, background: "linear-gradient(transparent, rgba(57,255,136,0.05), transparent)", animation: "lmScan 7s linear infinite" }} />
+
+      <div className="relative h-full flex flex-col" style={{ padding: "clamp(12px,2.2vh,26px) clamp(18px,3vw,44px)", gap: "clamp(6px,1.2vh,14px)" }}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={sfhLogo.url} alt="Startup Factory Hub" style={{ height: "clamp(26px,4vh,40px)", width: "auto" }} />
+            <img src={sfhLogo.url} alt="Startup Factory Hub" style={{ height: "clamp(24px,3.8vh,38px)", width: "auto" }} />
             <span style={{ fontFamily: MONO, fontSize: "clamp(9px,1.1vh,12px)", letterSpacing: "0.2em" }}>STARTUP FACTORY HUB</span>
             <span style={{ color: LM, fontFamily: MONO }}>×</span>
             <span style={{ fontFamily: MONO, fontSize: "clamp(9px,1.1vh,12px)", letterSpacing: "0.2em", color: LM }}>LOCKHEED MARTIN SPACE</span>
           </div>
           <div className="flex items-center gap-3">
-            <span style={{ fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.2em", color: G }}>PARTNERSHIP OPPORTUNITY</span>
+            <span className="flex items-center gap-2" style={{ fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.2em", color: G }}>
+              <span style={{ width: 7, height: 7, borderRadius: 9, background: G, boxShadow: `0 0 8px ${G}`, animation: "lmBlink 1.6s infinite" }} /> ENGINE ONLINE // PARTNERSHIP OPPORTUNITY
+            </span>
             <button onClick={() => window.print()} className="lm-print inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold" style={{ background: G, color: "#02130a", fontFamily: MONO }}>
               <Download className="h-3.5 w-3.5" /> Download PDF
             </button>
@@ -84,60 +104,72 @@ export default function LMSpace() {
 
         {/* Title */}
         <div>
-          <div style={{ fontFamily: MONO, fontSize: "clamp(9px,1.2vh,12px)", letterSpacing: "0.24em", color: CY, marginBottom: 6 }}>THE 3-ENGINE SYSTEM</div>
-          <h1 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(24px,5vh,54px)", lineHeight: 1.05, color: "#f2f7ff" }}>
-            From space research to <span style={{ color: G }}>funded companies.</span>
+          <div style={{ fontFamily: MONO, fontSize: "clamp(9px,1.2vh,12px)", letterSpacing: "0.24em", color: CY, marginBottom: 4 }}>THE 3-ENGINE SYSTEM</div>
+          <h1 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(22px,4.4vh,48px)", lineHeight: 1.05, color: "#f2f7ff" }}>
+            An engine that produces <span style={{ color: G }}>validated, investable ventures.</span>
           </h1>
         </div>
 
-        {/* Engines */}
-        <div className="flex-1 min-h-0 grid items-stretch" style={{ gridTemplateColumns: "0.7fr auto 1fr auto 1fr auto 1fr", gap: "clamp(6px,1vw,14px)" }}>
-          <div className="min-h-0 flex flex-col overflow-hidden" style={{ border: `1px dashed ${LM}70`, background: "rgba(6,16,30,0.6)", borderRadius: 14, padding: "clamp(10px,2vh,22px)" }}>
-            <div className="flex items-center justify-between">
-              <span style={{ fontFamily: MONO, fontSize: "clamp(9px,1.1vh,12px)", letterSpacing: "0.2em", color: LM }}>START</span>
-              <Building2 style={{ color: LM, width: "clamp(18px,2.6vh,26px)", height: "clamp(18px,2.6vh,26px)" }} />
+        {/* Mind map */}
+        <div className="relative flex-1 min-h-0">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="none">
+            {LINKS.map((l, i) => {
+              const d = curve(l.a, l.b);
+              return (
+                <g key={i}>
+                  <path d={d} fill="none" stroke={l.color} strokeOpacity={0.22} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+                  <path d={d} fill="none" stroke={l.color} strokeWidth={2.5} strokeLinecap="round" vectorEffect="non-scaling-stroke" strokeDasharray="6 82"
+                    style={{ animation: `lmFlow ${l.dur}s linear infinite`, filter: `drop-shadow(0 0 4px ${l.color})` }} />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Engine core */}
+          <div className="absolute" style={{ left: "50%", top: "27.5%", transform: "translate(-50%,-50%)", width: "clamp(110px,19vh,170px)", aspectRatio: "1" }}>
+            <div className="absolute inset-0 rounded-full" style={{ border: `1px dashed ${G}80`, animation: "lmSpin 18s linear infinite" }} />
+            <div className="absolute rounded-full" style={{ inset: "12%", border: `2px solid transparent`, borderTopColor: CY, borderBottomColor: VI, animation: "lmSpinR 6s linear infinite" }} />
+            <div className="absolute rounded-full flex flex-col items-center justify-center text-center" style={{ inset: "24%", background: "radial-gradient(circle, rgba(57,255,136,0.18), rgba(2,10,8,0.95))", border: `1px solid ${G}90`, animation: "lmPulse 3s ease-in-out infinite" }}>
+              <img src={sfhLogo.url} alt="" style={{ width: "42%", height: "auto" }} />
+              <span style={{ fontFamily: MONO, fontSize: "clamp(7px,1vh,10px)", letterSpacing: "0.16em", color: G, marginTop: 2 }}>CORE</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(18px,3vh,30px)", color: "#f2f7ff", marginTop: 6, lineHeight: 1.1 }}>University or Corporation</div>
-            <div style={{ fontFamily: MONO, fontSize: "clamp(10px,1.4vh,14px)", color: LM, marginTop: 2 }}>IP Owner</div>
-            <div className="flex flex-col flex-1 justify-center">
-              <div style={{ borderLeft: `2px solid ${LM}`, paddingLeft: 10 }}>
-                <div style={{ fontSize: "clamp(11px,2.1vh,19px)", lineHeight: 1.35, color: "#e4eef8" }}>Holds IP it wants to commercialize.</div>
-              </div>
-            </div>
-            <div style={{ fontSize: "clamp(10px,1.4vh,14px)", fontStyle: "italic", color: LM }}>Then the engines plug in.</div>
           </div>
-          <div className="flex items-center"><ArrowRight style={{ color: "#5d7894", width: 22, height: 22 }} /></div>
-          {ENGINES.map((e, i) => {
-            const Icon = e.icon;
-            return [
-              <div key={e.n} className="min-h-0 flex flex-col overflow-hidden" style={{ border: `1px solid ${e.color}40`, background: "rgba(6,16,30,0.78)", borderRadius: 14, padding: "clamp(10px,2vh,22px)", boxShadow: `inset 0 1px 0 ${e.color}30` }}>
+          <div className="absolute text-center" style={{ left: "50%", top: "45%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: "clamp(8px,1.05vh,11px)", letterSpacing: "0.18em", color: "#8aa3bd", whiteSpace: "nowrap" }}>
+            PRODUCE <span style={{ color: VI }}>›</span> VALIDATE <span style={{ color: G }}>›</span> INVEST <span style={{ color: CY }}>›</span> PLUG IN
+          </div>
+
+          {/* Nodes */}
+          {NODES.map((n, i) => {
+            const Icon = n.icon;
+            return (
+              <div key={n.id} className="lm-node absolute flex flex-col"
+                style={{ left: `${n.x}%`, top: `${n.y}%`, width: n.w, animationDelay: `${i * 0.8}s`, ["--c" as string]: `${n.color}80`,
+                  border: `1px ${n.dashed ? "dashed" : "solid"} ${n.color}55`, background: "rgba(5,14,26,0.86)", backdropFilter: "blur(8px)", borderRadius: 14,
+                  padding: "clamp(8px,1.5vh,16px)", boxShadow: `0 0 22px ${n.color}22, inset 0 1px 0 ${n.color}40` }}>
                 <div className="flex items-center justify-between">
-                  <span style={{ fontFamily: MONO, fontSize: "clamp(9px,1.1vh,12px)", letterSpacing: "0.2em", color: e.color }}>PHASE {e.n}</span>
-                  <Icon style={{ color: e.color, width: "clamp(18px,2.6vh,26px)", height: "clamp(18px,2.6vh,26px)" }} />
+                  <span style={{ fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.2em", color: n.color }}>{n.label}</span>
+                  <span className="flex items-center justify-center rounded-md" style={{ width: "clamp(20px,3vh,28px)", height: "clamp(20px,3vh,28px)", background: `${n.color}18`, border: `1px solid ${n.color}55` }}>
+                    <Icon style={{ color: n.color, width: "60%", height: "60%" }} />
+                  </span>
                 </div>
-                <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(18px,3vh,30px)", color: "#f2f7ff", marginTop: 6, lineHeight: 1.1 }}>{e.name}</div>
-                <div style={{ fontFamily: MONO, fontSize: "clamp(10px,1.4vh,14px)", color: e.color, marginTop: 2, marginBottom: "clamp(6px,1.4vh,14px)" }}>{e.tag}</div>
-                <div className="flex flex-col flex-1 justify-around" style={{ gap: "clamp(5px,1.1vh,12px)" }}>
-                  {e.rows.map(([k, v]) => (
-                    <div key={k} style={{ borderLeft: `2px solid ${e.color}`, paddingLeft: 10 }}>
-                      <div style={{ fontFamily: MONO, fontSize: "clamp(8px,1.2vh,12px)", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8aa3bd" }}>{k}</div>
-                      <div style={{ fontSize: "clamp(11px,2.1vh,19px)", lineHeight: 1.35, color: "#e4eef8" }}>{v}</div>
+                <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(15px,2.5vh,25px)", color: "#f2f7ff", marginTop: 4, lineHeight: 1.1 }}>{n.name}</div>
+                <div style={{ fontFamily: MONO, fontSize: "clamp(9px,1.25vh,13px)", color: n.color, marginBottom: "clamp(4px,0.9vh,10px)" }}>{n.tag}</div>
+                <div className="flex flex-col" style={{ gap: "clamp(3px,0.7vh,8px)" }}>
+                  {n.rows.map(([k, v]) => (
+                    <div key={k} style={{ borderLeft: `2px solid ${n.color}`, paddingLeft: 8 }}>
+                      <div style={{ fontFamily: MONO, fontSize: "clamp(7px,1vh,10px)", letterSpacing: "0.16em", textTransform: "uppercase", color: "#7f97b0" }}>{k}</div>
+                      <div style={{ fontSize: "clamp(10px,1.6vh,15px)", lineHeight: 1.3, color: "#e4eef8" }}>{v}</div>
                     </div>
                   ))}
                 </div>
-                {e.note && <div className="mt-auto" style={{ fontSize: "clamp(10px,1.4vh,14px)", fontStyle: "italic", color: e.color, paddingTop: 10 }}>{e.note}</div>}
-              </div>,
-              i < ENGINES.length - 1 && (
-                <div key={`a${i}`} className="flex items-center">
-                  <ArrowRight style={{ color: "#5d7894", width: 22, height: 22 }} />
-                </div>
-              ),
-            ];
+                {n.note && <div style={{ fontSize: "clamp(9px,1.3vh,13px)", fontStyle: "italic", color: n.color, marginTop: 8 }}>{n.note}</div>}
+              </div>
+            );
           })}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between" style={{ borderTop: "1px solid rgba(74,168,255,0.2)", paddingTop: "clamp(6px,1.2vh,12px)", fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.14em", color: "#8aa3bd" }}>
+        <div className="flex items-center justify-between" style={{ borderTop: "1px solid rgba(74,168,255,0.2)", paddingTop: "clamp(5px,1vh,10px)", fontFamily: MONO, fontSize: "clamp(8px,1vh,11px)", letterSpacing: "0.14em", color: "#8aa3bd" }}>
           <span>IMAGINE ENGINE // STARTUP FACTORY HUB // DECAHEDRON VENTURES</span>
           <span>startupfactoryhub.com</span>
         </div>
