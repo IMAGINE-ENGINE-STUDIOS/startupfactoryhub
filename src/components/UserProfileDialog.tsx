@@ -1,4 +1,4 @@
-import { DeckViewerButton } from '@/components/deck/DeckAccess';
+import { DeckViewerButton, DataRoomViewerButton } from '@/components/deck/DeckAccess';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -340,6 +340,7 @@ export default function UserProfileDialog({
       <>
               {profile.role !== 'startup' && userId && (
                 <DeckViewerButton ownerId={userId} label={profile.role === 'investor' ? 'Fund Deck' : profile.role === 'accelerator' ? 'Cohort Prospectus' : 'Overview Deck'} />
+                {userId && <DataRoomViewerButton ownerId={userId} />}
               )}
 
               {/* Role-Specific Professional Info */}
@@ -402,6 +403,7 @@ export default function UserProfileDialog({
 
                     <Separator />
                     <DeckViewerButton ownerId={userId!} />
+                    <DataRoomViewerButton ownerId={userId!} />
                   </CardContent>
                 </Card>
               )}
