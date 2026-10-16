@@ -1,4 +1,4 @@
-import { DeckAccessSettings } from '@/components/deck/DeckAccess';
+import { DeckAccessSettings, DataRoomViewerButton } from '@/components/deck/DeckAccess';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -510,6 +510,7 @@ export default function CompanyProfileManager() {
     { value: 'about', label: 'About', icon: FileText },
     { value: 'details', label: 'Details', icon: Briefcase },
     { value: 'deck', label: 'Pitch Deck', icon: Presentation },
+    { value: 'dataroom', label: 'Data Room', icon: FileText },
     { value: 'team', label: 'Team', icon: UserSquare2 },
     { value: 'investor-qa', label: 'Investor Q&A', icon: HelpCircle },
     { value: 'posts', label: 'Posts', icon: ImageIcon },
@@ -718,6 +719,11 @@ export default function CompanyProfileManager() {
 
         <TabsContent value="team" className="space-y-4">
           <TeamRequestsManager companyId={company.id} />
+        </TabsContent>
+
+        <TabsContent value="dataroom" className="space-y-4">
+          <DeckAccessSettings showLinkField={false} />
+          {user && <Card className="tech-card border-0"><CardContent className="p-5"><DataRoomViewerButton ownerId={user.id} /></CardContent></Card>}
         </TabsContent>
 
         <TabsContent value="investor-qa" className="space-y-4">
