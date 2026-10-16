@@ -12,12 +12,6 @@ import { usePageSeo } from "@/hooks/usePageSeo";
 import { WEBSITE_PARTNERS } from "@/config/partners";
 import sfhLogo from "@/assets/sfh-main-logo.png.asset.json";
 
-const G = "#39ff88";
-const CY = "#22d3ee";
-const MONO = "'JetBrains Mono', ui-monospace, monospace";
-const SERIF = "'Playfair Display', Georgia, serif";
-const box = { border: "1px solid rgba(57,255,136,0.22)", background: "rgba(8,20,14,0.75)", borderRadius: 10 } as const;
-const input = { background: "#03120a", border: "1px solid rgba(57,255,136,0.3)", color: "#d6e7dc", borderRadius: 6, padding: "8px 10px", fontSize: 13 } as const;
 
 const CATEGORIES = [
   "Startup contracts",
@@ -40,7 +34,7 @@ interface Doc { id: string; category: string; title: string; description: string
 const db = supabase as any;
 
 const Eyebrow = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.22em", color: G, textTransform: "uppercase", marginBottom: 8 }}>{children}</div>
+  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">{children}</div>
 );
 
 export default function InvestorDataRoom() {
@@ -122,41 +116,43 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
   };
   const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); void load(); };
 
+  const field = "w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
   return (
-    <div className={embedded ? "relative overflow-hidden rounded-2xl py-6 px-4" : "min-h-screen py-8 px-4"} style={{ background: "radial-gradient(ellipse at 90% 0%, rgba(57,255,136,0.12), transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(34,211,238,0.08), transparent 45%), #020805", color: "#d6e7dc", fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <div className={(embedded ? "absolute" : "fixed") + " inset-0 pointer-events-none"} style={{ opacity: 0.08, backgroundImage: "linear-gradient(rgba(57,255,136,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,136,0.5) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-      <div className="relative mx-auto flex flex-col gap-6" style={{ maxWidth: 1040 }}>
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={sfhLogo.url} alt="Startup Factory Hub" style={{ height: 34, width: "auto" }} />
-            <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.2em", color: "#e8fff0" }}>STARTUP FACTORY HUB</span>
-          </Link>
-          <div className="flex items-center gap-2" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.18em", color: G }}>
-            <span style={{ width: 7, height: 7, borderRadius: 9, background: G, boxShadow: `0 0 8px ${G}` }} /> DATA ROOM / CONFIDENTIAL
-          </div>
-        </header>
+    <div className={embedded ? "space-y-6" : "min-h-screen bg-background py-8 px-4"}>
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        {!embedded && (
+          <header className="flex flex-wrap items-center justify-between gap-3">
+            <Link to="/" className="flex items-center gap-3">
+              <img src={sfhLogo.url} alt="Startup Factory Hub" className="h-9 w-auto" />
+              <span className="text-sm font-semibold tracking-wide text-foreground">Startup Factory Hub</span>
+            </Link>
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Lock className="h-3.5 w-3.5" /> Confidential
+            </span>
+          </header>
+        )}
 
-        <section>
-          <Eyebrow>SFH://INVESTORS/DATA_ROOM</Eyebrow>
-          <h1 style={{ fontFamily: SERIF, fontWeight: 800, fontSize: 44, lineHeight: 1.05, color: "#f2fff6" }}>
-            Investor <span style={{ color: G }}>Data Room</span>
+        <section className="tech-card border-0 rounded-2xl p-6">
+          <Eyebrow>Investors · Data Room</Eyebrow>
+          <h1 className={embedded ? "text-2xl font-bold text-foreground" : "text-4xl font-bold text-foreground"}>
+            Investor <span className="text-primary">Data Room</span>
           </h1>
-          <p style={{ maxWidth: 640, marginTop: 10, fontSize: 15, color: "#a9c4b3" }}>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             One secure place for due diligence: the deck, the one-pager, our partner network, accelerator startup contracts and company documents.
           </p>
         </section>
 
         {allowed === null ? (
-          <div style={{ ...box, padding: 24, fontFamily: MONO, fontSize: 12, color: G }}>LOADING…</div>
+          <div className="tech-card border-0 rounded-2xl p-6 text-sm text-muted-foreground">Loading…</div>
         ) : !allowed ? (
-          <div style={{ ...box, padding: 28 }} className="flex flex-col items-start gap-3">
-            <Lock className="h-6 w-6" style={{ color: G }} />
-            <h2 style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 700, color: "#f2fff6" }}>Access by invitation</h2>
-            <p style={{ fontSize: 14, color: "#a9c4b3", maxWidth: 560 }}>
+          <div className="tech-card border-0 rounded-2xl p-6 flex flex-col items-start gap-3">
+            <Lock className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold text-foreground">Access by invitation</h2>
+            <p className="max-w-xl text-sm text-muted-foreground">
               {user ? "Your account hasn't been approved for the data room yet. Contact the Startup Factory Hub team to request access." : "Sign in with the email address the Startup Factory Hub team approved for you."}
             </p>
             {!user && (
-              <Link to="/auth?redirect=/data-room" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold" style={{ background: G, color: "#02130a", fontFamily: MONO }}>
+              <Link to="/auth?redirect=/data-room" className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
                 Sign in <ArrowUpRight className="h-4 w-4" />
               </Link>
             )}
@@ -164,50 +160,50 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
         ) : (
           <>
             <section>
-              <Eyebrow>[01] CORE MATERIALS</Eyebrow>
+              <Eyebrow>Core materials</Eyebrow>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {CORE.map((c) => (
-                  <Link key={c.href} to={c.href} target="_blank" style={{ ...box, padding: 16 }} className="flex flex-col gap-1 transition hover:brightness-125">
-                    <div className="flex items-center justify-between"><FileText className="h-4 w-4" style={{ color: CY }} /><ArrowUpRight className="h-4 w-4" style={{ color: G }} /></div>
-                    <div style={{ fontWeight: 700, color: "#f2fff6", fontSize: 15, marginTop: 6 }}>{c.title}</div>
-                    <div style={{ fontSize: 12.5, color: "#8fb09c" }}>{c.desc}</div>
+                  <Link key={c.href} to={c.href} target="_blank" className="tech-card border-0 rounded-xl p-4 flex flex-col gap-1 transition hover:bg-primary/5">
+                    <div className="flex items-center justify-between"><FileText className="h-4 w-4 text-primary" /><ArrowUpRight className="h-4 w-4 text-muted-foreground" /></div>
+                    <div className="mt-1.5 text-sm font-semibold text-foreground">{c.title}</div>
+                    <div className="text-xs text-muted-foreground">{c.desc}</div>
                   </Link>
                 ))}
               </div>
             </section>
 
             <section>
-              <Eyebrow>[02] PARTNER NETWORK · {WEBSITE_PARTNERS.length} PARTNERS</Eyebrow>
-              <div style={{ ...box, padding: 16 }} className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3">
+              <Eyebrow>Partner network · {WEBSITE_PARTNERS.length} partners</Eyebrow>
+              <div className="tech-card border-0 rounded-xl p-4 grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3">
                 {WEBSITE_PARTNERS.map((p) => (
                   <div key={p.name} className="flex flex-col items-center gap-1.5 text-center">
-                    <div className="flex h-12 w-full items-center justify-center rounded-md p-1.5" style={{ background: "rgba(255,255,255,0.92)" }}>
+                    <div className="flex h-12 w-full items-center justify-center rounded-md bg-foreground/90 p-1.5">
                       <img src={p.logo} alt={p.name} loading="lazy" className="max-h-full max-w-full object-contain" />
                     </div>
-                    <span style={{ fontSize: 10, color: "#a9c4b3", lineHeight: 1.2 }}>{p.name}</span>
-                    <span style={{ fontFamily: MONO, fontSize: 8.5, color: G, letterSpacing: "0.1em" }}>{p.tier.toUpperCase()}</span>
+                    <span className="text-[10px] leading-tight text-muted-foreground">{p.name}</span>
+                    <span className="text-[9px] uppercase tracking-wider text-primary">{p.tier}</span>
                   </div>
                 ))}
               </div>
             </section>
 
-            {CATEGORIES.map((cat, i) => {
+            {CATEGORIES.map((cat) => {
               const list = docs.filter((d) => d.category === cat);
               return (
                 <section key={cat}>
-                  <Eyebrow>[{String(i + 3).padStart(2, "0")}] {cat}</Eyebrow>
-                  <div style={{ ...box, padding: list.length ? 6 : 16 }}>
+                  <Eyebrow>{cat}</Eyebrow>
+                  <div className={"tech-card border-0 rounded-xl " + (list.length ? "p-1.5" : "p-4")}>
                     {list.length === 0 ? (
-                      <div style={{ fontSize: 13, color: "#6f8f7c" }}>No documents yet.</div>
+                      <div className="text-sm text-muted-foreground">No documents yet.</div>
                     ) : list.map((d) => (
-                      <div key={d.id} className="flex items-center gap-3 rounded-md px-3 py-2.5 hover:bg-white/5">
-                        {d.external_url ? <Link2 className="h-4 w-4 shrink-0" style={{ color: CY }} /> : <FileText className="h-4 w-4 shrink-0" style={{ color: CY }} />}
+                      <div key={d.id} className="flex items-center gap-3 rounded-md px-3 py-2.5 hover:bg-muted/40">
+                        {d.external_url ? <Link2 className="h-4 w-4 shrink-0 text-primary" /> : <FileText className="h-4 w-4 shrink-0 text-primary" />}
                         <button onClick={() => openDoc(d)} className="flex-1 min-w-0 text-left">
-                          <div style={{ fontWeight: 600, color: "#f2fff6", fontSize: 14 }} className="truncate">{d.title}</div>
-                          {d.description && <div style={{ fontSize: 12, color: "#8fb09c" }} className="truncate">{d.description}</div>}
+                          <div className="truncate text-sm font-medium text-foreground">{d.title}</div>
+                          {d.description && <div className="truncate text-xs text-muted-foreground">{d.description}</div>}
                         </button>
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: "#6f8f7c" }}>{new Date(d.created_at).toLocaleDateString()}</span>
-                        {isAdmin && <button onClick={() => removeDoc(d)} aria-label="Remove"><Trash2 className="h-4 w-4" style={{ color: "#ff6b8a" }} /></button>}
+                        <span className="text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</span>
+                        {isAdmin && <button onClick={() => removeDoc(d)} aria-label="Remove"><Trash2 className="h-4 w-4 text-destructive" /></button>}
                       </div>
                     ))}
                   </div>
@@ -217,46 +213,48 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
 
             {isAdmin && (
               <section className="grid gap-4 lg:grid-cols-2">
-                <div style={{ ...box, padding: 18 }} className="flex flex-col gap-2.5">
-                  <Eyebrow>ADMIN // ADD DOCUMENT</Eyebrow>
-                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={input}>
+                <div className="tech-card border-0 rounded-xl p-5 flex flex-col gap-2.5">
+                  <Eyebrow>Admin · Add document</Eyebrow>
+                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={field}>
                     {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
-                  <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={input} />
-                  <input placeholder="Short description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} style={input} />
-                  <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} style={{ ...input, padding: 6 }} />
-                  <input placeholder="…or an external link (Docsend, Drive)" value={form.url} disabled={!!file} onChange={(e) => setForm({ ...form, url: e.target.value })} style={input} />
-                  <button onClick={addDoc} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-60" style={{ background: G, color: "#02130a", fontFamily: MONO }}>
+                  <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={field} />
+                  <input placeholder="Short description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={field} />
+                  <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className={field} />
+                  <input placeholder="…or an external link (Docsend, Drive)" value={form.url} disabled={!!file} onChange={(e) => setForm({ ...form, url: e.target.value })} className={field} />
+                  <button onClick={addDoc} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
                     <Upload className="h-4 w-4" /> {busy ? "Uploading…" : "Add to data room"}
                   </button>
                 </div>
-                <div style={{ ...box, padding: 18 }} className="flex flex-col gap-2.5">
-                  <Eyebrow>ADMIN // INVESTOR ACCESS</Eyebrow>
+                <div className="tech-card border-0 rounded-xl p-5 flex flex-col gap-2.5">
+                  <Eyebrow>Admin · Investor access</Eyebrow>
                   <div className="flex gap-2">
-                    <input placeholder="investor@email.com" value={email} onChange={(e) => setEmail(e.target.value)} style={{ ...input, flex: 1 }} />
-                    <button onClick={grant} className="inline-flex items-center gap-1.5 rounded-md px-3 text-sm font-semibold" style={{ background: CY, color: "#02130a", fontFamily: MONO }}>
+                    <input placeholder="investor@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
+                    <button onClick={grant} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">
                       <UserPlus className="h-4 w-4" /> Grant
                     </button>
                   </div>
-                  <div className="flex flex-col gap-1 max-h-56 overflow-y-auto">
-                    {access.length === 0 && <div style={{ fontSize: 12.5, color: "#6f8f7c" }}>No investors approved yet.</div>}
+                  <div className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+                    {access.length === 0 && <div className="text-sm text-muted-foreground">No investors approved yet.</div>}
                     {access.map((a) => (
-                      <div key={a.email} className="flex items-center justify-between rounded px-2 py-1.5" style={{ background: "rgba(57,255,136,0.05)" }}>
-                        <span style={{ fontSize: 13 }}>{a.email}</span>
-                        <button onClick={() => revoke(a.email)} style={{ fontFamily: MONO, fontSize: 10, color: "#ff6b8a" }}>REVOKE</button>
+                      <div key={a.email} className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5">
+                        <span className="text-sm text-foreground">{a.email}</span>
+                        <button onClick={() => revoke(a.email)} className="text-xs font-medium text-destructive">Revoke</button>
                       </div>
                     ))}
                   </div>
                 </div>
-                {msg && <div className="lg:col-span-2" style={{ fontFamily: MONO, fontSize: 11, color: G }}>{msg}</div>}
+                {msg && <div className="lg:col-span-2 text-sm text-primary">{msg}</div>}
               </section>
             )}
           </>
         )}
 
-        <footer style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: "0.16em", color: "#5d7d6a" }} className="pt-4 border-t border-white/10">
-          CONFIDENTIAL · STARTUP FACTORY HUB · BUILT BY IMAGINE ENGINE STUDIOS CORP
-        </footer>
+        {!embedded && (
+          <footer className="border-t border-border pt-4 text-xs text-muted-foreground">
+            Confidential · Startup Factory Hub · Built by Imagine Engine Studios Corp
+          </footer>
+        )}
       </div>
     </div>
   );
