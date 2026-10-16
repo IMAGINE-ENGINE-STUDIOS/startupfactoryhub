@@ -23,15 +23,15 @@ const SANS = "'Space Grotesk', 'Inter', system-ui, sans-serif";
 const SERIF = "'Playfair Display', Georgia, serif";
 const W = 1600, H = 900, Y = 470;
 
-const IE = { x: 440, r: 72 };
+const IE = { x: 375, r: 72 };
 const SFH = { x: 800, r: 118 };
-const DV = { x: 1165, r: 84 };
+const DV = { x: 1200, r: 80 };
 
 const SFH_TAGS: [string, typeof Users, number][] = [
-  ["Team formation", Users, -150], ["Mentors & advisors", Handshake, -110],
-  ["Genius AI strategy", Brain, -70], ["Journey mapping", Route, -30],
-  ["Labs & office space", FlaskConical, 150], ["500+ resources & perks", Gift, 110],
-  ["Events & pitch days", Mic, 70], ["AI product building", Code2, 30],
+  ["Team formation", Users, -155], ["Mentors & advisors", Handshake, -118],
+  ["Genius AI strategy", Brain, -62], ["Journey mapping", Route, -25],
+  ["Labs & office space", FlaskConical, 155], ["500+ resources & perks", Gift, 118],
+  ["Events & pitch days", Mic, 62], ["AI product building", Code2, 25],
 ];
 const DV_TAGS: [string, typeof Users, number][] = [
   ["Angels & family offices", Coins, -90], ["Early-stage VCs", TrendingUp, -38],
@@ -53,7 +53,7 @@ function useStageScale() {
 }
 
 const Tag = ({ x, y, label, Icon, color }: { x: number; y: number; label: string; Icon: typeof Users; color: string }) => (
-  <div className="absolute flex items-center gap-2 lm-tag" style={{ left: x, top: y, transform: "translate(-50%,-50%)", padding: "6px 12px", borderRadius: 999, border: `1px solid ${color}55`, background: "rgba(4,14,22,0.9)", boxShadow: `0 0 14px ${color}25`, fontFamily: MONO, fontSize: 12.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#e4eef8", whiteSpace: "nowrap" }}>
+  <div className="absolute flex items-center gap-2 lm-tag" style={{ left: x, top: y, transform: "translate(-50%,-50%)", padding: "6px 12px", borderRadius: 999, border: `1px solid ${color}55`, background: "rgba(4,14,22,0.9)", boxShadow: `0 0 14px ${color}25`, fontFamily: MONO, fontSize: 11.5, letterSpacing: "0.07em", textTransform: "uppercase", color: "#e4eef8", whiteSpace: "nowrap" }}>
     <Icon style={{ width: 15, height: 15, color }} /> {label}
   </div>
 );
@@ -148,8 +148,8 @@ export default function LMSpace() {
               <stop offset="0" stopColor={LM} /><stop offset="0.3" stopColor={VI} /><stop offset="0.5" stopColor={G} /><stop offset="0.75" stopColor={CY} /><stop offset="1" stopColor={AM} />
             </linearGradient>
           </defs>
-          <ellipse cx={SFH.x} cy={Y} rx={240} ry={206} fill="none" stroke={G} strokeOpacity={0.14} strokeDasharray="3 7" />
-          <ellipse cx={DV.x} cy={Y} rx={150} ry={158} fill="none" stroke={CY} strokeOpacity={0.14} strokeDasharray="3 7" />
+          <ellipse cx={SFH.x} cy={Y} rx={225} ry={220} fill="none" stroke={G} strokeOpacity={0.14} strokeDasharray="3 7" />
+          
           <path d={WAVE} fill="none" stroke="url(#lmWave)" strokeOpacity={0.35} strokeWidth={8} style={{ filter: "blur(6px)" }} />
           <path d={WAVE} fill="none" stroke="url(#lmWave)" strokeWidth={2.5} />
           <path d={WAVE} fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeDasharray="10 110" style={{ animation: "lmFlow 2.4s linear infinite" }} />
@@ -161,7 +161,7 @@ export default function LMSpace() {
         </svg>
 
         {/* Origin */}
-        <div className="absolute" style={{ left: 40, top: Y - 118, width: 230, padding: 16, borderRadius: 16, border: `1px dashed ${LM}88`, background: "rgba(4,14,26,0.92)", boxShadow: `0 0 26px ${LM}22` }}>
+        <div className="absolute" style={{ left: 40, top: Y - 118, width: 210, padding: 16, borderRadius: 16, border: `1px dashed ${LM}88`, background: "rgba(4,14,26,0.92)", boxShadow: `0 0 26px ${LM}22` }}>
           <div className="flex items-center justify-between" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.2em", color: LM }}>
             <span>ORIGIN // 00</span>
             <Building2 style={{ width: 20, height: 20 }} />
@@ -177,8 +177,8 @@ export default function LMSpace() {
           <Lightbulb style={{ width: 24, height: 24, color: VI }} />
           <div style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, letterSpacing: "0.14em", color: "#f2f7ff", marginTop: 4, lineHeight: 1.2 }}>IMAGINE<br />ENGINE</div>
         </Planet>
-        <div className="absolute text-center" style={{ left: IE.x - 120, top: Y - IE.r - 92, width: 240, fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: VI }}>ENGINE 01 · IP → PRODUCT</div>
-        <div className="absolute text-center" style={{ left: IE.x - 130, top: Y + IE.r + 36, width: 260 }}>
+        <div className="absolute text-center" style={{ left: IE.x - 120, top: 262, width: 240, fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: VI }}>ENGINE 01 · IP → PRODUCT</div>
+        <div className="absolute text-center" style={{ left: IE.x - 130, top: 288, width: 260 }}>
           <div style={{ fontSize: 15, color: "#e4eef8", lineHeight: 1.35 }}>De-risk, validate and package the IP into a buildable product.</div>
           <div style={{ fontFamily: MONO, fontSize: 11.5, color: VI, marginTop: 6 }}>TRL 1–6 IN → TRL 6–10 OUT</div>
         </div>
@@ -189,10 +189,10 @@ export default function LMSpace() {
           <div style={{ fontFamily: MONO, fontSize: 15, fontWeight: 700, letterSpacing: "0.14em", color: "#f2f7ff", marginTop: 6, lineHeight: 1.2 }}>STARTUP<br />FACTORY HUB</div>
           <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.1em", color: G, marginTop: 6, lineHeight: 1.35 }}>AI VENTURE-BUILDING<br />PLATFORM</div>
         </Planet>
-        {SFH_TAGS.map(([l, I, a]) => { const [x, y] = pol(SFH.x, 240, 206, a); return <Tag key={l} x={x} y={y} label={l} Icon={I} color={G} />; })}
-        <div className="absolute text-center" style={{ left: SFH.x - 300, top: 712, width: 600, padding: "10px 16px", borderRadius: 12, border: `1px solid ${G}33`, background: "rgba(4,18,12,0.85)" }}>
+        {SFH_TAGS.map(([l, I, a]) => { const [x, y] = pol(SFH.x, 225, 220, a); return <Tag key={l} x={x} y={y} label={l} Icon={I} color={G} />; })}
+        <div className="absolute text-center" style={{ left: SFH.x - 330, top: 726, width: 660, padding: "8px 16px", borderRadius: 12, border: `1px solid ${G}33`, background: "rgba(4,18,12,0.85)" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: G }}>ENGINE 02 · TEAM + INCUBATION</div>
-          <div style={{ fontSize: 15, color: "#e4eef8", marginTop: 4, lineHeight: 1.4 }}>
+          <div style={{ fontSize: 14, color: "#e4eef8", marginTop: 3, lineHeight: 1.35 }}>
             One AI-powered incubator and accelerator: we build or match the team, then nurture it with mentors, labs, workspace, resources and strategy from idea to growth.
           </div>
         </div>
@@ -203,8 +203,8 @@ export default function LMSpace() {
           <div style={{ fontFamily: MONO, fontSize: 13.5, fontWeight: 700, letterSpacing: "0.14em", color: "#f2f7ff", marginTop: 4, lineHeight: 1.2 }}>DECAHEDRON<br />VENTURES</div>
           <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", color: CY, marginTop: 4 }}>ENGINE 03</div>
         </Planet>
-        {DV_TAGS.map(([l, I, a]) => { const [x, y] = pol(DV.x, 150, 158, a); return <Tag key={l} x={x} y={y} label={l} Icon={I} color={CY} />; })}
-        <div className="absolute text-center" style={{ left: DV.x - 150, top: 660, width: 300 }}>
+        {DV_TAGS.map(([l, I], i) => <Tag key={l} x={DV.x} y={[290, 334, 606, 650][i]} label={l} Icon={I} color={CY} />)}
+        <div className="absolute text-center" style={{ left: DV.x - 150, top: 690, width: 300 }}>
           <div style={{ fontSize: 15, color: "#e4eef8", lineHeight: 1.35 }}>Investment platform and private equity firm.</div>
           <div style={{ fontFamily: MONO, fontSize: 11.5, color: CY, marginTop: 4 }}>INVESTOR-READY → FUNDED</div>
         </div>
