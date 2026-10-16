@@ -43,6 +43,21 @@ const TIMELINE = [
   ["04", "Plug-in", "Lockheed Martin Space", AM],
 ] as const;
 
+const DETAILS: { id: string; x: number; r: number; color: string; title: string; align: "left" | "center" | "right"; rows: [string, string][] }[] = [
+  { id: "src", x: 145, r: 120, color: LM, title: "University or Corporation", align: "left", rows: [
+    ["Looking to", "Commercialize its IP"], ["Assets", "Raw research, patents, lab prototypes"], ["Stage", "Research IP at TRL 1–6"], ["Seeks", "Productization and a venture path"]] },
+  { id: "ie", x: IE.x, r: IE.r + 26, color: VI, title: "Imagine Engine · IP → Product", align: "center", rows: [
+    ["Entry", "University or corporate IP at TRL 1–6"], ["What we do", "De-risk, validate, IP packaging"], ["Exit", "Commercial product at TRL 6–10"], ["Result", "Raw research becomes a buildable product"]] },
+  { id: "sfh", x: SFH.x, r: SFH.r + 26, color: G, title: "Startup Factory Hub · Team & Incubation", align: "center", rows: [
+    ["Teams", "Create teams around the product or match existing teams"], ["The factory", "Incubator / Accelerator platform"],
+    ["Nurture with", "Human Capital, Professional Space, Lab Access, Mentorship, Advisory, Strategic Guidance, Platform"]] },
+  { id: "dv", x: DV.x, r: DV.r + 26, color: CY, title: "Decahedron Ventures · Growth & Capital", align: "center", rows: [
+    ["Journey", "Ideation → Growth → Maturity"], ["Traction", "We find the first commercial clients for the tech"], ["Readiness", "Make it Investor-Ready"],
+    ["Then", "Angels, Family Offices, Early-Stage Investors, or direct investment through your Private Equity firm"]] },
+  { id: "lm", x: 1450, r: 115, color: AM, title: "Lockheed Martin Space", align: "right", rows: [
+    ["Plug-in", "Validated, investable ventures connect to the Lockheed Martin Space ecosystem"]] },
+];
+
 const WAVE = `M40,${Y} C200,${Y - 70} 320,${Y + 60} ${IE.x},${Y} S640,${Y - 70} ${SFH.x},${Y} S1030,${Y + 70} ${DV.x},${Y} S1360,${Y - 60} 1560,${Y}`;
 
 function useStageScale() {
@@ -86,6 +101,8 @@ export default function LMSpace() {
         @keyframes lmBlink { 50% { opacity: .25; } }
         @keyframes lmTw { 50% { opacity: .15; } }
         .lm-tag { transition: transform .25s, box-shadow .25s; }
+        .lm-hot .lm-pop { opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .25s, transform .25s; }
+        .lm-hot:hover .lm-pop { opacity: 1; transform: translateY(0); }
         .lm-tag:hover { transform: translate(-50%,-50%) scale(1.06) !important; }
         @media print {
           html, body, #root { background: #010810 !important; }
@@ -221,6 +238,24 @@ export default function LMSpace() {
             <span style={{ width: 7, height: 7, borderRadius: 9, background: AM, boxShadow: `0 0 8px ${AM}`, animation: "lmBlink 1.6s infinite" }} /> READY TO PLUG IN
           </div>
         </div>
+
+        {/* Hover details */}
+        {DETAILS.map((d) => (
+          <div key={d.id} className="lm-hot absolute rounded-full" style={{ left: d.x - d.r, top: Y - d.r, width: d.r * 2, height: d.r * 2, zIndex: 30, cursor: "help" }}>
+            <div className="lm-pop absolute" style={{ bottom: "100%", marginBottom: 10, width: 340, ...(d.align === "left" ? { left: 0 } : d.align === "right" ? { right: 0 } : { left: "50%", marginLeft: -170 }),
+              padding: 16, borderRadius: 14, border: `1px solid ${d.color}aa`, background: "rgba(3,10,18,0.97)", boxShadow: `0 0 40px ${d.color}40` }}>
+              <div style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: "0.16em", textTransform: "uppercase", color: d.color, marginBottom: 10 }}>{d.title}</div>
+              <div className="flex flex-col" style={{ gap: 8 }}>
+                {d.rows.map(([k, v]) => (
+                  <div key={k} style={{ borderLeft: `2px solid ${d.color}`, paddingLeft: 10 }}>
+                    <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#7f97b0" }}>{k}</div>
+                    <div style={{ fontSize: 15, lineHeight: 1.35, color: "#e4eef8" }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
 
         {/* Timeline */}
         <div className="absolute flex items-center justify-between" style={{ left: 40, right: 40, bottom: 22, padding: "12px 22px", borderRadius: 14, border: `1px solid ${CY}26`, background: "rgba(4,14,22,0.85)" }}>
