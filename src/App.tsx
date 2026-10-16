@@ -39,6 +39,7 @@ const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const About = lazy(() => import("./pages/About"));
 const StartupFactory = lazy(() => import("./pages/StartupFactory"));
 const InvestorOnePager = lazy(() => import("./pages/InvestorOnePager"));
+const LMSpace = lazy(() => import("./pages/LMSpace"));
 const InvestorDataRoom = lazy(() => import("./pages/InvestorDataRoom"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Sponsorship = lazy(() => import("./pages/Sponsorship"));
@@ -185,6 +186,9 @@ const App = () => (
                     <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/startup-factory" element={<StartupFactory />} />
                     <Route path="/onepager" element={<InvestorOnePager />} />
+                    <Route path="/LMSpace" element={<LMSpace />} />
+                    <Route path="/LMSapce" element={<LMSpace />} />
+                    <Route path="/lmspace" element={<LMSpace />} />
                     <Route path="/data-room" element={<InvestorDataRoom />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/blog" element={<Navigate to="/" replace />} />
