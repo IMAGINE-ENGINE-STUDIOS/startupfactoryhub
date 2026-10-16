@@ -11,8 +11,29 @@ import { useToast } from '@/hooks/use-toast';
 
 type Status = {
   has_deck: boolean; visibility: 'public' | 'request' | 'private'; deck_url: string | null; pending: boolean;
+  has_data_room?: boolean; data_room_url?: string | null; own_data_room_url?: string | null;
   own_deck_url?: string | null; requests?: { id: string; name: string; email: string | null; role: string | null; at: string }[];
 };
+
+/** Viewer-side Investor Data Room button (external link set by the owner). Credits: Imagine Engine Studios Corp. */
+export function DataRoomViewerButton({ ownerId }: { ownerId: string }) {
+  const { user } = useAuth();
+  const [s, setS] = useState<Status | null>(null);
+  useEffect(() => { call({ action: 'status', owner_id: ownerId }).then(setS).catch(() => setS(null)); }, [ownerId, user?.id]);
+  if (!s?.has_data_room) return null;
+  return (
+    <div>
+      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Lock className="h-4 w-4" />Investor Data Room</h4>
+      {s.data_room_url ? (
+        <Button onClick={() => openDeckUrl(s.data_room_url!)} variant="outline" className="w-full gap-2">
+          <ExternalLink className="h-4 w-4" /> Open Data Room
+        </Button>
+      ) : (
+        <Button disabled variant="outline" className="w-full gap-2"><Lock className="h-4 w-4" /> Available on approved deck access</Button>
+      )}
+    </div>
+  );
+}
 
 const call = async (body: Record<string, unknown>) => {
   const { data, error } = await supabase.functions.invoke('deck-access', { body });
