@@ -134,7 +134,7 @@ export default function LMSpace() {
               <span style={{ fontFamily: MONO, fontSize: "clamp(7px,1vh,10px)", letterSpacing: "0.16em", color: G, marginTop: 2 }}>CORE</span>
             </div>
           </div>
-          <div className="absolute text-center" style={{ left: "50%", top: "45%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: "clamp(8px,1.05vh,11px)", letterSpacing: "0.18em", color: "#8aa3bd", whiteSpace: "nowrap" }}>
+          <div className="absolute text-center" style={{ left: "50%", top: "1%", transform: "translateX(-50%)", fontFamily: MONO, fontSize: "clamp(8px,1.05vh,11px)", letterSpacing: "0.18em", color: "#8aa3bd", whiteSpace: "nowrap" }}>
             PRODUCE <span style={{ color: VI }}>›</span> VALIDATE <span style={{ color: G }}>›</span> INVEST <span style={{ color: CY }}>›</span> PLUG IN
           </div>
 
