@@ -174,7 +174,7 @@ export default function InvestorOnePager() {
                   <div className="p-2 flex flex-col flex-1 min-h-0">
                     <div style={{ fontSize: 10.5, fontWeight: 800, color: "#f4fff8", lineHeight: 1.15 }}>{m.n}</div>
                     <div style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: "0.1em", color: G, textTransform: "uppercase", marginTop: 2 }}>{m.r}</div>
-                    <p style={{ fontSize: 8.5, lineHeight: 1.35, color: "#9fb8a8", marginTop: 3, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{m.bio}</p>
+                    <p style={{ fontSize: 9, lineHeight: 1.4, color: "#9fb8a8", marginTop: 3, display: "-webkit-box", WebkitLineClamp: 11, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{m.bio}</p>
                     <a href={m.li} target="_blank" rel="noopener noreferrer" className="mt-auto pt-1 inline-flex items-center gap-1" style={{ fontSize: 8, color: CY, fontFamily: MONO }}>
                       <Linkedin className="h-3 w-3" /> LinkedIn
                     </a>
