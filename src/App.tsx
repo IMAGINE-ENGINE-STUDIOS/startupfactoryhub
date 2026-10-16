@@ -38,6 +38,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const About = lazy(() => import("./pages/About"));
 const StartupFactory = lazy(() => import("./pages/StartupFactory"));
+const InvestorOnePager = lazy(() => import("./pages/InvestorOnePager"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplication"));
@@ -182,6 +183,7 @@ const App = () => (
                     <Route path="/terms-of-service" element={<TermsOfService />} />
                     <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/startup-factory" element={<StartupFactory />} />
+                    <Route path="/onepager" element={<InvestorOnePager />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/blog" element={<Navigate to="/" replace />} />
                     <Route path="/sponsorship" element={<Sponsorship />} />

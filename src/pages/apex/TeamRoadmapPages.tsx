@@ -29,7 +29,7 @@ const Shell = ({ code, label, children }: { code: string; label: string; childre
   </div>
 );
 
-const TEAM = [
+export const TEAM = [
   { n: 'Khalia Padilla', r: 'Chief Executive Officer', img: khalia.url, li: 'https://www.linkedin.com/in/khaliapadilla/', h: 'linkedin.com/in/khaliapadilla', bio: 'Founder & CEO, Imagine Engine venture studio. CEO & Co-Founder, Lightware Technologies (photonic networks). VC investor building AI-powered accelerators; former advisor, USF Muma Design Thinking Program.' },
   { n: 'Ricardo Font', r: 'Chief Operating Officer', img: ricardo.url, li: 'https://www.linkedin.com/in/ricardo-font-952034248/', h: 'linkedin.com/in/ricardo-font', bio: 'Chairman of the Board, Startup Factory Hub. Managing Partner, Decahedron Ventures. Business Advisor, Startupbootcamp. Physicist and inventor in photonics, aerospace and fintech.' },
   { n: 'Dominic Catrambone', r: 'Chief Financial Officer', img: catrambone.url, li: 'https://www.linkedin.com/in/dom-catrambone/', h: 'linkedin.com/in/dom-catrambone', bio: '40+ years of executive leadership in financial services, banking and investment management. Former CEO and President; founded an NYSE-listed ETF organization. Senior Strategy Consultant, Pathfinder.' },
