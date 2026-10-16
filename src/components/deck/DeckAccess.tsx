@@ -105,6 +105,14 @@ export function DeckAccessSettings({ showLinkField = true }: { showLinkField?: b
             <Button variant="outline" onClick={() => save({ deck_url: link })}>Save</Button>
           </div>
         )}
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Investor Data Room link</p>
+          <div className="flex gap-2">
+            <Input placeholder="Data room link (Docsend, Drive, Notion, Carta...)" value={room} onChange={(e) => setRoom(e.target.value)} />
+            <Button variant="outline" onClick={() => save({ data_room_url: room })}>Save</Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Shown on your profile with the same visibility as your deck.</p>
+        </div>
         <Select value={s?.visibility || 'public'} onValueChange={(v) => save({ visibility: v })}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent className="bg-background backdrop-blur-none">
