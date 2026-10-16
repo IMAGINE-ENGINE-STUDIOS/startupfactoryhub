@@ -193,7 +193,7 @@ export default function LMSpace() {
         <div className="absolute text-center" style={{ left: SFH.x - 300, top: 722, width: 590, padding: "8px 16px", borderRadius: 12, border: `1px solid ${G}33`, background: "rgba(4,18,12,0.85)" }}>
           <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: G }}>ENGINE 02 · TEAM + INCUBATION</div>
           <div style={{ fontSize: 14, color: "#e4eef8", marginTop: 3, lineHeight: 1.35 }}>
-            One AI-powered incubator and accelerator: we build or match the team, then nurture it with mentors, labs, workspace, resources and strategy from idea to growth.
+            AI-powered incubator and accelerator: we build or match the team, then nurture it with mentors, labs, workspace and strategy.
           </div>
         </div>
 
