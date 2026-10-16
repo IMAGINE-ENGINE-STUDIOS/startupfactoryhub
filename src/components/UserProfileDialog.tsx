@@ -340,8 +340,8 @@ export default function UserProfileDialog({
       <>
               {profile.role !== 'startup' && userId && (
                 <DeckViewerButton ownerId={userId} label={profile.role === 'investor' ? 'Fund Deck' : profile.role === 'accelerator' ? 'Cohort Prospectus' : 'Overview Deck'} />
-                {userId && <DataRoomViewerButton ownerId={userId} />}
               )}
+              {profile.role !== 'startup' && userId && <DataRoomViewerButton ownerId={userId} />}
 
               {/* Role-Specific Professional Info */}
               {(profile.role === 'advisor' || profile.role === 'mentor') && (
