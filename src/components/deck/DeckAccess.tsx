@@ -70,14 +70,6 @@ export function DeckViewerButton({ ownerId, label = 'Pitch Deck' }: { ownerId: s
       ) : (
         <Button onClick={request} disabled={busy} variant="outline" className="w-full gap-2"><Lock className="h-4 w-4" /> Request Access</Button>
         )}
-        <div className="space-y-1">
-          <p className="text-sm font-medium">Investor Data Room link</p>
-          <div className="flex gap-2">
-            <Input placeholder="Data room link (Docsend, Drive, Notion, Carta...)" value={room} onChange={(e) => setRoom(e.target.value)} />
-            <Button variant="outline" onClick={() => save({ data_room_url: room })}>Save</Button>
-          </div>
-          <p className="text-xs text-muted-foreground">Shown on your profile with the same visibility as your deck.</p>
-        </div>
     </div>
   );
 }
@@ -88,9 +80,10 @@ export function DeckAccessSettings({ showLinkField = true }: { showLinkField?: b
   const { toast } = useToast();
   const [s, setS] = useState<Status | null>(null);
   const [link, setLink] = useState('');
+  const [room, setRoom] = useState('');
   const load = useCallback(() => {
     if (!user) return;
-    call({ action: 'status', owner_id: user.id }).then((d) => { setS(d); setLink(d.own_deck_url || ''); }).catch(() => {});
+    call({ action: 'status', owner_id: user.id }).then((d) => { setS(d); setLink(d.own_deck_url || ''); setRoom(d.own_data_room_url || ''); }).catch(() => {});
   }, [user]);
   useEffect(load, [load]);
   if (!user) return null;
