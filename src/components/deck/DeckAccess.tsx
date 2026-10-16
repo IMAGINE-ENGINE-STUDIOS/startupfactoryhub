@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { openDeckUrl, normalizeDeckUrl } from '@/lib/deckUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,20 +15,29 @@ type Status = {
   own_deck_url?: string | null; requests?: { id: string; name: string; email: string | null; role: string | null; at: string }[];
 };
 
-/** Viewer-side Investor Data Room button (external link set by the owner). Credits: Imagine Engine Studios Corp. */
+const SFH_ROOM = 'https://startupfactoryhub.com/data-room';
+const DataRoomContent = lazy(() => import('@/pages/InvestorDataRoom').then((m) => ({ default: m.DataRoomContent })));
+
+/** In-profile Investor Data Room: the SFH room renders inline; other profiles show their external link. Credits: Imagine Engine Studios Corp. */
 export function DataRoomViewerButton({ ownerId }: { ownerId: string }) {
   const { user } = useAuth();
   const [s, setS] = useState<Status | null>(null);
   useEffect(() => { call({ action: 'status', owner_id: ownerId }).then(setS).catch(() => setS(null)); }, [ownerId, user?.id]);
   if (!s?.has_data_room) return null;
+  const external = s.own_data_room_url || (s.data_room_url !== SFH_ROOM ? s.data_room_url : null);
   return (
-    <div>
-      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Lock className="h-4 w-4" />Investor Data Room</h4>
-      {s.data_room_url ? (
-        <Button onClick={() => openDeckUrl(s.data_room_url!)} variant="outline" className="w-full gap-2">
-          <ExternalLink className="h-4 w-4" /> Open Data Room
+    <div className="space-y-3">
+      <h4 className="text-sm font-semibold flex items-center gap-2"><Lock className="h-4 w-4" />Investor Data Room</h4>
+      {s.data_room_url === SFH_ROOM && (
+        <Suspense fallback={<p className="text-xs text-muted-foreground">Loading data room…</p>}>
+          <DataRoomContent embedded />
+        </Suspense>
+      )}
+      {external ? (
+        <Button onClick={() => openDeckUrl(external)} variant="outline" className="w-full gap-2">
+          <ExternalLink className="h-4 w-4" /> Open external Data Room link
         </Button>
-      ) : (
+      ) : !s.data_room_url && (
         <Button disabled variant="outline" className="w-full gap-2"><Lock className="h-4 w-4" /> Available on approved deck access</Button>
       )}
     </div>

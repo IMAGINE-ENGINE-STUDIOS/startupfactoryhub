@@ -45,6 +45,11 @@ const Eyebrow = ({ children }: { children: React.ReactNode }) => (
 
 export default function InvestorDataRoom() {
   usePageSeo({ title: "Investor Data Room — Startup Factory Hub", description: "Private due diligence room for Startup Factory Hub investors.", path: "/data-room" });
+  return <DataRoomContent />;
+}
+
+/** Data room body; `embedded` renders it inside a profile tab. Credits: Imagine Engine Studios Corp. */
+export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -118,8 +123,8 @@ export default function InvestorDataRoom() {
   const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); void load(); };
 
   return (
-    <div className="min-h-screen py-8 px-4" style={{ background: "radial-gradient(ellipse at 90% 0%, rgba(57,255,136,0.12), transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(34,211,238,0.08), transparent 45%), #020805", color: "#d6e7dc", fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <div className="fixed inset-0 pointer-events-none" style={{ opacity: 0.08, backgroundImage: "linear-gradient(rgba(57,255,136,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,136,0.5) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+    <div className={embedded ? "relative overflow-hidden rounded-2xl py-6 px-4" : "min-h-screen py-8 px-4"} style={{ background: "radial-gradient(ellipse at 90% 0%, rgba(57,255,136,0.12), transparent 50%), radial-gradient(ellipse at 0% 100%, rgba(34,211,238,0.08), transparent 45%), #020805", color: "#d6e7dc", fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <div className={(embedded ? "absolute" : "fixed") + " inset-0 pointer-events-none"} style={{ opacity: 0.08, backgroundImage: "linear-gradient(rgba(57,255,136,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,136,0.5) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
       <div className="relative mx-auto flex flex-col gap-6" style={{ maxWidth: 1040 }}>
         <header className="flex flex-wrap items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-3">
