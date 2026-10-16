@@ -8,8 +8,11 @@ const cors = {
 };
 const BUCKET = "deck-access";
 type Req = { id: string; name: string; email: string | null; role: string | null; at: string };
-type State = { visibility: "public" | "request" | "private"; deck_url: string | null; approved: string[]; pending: Req[] };
-const empty = (): State => ({ visibility: "public", deck_url: null, approved: [], pending: [] });
+type State = { visibility: "public" | "request" | "private"; deck_url: string | null; data_room_url: string | null; approved: string[]; pending: Req[] };
+const empty = (): State => ({ visibility: "public", deck_url: null, data_room_url: null, approved: [], pending: [] });
+// Platform owner's profile always shows the Startup Factory Hub Investor Data Room.
+const OWNER_EMAILS = ["ceo@imagineengine.space"];
+const SFH_DATA_ROOM = "https://startupfactoryhub.com/data-room";
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 
 Deno.serve(async (req) => {
@@ -45,12 +48,20 @@ Deno.serve(async (req) => {
       const deck = s.deck_url || (await companyDeck(ownerId));
       const isOwner = user?.id === ownerId;
       const granted = isOwner || s.visibility === "public" || (!!user && s.approved.includes(user.id));
+      let room = s.data_room_url;
+      if (!room) {
+        const { data: ou } = await admin.auth.admin.getUserById(ownerId);
+        if (ou?.user?.email && OWNER_EMAILS.includes(ou.user.email.toLowerCase())) room = SFH_DATA_ROOM;
+      }
       return json({
         has_deck: !!deck,
+        has_data_room: !!room,
         visibility: s.visibility,
         deck_url: granted ? deck : null,
+        // The SFH data room page enforces its own investor approval.
+        data_room_url: room === SFH_DATA_ROOM || granted ? room : null,
         pending: !!user && s.pending.some((p) => p.id === user.id),
-        ...(isOwner ? { own_deck_url: s.deck_url, requests: s.pending, approved_count: s.approved.length } : {}),
+        ...(isOwner ? { own_deck_url: s.deck_url, own_data_room_url: s.data_room_url, requests: s.pending, approved_count: s.approved.length } : {}),
       });
     }
 
@@ -60,6 +71,7 @@ Deno.serve(async (req) => {
       const s = await load(user.id);
       if (["public", "request", "private"].includes(body.visibility)) s.visibility = body.visibility;
       if (body.deck_url !== undefined) s.deck_url = body.deck_url ? String(body.deck_url).slice(0, 2000) : null;
+      if (body.data_room_url !== undefined) s.data_room_url = body.data_room_url ? String(body.data_room_url).slice(0, 2000) : null;
       await save(user.id, s);
       return json({ ok: true, state: s });
     }
