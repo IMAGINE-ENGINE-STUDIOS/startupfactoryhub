@@ -3,7 +3,7 @@
  * screen, print-ready landscape PDF. Presents the 3-Engine System.
  * Credits: Imagine Engine Studios Corp.
  */
-import { Download, Lightbulb, Users, TrendingUp, ArrowRight } from "lucide-react";
+import { Download, Lightbulb, Users, TrendingUp, ArrowRight, Building2 } from "lucide-react";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import sfhLogo from "@/assets/sfh-main-logo.png.asset.json";
 
@@ -17,7 +17,7 @@ const ENGINES = [
   {
     n: "01", name: "Imagine Engine", tag: "IP → Product", icon: Lightbulb, color: "#b28cff",
     rows: [
-      ["Entry", "University IP at TRL 1–6"],
+      ["Entry", "University or corporate IP at TRL 1–6"],
       ["What we do", "De-risk, validate, IP packaging"],
       ["Exit", "Commercial product at TRL 6–10"],
     ],
@@ -91,7 +91,22 @@ export default function LMSpace() {
         </div>
 
         {/* Engines */}
-        <div className="flex-1 min-h-0 grid items-stretch" style={{ gridTemplateColumns: "1fr auto 1fr auto 1fr", gap: "clamp(6px,1vw,14px)" }}>
+        <div className="flex-1 min-h-0 grid items-stretch" style={{ gridTemplateColumns: "0.7fr auto 1fr auto 1fr auto 1fr", gap: "clamp(6px,1vw,14px)" }}>
+          <div className="min-h-0 flex flex-col overflow-hidden" style={{ border: `1px dashed ${LM}70`, background: "rgba(6,16,30,0.6)", borderRadius: 14, padding: "clamp(10px,2vh,22px)" }}>
+            <div className="flex items-center justify-between">
+              <span style={{ fontFamily: MONO, fontSize: "clamp(9px,1.1vh,12px)", letterSpacing: "0.2em", color: LM }}>START</span>
+              <Building2 style={{ color: LM, width: "clamp(18px,2.6vh,26px)", height: "clamp(18px,2.6vh,26px)" }} />
+            </div>
+            <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: "clamp(18px,3vh,30px)", color: "#f2f7ff", marginTop: 6, lineHeight: 1.1 }}>University or Corporation</div>
+            <div style={{ fontFamily: MONO, fontSize: "clamp(10px,1.4vh,14px)", color: LM, marginTop: 2 }}>IP Owner</div>
+            <div className="flex flex-col flex-1 justify-center">
+              <div style={{ borderLeft: `2px solid ${LM}`, paddingLeft: 10 }}>
+                <div style={{ fontSize: "clamp(11px,2.1vh,19px)", lineHeight: 1.35, color: "#e4eef8" }}>Holds IP it wants to commercialize.</div>
+              </div>
+            </div>
+            <div style={{ fontSize: "clamp(10px,1.4vh,14px)", fontStyle: "italic", color: LM }}>Then the engines plug in.</div>
+          </div>
+          <div className="flex items-center"><ArrowRight style={{ color: "#5d7894", width: 22, height: 22 }} /></div>
           {ENGINES.map((e, i) => {
             const Icon = e.icon;
             return [
