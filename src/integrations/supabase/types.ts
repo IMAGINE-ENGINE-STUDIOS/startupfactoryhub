@@ -2407,6 +2407,57 @@ export type Database = {
           },
         ]
       }
+      data_room_access: {
+        Row: {
+          email: string
+          granted_at: string
+          note: string | null
+        }
+        Insert: {
+          email: string
+          granted_at?: string
+          note?: string | null
+        }
+        Update: {
+          email?: string
+          granted_at?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
+      data_room_documents: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          external_url: string | null
+          file_path: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       directory_investors: {
         Row: {
           accepting_investments: boolean | null
@@ -9632,6 +9683,7 @@ export type Database = {
         Returns: undefined
       }
       can_see_profile_contact: { Args: { _owner: string }; Returns: boolean }
+      can_view_data_room: { Args: never; Returns: boolean }
       check_and_grant_official_status: {
         Args: { p_user_id: string }
         Returns: Json
