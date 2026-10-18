@@ -37,6 +37,11 @@ export interface SuperAdminData {
   fundingByIndustry: { name: string; total: number }[];
   aiByTier: NamedCount[];
   aiByModel: NamedCount[];
+  pipeline: { name: string; industry: string; stage: string; location: string; lookingFor: string; funding: number }[];
+  activity: { at: string; label: string; delta: number }[];
+  mentors: number;
+  investors: number;
+  seekingCapital: number;
   llamaSharePct: number;
   insights: Insight[];
 }
@@ -50,6 +55,7 @@ const EMPTY: SuperAdminData = {
   usersByIndustry: [], usersByRole: [], topLocations: [],
   companiesByIndustry: [], companiesByStage: [], fundingByIndustry: [],
   aiByTier: [], aiByModel: [], llamaSharePct: 0, insights: [],
+  pipeline: [], activity: [], mentors: 0, investors: 0, seekingCapital: 0,
 };
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
@@ -80,8 +86,8 @@ export function useSuperAdminData(): SuperAdminData {
         try { const { data, error } = await p; return error ? [] : (data || []); } catch { return []; }
       };
       const [profiles, companies, credits, ledger, genius, sales, roles] = await Promise.all([
-        q(supabase.from('profiles').select('user_id,email,created_at,industry,location,is_online').not('email', 'ilike', 'demo-%@startupfactoryhub.com').limit(20000) as any),
-        q(supabase.from('companies').select('created_at,industry,stage,location,funding_amount').limit(20000) as any),
+        q(supabase.from('profiles').select('user_id,email,created_at,industry,location,is_online,is_official_mentor').not('email', 'ilike', 'demo-%@startupfactoryhub.com').limit(20000) as any),
+        q(supabase.from('companies').select('name,created_at,industry,stage,location,funding_amount,looking_for').limit(20000) as any),
         q(supabase.from('user_ai_credits').select('plan,balance').limit(20000) as any),
         q(supabase.from('ai_credit_ledger').select('created_at,delta,reason').gte('created_at', since90).order('created_at', { ascending: true }).limit(50000) as any),
         q(supabase.from('genius_ai_usage').select('user_id,turns_used,input_tokens,output_tokens,period_start').gte('period_start', dayKey(monthStart)).limit(20000) as any),
@@ -174,6 +180,25 @@ export function useSuperAdminData(): SuperAdminData {
     }
     const fundingByIndustry = [...fundMap.entries()].map(([name, total]) => ({ name, total })).sort((a, b) => b.total - a.total).slice(0, 6);
 
+    const pipeline = [...companies]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 12)
+      .map((co) => ({
+        name: String(co.name || 'Unnamed company'),
+        industry: String(co.industry || '—'),
+        stage: String(co.stage || '—'),
+        location: String(co.location || '—'),
+        lookingFor: String(co.looking_for || ''),
+        funding: Number(co.funding_amount) || 0,
+      }));
+    const activity = [...ledger]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 15)
+      .map((row) => ({ at: String(row.created_at), label: String(row.reason || 'credit event'), delta: Number(row.delta) || 0 }));
+    const mentors = profiles.filter((p) => p.is_official_mentor).length;
+    const investors = roles.filter((r) => r.role === 'investor').length;
+    const seekingCapital = companies.filter((co) => /fund|rais|capital|invest|seed/i.test(String(co.looking_for || ''))).length;
+
     // Rule-based strategic insights.
     const insights: Insight[] = [];
     if (signupsPrev7d > 0) {
@@ -199,6 +224,7 @@ export function useSuperAdminData(): SuperAdminData {
       usersByIndustry, usersByRole, topLocations,
       companiesByIndustry, companiesByStage, fundingByIndustry,
       aiByTier, aiByModel, llamaSharePct, insights,
+      pipeline, activity, mentors, investors, seekingCapital,
     };
   }, [raw]);
 }

@@ -143,7 +143,7 @@ const AdminDashboard = () => {
           <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
             <TabsTrigger value="command" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <LayoutDashboard className="h-4 w-4" />
-              <span className="hidden lg:inline">Command</span>
+              <span className="hidden lg:inline">Matrix</span>
             </TabsTrigger>
             <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <BarChart3 className="h-4 w-4" />
