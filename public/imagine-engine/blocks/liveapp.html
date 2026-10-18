@@ -29,7 +29,10 @@
   function src() { var h = host(); try { return (h && h.__IEFiles.get(file)) || localStorage.getItem("ie-live:" + file) || ""; } catch (e) { return ""; } }
   var lastErr = "";
   function fail(m, stack) {
-    m = String(m || "Unknown error"); if (m === lastErr) return; lastErr = m;
+    m = String(m || "Unknown error");
+    // Credits: Imagine Engine Studios Corp. Resize delivery warnings are not crashes.
+    if (/^ResizeObserver loop (completed with undelivered notifications\.?|limit exceeded)$/.test(m)) return;
+    if (m === lastErr) return; lastErr = m;
     var e = document.getElementById("ie-err"), h = host(); e.style.display = "block"; e.textContent = "App error: " + m;
     var info = { ie: "liveapp-error", file: file, message: m, stack: String(stack || "").slice(0, 2000) };
     try { (h || parent).postMessage(info, "*"); } catch (x) {}
