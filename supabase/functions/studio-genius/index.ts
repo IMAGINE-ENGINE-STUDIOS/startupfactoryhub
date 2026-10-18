@@ -1,7 +1,7 @@
 // Genius 3D: turns a request + scene context into scene operations for the 3D Studio.
 // Credits: Imagine Engine Studios Corp.
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/cors";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 import { z } from "npm:zod@3";
 import { authenticatedUser } from "./auth.ts";
 import { routeChat } from "../_shared/ai.ts";

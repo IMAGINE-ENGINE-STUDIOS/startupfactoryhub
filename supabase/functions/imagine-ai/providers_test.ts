@@ -36,7 +36,7 @@ Deno.test("Ollama translates token limits and response usage", async () => {
   const oldDns = Deno.resolveDns;
   let endpoint = "";
   let payload: Record<string, unknown> = {};
-  Deno.resolveDns = (() => Promise.resolve(["93.184.216.34"])) as typeof Deno.resolveDns;
+  Deno.resolveDns = (() => Promise.resolve(["93.184.216.34"])) as unknown as typeof Deno.resolveDns;
   globalThis.fetch = async (url, init) => {
     endpoint = String(url);
     payload = JSON.parse(String(init && "body" in init ? init.body : "{}"));
@@ -58,7 +58,7 @@ Deno.test("Custom provider private DNS resolution blocks outbound calls", async 
   const oldDns = Deno.resolveDns;
   const oldFetch = globalThis.fetch;
   let calls = 0;
-  Deno.resolveDns = (() => Promise.resolve(["10.0.0.1"])) as typeof Deno.resolveDns;
+  Deno.resolveDns = (() => Promise.resolve(["10.0.0.1"])) as unknown as typeof Deno.resolveDns;
   globalThis.fetch = async () => { calls++; return new Response("{}"); };
   try {
     let blocked = false;

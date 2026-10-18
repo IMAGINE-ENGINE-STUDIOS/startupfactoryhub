@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // Credits: Imagine Engine Studios Corp.
 import { costUsd, type Tier } from "../_shared/ai.ts";
 import { configuredChat, PROVIDERS, validCustom, validateSelection, type CustomProvider } from "./providers.ts";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/cors";
 
 const cors = corsHeaders;
 const json = (b: unknown, status = 200) =>
