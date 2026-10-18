@@ -3,15 +3,23 @@
 // Supabase secrets. No Lovable gateway. `aiFetch` is a drop-in replacement for the old
 // OpenAI-style chat-completions fetch so existing callers keep their request/response shapes.
 
-export type Tier = "fast" | "standard" | "vision" | "heavy" | "free";
-export type Provider = "groq" | "gemini" | "openai";
+export type Tier = "fast" | "standard" | "vision" | "heavy" | "free" | "llama";
+export type Provider = "groq" | "gemini" | "openai" | "ollama";
 
 const URLS: Record<Provider, string> = {
   groq: "https://api.groq.com/openai/v1/chat/completions",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
+  ollama: "", // resolved from OLLAMA_BASE_URL at call time
 };
-const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY" };
+const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY", ollama: "OLLAMA_API_KEY" };
+
+// Self-hosted Ollama (OpenAI-compatible /v1/chat/completions), e.g. the user's own
+// GPU box behind a tunnel. Empty = provider skipped silently.
+const ollamaUrl = () => {
+  const base = (Deno.env.get("OLLAMA_BASE_URL") || "").replace(/\/+$/, "");
+  return base ? `${base}/chat/completions` : "";
+};
 
 export const CHAINS: Record<Tier, [Provider, string][]> = {
   fast: [["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["gemini", "gemini-2.5-flash-lite"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
@@ -20,6 +28,8 @@ export const CHAINS: Record<Tier, [Provider, string][]> = {
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"], ["gemini", "gemini-2.5-flash"]],
   // Groq free-plan models only (no paid OpenAI hop).
   free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
+  // Llama: self-hosted Ollama first (free when OLLAMA_BASE_URL is set), then Groq-hosted.
+  llama: [["ollama", "llama3.1:8b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "llama-3.1-8b-instant"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
@@ -34,6 +44,8 @@ export const PRICES: Record<string, [number, number]> = {
   "gemini-2.5-pro": [1.25, 10],
   "gpt-4o-mini": [0.15, 0.6],
   "gpt-4.1": [2, 8],
+  "llama-3.1-8b-instant": [0.05, 0.08],
+  "llama3.1:8b": [0, 0], // self-hosted: no provider cost
 };
 export const costUsd = (model: string, inTok: number, outTok: number) => {
   const p = PRICES[model] || [2, 10];
@@ -42,7 +54,7 @@ export const costUsd = (model: string, inTok: number, outTok: number) => {
 
 const keyOf = (p: Provider) => Deno.env.get(SECRETS[p]) || "";
 /** Truthy when at least one direct provider key is configured. */
-export const aiKeysConfigured = () => (keyOf("groq") || keyOf("gemini") || keyOf("openai") ? "direct" : "");
+export const aiKeysConfigured = () => (keyOf("groq") || keyOf("gemini") || keyOf("openai") || ollamaUrl() ? "direct" : "");
 
 const jsonResp = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
@@ -52,6 +64,7 @@ const hasImages = (messages: any[]) =>
 
 function tierFor(model: string, messages: any[]): Tier {
   if (hasImages(messages)) return "vision";
+  if (/llama/i.test(model)) return "llama";
   if (/lite|8b|instant|20b/.test(model)) return "fast";
   return "standard";
 }
@@ -67,8 +80,9 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
   let last: RouteResult | null = null;
   const chain: [Provider, string][] = selected ? [[selected.provider, selected.model]] : CHAINS[tier];
   for (const [prov, model] of chain) {
+    const url = prov === "ollama" ? ollamaUrl() : URLS[prov];
     const key = keyOf(prov) || String(keyOverrides[prov] || "");
-    if (!key) { console.warn(`[ai] skip ${prov}/${model}: no key`); continue; }
+    if (!url || (!key && prov !== "ollama")) { console.warn(`[ai] skip ${prov}/${model}: no url/key`); continue; }
     const payload: Record<string, unknown> = { ...clean, model };
     if (prov === "openai" && payload.max_tokens) { payload.max_completion_tokens = payload.max_tokens; delete payload.max_tokens; }
     if (prov === "groq" && Number(payload.max_tokens) > 8000) payload.max_tokens = 8000;
@@ -76,9 +90,9 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
     if (payload.stream) payload.stream_options = { include_usage: true };
     if (prov === "gemini") delete payload.stream_options;
     try {
-      const send = () => fetch(URLS[prov], {
+      const send = () => fetch(url, {
         method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        headers: key ? { Authorization: `Bearer ${key}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       let resp = await send();

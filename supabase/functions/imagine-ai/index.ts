@@ -264,9 +264,9 @@ serve(async (req) => {
     const wantsHeavy = body.mode !== "chat" && (body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText));
     const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
     const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
-    const tier: Tier = light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
-    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2, free: 10 };
-    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2, free: 1 };
+    const tier: Tier = /llama/i.test(String(settings.model || "")) ? "llama" : light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
+    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2, free: 10, llama: 10 };
+    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2, free: 1, llama: 1 };
     const reserve = isAdmin ? 0 : RESERVE[tier];
     let balance: number | null = null;
     if (reserve > 0) {
