@@ -35,11 +35,11 @@ function AdminBookingStepLine({ status }: { status: string }) {
         let textColor = 'text-muted-foreground/50';
 
         if (isActive) {
-          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : step.key === 'completed' ? 'bg-blue-500' : step.key === 'pending' ? 'bg-amber-500' : 'bg-emerald-500';
-          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : step.key === 'completed' ? 'text-blue-500' : step.key === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+          dotColor = isCancelledStep ? 'bg-[#FF3D6E]' : step.key === 'needs_action' ? 'bg-[#FF8A3D]' : step.key === 'completed' ? 'bg-[#00E5FF]' : step.key === 'pending' ? 'bg-[#FFB86A]' : 'bg-[#2EF8A0]';
+          textColor = isCancelledStep ? 'text-[#FF3D6E]' : step.key === 'needs_action' ? 'text-[#FF8A3D]' : step.key === 'completed' ? 'text-[#00E5FF]' : step.key === 'pending' ? 'text-[#FFB86A]' : 'text-[#2EF8A0]';
         } else if (isPast) {
-          dotColor = 'bg-emerald-500/60';
-          textColor = 'text-emerald-600/60';
+          dotColor = 'bg-[#2EF8A0]/60';
+          textColor = 'text-[#2EF8A0]/60';
         }
 
         return (
@@ -57,7 +57,7 @@ function AdminBookingStepLine({ status }: { status: string }) {
             {i < steps.length - 1 && (
               <div className={cn(
                 "h-[2px] flex-1 mx-1 rounded-full transition-all",
-                isPast ? 'bg-emerald-500/40' : 'bg-muted-foreground/15'
+                isPast ? 'bg-[#2EF8A0]/40' : 'bg-muted-foreground/15'
               )} />
             )}
           </div>
@@ -68,18 +68,18 @@ function AdminBookingStepLine({ status }: { status: string }) {
 }
 
 const TIER_CONFIG: Record<string, { label: string; icon: React.ReactNode; spaceType: string; badgeClass: string }> = {
-  community: { label: 'Community', icon: <Users className="h-3 w-3" />, spaceType: 'Community Space', badgeClass: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  self_paced: { label: 'Self-Paced', icon: <Monitor className="h-3 w-3" />, spaceType: 'Desk', badgeClass: 'bg-violet-500/10 text-violet-600 border-violet-500/20' },
-  global_access: { label: 'Global Access', icon: <DoorOpen className="h-3 w-3" />, spaceType: 'Office', badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
-  corporate: { label: 'Corporate', icon: <Crown className="h-3 w-3" />, spaceType: 'Premium Office', badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+  community: { label: 'Community', icon: <Users className="h-3 w-3" />, spaceType: 'Community Space', badgeClass: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20' },
+  self_paced: { label: 'Self-Paced', icon: <Monitor className="h-3 w-3" />, spaceType: 'Desk', badgeClass: 'bg-[#7BC4B6]/10 text-[#7BC4B6] border-[#7BC4B6]/20' },
+  global_access: { label: 'Global Access', icon: <DoorOpen className="h-3 w-3" />, spaceType: 'Office', badgeClass: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20' },
+  corporate: { label: 'Corporate', icon: <Crown className="h-3 w-3" />, spaceType: 'Premium Office', badgeClass: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/20' },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-  confirmed: { label: 'Confirmed', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
-  needs_action: { label: 'Needs Action', className: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
-  completed: { label: 'Completed', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  cancelled: { label: 'Cancelled', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
+  pending: { label: 'Pending', className: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/20' },
+  confirmed: { label: 'Confirmed', className: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20' },
+  needs_action: { label: 'Needs Action', className: 'bg-[#FF8A3D]/10 text-[#FF8A3D] border-[#FF8A3D]/20' },
+  completed: { label: 'Completed', className: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20' },
+  cancelled: { label: 'Cancelled', className: 'bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/20' },
 };
 
 export default function WorkspaceBookingsManagement() {
@@ -219,20 +219,20 @@ export default function WorkspaceBookingsManagement() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-teal-500" />
+          <h2 className="text-2xl font-bold flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+            <Building2 className="h-6 w-6 text-[#2EF8A0]" />
             Workspace Bookings
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Manage Startup Factory Hub workspace booking requests
             {pendingCount > 0 && (
-              <Badge className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20 border">{pendingCount} pending</Badge>
+              <Badge className="ml-2 bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">{pendingCount} pending</Badge>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] bg-white/[0.03] border-white/10">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
             <SelectContent>
@@ -252,13 +252,13 @@ export default function WorkspaceBookingsManagement() {
 
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-md" />)}
         </div>
       ) : bookings.length === 0 ? (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="py-16 text-center">
             <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-30" />
-            <h3 className="text-lg font-semibold mb-1">No bookings found</h3>
+            <h3 className="text-lg font-semibold mb-1 font-['Space_Grotesk'] tracking-wide">No bookings found</h3>
             <p className="text-sm text-muted-foreground">No workspace booking requests match the current filter.</p>
           </CardContent>
         </Card>
@@ -272,31 +272,31 @@ export default function WorkspaceBookingsManagement() {
             const isSubscribed = subscriptionMap[booking.user_id] === true;
 
             return (
-              <Card key={booking.id} className="tech-card border-0">
+              <Card key={booking.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
                     <div className="flex-1 space-y-2.5">
                       {/* Header row: venue + status + tier */}
                       <div className="flex items-center gap-3 flex-wrap">
-                        <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
-                          <Building2 className="h-4 w-4 text-teal-500" />
+                        <div className="h-9 w-9 rounded-md bg-[#2EF8A0]/10 flex items-center justify-center shrink-0">
+                          <Building2 className="h-4 w-4 text-[#2EF8A0]" />
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-semibold text-sm">{booking.venue_name}</h4>
                           <p className="text-xs text-muted-foreground">{booking.workspace_type}</p>
                         </div>
-                        <Badge className={`${config.className} border text-xs shrink-0`}>{config.label}</Badge>
-                        <Badge className={cn("border text-xs shrink-0 flex items-center gap-1", tierInfo.badgeClass)}>
+                        <Badge className={`${config.className} border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0`}>{config.label}</Badge>
+                        <Badge className={cn("border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1", tierInfo.badgeClass)}>
                           {tierInfo.icon}
                           {tierInfo.spaceType}
                         </Badge>
                         {/* Subscription verification badge */}
                         {isSubscribed ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 border text-xs shrink-0 flex items-center gap-1">
+                          <Badge className="bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1">
                             <ShieldCheck className="h-3 w-3" /> Subscribed
                           </Badge>
                         ) : (
-                          <Badge className="bg-red-500/10 text-red-600 border-red-500/20 border text-xs shrink-0 flex items-center gap-1">
+                          <Badge className="bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1">
                             <ShieldAlert className="h-3 w-3" /> Not Subscribed
                           </Badge>
                         )}
@@ -315,7 +315,7 @@ export default function WorkspaceBookingsManagement() {
                         </div>
                         {/* Location */}
                         <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-teal-500" />
+                          <MapPin className="h-3 w-3 text-[#2EF8A0]" />
                           {venue ? `${venue.city}, ${venue.country}` : booking.venue_name}
                         </div>
                         {venue?.address && (
@@ -347,13 +347,13 @@ export default function WorkspaceBookingsManagement() {
                         </p>
                       )}
                       {booking.admin_notes && (
-                        <p className="text-xs text-orange-600 pl-12 line-clamp-1">
+                        <p className="text-xs text-[#FF8A3D] pl-12 line-clamp-1">
                           <span className="font-medium">Admin note:</span> {booking.admin_notes}
                         </p>
                       )}
                       {/* Warn admin if user is not subscribed */}
                       {!isSubscribed && booking.status === 'pending' && (
-                        <p className="text-xs text-red-500 pl-12 flex items-center gap-1 font-medium">
+                        <p className="text-xs text-[#FF3D6E] pl-12 flex items-center gap-1 font-medium">
                           <AlertTriangle className="h-3 w-3" />
                           This user does not have an active subscription — verify before approving.
                         </p>
@@ -363,44 +363,44 @@ export default function WorkspaceBookingsManagement() {
                     <div className="flex items-center gap-2 pl-12 lg:pl-0 shrink-0">
                       {booking.status === 'pending' && (
                         <>
-                          <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
+                          <Button size="sm" variant="outline" className="text-[#2EF8A0] border-[#2EF8A0]/30 hover:bg-[#2EF8A0]/10" onClick={() => openAction(booking, 'confirm')}>
                             <Check className="h-3.5 w-3.5 mr-1" /> Approve
                           </Button>
-                          <Button size="sm" variant="outline" className="text-orange-600 border-orange-500/30 hover:bg-orange-500/10" onClick={() => openAction(booking, 'flag')}>
+                          <Button size="sm" variant="outline" className="text-[#FF8A3D] border-[#FF8A3D]/30 hover:bg-[#FF8A3D]/10" onClick={() => openAction(booking, 'flag')}>
                             <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Flag
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-500/30 hover:bg-red-500/10" onClick={() => openAction(booking, 'cancel')}>
+                          <Button size="sm" variant="outline" className="text-[#FF3D6E] border-[#FF3D6E]/30 hover:bg-[#FF3D6E]/10" onClick={() => openAction(booking, 'cancel')}>
                             <X className="h-3.5 w-3.5 mr-1" /> Reject
                           </Button>
                         </>
                       )}
                       {booking.status === 'confirmed' && (
                         <>
-                          <Button size="sm" variant="outline" className="text-orange-600 border-orange-500/30 hover:bg-orange-500/10" onClick={() => openAction(booking, 'flag')}>
+                          <Button size="sm" variant="outline" className="text-[#FF8A3D] border-[#FF8A3D]/30 hover:bg-[#FF8A3D]/10" onClick={() => openAction(booking, 'flag')}>
                             <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Update
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-500/30 hover:bg-red-500/10" onClick={() => openAction(booking, 'cancel')}>
+                          <Button size="sm" variant="outline" className="text-[#FF3D6E] border-[#FF3D6E]/30 hover:bg-[#FF3D6E]/10" onClick={() => openAction(booking, 'cancel')}>
                             <X className="h-3.5 w-3.5 mr-1" /> Cancel
                           </Button>
                         </>
                       )}
                       {booking.status === 'needs_action' && (
                         <>
-                          <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
+                          <Button size="sm" variant="outline" className="text-[#2EF8A0] border-[#2EF8A0]/30 hover:bg-[#2EF8A0]/10" onClick={() => openAction(booking, 'confirm')}>
                             <Check className="h-3.5 w-3.5 mr-1" /> Approve
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-500/30 hover:bg-red-500/10" onClick={() => openAction(booking, 'cancel')}>
+                          <Button size="sm" variant="outline" className="text-[#FF3D6E] border-[#FF3D6E]/30 hover:bg-[#FF3D6E]/10" onClick={() => openAction(booking, 'cancel')}>
                             <X className="h-3.5 w-3.5 mr-1" /> Cancel
                           </Button>
                         </>
                       )}
                       {booking.status === 'cancelled' && (
-                        <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
+                        <Button size="sm" variant="outline" className="text-[#2EF8A0] border-[#2EF8A0]/30 hover:bg-[#2EF8A0]/10" onClick={() => openAction(booking, 'confirm')}>
                           <Check className="h-3.5 w-3.5 mr-1" /> Re-approve
                         </Button>
                       )}
                       {booking.status === 'completed' && (
-                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 border text-xs">
+                        <Badge className="bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                           Completed
                         </Badge>
                       )}
@@ -417,7 +417,7 @@ export default function WorkspaceBookingsManagement() {
       <Dialog open={!!actionBooking && !!actionType} onOpenChange={(open) => { if (!open) { setActionBooking(null); setActionType(null); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">
               {actionType === 'confirm' ? '✅ Approve Booking' : actionType === 'flag' ? '⚠️ Flag Booking' : '❌ Reject Booking'}
             </DialogTitle>
             <DialogDescription>
@@ -429,7 +429,7 @@ export default function WorkspaceBookingsManagement() {
 
           {actionBooking && (
             <div className="space-y-4">
-              <div className="rounded-lg bg-muted/50 p-3 space-y-1.5 text-sm">
+              <div className="rounded-md bg-white/[0.03] p-3 space-y-1.5 text-sm">
                 <p className="font-medium">{actionBooking.venue_name}</p>
                 {venueMap[actionBooking.venue_id] && (
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -444,17 +444,17 @@ export default function WorkspaceBookingsManagement() {
                   {(() => {
                     const ti = TIER_CONFIG[actionBooking.subscription_tier] || TIER_CONFIG.community;
                     return (
-                      <Badge className={cn("border text-xs flex items-center gap-1", ti.badgeClass)}>
+                      <Badge className={cn("border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] flex items-center gap-1", ti.badgeClass)}>
                         {ti.icon} {ti.spaceType}
                       </Badge>
                     );
                   })()}
                   {subscriptionMap[actionBooking.user_id] ? (
-                    <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 border text-xs flex items-center gap-1">
+                    <Badge className="bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] flex items-center gap-1">
                       <ShieldCheck className="h-3 w-3" /> Verified
                     </Badge>
                   ) : (
-                    <Badge className="bg-red-500/10 text-red-600 border-red-500/20 border text-xs flex items-center gap-1">
+                    <Badge className="bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/20 border font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] flex items-center gap-1">
                       <ShieldAlert className="h-3 w-3" /> Not Subscribed
                     </Badge>
                   )}
@@ -467,6 +467,7 @@ export default function WorkspaceBookingsManagement() {
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Add a note for the user..."
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   rows={3}
                 />
               </div>

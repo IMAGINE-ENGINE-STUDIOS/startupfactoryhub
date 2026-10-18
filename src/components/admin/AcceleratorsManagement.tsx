@@ -64,14 +64,14 @@ interface Cohort {
 }
 
 const CHART_COLORS = [
-  'hsl(160, 70%, 45%)',
-  'hsl(200, 70%, 50%)',
-  'hsl(280, 70%, 50%)',
-  'hsl(45, 80%, 50%)',
-  'hsl(15, 80%, 55%)',
-  'hsl(330, 70%, 50%)',
-  'hsl(100, 60%, 45%)',
-  'hsl(240, 60%, 55%)',
+  '#2EF8A0',
+  '#00E5FF',
+  '#7BC4B6',
+  '#FFB86A',
+  '#FF8A3D',
+  '#FF3D6E',
+  '#00FFCC',
+  '#00E5FF',
 ];
 
 const AcceleratorsManagement = () => {
@@ -198,36 +198,36 @@ const AcceleratorsManagement = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Building2 className="h-5 w-5 text-emerald-400 mb-2" />
-            <p className="text-2xl font-bold">{accelerators.length}</p>
-            <p className="text-xs text-muted-foreground">Accelerators</p>
+            <Building2 className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{accelerators.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Accelerators</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Calendar className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{cohorts.length}</p>
-            <p className="text-xs text-muted-foreground">Active Cohorts</p>
+            <Calendar className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{cohorts.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Active Cohorts</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Rocket className="h-5 w-5 text-purple-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <Rocket className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {accelerators.reduce((sum, a) => sum + (a.total_startups_supported || 0), 0)}
             </p>
-            <p className="text-xs text-muted-foreground">Startups Supported</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Startups Supported</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <DollarSign className="h-5 w-5 text-green-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <DollarSign className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {formatFunding(accelerators.reduce((sum, a) => sum + (a.funding_offered || 0), 0))}
             </p>
-            <p className="text-xs text-muted-foreground">Total Funding Offered</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Funding Offered</p>
           </CardContent>
         </Card>
       </div>
@@ -235,10 +235,10 @@ const AcceleratorsManagement = () => {
       {/* Demographics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location Distribution */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-emerald-400" />
+            <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+              <MapPin className="h-4 w-4 text-[#2EF8A0]" />
               Accelerators by Location
             </CardTitle>
           </CardHeader>
@@ -264,7 +264,7 @@ const AcceleratorsManagement = () => {
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="rounded-md border border-[#00E5FF]/25 bg-[#0A1418] p-2 shadow-sm">
                               <p className="text-sm font-medium">{payload[0].name}</p>
                               <p className="text-sm text-muted-foreground">{payload[0].value} accelerators</p>
                             </div>
@@ -298,10 +298,10 @@ const AcceleratorsManagement = () => {
         </Card>
 
         {/* Industries Focus Distribution */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-blue-400" />
+            <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+              <Briefcase className="h-4 w-4 text-[#00E5FF]" />
               Industries Focus
             </CardTitle>
           </CardHeader>
@@ -318,12 +318,12 @@ const AcceleratorsManagement = () => {
                       width={90}
                       tickFormatter={(value) => value.length > 14 ? value.slice(0, 14) + '...' : value}
                     />
-                    <Bar dataKey="value" fill="hsl(160, 70%, 45%)" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="value" fill="#2EF8A0" radius={[0, 4, 4, 0]} />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="rounded-md border border-[#00E5FF]/25 bg-[#0A1418] p-2 shadow-sm">
                               <p className="text-sm font-medium">{payload[0].payload.name}</p>
                               <p className="text-sm text-muted-foreground">{payload[0].value} accelerators</p>
                             </div>
@@ -345,7 +345,7 @@ const AcceleratorsManagement = () => {
       </div>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -354,10 +354,10 @@ const AcceleratorsManagement = () => {
                 placeholder="Search accelerators..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
-            <Button variant="outline" onClick={fetchData} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchData} className="bg-white/[0.03] border-white/10 hover:bg-white/[0.04]">
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -366,9 +366,9 @@ const AcceleratorsManagement = () => {
       </Card>
 
       {/* Accelerators Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Building2 className="h-5 w-5" />
             Accelerators ({filteredAccelerators.length})
           </CardTitle>
@@ -378,14 +378,14 @@ const AcceleratorsManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead className="hidden md:table-cell">Industries</TableHead>
-                  <TableHead>Funding</TableHead>
-                  <TableHead className="hidden sm:table-cell">Equity</TableHead>
-                  <TableHead className="hidden lg:table-cell">Cohorts</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Organization</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</TableHead>
+                  <TableHead className="hidden md:table-cell font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Industries</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Funding</TableHead>
+                  <TableHead className="hidden sm:table-cell font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Equity</TableHead>
+                  <TableHead className="hidden lg:table-cell font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Cohorts</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -418,12 +418,12 @@ const AcceleratorsManagement = () => {
                     <TableCell className="hidden md:table-cell">
                       <div className="flex flex-wrap gap-1 max-w-[180px]">
                         {accelerator.industries_focus?.slice(0, 2).map(ind => (
-                          <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0">
+                          <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                             {getIndustryLabel(ind).slice(0, 12)}
                           </Badge>
                         ))}
                         {(accelerator.industries_focus?.length || 0) > 2 && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                             +{accelerator.industries_focus!.length - 2}
                           </Badge>
                         )}
@@ -443,11 +443,11 @@ const AcceleratorsManagement = () => {
                     </TableCell>
                     <TableCell>
                       {accelerator.is_accepting_applications ? (
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                        <Badge className="bg-[#2EF8A0]/20 text-[#2EF8A0] border-[#2EF8A0]/30 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                           Open
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-muted-foreground text-xs">
+                        <Badge variant="outline" className="text-muted-foreground font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                           Closed
                         </Badge>
                       )}
@@ -480,9 +480,9 @@ const AcceleratorsManagement = () => {
 
       {/* Accelerator Detail Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-lg">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-lg">
           <DialogHeader>
-            <DialogTitle>Accelerator Details</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Accelerator Details</DialogTitle>
           </DialogHeader>
           {selectedAccelerator && (
             <div className="space-y-4">
@@ -511,7 +511,7 @@ const AcceleratorsManagement = () => {
                   <p className="text-sm text-muted-foreground mb-2">Industries Focus</p>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedAccelerator.industries_focus.map(ind => (
-                      <Badge key={ind} variant="outline" className="text-xs">
+                      <Badge key={ind} variant="outline" className="font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                         {getIndustryLabel(ind)}
                       </Badge>
                     ))}
@@ -544,9 +544,9 @@ const AcceleratorsManagement = () => {
                   <p className="text-sm text-muted-foreground mb-2">Active Cohorts</p>
                   <div className="space-y-2">
                     {getAcceleratorCohorts(selectedAccelerator.id).slice(0, 3).map(cohort => (
-                      <div key={cohort.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                      <div key={cohort.id} className="flex items-center justify-between p-2 rounded-md bg-white/[0.03]">
                         <span className="text-sm font-medium">{cohort.name}</span>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                           {cohort.status || 'Active'}
                         </Badge>
                       </div>

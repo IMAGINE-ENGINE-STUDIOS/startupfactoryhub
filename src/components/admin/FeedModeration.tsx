@@ -212,22 +212,22 @@ const FeedModeration = () => {
 
   const getPostTypeBadge = (type: string) => {
     const styles: Record<string, string> = {
-      text: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      image: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      video: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-      cohort_announcement: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      internship_announcement: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+      text: 'bg-[#00E5FF]/20 text-[#00E5FF] border-[#00E5FF]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      image: 'bg-[#7BC4B6]/20 text-[#7BC4B6] border-[#7BC4B6]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      video: 'bg-[#FF3D6E]/20 text-[#FF3D6E] border-[#FF3D6E]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      cohort_announcement: 'bg-[#2EF8A0]/20 text-[#2EF8A0] border-[#2EF8A0]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      internship_announcement: 'bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30 font-["JetBrains_Mono"] uppercase tracking-wider'
     };
     return styles[type] || 'bg-muted text-muted-foreground';
   };
 
   const getFlagStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
-      pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      resolved: 'bg-green-500/20 text-green-400 border-green-500/30',
-      dismissed: 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+      pending: 'bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      resolved: 'bg-[#2EF8A0]/20 text-[#2EF8A0] border-[#2EF8A0]/30 font-["JetBrains_Mono"] uppercase tracking-wider',
+      dismissed: 'bg-[#4E7A73]/20 text-[#7BC4B6] border-[#4E7A73]/30 font-["JetBrains_Mono"] uppercase tracking-wider'
     };
-    return styles[status || 'pending'] || 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+    return styles[status || 'pending'] || 'bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30 font-["JetBrains_Mono"] uppercase tracking-wider';
   };
 
   const filteredPosts = posts.filter(p => 
@@ -250,40 +250,40 @@ const FeedModeration = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <MessageSquare className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{posts.length}</p>
-            <p className="text-xs text-muted-foreground">Total Posts</p>
+            <MessageSquare className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{posts.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Posts</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Flag className="h-5 w-5 text-red-400 mb-2" />
-            <p className="text-2xl font-bold">{flags.length}</p>
-            <p className="text-xs text-muted-foreground">Total Flags</p>
+            <Flag className="h-5 w-5 text-[#FF3D6E] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{flags.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Flags</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <AlertTriangle className="h-5 w-5 text-amber-400 mb-2" />
-            <p className="text-2xl font-bold">{pendingFlags}</p>
-            <p className="text-xs text-muted-foreground">Pending Review</p>
+            <AlertTriangle className="h-5 w-5 text-[#FFB86A] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{pendingFlags}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Pending Review</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Heart className="h-5 w-5 text-rose-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <Heart className="h-5 w-5 text-[#FF3D6E] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {posts.reduce((sum, p) => sum + (p.likes_count || 0), 0)}
             </p>
-            <p className="text-xs text-muted-foreground">Total Likes</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Likes</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -292,11 +292,11 @@ const FeedModeration = () => {
                 placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={viewType} onValueChange={(v: 'posts' | 'flags') => setViewType(v)}>
-              <SelectTrigger className="w-[180px] tech-card border-0">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -304,7 +304,7 @@ const FeedModeration = () => {
                 <SelectItem value="flags">Flagged Content</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={fetchData} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchData} className="bg-white/[0.03] border-white/10 hover:bg-white/[0.04]">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -312,9 +312,9 @@ const FeedModeration = () => {
       </Card>
 
       {/* Content Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             {viewType === 'posts' ? <MessageSquare className="h-5 w-5" /> : <Flag className="h-5 w-5" />}
             {viewType === 'posts' ? `Posts (${filteredPosts.length})` : `Flagged Content (${flags.length})`}
           </CardTitle>
@@ -325,13 +325,13 @@ const FeedModeration = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Author</TableHead>
-                    <TableHead>Content</TableHead>
-                    <TableHead>Media</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Engagement</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Author</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Content</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Media</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Type</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Engagement</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Created</TableHead>
+                    <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -352,7 +352,7 @@ const FeedModeration = () => {
                       <TableCell>
                         {post.media_urls && post.media_urls.length > 0 ? (
                           <div className="flex items-center gap-1">
-                            <ImageIcon className="h-4 w-4 text-purple-400" />
+                            <ImageIcon className="h-4 w-4 text-[#00E5FF]" />
                             <span className="text-xs text-muted-foreground">{post.media_urls.length}</span>
                           </div>
                         ) : (
@@ -392,7 +392,7 @@ const FeedModeration = () => {
                               <Eye className="h-4 w-4 mr-2" />
                               View Full Post
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeletePost(post.id)} className="text-red-500">
+                            <DropdownMenuItem onClick={() => handleDeletePost(post.id)} className="text-[#FF3D6E]">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete Post
                             </DropdownMenuItem>
@@ -407,12 +407,12 @@ const FeedModeration = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Content Type</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Details</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reported</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Content Type</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Reason</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Details</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Reported</TableHead>
+                    <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -442,7 +442,7 @@ const FeedModeration = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleResolveFlag(flag.id, 'resolved')}>
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                              <CheckCircle className="h-4 w-4 mr-2 text-[#2EF8A0]" />
                               Mark Resolved
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleResolveFlag(flag.id, 'dismissed')}>
@@ -463,9 +463,9 @@ const FeedModeration = () => {
 
       {/* Post Detail Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-lg">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-lg">
           <DialogHeader>
-            <DialogTitle>Post Details</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Post Details</DialogTitle>
           </DialogHeader>
           {selectedPost && (
             <div className="space-y-4">
@@ -479,7 +479,7 @@ const FeedModeration = () => {
                   <p className="text-xs text-muted-foreground">{selectedPost.profiles?.email}</p>
                 </div>
               </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="p-4 bg-white/[0.03] rounded-md">
                 <p className="text-sm whitespace-pre-wrap">{selectedPost.content}</p>
               </div>
               
@@ -487,12 +487,12 @@ const FeedModeration = () => {
               {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-purple-400" />
+                    <ImageIcon className="h-4 w-4 text-[#00E5FF]" />
                     Media ({selectedPost.media_urls.length})
                   </p>
                   <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto">
                     {selectedPost.media_urls.map((url, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                      <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white/[0.03]">
                         {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
                           <video src={url} controls className="w-full h-full object-cover" />
                         ) : (

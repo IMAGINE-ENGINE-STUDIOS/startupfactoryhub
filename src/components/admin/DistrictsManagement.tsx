@@ -61,10 +61,10 @@ const ROLE_ICONS: Record<string, typeof Shield> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  moderator: 'text-blue-500 bg-blue-500/10',
-  curator: 'text-amber-500 bg-amber-500/10',
-  ambassador: 'text-emerald-500 bg-emerald-500/10',
-  archivist: 'text-violet-500 bg-violet-500/10',
+  moderator: 'text-[#00E5FF] bg-[#00E5FF]/10 font-["JetBrains_Mono"] uppercase tracking-wider',
+  curator: 'text-[#FFB86A] bg-[#FFB86A]/10 font-["JetBrains_Mono"] uppercase tracking-wider',
+  ambassador: 'text-[#2EF8A0] bg-[#2EF8A0]/10 font-["JetBrains_Mono"] uppercase tracking-wider',
+  archivist: 'text-[#7BC4B6] bg-[#7BC4B6]/10 font-["JetBrains_Mono"] uppercase tracking-wider',
 };
 
 const DISTRICT_EMOJIS: Record<string, string> = {
@@ -267,15 +267,15 @@ export default function DistrictsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            <Crown className="h-5 w-5 text-indigo-500" />
+          <div className="h-10 w-10 rounded-md bg-[#00E5FF]/10 flex items-center justify-center">
+            <Crown className="h-5 w-5 text-[#00E5FF]" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">District Rooms</h2>
+            <h2 className="text-xl font-semibold font-['Space_Grotesk'] tracking-wide">District Rooms</h2>
             <p className="text-sm text-muted-foreground">Full administrative control over community districts</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchAll} className="gap-2 tech-card border-0">
+        <Button variant="outline" size="sm" onClick={fetchAll} className="gap-2 bg-white/[0.03] border-white/10 hover:bg-white/[0.04]">
           <RefreshCw className="h-4 w-4" />
           Refresh
         </Button>
@@ -288,9 +288,9 @@ export default function DistrictsManagement() {
         const activeElection = elections.find(e => e.status === 'active');
 
         return (
-          <Card key={room.id} className="tech-card border-0 overflow-hidden">
+          <Card key={room.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md overflow-hidden">
             {/* Top accent */}
-            <div className={`h-1 bg-gradient-to-r ${room.village_type === 'merchant_village' ? 'from-amber-500 to-orange-500' : 'from-indigo-500 to-violet-500'}`} />
+            <div className={`h-1 bg-gradient-to-r ${room.village_type === 'merchant_village' ? 'from-[#FFB86A] to-[#FF8A3D]' : 'from-[#00E5FF] to-[#00FFCC]'}`} />
 
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-4">
@@ -298,14 +298,14 @@ export default function DistrictsManagement() {
                   <span className="text-3xl">{DISTRICT_EMOJIS[room.name] || '🏘️'}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{room.name}</CardTitle>
+                      <CardTitle className="text-lg font-['Space_Grotesk'] tracking-wide">{room.name}</CardTitle>
                       {room.village_type === 'merchant_village' ? (
-                        <Badge className="bg-amber-500/10 text-amber-600 border-0 flex items-center gap-1 text-[10px]">
+                        <Badge className="bg-[#FFB86A]/10 text-[#FFB86A] border-0 flex items-center gap-1 text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider">
                           <ShoppingBag className="h-2.5 w-2.5" />
                           Merchant
                         </Badge>
                       ) : (
-                        <Badge className="bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-1 text-[10px]">
+                        <Badge className="bg-[#00E5FF]/10 text-[#00E5FF] border-0 flex items-center gap-1 text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider">
                           <Vote className="h-2.5 w-2.5" />
                           Democratic
                         </Badge>
@@ -320,8 +320,8 @@ export default function DistrictsManagement() {
                     </p>
                     {room.purchase && (
                       <div className="flex items-center gap-2 mt-1">
-                        <DollarSign className="h-3 w-3 text-emerald-500" />
-                        <span className="text-xs text-emerald-600 font-medium">
+                        <DollarSign className="h-3 w-3 text-[#2EF8A0]" />
+                        <span className="text-xs text-[#2EF8A0] font-medium">
                           ${((room.purchase.total_paid_cents || 0) / 100).toFixed(2)} paid
                         </span>
                         <span className="text-xs text-muted-foreground">by {room.purchase.creator_name}</span>
@@ -335,12 +335,12 @@ export default function DistrictsManagement() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge className="bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-1 text-xs">
+                  <Badge className="bg-[#00E5FF]/10 text-[#00E5FF] border-0 flex items-center gap-1 text-xs font-['JetBrains_Mono'] uppercase tracking-wider">
                     <Users className="h-3 w-3" />
                     {room.participant_count} online
                   </Badge>
                   {activeElection && (
-                    <Badge className="bg-amber-500/10 text-amber-600 border-0 flex items-center gap-1 animate-pulse text-xs">
+                    <Badge className="bg-[#FFB86A]/10 text-[#FFB86A] border-0 flex items-center gap-1 animate-pulse text-xs font-['JetBrains_Mono'] uppercase tracking-wider">
                       <Radio className="h-3 w-3" />
                       Election Live
                     </Badge>
@@ -361,11 +361,11 @@ export default function DistrictsManagement() {
             <CardContent className="space-y-5">
               {/* ── Host Section — only for democratic villages ── */}
               {room.village_type !== 'merchant_village' ? (
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                <div className="rounded-md border border-[#FFB86A]/25 bg-[#FFB86A]/5 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-amber-500" />
-                      <span className="text-sm font-semibold">Current Host</span>
+                      <Trophy className="h-4 w-4 text-[#FFB86A]" />
+                      <span className="text-sm font-semibold font-['Space_Grotesk'] tracking-wide">Current Host</span>
                     </div>
                     {room.host && (
                       <Button
@@ -393,16 +393,16 @@ export default function DistrictsManagement() {
                           </p>
                         )}
                       </div>
-                      <Badge className="bg-amber-500/15 text-amber-600 border-0 text-[10px] ml-auto">HOST</Badge>
+                      <Badge className="bg-[#FFB86A]/15 text-[#FFB86A] border-0 text-[10px] ml-auto font-['JetBrains_Mono'] uppercase tracking-wider">HOST</Badge>
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">No host elected — district awaiting election.</p>
                   )}
                 </div>
               ) : (
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm text-amber-700">Merchant District — no election or host system</span>
+                <div className="rounded-md border border-[#FFB86A]/25 bg-[#FFB86A]/5 p-3 flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4 text-[#FFB86A]" />
+                  <span className="text-sm text-[#FFB86A]">Merchant District — no election or host system</span>
                 </div>
               )}
 
@@ -410,7 +410,7 @@ export default function DistrictsManagement() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Shield className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-semibold">Staff Committee</span>
+                  <span className="text-sm font-semibold font-['Space_Grotesk'] tracking-wide">Staff Committee</span>
                   <Badge className="bg-muted text-muted-foreground border-0 text-[10px]">{staff.length} members</Badge>
                 </div>
                 {staff.length === 0 ? (
@@ -420,7 +420,7 @@ export default function DistrictsManagement() {
                     {staff.map(s => {
                       const RoleIcon = ROLE_ICONS[s.role] || Shield;
                       return (
-                        <div key={s.id} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                        <div key={s.id} className="flex items-center justify-between p-2.5 rounded-md bg-white/[0.03] border border-white/[0.05]">
                           <div className="flex items-center gap-2">
                             <Avatar className="h-7 w-7">
                               <AvatarImage src={s.profile?.avatar_url || undefined} />
@@ -454,19 +454,19 @@ export default function DistrictsManagement() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Gavel className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-semibold">Election History</span>
+                    <span className="text-sm font-semibold font-['Space_Grotesk'] tracking-wide">Election History</span>
                   </div>
                   {elections.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No elections held yet.</p>
                   ) : (
                     <div className="space-y-2">
                       {elections.slice(0, 5).map(e => (
-                        <div key={e.id} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                        <div key={e.id} className="flex items-center justify-between p-2.5 rounded-md bg-white/[0.03] border border-white/[0.05]">
                           <div className="flex items-center gap-2">
                             <Badge
                               className={`text-[10px] border-0 ${
-                                e.status === 'active' ? 'bg-amber-500/15 text-amber-600 animate-pulse' :
-                                e.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600' :
+                                e.status === 'active' ? 'bg-[#FFB86A]/15 text-[#FFB86A] animate-pulse' :
+                                e.status === 'completed' ? 'bg-[#2EF8A0]/10 text-[#2EF8A0]' :
                                 'bg-muted text-muted-foreground'
                               }`}
                             >
@@ -499,7 +499,7 @@ export default function DistrictsManagement() {
               )}
 
               {/* Meeting link */}
-              <div className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2 font-mono truncate">
+              <div className="text-xs text-muted-foreground bg-white/[0.03] rounded-md px-3 py-2 font-mono truncate">
                 🔗 {room.meeting_link}
               </div>
             </CardContent>
@@ -511,7 +511,7 @@ export default function DistrictsManagement() {
       <Dialog open={!!editRoom} onOpenChange={o => { if (!o) setEditRoom(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Edit3 className="h-4 w-4" />
               Edit {editRoom?.name}
             </DialogTitle>
@@ -548,7 +548,7 @@ export default function DistrictsManagement() {
       <Dialog open={!!confirmReset} onOpenChange={o => { if (!o) setConfirmReset(null); }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
+            <DialogTitle className="flex items-center gap-2 text-destructive font-['Space_Grotesk'] tracking-wide">
               <AlertTriangle className="h-5 w-5" />
               Remove Host?
             </DialogTitle>

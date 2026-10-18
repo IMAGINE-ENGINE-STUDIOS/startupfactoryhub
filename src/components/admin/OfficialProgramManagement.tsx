@@ -243,7 +243,7 @@ export default function OfficialProgramManagement() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'accepted': return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Accepted</Badge>;
+      case 'accepted': return <Badge className="bg-[#2EF8A0]/20 text-[#2EF8A0] border-[#2EF8A0]/30 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">Accepted</Badge>;
       case 'expired': return <Badge variant="destructive">Expired</Badge>;
       default: return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
     }
@@ -252,10 +252,10 @@ export default function OfficialProgramManagement() {
   return (
     <div className="space-y-6">
       {/* Select from Platform Mentors/Advisors */}
-      <Card className="tech-card">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-amber-400" />
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+            <UserPlus className="h-5 w-5 text-[#FFB86A]" />
             Select Mentors & Advisors to Invite
           </CardTitle>
         </CardHeader>
@@ -267,7 +267,7 @@ export default function OfficialProgramManagement() {
                 value={mentorSearch}
                 onChange={(e) => setMentorSearch(e.target.value)}
                 placeholder="Search by name or email..."
-                className="pl-9"
+                className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div className="flex gap-2">
@@ -287,14 +287,14 @@ export default function OfficialProgramManagement() {
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <ScrollArea className="h-[280px] border rounded-md">
-              <div className="divide-y divide-border">
+            <ScrollArea className="h-[280px] border border-white/10 rounded-md bg-[#0A1418]">
+              <div className="divide-y divide-white/[0.05]">
                 {filteredMentors.map((m) => {
                   const alreadyInvited = invitedEmails.has(m.email.toLowerCase());
                   return (
                     <label
                       key={m.user_id}
-                      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-accent/50 transition-colors ${alreadyInvited ? 'opacity-50' : ''}`}
+                      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/[0.04] transition-colors ${alreadyInvited ? 'opacity-50' : ''}`}
                     >
                       <Checkbox
                         checked={selectedMentors.has(m.user_id)}
@@ -309,8 +309,8 @@ export default function OfficialProgramManagement() {
                         <p className="text-sm font-medium truncate">{m.full_name || 'No name'}</p>
                         <p className="text-xs text-muted-foreground truncate">{m.email}</p>
                       </div>
-                      <Badge variant="outline" className="text-xs capitalize shrink-0">{m.role}</Badge>
-                      {alreadyInvited && <Badge variant="secondary" className="text-xs shrink-0">Invited</Badge>}
+                      <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0">{m.role}</Badge>
+                      {alreadyInvited && <Badge variant="secondary" className="font-['JetBrains_Mono'] uppercase tracking-wider text-[10px] shrink-0">Invited</Badge>}
                     </label>
                   );
                 })}
@@ -322,7 +322,7 @@ export default function OfficialProgramManagement() {
           )}
 
           {/* External Emails Section */}
-          <div className="space-y-3 border-t border-border pt-4">
+          <div className="space-y-3 border-t border-white/10 pt-4">
             <Label className="text-sm font-medium">Add External Members (not on platform)</Label>
             <div className="flex gap-2">
               <Input
@@ -330,7 +330,7 @@ export default function OfficialProgramManagement() {
                 onChange={(e) => setExternalInput(e.target.value)}
                 placeholder="external@example.com"
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addExternalEmail())}
-                className="flex-1"
+                className="flex-1 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
               <Button variant="outline" size="sm" onClick={addExternalEmail} type="button">
                 <UserPlus className="h-4 w-4 mr-1" /> Add
@@ -339,7 +339,7 @@ export default function OfficialProgramManagement() {
             {externalEmails.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {externalEmails.map((ext) => (
-                  <Badge key={ext} variant="secondary" className="flex items-center gap-1 py-1 px-2">
+                  <Badge key={ext} variant="secondary" className="flex items-center gap-1 py-1 px-2 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">
                     {ext}
                     <button onClick={() => removeExternalEmail(ext)} className="ml-1 hover:text-destructive">
                       <X className="h-3 w-3" />
@@ -352,7 +352,7 @@ export default function OfficialProgramManagement() {
 
           <div className="space-y-2">
             <Label>Personal Message (optional)</Label>
-            <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="We'd love to have you as an official mentor..." rows={2} />
+            <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="We'd love to have you as an official mentor..." rows={2} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
           </div>
 
           {(selectedMentors.size > 0 || externalEmails.length > 0) && (
@@ -370,9 +370,9 @@ export default function OfficialProgramManagement() {
       </Card>
 
       {/* Invitations List */}
-      <Card className="tech-card">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <CardTitle className="text-base">Invitations ({invitations.length})</CardTitle>
+          <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Invitations ({invitations.length})</CardTitle>
           <Button
             variant="outline"
             size="sm"
@@ -387,12 +387,12 @@ export default function OfficialProgramManagement() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Sent</TableHead>
-                <TableHead>Expires</TableHead>
-                <TableHead>Reminders</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Email</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Sent</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Expires</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Reminders</TableHead>
+                <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -438,29 +438,29 @@ export default function OfficialProgramManagement() {
 
       {/* Member Progress */}
       {statuses.length > 0 && (
-        <Card className="tech-card">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-base">Member Progress ({statuses.length})</CardTitle>
+            <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Member Progress ({statuses.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Profile</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Connection</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Member</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Profile</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Email</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Connection</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {statuses.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium">{s.profile?.full_name || s.profile?.email || s.user_id.slice(0, 8)}</TableCell>
-                    <TableCell>{s.profile_completed ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
-                    <TableCell>{s.email_verified ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
-                    <TableCell>{s.connection_invited ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
-                    <TableCell>{s.is_official ? <Badge className="bg-amber-400/20 text-amber-400 border-amber-400/30">Official</Badge> : <Badge variant="outline">Pending</Badge>}</TableCell>
+                    <TableCell>{s.profile_completed ? <CheckCircle className="h-4 w-4 text-[#2EF8A0]" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                    <TableCell>{s.email_verified ? <CheckCircle className="h-4 w-4 text-[#2EF8A0]" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                    <TableCell>{s.connection_invited ? <CheckCircle className="h-4 w-4 text-[#2EF8A0]" /> : <Circle className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                    <TableCell>{s.is_official ? <Badge className="bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30 font-['JetBrains_Mono'] uppercase tracking-wider text-[10px]">Official</Badge> : <Badge variant="outline">Pending</Badge>}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
