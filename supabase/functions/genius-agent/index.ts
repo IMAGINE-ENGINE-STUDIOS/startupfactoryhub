@@ -579,11 +579,13 @@ serve(async (req) => {
       );
     }
 
-    // Free tier gets the cheaper/faster model; paid tiers get premium.
+    // Genius chat runs on Llama: the model name routes to the llama tier in
+    // _shared/ai.ts (self-hosted Ollama first when configured, then Groq-hosted
+    // Llama — fast, tool-calling capable). The tier chain picks the exact model.
     const model =
       plan === "pro" || plan === "enterprise"
-        ? "google/gemini-3-pro-preview"
-        : "google/gemini-3-flash-preview";
+        ? "llama-3.3-70b-versatile"
+        : "llama-3.1-8b-instant";
 
     let dynamicSystem = SYSTEM_PROMPT;
     if (user) dynamicSystem += `\n\nCurrent user id: ${user.id}.`;
