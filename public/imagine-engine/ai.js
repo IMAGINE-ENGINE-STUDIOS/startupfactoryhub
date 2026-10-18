@@ -78,17 +78,13 @@
       flush(); return html;
     }).join("");
   }
-  function ctx() {
+  function ctx(query) {
     var ie = window.__IE || {};
     var files = ((ie.raw && ie.raw.files) || []).map(function (f) { return { name: f.name, content: String(f.content || "") }; });
-    var budget = 36000, fileCtx = files.map(function (f) {
-      var full = /^apps\//.test(f.name) || f.content.length < 3000;
-      var c = full && budget > 0 ? f.content.slice(0, Math.min(budget, 24000)) : "";
-      budget -= c.length; return { name: f.name, size: f.content.length, content: c };
-    });
+    var fileCtx = files;
     var sel = null; try { var s = document.querySelector("[data-ie-selected], .ie-selected"); if (s) sel = { tag: s.tagName, text: (s.textContent || "").trim().slice(0, 120) }; } catch (e) {}
     var pin = window.__IEPin; if (pin && pin.file) { try { var lines = String((window.__IEFiles && window.__IEFiles.get(pin.file)) || "").split("\n"), ln = +pin.line || 1, a = Math.max(0, ln - 9), b = Math.min(lines.length, ln + 12); sel = { file: pin.file, line: ln, tag: pin.tag, text: (pin.text || "").slice(0, 200), snippet: lines.slice(a, b).map(function (x, i) { return (a + i + 1) + ": " + x; }).join("\n") }; } catch (e) {} }
-    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}), files: fileCtx, selected: sel, legacyBlocks: legacyBlocks() };
+    return { widgets: ie.widgets || [], tables: ie.tables || [], nodes: ie.nodes || [], graph: ie.graph || null, programs: ie.programs || [], sections: (ie.sections || []).slice(0, 40), state: Object.keys(window.__IEState || {}), files: window.__IEBuild.rank(fileCtx, query, sel, 36000), selected: sel, legacyBlocks: legacyBlocks() };
   }
   /* static template blocks placed before templates became Dev files */
   function legacyBlocks() {
@@ -113,40 +109,11 @@
   function currentTab() { return (window.__IE && window.__IE.mode) || "canvas"; }
 
   function extractActions(text) {
-    var found = [], clean = String(text || ""), roots = [];
-    var tryParse = function (s) { try { var v = JSON.parse(s.trim()); var arr = Array.isArray(v) ? v : (v && Array.isArray(v.actions) ? v.actions : [v]); return arr.filter(function (a) { return a && typeof a === "object" && typeof a.type === "string"; }); } catch (e) { return null; } };
-    /* Source files arrive as plain code fences (no JSON escaping, so big apps never break). Accepted forms:
-       ```tsx file=apps/Name.tsx | ```tsx:apps/Name.tsx | ```tsx apps/Name.tsx | ```tsx title="apps/Name.tsx" | first line "// file: apps/Name.tsx" */
-    var PATH = "(?:\\./|/)?((?:apps|components|lib|src|styles|custom-scripts|hooks|pages|scenes)\\/[\\w\\-./]+\\.(?:tsx|ts|jsx|js|html|css|json))";
-    var addSrc = function (path, body) {
-      path = path.replace(/^src\/(?=apps\/)/, "");
-      var code = String(body).replace(/^\s*(?:\/\/|<!--|\/\*)\s*(?:file|path)\s*[:=]\s*[^\n]*\n/i, "").replace(/\s+$/, "") + "\n";
-      if (!code.trim()) return;
-      var hit = function (a) { return a.name === path || (a.type === "addLiveApp" && "apps/" + a.name === path.replace(/\.\w+$/, "")); };
-      roots = roots.filter(function (a) { return !hit(a); }); found = found.filter(function (a) { return !hit(a); }); /* last copy of a file wins */
-      if (/^apps\/[^/]+\.(tsx|jsx|html)$/i.test(path)) roots.push({ type: "addLiveApp", name: path.replace(/^apps\//, "").replace(/\.\w+$/, ""), kind: /\.html$/i.test(path) ? "html" : "react", code: code });
-      else found.push({ type: "addFile", name: path, content: code });
-    };
-    clean = clean.replace(new RegExp("```[\\w-]*(?:[ \\t]*:[ \\t]*|[ \\t]+)(?:(?:file|path|name|title|filename)\\s*=\\s*)?[\"']?" + PATH + "[\"']?[^\\n]*\\n([\\s\\S]*?)(?:```|$(?![\\s\\S]))", "gi"), function (all, path, body) { addSrc(path, body); return ""; });
-    clean = clean.replace(new RegExp("```[\\w-]*[ \\t]*\\n[ \\t]*(?:\\/\\/|<!--|\\/\\*)[ \\t]*(?:file|path)?[ \\t]*[:=]?[ \\t]*" + PATH + "[^\\n]*\\n([\\s\\S]*?)```", "gi"), function (all, path, body) { addSrc(path, body); return ""; });
-    clean = clean.replace(/```(actions|json|javascript|js)?\s*([\s\S]*?)```/gi, function (all, lang, body) { var r = tryParse(body); if (r && r.length) { found = found.concat(r); return ""; } return lang === "actions" ? "" : all; });
-    // Bare JSON arrays / objects with "type" outside fences
-    var i = 0;
-    while (i < clean.length) {
-      var c = clean[i];
-      if ((c === "[" || c === "{") && /"type"\s*:/.test(clean.slice(i, i + 400))) {
-        var depth = 0, inStr = false, esc = false, j = i;
-        for (; j < clean.length; j++) { var ch = clean[j];
-          if (inStr) { if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === '"') inStr = false; continue; }
-          if (ch === '"') inStr = true; else if (ch === "[" || ch === "{") depth++; else if (ch === "]" || ch === "}") { depth--; if (depth === 0) break; } }
-        var r2 = tryParse(clean.slice(i, j + 1));
-        if (r2 && r2.length) { found = found.concat(r2); clean = clean.slice(0, i) + clean.slice(j + 1); continue; }
-      }
-      i++;
-    }
-    found = found.filter(function (a) { return a.type !== "addLiveApp" || !roots.some(function (r) { return r.name === a.name; }); }).concat(roots);
-    return { list: found, clean: clean.replace(/\n{3,}/g, "\n\n").trim() };
+    var parsed = window.__IEBuild.parse(text);
+    if (parsed.errors.length) throw new Error(parsed.errors.join("; "));
+    return parsed;
   }
+
   var APPWORDS = /\b(game|car|cars|player|enemy|enemies|level|scene|speed|lane|lanes|obstacle|bump|jump|score|traffic|road|physics|camera|character|3d|app|ui|button|animation)\b/i;
   var FLOWTYPES = /^(addNode|connect|createMetascript|callMetascript|runFlow|clearFlow)$/;
   /* continuous development: changes to a running app must edit its apps/* file, never add disconnected Flow scripts */
@@ -204,19 +171,19 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
-        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEBuild.validateSource(a.name, nc); window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
         else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
           var cur = window.__IEFiles.get(a.name); if (cur == null) { done.push("Missing file " + a.name); return; }
-          var ok = 0, miss = 0;
-          a.edits.forEach(function (e) { if (e && typeof e.find === "string" && e.find && cur.indexOf(e.find) > -1) { cur = cur.replace(e.find, String(e.replace == null ? "" : e.replace)); ok++; } else miss++; });
-          if (ok) { window.__IEFiles.put(a.name, cur); try { localStorage.setItem("ie-live:" + a.name, cur); } catch (e) {} }
-          done.push("Edited " + a.name + " (" + ok + " change" + (ok === 1 ? "" : "s") + (miss ? ", " + miss + " not found" : "") + ")");
+          var next = window.__IEBuild.patch(cur, a.edits);
+          window.__IEBuild.validateSource(a.name, next);
+          window.__IEFiles.put(a.name, next); try { localStorage.setItem("ie-live:" + a.name, next); } catch (e) {}
+          done.push("Edited " + a.name + " (" + a.edits.length + " changes)");
         }
         else if (a.type === "dispatchApp" && a.action) { var n2 = window.__IEAppBus.broadcast(a.action, a.payload); done.push("Sent " + a.action + " to " + n2 + " app" + (n2 === 1 ? "" : "s")); }
-        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
+        else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEBuild.validateSource("apps/" + a.name + (a.kind === "html" ? ".html" : ".tsx"), a.code || a.content); var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
       });
       if (wantRun) { setTimeout(function () { window.__IE && window.__IE.run(); }, 500); done.push("Flow running"); }
-    } catch (e) { done.push("Could not apply some changes"); }
+    } catch (e) { throw e; }
     return { text: clean, done: done };
   }
 
@@ -439,7 +406,13 @@
       var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
       if (!token()) { toast("Sign in required for AI search", "warning"); throw new Error("Sign in required for AI search"); }
       var list = src.slice(0, 200).map(function (r, i) { return i + ": " + JSON.stringify(r).slice(0, 300); }).join("\n");
-      fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
+      var applied = [], appliedKeys = {}, streamed = "", streamParser = window.__IEBuild.parser(function (record) {
+      if (mode === "chat" || ["summary", "done", "phases"].indexOf(record.type) >= 0) return;
+      var key = JSON.stringify(record); if (appliedKeys[key]) return;
+      var result = runActions(JSON.stringify(record) + "\n"); appliedKeys[key] = true; applied = applied.concat(result.done);
+      progressLabel = result.done[result.done.length - 1] || "Applying changes...";
+    });
+    window.__IEBuild.prepare().then(function () { return fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
         .then(function (r) { return r.json(); })
         .then(function (j) { if (j.error) { L("aiSearch: " + j.error, "error"); return; } var m = String(j.text || "").match(/\[[\d,\s]*\]/); var ids = m ? JSON.parse(m[0]) : [];
           var out = ids.map(function (i) { return src[i]; }).filter(Boolean); (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "results", out); L("aiSearch: " + out.length + " matches"); })
@@ -549,9 +522,8 @@
   };
   /* Live progress: shows what Genius is doing while a build runs, and the files it wrote afterwards */
   var stageAt = 0, stageKind = "edit";
-  var STAGES = { app: ["Understanding your request", "Planning the data and screens", "Writing the app files", "Linking the pieces together", "Starting your app"], edit: ["Reading your project", "Finding the exact place to change", "Writing the change", "Applying it"], chat: ["Thinking"], site: ["Planning the page", "Writing the sections", "Placing them on the canvas"] };
-  function stageText() { var l = STAGES[stageKind] || STAGES.edit, i = Math.min(l.length - 1, Math.floor((Date.now() - stageAt) / 6000)); return l[i] + "..."; }
-  setInterval(function () { var el = document.getElementById("iea-stage"); if (el && busy) el.textContent = stageText(); }, 1000);
+  var liveProgress = "", progressLabel = "Reading your project...";
+  function stageText() { return progressLabel; }
   function fileChips(done) {
     var files = (done || []).map(function (d) { var m = /^(?:Live app|File|Updated|Edited)\s+(\S+)/.exec(d); return m && /[\/.]/.test(m[1]) ? m[1] : null; }).filter(Boolean);
     if (!files.length) return "";
@@ -570,6 +542,7 @@
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
       else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + fileChips(m.done) + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
     });
+    if (busy && liveProgress) h += '<div class="iea-a">' + md(liveProgress) + "</div>";
     if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span> <span id="iea-stage" style="color:#a1a1aa;font-size:11px">' + esc(stageText()) + '</span></div>';
     list.innerHTML = h;
     list.querySelectorAll("[data-file]").forEach(function (b) { b.onclick = function () { try { window.__IE && window.__IE.setMode("dev"); } catch (e) {} }; });
@@ -581,9 +554,13 @@
   /* Phase plans: Genius builds what fits in one job and splits the rest into at most 4 phases */
   var autoPhases = false;
   function parsePhases(text) {
-    var m = /```phases\s*([\s\S]*?)```/.exec(text || ""); if (!m) return null;
-    try { var p = JSON.parse(m[1]); var list = (p.phases || p).slice(0, 4).map(String); if (!list.length) return null; return { list: list, current: Math.max(1, Math.min(list.length, +p.current || 1)) }; } catch (e) { return null; }
+    var records = window.__IEBuild.parse(text).records;
+    var p = records.filter(function (r) { return r.type === "phases"; }).pop();
+    if (!p || !Array.isArray(p.phases)) return null;
+    var phases = p.phases.slice(0, 4).map(String);
+    return { list: phases, current: Math.max(1, Math.min(phases.length, Number(p.current) || 1)) };
   }
+
   function phaseBox(m) {
     var p = m.phases, left = p.list.length - p.current;
     return '<div class="iea-ph"><b>Plan in ' + p.list.length + ' phases</b><ol>' + p.list.map(function (x, k) { return '<li class="' + (k < p.current ? "ok" : "") + '">' + esc(x) + "</li>"; }).join("") + "</ol>" +
@@ -606,7 +583,7 @@
     input.value = "";
     if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Genius AI." }); render(); save(); return; }
     var mode = model === "chat" ? "chat" : "build";
-    stageAt = Date.now(); stageKind = mode === "chat" ? "chat" : buildKind(text);
+    liveProgress = ""; progressLabel = "Reading your project..."; stageAt = Date.now(); stageKind = mode === "chat" ? "chat" : buildKind(text);
     busy = true; render();
     migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); if (window.__IEPin) { window.__IEPin = null; drawAtts(); } }, 200); });
   }
@@ -657,9 +634,17 @@
     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode }),
-    })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(text), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode, stream: true, protocol: "records-v1" }),
+    }); })
+      .then(function (r) { return window.__IEBuild.readResponse(r, function (event) {
+        if (event.type === "delta") {
+          streamed += event.text; streamParser.feed(event.text);
+          var partial = streamParser.result();
+          liveProgress = partial.clean;
+          if (!applied.length) progressLabel = "Writing your changes (" + streamed.length + " characters)...";
+          render();
+        } else if (event.type === "status") { progressLabel = event.message; render(); }
+      }); })
       .then(function (res) {
         if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
@@ -673,7 +658,11 @@
           messages.push({ role: "user", content: "That did not build a working app. Build it now as a real React live app: write each file as a code fence like ```tsx file=apps/<Name>.tsx (root, export default function App) plus module fences under apps/<name>/..., using real libraries (lucide-react, framer-motion, recharts, zustand, date-fns, three/@react-three/fiber when 3D) and IE.db for saved data. No widgets, no Flow nodes." });
           setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
         }
-        var out = runActions(res.j.text || "");
+        var finalParsed = extractActions(res.j.text || "");
+        var remaining = finalParsed.list.filter(function (a) { return !appliedKeys[JSON.stringify(a)]; });
+        var out = remaining.length ? runActions(remaining.map(function (a) { return JSON.stringify(a); }).join("\n")) : { done: [], text: "" };
+        out.done = applied.concat(out.done); out.text = finalParsed.clean;
+        if (!finalParsed.list.length && !doSend._retried) throw new Error("The AI returned no applicable changes; no files were changed");
         var ph = parsePhases(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```phases[\s\S]*?```/g, "").trim(), done: out.done, phases: ph });
         if (res.j.credits && res.j.credits.refunded) messages.push({ role: "assistant", error: true, content: "Genius hit an error, so your credits for that request were returned." });
@@ -686,8 +675,8 @@
         }
         doSend._retried = false;
       })
-      .catch(function () { messages.push({ role: "assistant", error: true, content: "Network error. Please try again." }); })
-      .then(function (v) { if (v === "retry") { render(); return; } busy = false; render(); save(); input.focus(); });
+      .catch(function (e) { autoPhases = false; doSend._retried = false; messages.push({ role: "assistant", error: true, content: (e.message || "Network error. Please try again.") + (applied.length ? " Completed changes were kept." : "") }); })
+      .then(function (v) { if (v === "retry") { render(); return; } busy = false; liveProgress = ""; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
   var menu = root.querySelector("#iea-menu");
