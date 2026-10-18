@@ -1,5 +1,9 @@
 // Genius 3D: turns a request + scene context into scene operations for the 3D Studio.
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+// Credits: Imagine Engine Studios Corp.
+import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/cors";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
+import { z } from "npm:zod@3";
+import { authenticatedUser } from "./auth.ts";
 import { routeChat } from "../_shared/ai.ts";
 
 const json = (d: unknown, status = 200) =>
@@ -44,9 +48,22 @@ New levels already contain ground and a playable hero; keep the hero (do not rem
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const body = await req.json().catch(() => ({}));
-    const prompt = String(body.prompt || "").slice(0, 4000);
-    if (!prompt) return json({ error: "Missing prompt" }, 400);
+    if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+    if (!req.headers.get("Authorization")?.startsWith("Bearer ")) return json({ error: "Please sign in to use Genius 3D." }, 401);
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!url || !key) return json({ error: "Genius 3D configuration is unavailable" }, 503);
+    const client = createClient(url, key, { auth: { persistSession: false } });
+    const userId = await authenticatedUser(req, (token) => client.auth.getUser(token));
+    if (!userId) return json({ error: "Please sign in to use Genius 3D." }, 401);
+    const parsedBody = z.object({
+      prompt: z.string().trim().min(1).max(4000),
+      context: z.record(z.unknown()).optional(),
+      history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(12000) })).max(30).optional(),
+    }).safeParse(await req.json().catch(() => null));
+    if (!parsedBody.success) return json({ error: "Invalid Genius 3D request", details: parsedBody.error.flatten().fieldErrors }, 400);
+    const body = parsedBody.data;
+    const prompt = body.prompt;
     const ctx = JSON.stringify(body.context || {}).slice(0, 24000);
     const history = Array.isArray(body.history) ? body.history.slice(-6).map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 2000) })) : [];
     const { resp } = await routeChat("standard", {
