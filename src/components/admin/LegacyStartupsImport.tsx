@@ -119,11 +119,11 @@ export default function LegacyStartupsImport() {
   }, {} as Record<string, number>);
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Database className="h-5 w-5 text-primary" />
               Legacy Startups Migration
             </CardTitle>
@@ -162,14 +162,14 @@ export default function LegacyStartupsImport() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Startup</TableHead>
-                  <TableHead>Founders</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Markets</TableHead>
-                  <TableHead>Milestone</TableHead>
-                  <TableHead>Revenue (mo)</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-20"></TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Startup</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Founders</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Markets</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Milestone</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Revenue (mo)</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="w-20 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -202,7 +202,7 @@ export default function LegacyStartupsImport() {
                     <TableCell className="text-xs max-w-[180px]">
                       <div className="flex flex-wrap gap-1">
                         {(s.markets || []).slice(0, 3).map((m, i) => (
-                          <Badge key={i} variant="outline" className="text-[10px]">{m}</Badge>
+                          <Badge key={i} variant="outline" className="text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider">{m}</Badge>
                         ))}
                       </div>
                     </TableCell>

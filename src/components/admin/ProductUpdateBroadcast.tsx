@@ -78,11 +78,11 @@ export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => vo
   }
 
   return (
-    <div className="tech-card border-0 rounded-xl px-4 py-3 flex flex-wrap items-center gap-3">
+    <div className="bg-[#0A1418] border border-cyan-400/15 rounded-md px-4 py-3 flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 mr-auto">
         <Megaphone className="h-4 w-4 text-primary" />
         <div>
-          <p className="text-sm font-semibold leading-tight">Product Update Broadcast</p>
+          <p className="text-sm font-semibold leading-tight font-['Space_Grotesk'] tracking-wide">Product Update Broadcast</p>
           <p className="text-[11px] text-muted-foreground">Envía el resumen de novedades por lotes para no superar el límite diario</p>
         </div>
       </div>
@@ -93,7 +93,7 @@ export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => vo
           placeholder="tu@email.com"
           value={testEmail}
           onChange={(e) => setTestEmail(e.target.value)}
-          className="h-8 w-48 text-xs"
+          className="h-8 w-48 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
         />
         <Button
           size="sm"
@@ -112,16 +112,16 @@ export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => vo
           type="number"
           value={offset}
           onChange={(e) => setOffset(Math.max(0, Number(e.target.value) || 0))}
-          className="h-8 w-20 text-xs"
+          className="h-8 w-20 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
         />
         <Label className="text-xs text-muted-foreground">Cantidad</Label>
         <Input
           type="number"
           value={limit}
           onChange={(e) => setLimit(Math.min(500, Math.max(1, Number(e.target.value) || 1)))}
-          className="h-8 w-20 text-xs"
+          className="h-8 w-20 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
         />
-        <Badge variant="outline" className="text-[10px]">{offset}–{offset + limit - 1}</Badge>
+        <Badge variant="outline" className="text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider">{offset}–{offset + limit - 1}</Badge>
         <Button
           size="sm"
           disabled={sending}
@@ -136,13 +136,13 @@ export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => vo
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 border-l border-border/50 pl-3">
+      <div className="flex items-center gap-2 border-l border-white/10 pl-3">
         <Label className="text-xs text-muted-foreground whitespace-nowrap">Programar</Label>
         <Input
           type="datetime-local"
           value={scheduleAt}
           onChange={(e) => setScheduleAt(e.target.value)}
-          className="h-8 w-52 text-xs"
+          className="h-8 w-52 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
         />
         <Button size="sm" variant="outline" disabled={scheduling || !scheduleAt} onClick={scheduleBatch} className="gap-1.5">
           {scheduling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CalendarClock className="h-3.5 w-3.5" />}

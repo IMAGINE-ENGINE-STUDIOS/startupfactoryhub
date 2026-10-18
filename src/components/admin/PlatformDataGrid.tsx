@@ -108,17 +108,17 @@ export default function PlatformDataGrid() {
 
   if (tables === null) return <div className="flex justify-center p-8"><Loader2 className="w-5 h-5 animate-spin" /></div>;
   return (
-    <section className="tech-card border-0 p-5 space-y-3">
+    <section className="bg-[#0A1418] border border-cyan-400/15 rounded-md p-5 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Select value={name} onValueChange={(v) => { setName(v); setPage(0); }}>
-          <SelectTrigger className="w-64"><SelectValue placeholder="Choose a table" /></SelectTrigger>
-          <SelectContent className="bg-background backdrop-blur-none max-h-80">
+          <SelectTrigger className="w-64 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"><SelectValue placeholder="Choose a table" /></SelectTrigger>
+          <SelectContent className="bg-[#0A1418] border-cyan-400/15 backdrop-blur-none max-h-80">
             {tables.map((t) => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <div className="relative">
           <Search className="w-4 h-4 absolute left-2 top-2.5 text-muted-foreground" />
-          <Input className="pl-8 w-48" placeholder="Filter this page" value={filter} onChange={(e) => setFilter(e.target.value)} />
+          <Input className="pl-8 w-48 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" placeholder="Filter this page" value={filter} onChange={(e) => setFilter(e.target.value)} />
         </div>
         <Button size="sm" variant="secondary" onClick={load}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
         <Button size="sm" onClick={addRow}><Plus className="w-4 h-4 mr-1" />Add row</Button>
@@ -127,22 +127,22 @@ export default function PlatformDataGrid() {
         <Button size="sm" variant="ghost" disabled={rows.length < PAGE} onClick={() => setPage((p) => p + 1)}>Next</Button>
       </div>
       <p className="text-xs text-muted-foreground">Click a cell to edit it. Changes save to the live table right away.</p>
-      <div className="overflow-auto max-h-[60vh] rounded-lg border border-border">
+      <div className="overflow-auto max-h-[60vh] rounded-md border border-white/[0.05]">
         {loading ? <div className="flex justify-center p-8"><Loader2 className="w-5 h-5 animate-spin" /></div> : (
           <table className="w-full text-xs">
-            <thead className="bg-muted sticky top-0">
-              <tr>{table?.columns.map((c) => <th key={c.name} className="text-left px-2 py-2 font-medium whitespace-nowrap">{c.name}</th>)}<th /></tr>
+            <thead className="bg-[#0F1F25] sticky top-0">
+              <tr>{table?.columns.map((c) => <th key={c.name} className="text-left px-2 py-2 whitespace-nowrap font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">{c.name}</th>)}<th /></tr>
             </thead>
             <tbody>
               {shown.map((r) => {
                 const i = rows.indexOf(r);
                 return (
-                  <tr key={String(r[pk] ?? i)} className="border-t border-border hover:bg-muted/40">
+                  <tr key={String(r[pk] ?? i)} className="border-t border-white/[0.05] hover:bg-white/[0.04]">
                     {table?.columns.map((c) => (
                       <td key={c.name} className="px-2 py-1 align-top">
                         {edit && edit.i === i && edit.col === c.name ? (
                           <div className="flex gap-1">
-                            <Input autoFocus className="h-7 text-xs w-48" value={edit.value} onChange={(e) => setEdit({ ...edit, value: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEdit(null); }} />
+                            <Input autoFocus className="h-7 text-xs w-48 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={edit.value} onChange={(e) => setEdit({ ...edit, value: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEdit(null); }} />
                             <Button size="sm" className="h-7" onClick={save}>Save</Button>
                           </div>
                         ) : (

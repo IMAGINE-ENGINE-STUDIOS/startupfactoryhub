@@ -42,10 +42,10 @@ export const UnverifiedUsersPanel = () => {
   };
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <MailWarning className="h-4 w-4 text-amber-400" />
+        <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+          <MailWarning className="h-4 w-4 text-[#FFB86A]" />
           Unverified Accounts
         </CardTitle>
         <CardDescription>
@@ -68,12 +68,12 @@ export const UnverifiedUsersPanel = () => {
         {result && (
           <div className="flex flex-wrap gap-2 text-xs">
             {typeof result.count === 'number' && (
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20">
+              <Badge variant="outline" className="bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/25 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                 {result.count} unverified
               </Badge>
             )}
             {typeof result.sent === 'number' && (
-              <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20">
+              <Badge variant="outline" className="bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/25 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                 {result.sent} verification emails sent
               </Badge>
             )}

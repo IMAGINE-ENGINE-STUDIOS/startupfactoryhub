@@ -41,11 +41,11 @@ export const UnsubscribesPanel = () => {
   }, [rows, query]);
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-base font-['Space_Grotesk'] tracking-wide">
               <MailX className="h-4 w-4 text-destructive" />
               Unsubscribes
               <Badge variant="secondary">{rows.length}</Badge>
@@ -67,7 +67,7 @@ export const UnsubscribesPanel = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by email or source"
-            className="pl-9"
+            className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
           />
         </div>
 
@@ -78,7 +78,7 @@ export const UnsubscribesPanel = () => {
           {filtered.map((r) => (
             <div
               key={r.email}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border/40 px-3 py-2 text-sm"
+              className="flex items-center justify-between gap-3 rounded-md border border-white/[0.05] bg-white/[0.03] px-3 py-2 text-sm"
             >
               <span className="truncate font-medium">{r.email}</span>
               <span className="text-xs text-muted-foreground shrink-0">

@@ -148,23 +148,23 @@ export default function InternsManagement() {
 
   return (
     <div className="space-y-6">
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Upload className="h-5 w-5" /> 1. Upload CSV</CardTitle>
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide"><Upload className="h-5 w-5" /> 1. Upload CSV</CardTitle>
           <CardDescription>Required column: <code>email</code>. Optional: <code>full_name</code>, <code>program</code>, <code>company</code>.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-3 items-center flex-wrap">
-            <Input type="file" accept=".csv" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} className="max-w-md" />
+            <Input type="file" accept=".csv" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} className="max-w-md bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
             <Button variant="outline" onClick={downloadSample}><Download className="h-4 w-4 mr-2" /> Sample CSV</Button>
           </div>
 
           {rows.length > 0 && (
             <>
-              <div className="border rounded-lg max-h-80 overflow-auto">
+              <div className="border border-white/[0.05] rounded-md max-h-80 overflow-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow><TableHead>Email</TableHead><TableHead>Name</TableHead><TableHead>Program</TableHead><TableHead>Status</TableHead></TableRow>
+                    <TableRow><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Email</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Name</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Program</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead></TableRow>
                   </TableHeader>
                   <TableBody>
                     {rows.slice(0, 100).map((r, i) => (
@@ -191,11 +191,11 @@ export default function InternsManagement() {
         </CardContent>
       </Card>
 
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5" /> 2. Invitations</CardTitle>
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide"><Mail className="h-5 w-5" /> 2. Invitations</CardTitle>
               <CardDescription>Send activation emails to imported interns.</CardDescription>
             </div>
             <Button onClick={() => sendInvites({ all: true })} disabled={sending || counts.pending === 0}>
@@ -216,17 +216,17 @@ export default function InternsManagement() {
                     placeholder="Email, name, or program…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   />
                 </div>
               </div>
               <div>
                 <Label htmlFor="date-from" className="mb-1.5 block text-xs text-muted-foreground">From</Label>
-                <Input id="date-from" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                <Input id="date-from" type="date" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
               </div>
               <div>
                 <Label htmlFor="date-to" className="mb-1.5 block text-xs text-muted-foreground">To</Label>
-                <Input id="date-to" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                <Input id="date-to" type="date" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
               </div>
               <Button size="sm" variant="ghost" className="mb-0.5" onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}>
                 Clear
@@ -240,15 +240,15 @@ export default function InternsManagement() {
               ))}
             </div>
           </div>
-          <div className="border rounded-lg max-h-[500px] overflow-auto">
+          <div className="border border-white/[0.05] rounded-md max-h-[500px] overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow><TableHead>Email</TableHead><TableHead>Name</TableHead><TableHead>Program</TableHead><TableHead>Status</TableHead><TableHead>Sent</TableHead><TableHead></TableHead></TableRow>
+                <TableRow><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Email</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Name</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Program</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Sent</TableHead><TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]"></TableHead></TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((inv) => (
                   <TableRow key={inv.id}>
-                    <TableCell className="font-mono text-xs">{inv.email}</TableCell>
+                    <TableCell className="font-['JetBrains_Mono'] text-xs">{inv.email}</TableCell>
                     <TableCell>{inv.full_name || "—"}</TableCell>
                     <TableCell>{inv.program || "—"}</TableCell>
                     <TableCell>

@@ -56,19 +56,19 @@ export default function AdminPricePanel({ plan, onSave, onSaved }: Props) {
   };
 
   return (
-    <Card className="tech-card border-0 p-5 space-y-4">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md p-5 space-y-4">
       <div className="flex items-center gap-2">
         <Settings2 className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold">Admin — Pricing</h3>
+        <h3 className="font-semibold font-['Space_Grotesk'] tracking-wide">Admin — Pricing</h3>
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="basic-monthly">Monthly price (USD)</Label>
-          <Input id="basic-monthly" type="number" min={1} step={1} value={monthly} onChange={(e) => setMonthly(e.target.value)} />
+          <Input id="basic-monthly" type="number" min={1} step={1} value={monthly} onChange={(e) => setMonthly(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="basic-yearly">Yearly price (USD)</Label>
-          <Input id="basic-yearly" type="number" min={1} step={1} value={yearly} onChange={(e) => setYearly(e.target.value)} />
+          <Input id="basic-yearly" type="number" min={1} step={1} value={yearly} onChange={(e) => setYearly(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
         </div>
       </div>
       <Button onClick={handleSave} disabled={saving} variant="secondary" size="sm">

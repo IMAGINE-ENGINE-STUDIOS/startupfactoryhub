@@ -123,9 +123,9 @@ export default function MembershipGrants() {
 
   return (
     <div className="space-y-6">
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <ShieldCheck className="h-5 w-5 text-primary" />
             Membership grants
           </CardTitle>
@@ -141,11 +141,13 @@ export default function MembershipGrants() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
+              className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
             />
             <Input
               placeholder="Note (optional)"
               value={note}
               onChange={(e) => setNote(e.target.value)}
+              className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
             />
             <Button onClick={grant} disabled={saving || !email.trim()} className="gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
@@ -155,14 +157,14 @@ export default function MembershipGrants() {
         </CardContent>
       </Card>
 
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <CardTitle className="text-base">Active grants ({rows.length})</CardTitle>
+          <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Active grants ({rows.length})</CardTitle>
           <Input
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="max-w-[220px]"
+            className="max-w-[220px] bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
           />
         </CardHeader>
         <CardContent>
@@ -175,7 +177,7 @@ export default function MembershipGrants() {
               {filtered.map((r) => (
                 <div
                   key={r.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-border/60 p-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-md border border-white/10 bg-white/[0.03] p-3"
                 >
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{r.full_name || r.user_id}</div>
@@ -184,7 +186,7 @@ export default function MembershipGrants() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="uppercase">{r.tier}</Badge>
+                    <Badge variant="secondary" className="uppercase font-['JetBrains_Mono'] text-[10px] tracking-wider">{r.tier}</Badge>
                     <Button size="sm" variant="ghost" className="gap-1 text-destructive" onClick={() => revoke(r.id)}>
                       <Trash2 className="h-4 w-4" /> Revoke
                     </Button>

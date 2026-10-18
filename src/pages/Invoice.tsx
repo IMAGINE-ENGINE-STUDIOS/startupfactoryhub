@@ -593,7 +593,7 @@ const Invoice = () => {
 
   if (authLoading || roleLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#061016] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -601,10 +601,10 @@ const Invoice = () => {
 
   if (role !== "admin") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <Card className="max-w-md w-full">
+      <div className="min-h-screen bg-[#061016] flex items-center justify-center px-6">
+        <Card className="max-w-md w-full bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle>Restricted</CardTitle>
+            <CardTitle className="font-['Space_Grotesk'] tracking-wide">Restricted</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground">
             This page is available to platform administrators only.
@@ -618,18 +618,18 @@ const Invoice = () => {
   const editableText = "bg-transparent border-0 border-b border-dashed border-slate-200 hover:border-slate-300 focus-visible:border-emerald-500 focus-visible:ring-0 px-1 h-auto py-0.5 text-slate-900 rounded-none";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#061016]">
       {/* Toolbar — hidden on print */}
-      <div className="print:hidden border-b border-border/40 bg-card/40 backdrop-blur sticky top-0 z-30">
+      <div className="print:hidden border-b border-cyan-400/15 bg-[#0A1418]/90 backdrop-blur sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <FileText className="h-4 w-4" />
-            <span className="font-mono">{proposalNumber}</span>
+            <span className="font-['JetBrains_Mono']">{proposalNumber}</span>
             {autoSaveStatus === "saving" && (
               <span className="text-xs flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Autosaving…</span>
             )}
             {autoSaveStatus === "saved" && (
-              <span className="text-xs flex items-center gap-1 text-emerald-600"><CheckCircle2 className="h-3 w-3" />Autosaved</span>
+              <span className="text-xs flex items-center gap-1 text-[#2EF8A0]"><CheckCircle2 className="h-3 w-3" />Autosaved</span>
             )}
             {autoSaveStatus === "error" && (
               <span className="text-xs text-destructive">Autosave failed</span>
@@ -1016,9 +1016,9 @@ const Invoice = () => {
 
       {/* Templates dialog */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <DialogHeader>
-            <DialogTitle>Proposal Templates</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Proposal Templates</DialogTitle>
             <DialogDescription>
               Pick a plan template to pre-fill the proposal. You can still edit, add or remove items afterwards.
             </DialogDescription>
@@ -1026,14 +1026,14 @@ const Invoice = () => {
           <div className="max-h-[65vh] overflow-y-auto -mx-2 px-2 space-y-6">
             {TEMPLATE_GROUPS.map((group) => (
               <div key={group}>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                <div className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] mb-2">
                   {group}
                 </div>
                 <div className="grid gap-2">
                   {PROPOSAL_TEMPLATES.filter((t) => t.group === group).map((tpl) => (
                     <div
                       key={tpl.id}
-                      className="rounded-md border border-border p-3 hover:bg-accent/30 transition-colors"
+                      className="rounded-md border border-white/10 bg-white/[0.03] p-3 hover:bg-white/[0.05] transition-colors"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -1060,9 +1060,9 @@ const Invoice = () => {
 
       {/* Saved Proposals dialog */}
       <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <DialogHeader>
-            <DialogTitle>Saved Proposals</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Saved Proposals</DialogTitle>
             <DialogDescription>Click a proposal to load it for editing.</DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto -mx-2 px-2">
@@ -1075,18 +1075,18 @@ const Invoice = () => {
                 No proposals saved yet.
               </div>
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-white/[0.05]">
                 {savedProposals.map((p) => (
                   <li key={p.id}>
                     <button
                       onClick={() => loadProposal(p)}
-                      className="w-full text-left px-3 py-3 hover:bg-accent/40 rounded transition-colors flex items-center justify-between gap-3"
+                      className="w-full text-left px-3 py-3 hover:bg-white/[0.04] rounded transition-colors flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0">
                         <div className="text-sm font-semibold truncate">
                           {p.client_name}{p.client_company ? ` — ${p.client_company}` : ""}
                         </div>
-                        <div className="text-xs text-muted-foreground font-mono">{p.proposal_number}</div>
+                        <div className="text-xs text-muted-foreground font-['JetBrains_Mono']">{p.proposal_number}</div>
                         <div className="text-xs text-muted-foreground">
                           {new Date(p.updated_at).toLocaleString()} • {p.title}
                         </div>
@@ -1105,27 +1105,27 @@ const Invoice = () => {
 
       {/* SEND EMAIL DIALOG */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="max-w-2xl bg-background backdrop-blur-none">
+        <DialogContent className="max-w-2xl bg-[#0A1418] border border-cyan-400/15 rounded-md backdrop-blur-none">
           <DialogHeader>
-            <DialogTitle>Send Proposal by Email</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Send Proposal by Email</DialogTitle>
             <DialogDescription>
-              Sender: <span className="font-mono">info@startupfactoryhub.com</span> · PDF and payment link will be included automatically.
+              Sender: <span className="font-['JetBrains_Mono']">info@startupfactoryhub.com</span> · PDF and payment link will be included automatically.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Recipients</Label>
-              <div className="mt-2 flex flex-wrap gap-2 min-h-[36px] p-2 rounded-md border border-border bg-muted/20">
+              <Label className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Recipients</Label>
+              <div className="mt-2 flex flex-wrap gap-2 min-h-[36px] p-2 rounded-md border border-white/10 bg-white/[0.03]">
                 {emailRecipients.length === 0 && (
                   <span className="text-xs text-muted-foreground">No recipients yet</span>
                 )}
                 {emailRecipients.map((e) => (
-                  <span key={e} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 text-xs">
+                  <span key={e} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#2EF8A0]/15 text-[#2EF8A0] text-xs">
                     {e}
                     <button
                       onClick={() => setEmailRecipients((p) => p.filter((x) => x !== e))}
-                      className="hover:text-red-600"
+                      className="hover:text-[#FF3D6E]"
                       aria-label="Remove"
                     >
                       <X className="h-3 w-3" />
@@ -1137,11 +1137,12 @@ const Invoice = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Add external email</Label>
+                <Label className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Add external email</Label>
                 <div className="mt-2 flex gap-2">
                   <Input
                     type="email"
                     placeholder="name@example.com"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -1158,9 +1159,9 @@ const Invoice = () => {
               </div>
 
               <div>
-                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Search platform contacts</Label>
+                <Label className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Search platform contacts</Label>
                 <Input
-                  className="mt-2"
+                  className="mt-2 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   placeholder="Search by name or email…"
                   value={contactSearch}
                   onChange={(e) => setContactSearch(e.target.value)}
@@ -1169,7 +1170,7 @@ const Invoice = () => {
             </div>
 
             {contactSearch.length >= 2 && (
-              <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-muted/10">
+              <div className="border border-white/10 rounded-md max-h-48 overflow-y-auto bg-white/[0.03]">
                 {searchingContacts && (
                   <div className="p-3 text-xs text-muted-foreground flex items-center gap-2">
                     <Loader2 className="h-3 w-3 animate-spin" /> Searching…
@@ -1182,7 +1183,7 @@ const Invoice = () => {
                   <button
                     key={c.id}
                     onClick={() => c.email && addRecipient(c.email)}
-                    className="w-full text-left px-3 py-2 hover:bg-muted/40 flex items-center justify-between text-sm border-b border-border last:border-b-0"
+                    className="w-full text-left px-3 py-2 hover:bg-white/[0.04] flex items-center justify-between text-sm border-b border-white/[0.05] last:border-b-0"
                   >
                     <span>
                       <span className="font-medium">{c.full_name || "Unnamed"}</span>
@@ -1195,9 +1196,9 @@ const Invoice = () => {
             )}
 
             <div>
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Personal message (optional)</Label>
+              <Label className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Personal message (optional)</Label>
               <Textarea
-                className="mt-2 min-h-[100px]"
+                className="mt-2 min-h-[100px] bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 placeholder="Add a short note for the recipient…"
                 value={emailMessage}
                 onChange={(e) => setEmailMessage(e.target.value)}
@@ -1205,7 +1206,7 @@ const Invoice = () => {
             </div>
 
             {!paymentLinkUrl && (oneTimeTotal > 0 || monthlyTotal > 0 || yearlyTotalRecurring > 0) && (
-              <div className="text-xs text-muted-foreground bg-muted/30 rounded-md p-3 border border-border">
+              <div className="text-xs text-muted-foreground bg-white/[0.03] rounded-md p-3 border border-white/10">
                 A Stripe payment link will be generated automatically when sending.
               </div>
             )}

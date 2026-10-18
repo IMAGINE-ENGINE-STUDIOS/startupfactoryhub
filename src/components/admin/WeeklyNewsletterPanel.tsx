@@ -32,10 +32,10 @@ interface SendLog {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  processing: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  sent: 'bg-green-500/10 text-green-400 border-green-500/20',
-  failed: 'bg-red-500/10 text-red-400 border-red-500/20',
+  pending: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  processing: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  sent: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  failed: 'bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
 };
 
 function currentWeekOf() {
@@ -192,9 +192,9 @@ export const WeeklyNewsletterPanel = () => {
   const paused = isActive === false;
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
       <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between flex-wrap gap-2">
+        <CardTitle className="text-base flex items-center justify-between flex-wrap gap-2 font-['Space_Grotesk'] tracking-wide">
           <span className="flex items-center gap-2">
             <Newspaper className="h-4 w-4 text-primary" /> Weekly Investment Newsletter
           </span>
@@ -237,10 +237,10 @@ export const WeeklyNewsletterPanel = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {paused && (
-          <div className="flex items-start gap-3 text-xs p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 text-xs p-3 rounded-md bg-[#FF3D6E]/10 border border-[#FF3D6E]/25">
+            <AlertTriangle className="h-4 w-4 text-[#FF3D6E] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-300">Auto-send is paused</p>
+              <p className="font-semibold text-[#FF3D6E]">Auto-send is paused</p>
               <p className="text-muted-foreground mt-0.5">
                 The weekly brief will not be sent automatically until you click <strong>Activate auto-send</strong>. Preview and test sends still work.
               </p>
@@ -253,7 +253,7 @@ export const WeeklyNewsletterPanel = () => {
             <Badge variant="outline" className={statusStyles[log.status] || ''}>{log.status}</Badge>
             <span className="text-muted-foreground">Week of {log.week_of}</span>
             <span className="flex items-center gap-1 text-muted-foreground">
-              {log.error_count > 0 ? <XCircle className="h-3 w-3 text-red-400" /> : <CheckCircle className="h-3 w-3 text-green-400" />}
+              {log.error_count > 0 ? <XCircle className="h-3 w-3 text-[#FF3D6E]" /> : <CheckCircle className="h-3 w-3 text-[#2EF8A0]" />}
               {log.sent_count}/{log.recipients_count} sent · {log.error_count} errors
             </span>
             {log.last_error && <span className="text-muted-foreground truncate max-w-[280px]">{log.last_error}</span>}
@@ -261,7 +261,7 @@ export const WeeklyNewsletterPanel = () => {
         )}
 
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-2">
+          <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] mb-2">
             Funding radar for this week ({news.length} round{news.length === 1 ? '' : 's'})
           </p>
           {news.length === 0 ? (
@@ -283,7 +283,7 @@ export const WeeklyNewsletterPanel = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium">{item.startup_name || item.title}</p>
                       {item.amount_text && <span className="text-sm font-semibold text-primary">{item.amount_text}</span>}
-                      {item.round_type && <Badge variant="outline" className="text-[10px]">{item.round_type}</Badge>}
+                      {item.round_type && <Badge variant="outline" className="text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider">{item.round_type}</Badge>}
                     </div>
                     {item.summary && <p className="text-xs text-muted-foreground mt-1">{item.summary}</p>}
                     {item.source_site && <p className="text-[10px] text-muted-foreground mt-1">{item.source_site}</p>}

@@ -77,7 +77,7 @@ export default function AutoPostingHub() {
 
   return (
     <div className="space-y-6">
-      <div className="tech-card border-0 rounded-xl p-6 relative overflow-hidden">
+      <div className="bg-[#0A1418] border border-cyan-400/15 rounded-md p-6 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
@@ -88,16 +88,16 @@ export default function AutoPostingHub() {
         />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-primary">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-primary font-['JetBrains_Mono']">
               <Radio className="h-4 w-4" /> Campaign Automation
             </div>
-            <h2 className="text-2xl font-semibold mt-2">Marketing Control Center</h2>
+            <h2 className="text-2xl font-semibold mt-2 font-['Space_Grotesk'] tracking-wide">Marketing Control Center</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               Every scheduled LinkedIn and feed campaign lives here. Posts are generated and
               published automatically — no manual approval required.
             </p>
           </div>
-          <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 self-center">
+          <Badge variant="outline" className="border-[#2EF8A0]/40 text-[#2EF8A0] self-center font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
             <Zap className="h-3 w-3 mr-1" /> Auto-publish ON
           </Badge>
         </div>
@@ -112,7 +112,7 @@ export default function AutoPostingHub() {
                 variant={isActive ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActive(c.key)}
-                className="rounded-lg justify-start w-full"
+                className="rounded-md justify-start w-full"
               >
                 <Icon className="h-4 w-4 mr-2 shrink-0" />
                 <span className="truncate">{c.label}</span>

@@ -20,11 +20,11 @@ interface ScheduledEmail {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  processing: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  sent: 'bg-green-500/10 text-green-400 border-green-500/20',
-  failed: 'bg-red-500/10 text-red-400 border-red-500/20',
-  cancelled: 'bg-muted text-muted-foreground',
+  pending: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  processing: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  sent: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  failed: 'bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/25 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+  cancelled: 'bg-white/[0.06] text-white/50 border-white/15 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
 };
 
 export const ScheduledEmailsPanel = ({ refreshKey = 0 }: { refreshKey?: number }) => {
@@ -77,9 +77,9 @@ export const ScheduledEmailsPanel = ({ refreshKey = 0 }: { refreshKey?: number }
   };
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
       <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between">
+        <CardTitle className="text-base flex items-center justify-between font-['Space_Grotesk'] tracking-wide">
           <span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-primary" /> Scheduled Emails</span>
           <span className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={load} disabled={loading} className="h-7 px-2 text-xs">
@@ -107,7 +107,7 @@ export const ScheduledEmailsPanel = ({ refreshKey = 0 }: { refreshKey?: number }
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium truncate">{item.label}</p>
-                      <Badge variant="outline" className={`text-xs ${statusStyles[item.status] || ''}`}>{item.status}</Badge>
+                      <Badge variant="outline" className={`${statusStyles[item.status] || ''}`}>{item.status}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(item.scheduled_at).toLocaleString()} · {item.recipients?.length || 0} recipient{(item.recipients?.length || 0) !== 1 ? 's' : ''}
@@ -115,8 +115,8 @@ export const ScheduledEmailsPanel = ({ refreshKey = 0 }: { refreshKey?: number }
                     {(item.status === 'sent' || item.status === 'failed') && (
                       <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                         {item.error_count > 0
-                          ? <XCircle className="h-3 w-3 text-red-400" />
-                          : <CheckCircle className="h-3 w-3 text-green-400" />}
+                          ? <XCircle className="h-3 w-3 text-[#FF3D6E]" />
+                          : <CheckCircle className="h-3 w-3 text-[#2EF8A0]" />}
                         Sent: {item.sent_count} · Errors: {item.error_count}
                         {item.last_error ? ` · ${item.last_error}` : ''}
                       </p>

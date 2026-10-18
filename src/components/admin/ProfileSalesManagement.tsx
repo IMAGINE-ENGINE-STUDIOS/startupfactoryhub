@@ -51,23 +51,23 @@ export default function ProfileSalesManagement() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         {[['Gross sales', money(total)], ['Platform fees', money(fees)], ['Owed to sellers', money(total - fees)], ['Orders', String(sales.length)]].map(([l, v]) => (
-          <Card key={l} className="tech-card border-0"><CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">{l}</p><p className="text-xl font-semibold">{v}</p>
+          <Card key={l} className="bg-[#0A1418] border border-cyan-400/15 rounded-md"><CardContent className="p-4">
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{l}</p><p className="text-xl font-semibold font-['JetBrains_Mono']">{v}</p>
           </CardContent></Card>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
-        <Card className="tech-card border-0">
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Sellers</CardTitle></CardHeader>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-['Space_Grotesk'] tracking-wide">Sellers</CardTitle></CardHeader>
           <CardContent className="space-y-1">
             <div className="relative mb-2">
               <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={e => setQ(e.target.value)} placeholder="Search seller" className="h-8 pl-8 text-xs" />
+              <Input value={q} onChange={e => setQ(e.target.value)} placeholder="Search seller" className="h-8 pl-8 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
             </div>
-            <button onClick={() => setSeller(null)} className={`w-full rounded-md px-2 py-1.5 text-left text-xs ${!seller ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}>All sellers</button>
+            <button onClick={() => setSeller(null)} className={`w-full rounded-md px-2 py-1.5 text-left text-xs ${!seller ? 'bg-primary/10 text-primary' : 'hover:bg-white/[0.04]'}`}>All sellers</button>
             {bySeller.map(([id, t]) => (
-              <button key={id} onClick={() => setSeller(id)} className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left ${seller === id ? 'bg-primary/10' : 'hover:bg-muted'}`}>
+              <button key={id} onClick={() => setSeller(id)} className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left ${seller === id ? 'bg-primary/10' : 'hover:bg-white/[0.04]'}`}>
                 <Avatar className="h-7 w-7"><AvatarImage src={people[id]?.avatar_url} /><AvatarFallback className="text-[10px]">{(people[id]?.full_name || '?')[0]}</AvatarFallback></Avatar>
                 <span className="flex-1 truncate text-xs">{people[id]?.full_name || 'Unknown'}</span>
                 <span className="text-xs font-medium">{money(t.gross)}</span>
@@ -77,17 +77,17 @@ export default function ProfileSalesManagement() {
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-sm"><ShoppingBag className="h-4 w-4" />Orders</CardTitle></CardHeader>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
+          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-sm font-['Space_Grotesk'] tracking-wide"><ShoppingBag className="h-4 w-4" />Orders</CardTitle></CardHeader>
           <CardContent className="overflow-x-auto">
             <table className="w-full text-xs">
-              <thead className="text-muted-foreground"><tr className="text-left">
-                <th className="py-2 pr-3">Date</th><th className="pr-3">Item</th><th className="pr-3">Seller</th><th className="pr-3">Buyer</th>
-                <th className="pr-3 text-right">Amount</th><th className="pr-3 text-right">Fee</th><th className="text-right">Seller net</th>
+              <thead><tr className="text-left">
+                <th className="py-2 pr-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Date</th><th className="pr-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Item</th><th className="pr-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Seller</th><th className="pr-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Buyer</th>
+                <th className="pr-3 text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Amount</th><th className="pr-3 text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Fee</th><th className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Seller net</th>
               </tr></thead>
               <tbody>
                 {list.map(s => (
-                  <tr key={s.id} className="border-t border-border/40">
+                  <tr key={s.id} className="border-t border-white/[0.05]">
                     <td className="py-2 pr-3 whitespace-nowrap">{new Date(s.created_at).toLocaleDateString()}</td>
                     <td className="pr-3">{s.listing_title}{s.quantity > 1 ? ` x${s.quantity}` : ''}</td>
                     <td className="pr-3">{people[s.seller_id]?.full_name || '—'}</td>
