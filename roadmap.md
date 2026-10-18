@@ -1,5 +1,11 @@
 # Roadmap
 
+## Imagine Engine Phase 1
+- [ ] Add Groq Llama and optional self-hosted Ollama routing
+- [ ] Make configured provider/model selections drive Imagine AI requests
+- [ ] Authenticate 3D AI requests before provider calls
+- [ ] Test routing/settings/authentication and deploy updated functions
+
 ## Net + public profiles (current)
 - [x] Net cards: large photo, Message replaces Connect when connected/requested, shuffle per tab, responsive grid
 - [x] Profile icon moved from header into the dashboard tab bar (far right)
