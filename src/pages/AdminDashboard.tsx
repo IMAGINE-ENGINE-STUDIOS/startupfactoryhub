@@ -132,160 +132,168 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#02070E]">
       <DashboardHeader />
       
       <main className="container mx-auto px-4 py-6 pt-16 lg:pt-20">
 
       
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
-            <TabsTrigger value="command" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="matrix-admin">
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <aside className="order-1 lg:order-2 w-full lg:w-64 shrink-0 lg:sticky lg:top-20 rounded-lg border border-cyan-400/15 bg-[#061016] flex flex-col lg:max-h-[calc(100vh-6.5rem)]">
+            <div className="px-4 pt-4 pb-1">
+              <p className="text-[9px] tracking-[0.25em] text-[#4E7A73]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>SYSTEM NAVIGATION</p>
+              <p className="text-sm font-semibold tracking-wide mt-1">HUB <span className="text-[#00E5FF]">//</span> MATRIX</p>
+            </div>
+            <TabsList className="flex lg:flex-col flex-row items-stretch gap-[2px] p-3 bg-transparent border-0 rounded-none overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto flex-1 justify-start">
+            <TabsTrigger value="command" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <LayoutDashboard className="h-4 w-4" />
-              <span className="hidden lg:inline">Matrix</span>
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Matrix</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="overview" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden lg:inline">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Overview</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="users" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Users</span>
-            </TabsTrigger>
-            <TabsTrigger value="investors" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Users</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="investors" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <DollarSign className="h-4 w-4" />
-              <span className="hidden lg:inline">Investors</span>
-            </TabsTrigger>
-            <TabsTrigger value="startups" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Investors</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="startups" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Building2 className="h-4 w-4" />
-              <span className="hidden lg:inline">Startups</span>
-            </TabsTrigger>
-            <TabsTrigger value="accelerators" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Startups</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="accelerators" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Building2 className="h-4 w-4" />
-              <span className="hidden lg:inline">Accelerators</span>
-            </TabsTrigger>
-            <TabsTrigger value="partners" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Accelerators</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="partners" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Handshake className="h-4 w-4" />
-              <span className="hidden lg:inline">Partners</span>
-            </TabsTrigger>
-            <TabsTrigger value="hub-leads" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Partners</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="hub-leads" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Globe className="h-4 w-4" />
-              <span className="hidden lg:inline">Hub Leads</span>
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Hub Leads</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="resources" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Globe className="h-4 w-4" />
-              <span className="hidden lg:inline">Resources</span>
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Resources</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="events" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Calendar className="h-4 w-4" />
-              <span className="hidden lg:inline">Events</span>
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Events</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="jobs" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Briefcase className="h-4 w-4" />
-              <span className="hidden lg:inline">Jobs</span>
-            </TabsTrigger>
-            <TabsTrigger value="moderation" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Jobs</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="moderation" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <MessageSquare className="h-4 w-4" />
-              <span className="hidden lg:inline">Feed</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Feed</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="analytics" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Activity className="h-4 w-4" />
-              <span className="hidden lg:inline">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="api-usage" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Analytics</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="api-usage" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <DollarSign className="h-4 w-4" />
-              <span className="hidden lg:inline">API</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">API</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="settings" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Settings className="h-4 w-4" />
-              <span className="hidden lg:inline">Settings</span>
-            </TabsTrigger>
-            <TabsTrigger value="sfh-program" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Settings</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="sfh-program" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Rocket className="h-4 w-4" />
-              <span className="hidden lg:inline">Cohorts</span>
-            </TabsTrigger>
-            <TabsTrigger value="marketing" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Cohorts</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="marketing" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Megaphone className="h-4 w-4" />
-              <span className="hidden lg:inline">Marketing</span>
-            </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Marketing</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="emails" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Mail className="h-4 w-4" />
-              <span className="hidden lg:inline">Emails</span>
-            </TabsTrigger>
-            <TabsTrigger value="districts" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Emails</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="districts" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Crown className="h-4 w-4" />
-              <span className="hidden lg:inline">Districts</span>
-            </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Districts</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="subscriptions" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <CreditCard className="h-4 w-4" />
-              <span className="hidden lg:inline">Subscriptions</span>
-            </TabsTrigger>
-            <TabsTrigger value="sales" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Subscriptions</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="sales" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <ShoppingBag className="h-4 w-4" />
-              <span className="hidden lg:inline">Sales</span>
-            </TabsTrigger>
-            <TabsTrigger value="live-guests" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Sales</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="live-guests" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Live Guests</span>
-            </TabsTrigger>
-            <TabsTrigger value="referral-partners" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Live Guests</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="referral-partners" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Gift className="h-4 w-4" />
-              <span className="hidden lg:inline">Referrals</span>
-            </TabsTrigger>
-            <TabsTrigger value="workspace-bookings" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Referrals</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="workspace-bookings" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Building className="h-4 w-4" />
-              <span className="hidden lg:inline">Bookings</span>
-            </TabsTrigger>
-            <TabsTrigger value="flights" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Bookings</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="flights" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Plane className="h-4 w-4" />
-              <span className="hidden lg:inline">Flights</span>
-            </TabsTrigger>
-            <TabsTrigger value="soft-landing" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Flights</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="soft-landing" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Globe className="h-4 w-4" />
-              <span className="hidden lg:inline">Soft Landing</span>
-            </TabsTrigger>
-            <TabsTrigger value="official-program" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Soft Landing</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="official-program" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Award className="h-4 w-4" />
-              <span className="hidden lg:inline">Official</span>
-            </TabsTrigger>
-            <TabsTrigger value="vc-intros" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Official</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="vc-intros" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Rocket className="h-4 w-4" />
-              <span className="hidden lg:inline">VC Intros</span>
-            </TabsTrigger>
-            <TabsTrigger value="hot-deals-feedback" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">VC Intros</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="hot-deals-feedback" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Star className="h-4 w-4" />
-              <span className="hidden lg:inline">Event Feedback</span>
-            </TabsTrigger>
-            <TabsTrigger value="proposals" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Event Feedback</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="proposals" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <FileText className="h-4 w-4" />
-              <span className="hidden lg:inline">Proposals</span>
-            </TabsTrigger>
-            <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Proposals</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="legacy-import" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Legacy Users</span>
-            </TabsTrigger>
-            <TabsTrigger value="legacy-startups" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Legacy Users</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="legacy-startups" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Building2 className="h-4 w-4" />
-              <span className="hidden lg:inline">Legacy Startups</span>
-            </TabsTrigger>
-            <TabsTrigger value="interns" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Legacy Startups</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="interns" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <GraduationCap className="h-4 w-4" />
-              <span className="hidden lg:inline">Interns</span>
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Interns</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="invoices" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <CreditCard className="h-4 w-4" />
-              <span className="hidden lg:inline">Invoices</span>
-            </TabsTrigger>
-            <TabsTrigger value="equity-contracts" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Invoices</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="equity-contracts" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <FileSignature className="h-4 w-4" />
-              <span className="hidden lg:inline">Contracts</span>
-            </TabsTrigger>
-            <TabsTrigger value="membership-grants" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <span className="whitespace-nowrap">Contracts</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="membership-grants" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <ShieldCheck className="h-4 w-4" />
-              <span className="hidden lg:inline">Grants</span>
-            </TabsTrigger>
+              <span className="whitespace-nowrap">Grants</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
           </TabsList>
+            </aside>
+            <div className="order-2 lg:order-1 flex-1 min-w-0 w-full">
 
 
 
@@ -329,6 +337,8 @@ const AdminDashboard = () => {
           <TabsContent value="invoices"><InvoiceBilling /></TabsContent>
           <TabsContent value="equity-contracts"><EquityContractsManager /></TabsContent>
           <TabsContent value="membership-grants"><MembershipGrants /></TabsContent>
+            </div>
+        </div>
         </Tabs>
       </main>
     </div>

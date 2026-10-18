@@ -590,3 +590,47 @@ All colors MUST be HSL.
     opacity: 0.6;
   }
 }
+
+/* ── HUB // MATRIX admin theme (scoped to the admin dashboard shell) ─────── */
+.matrix-admin { font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif; }
+.matrix-admin [data-state="active"] .nav-dot { opacity: 1; }
+.matrix-admin ::-webkit-scrollbar { width: 6px; height: 6px; }
+.matrix-admin ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 999px; }
+.matrix-admin ::-webkit-scrollbar-track { background: transparent; }
+
+/* Shared surfaces in every admin module take the Matrix panel look */
+.matrix-admin .bg-card {
+  background-color: #0A1418;
+  border-color: rgba(0, 229, 255, 0.14);
+  color: #E6FFFA;
+  border-radius: 6px;
+}
+.matrix-admin h1, .matrix-admin h2, .matrix-admin h3, .matrix-admin h4 {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* Tables: mono uppercase teal headers, hairline rows */
+.matrix-admin table th {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  color: #4E7A73;
+}
+.matrix-admin table td { border-color: rgba(255, 255, 255, 0.05); }
+
+/* Form controls */
+.matrix-admin input, .matrix-admin textarea, .matrix-admin select {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.matrix-admin input:focus, .matrix-admin textarea:focus, .matrix-admin select:focus {
+  border-color: rgba(0, 229, 255, 0.45);
+  outline: none;
+}
+
+/* Badges read as Matrix status chips */
+.matrix-admin .rounded-full.border, .matrix-admin [class*="badge"] {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
