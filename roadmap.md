@@ -1,10 +1,11 @@
 # Roadmap
 
 ## Imagine Engine Phase 1
-- [ ] Add Groq Llama and optional self-hosted Ollama routing
-- [ ] Make configured provider/model selections drive Imagine AI requests
-- [ ] Authenticate 3D AI requests before provider calls
-- [ ] Test routing/settings/authentication and deploy updated functions
+- [x] Add Groq Llama and optional authenticated public-HTTPS Ollama routing
+- [x] Make configured provider/model selections drive Imagine AI requests
+- [x] Authenticate 3D AI requests before provider calls
+- [x] Nine routing/auth tests passed; deployed both functions and verified live anonymous/invalid-token rejection
+- [ ] Signed-in model-generation and admin settings verification: blocked by unavailable authenticated testing on external Supabase; Ollama also needs the owner's HTTPS server and access key
 
 ## Net + public profiles (current)
 - [x] Net cards: large photo, Message replaces Connect when connected/requested, shuffle per tab, responsive grid
