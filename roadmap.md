@@ -141,3 +141,9 @@
 - [x] Switch between linked accounts from the dashboard
 - [x] Search/Network: show one card per linked person (best profile) with an icon per account type; startup accounts stay separate
 - [x] Email template asking users to finish their profile and add a photo
+
+## Imagine Engine phases 2 and 3
+- [ ] End-to-end streaming with incremental completed-file application
+- [ ] Bounded continuation for truncated multi-file output
+- [ ] Structured records, atomic safe fuzzy patches and relevance-ranked context
+- [ ] Regression tests, deployment and available live checks
