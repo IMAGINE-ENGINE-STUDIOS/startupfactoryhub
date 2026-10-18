@@ -59,9 +59,13 @@ Deno.serve(async (req) => {
       'r_marketing_leadgen_automation',
       'r_verify',
     ]
+    // Company Page automation needs only the organization scopes. The
+    // Community app is NOT approved for the OpenID Connect product, and
+    // requesting 'openid' makes LinkedIn reject the entire authorization
+    // before the user ever sees a consent screen — so openid/profile are
+    // never requested in this flow (the callback resolves administered
+    // pages via /rest/organizationAcls, which needs r_organization_admin).
     const DEFAULT_SCOPES = [
-      'openid',
-      'profile',
       'r_organization_admin',
       'w_organization_social',
     ]
@@ -73,9 +77,9 @@ Deno.serve(async (req) => {
       // This connection exists specifically for Company Page automation. Never
       // let a stale saved selection silently omit the permission needed to post.
       const companyScopes = picked.filter((scope: string) =>
-        ['openid', 'profile', 'r_organization_admin', 'w_organization_social'].includes(scope)
+        ['r_organization_admin', 'w_organization_social'].includes(scope)
       )
-      const scopeList = Array.from(new Set(['openid', 'profile', 'r_organization_admin', 'w_organization_social', ...companyScopes]))
+      const scopeList = Array.from(new Set(['r_organization_admin', 'w_organization_social', ...companyScopes]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
       const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
       const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null, origin: safeOrigin }))
