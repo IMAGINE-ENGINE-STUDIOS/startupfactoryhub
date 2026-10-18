@@ -406,13 +406,7 @@
       var src = window.__IEState[p.sourceKey || "rows"]; if (!Array.isArray(src)) throw new Error("State " + (p.sourceKey || "rows") + " is not a list");
       if (!token()) { toast("Sign in required for AI search", "warning"); throw new Error("Sign in required for AI search"); }
       var list = src.slice(0, 200).map(function (r, i) { return i + ": " + JSON.stringify(r).slice(0, 300); }).join("\n");
-      var applied = [], appliedKeys = {}, streamed = "", streamParser = window.__IEBuild.parser(function (record) {
-      if (mode === "chat" || ["summary", "done", "phases"].indexOf(record.type) >= 0) return;
-      var key = JSON.stringify(record); if (appliedKeys[key]) return;
-      var result = runActions(JSON.stringify(record) + "\n"); appliedKeys[key] = true; applied = applied.concat(result.done);
-      progressLabel = result.done[result.done.length - 1] || "Applying changes...";
-    });
-    window.__IEBuild.prepare().then(function () { return fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
+      fetch(FN, { method: "POST", headers: hdr(), body: JSON.stringify({ action: "chat", tab: "flow", messages: [{ role: "user", content: "Rank these items by how well they match the request \"" + (p.query || "") + "\". Reply with ONLY a JSON array of item numbers, best first, at most " + (Number(p.limit) || 10) + ".\n" + list }], context: { plain: true } }) })
         .then(function (r) { return r.json(); })
         .then(function (j) { if (j.error) { L("aiSearch: " + j.error, "error"); return; } var m = String(j.text || "").match(/\[[\d,\s]*\]/); var ids = m ? JSON.parse(m[0]) : [];
           var out = ids.map(function (i) { return src[i]; }).filter(Boolean); (window.__IEBus ? window.__IEBus.set : put)(p.stateKey || "results", out); L("aiSearch: " + out.length + " matches"); })
@@ -631,16 +625,22 @@
       if (send3DStudio(text)) { busy = false; render(); save(); return; }
     }
     var history = messages.filter(function (m) { return !m.error; }).map(function (m) { return { role: m.role, content: m.content }; });
-    fetch(FN, {
+    var applied = [], appliedKeys = {}, streamed = "", streamParser = window.__IEBuild.parser(function (record) {
+      if (mode === "chat" || !/^(addFile|updateFile|patchFile|addLiveApp)$/.test(record.type)) return;
+      var key = JSON.stringify(record); if (appliedKeys[key]) return;
+      var result = runActions(JSON.stringify(record) + "\n"); appliedKeys[key] = true; applied = applied.concat(result.done);
+      progressLabel = result.done[result.done.length - 1] || "Applying changes...";
+    });
+    window.__IEBuild.prepare().then(function () { return     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
       body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(text), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode, stream: true, protocol: "records-v1" }),
     }); })
       .then(function (r) { return window.__IEBuild.readResponse(r, function (event) {
         if (event.type === "delta") {
-          streamed += event.text; streamParser.feed(event.text);
+          streamed += event.text; if (mode !== "chat") streamParser.feed(event.text);
           var partial = streamParser.result();
-          liveProgress = partial.clean;
+          liveProgress = mode === "chat" ? streamed : partial.clean;
           if (!applied.length) progressLabel = "Writing your changes (" + streamed.length + " characters)...";
           render();
         } else if (event.type === "status") { progressLabel = event.message; render(); }
@@ -648,7 +648,7 @@
       .then(function (res) {
         if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
         if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
-        if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: extractActions(res.j.text || "").clean || res.j.text, done: [], chat: true }); return; }
+        if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: res.j.text, done: [], chat: true }); return; }
         needFix = false;
         var kindNow = buildKind(text), exNow = extractActions(res.j.text || "").list;
         var builtApp = exNow.some(function (a) { return /^(addLiveApp|applyTemplate|updateFile|patchFile)$/.test(a.type); });

@@ -32,8 +32,9 @@
         if (r.type === "summary") { if (typeof r.text !== "string") throw new Error("Invalid summary"); prose.push(r.text); }
         else if (r.type === "phases" || r.type === "done") { /* metadata */ }
         else { r = action(r); }
-        records.push(r); if (onRecord) onRecord(r);
-      } catch (e) { errors.push(e.message); }
+        records.push(r);
+      } catch (e) { errors.push(e.message); return; }
+      if (onRecord) onRecord(r);
     }
     function json(text) {
       var value = JSON.parse(text), list = Array.isArray(value) ? value : value.actions || [value];
@@ -68,7 +69,7 @@
       if (trimmed) prose.push(ln);
     }
     return {
-      feed: function (chunk) { pending += chunk; var i; while ((i = pending.indexOf("\n")) >= 0) { line(pending.slice(0, i).replace(/\r$/, "")); pending = pending.slice(i + 1); } },
+      feed: function (chunk) { pending += chunk; var i; while ((i = pending.indexOf("\n")) >= 0) { line(pending.slice(0, i).replace(/\r$/, "")); pending = pending.slice(i + 1); } if (errors.length) throw new Error(errors.join("; ")); },
       finish: function () { if (pending) { line(pending); pending = ""; } if (fence) errors.push("Incomplete source block; no partial file was saved"); return this.result(); },
       result: function () { return { records: records.slice(), list: records.filter(function (r) { return ["summary", "phases", "done"].indexOf(r.type) < 0; }), clean: prose.join("\n").trim(), errors: errors.slice() }; }
     };
@@ -139,5 +140,31 @@
       return { ok: true, j: final };
     } finally { await reader.cancel().catch(function () {}); reader.releaseLock(); }
   }
-  host.__IEBuild = { safePath: safePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse };
+  var compilerPromise;
+  function prepare() {
+    if (host.Babel) return Promise.resolve();
+    if (typeof document === "undefined") return Promise.resolve();
+    if (!compilerPromise) compilerPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement("script"); script.src = "https://cdn.jsdelivr.net/npm/@babel/standalone@7.28.5/babel.min.js";
+      script.onload = resolve; script.onerror = function () { compilerPromise = null; reject(new Error("Could not load source validation; please retry")); };
+      document.head.appendChild(script);
+    });
+    return compilerPromise;
+  }
+  function validateSource(path, content) {
+    if (!safePath(path)) throw new Error("Unsafe file path");
+    if (/\.json$/.test(path)) JSON.parse(content);
+    if (/\.(tsx|ts|jsx|js)$/.test(path)) {
+      if (!host.Babel) throw new Error("Source validator is not ready");
+      host.Babel.transform(content, { filename: path, presets: [/\.(tsx|jsx)$/.test(path) ? "react" : null, /\.(tsx|ts)$/.test(path) ? "typescript" : null].filter(Boolean) });
+    }
+    if (/\.html$/.test(path) && typeof DOMParser !== "undefined") {
+      var doc = new DOMParser().parseFromString(content, "text/html");
+      doc.querySelectorAll("script:not([src])").forEach(function (script) {
+        if (script.type && ["module", "text/javascript", "application/javascript"].indexOf(script.type) < 0) return;
+        if (host.Babel && script.textContent.trim()) host.Babel.transform(script.textContent, { filename: "inline.js" });
+      });
+    }
+  }
+  host.__IEBuild = { prepare: prepare, validateSource: validateSource, safePath: safePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse };
 })(typeof window === "undefined" ? globalThis : window);
