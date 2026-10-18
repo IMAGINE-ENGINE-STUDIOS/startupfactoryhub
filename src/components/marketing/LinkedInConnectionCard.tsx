@@ -38,7 +38,10 @@ export default function LinkedInConnectionCard() {
 
   async function connect() {
     const { data, error } = await supabase.functions.invoke('linkedin-org-auth', {
-      body: { action: 'get-auth-url', origin: window.location.origin },
+      // The Startup Factory Hub Company Page (ID from the Page admin URL).
+      // Passing the URN lets the callback bind this Page directly, without
+      // needing the r_organization_admin discovery scope.
+      body: { action: 'get-auth-url', origin: window.location.origin, org_urn: 'urn:li:organization:101979688' },
     });
     if (error || !data?.authUrl) {
       toast.error('Failed to start LinkedIn authorization');

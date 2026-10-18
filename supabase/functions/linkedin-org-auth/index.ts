@@ -66,7 +66,6 @@ Deno.serve(async (req) => {
     // never requested in this flow (the callback resolves administered
     // pages via /rest/organizationAcls, which needs r_organization_admin).
     const DEFAULT_SCOPES = [
-      'r_organization_admin',
       'w_organization_social',
     ]
 
@@ -76,10 +75,15 @@ Deno.serve(async (req) => {
         : DEFAULT_SCOPES
       // This connection exists specifically for Company Page automation. Never
       // let a stale saved selection silently omit the permission needed to post.
+      // Only w_organization_social is requested: this app is not approved
+      // for r_organization_admin either, and asking for any unapproved scope
+      // makes LinkedIn reject the whole authorization. Page discovery is
+      // unnecessary — the callback receives the Page URN via OAuth state
+      // and skips the organizationAcls lookup when it is already known.
       const companyScopes = picked.filter((scope: string) =>
-        ['r_organization_admin', 'w_organization_social'].includes(scope)
+        ['w_organization_social'].includes(scope)
       )
-      const scopeList = Array.from(new Set(['r_organization_admin', 'w_organization_social', ...companyScopes]))
+      const scopeList = Array.from(new Set(['w_organization_social', ...companyScopes]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
       const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
       const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null, origin: safeOrigin }))
