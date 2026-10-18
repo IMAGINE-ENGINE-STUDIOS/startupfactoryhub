@@ -40,11 +40,11 @@ interface HubApplication {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  reviewing: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-  interview: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-  approved: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-  rejected: 'bg-red-500/10 text-red-600 border-red-500/20',
+  pending: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/25',
+  reviewing: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/25',
+  interview: 'bg-[#7BC4B6]/10 text-[#7BC4B6] border-[#7BC4B6]/25',
+  approved: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/25',
+  rejected: 'bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/25',
 };
 
 export default function HubApplicationsManagement() {
@@ -138,16 +138,16 @@ export default function HubApplicationsManagement() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Leads', value: stats.total, icon: Users, color: 'text-foreground' },
-          { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-500' },
-          { label: 'In Review', value: stats.reviewing, icon: Eye, color: 'text-blue-500' },
-          { label: 'Approved', value: stats.approved, icon: Globe, color: 'text-emerald-500' },
+          { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-[#FFB86A]' },
+          { label: 'In Review', value: stats.reviewing, icon: Eye, color: 'text-[#00E5FF]' },
+          { label: 'Approved', value: stats.approved, icon: Globe, color: 'text-[#2EF8A0]' },
         ].map(s => (
-          <Card key={s.label} className="tech-card border-0">
+          <Card key={s.label} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardContent className="p-4 flex items-center gap-3">
               <s.icon className={`h-8 w-8 ${s.color}`} />
               <div>
-                <p className="text-2xl font-bold">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{s.value}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{s.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -158,10 +158,10 @@ export default function HubApplicationsManagement() {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, email, city..." className="pl-10" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, email, city..." className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40 bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -177,23 +177,23 @@ export default function HubApplicationsManagement() {
       </div>
 
       {/* Table */}
-      <Card className="tech-card border-0 overflow-hidden">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left p-3 font-medium">Applicant</th>
-                <th className="text-left p-3 font-medium">Location</th>
-                <th className="text-left p-3 font-medium">Role</th>
-                <th className="text-left p-3 font-medium">Experience</th>
-                <th className="text-left p-3 font-medium">Status</th>
-                <th className="text-left p-3 font-medium">Date</th>
-                <th className="text-left p-3 font-medium">Actions</th>
+              <tr className="border-b border-white/[0.05] bg-white/[0.03]">
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Applicant</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Role</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Experience</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Date</th>
+                <th className="text-left p-3 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(app => (
-                <tr key={app.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                <tr key={app.id} className="border-b border-white/[0.05] hover:bg-white/[0.04] transition-colors">
                   <td className="p-3">
                     <div>
                       <p className="font-medium">{app.full_name}</p>
@@ -208,7 +208,7 @@ export default function HubApplicationsManagement() {
                   <td className="p-3 text-xs max-w-[120px] truncate">{app.primary_role}</td>
                   <td className="p-3 text-xs">{app.years_experience} yrs</td>
                   <td className="p-3">
-                    <Badge variant="outline" className={`text-[10px] ${STATUS_COLORS[app.status] || ''}`}>
+                    <Badge variant="outline" className={`text-[10px] font-['JetBrains_Mono'] uppercase tracking-wider ${STATUS_COLORS[app.status] || ''}`}>
                       {app.status}
                     </Badge>
                   </td>
@@ -237,13 +237,13 @@ export default function HubApplicationsManagement() {
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={o => !o && setSelectedApp(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-[#0A1418] border border-cyan-400/15 rounded-md">
           {selectedApp && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center justify-between">
+                <DialogTitle className="flex items-center justify-between font-['Space_Grotesk'] tracking-wide">
                   <span>{selectedApp.full_name}</span>
-                  <Badge variant="outline" className={STATUS_COLORS[selectedApp.status] || ''}>
+                  <Badge variant="outline" className={`${STATUS_COLORS[selectedApp.status] || ''} font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider`}>
                     {selectedApp.status}
                   </Badge>
                 </DialogTitle>
@@ -251,7 +251,7 @@ export default function HubApplicationsManagement() {
 
               <div className="space-y-5 text-sm">
                 {/* Contact */}
-                <div className="grid grid-cols-2 gap-3 p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="grid grid-cols-2 gap-3 p-4 rounded-md bg-white/[0.03] border border-white/10">
                   <div><span className="text-muted-foreground">Email:</span> <span className="font-medium">{selectedApp.email}</span></div>
                   <div><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{selectedApp.phone}</span></div>
                   <div><span className="text-muted-foreground">Location:</span> <span className="font-medium">{selectedApp.city}, {selectedApp.country}</span></div>
@@ -269,7 +269,7 @@ export default function HubApplicationsManagement() {
                   { title: 'Commitment', items: [['Onboarding', selectedApp.onboarding_timeline], ['3-Year Commitment', selectedApp.three_year_commitment], ['Signature', selectedApp.digital_signature]] },
                 ].map(section => (
                   <div key={section.title}>
-                    <h4 className="font-semibold text-xs text-primary uppercase mb-2">{section.title}</h4>
+                    <h4 className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-primary mb-2">{section.title}</h4>
                     <div className="space-y-1">
                       {section.items.map(([label, value]) => (
                         <div key={label as string} className="flex gap-2">
@@ -282,8 +282,8 @@ export default function HubApplicationsManagement() {
                 ))}
 
                 {/* Status Update */}
-                <div className="border-t border-border pt-4 space-y-3">
-                  <h4 className="font-semibold text-xs text-primary uppercase">Update Status</h4>
+                <div className="border-t border-white/[0.05] pt-4 space-y-3">
+                  <h4 className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-primary">Update Status</h4>
                   <div className="flex gap-2 flex-wrap">
                     {['pending', 'reviewing', 'interview', 'approved', 'rejected'].map(s => (
                       <Button
@@ -301,8 +301,8 @@ export default function HubApplicationsManagement() {
 
                 {/* Admin Notes */}
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-xs text-primary uppercase">Admin Notes</h4>
-                  <Textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={3} placeholder="Internal notes about this applicant..." />
+                  <h4 className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-primary">Admin Notes</h4>
+                  <Textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={3} placeholder="Internal notes about this applicant..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                   <Button size="sm" onClick={saveNotes}>Save Notes</Button>
                 </div>
               </div>

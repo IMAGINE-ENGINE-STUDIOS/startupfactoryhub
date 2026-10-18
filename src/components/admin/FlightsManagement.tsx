@@ -98,8 +98,8 @@ export default function FlightsManagement() {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case 'pending': return <Badge variant="outline" className="text-yellow-500 border-yellow-500"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
-      case 'approved': return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+      case 'pending': return <Badge variant="outline" className="text-[#FFB86A] border-[#FFB86A]/50 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+      case 'approved': return <Badge className="bg-[#2EF8A0] text-[#02141A] font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
       case 'rejected': return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       case 'revoked': return <Badge variant="secondary">Revoked</Badge>;
       default: return <Badge>{status}</Badge>;
@@ -110,13 +110,13 @@ export default function FlightsManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Plane className="h-6 w-6 text-emerald-500" />
+          <Plane className="h-6 w-6 text-[#2EF8A0]" />
           <div>
-            <h2 className="text-xl font-bold">Frontier Airlines Pass Management</h2>
+            <h2 className="text-xl font-bold font-['Space_Grotesk'] tracking-wide">Frontier Airlines Pass Management</h2>
             <p className="text-sm text-muted-foreground">Approve GoWild All-You-Can-Fly passes for Corporate members</p>
           </div>
         </div>
-        <Button variant="outline" onClick={fetchRequests} className="tech-card border-0">
+        <Button variant="outline" onClick={fetchRequests} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
@@ -125,14 +125,14 @@ export default function FlightsManagement() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Requests', value: requests.length, color: 'text-foreground' },
-          { label: 'Pending', value: requests.filter(r => r.status === 'pending').length, color: 'text-yellow-500' },
-          { label: 'Approved', value: requests.filter(r => r.status === 'approved').length, color: 'text-green-500' },
-          { label: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, color: 'text-red-500' },
+          { label: 'Pending', value: requests.filter(r => r.status === 'pending').length, color: 'text-[#FFB86A]' },
+          { label: 'Approved', value: requests.filter(r => r.status === 'approved').length, color: 'text-[#2EF8A0]' },
+          { label: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, color: 'text-[#FF3D6E]' },
         ].map(stat => (
-          <Card key={stat.label}>
+          <Card key={stat.label} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardContent className="p-4 text-center">
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+              <p className={`text-2xl font-bold font-['JetBrains_Mono'] ${stat.color}`}>{stat.value}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -141,7 +141,7 @@ export default function FlightsManagement() {
       {loading ? (
         <div className="text-center py-12 text-muted-foreground">Loading requests...</div>
       ) : requests.length === 0 ? (
-        <Card>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Plane className="h-12 w-12 mx-auto mb-3 opacity-40" />
             <p className="font-medium">No flight pass requests yet</p>
@@ -150,7 +150,7 @@ export default function FlightsManagement() {
       ) : (
         <div className="space-y-4">
           {requests.map(req => (
-            <Card key={req.id}>
+            <Card key={req.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <CardContent className="p-5">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -165,7 +165,7 @@ export default function FlightsManagement() {
                       <p className="font-semibold truncate">{req.profiles?.full_name || 'Unknown'}</p>
                       <p className="text-xs text-muted-foreground truncate">{req.profiles?.email}</p>
                       {req.frontier_account_email && (
-                        <p className="text-xs text-emerald-500">Frontier Email: {req.frontier_account_email}</p>
+                        <p className="text-xs text-[#2EF8A0]">Frontier Email: {req.frontier_account_email}</p>
                       )}
                     </div>
                   </div>
@@ -185,8 +185,8 @@ export default function FlightsManagement() {
                 {(req.status === 'pending' || req.status === 'approved') && (
                   <div className="mt-4 space-y-3">
                     {/* Frontier credentials - required for approval */}
-                    <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-3">
-                      <p className="text-xs font-medium text-emerald-600">Frontier Airlines Username {req.status === 'pending' && '(required for approval)'}</p>
+                    <div className="p-3 rounded-md border border-[#2EF8A0]/25 bg-[#2EF8A0]/5 space-y-3">
+                      <p className="text-xs font-medium text-[#2EF8A0]">Frontier Airlines Username {req.status === 'pending' && '(required for approval)'}</p>
                       <p className="text-[11px] text-muted-foreground">For security, passwords are no longer stored. Share the password with the user through a secure out-of-band channel.</p>
                       <div>
                         <Label className="text-xs">Username / Email</Label>
@@ -194,7 +194,7 @@ export default function FlightsManagement() {
                           value={credentials[req.id]?.username || ''}
                           onChange={e => setCredentials(prev => ({ ...prev, [req.id]: { ...prev[req.id], username: e.target.value } }))}
                           placeholder="Frontier account username"
-                          className="text-sm"
+                          className="text-sm bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                         />
                       </div>
                     </div>
@@ -203,7 +203,7 @@ export default function FlightsManagement() {
                       placeholder="Admin notes (optional)..."
                       value={notes[req.id] || req.admin_notes || ''}
                       onChange={e => setNotes(prev => ({ ...prev, [req.id]: e.target.value }))}
-                      className="text-sm"
+                      className="text-sm bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                       rows={2}
                     />
                     <div className="flex gap-2">
@@ -213,7 +213,7 @@ export default function FlightsManagement() {
                             size="sm"
                             onClick={() => updateStatus(req.id, 'approved')}
                             disabled={updating === req.id}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-[#2EF8A0] text-[#02141A] hover:bg-[#2EF8A0]/85"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Approve Pass

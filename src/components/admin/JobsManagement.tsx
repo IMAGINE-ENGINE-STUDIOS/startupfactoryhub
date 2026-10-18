@@ -150,9 +150,9 @@ const JobsManagement = () => {
 
   const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
-      open: 'bg-green-500/20 text-green-400 border-green-500/30',
-      closed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-      pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+      open: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+      closed: 'bg-white/[0.06] text-white/50 border-white/15 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+      pending: 'bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider'
     };
     return styles[status || ''] || 'bg-muted text-muted-foreground';
   };
@@ -187,38 +187,38 @@ const JobsManagement = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Briefcase className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{jobs.length}</p>
-            <p className="text-xs text-muted-foreground">Total Jobs</p>
+            <Briefcase className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{jobs.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Jobs</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <GraduationCap className="h-5 w-5 text-purple-400 mb-2" />
-            <p className="text-2xl font-bold">{internships.length}</p>
-            <p className="text-xs text-muted-foreground">Internships</p>
+            <GraduationCap className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{internships.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Internships</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <CheckCircle className="h-5 w-5 text-green-400 mb-2" />
-            <p className="text-2xl font-bold">{jobs.filter(j => j.status === 'open').length}</p>
-            <p className="text-xs text-muted-foreground">Open Positions</p>
+            <CheckCircle className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{jobs.filter(j => j.status === 'open').length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Open Positions</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Users className="h-5 w-5 text-cyan-400 mb-2" />
-            <p className="text-2xl font-bold">{totalApplications}</p>
-            <p className="text-xs text-muted-foreground">Total Applications</p>
+            <Users className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{totalApplications}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Applications</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -227,11 +227,11 @@ const JobsManagement = () => {
                 placeholder="Search jobs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={viewType} onValueChange={(v: 'jobs' | 'internships') => setViewType(v)}>
-              <SelectTrigger className="w-[150px] tech-card border-0">
+              <SelectTrigger className="w-[150px] bg-white/[0.03] border-white/10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -240,7 +240,7 @@ const JobsManagement = () => {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px] tech-card border-0">
+              <SelectTrigger className="w-[150px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -250,7 +250,7 @@ const JobsManagement = () => {
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={fetchData} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchData} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -258,9 +258,9 @@ const JobsManagement = () => {
       </Card>
 
       {/* Jobs/Internships Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             {viewType === 'jobs' ? <Briefcase className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
             {viewType === 'jobs' ? `Jobs (${filteredJobs.length})` : `Internships (${filteredInternships.length})`}
           </CardTitle>
@@ -270,13 +270,13 @@ const JobsManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>{viewType === 'jobs' ? 'Salary' : 'Compensation'}</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Applications</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Position</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Company</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">{viewType === 'jobs' ? 'Salary' : 'Compensation'}</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Applications</TableHead>
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -322,14 +322,14 @@ const JobsManagement = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleUpdateJobStatus(job.id, 'open')}>
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                              <CheckCircle className="h-4 w-4 mr-2 text-[#2EF8A0]" />
                               Approve
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleUpdateJobStatus(job.id, 'closed')}>
-                              <XCircle className="h-4 w-4 mr-2 text-amber-500" />
+                              <XCircle className="h-4 w-4 mr-2 text-[#FFB86A]" />
                               Close
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteJob(job.id)} className="text-red-500">
+                            <DropdownMenuItem onClick={() => handleDeleteJob(job.id)} className="text-[#FF3D6E]">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>

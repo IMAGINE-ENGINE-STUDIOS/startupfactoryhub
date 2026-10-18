@@ -80,10 +80,10 @@ export default function VCIntroductionsManagement() {
   };
 
   const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30',
-    approved: 'bg-blue-500/20 text-blue-600 border-blue-500/30',
-    rejected: 'bg-red-500/20 text-red-600 border-red-500/30',
-    completed: 'bg-green-500/20 text-green-600 border-green-500/30',
+    pending: 'bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30',
+    approved: 'bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30',
+    rejected: 'bg-[#FF3D6E]/15 text-[#FF3D6E] border-[#FF3D6E]/30',
+    completed: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30',
   };
 
   const statusIcons: Record<string, React.ReactNode> = {
@@ -112,9 +112,9 @@ export default function VCIntroductionsManagement() {
 
   return (
     <div className="space-y-6">
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Rocket className="h-5 w-5 text-primary" />
             VC Direct Introductions
           </CardTitle>
@@ -132,15 +132,15 @@ export default function VCIntroductionsManagement() {
                 placeholder="Search by name, company, or industry..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
-            <Badge variant="outline" className="shrink-0">{requests.length} Total</Badge>
+            <Badge variant="outline" className="shrink-0 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">{requests.length} Total</Badge>
           </div>
 
           {/* Eligibility Note */}
-          <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 mb-4">
-            <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+          <div className="flex items-start gap-2 p-3 rounded-md border border-[#FFB86A]/30 bg-[#FFB86A]/5 mb-4">
+            <AlertTriangle className="h-4 w-4 text-[#FFB86A] mt-0.5 shrink-0" />
             <div className="text-xs text-muted-foreground">
               <strong className="text-foreground">Eligibility Criteria:</strong> The startup must operate in 
               Space, Deep Tech, or Quantum industries and demonstrate at least $1M in Annual Recurring Revenue (ARR) 
@@ -156,7 +156,7 @@ export default function VCIntroductionsManagement() {
           ) : (
             <div className="space-y-4">
               {filtered.map(req => (
-                <Card key={req.id} className="tech-card border-0">
+                <Card key={req.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export default function VCIntroductionsManagement() {
                           <p className="text-xs text-muted-foreground">{req.profile?.email}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className={statusColors[req.status]}>
+                      <Badge variant="outline" className={`${statusColors[req.status]} font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider`}>
                         {statusIcons[req.status]}
                         <span className="ml-1 capitalize">{req.status}</span>
                       </Badge>
@@ -197,14 +197,14 @@ export default function VCIntroductionsManagement() {
                     </div>
 
                     {/* Admin controls */}
-                    <div className="space-y-2 pt-2 border-t border-border">
+                    <div className="space-y-2 pt-2 border-t border-white/[0.05]">
                       <div className="flex items-center gap-2">
                         <label className="text-xs text-muted-foreground shrink-0">Status:</label>
                         <Select
                           value={req.status}
                           onValueChange={val => updateRequest(req.id, { status: val })}
                         >
-                          <SelectTrigger className="h-7 text-xs w-36">
+                          <SelectTrigger className="h-7 text-xs w-36 bg-white/[0.03] border-white/10">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -219,7 +219,7 @@ export default function VCIntroductionsManagement() {
                         <label className="text-xs text-muted-foreground shrink-0">VC Firm:</label>
                         <Input
                           placeholder="Enter VC firm name..."
-                          className="h-7 text-xs"
+                          className="h-7 text-xs bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                           value={editingVcFirm[req.id] ?? req.vc_firm_name ?? ''}
                           onChange={e => setEditingVcFirm(prev => ({ ...prev, [req.id]: e.target.value }))}
                           onBlur={() => {
@@ -234,7 +234,7 @@ export default function VCIntroductionsManagement() {
                         <label className="text-xs text-muted-foreground">Admin Notes:</label>
                         <Textarea
                           placeholder="Add notes about this introduction..."
-                          className="text-xs mt-1"
+                          className="text-xs mt-1 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                           rows={2}
                           value={editingNotes[req.id] ?? req.admin_notes ?? ''}
                           onChange={e => setEditingNotes(prev => ({ ...prev, [req.id]: e.target.value }))}

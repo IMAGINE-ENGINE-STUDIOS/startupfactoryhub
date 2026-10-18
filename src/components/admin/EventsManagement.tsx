@@ -132,9 +132,9 @@ const EventsManagement = () => {
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      upcoming: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      ongoing: 'bg-green-500/20 text-green-400 border-green-500/30',
-      past: 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+      upcoming: 'bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+      ongoing: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider',
+      past: 'bg-white/[0.06] text-white/50 border-white/15 font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider'
     };
     return styles[status] || '';
   };
@@ -164,38 +164,38 @@ const EventsManagement = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Calendar className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{events.length}</p>
-            <p className="text-xs text-muted-foreground">Total Events</p>
+            <Calendar className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{events.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Events</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Calendar className="h-5 w-5 text-green-400 mb-2" />
-            <p className="text-2xl font-bold">{upcomingCount}</p>
-            <p className="text-xs text-muted-foreground">Upcoming</p>
+            <Calendar className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{upcomingCount}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Upcoming</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Video className="h-5 w-5 text-purple-400 mb-2" />
-            <p className="text-2xl font-bold">{virtualCount}</p>
-            <p className="text-xs text-muted-foreground">Virtual Events</p>
+            <Video className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{virtualCount}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Virtual Events</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Users className="h-5 w-5 text-cyan-400 mb-2" />
-            <p className="text-2xl font-bold">{totalAttendees}</p>
-            <p className="text-xs text-muted-foreground">Total RSVPs</p>
+            <Users className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{totalAttendees}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total RSVPs</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -204,11 +204,11 @@ const EventsManagement = () => {
                 placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px] tech-card border-0">
+              <SelectTrigger className="w-[150px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -218,7 +218,7 @@ const EventsManagement = () => {
                 <SelectItem value="past">Past</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={fetchEvents} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchEvents} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -226,9 +226,9 @@ const EventsManagement = () => {
       </Card>
 
       {/* Events Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Calendar className="h-5 w-5" />
             Events ({filteredEvents.length})
           </CardTitle>
@@ -238,13 +238,13 @@ const EventsManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>RSVPs</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Event</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Date</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Type</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">RSVPs</TableHead>
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -272,7 +272,7 @@ const EventsManagement = () => {
                       </TableCell>
                       <TableCell>
                         {event.is_virtual ? (
-                          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                          <Badge className="bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                             <Video className="h-3 w-3 mr-1" />
                             Virtual
                           </Badge>
@@ -309,7 +309,7 @@ const EventsManagement = () => {
                               <Star className="h-4 w-4 mr-2" />
                               Feature Event
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteEvent(event.id)} className="text-red-500">
+                            <DropdownMenuItem onClick={() => handleDeleteEvent(event.id)} className="text-[#FF3D6E]">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>

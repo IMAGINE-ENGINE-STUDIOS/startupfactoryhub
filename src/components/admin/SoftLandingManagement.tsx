@@ -30,10 +30,10 @@ interface SoftLandingRequest {
 }
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
-  in_progress: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
-  completed: 'bg-green-500/10 text-green-600 border-green-500/30',
-  rejected: 'bg-red-500/10 text-red-600 border-red-500/30',
+  pending: 'bg-[#FFB86A]/10 text-[#FFB86A] border-[#FFB86A]/30',
+  in_progress: 'bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/30',
+  completed: 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/30',
+  rejected: 'bg-[#FF3D6E]/10 text-[#FF3D6E] border-[#FF3D6E]/30',
   cancelled: 'bg-muted text-muted-foreground border-border',
 };
 
@@ -105,14 +105,14 @@ export default function SoftLandingManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Globe className="h-6 w-6 text-violet-500" />
+          <h2 className="text-2xl font-bold flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+            <Globe className="h-6 w-6 text-[#00E5FF]" />
             Soft Landing Requests
           </h2>
           <p className="text-sm text-muted-foreground mt-1">{requests.length} total requests</p>
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40 bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -132,20 +132,20 @@ export default function SoftLandingManagement() {
 
       <div className="space-y-4">
         {filtered.map((req) => (
-          <div key={req.id} className="tech-card p-5 space-y-4">
+          <div key={req.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md p-5 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-lg">{req.company_name}</h3>
-                  <Badge className={statusColors[req.status] || ''}>
+                  <h3 className="font-semibold text-lg font-['Space_Grotesk'] tracking-wide">{req.company_name}</h3>
+                  <Badge className={`${statusColors[req.status] || ''} font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider`}>
                     {req.status.replace('_', ' ').toUpperCase()}
                   </Badge>
-                  <Badge variant="outline">{req.target_country}</Badge>
+                  <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">{req.target_country}</Badge>
                   {req.is_corporate_subscriber && (
-                    <Badge variant="secondary" className="text-[10px]">Corporate — $5,000</Badge>
+                    <Badge variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Corporate — $5,000</Badge>
                   )}
                   {!req.is_corporate_subscriber && (
-                    <Badge variant="secondary" className="text-[10px]">Standard — $7,500</Badge>
+                    <Badge variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Standard — $7,500</Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -190,13 +190,14 @@ export default function SoftLandingManagement() {
               </div>
             )}
 
-            <div className="space-y-2 pt-2 border-t">
+            <div className="space-y-2 pt-2 border-t border-white/[0.05]">
               <label className="text-xs font-medium text-muted-foreground">Admin Notes</label>
               <Textarea
                 value={adminNotes[req.id] || ''}
                 onChange={(e) => setAdminNotes((prev) => ({ ...prev, [req.id]: e.target.value }))}
                 placeholder="Internal notes..."
                 rows={2}
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
               <div className="flex gap-2 flex-wrap">
                 {req.status === 'pending' && (
@@ -207,7 +208,7 @@ export default function SoftLandingManagement() {
                 )}
                 {req.status === 'in_progress' && (
                   <>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => updateStatus(req.id, 'completed')}>Mark Completed</Button>
+                    <Button size="sm" className="bg-[#2EF8A0] text-[#02141A] hover:bg-[#2EF8A0]/85" onClick={() => updateStatus(req.id, 'completed')}>Mark Completed</Button>
                     <Button size="sm" variant="outline" onClick={() => updateStatus(req.id, 'rejected')}>Reject</Button>
                   </>
                 )}

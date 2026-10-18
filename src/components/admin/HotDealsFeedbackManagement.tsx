@@ -147,8 +147,8 @@ const HotDealsFeedbackManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Star className="h-6 w-6 text-orange-400" />
+          <h2 className="text-2xl font-bold flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+            <Star className="h-6 w-6 text-[#FF8A3D]" />
             Hot Deals Event Feedback
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -156,7 +156,7 @@ const HotDealsFeedbackManagement = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={load} disabled={loading} className="tech-card border-0">
+          <Button variant="outline" onClick={load} disabled={loading} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
@@ -169,49 +169,49 @@ const HotDealsFeedbackManagement = () => {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <CardTitle className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] font-medium flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5" /> TOTAL RESPONSES
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalResponses}</div>
+            <div className="text-3xl font-bold font-['JetBrains_Mono']">{totalResponses}</div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <CardTitle className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] font-medium flex items-center gap-1.5">
               <Star className="h-3.5 w-3.5" /> OVERALL AVERAGE
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold flex items-baseline gap-2">
+            <div className="text-3xl font-bold font-['JetBrains_Mono'] flex items-baseline gap-2">
               {overallAvg.toFixed(2)}
               <span className="text-sm text-muted-foreground font-normal">/ 5</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <CardTitle className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] font-medium flex items-center gap-1.5">
               <MessageCircle className="h-3.5 w-3.5" /> WITH COMMENTS
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold font-['JetBrains_Mono']">
               {rows.filter((r) => r.comment && r.comment.trim()).length}
             </div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <CardTitle className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] font-medium flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5" /> UNIQUE SESSIONS
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold font-['JetBrains_Mono']">
               {new Set(rows.map((r) => r.session_token).filter(Boolean)).size}
             </div>
           </CardContent>
@@ -221,11 +221,11 @@ const HotDealsFeedbackManagement = () => {
       {/* Per-category breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {perCategory.map((c) => (
-          <Card key={c.value} className="tech-card border-0">
+          <Card key={c.value} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center justify-between">
+              <CardTitle className="text-sm flex items-center justify-between font-['Space_Grotesk'] tracking-wide">
                 <span className="uppercase tracking-wider">{c.label}</span>
-                <Badge variant="outline" className="font-normal">
+                <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {c.count} {c.count === 1 ? "response" : "responses"}
                 </Badge>
               </CardTitle>
@@ -236,14 +236,14 @@ const HotDealsFeedbackManagement = () => {
               ) : (
                 <>
                   <div className="flex items-baseline gap-3 mb-3">
-                    <span className="text-3xl font-bold text-orange-400">{c.avg.toFixed(2)}</span>
+                    <span className="text-3xl font-bold font-['JetBrains_Mono'] text-[#FF8A3D]">{c.avg.toFixed(2)}</span>
                     <div className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <Star
                           key={n}
                           className={`w-4 h-4 ${
                             n <= Math.round(c.avg)
-                              ? "fill-orange-400 text-orange-400"
+                              ? "fill-[#FF8A3D] text-[#FF8A3D]"
                               : "text-muted-foreground/30"
                           }`}
                         />
@@ -256,10 +256,10 @@ const HotDealsFeedbackManagement = () => {
                       return (
                         <div key={d.star} className="flex items-center gap-2 text-xs">
                           <span className="w-3 text-muted-foreground font-mono">{d.star}</span>
-                          <Star className="w-3 h-3 text-orange-400/60" />
-                          <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                          <Star className="w-3 h-3 text-[#FF8A3D]/60" />
+                          <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-orange-400 transition-all"
+                              className="h-full rounded-full bg-[#FF8A3D] transition-all"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -278,9 +278,9 @@ const HotDealsFeedbackManagement = () => {
       </div>
 
       {/* Filters + table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Filter className="h-4 w-4" />
             All Responses
           </CardTitle>
@@ -349,15 +349,15 @@ const HotDealsFeedbackManagement = () => {
           </div>
 
           {/* Table */}
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-md border border-white/10 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">When</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead className="min-w-[300px]">Comment</TableHead>
-                  <TableHead className="whitespace-nowrap">Session</TableHead>
+                  <TableHead className="whitespace-nowrap font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">When</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Category</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Rating</TableHead>
+                  <TableHead className="min-w-[300px] font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Comment</TableHead>
+                  <TableHead className="whitespace-nowrap font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Session</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -374,7 +374,7 @@ const HotDealsFeedbackManagement = () => {
                         {new Date(r.created_at).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="capitalize">
+                        <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                           {r.category}
                         </Badge>
                       </TableCell>
@@ -385,7 +385,7 @@ const HotDealsFeedbackManagement = () => {
                               key={n}
                               className={`w-3.5 h-3.5 ${
                                 n <= r.rating
-                                  ? "fill-orange-400 text-orange-400"
+                                  ? "fill-[#FF8A3D] text-[#FF8A3D]"
                                   : "text-muted-foreground/30"
                               }`}
                             />

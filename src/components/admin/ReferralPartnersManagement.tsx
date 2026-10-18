@@ -134,7 +134,7 @@ export default function ReferralPartnersManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
+          <h2 className="text-2xl font-bold flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Users className="h-6 w-6 text-primary" />
             Referral Partners
             {pendingCount > 0 && (
@@ -154,7 +154,7 @@ export default function ReferralPartnersManagement() {
             placeholder="Search by name, email, or code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
           />
         </div>
         {["all", "pending", "approved", "rejected"].map((f) => (
@@ -179,11 +179,11 @@ export default function ReferralPartnersManagement() {
           { label: "Pending Applications", value: pendingCount, icon: Eye },
           { label: "Total Commissions", value: formatCents(accounts.reduce((sum, a) => sum + (a.total_earned_cents || 0), 0)), icon: DollarSign },
         ].map((stat, i) => (
-          <Card key={i} className="tech-card border-0">
+          <Card key={i} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-                <p className="text-xl font-bold">{stat.value}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{stat.label}</p>
+                <p className="text-xl font-bold font-['JetBrains_Mono']">{stat.value}</p>
               </div>
               <stat.icon className="h-6 w-6 text-primary" />
             </CardContent>
@@ -192,20 +192,20 @@ export default function ReferralPartnersManagement() {
       </div>
 
       {/* Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Partner</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Clicks</TableHead>
-                <TableHead className="text-right">Referrals</TableHead>
-                <TableHead className="text-right">Earned</TableHead>
-                <TableHead>Payout</TableHead>
-                <TableHead>Applied</TableHead>
-                <TableHead></TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Partner</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Code</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Clicks</TableHead>
+                <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Referrals</TableHead>
+                <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Earned</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Payout</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Applied</TableHead>
+                <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -232,7 +232,7 @@ export default function ReferralPartnersManagement() {
                     <TableCell className="text-right">{a.total_referrals}</TableCell>
                     <TableCell className="text-right font-medium">{formatCents(a.total_earned_cents)}</TableCell>
                     <TableCell>
-                      <Badge variant={a.payout_status === "connected" ? "default" : "secondary"} className="text-xs">
+                      <Badge variant={a.payout_status === "connected" ? "default" : "secondary"} className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                         {a.payout_status || "not_connected"}
                       </Badge>
                     </TableCell>
@@ -254,9 +254,9 @@ export default function ReferralPartnersManagement() {
 
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <DialogHeader>
-            <DialogTitle>Referral Partner Details</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Referral Partner Details</DialogTitle>
           </DialogHeader>
           {selectedAccount && (
             <div className="space-y-4">
@@ -292,7 +292,7 @@ export default function ReferralPartnersManagement() {
               {selectedAccount.application_message && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Application Message</p>
-                  <p className="text-sm bg-muted/50 p-3 rounded-lg">{selectedAccount.application_message}</p>
+                  <p className="text-sm bg-white/[0.03] p-3 rounded-md">{selectedAccount.application_message}</p>
                 </div>
               )}
 
@@ -304,7 +304,7 @@ export default function ReferralPartnersManagement() {
                 {links.length > 0 ? (
                   <div className="space-y-2">
                     {links.map((link: any) => (
-                      <div key={link.id} className="flex items-center justify-between bg-muted/30 p-2 rounded text-sm">
+                      <div key={link.id} className="flex items-center justify-between bg-white/[0.03] p-2 rounded-md text-sm">
                         <div>
                           <span className="font-medium">{link.label}</span>
                           <span className="ml-2 font-mono text-xs text-muted-foreground">{link.referral_code}</span>
@@ -312,7 +312,7 @@ export default function ReferralPartnersManagement() {
                         <div className="flex gap-3 text-xs text-muted-foreground">
                           <span>{link.total_clicks} clicks</span>
                           <span>{link.total_conversions} conversions</span>
-                          <Badge variant={link.is_active ? "default" : "secondary"} className="text-xs">
+                          <Badge variant={link.is_active ? "default" : "secondary"} className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                             {link.is_active ? "Active" : "Inactive"}
                           </Badge>
                         </div>
