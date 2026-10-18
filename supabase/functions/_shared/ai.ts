@@ -1,9 +1,10 @@
+// Credits: Imagine Engine Studios Corp.
 // Direct-provider AI client. Uses OPENAI_API_KEY, GROQ_API_KEY and GEMINI_API_KEY from
 // Supabase secrets. No Lovable gateway. `aiFetch` is a drop-in replacement for the old
 // OpenAI-style chat-completions fetch so existing callers keep their request/response shapes.
 
 export type Tier = "fast" | "standard" | "vision" | "heavy" | "free";
-type Provider = "groq" | "gemini" | "openai";
+export type Provider = "groq" | "gemini" | "openai";
 
 const URLS: Record<Provider, string> = {
   groq: "https://api.groq.com/openai/v1/chat/completions",
@@ -13,18 +14,19 @@ const URLS: Record<Provider, string> = {
 const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY" };
 
 export const CHAINS: Record<Tier, [Provider, string][]> = {
-  fast: [["groq", "openai/gpt-oss-20b"], ["gemini", "gemini-2.5-flash-lite"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
-  standard: [["groq", "openai/gpt-oss-120b"], ["gemini", "gemini-2.5-flash"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
+  fast: [["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["gemini", "gemini-2.5-flash-lite"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
+  standard: [["groq", "openai/gpt-oss-120b"], ["groq", "llama-3.3-70b-versatile"], ["gemini", "gemini-2.5-flash"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
   vision: [["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"], ["gemini", "gemini-2.0-flash"], ["openai", "gpt-4o-mini"]],
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"], ["gemini", "gemini-2.5-flash"]],
   // Groq free-plan models only (no paid OpenAI hop).
-  free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
+  free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
 export const PRICES: Record<string, [number, number]> = {
   "openai/gpt-oss-20b": [0.075, 0.3],
   "openai/gpt-oss-120b": [0.15, 0.6],
+  "llama-3.3-70b-versatile": [0.59, 0.79],
   "qwen/qwen3.8-27b": [0.8, 4],
   "gemini-2.5-flash-lite": [0.1, 0.4],
   "gemini-2.0-flash": [0.1, 0.4],
@@ -59,11 +61,12 @@ const RETRY = new Set([400, 401, 403, 404, 408, 413, 429, 500, 502, 503, 504]);
 export interface RouteResult { resp: Response; provider: Provider | null; model: string }
 
 /** Calls the tier's provider chain, falling back on missing keys / 413 / 429 / 5xx. */
-export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOverrides: Partial<Record<Provider, string>> = {}): Promise<RouteResult> {
+export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOverrides: Partial<Record<Provider, string>> = {}, selected?: { provider: Provider; model: string }): Promise<RouteResult> {
   const clean: Record<string, unknown> = { ...body };
   delete clean.modalities; delete clean.reasoning_effort; delete clean.reasoning; delete clean.provider;
   let last: RouteResult | null = null;
-  for (const [prov, model] of CHAINS[tier]) {
+  const chain: [Provider, string][] = selected ? [[selected.provider, selected.model]] : CHAINS[tier];
+  for (const [prov, model] of chain) {
     const key = keyOf(prov) || String(keyOverrides[prov] || "");
     if (!key) { console.warn(`[ai] skip ${prov}/${model}: no key`); continue; }
     const payload: Record<string, unknown> = { ...clean, model };
