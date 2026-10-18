@@ -1,11 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { routeChat, costUsd, type Tier } from "../_shared/ai.ts";
+// Credits: Imagine Engine Studios Corp.
+import { costUsd, type Tier } from "../_shared/ai.ts";
+import { configuredChat, PROVIDERS, validCustom, validateSelection, type CustomProvider } from "./providers.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const cors = corsHeaders;
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
@@ -32,33 +32,10 @@ const DEFAULTS = {
     { id: "pro", name: "Pro", price_monthly: 25, price_yearly: 240, monthly_tokens: 2000000, daily_messages: 150 },
     { id: "studio", name: "Studio", price_monthly: 99, price_yearly: 950, monthly_tokens: 10000000, daily_messages: 600 },
   ],
-  custom_providers: [] as { id: string; name: string; base_url: string; kind: "openai" | "anthropic"; models: string[] }[],
-};
-
-const PROVIDERS: Record<string, { secret: string; url: string; kind: "openai" | "anthropic" }> = {
-  groq: { secret: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", kind: "openai" },
-  gemini: { secret: "GEMINI_API_KEY", url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", kind: "openai" },
-  openai: { secret: "OPENAI_API_KEY", url: "https://api.openai.com/v1/chat/completions", kind: "openai" },
-  xai: { secret: "XAI_API_KEY", url: "https://api.x.ai/v1/chat/completions", kind: "openai" },
-  anthropic: { secret: "ANTHROPIC_API_KEY", url: "https://api.anthropic.com/v1/messages", kind: "anthropic" },
+  custom_providers: [] as CustomProvider[],
 };
 
 const ALLOWED_KEYS = Object.keys(DEFAULTS);
-
-function resolveProvider(settings: any, keys: Record<string, string>) {
-  const builtin = PROVIDERS[settings.provider];
-  if (builtin) return { url: builtin.url, kind: builtin.kind, key: keys[settings.provider] || Deno.env.get(builtin.secret) || "" };
-  const c = (settings.custom_providers || []).find((p: any) => p.id === settings.provider);
-  if (!c) return null;
-  let url = String(c.base_url || "").replace(/\/+$/, "");
-  if (c.kind === "anthropic") { if (!url.endsWith("/messages")) url += "/messages"; }
-  else if (!url.endsWith("/chat/completions")) url += "/chat/completions";
-  return { url, kind: c.kind === "anthropic" ? "anthropic" : "openai", key: keys[c.id] || "" };
-}
-function validCustom(list: any): boolean {
-  if (!Array.isArray(list) || list.length > 20) return false;
-  return list.every((p) => p && /^[a-z0-9_-]{2,30}$/.test(p.id) && !PROVIDERS[p.id] && /^https:\/\//.test(p.base_url || "") && (p.kind === "openai" || p.kind === "anthropic"));
-}
 
 // Storage-backed state (private bucket, service role only) — no client access.
 const BUCKET = "imagine-ai-private";
@@ -198,14 +175,17 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   let failRefund: null | (() => Promise<void>) = null;
   try {
-    const url = Deno.env.get("SUPABASE_URL")!;
-    const authed = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const url = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !anonKey || !serviceKey) return json({ error: "AI service configuration is unavailable" }, 503);
+    const authed = createClient(url, anonKey, {
       global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
     });
     const { data: { user } } = await authed.auth.getUser();
     if (!user) return json({ error: "Please sign in to use Imagine AI." }, 401);
 
-    const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "chat");
 
@@ -245,9 +225,10 @@ serve(async (req) => {
       if (action === "save_config") {
         const patch: Record<string, unknown> = {};
         for (const k of ALLOWED_KEYS) if (k in (body.config || {})) patch[k] = body.config[k];
-        if ("custom_providers" in patch && !validCustom(patch.custom_providers)) return json({ error: "Custom providers need a short lowercase id and an https:// address." }, 400);
+        if ("custom_providers" in patch && !validCustom(patch.custom_providers)) return json({ error: "Custom providers need unique lowercase ids, model names and a public HTTPS address." }, 400);
         const customs: any[] = (patch.custom_providers as any[]) ?? settings.custom_providers ?? [];
-        if (patch.provider && !PROVIDERS[String(patch.provider)] && !customs.some((p) => p.id === patch.provider)) return json({ error: "Unknown provider" }, 400);
+        const selectionError = validateSelection({ ...settings, ...patch, custom_providers: customs });
+        if (selectionError) return json({ error: selectionError }, 400);
         await writeJson(admin, "settings.json", { ...settings, ...patch, updated_at: new Date().toISOString(), updated_by: user.id });
         return json({ ok: true });
       }
@@ -280,8 +261,8 @@ serve(async (req) => {
     const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
     const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
     const tier: Tier = light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
-    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2 };
-    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2 };
+    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2, free: 10 };
+    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2, free: 1 };
     const reserve = isAdmin ? 0 : RESERVE[tier];
     let balance: number | null = null;
     if (reserve > 0) {
@@ -305,7 +286,7 @@ serve(async (req) => {
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
     const storedKeys: any = (await readJson(admin, "keys.json").catch(() => null)) || {};
-    const routed = await routeChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : body.context?.build === "app" ? 16000 : 8000 }, { groq: storedKeys.groq, gemini: storedKeys.gemini, openai: storedKeys.openai });
+    const routed = await configuredChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : body.context?.build === "app" ? 16000 : 8000 }, settings, storedKeys);
     const resp = routed.resp;
     if (!resp.ok) {
       await refund();

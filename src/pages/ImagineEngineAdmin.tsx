@@ -1,3 +1,4 @@
+// Credits: Imagine Engine Studios Corp.
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,7 +15,7 @@ import PlatformDataGrid from "@/components/admin/PlatformDataGrid";
 import logo from "@/assets/imagine-engine-logo.png.asset.json";
 
 type Plan = { id: string; name: string; price_monthly: number; price_yearly: number; monthly_tokens: number; daily_messages: number };
-type Custom = { id: string; name: string; base_url: string; kind: "openai" | "anthropic"; models: string[] };
+type Custom = { id: string; name: string; base_url: string; kind: "openai" | "anthropic" | "ollama"; models: string[] };
 type Config = {
   provider: string; model: string; pricing_mode: string;
   cost_per_1k_input: number; cost_per_1k_output: number; markup_multiplier: number;
@@ -27,13 +28,15 @@ type Config = {
 type Stats = { requests: number; input_tokens: number; output_tokens: number; cost_usd: number; charge_usd: number; active_users: number };
 
 const MODELS: Record<string, string[]> = {
-  lovable: ["openai/gpt-6-astra", "google/gemini-3-flash-preview", "google/gemini-3-pro-preview", "anthropic/claude-sonnet-5"],
+  router: ["smart-router"],
+  groq: ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "llama-3.3-70b-versatile"],
+  gemini: ["gemini-2.5-flash", "gemini-2.5-pro"],
   openai: ["gpt-5", "gpt-5-mini", "gpt-4.1"],
   anthropic: ["claude-sonnet-4-5", "claude-opus-4-1", "claude-haiku-4-5"],
   xai: ["grok-4", "grok-4-fast", "grok-code-fast-1"],
 };
 const PROVIDER_LABEL: Record<string, string> = {
-  lovable: "Built-in (no key needed)", openai: "OpenAI (ChatGPT)", anthropic: "Anthropic (Claude)", xai: "xAI (Grok)",
+  router: "Smart router (direct providers)", groq: "Groq (Llama & GPT OSS)", gemini: "Google Gemini", openai: "OpenAI (ChatGPT)", anthropic: "Anthropic (Claude)", xai: "xAI (Grok)",
 };
 const MARKET_TOKENS = 2_000_000;
 
@@ -60,7 +63,7 @@ export default function ImagineEngineAdmin() {
 
   const load = async () => {
     const [c, s] = await Promise.all([call("get_config"), call("stats")]);
-    setCfg({ plans: [], custom_providers: [], ...c.config });
+    setCfg({ plans: [], custom_providers: [], ...c.config, ...(c.config.provider === "lovable" ? { provider: "router", model: "smart-router" } : {}) });
     setKeys(c.providerKeys || {}); setHints(c.keyHints || {}); setStats(s); setState("ready");
   };
 
@@ -265,7 +268,7 @@ export default function ImagineEngineAdmin() {
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent className="bg-background backdrop-blur-none">
                       {allProviders.map((p) => (
-                        <SelectItem key={p} value={p}>{providerName(p)}{p !== "lovable" && !keys[p] ? " — key missing" : ""}</SelectItem>
+                        <SelectItem key={p} value={p}>{providerName(p)}{p !== "router" && !keys[p] ? " — key missing" : ""}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -281,7 +284,7 @@ export default function ImagineEngineAdmin() {
             <section className="tech-card border-0 p-5 space-y-3">
               <h2 className="font-semibold flex items-center gap-2"><KeyRound className="w-4 h-4 text-primary" /> API keys</h2>
               <p className="text-xs text-muted-foreground">Keys are stored privately on the server and never shown again — only the last 4 characters.</p>
-              {allProviders.filter((p) => p !== "lovable").map((p) => (
+              {allProviders.filter((p) => p !== "router").map((p) => (
                 <div key={p} className="flex flex-wrap items-center gap-2">
                   <div className="w-44 text-sm">{providerName(p)}</div>
                   <div className="text-xs text-muted-foreground w-24">{hints[p] || (keys[p] ? "set on server" : "not set")}</div>
@@ -296,7 +299,7 @@ export default function ImagineEngineAdmin() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-semibold">Custom models</h2>
-                  <p className="text-xs text-muted-foreground">Add any OpenAI-compatible or Claude-compatible service (DeepSeek, Mistral, Groq, Together, OpenRouter, your own server...). Save settings, then add its key above.</p>
+                  <p className="text-xs text-muted-foreground">Add an OpenAI-compatible, Claude-compatible or Ollama service. Ollama requires a public HTTPS server with an access key; localhost cannot be reached. Save settings, then add its key above.</p>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => set("custom_providers", [...cfg.custom_providers, { id: `custom${cfg.custom_providers.length + 1}`, name: "My model", base_url: "https://", kind: "openai", models: [] }])}><Plus className="w-4 h-4 mr-1" />Add</Button>
               </div>
@@ -312,6 +315,7 @@ export default function ImagineEngineAdmin() {
                       <SelectContent className="bg-background backdrop-blur-none">
                         <SelectItem value="openai">OpenAI style</SelectItem>
                         <SelectItem value="anthropic">Claude style</SelectItem>
+                        <SelectItem value="ollama">Ollama (HTTPS server)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
