@@ -69,18 +69,19 @@ export async function configuredChat(tier: Tier, body: Record<string, unknown>, 
   if (!url.endsWith(suffix)) url += suffix;
   if (custom) await publicHost(url);
   const messages = body.messages as { role: string; content: string }[];
-  const payload: Record<string, unknown> = { ...body, model: settings.model, stream: false };
+  const payload: Record<string, unknown> = { ...body, model: settings.model, stream: !!body.stream };
   const headers: Record<string, string> = { "Content-Type": "application/json", Authorization: `Bearer ${key}` };
   if (kind === "anthropic") {
     headers["x-api-key"] = key; headers["anthropic-version"] = "2023-06-01";
+    delete payload.stream_options; delete payload.response_format;
     payload.system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n");
     payload.messages = messages.filter((m) => m.role !== "system");
   } else if (kind === "ollama") {
-    delete payload.max_tokens;
+    delete payload.max_tokens; delete payload.stream_options; delete payload.response_format;
     payload.options = { num_predict: body.max_tokens };
   }
   const resp = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload), redirect: "error", signal: AbortSignal.timeout(120000) });
-  if (!resp.ok || kind === "openai") return { resp, provider: settings.provider, model: settings.model };
+  if (!resp.ok || kind === "openai" || body.stream) return { resp, provider: settings.provider, model: settings.model };
   const data = await resp.json();
   const content = kind === "ollama" ? data.message?.content : (data.content || []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("");
   const normalized = { choices: [{ message: { content } }], usage: {

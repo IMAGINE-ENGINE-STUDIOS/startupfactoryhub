@@ -141,3 +141,10 @@
 - [x] Switch between linked accounts from the dashboard
 - [x] Search/Network: show one card per linked person (best profile) with an icon per account type; startup accounts stay separate
 - [x] Email template asking users to finish their profile and add a photo
+
+## Imagine Engine phases 2 and 3
+- [x] End-to-end streaming with incremental completed-file application
+- [x] Bounded continuation for truncated multi-file output
+- [x] Structured records, atomic safe fuzzy patches and relevance-ranked context
+- [x] 25 regression tests, service deployment, anonymous rejection and browser file/patch validation
+- [ ] Signed-in provider generation: blocked by external unmanaged Supabase authentication

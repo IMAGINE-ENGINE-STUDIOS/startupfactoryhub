@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // Credits: Imagine Engine Studios Corp.
+import { readCompletion, continuation, resumeMessages } from "./stream.ts";
 import { costUsd, type Tier } from "../_shared/ai.ts";
 import { configuredChat, PROVIDERS, validCustom, validateSelection, type CustomProvider } from "./providers.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/cors";
@@ -173,6 +174,7 @@ For a NEW 3D car/racing/driving game (none exists yet) use {"type":"applyTemplat
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return json({ error: "POST required" }, 405);
   let failRefund: null | (() => Promise<void>) = null;
   try {
     const url = Deno.env.get("SUPABASE_URL");
@@ -250,7 +252,9 @@ serve(async (req) => {
     // ── chat ──
     if (!settings.enabled) return json({ error: settings.maintenance_message || "Imagine AI is temporarily disabled by the administrator." }, 403);
     const messages = Array.isArray(body.messages) ? body.messages.slice(-30) : [];
-    if (!messages.length) return json({ error: "messages required" }, 400);
+    if (!messages.length || !messages.every((m: any) => m && ["user", "assistant"].includes(m.role) && typeof m.content === "string" && m.content.length <= 300000)) return json({ error: "Valid messages required" }, 400);
+    if (body.stream != null && typeof body.stream !== "boolean") return json({ error: "Invalid stream option" }, 400);
+    if (body.context && (!Array.isArray(body.context.files || []) || (body.context.files || []).length > 500 || !(body.context.files || []).every((f: any) => f && typeof f.name === "string" && f.name.length < 240 && (f.content == null || typeof f.content === "string")))) return json({ error: "Invalid project files" }, 400);
     const tab = String(body.tab || "canvas").slice(0, 20);
 
     // Smart Model Router: fast (Groq 8B) for chat/tweaks, standard (Groq 70B -> Gemini) for builds,
@@ -282,28 +286,32 @@ serve(async (req) => {
     failRefund = refund;
 
     if (body.context && typeof body.context === "object") body.context.lastUser = lastText.slice(0, 2000);
-    const sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
+    let sys = body.context?.plain ? "You are a concise writing assistant. Reply with only the requested text." : body.mode === "chat" ? chatPrompt(tab, body.context) : systemPrompt(tab, body.context, String(settings.system_prompt_extra || ""));
+    if (body.protocol === "records-v1" && body.mode !== "chat" && !body.context?.plain) sys += `
+FINAL OUTPUT CONTRACT — overrides ALL fence/JSON array output instructions above:
+Output newline-delimited JSON (one valid JSON object per line), with escaped newlines inside strings. No markdown fences, no bare prose.
+Record types: {"type":"summary","text":"short user-facing progress/summary"}; {"type":"file","path":"apps/name/components/X.tsx","content":"complete source"}; {"type":"action","action":{...one supported action above...}}; {"type":"phases","current":1,"phases":["..."]}; {"type":"done"}.
+Emit a summary first, dependencies before the root apps/Name.tsx (root LAST), and done LAST. Existing file edits use action.patchFile with unique exact snippets; never edit omitted source. Each file must be complete, under 150 lines and preferably under 2500 tokens. Large requests are a sequence of complete modules, not one oversized file. Never repeat completed records. The engine can continue an interrupted record automatically; do not omit any required module.
+No invented production records: use empty states unless the user supplied data. All new source credits Imagine Engine Studios Corp.`;
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
     const storedKeys: any = (await readJson(admin, "keys.json").catch(() => null)) || {};
-    const routed = await configuredChat(tier, { messages: [{ role: "system", content: sys }, ...clean], max_tokens: tier === "fast" ? 2048 : body.context?.build === "app" ? 16000 : 8000 }, settings, storedKeys);
-    const resp = routed.resp;
-    if (!resp.ok) {
-      await refund();
-      const t = await resp.text();
-      console.error("imagine-ai provider error", routed.provider, routed.model, resp.status, t);
-      if (resp.status === 429) return json({ error: "All AI providers are at their usage limit right now. Wait about a minute and send again; your credits were refunded." }, 429);
-      if (resp.status === 503 && !routed.provider) return json({ error: "AI provider is not configured yet. An administrator must add its API key." }, 503);
-      return json({ error: "The AI provider returned an error." }, resp.status === 403 ? 403 : 502);
+    const run = async (emit: (event: unknown) => void) => {
+    const baseMessages = [{ role: "system", content: sys }, ...clean];
+    let text = "", inTok = 0, outTok = 0, routed: Awaited<ReturnType<typeof configuredChat>> | null = null;
+    let accumulatedCost = 0;
+    for (let part = 0; part < 4; part++) {
+      emit({ type: "status", message: part ? "Continuing the remaining files..." : "Connecting to your AI provider..." });
+      routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
+      if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "AI providers are at their usage limit; please try again shortly" : "The AI provider returned an error");
+      const completion = await readCompletion(routed.resp, (delta) => { text += delta; emit({ type: "delta", text: delta }); });
+      inTok += completion.input; outTok += completion.output;
+      accumulatedCost += costUsd(routed.model, completion.input, completion.output);
+      if (!continuation(text, completion.finish)) break;
+      if (part === 3) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
     }
-    const data = await resp.json().catch(() => null);
-    const text = data?.choices?.[0]?.message?.content ?? "";
-    if (!String(text).trim()) {
-      await refund();
-      return json({ error: "Genius AI could not produce a result for that request. Your credits were returned - please try again.", credits: { charged: 0, balance, refunded: reserve } }, 502);
-    }
-    const inTok = data.usage?.prompt_tokens ?? 0, outTok = data.usage?.completion_tokens ?? 0;
-    const realCost = costUsd(routed.model, inTok, outTok);
+    if (!routed || !text.trim()) throw new Error("The AI produced no result");
+    const realCost = accumulatedCost;
     let price = isAdmin ? 0 : Math.max(0.05, Math.round((realCost * MARKUP[tier] / 0.05) * 100) / 100);
     const tag = `${tier}:${routed.provider}/${routed.model}:${inTok}/${outTok}:$${realCost.toFixed(6)}`;
     if (!isAdmin) {
@@ -325,7 +333,23 @@ serve(async (req) => {
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
-    return json({ text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: wantsHeavy && !paid ? "Heavy models are available on paid plans." : undefined });
+    return { text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: wantsHeavy && !paid ? "Heavy models are available on paid plans." : undefined };
+    };
+    if (!body.stream) return json(await run(() => {}));
+    const encoder = new TextEncoder();
+    let cancelled = false;
+    const stream = new ReadableStream({
+      start(controller) {
+        const emit = (event: unknown) => { if (!cancelled) controller.enqueue(encoder.encode("data: " + JSON.stringify(event) + "\n\n")); };
+        const heartbeat = setInterval(() => { if (!cancelled) controller.enqueue(encoder.encode(": keepalive\n\n")); }, 15000);
+        run(emit).then((result) => emit({ type: "complete", result })).catch(async (error) => {
+          if (failRefund) { try { await failRefund(); } catch (_) {} failRefund = null; }
+          emit({ type: "error", error: error instanceof Error ? error.message : "Build interrupted" });
+        }).finally(() => { clearInterval(heartbeat); if (!cancelled) controller.close(); });
+      },
+      cancel() { cancelled = true; },
+    });
+    return new Response(stream, { headers: { ...cors, "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
   } catch (e) {
     console.error("imagine-ai error", e);
     if (failRefund) { try { await failRefund(); } catch (_) {} }
