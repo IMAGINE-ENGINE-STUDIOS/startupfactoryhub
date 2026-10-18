@@ -320,7 +320,7 @@ const SFHAcceleratorManager = () => {
 
   if (!profile) {
     return (
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground">SFH Accelerator profile not found. Please check the database.</p>
         </CardContent>
@@ -337,10 +337,10 @@ const SFHAcceleratorManager = () => {
             <Rocket className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">{profile.organization_name}</h2>
+            <h2 className="text-xl font-bold font-['Space_Grotesk'] tracking-wide">{profile.organization_name}</h2>
             <p className="text-sm text-muted-foreground">Cohorts & Program Management</p>
           </div>
-          <Badge variant={profile.is_accepting_applications ? 'default' : 'secondary'} className="ml-2">
+          <Badge variant={profile.is_accepting_applications ? 'default' : 'secondary'} className="ml-2 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
             {profile.is_accepting_applications ? (
               <><CheckCircle className="h-3 w-3 mr-1" /> Accepting Applications</>
             ) : (
@@ -348,7 +348,7 @@ const SFHAcceleratorManager = () => {
             )}
           </Badge>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchData} className="tech-card border-0">
+        <Button variant="outline" size="sm" onClick={fetchData} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
@@ -362,12 +362,12 @@ const SFHAcceleratorManager = () => {
           { label: 'Applications', value: stats.totalApplications, icon: <FileText className="h-5 w-5 text-muted-foreground" /> },
           { label: 'Active Cohorts', value: cohorts.filter(c => c.status === 'in_progress' || c.status === 'applications_open').length, icon: <Users className="h-5 w-5 text-muted-foreground" /> },
         ].map(stat => (
-          <Card key={stat.label} className="tech-card border-0">
+          <Card key={stat.label} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardContent className="p-4 flex items-center gap-3">
               {stat.icon}
               <div>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{stat.value}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{stat.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -377,21 +377,21 @@ const SFHAcceleratorManager = () => {
       {/* Platform Landing Page + External Link Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Platform public page — always shown */}
-        <Card className="tech-card border-0 border-l-4 border-l-primary">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md border-l-4 border-l-primary">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 min-w-0">
                 <Rocket className="h-4 w-4 text-primary shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground mb-1">Platform Landing Page</p>
+                  <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] mb-1">Platform Landing Page</p>
                   <p className="text-sm font-medium truncate">{window.location.origin}/mvp-program</p>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => copyToClipboard(`${window.location.origin}/mvp-program`)}>
+                <Button size="sm" variant="outline" className="bg-[#0A1418] border border-cyan-400/15 rounded-md" onClick={() => copyToClipboard(`${window.location.origin}/mvp-program`)}>
                   <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
                 </Button>
-                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => window.open('/mvp-program', '_blank')}>
+                <Button size="sm" variant="outline" className="bg-[#0A1418] border border-cyan-400/15 rounded-md" onClick={() => window.open('/mvp-program', '_blank')}>
                   <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open
                 </Button>
               </div>
@@ -401,21 +401,21 @@ const SFHAcceleratorManager = () => {
 
         {/* Custom external link — only if set */}
         {profile.external_link && (
-          <Card className="tech-card border-0 border-l-4 border-l-accent">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md border-l-4 border-l-accent">
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 min-w-0">
                   <Link className="h-4 w-4 text-accent shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground mb-1">External Program Link</p>
+                    <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73] mb-1">External Program Link</p>
                     <p className="text-sm font-medium truncate">{profile.external_link}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => copyToClipboard(profile.external_link!)}>
+                  <Button size="sm" variant="outline" className="bg-[#0A1418] border border-cyan-400/15 rounded-md" onClick={() => copyToClipboard(profile.external_link!)}>
                     <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
                   </Button>
-                  <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => window.open(profile.external_link!, '_blank')}>
+                  <Button size="sm" variant="outline" className="bg-[#0A1418] border border-cyan-400/15 rounded-md" onClick={() => window.open(profile.external_link!, '_blank')}>
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open
                   </Button>
                 </div>
@@ -427,7 +427,7 @@ const SFHAcceleratorManager = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="tech-card border-0">
+        <TabsList className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <TabsTrigger value="overview">Overview & Profile</TabsTrigger>
           <TabsTrigger value="cohorts">Cohorts ({cohorts.length})</TabsTrigger>
           <TabsTrigger value="applications">Applications ({stats.totalApplications})</TabsTrigger>
@@ -436,23 +436,23 @@ const SFHAcceleratorManager = () => {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="text-base">Program Profile</CardTitle>
+              <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Program Profile</CardTitle>
               <CardDescription>Edit the SFH MVP Accelerator program details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Organization Name</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={formData.organization_name || ''}
                     onChange={e => setFormData(p => ({ ...p, organization_name: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Location</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={formData.location || ''}
                     onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
                     placeholder="e.g. Orlando, FL"
@@ -460,7 +460,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Website URL</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={formData.website || ''}
                     onChange={e => setFormData(p => ({ ...p, website: e.target.value }))}
                     placeholder="https://..."
@@ -471,7 +471,7 @@ const SFHAcceleratorManager = () => {
                     <Globe className="h-3.5 w-3.5 text-primary" />
                     External Program Link
                   </Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={formData.external_link || ''}
                     onChange={e => setFormData(p => ({ ...p, external_link: e.target.value }))}
                     placeholder="https://apply.startupfactoryhub.com/..."
@@ -479,7 +479,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Program Duration</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={formData.program_duration || ''}
                     onChange={e => setFormData(p => ({ ...p, program_duration: e.target.value }))}
                     placeholder="e.g. 4 weeks"
@@ -487,7 +487,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Equity Percentage (%)</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="number"
                     value={formData.equity_percentage ?? ''}
                     onChange={e => setFormData(p => ({ ...p, equity_percentage: e.target.value ? Number(e.target.value) : null }))}
@@ -496,7 +496,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Funding Offered ($)</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="number"
                     value={formData.funding_offered ?? ''}
                     onChange={e => setFormData(p => ({ ...p, funding_offered: e.target.value ? Number(e.target.value) : null }))}
@@ -514,7 +514,7 @@ const SFHAcceleratorManager = () => {
 
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea
+                <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   value={formData.description || ''}
                   onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
                   rows={4}
@@ -538,7 +538,7 @@ const SFHAcceleratorManager = () => {
           <div className="flex justify-end">
             <Button
               variant="outline"
-              className="gap-2 tech-card border-0"
+              className="gap-2 bg-[#0A1418] border border-cyan-400/15 rounded-md"
               onClick={() => setAddStartupOpen(true)}
               disabled={cohorts.length === 0}
             >
@@ -560,7 +560,7 @@ const SFHAcceleratorManager = () => {
         {/* Applications Tab */}
         <TabsContent value="applications">
           {cohorts.length === 0 ? (
-            <Card className="tech-card border-0">
+            <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">Create a cohort first to view applications.</p>
               </CardContent>
@@ -573,7 +573,7 @@ const SFHAcceleratorManager = () => {
         {/* Portfolio Tab */}
         <TabsContent value="portfolio">
           {cohorts.length === 0 ? (
-            <Card className="tech-card border-0">
+            <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">No cohorts yet. Create a cohort to start building your portfolio.</p>
               </CardContent>
@@ -597,21 +597,21 @@ const SFHAcceleratorManager = () => {
       <Sheet open={cohortSheetOpen} onOpenChange={(open) => { setCohortSheetOpen(open); if (!open) setSelectedCohort(null); }}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="mb-6">
-            <SheetTitle>Cohort Details</SheetTitle>
+            <SheetTitle className="font-['Space_Grotesk'] tracking-wide">Cohort Details</SheetTitle>
             <SheetDescription>View and edit cohort settings</SheetDescription>
           </SheetHeader>
           {selectedCohort && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Cohort Name</Label>
-                <Input
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   value={cohortEditData.name || ''}
                   onChange={e => setCohortEditData(p => ({ ...p, name: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea
+                <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   value={cohortEditData.description || ''}
                   onChange={e => setCohortEditData(p => ({ ...p, description: e.target.value }))}
                   rows={3}
@@ -623,7 +623,7 @@ const SFHAcceleratorManager = () => {
                   value={cohortEditData.status || 'upcoming'}
                   onValueChange={v => setCohortEditData(p => ({ ...p, status: v }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/[0.03] border-white/10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -637,7 +637,7 @@ const SFHAcceleratorManager = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Start Date</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="date"
                     value={cohortEditData.start_date?.split('T')[0] || ''}
                     onChange={e => setCohortEditData(p => ({ ...p, start_date: e.target.value }))}
@@ -645,7 +645,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />End Date</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="date"
                     value={cohortEditData.end_date?.split('T')[0] || ''}
                     onChange={e => setCohortEditData(p => ({ ...p, end_date: e.target.value }))}
@@ -654,7 +654,7 @@ const SFHAcceleratorManager = () => {
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Application Deadline</Label>
-                <Input
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   type="date"
                   value={cohortEditData.application_deadline?.split('T')[0] || ''}
                   onChange={e => setCohortEditData(p => ({ ...p, application_deadline: e.target.value }))}
@@ -663,7 +663,7 @@ const SFHAcceleratorManager = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Max Startups</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="number"
                     value={cohortEditData.max_startups ?? ''}
                     onChange={e => setCohortEditData(p => ({ ...p, max_startups: Number(e.target.value) }))}
@@ -671,7 +671,7 @@ const SFHAcceleratorManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Funding per Startup ($)</Label>
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     type="number"
                     value={cohortEditData.funding_per_startup ?? ''}
                     onChange={e => setCohortEditData(p => ({ ...p, funding_per_startup: e.target.value ? Number(e.target.value) : null }))}
@@ -680,7 +680,7 @@ const SFHAcceleratorManager = () => {
               </div>
               <div className="space-y-2">
                 <Label>Equity Percentage (%)</Label>
-                <Input
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   type="number"
                   value={cohortEditData.equity_percentage ?? ''}
                   onChange={e => setCohortEditData(p => ({ ...p, equity_percentage: e.target.value ? Number(e.target.value) : null }))}
@@ -852,7 +852,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
 
   if (applications.length === 0) {
     return (
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="py-12 text-center">
           <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No applications yet.</p>
@@ -887,11 +887,11 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
   return (
     <div className="space-y-3">
       {applications.map(app => (
-        <Card key={app.id} className="tech-card border-0">
+        <Card key={app.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-md bg-white/[0.04] flex items-center justify-center shrink-0">
               {app.companies?.logo_url
-                ? <img src={app.companies.logo_url} alt={app.companies?.name} className="h-10 w-10 rounded-lg object-cover" />
+                ? <img src={app.companies.logo_url} alt={app.companies?.name} className="h-10 w-10 rounded-md object-cover" />
                 : <Building2 className="h-5 w-5 text-muted-foreground" />
               }
             </div>
@@ -904,9 +904,9 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
             </div>
             <div className="flex items-center gap-2">
               {app.source === 'public' && (
-                <Badge variant="outline" className="text-[10px]">Public link</Badge>
+                <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Public link</Badge>
               )}
-              <Badge variant={(statusColors[app.status] || 'secondary') as any} className="text-xs capitalize">
+              <Badge variant={(statusColors[app.status] || 'secondary') as any} className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                 {(app.status || 'pending').replace('_', ' ')}
               </Badge>
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelected(app)}>
@@ -928,7 +928,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs border-red-500/40 text-red-400 hover:bg-red-500/10"
+                className="h-7 text-xs border-[#FF3D6E]/40 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                 disabled={sendingFinalNoticeFor === app.id || !app.email}
                 title={app.email ? `Send final notice — spot expires in 72h — to ${app.email}` : 'No email on this application'}
                 onClick={() => sendFinalNotice(app)}
@@ -957,7 +957,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto bg-background backdrop-blur-none">
           <SheetHeader>
-            <SheetTitle>{selected?.companies?.name || selected?.startup_name || 'Application'}</SheetTitle>
+            <SheetTitle className="font-['Space_Grotesk'] tracking-wide">{selected?.companies?.name || selected?.startup_name || 'Application'}</SheetTitle>
             <SheetDescription>
               {selected?.accelerator_cohorts?.name} · {selected?.applied_at ? new Date(selected.applied_at).toLocaleString() : '—'}
             </SheetDescription>
@@ -966,10 +966,10 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
           {selected && (
             <div className="mt-6 space-y-4">
               <div className="flex items-center gap-2">
-                <Badge variant={(statusColors[selected.status] || 'secondary') as any} className="capitalize">
+                <Badge variant={(statusColors[selected.status] || 'secondary') as any} className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {(selected.status || 'pending').replace('_', ' ')}
                 </Badge>
-                {selected.source === 'public' && <Badge variant="outline" className="text-[10px]">Public link</Badge>}
+                {selected.source === 'public' && <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Public link</Badge>}
               </div>
 
               {detailFields.map(f => {
@@ -977,7 +977,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                 if (!value) return null;
                 return (
                   <div key={f.key} className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{f.label}</p>
+                    <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{f.label}</p>
                     {f.link === 'url' ? (
                       <a href={value} target="_blank" rel="noreferrer" className="text-sm text-primary break-all underline">{value}</a>
                     ) : f.link === 'email' ? (
@@ -991,8 +991,8 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
 
               {selected.application_answers && (
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Answers</p>
-                  <pre className="text-xs whitespace-pre-wrap break-words bg-muted/40 rounded-lg p-3">
+                  <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Answers</p>
+                  <pre className="text-xs whitespace-pre-wrap break-words bg-white/[0.03] rounded-md p-3">
                     {JSON.stringify(selected.application_answers, null, 2)}
                   </pre>
                 </div>
@@ -1013,7 +1013,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  className="border-[#FF3D6E]/40 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                   disabled={sendingFinalNoticeFor === selected.id || !selected.email}
                   onClick={() => sendFinalNotice(selected)}
                 >
@@ -1069,7 +1069,7 @@ const SFHPortfolio = ({ cohorts }: { cohorts: Cohort[] }) => {
 
   if (startups.length === 0) {
     return (
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="py-12 text-center">
           <Building2 className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No startups in the portfolio yet.</p>
@@ -1081,11 +1081,11 @@ const SFHPortfolio = ({ cohorts }: { cohorts: Cohort[] }) => {
   return (
     <div className="space-y-3">
       {startups.map(s => (
-        <Card key={s.id} className="tech-card border-0">
+        <Card key={s.id} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-md bg-white/[0.04] flex items-center justify-center shrink-0">
               {s.companies?.logo_url
-                ? <img src={s.companies.logo_url} alt={s.companies?.name} className="h-10 w-10 rounded-lg object-cover" />
+                ? <img src={s.companies.logo_url} alt={s.companies?.name} className="h-10 w-10 rounded-md object-cover" />
                 : <Building2 className="h-5 w-5 text-muted-foreground" />
               }
             </div>
@@ -1094,9 +1094,9 @@ const SFHPortfolio = ({ cohorts }: { cohorts: Cohort[] }) => {
               <p className="text-sm text-muted-foreground">{s.companies?.industry || s.external_company_industry || '—'} · {s.accelerator_cohorts?.name}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">{s.current_stage || s.companies?.stage || 'Active'}</Badge>
+              <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">{s.current_stage || s.companies?.stage || 'Active'}</Badge>
               {s.payment_status && (
-                <Badge variant={s.payment_status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                <Badge variant={s.payment_status === 'completed' ? 'default' : 'secondary'} className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {s.payment_status}
                 </Badge>
               )}

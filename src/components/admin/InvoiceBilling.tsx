@@ -270,9 +270,9 @@ const InvoiceBilling = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base font-['Space_Grotesk'] tracking-wide">
             <FileText className="h-5 w-5 text-primary" />
             Invoice Billing
           </CardTitle>
@@ -284,20 +284,20 @@ const InvoiceBilling = () => {
             <div className="grid gap-3 sm:grid-cols-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">Invoice #</Label>
-                <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Issue date</Label>
-                <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Due date</Label>
-                <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Currency</Label>
                 <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-background backdrop-blur-none">
                     <SelectItem value="usd">USD</SelectItem>
                     <SelectItem value="eur">EUR</SelectItem>
@@ -309,11 +309,11 @@ const InvoiceBilling = () => {
             <div className="space-y-2">
               <Label className="text-xs">Add from catalog</Label>
               <Select value="" onValueChange={addCatalogItem}>
-                <SelectTrigger><SelectValue placeholder="Subscriptions & accelerator programs" /></SelectTrigger>
+                <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue placeholder="Subscriptions & accelerator programs" /></SelectTrigger>
                 <SelectContent className="bg-background backdrop-blur-none">
                   {CATALOG_GROUPS.map((g) => (
                     <div key={g}>
-                      <div className="px-2 py-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">{g}</div>
+                      <div className="px-2 py-1.5 font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">{g}</div>
                       {INVOICE_CATALOG.filter((c) => c.group === g).map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.label} — {money(c.unit_price, currency)}
@@ -327,10 +327,10 @@ const InvoiceBilling = () => {
 
             <div className="space-y-3">
               {items.map((i) => (
-                <div key={i.id} className="grid gap-2 rounded-lg border border-border/50 p-3 sm:grid-cols-12">
+                <div key={i.id} className="grid gap-2 rounded-md border border-white/10 bg-white/[0.02] p-3 sm:grid-cols-12">
                   <div className="sm:col-span-5 space-y-1">
                     <Label className="text-[11px] text-muted-foreground">Description</Label>
-                    <Textarea
+                    <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                       rows={2}
                       value={i.description}
                       onChange={(e) => updateItem(i.id, { description: e.target.value })}
@@ -340,7 +340,7 @@ const InvoiceBilling = () => {
                   <div className="sm:col-span-3 space-y-1">
                     <Label className="text-[11px] text-muted-foreground">Billing</Label>
                     <Select value={i.billing} onValueChange={(v) => updateItem(i.id, { billing: v as Billing })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-background backdrop-blur-none">
                         {(Object.keys(billingLabel) as Billing[]).map((b) => (
                           <SelectItem key={b} value={b}>{billingLabel[b]}</SelectItem>
@@ -350,7 +350,7 @@ const InvoiceBilling = () => {
                   </div>
                   <div className="sm:col-span-1 space-y-1">
                     <Label className="text-[11px] text-muted-foreground">Qty</Label>
-                    <Input
+                    <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                       type="number"
                       min={1}
                       value={i.quantity}
@@ -359,7 +359,7 @@ const InvoiceBilling = () => {
                   </div>
                   <div className="sm:col-span-2 space-y-1">
                     <Label className="text-[11px] text-muted-foreground">Unit price</Label>
-                    <Input
+                    <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                       type="number"
                       min={0}
                       value={i.unit_price}
@@ -383,20 +383,20 @@ const InvoiceBilling = () => {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-xs">Discount ({currency.toUpperCase()})</Label>
-                <Input type="number" min={0} value={discount} onChange={(e) => setDiscount(Number(e.target.value) || 0)} />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" type="number" min={0} value={discount} onChange={(e) => setDiscount(Number(e.target.value) || 0)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Tax rate (%)</Label>
-                <Input type="number" min={0} value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value) || 0)} />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" type="number" min={0} value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value) || 0)} />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs">Note to recipients</Label>
-              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional message included in the invoice email" />
+              <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional message included in the invoice email" />
             </div>
 
-            <div className="rounded-lg border border-border/50 p-4 text-sm space-y-1">
+            <div className="rounded-md border border-cyan-400/15 bg-[#0A1418] p-4 text-sm space-y-1 font-['JetBrains_Mono']">
               <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{money(subtotal, currency)}</span></div>
               {discount > 0 && <div className="flex justify-between text-muted-foreground"><span>Discount</span><span>-{money(discount, currency)}</span></div>}
               {taxRate > 0 && <div className="flex justify-between text-muted-foreground"><span>Tax</span><span>{money(taxAmount, currency)}</span></div>}
@@ -429,7 +429,7 @@ const InvoiceBilling = () => {
 
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input className="pl-9" placeholder="Search users by name or email" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" placeholder="Search users by name or email" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
 
             <div className="flex gap-2">
@@ -437,7 +437,7 @@ const InvoiceBilling = () => {
               <Button variant="ghost" size="sm" onClick={() => setSelected({})}>Clear</Button>
             </div>
 
-            <ScrollArea className="h-72 rounded-lg border border-border/50">
+            <ScrollArea className="h-72 rounded-md border border-white/10">
               <div className="p-2 space-y-1">
                 {loadingUsers && <p className="p-3 text-sm text-muted-foreground">Loading users…</p>}
                 {!loadingUsers && filteredProfiles.length === 0 && (
@@ -456,7 +456,7 @@ const InvoiceBilling = () => {
             </ScrollArea>
 
             <div className="flex gap-2">
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 placeholder="Add external email"
                 value={manualEmail}
                 onChange={(e) => setManualEmail(e.target.value)}
@@ -468,7 +468,7 @@ const InvoiceBilling = () => {
             {recipients.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {recipients.map((r) => (
-                  <Badge key={r.user_id} variant="secondary" className="cursor-pointer" onClick={() => toggleUser(r)}>
+                  <Badge key={r.user_id} variant="secondary" className="cursor-pointer font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider" onClick={() => toggleUser(r)}>
                     {r.email}
                   </Badge>
                 ))}

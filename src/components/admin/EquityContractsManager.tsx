@@ -367,9 +367,9 @@ export default function EquityContractsManager() {
 
   return (
     <div className="space-y-6">
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <FileSignature className="h-5 w-5 text-primary" />
             Equity Contracts
           </CardTitle>
@@ -382,7 +382,7 @@ export default function EquityContractsManager() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label>Effective date</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 type="date"
                 value={values.effectiveDate}
                 onChange={(e) => set("effectiveDate")(e.target.value)}
@@ -390,7 +390,7 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2">
               <Label>Company name</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companyName}
                 onChange={(e) => set("companyName")(e.target.value)}
                 placeholder="Acme Robotics Inc."
@@ -398,7 +398,7 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2">
               <Label>Jurisdiction</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.jurisdiction}
                 onChange={(e) => set("jurisdiction")(e.target.value)}
                 placeholder="Delaware, USA"
@@ -406,7 +406,7 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2 sm:col-span-2 lg:col-span-3">
               <Label>Company address</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companyAddress}
                 onChange={(e) => set("companyAddress")(e.target.value)}
                 placeholder="Street, city, state, country"
@@ -414,19 +414,19 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2">
               <Label>Equity %</Label>
-              <Input value={values.equityPercent} onChange={(e) => set("equityPercent")(e.target.value)} />
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.equityPercent} onChange={(e) => set("equityPercent")(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Profit participation %</Label>
-              <Input value={values.profitPercent} onChange={(e) => set("profitPercent")(e.target.value)} />
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.profitPercent} onChange={(e) => set("profitPercent")(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Term (months)</Label>
-              <Input value={values.termMonths} onChange={(e) => set("termMonths")(e.target.value)} />
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.termMonths} onChange={(e) => set("termMonths")(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Company signer name</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companySignerName}
                 onChange={(e) => set("companySignerName")(e.target.value)}
                 placeholder="Founder name"
@@ -434,7 +434,7 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2">
               <Label>Company signer title</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companySignerTitle}
                 onChange={(e) => set("companySignerTitle")(e.target.value)}
                 placeholder="CEO"
@@ -442,7 +442,7 @@ export default function EquityContractsManager() {
             </div>
             <div className="space-y-2">
               <Label>Accelerator signer</Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.acceleratorSignerName}
                 onChange={(e) => set("acceleratorSignerName")(e.target.value)}
               />
@@ -456,7 +456,7 @@ export default function EquityContractsManager() {
               <Label className="flex items-center gap-2">
                 <Users className="h-4 w-4" /> Platform member
               </Label>
-              <Input
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={selectedMember ? `${recipient.name} · ${recipient.email}` : memberQuery}
                 onChange={(e) => {
                   setSelectedMember(null);
@@ -465,12 +465,12 @@ export default function EquityContractsManager() {
                 placeholder="Search by name or email"
               />
               {filteredMembers.length > 0 && (
-                <div className="rounded-lg border border-border/60 bg-background divide-y divide-border/40">
+                <div className="rounded-md border border-white/10 bg-[#0F1F25] divide-y divide-white/[0.05]">
                   {filteredMembers.map((p) => (
                     <button
                       key={p.user_id}
                       type="button"
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted/60"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-white/[0.04]"
                       onClick={() => {
                         setSelectedMember(p);
                         setMemberQuery("");
@@ -491,7 +491,7 @@ export default function EquityContractsManager() {
                 <Mail className="h-4 w-4" /> External recipient
               </Label>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Input
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   value={externalName}
                   onChange={(e) => {
                     setExternalName(e.target.value);
@@ -499,7 +499,7 @@ export default function EquityContractsManager() {
                   }}
                   placeholder="Full name"
                 />
-                <Input
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   type="email"
                   value={externalEmail}
                   onChange={(e) => {
@@ -528,9 +528,9 @@ export default function EquityContractsManager() {
               </p>
             )}
             {clauses.map((c, i) => (
-              <div key={i} className="space-y-2 rounded-xl border border-border/50 p-3">
+              <div key={i} className="space-y-2 rounded-md border border-white/10 bg-white/[0.02] p-3">
                 <div className="flex items-center gap-2">
-                  <Input
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     value={c.title}
                     onChange={(e) => setClause(i, "title", e.target.value)}
                     placeholder={`Clause ${17 + i} title (e.g. PAYMENT PLAN)`}
@@ -539,7 +539,7 @@ export default function EquityContractsManager() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Textarea
+                <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   rows={4}
                   value={c.body}
                   onChange={(e) => setClause(i, "body", e.target.value)}
@@ -551,7 +551,7 @@ export default function EquityContractsManager() {
 
           <div className="space-y-2">
             <Label>Message for the recipient</Label>
-            <Textarea
+            <Textarea className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -595,7 +595,7 @@ export default function EquityContractsManager() {
               <p className="text-xs text-muted-foreground">
                 LightPaper view · {previewPages} {previewPages === 1 ? "page" : "pages"}
               </p>
-              <div className="max-h-[700px] overflow-auto rounded-xl bg-muted/40 p-4">
+              <div className="max-h-[700px] overflow-auto rounded-md bg-white/[0.04] p-4">
                 <PaperDocumentView html={html} onPageCount={setPreviewPages} />
               </div>
             </div>
@@ -604,9 +604,9 @@ export default function EquityContractsManager() {
         </CardContent>
       </Card>
 
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Drafts & sent contracts</CardTitle>
+          <CardTitle className="text-lg font-['Space_Grotesk'] tracking-wide">Drafts & sent contracts</CardTitle>
           <Button variant="ghost" size="sm" onClick={loadContracts} disabled={loadingList}>
             <RefreshCw className={`h-4 w-4 ${loadingList ? "animate-spin" : ""}`} />
           </Button>
@@ -617,7 +617,7 @@ export default function EquityContractsManager() {
             <p className="text-sm text-muted-foreground">No equity contracts yet.</p>
           )}
           {contracts.map((c) => (
-            <div key={c.id} className="rounded-xl border border-border/50 p-4">
+            <div key={c.id} className="rounded-md border border-white/10 bg-white/[0.03] p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium truncate">{c.title}</p>
@@ -676,7 +676,7 @@ export default function EquityContractsManager() {
               </div>
 
               {openSignatures === c.id && (
-                <div className="mt-4 border-t border-border/50 pt-4">
+                <div className="mt-4 border-t border-white/[0.05] pt-4">
                   {loadingSignatures && (
                     <p className="text-sm text-muted-foreground">Loading signatures…</p>
                   )}
@@ -690,7 +690,7 @@ export default function EquityContractsManager() {
                       signatureRows.map((s) => (
                         <div
                           key={s.id}
-                          className="relative rounded-lg border border-border/50 bg-background/60 p-3"
+                          className="relative rounded-md border border-white/10 bg-white/[0.03] p-3"
                         >
                           <Button
                             variant="ghost"
@@ -706,7 +706,7 @@ export default function EquityContractsManager() {
                             alt={`Signature of ${s.signer_name}`}
                             className="h-14 w-full object-contain"
                           />
-                          <p className="mt-2 border-t border-border/50 pt-2 text-sm font-medium truncate">
+                          <p className="mt-2 border-t border-white/[0.05] pt-2 text-sm font-medium truncate">
                             {s.signer_name}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate">

@@ -186,7 +186,7 @@ export default function CorporatePartnersManagement() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-500/10 text-green-500"><CheckCircle2 className="h-3 w-3 mr-1" />Approved</Badge>;
+        return <Badge className="bg-[#2EF8A0]/10 text-[#2EF8A0] border border-[#2EF8A0]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider"><CheckCircle2 className="h-3 w-3 mr-1" />Approved</Badge>;
       case 'rejected':
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       default:
@@ -213,36 +213,36 @@ export default function CorporatePartnersManagement() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-sm text-muted-foreground">Total Applications</p>
+            <div className="text-2xl font-bold font-['JetBrains_Mono']">{stats.total}</div>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Applications</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-yellow-500">{stats.pending}</div>
-            <p className="text-sm text-muted-foreground">Pending Review</p>
+            <div className="text-2xl font-bold font-['JetBrains_Mono'] text-[#FFB86A]">{stats.pending}</div>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Pending Review</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-green-500">{stats.approved}</div>
-            <p className="text-sm text-muted-foreground">Approved</p>
+            <div className="text-2xl font-bold font-['JetBrains_Mono'] text-[#2EF8A0]">{stats.approved}</div>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Approved</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-primary">{stats.featured}</div>
-            <p className="text-sm text-muted-foreground">Featured</p>
+            <div className="text-2xl font-bold font-['JetBrains_Mono'] text-primary">{stats.featured}</div>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Featured</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Building2 className="h-5 w-5" />
             Corporate Partner Applications
           </CardTitle>
@@ -255,11 +255,11 @@ export default function CorporatePartnersManagement() {
                 placeholder="Search by company, contact, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -281,13 +281,13 @@ export default function CorporatePartnersManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Featured</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Company</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Contact</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Type</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Featured</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Date</TableHead>
+                    <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -311,7 +311,7 @@ export default function CorporatePartnersManagement() {
                         <div className="text-xs text-muted-foreground">{partner.contact_email}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="capitalize">
+                        <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                           {partner.partnership_type}
                         </Badge>
                       </TableCell>
@@ -340,7 +340,7 @@ export default function CorporatePartnersManagement() {
                               <Button 
                                 size="sm" 
                                 variant="ghost"
-                                className="text-green-500 hover:text-green-600"
+                                className="text-[#2EF8A0] hover:text-[#2EF8A0]/80"
                                 onClick={() => updatePartnerStatus(partner.id, 'approved')}
                               >
                                 <CheckCircle2 className="h-4 w-4" />
@@ -348,7 +348,7 @@ export default function CorporatePartnersManagement() {
                               <Button 
                                 size="sm" 
                                 variant="ghost"
-                                className="text-red-500 hover:text-red-600"
+                                className="text-[#FF3D6E] hover:text-[#FF3D6E]/80"
                                 onClick={() => updatePartnerStatus(partner.id, 'rejected')}
                               >
                                 <XCircle className="h-4 w-4" />
@@ -370,7 +370,7 @@ export default function CorporatePartnersManagement() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Building2 className="h-5 w-5" />
               {selectedPartner?.company_name}
             </DialogTitle>
@@ -438,7 +438,7 @@ export default function CorporatePartnersManagement() {
               {selectedPartner.message && (
                 <div>
                   <Label className="text-muted-foreground">Message</Label>
-                  <p className="bg-muted p-3 rounded-lg mt-1 text-sm">{selectedPartner.message}</p>
+                  <p className="bg-white/[0.03] p-3 rounded-md mt-1 text-sm">{selectedPartner.message}</p>
                 </div>
               )}
 
@@ -450,7 +450,7 @@ export default function CorporatePartnersManagement() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Add internal notes about this partner..."
                   rows={3}
-                  className="mt-1"
+                  className="mt-1 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
             </div>
