@@ -143,7 +143,7 @@ const ApiUsageTracker = () => {
         icon: Video, 
         requests: stats.whereby.requests, 
         cost: stats.whereby.cost > 0 ? stats.whereby.cost : stats.whereby.requests * SERVICE_COSTS.whereby,
-        color: '#3B82F6',
+        color: '#00E5FF',
         limit: 1000
       },
       { 
@@ -151,7 +151,7 @@ const ApiUsageTracker = () => {
         icon: Brain, 
         requests: stats.gemini.requests, 
         cost: stats.gemini.cost > 0 ? stats.gemini.cost : stats.gemini.tokens * SERVICE_COSTS.gemini,
-        color: '#8B5CF6',
+        color: '#00FFCC',
         limit: 100000
       },
       { 
@@ -159,7 +159,7 @@ const ApiUsageTracker = () => {
         icon: Newspaper, 
         requests: stats.webzio.requests, 
         cost: stats.webzio.cost > 0 ? stats.webzio.cost : stats.webzio.requests * SERVICE_COSTS.webzio,
-        color: '#10B981',
+        color: '#2EF8A0',
         limit: 10000,
         remaining: stats.webzio.remaining
       },
@@ -168,7 +168,7 @@ const ApiUsageTracker = () => {
         icon: Mail, 
         requests: stats.resend.requests, 
         cost: stats.resend.cost > 0 ? stats.resend.cost : stats.resend.requests * SERVICE_COSTS.resend,
-        color: '#F59E0B',
+        color: '#FFB86A',
         limit: 3000
       },
       { 
@@ -176,7 +176,7 @@ const ApiUsageTracker = () => {
         icon: Linkedin, 
         requests: stats.linkedin.requests, 
         cost: stats.linkedin.cost > 0 ? stats.linkedin.cost : stats.linkedin.requests * SERVICE_COSTS.linkedin,
-        color: '#0A66C2',
+        color: '#7BC4B6',
         limit: 5000
       }
     ];
@@ -224,11 +224,11 @@ const ApiUsageTracker = () => {
       } else {
         // No data - set empty stats
         setServiceStats([
-          { name: 'Whereby', icon: Video, requests: 0, cost: 0, color: '#3B82F6', limit: 1000 },
-          { name: 'Gemini AI', icon: Brain, requests: 0, cost: 0, color: '#8B5CF6', limit: 100000 },
-          { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#10B981', limit: 10000 },
-          { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#F59E0B', limit: 3000 },
-          { name: 'LinkedIn', icon: Linkedin, requests: 0, cost: 0, color: '#0A66C2', limit: 5000 }
+          { name: 'Whereby', icon: Video, requests: 0, cost: 0, color: '#00E5FF', limit: 1000 },
+          { name: 'Gemini AI', icon: Brain, requests: 0, cost: 0, color: '#00FFCC', limit: 100000 },
+          { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#2EF8A0', limit: 10000 },
+          { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#FFB86A', limit: 3000 },
+          { name: 'LinkedIn', icon: Linkedin, requests: 0, cost: 0, color: '#7BC4B6', limit: 5000 }
         ]);
         setMonthlySpending([]);
       }
@@ -261,40 +261,40 @@ const ApiUsageTracker = () => {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <DollarSign className="h-5 w-5 text-green-400 mb-2" />
+            <DollarSign className="h-5 w-5 text-[#2EF8A0] mb-2" />
             <p className="text-2xl font-bold">${totalMonthlyCost.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">Monthly Cost</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Monthly Cost</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <TrendingUp className="h-5 w-5 text-blue-400 mb-2" />
+            <TrendingUp className="h-5 w-5 text-[#00E5FF] mb-2" />
             <p className="text-2xl font-bold">{totalRequests.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Total Requests</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Requests</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Brain className="h-5 w-5 text-purple-400 mb-2" />
+            <Brain className="h-5 w-5 text-[#00FFCC] mb-2" />
             <p className="text-2xl font-bold">{serviceStats.filter(s => s.requests > 0).length}</p>
-            <p className="text-xs text-muted-foreground">Active Services</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Active Services</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <AlertTriangle className="h-5 w-5 text-amber-400 mb-2" />
+            <AlertTriangle className="h-5 w-5 text-[#FFB86A] mb-2" />
             <p className="text-2xl font-bold">
               {serviceStats.filter(s => s.limit && (s.requests / s.limit) > 0.8).length}
             </p>
-            <p className="text-xs text-muted-foreground">Budget Alerts</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Budget Alerts</p>
           </CardContent>
         </Card>
       </div>
 
       {!hasData && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-8 text-center">
             <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No API Usage Data Yet</h3>
@@ -314,21 +314,21 @@ const ApiUsageTracker = () => {
           const isComingSoon = service.name === 'Webz.io';
           
           return (
-            <Card key={service.name} className="tech-card border-0">
+            <Card key={service.name} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
+                  <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                     <Icon className="h-5 w-5" style={{ color: service.color }} />
                     {service.name}
                   </CardTitle>
                   {isComingSoon ? (
-                    <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                    <Badge variant="outline" className="bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                       Coming Soon
                     </Badge>
                   ) : (
                     <Badge 
                       variant="outline" 
-                      className={isNearLimit ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : service.requests > 0 ? 'bg-green-500/20 text-green-400' : ''}
+                      className={isNearLimit ? 'bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30' : service.requests > 0 ? 'bg-[#2EF8A0]/15 text-[#2EF8A0]' : ''}
                     >
                       {isNearLimit ? 'Near Limit' : service.requests > 0 ? 'Active' : 'No Activity'}
                     </Badge>
@@ -381,10 +381,10 @@ const ApiUsageTracker = () => {
 
       {/* Monthly Spending Chart */}
       {monthlySpending.some(m => m.cost > 0 || m.requests > 0) && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <DollarSign className="h-5 w-5 text-primary" />
                 Monthly Spending Trends
               </CardTitle>
@@ -392,7 +392,7 @@ const ApiUsageTracker = () => {
                 variant="outline" 
                 size="sm"
                 onClick={() => setShowSettings(!showSettings)}
-                className="tech-card border-0"
+                className="bg-[#0A1418] border border-cyan-400/15 rounded-md"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Budget Alerts
@@ -402,21 +402,17 @@ const ApiUsageTracker = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlySpending}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" stroke="#4E7A73" fontSize={12} />
+                <YAxis stroke="#4E7A73" fontSize={12} />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
+                  contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }}
                   formatter={(value: any, name: string) => [
                     name === 'cost' ? `$${value.toFixed(2)}` : value.toLocaleString(),
                     name === 'cost' ? 'Cost' : 'Requests'
                   ]}
                 />
-                <Bar dataKey="cost" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="cost" fill="#2EF8A0" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -425,10 +421,10 @@ const ApiUsageTracker = () => {
 
       {/* Budget Alerts Configuration */}
       {showSettings && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
+            <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+              <AlertTriangle className="h-5 w-5 text-[#FFB86A]" />
               Budget Alert Configuration
             </CardTitle>
             <CardDescription>Set monthly spending limits for each service</CardDescription>
@@ -445,7 +441,7 @@ const ApiUsageTracker = () => {
                       ...prev,
                       [service]: parseFloat(e.target.value) || 0
                     }))}
-                    className="tech-card border-0"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                   />
                 </div>
               ))}
@@ -461,11 +457,11 @@ const ApiUsageTracker = () => {
       )}
 
       {/* Recent API Calls */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Recent API Calls</CardTitle>
-            <Button variant="outline" size="sm" onClick={fetchUsageData} className="tech-card border-0">
+            <CardTitle className="font-['Space_Grotesk'] tracking-wide">Recent API Calls</CardTitle>
+            <Button variant="outline" size="sm" onClick={fetchUsageData} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -474,7 +470,7 @@ const ApiUsageTracker = () => {
         <CardContent>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {usageLogs.slice(0, 20).map((log) => (
-              <div key={log.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+              <div key={log.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04]">
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="capitalize">{log.service_name}</Badge>
                   <span className="text-sm text-muted-foreground">{log.endpoint || 'API Call'}</span>

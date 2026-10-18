@@ -235,13 +235,13 @@ const UsersManagement = () => {
 
   const getRoleBadgeColor = (role: AppRole | null) => {
     const colors: Record<string, string> = {
-      admin: 'bg-red-500/20 text-red-400 border-red-500/30',
-      startup: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      investor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      mentor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      advisor: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      student: 'bg-green-500/20 text-green-400 border-green-500/30',
-      accelerator: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+      admin: 'bg-[#FF3D6E]/15 text-[#FF3D6E] border-[#FF3D6E]/30',
+      startup: 'bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30',
+      investor: 'bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30',
+      mentor: 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/30',
+      advisor: 'bg-[#7BC4B6]/15 text-[#7BC4B6] border-[#7BC4B6]/30',
+      student: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30',
+      accelerator: 'bg-[#6FA99C]/15 text-[#6FA99C] border-[#6FA99C]/30'
     };
     return colors[role || ''] || 'bg-muted text-muted-foreground';
   };
@@ -365,7 +365,7 @@ const UsersManagement = () => {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -374,11 +374,11 @@ const UsersManagement = () => {
                 placeholder="Search users by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[180px] tech-card border-0">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
@@ -393,11 +393,11 @@ const UsersManagement = () => {
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={handleExportCSV} className="tech-card border-0">
+            <Button variant="outline" onClick={handleExportCSV} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <Download className="h-4 w-4 mr-2" />
               Export CSV ({filteredUsers.length})
             </Button>
-            <Button variant="outline" onClick={fetchUsers} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchUsers} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -406,9 +406,9 @@ const UsersManagement = () => {
       </Card>
 
       {/* Users Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Users className="h-5 w-5" />
             Users ({filteredUsers.length})
           </CardTitle>
@@ -417,13 +417,13 @@ const UsersManagement = () => {
           <ScrollArea className="h-[500px]">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead>Last Seen</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-white/[0.05]">
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">User</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Role</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Joined</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Last Seen</TableHead>
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -448,12 +448,12 @@ const UsersManagement = () => {
                     </TableCell>
                     <TableCell>
                       {user.is_unverified ? (
-                        <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                        <Badge variant="outline" className="bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                           Unverified
                         </Badge>
                       ) : user.is_online ? (
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                          <div className="h-2 w-2 rounded-full bg-green-500 mr-1 animate-pulse" />
+                        <Badge className="bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30">
+                          <div className="h-2 w-2 rounded-full bg-[#2EF8A0] mr-1 animate-pulse" />
                           Online
                         </Badge>
                       ) : (
@@ -480,11 +480,11 @@ const UsersManagement = () => {
                             <Eye className="h-4 w-4 mr-2" />
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-amber-500">
+                          <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-[#FFB86A]">
                             <Ban className="h-4 w-4 mr-2" />
                             Suspend User
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteUser(user)} className="text-red-500">
+                          <DropdownMenuItem onClick={() => handleDeleteUser(user)} className="text-[#FF3D6E]">
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete User
                           </DropdownMenuItem>
@@ -504,9 +504,9 @@ const UsersManagement = () => {
         setShowUserDialog(open);
         if (!open) setRoleSpecificData({});
       }}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[85vh] overflow-hidden">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-2xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>User Profile</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">User Profile</DialogTitle>
             <DialogDescription>Comprehensive user details and activity</DialogDescription>
           </DialogHeader>
           {selectedUser && (
@@ -526,8 +526,8 @@ const UsersManagement = () => {
                         {selectedUser.role || 'No role'}
                       </Badge>
                       {selectedUser.is_online && (
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                          <div className="h-2 w-2 rounded-full bg-green-500 mr-1" />
+                        <Badge className="bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30">
+                          <div className="h-2 w-2 rounded-full bg-[#2EF8A0] mr-1" />
                           Online
                         </Badge>
                       )}
@@ -537,22 +537,22 @@ const UsersManagement = () => {
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-4 gap-3">
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg bg-white/[0.04]">
                     <MessageSquare className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-lg font-bold">{roleSpecificData.postsCount || 0}</p>
                     <p className="text-xs text-muted-foreground">Posts</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg bg-white/[0.04]">
                     <Link2 className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-lg font-bold">{roleSpecificData.connectionsCount || 0}</p>
                     <p className="text-xs text-muted-foreground">Connections</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg bg-white/[0.04]">
                     <MapPin className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-sm font-medium truncate">{selectedUser.location || 'N/A'}</p>
                     <p className="text-xs text-muted-foreground">Location</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-center p-3 rounded-lg bg-white/[0.04]">
                     <GraduationCap className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                     <p className="text-sm font-medium">{format(new Date(selectedUser.created_at), 'MMM yyyy')}</p>
                     <p className="text-xs text-muted-foreground">Joined</p>
@@ -561,7 +561,7 @@ const UsersManagement = () => {
 
                 {/* Bio */}
                 {selectedUser.bio && (
-                  <div className="p-3 rounded-lg bg-muted/30">
+                  <div className="p-3 rounded-lg bg-white/[0.03]">
                     <p className="text-sm text-muted-foreground mb-1">Bio</p>
                     <p className="text-sm">{selectedUser.bio}</p>
                   </div>
@@ -607,7 +607,7 @@ const UsersManagement = () => {
                             <Building className="h-4 w-4" />
                             Company Details
                           </h4>
-                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30">
+                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-white/[0.03]">
                             <div>
                               <p className="text-xs text-muted-foreground">Company Name</p>
                               <p className="font-medium">{roleSpecificData.company.name}</p>
@@ -652,7 +652,7 @@ const UsersManagement = () => {
                             <TrendingUp className="h-4 w-4" />
                             Investor Profile
                           </h4>
-                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30">
+                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-white/[0.03]">
                             <div>
                               <p className="text-xs text-muted-foreground">Investment Focus</p>
                               <div className="flex flex-wrap gap-1 mt-1">
@@ -692,7 +692,7 @@ const UsersManagement = () => {
                             <Building className="h-4 w-4" />
                             Accelerator Profile
                           </h4>
-                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30">
+                          <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-white/[0.03]">
                             <div>
                               <p className="text-xs text-muted-foreground">Organization</p>
                               <p className="font-medium">{roleSpecificData.acceleratorProfile.organization_name}</p>
@@ -754,7 +754,7 @@ const UsersManagement = () => {
                       <TabsContent value="experience" className="mt-4 space-y-4">
                         {roleSpecificData.experiences && roleSpecificData.experiences.length > 0 ? (
                           roleSpecificData.experiences.map((exp: any) => (
-                            <div key={exp.id} className="p-3 rounded-lg bg-muted/30">
+                            <div key={exp.id} className="p-3 rounded-lg bg-white/[0.03]">
                               <p className="font-medium">{exp.title}</p>
                               <p className="text-sm text-muted-foreground">{exp.company}</p>
                               <p className="text-xs text-muted-foreground mt-1">
@@ -790,15 +790,15 @@ const UsersManagement = () => {
           setUserToDelete(null);
         }
       }}>
-        <AlertDialogContent className="tech-card border-0">
+        <AlertDialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-500">⚠️ Permanently Delete User</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#FF3D6E]">⚠️ Permanently Delete User</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>You are about to permanently delete:</p>
               <p className="font-semibold text-foreground">
                 {userToDelete?.full_name || 'Unknown'} ({userToDelete?.email})
               </p>
-              <p className="text-red-400">
+              <p className="text-[#FF3D6E]">
                 This will remove the user's account, profile, posts, messages, connections, and ALL associated data. This action cannot be undone.
               </p>
             </AlertDialogDescription>
@@ -808,7 +808,7 @@ const UsersManagement = () => {
             <AlertDialogAction
               onClick={confirmDeleteUser}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-[#FF3D6E] hover:bg-[#FF3D6E]/85"
             >
               {deleting ? (
                 <>

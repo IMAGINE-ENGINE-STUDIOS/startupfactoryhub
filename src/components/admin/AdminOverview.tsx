@@ -59,18 +59,18 @@ interface PlatformStats {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  startup: '#3B82F6',
-  investor: '#F59E0B',
-  mentor: '#8B5CF6',
-  advisor: '#06B6D4',
-  student: '#22C55E',
-  accelerator: '#10B981',
-  admin: '#EF4444'
+  startup: '#00E5FF',
+  investor: '#FFB86A',
+  mentor: '#00FFCC',
+  advisor: '#7BC4B6',
+  student: '#2EF8A0',
+  accelerator: '#6FA99C',
+  admin: '#FF3D6E'
 };
 
 const INDUSTRY_COLORS = [
-  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', 
-  '#06B6D4', '#EC4899', '#84CC16', '#F97316', '#6366F1'
+  '#00E5FF', '#2EF8A0', '#FFB86A', '#FF3D6E', '#00FFCC',
+  '#7BC4B6', '#FF8A3D', '#6FA99C', '#00E5FF', '#2EF8A0'
 ];
 
 const AdminOverview = () => {
@@ -343,105 +343,105 @@ const AdminOverview = () => {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Users className="h-5 w-5 text-blue-400" />
+              <Users className="h-5 w-5 text-[#00E5FF]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalUsers}</p>
-              <p className="text-xs text-muted-foreground">Total Users</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalUsers}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Users</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Activity className="h-5 w-5 text-green-400" />
+              <Activity className="h-5 w-5 text-[#2EF8A0]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.activeUsers}</p>
-              <p className="text-xs text-muted-foreground">Online Now</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.activeUsers}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Online Now</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Building2 className="h-5 w-5 text-purple-400" />
+              <Building2 className="h-5 w-5 text-[#00E5FF]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalCompanies}</p>
-              <p className="text-xs text-muted-foreground">Companies</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalCompanies}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Companies</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Link2 className="h-5 w-5 text-teal-400" />
+              <Link2 className="h-5 w-5 text-[#2EF8A0]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalConnections}</p>
-              <p className="text-xs text-muted-foreground">Connections</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalConnections}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Connections</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <MessageSquare className="h-5 w-5 text-cyan-400" />
+              <MessageSquare className="h-5 w-5 text-[#00E5FF]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalPosts}</p>
-              <p className="text-xs text-muted-foreground">Posts</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalPosts}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Posts</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Briefcase className="h-5 w-5 text-amber-400" />
+              <Briefcase className="h-5 w-5 text-[#FFB86A]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalJobs}</p>
-              <p className="text-xs text-muted-foreground">Jobs</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalJobs}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Jobs</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Calendar className="h-5 w-5 text-rose-400" />
+              <Calendar className="h-5 w-5 text-[#FF3D6E]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.totalEvents}</p>
-              <p className="text-xs text-muted-foreground">Events</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.totalEvents}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Events</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Pending Resources - Clickable */}
         <Card 
-          className={`tech-card border-0 cursor-pointer hover:bg-muted/50 transition-colors ${stats.pendingResources > 0 ? 'ring-2 ring-amber-500/50' : ''}`}
+          className={`bg-[#0A1418] border border-cyan-400/15 rounded-md cursor-pointer hover:bg-white/[0.04] transition-colors ${stats.pendingResources > 0 ? 'ring-2 ring-[#FFB86A]/50' : ''}`}
           onClick={navigateToResources}
         >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <Package className="h-5 w-5 text-amber-400" />
+              <Package className="h-5 w-5 text-[#FFB86A]" />
               {stats.pendingResources > 0 && (
-                <AlertCircle className="h-4 w-4 text-amber-400 animate-pulse" />
+                <AlertCircle className="h-4 w-4 text-[#FFB86A] animate-pulse" />
               )}
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold">{stats.pendingResources}</p>
-              <p className="text-xs text-muted-foreground">Pending Resources</p>
+              <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.pendingResources}</p>
+              <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Pending Resources</p>
             </div>
           </CardContent>
         </Card>
@@ -450,15 +450,15 @@ const AdminOverview = () => {
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Growth Chart */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <TrendingUp className="h-5 w-5 text-primary" />
                 Platform Growth
               </CardTitle>
               <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] bg-white/[0.03] border-white/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -474,27 +474,23 @@ const AdminOverview = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="date" stroke="#4E7A73" fontSize={12} />
+                <YAxis stroke="#4E7A73" fontSize={12} />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }} 
+                  contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} 
                 />
-                <Area type="monotone" dataKey="users" stroke="#10B981" fill="#10B981" fillOpacity={0.3} name="Users" />
-                <Area type="monotone" dataKey="posts" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} name="Posts" />
+                <Area type="monotone" dataKey="users" stroke="#2EF8A0" fill="#2EF8A0" fillOpacity={0.3} name="Users" />
+                <Area type="monotone" dataKey="posts" stroke="#00E5FF" fill="#00E5FF" fillOpacity={0.3} name="Posts" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Users by Role Pie Chart */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Users className="h-5 w-5 text-primary" />
               Users by Role
             </CardTitle>
@@ -516,7 +512,7 @@ const AdminOverview = () => {
                       <Cell key={`cell-${index}`} fill={ROLE_COLORS[entry.role] || '#888'} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="space-y-2">
@@ -539,9 +535,9 @@ const AdminOverview = () => {
       {/* Charts Row 2 - Location & Industry Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Startup Locations */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <MapPin className="h-5 w-5 text-primary" />
               Startup Locations
             </CardTitle>
@@ -550,24 +546,20 @@ const AdminOverview = () => {
             {stats.locationData.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={stats.locationData} layout="vertical" margin={{ left: 80 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis type="number" stroke="#4E7A73" fontSize={12} />
                   <YAxis 
                     type="category" 
                     dataKey="location" 
-                    stroke="hsl(var(--muted-foreground))" 
+                    stroke="#4E7A73" 
                     fontSize={11}
                     width={75}
                     tickFormatter={(value) => value.length > 12 ? value.slice(0, 12) + '...' : value}
                   />
                   <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }} 
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} 
                   />
-                  <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} name="Startups" />
+                  <Bar dataKey="count" fill="#2EF8A0" radius={[0, 4, 4, 0]} name="Startups" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -579,9 +571,9 @@ const AdminOverview = () => {
         </Card>
 
         {/* Startup Industries */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Factory className="h-5 w-5 text-primary" />
               Startup Industries
             </CardTitle>
@@ -604,7 +596,7 @@ const AdminOverview = () => {
                         <Cell key={`cell-${index}`} fill={INDUSTRY_COLORS[index % INDUSTRY_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <ScrollArea className="h-[200px] flex-1">
@@ -634,30 +626,30 @@ const AdminOverview = () => {
       {/* Connections Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Connections Stats */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Link2 className="h-5 w-5 text-primary" />
               Connection Stats
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.04]">
                 <span className="text-sm">Accepted Connections</span>
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                <Badge className="bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {stats.totalConnections}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.04]">
                 <span className="text-sm">Pending Requests</span>
-                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                <Badge className="bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {stats.pendingConnections}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.04]">
                 <span className="text-sm">Acceptance Rate</span>
-                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                <Badge className="bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                   {stats.totalConnections + stats.pendingConnections > 0 
                     ? ((stats.totalConnections / (stats.totalConnections + stats.pendingConnections)) * 100).toFixed(1)
                     : 0}%
@@ -668,9 +660,9 @@ const AdminOverview = () => {
         </Card>
 
         {/* Recent Connections */}
-        <Card className="tech-card border-0 lg:col-span-2">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <UserPlus className="h-5 w-5 text-primary" />
               Recent Connections Made
             </CardTitle>
@@ -680,7 +672,7 @@ const AdminOverview = () => {
               <div className="space-y-3">
                 {stats.recentConnections.length > 0 ? (
                   stats.recentConnections.map((conn: any) => (
-                    <div key={conn.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={conn.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.04] transition-colors">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={conn.requester?.avatar_url || ''} />
                         <AvatarFallback>{conn.requester?.full_name?.charAt(0) || 'U'}</AvatarFallback>
@@ -713,9 +705,9 @@ const AdminOverview = () => {
       {/* Recent Activity Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Signups */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <UserPlus className="h-5 w-5 text-primary" />
               Recent Signups
             </CardTitle>
@@ -725,7 +717,7 @@ const AdminOverview = () => {
               <div className="space-y-3">
                 {stats.recentSignups.length > 0 ? (
                   stats.recentSignups.map((user: any) => (
-                    <div key={user.user_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={user.user_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] transition-colors">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={user.avatar_url || ''} />
@@ -741,7 +733,7 @@ const AdminOverview = () => {
                           {format(new Date(user.created_at), 'MMM dd, HH:mm')}
                         </span>
                         {user.is_online && (
-                          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                          <div className="h-2 w-2 rounded-full bg-[#2EF8A0] animate-pulse" />
                         )}
                       </div>
                     </div>
@@ -757,9 +749,9 @@ const AdminOverview = () => {
         </Card>
 
         {/* Recent Activity - Full Post Content */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Activity className="h-5 w-5 text-primary" />
               Recent Feed Posts
             </CardTitle>
@@ -769,7 +761,7 @@ const AdminOverview = () => {
               <div className="space-y-3">
                 {stats.recentActivity.length > 0 ? (
                   stats.recentActivity.map((post: any) => (
-                    <div key={post.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div key={post.id} className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.04] transition-colors">
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarImage src={post.profiles?.avatar_url || ''} />
                         <AvatarFallback>{post.profiles?.full_name?.charAt(0) || 'U'}</AvatarFallback>

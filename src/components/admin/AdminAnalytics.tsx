@@ -28,13 +28,13 @@ import {
 } from 'recharts';
 
 const ROLE_COLORS: Record<string, string> = {
-  startup: '#3B82F6',
-  investor: '#F59E0B',
-  mentor: '#8B5CF6',
-  advisor: '#06B6D4',
-  student: '#22C55E',
-  accelerator: '#10B981',
-  admin: '#EF4444'
+  startup: '#00E5FF',
+  investor: '#FFB86A',
+  mentor: '#00FFCC',
+  advisor: '#7BC4B6',
+  student: '#2EF8A0',
+  accelerator: '#6FA99C',
+  admin: '#FF3D6E'
 };
 
 const AdminAnalytics = () => {
@@ -218,10 +218,10 @@ const AdminAnalytics = () => {
       const engagedUsers = new Set([...usersWithPosts, ...usersWithConnections]).size;
 
       setFunnelData([
-        { name: 'Signups', value: totalSignups, fill: '#3B82F6' },
-        { name: 'Profile Complete', value: completedProfiles, fill: '#8B5CF6' },
-        { name: 'Active (7d)', value: recentlyActive, fill: '#10B981' },
-        { name: 'Engaged', value: engagedUsers, fill: '#F59E0B' }
+        { name: 'Signups', value: totalSignups, fill: '#00E5FF' },
+        { name: 'Profile Complete', value: completedProfiles, fill: '#00FFCC' },
+        { name: 'Active (7d)', value: recentlyActive, fill: '#2EF8A0' },
+        { name: 'Engaged', value: engagedUsers, fill: '#FFB86A' }
       ]);
 
     } catch (error) {
@@ -241,7 +241,7 @@ const AdminAnalytics = () => {
 
   if (!hasData) {
     return (
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-8 text-center">
           <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Analytics Data Yet</h3>
@@ -256,9 +256,9 @@ const AdminAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* User Growth Chart */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <TrendingUp className="h-5 w-5 text-primary" />
             User Growth (Last 30 Days)
           </CardTitle>
@@ -266,18 +266,14 @@ const AdminAnalytics = () => {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={userGrowthData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="date" stroke="#4E7A73" fontSize={12} />
+              <YAxis stroke="#4E7A73" fontSize={12} />
               <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }} 
+                contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} 
               />
-              <Area type="monotone" dataKey="users" stroke="#10B981" fill="#10B981" fillOpacity={0.3} name="Total Users" />
-              <Area type="monotone" dataKey="newUsers" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} name="New Users" />
+              <Area type="monotone" dataKey="users" stroke="#2EF8A0" fill="#2EF8A0" fillOpacity={0.3} name="Total Users" />
+              <Area type="monotone" dataKey="newUsers" stroke="#00E5FF" fill="#00E5FF" fillOpacity={0.3} name="New Users" />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -286,9 +282,9 @@ const AdminAnalytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Users by Role */}
         {usersByRole.length > 0 && (
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <Users className="h-5 w-5 text-primary" />
                 Users by Role
               </CardTitle>
@@ -310,13 +306,13 @@ const AdminAnalytics = () => {
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-2 flex-1">
                   {usersByRole.map((role) => (
                     <div key={role.role} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                         <div 
                           className="w-3 h-3 rounded-full" 
                           style={{ backgroundColor: role.fill }} 
@@ -334,9 +330,9 @@ const AdminAnalytics = () => {
 
         {/* Feature Usage */}
         {featureUsage.length > 0 && (
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <Activity className="h-5 w-5 text-primary" />
                 Feature Usage
               </CardTitle>
@@ -344,17 +340,13 @@ const AdminAnalytics = () => {
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={featureUsage} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis dataKey="feature" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={80} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis type="number" stroke="#4E7A73" fontSize={12} />
+                  <YAxis dataKey="feature" type="category" stroke="#4E7A73" fontSize={12} width={80} />
                   <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }} 
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} 
                   />
-                  <Bar dataKey="usage" fill="#10B981" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="usage" fill="#2EF8A0" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -364,9 +356,9 @@ const AdminAnalytics = () => {
 
       {/* Engagement by Role */}
       {engagementData.length > 0 && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <MessageSquare className="h-5 w-5 text-primary" />
               Engagement Metrics by Role
             </CardTitle>
@@ -374,19 +366,15 @@ const AdminAnalytics = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={engagementData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                <XAxis dataKey="role" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="role" stroke="#4E7A73" fontSize={12} />
+                <YAxis stroke="#4E7A73" fontSize={12} />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }} 
+                  contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }} 
                 />
-                <Bar dataKey="posts" fill="#3B82F6" name="Posts" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="connections" fill="#10B981" name="Connections" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="events" fill="#F59E0B" name="Events" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="posts" fill="#00E5FF" name="Posts" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="connections" fill="#2EF8A0" name="Connections" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="events" fill="#FFB86A" name="Events" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -395,9 +383,9 @@ const AdminAnalytics = () => {
 
       {/* Conversion Funnel */}
       {funnelData.some(f => f.value > 0) && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <ArrowRight className="h-5 w-5 text-primary" />
               Conversion Funnel
             </CardTitle>
@@ -413,9 +401,9 @@ const AdminAnalytics = () => {
                       borderLeft: `4px solid ${stage.fill}`
                     }}
                   >
-                    <p className="text-3xl font-bold" style={{ color: stage.fill }}>{stage.value}</p>
+                    <p className="text-3xl font-bold font-['JetBrains_Mono']" style={{ color: stage.fill }}>{stage.value}</p>
                   </div>
-                  <p className="text-sm font-medium">{stage.name}</p>
+                  <p className="text-sm font-medium font-['Space_Grotesk'] tracking-wide">{stage.name}</p>
                   {index < funnelData.length - 1 && funnelData[index + 1]?.value > 0 && stage.value > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
                       {Math.round((funnelData[index + 1]?.value / stage.value) * 100)}% →
