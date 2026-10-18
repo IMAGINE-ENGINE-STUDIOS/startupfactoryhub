@@ -238,6 +238,7 @@ const Ignition = () => {
             <IgnitionProgramAnimatedBanner />
           </div>
 
+          <h1 className="sr-only">Ignition Startup Accelerator Cohort by Startup Factory Hub</h1>
           {/* CTAs + tags */}
           <div className="flex flex-col items-center text-center space-y-5">
             <div className="flex flex-wrap justify-center gap-2">
@@ -267,7 +268,7 @@ const Ignition = () => {
                 onClick={() => document.getElementById('what-you-get')?.scrollIntoView({ behavior: 'smooth' })}
                 className="border-emerald-400/50 text-emerald-200 hover:bg-emerald-500/10"
               >
-                Learn More
+                View program details
               </Button>
             </div>
           </div>

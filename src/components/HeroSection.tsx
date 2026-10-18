@@ -38,6 +38,7 @@ const HeroSection = () => {
         <div className="max-w-7xl mx-auto">
           
 
+          <h1 className="sr-only">Startup Factory Hub — AI Startup Accelerator and Venture Builder</h1>
           {/* Main Logo */}
           <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="relative">
