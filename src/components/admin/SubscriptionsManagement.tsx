@@ -97,66 +97,66 @@ const SubscriptionsManagement = () => {
   };
 
   const tierColors: Record<string, string> = {
-    community: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    self_paced_office: 'bg-primary/10 text-primary border-primary/20',
-    global_access: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-    corporate: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    community: 'bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30',
+    self_paced_office: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30',
+    global_access: 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/30',
+    corporate: 'bg-[#FF8A3D]/15 text-[#FF8A3D] border-[#FF8A3D]/30',
   };
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Subscribers</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Subscribers</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.total}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <CreditCard className="h-5 w-5 text-green-500" />
+              <div className="p-2 rounded-lg bg-[#2EF8A0]/10">
+                <CreditCard className="h-5 w-5 text-[#2EF8A0]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold">{stats.active}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Active</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{stats.active}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-yellow-500/10">
-                <DollarSign className="h-5 w-5 text-yellow-500" />
+              <div className="p-2 rounded-lg bg-[#FFB86A]/10">
+                <DollarSign className="h-5 w-5 text-[#FFB86A]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Monthly Revenue</p>
-                <p className="text-2xl font-bold">${stats.mrr.toLocaleString()}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Monthly Revenue</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">${stats.mrr.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <TrendingUp className="h-5 w-5 text-purple-500" />
+              <div className="p-2 rounded-lg bg-[#00E5FF]/10">
+                <TrendingUp className="h-5 w-5 text-[#00E5FF]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Tier Breakdown</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Tier Breakdown</p>
                 <div className="flex gap-1 flex-wrap mt-1">
                   {Object.entries(stats.byTier).map(([tier, count]) => (
-                    <Badge key={tier} variant="outline" className={`text-xs ${tierColors[tier] || ''}`}>
+                    <Badge key={tier} variant="outline" className={`font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider ${tierColors[tier] || ''}`}>
                       {getTierLabel(tier)}: {count}
                     </Badge>
                   ))}
@@ -168,16 +168,16 @@ const SubscriptionsManagement = () => {
       </div>
 
       {/* Tier Products Info */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="text-lg">Membership Plans (Stripe)</CardTitle>
+          <CardTitle className="text-lg font-['Space_Grotesk'] tracking-wide">Membership Plans (Stripe)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {Object.entries(MEMBERSHIP_TIERS).filter(([k]) => k !== 'free').map(([key, tier]) => (
-              <div key={key} className={`p-4 rounded-xl border ${tierColors[key] || 'border-border'}`}>
-                <h4 className="font-semibold">{tier.name}</h4>
-                <p className="text-2xl font-bold mt-1">${tier.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              <div key={key} className={`p-4 rounded-md border ${tierColors[key] || 'border-border'}`}>
+                <h4 className="font-semibold font-['Space_Grotesk'] tracking-wide">{tier.name}</h4>
+                <p className="text-2xl font-bold mt-1 font-['JetBrains_Mono']">${tier.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                 <p className="text-xs text-muted-foreground mt-1 font-mono">{tier.price_id}</p>
               </div>
             ))}
@@ -186,10 +186,10 @@ const SubscriptionsManagement = () => {
       </Card>
 
       {/* Subscribers Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Subscribers</CardTitle>
+            <CardTitle className="text-lg font-['Space_Grotesk'] tracking-wide">Subscribers</CardTitle>
             <div className="flex gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -197,7 +197,7 @@ const SubscriptionsManagement = () => {
                   placeholder="Search subscribers..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 w-64"
+                  className="pl-9 w-64 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <Button variant="outline" size="icon" onClick={fetchSubscriptions}>
@@ -220,12 +220,12 @@ const SubscriptionsManagement = () => {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Period End</TableHead>
-                  <TableHead>Created</TableHead>
+                <TableRow className="border-white/[0.05]">
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">User</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Tier</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Status</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Period End</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Created</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -247,7 +247,7 @@ const SubscriptionsManagement = () => {
                         {sub.status}
                       </Badge>
                       {sub.cancel_at_period_end && (
-                        <Badge variant="destructive" className="ml-1 text-xs">Canceling</Badge>
+                        <Badge variant="destructive" className="ml-1 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Canceling</Badge>
                       )}
                     </TableCell>
                     <TableCell>

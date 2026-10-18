@@ -283,7 +283,7 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="platform" className="w-full">
-        <TabsList className="tech-card border-0 p-1 grid grid-cols-5 h-auto gap-1">
+        <TabsList className="bg-[#0A1418] border border-cyan-400/15 rounded-md p-1 grid grid-cols-5 h-auto gap-1">
           <TabsTrigger value="platform" className="flex items-center gap-2 py-2">
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">Platform</span>
@@ -308,9 +308,9 @@ const AdminSettings = () => {
 
         {/* Platform Settings */}
         <TabsContent value="platform" className="space-y-6 mt-6">
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <Settings className="h-5 w-5" />
                 Platform Configuration
               </CardTitle>
@@ -329,7 +329,7 @@ const AdminSettings = () => {
                 const label = labels[key];
                 
                 return (
-                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border border-white/10">
                     <div>
                       <p className="font-medium">{label.title}</p>
                       <p className="text-sm text-muted-foreground">{label.desc}</p>
@@ -352,9 +352,9 @@ const AdminSettings = () => {
           </Card>
 
           {/* Danger Zone */}
-          <Card className="tech-card border-0 border-red-500/20">
+          <Card className="bg-[#0A1418] border border-[#FF3D6E]/25 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-400">
+              <CardTitle className="flex items-center gap-2 text-[#FF3D6E] font-['Space_Grotesk'] tracking-wide">
                 <AlertTriangle className="h-5 w-5" />
                 Danger Zone
               </CardTitle>
@@ -364,21 +364,21 @@ const AdminSettings = () => {
               <div className="flex flex-wrap gap-3">
                 <Button 
                   variant="outline" 
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  className="border-[#FF3D6E]/30 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                   onClick={handleClearCache}
                 >
                   Clear All Cache
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  className="border-[#FF3D6E]/30 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                   disabled
                 >
                   Reset Platform Stats
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  className="border-[#FF3D6E]/30 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                   disabled
                 >
                   Purge Inactive Users
@@ -390,9 +390,9 @@ const AdminSettings = () => {
 
         {/* Feature Flags */}
         <TabsContent value="features" className="space-y-6 mt-6">
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <ToggleLeft className="h-5 w-5" />
                 Feature Flags
               </CardTitle>
@@ -411,13 +411,13 @@ const AdminSettings = () => {
                 const label = labels[key];
                 
                 return (
-                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border border-white/10">
                     <div>
                       <p className="font-medium">{label.title}</p>
                       <p className="text-sm text-muted-foreground">{label.desc}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className={value ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
+                      <Badge variant="outline" className={value ? 'bg-[#2EF8A0]/15 text-[#2EF8A0] font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider' : 'bg-[#FF3D6E]/15 text-[#FF3D6E] font-["JetBrains_Mono"] uppercase text-[10px] tracking-wider'}>
                         {value ? 'Enabled' : 'Disabled'}
                       </Badge>
                       <Switch
@@ -441,9 +441,9 @@ const AdminSettings = () => {
 
         {/* Email Templates */}
         <TabsContent value="email" className="space-y-6 mt-6">
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                 <Mail className="h-5 w-5" />
                 Email Templates
               </CardTitle>
@@ -456,7 +456,7 @@ const AdminSettings = () => {
                   <Input
                     value={emailTemplates.welcomeSubject}
                     onChange={(e) => setEmailTemplates(prev => ({ ...prev, welcomeSubject: e.target.value }))}
-                    className="tech-card border-0 mt-1"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 mt-1"
                   />
                 </div>
                 <div>
@@ -464,7 +464,7 @@ const AdminSettings = () => {
                   <Textarea
                     value={emailTemplates.welcomeBody}
                     onChange={(e) => setEmailTemplates(prev => ({ ...prev, welcomeBody: e.target.value }))}
-                    className="tech-card border-0 mt-1"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 mt-1"
                     rows={4}
                   />
                 </div>
@@ -473,7 +473,7 @@ const AdminSettings = () => {
                   <Input
                     value={emailTemplates.notificationSubject}
                     onChange={(e) => setEmailTemplates(prev => ({ ...prev, notificationSubject: e.target.value }))}
-                    className="tech-card border-0 mt-1"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 mt-1"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Use {'{title}'} for dynamic title</p>
                 </div>
@@ -482,7 +482,7 @@ const AdminSettings = () => {
                   <Textarea
                     value={emailTemplates.notificationBody}
                     onChange={(e) => setEmailTemplates(prev => ({ ...prev, notificationBody: e.target.value }))}
-                    className="tech-card border-0 mt-1"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 mt-1"
                     rows={4}
                   />
                   <p className="text-xs text-muted-foreground mt-1">Use {'{message}'} for dynamic message</p>
@@ -499,11 +499,11 @@ const AdminSettings = () => {
 
         {/* API Keys */}
         <TabsContent value="api" className="space-y-6 mt-6">
-          <Card className="tech-card border-0">
+          <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                     <Key className="h-5 w-5" />
                     API Keys
                   </CardTitle>
@@ -513,7 +513,7 @@ const AdminSettings = () => {
                   variant="outline" 
                   size="sm"
                   onClick={() => setShowApiKeys(!showApiKeys)}
-                  className="tech-card border-0"
+                  className="bg-[#0A1418] border border-cyan-400/15 rounded-md"
                 >
                   {showApiKeys ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
                   {showApiKeys ? 'Hide' : 'Show'} Keys
@@ -523,15 +523,15 @@ const AdminSettings = () => {
             <CardContent>
               <div className="space-y-3">
                 {apiKeys.map((key) => (
-                  <div key={key.name} className="flex items-center justify-between p-3 rounded-lg border border-border/50">
+                  <div key={key.name} className="flex items-center justify-between p-3 rounded-lg border border-white/10">
                     <div>
                       <p className="font-mono text-sm font-medium">{key.name}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-500/20 text-green-400">
+                      <Badge variant="outline" className="bg-[#2EF8A0]/15 text-[#2EF8A0] font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                         Configured
                       </Badge>
-                      <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                      <code className="text-xs bg-white/[0.06] px-2 py-1 rounded font-mono">
                         {showApiKeys ? key.value : '••••••••'}
                       </code>
                     </div>
@@ -553,16 +553,16 @@ const AdminSettings = () => {
           </Card>
 
           {/* LinkedIn Verification */}
-          <Card className="tech-card border-0 border-[#0A66C2]/20">
+          <Card className="bg-[#0A1418] border border-[#00E5FF]/25 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Linkedin className="h-5 w-5 text-[#0A66C2]" />
+              <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
+                <Linkedin className="h-5 w-5 text-[#00E5FF]" />
                 LinkedIn Integration
               </CardTitle>
               <CardDescription>Verify your LinkedIn application</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg border border-white/10">
                 <div>
                   <p className="font-medium">App Verification</p>
                   <p className="text-sm text-muted-foreground">
@@ -571,7 +571,7 @@ const AdminSettings = () => {
                 </div>
                 <Button 
                   variant="outline"
-                  className="border-[#0A66C2]/30 text-[#0A66C2] hover:bg-[#0A66C2]/10"
+                  className="border-[#00E5FF]/30 text-[#00E5FF] hover:bg-[#00E5FF]/10"
                   onClick={() => window.open('https://www.linkedin.com/developers/apps/verification/ac491359-8e1a-4d9c-9949-6240ba9fd9c3', '_blank')}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -584,9 +584,9 @@ const AdminSettings = () => {
 
         {/* Demo Data Management */}
         <TabsContent value="demo" className="space-y-6 mt-6">
-          <Card className="tech-card border-0 border-emerald-500/20">
+          <Card className="bg-[#0A1418] border border-[#2EF8A0]/25 rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-emerald-400">
+              <CardTitle className="flex items-center gap-2 text-[#2EF8A0] font-['Space_Grotesk'] tracking-wide">
                 <Users className="h-5 w-5" />
                 Demo Data Management
               </CardTitle>
@@ -595,23 +595,23 @@ const AdminSettings = () => {
             <CardContent className="space-y-4">
               {/* Demo Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
-                  <p className="text-3xl font-bold text-emerald-400">{demoStats.users}</p>
+                <div className="text-center p-4 rounded-lg bg-white/[0.04] border-white/10">
+                  <p className="text-3xl font-bold font-['JetBrains_Mono'] text-[#2EF8A0]">{demoStats.users}</p>
                   <p className="text-sm text-muted-foreground">Demo Users</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
-                  <p className="text-3xl font-bold text-blue-400">{demoStats.posts}</p>
+                <div className="text-center p-4 rounded-lg bg-white/[0.04] border-white/10">
+                  <p className="text-3xl font-bold font-['JetBrains_Mono'] text-[#00E5FF]">{demoStats.posts}</p>
                   <p className="text-sm text-muted-foreground">Demo Posts</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
-                  <p className="text-3xl font-bold text-purple-400">{demoStats.companies}</p>
+                <div className="text-center p-4 rounded-lg bg-white/[0.04] border-white/10">
+                  <p className="text-3xl font-bold font-['JetBrains_Mono'] text-[#00FFCC]">{demoStats.companies}</p>
                   <p className="text-sm text-muted-foreground">Demo Companies</p>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="space-y-4 pt-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-[#2EF8A0]/30">
                   <div>
                     <p className="font-medium">Generate Demo Data</p>
                     <p className="text-sm text-muted-foreground">
@@ -621,16 +621,16 @@ const AdminSettings = () => {
                   <Button 
                     onClick={handleSeedDemoData}
                     disabled={seeding}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className="bg-[#2EF8A0] text-[#02141A] hover:bg-[#2EF8A0]/85"
                   >
                     {seeding ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
                     {seeding ? 'Generating...' : 'Generate Demo Data'}
                   </Button>
                 </div>
                 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/30">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-[#FF3D6E]/30">
                   <div>
-                    <p className="font-medium text-red-400">Clear Demo Data</p>
+                    <p className="font-medium text-[#FF3D6E]">Clear Demo Data</p>
                     <p className="text-sm text-muted-foreground">
                       Remove all demo users, posts, and related data. Real users will not be affected.
                     </p>
@@ -639,14 +639,14 @@ const AdminSettings = () => {
                     <AlertDialogTrigger asChild>
                       <Button 
                         variant="outline" 
-                        className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        className="border-[#FF3D6E]/30 text-[#FF3D6E] hover:bg-[#FF3D6E]/10"
                         disabled={clearing}
                       >
                         {clearing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
                         {clearing ? 'Clearing...' : 'Clear Demo Data'}
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="tech-card border-0 !transition-none">
+                    <AlertDialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Clear all demo data?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -655,10 +655,10 @@ const AdminSettings = () => {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="tech-card border-0">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="bg-[#0A1418] border border-cyan-400/15 rounded-md">Cancel</AlertDialogCancel>
                         <AlertDialogAction 
                           onClick={handleClearDemoData}
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-[#FF3D6E] hover:bg-[#FF3D6E]/85"
                         >
                           Clear Demo Data
                         </AlertDialogAction>
@@ -669,7 +669,7 @@ const AdminSettings = () => {
               </div>
 
               {/* Info */}
-              <div className="p-4 rounded-lg bg-muted/30 border border-border/50 mt-4">
+              <div className="p-4 rounded-lg bg-white/[0.03] border-white/10 mt-4">
                 <p className="text-sm text-muted-foreground">
                   <strong>Note:</strong> Demo data is marked with a [DEMO] identifier in user bios and post content. 
                   This allows the system to identify and safely remove only demo data without affecting real users. 

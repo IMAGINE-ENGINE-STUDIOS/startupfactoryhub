@@ -69,12 +69,12 @@ const normalizeStage = (stage: string): string => {
 };
 
 const STAGE_COLORS: Record<string, string> = {
-  'pre_seed': 'hsl(280, 70%, 50%)',
-  'seed': 'hsl(200, 70%, 50%)',
-  'series_a': 'hsl(150, 70%, 45%)',
-  'series_b': 'hsl(45, 80%, 50%)',
-  'series_c': 'hsl(15, 80%, 55%)',
-  'growth': 'hsl(330, 70%, 50%)',
+  'pre_seed': '#00FFCC',
+  'seed': '#00E5FF',
+  'series_a': '#2EF8A0',
+  'series_b': '#FFB86A',
+  'series_c': '#FF8A3D',
+  'growth': '#FF3D6E',
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -299,57 +299,57 @@ export function InvestorsManagement() {
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-full bg-primary/10">
                 <Users className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Investors</p>
-                <p className="text-2xl font-bold">{totalInvestors}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Investors</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{totalInvestors}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-emerald-500/10">
-                <DollarSign className="h-6 w-6 text-emerald-500" />
+              <div className="p-3 rounded-full bg-[#2EF8A0]/10">
+                <DollarSign className="h-6 w-6 text-[#2EF8A0]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Invested</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalInvested)}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Invested</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{formatCurrency(totalInvested)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-500/10">
-                <TrendingUp className="h-6 w-6 text-blue-500" />
+              <div className="p-3 rounded-full bg-[#00E5FF]/10">
+                <TrendingUp className="h-6 w-6 text-[#00E5FF]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Investment</p>
-                <p className="text-2xl font-bold">{formatCurrency(avgInvestment)}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Avg Investment</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{formatCurrency(avgInvestment)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-amber-500/10">
-                <Briefcase className="h-6 w-6 text-amber-500" />
+              <div className="p-3 rounded-full bg-[#FFB86A]/10">
+                <Briefcase className="h-6 w-6 text-[#FFB86A]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Deals</p>
-                <p className="text-2xl font-bold">{totalDeals}</p>
+                <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Deals</p>
+                <p className="text-2xl font-bold font-['JetBrains_Mono']">{totalDeals}</p>
               </div>
             </div>
           </CardContent>
@@ -359,9 +359,9 @@ export function InvestorsManagement() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Investors by Stage */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Investors by Stage</CardTitle>
+            <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Investors by Stage</CardTitle>
             <p className="text-xs text-muted-foreground">Count of investors preferring each stage</p>
           </CardHeader>
           <CardContent className="overflow-hidden">
@@ -381,7 +381,7 @@ export function InvestorsManagement() {
                       {investorsByStageData.map((entry) => (
                         <Cell 
                           key={entry.key} 
-                          fill={STAGE_COLORS[entry.key] || 'hsl(220, 70%, 50%)'} 
+                          fill={STAGE_COLORS[entry.key] || '#00E5FF'} 
                         />
                       ))}
                     </Pie>
@@ -400,7 +400,7 @@ export function InvestorsManagement() {
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="rounded-md border border-[#00E5FF]/25 bg-[#0A1418] p-2 shadow-sm">
                               <p className="text-sm font-medium">{payload[0].name}</p>
                               <p className="text-sm text-muted-foreground">{payload[0].value} investors</p>
                             </div>
@@ -421,9 +421,9 @@ export function InvestorsManagement() {
         </Card>
 
         {/* Investors by Industry */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Investors by Industry</CardTitle>
+            <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Investors by Industry</CardTitle>
             <p className="text-xs text-muted-foreground">Count of investors preferring each industry</p>
           </CardHeader>
           <CardContent className="overflow-hidden">
@@ -439,12 +439,12 @@ export function InvestorsManagement() {
                       width={85}
                       tickFormatter={(value) => value.length > 12 ? value.slice(0, 12) + '...' : value}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="value" fill="#00E5FF" radius={[0, 4, 4, 0]} />
                     <ChartTooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="rounded-md border border-[#00E5FF]/25 bg-[#0A1418] p-2 shadow-sm">
                               <p className="text-sm font-medium">{payload[0].payload.name}</p>
                               <p className="text-sm text-muted-foreground">{payload[0].value} investors</p>
                             </div>
@@ -465,9 +465,9 @@ export function InvestorsManagement() {
         </Card>
 
         {/* Investment Activity */}
-        <Card className="tech-card border-0 md:col-span-2 lg:col-span-1">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md md:col-span-2 lg:col-span-1">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Investment Activity (12 Months)</CardTitle>
+            <CardTitle className="text-base font-['Space_Grotesk'] tracking-wide">Investment Activity (12 Months)</CardTitle>
             <p className="text-xs text-muted-foreground">Number of deals per month</p>
           </CardHeader>
           <CardContent className="overflow-hidden">
@@ -479,14 +479,14 @@ export function InvestorsManagement() {
                   <Area 
                     type="monotone" 
                     dataKey="count" 
-                    stroke="hsl(var(--primary))" 
-                    fill="hsl(var(--primary) / 0.2)" 
+                    stroke="#00E5FF" 
+                    fill="rgba(0,229,255,0.2)" 
                   />
                   <ChartTooltip 
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="rounded-md border border-[#00E5FF]/25 bg-[#0A1418] p-2 shadow-sm">
                             <p className="text-sm font-medium">{payload[0].payload.month}</p>
                             <p className="text-sm text-muted-foreground">{payload[0].value} deals</p>
                           </div>
@@ -503,10 +503,10 @@ export function InvestorsManagement() {
       </div>
 
       {/* Investor Directory */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <CardTitle>Investor Directory</CardTitle>
+            <CardTitle className="font-['Space_Grotesk'] tracking-wide">Investor Directory</CardTitle>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -514,11 +514,11 @@ export function InvestorsManagement() {
                   placeholder="Search investors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full sm:w-[200px]"
+                  className="pl-10 w-full sm:w-[200px] bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <Select value={stageFilter} onValueChange={setStageFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px] bg-white/[0.03] border-white/10">
                   <SelectValue placeholder="Stage" />
                 </SelectTrigger>
                 <SelectContent>
@@ -531,7 +531,7 @@ export function InvestorsManagement() {
                 </SelectContent>
               </Select>
               <Select value={industryFilter} onValueChange={setIndustryFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px] bg-white/[0.03] border-white/10">
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -555,7 +555,7 @@ export function InvestorsManagement() {
                 filteredInvestors.map((investor) => (
                   <div
                     key={investor.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-card/50 hover:bg-card/80 cursor-pointer"
+                    className="flex items-center justify-between p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.05] cursor-pointer"
                     onClick={() => handleViewInvestor(investor)}
                   >
                     <div className="flex items-center gap-4">
@@ -589,7 +589,7 @@ export function InvestorsManagement() {
                             investor.preferred_stages.slice(0, 2).map(stage => {
                               const key = normalizeStage(stage);
                               return (
-                                <Badge key={stage} variant="secondary" className="text-xs">
+                                <Badge key={stage} variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                                   {STAGE_LABELS[key] || stage.replace(/_/g, ' ')}
                                 </Badge>
                               );
@@ -602,7 +602,7 @@ export function InvestorsManagement() {
                         <div className="flex gap-1 flex-wrap justify-end">
                           {investor.preferred_industries?.length ? (
                             investor.preferred_industries.slice(0, 2).map(ind => (
-                              <Badge key={ind} variant="outline" className="text-xs">
+                              <Badge key={ind} variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                                 {getIndustryLabel(ind)}
                               </Badge>
                             ))
@@ -623,9 +623,9 @@ export function InvestorsManagement() {
       </Card>
 
       {/* Recent Investments Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle>Recent Investments</CardTitle>
+          <CardTitle className="font-['Space_Grotesk'] tracking-wide">Recent Investments</CardTitle>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[300px]">
@@ -638,7 +638,7 @@ export function InvestorsManagement() {
                 investments.slice(0, 20).map((investment) => (
                   <div
                     key={investment.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-card/50"
+                    className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03]"
                   >
                     <div className="flex items-center gap-3">
                       {investment.company?.logo_url ? (
@@ -657,7 +657,7 @@ export function InvestorsManagement() {
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{getCompanyName(investment)}</p>
                           {isExternalCompany(investment) && (
-                            <Badge variant="outline" className="text-xs">External</Badge>
+                            <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">External</Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -667,7 +667,7 @@ export function InvestorsManagement() {
                     </div>
                       <div className="flex items-center gap-4 text-sm">
                       <div className="text-right">
-                        <p className="font-medium text-emerald-500">{formatCurrency(investment.amount)}</p>
+                        <p className="font-medium text-[#2EF8A0]">{formatCurrency(investment.amount)}</p>
                         <p className="text-xs text-muted-foreground">{investment.investment_round || 'Round not set'}</p>
                       </div>
                       <div className="text-right hidden sm:block">
@@ -689,9 +689,9 @@ export function InvestorsManagement() {
 
       {/* Investor Detail Dialog with Tabs */}
       <Dialog open={!!selectedInvestor} onOpenChange={() => setSelectedInvestor(null)}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-3xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
+            <DialogTitle className="flex items-center gap-3 font-['Space_Grotesk'] tracking-wide">
               <Avatar className="h-14 w-14">
                 <AvatarImage src={selectedInvestor?.profile?.avatar_url || undefined} />
                 <AvatarFallback className="text-lg">
@@ -731,21 +731,21 @@ export function InvestorsManagement() {
               <TabsContent value="overview" className="space-y-6 pr-4">
                 {/* Investment Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 rounded-lg bg-card/50 text-center">
-                    <p className="text-2xl font-bold text-primary">{investorInvestments.length}</p>
+                  <div className="p-3 rounded-lg bg-white/[0.03] text-center">
+                    <p className="text-2xl font-bold text-primary font-['JetBrains_Mono']">{investorInvestments.length}</p>
                     <p className="text-xs text-muted-foreground">Investments</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-card/50 text-center">
-                    <p className="text-2xl font-bold text-emerald-500">
+                  <div className="p-3 rounded-lg bg-white/[0.03] text-center">
+                    <p className="text-2xl font-bold text-[#2EF8A0] font-['JetBrains_Mono']">
                       {formatCurrency(investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0))}
                     </p>
                     <p className="text-xs text-muted-foreground">Total Invested</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-card/50 text-center">
-                    <p className="text-2xl font-bold">{selectedInvestor?.portfolio_size || 0}</p>
+                  <div className="p-3 rounded-lg bg-white/[0.03] text-center">
+                    <p className="text-2xl font-bold font-['JetBrains_Mono']">{selectedInvestor?.portfolio_size || 0}</p>
                     <p className="text-xs text-muted-foreground">Portfolio Size</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-card/50 text-center">
+                  <div className="p-3 rounded-lg bg-white/[0.03] text-center">
                     <p className="text-lg font-bold">
                       {formatRange(selectedInvestor?.investment_range_min || null, selectedInvestor?.investment_range_max || null)}
                     </p>
@@ -796,7 +796,7 @@ export function InvestorsManagement() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {investorInvestments.map(inv => (
-                      <div key={inv.id} className="p-4 rounded-lg bg-card/50 space-y-3">
+                      <div key={inv.id} className="p-4 rounded-lg bg-white/[0.03] space-y-3">
                         <div className="flex items-start gap-3">
                           {inv.company?.logo_url ? (
                             <Avatar className="h-12 w-12 rounded-lg">
@@ -814,7 +814,7 @@ export function InvestorsManagement() {
                             <div className="flex items-center gap-2">
                               <p className="font-medium truncate">{getCompanyName(inv)}</p>
                               {isExternalCompany(inv) && (
-                                <Badge variant="outline" className="text-xs shrink-0">
+                                <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider shrink-0">
                                   <ExternalLink className="h-2.5 w-2.5 mr-1" />
                                   External
                                 </Badge>
@@ -822,12 +822,12 @@ export function InvestorsManagement() {
                             </div>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {getCompanyIndustry(inv) && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                                   {getCompanyIndustry(inv)}
                                 </Badge>
                               )}
                               {inv.company?.stage && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                                   {STAGE_LABELS[normalizeStage(inv.company.stage)] || inv.company.stage}
                                 </Badge>
                               )}
@@ -841,9 +841,9 @@ export function InvestorsManagement() {
                           </p>
                         )}
                         
-                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                        <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
                           <div>
-                            <p className="text-lg font-bold text-emerald-500">{formatCurrency(inv.amount)}</p>
+                            <p className="text-lg font-bold text-[#2EF8A0] font-['JetBrains_Mono']">{formatCurrency(inv.amount)}</p>
                             <p className="text-xs text-muted-foreground">{inv.investment_round || 'Round not set'}</p>
                           </div>
                           <div className="text-right">
@@ -874,7 +874,7 @@ export function InvestorsManagement() {
                 ) : (
                   <div className="space-y-2">
                     {investorInvestments.map(inv => (
-                      <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-card/50">
+                      <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03]">
                         <div className="flex items-center gap-3">
                           {inv.company?.logo_url ? (
                             <Avatar className="h-10 w-10">
@@ -892,7 +892,7 @@ export function InvestorsManagement() {
                             <div className="flex items-center gap-2">
                               <p className="font-medium">{getCompanyName(inv)}</p>
                               {isExternalCompany(inv) && (
-                                <Badge variant="outline" className="text-xs">External</Badge>
+                                <Badge variant="outline" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">External</Badge>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">
@@ -901,7 +901,7 @@ export function InvestorsManagement() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-emerald-500">{formatCurrency(inv.amount)}</p>
+                          <p className="font-bold text-[#2EF8A0]">{formatCurrency(inv.amount)}</p>
                           <p className="text-xs text-muted-foreground">
                             {inv.investment_date 
                               ? new Date(inv.investment_date).toLocaleDateString()

@@ -77,13 +77,13 @@ interface RoadmapProgress {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  idea: '#6b7280',
-  mvp: '#3b82f6',
-  seed: '#22c55e',
-  series_a: '#f59e0b',
-  series_b: '#a855f7',
-  series_c: '#06b6d4',
-  growth: '#10b981'
+  idea: '#4E7A73',
+  mvp: '#00E5FF',
+  seed: '#2EF8A0',
+  series_a: '#FFB86A',
+  series_b: '#00FFCC',
+  series_c: '#7BC4B6',
+  growth: '#FF8A3D'
 };
 
 const JOURNEY_STEPS = [
@@ -235,28 +235,28 @@ const StartupsManagement = () => {
 
   const getStageBadgeColor = (stage: string | null) => {
     const colors: Record<string, string> = {
-      idea: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-      mvp: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      seed: 'bg-green-500/20 text-green-400 border-green-500/30',
-      series_a: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      series_b: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      series_c: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      growth: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+      idea: 'bg-[#4E7A73]/15 text-[#7BC4B6] border-[#4E7A73]/30',
+      mvp: 'bg-[#00E5FF]/15 text-[#00E5FF] border-[#00E5FF]/30',
+      seed: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30',
+      series_a: 'bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30',
+      series_b: 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/30',
+      series_c: 'bg-[#7BC4B6]/15 text-[#7BC4B6] border-[#7BC4B6]/30',
+      growth: 'bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30'
     };
     return colors[stage || ''] || 'bg-muted text-muted-foreground';
   };
 
   const getJourneyBadge = (progress: Company['journey_progress']) => {
-    if (!progress) return <Badge variant="outline" className="bg-muted">Not Started</Badge>;
+    if (!progress) return <Badge variant="outline" className="bg-muted font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Not Started</Badge>;
     
     if (progress.completed_steps === 6) {
-      return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">✓ Complete</Badge>;
+      return <Badge className="bg-[#2EF8A0]/15 text-[#2EF8A0] border-[#2EF8A0]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">✓ Complete</Badge>;
     }
     if (progress.completed_steps === 0) {
-      return <Badge variant="outline" className="bg-gray-500/20 text-gray-400">Not Started</Badge>;
+      return <Badge variant="outline" className="bg-[#4E7A73]/15 text-[#7BC4B6] border-[#4E7A73]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Not Started</Badge>;
     }
     return (
-      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+      <Badge className="bg-[#FFB86A]/15 text-[#FFB86A] border-[#FFB86A]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
         {progress.completed_steps}/6 Steps
       </Badge>
     );
@@ -291,7 +291,7 @@ const StartupsManagement = () => {
   const stageData = stages.map(stage => ({
     name: formatStageLabel(stage as string),
     value: companies.filter(c => c.stage === stage).length,
-    color: STAGE_COLORS[stage || ''] || '#6b7280'
+    color: STAGE_COLORS[stage || ''] || '#4E7A73'
   })).filter(d => d.value > 0);
 
   // Industry distribution with proper labels (top 6)
@@ -326,9 +326,9 @@ const StartupsManagement = () => {
   const journeyNotStarted = companies.filter(c => !c.journey_progress || c.journey_progress.completed_steps === 0).length;
 
   const journeyData = [
-    { name: 'Completed', value: journeyCompleted, color: '#22c55e' },
-    { name: 'In Progress', value: journeyInProgress, color: '#3b82f6' },
-    { name: 'Not Started', value: journeyNotStarted, color: '#f59e0b' }
+    { name: 'Completed', value: journeyCompleted, color: '#2EF8A0' },
+    { name: 'In Progress', value: journeyInProgress, color: '#00E5FF' },
+    { name: 'Not Started', value: journeyNotStarted, color: '#FFB86A' }
   ].filter(d => d.value > 0);
 
   // Journey step breakdown
@@ -371,45 +371,45 @@ const StartupsManagement = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Building2 className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{companies.length}</p>
-            <p className="text-xs text-muted-foreground">Total Companies</p>
+            <Building2 className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{companies.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Companies</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <DollarSign className="h-5 w-5 text-green-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <DollarSign className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {companies.reduce((sum, c) => sum + (c.funding_amount || 0), 0) > 0 
                 ? formatFunding(companies.reduce((sum, c) => sum + (c.funding_amount || 0), 0))
                 : '0'}
             </p>
-            <p className="text-xs text-muted-foreground">Total Funding</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Funding</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Users className="h-5 w-5 text-purple-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <Users className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {companies.reduce((sum, c) => sum + (c.team_size || 0), 0)}
             </p>
-            <p className="text-xs text-muted-foreground">Total Team Members</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Team Members</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Globe className="h-5 w-5 text-cyan-400 mb-2" />
-            <p className="text-2xl font-bold">{industries.length}</p>
-            <p className="text-xs text-muted-foreground">Industries</p>
+            <Globe className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{industries.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Industries</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 mb-2" />
-            <p className="text-2xl font-bold">{journeyCompleted}</p>
-            <p className="text-xs text-muted-foreground">Journey Completed</p>
+            <CheckCircle2 className="h-5 w-5 text-[#2EF8A0] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{journeyCompleted}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Journey Completed</p>
           </CardContent>
         </Card>
       </div>
@@ -417,9 +417,9 @@ const StartupsManagement = () => {
       {/* Demographics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stage Distribution */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
+            <CardTitle className="text-sm flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <TrendingUp className="h-4 w-4" />
               By Stage
             </CardTitle>
@@ -443,12 +443,7 @@ const StartupsManagement = () => {
                   </Pie>
                   <Tooltip 
                     formatter={(value: number, name: string) => [`${value} startups`, name]}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -461,9 +456,9 @@ const StartupsManagement = () => {
         </Card>
 
         {/* Industry Distribution */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
+            <CardTitle className="text-sm flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <BarChart3 className="h-4 w-4" />
               By Industry
             </CardTitle>
@@ -474,15 +469,10 @@ const StartupsManagement = () => {
                 <BarChart data={industryData} layout="vertical">
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 10 }} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="count" fill="#00E5FF" radius={[0, 4, 4, 0]} />
                   <Tooltip 
                     formatter={(value: number) => [`${value} startups`]}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -495,9 +485,9 @@ const StartupsManagement = () => {
         </Card>
 
         {/* Location Distribution */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
+            <CardTitle className="text-sm flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <MapPin className="h-4 w-4" />
               By Location
             </CardTitle>
@@ -508,15 +498,10 @@ const StartupsManagement = () => {
                 <BarChart data={locationData} layout="vertical">
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 10 }} />
-                  <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="count" fill="#2EF8A0" radius={[0, 4, 4, 0]} />
                   <Tooltip 
                     formatter={(value: number) => [`${value} startups`]}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -529,9 +514,9 @@ const StartupsManagement = () => {
         </Card>
 
         {/* Journey Progress */}
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
+            <CardTitle className="text-sm flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
               <Rocket className="h-4 w-4" />
               Journey Progress
             </CardTitle>
@@ -555,12 +540,7 @@ const StartupsManagement = () => {
                   </Pie>
                   <Tooltip 
                     formatter={(value: number, name: string) => [`${value} startups`, name]}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
+                    contentStyle={{ background: '#0A1418', border: '1px solid rgba(0,229,255,0.25)', borderRadius: 4, fontFamily: 'JetBrains Mono', fontSize: 12 }}
                   />
                   <Legend 
                     verticalAlign="bottom"
@@ -580,15 +560,15 @@ const StartupsManagement = () => {
       </div>
 
       {/* Journey Step Breakdown */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Startups by Current Journey Step</CardTitle>
+          <CardTitle className="text-sm font-['Space_Grotesk'] tracking-wide">Startups by Current Journey Step</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
             {stepBreakdown.map((step, i) => (
-              <div key={i} className="p-3 rounded-lg bg-muted/30 text-center">
-                <p className="text-xl font-bold">{step.count}</p>
+              <div key={i} className="p-3 rounded-lg bg-white/[0.03] text-center">
+                <p className="text-xl font-bold font-['JetBrains_Mono']">{step.count}</p>
                 <p className="text-xs text-muted-foreground">{step.name}</p>
                 <p className="text-[10px] text-muted-foreground/70 truncate">{step.label}</p>
               </div>
@@ -598,7 +578,7 @@ const StartupsManagement = () => {
       </Card>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -607,11 +587,11 @@ const StartupsManagement = () => {
                 placeholder="Search companies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={stageFilter} onValueChange={setStageFilter}>
-              <SelectTrigger className="w-[150px] tech-card border-0">
+              <SelectTrigger className="w-[150px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Stage" />
               </SelectTrigger>
               <SelectContent>
@@ -622,7 +602,7 @@ const StartupsManagement = () => {
               </SelectContent>
             </Select>
             <Select value={industryFilter} onValueChange={setIndustryFilter}>
-              <SelectTrigger className="w-[150px] tech-card border-0">
+              <SelectTrigger className="w-[150px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent>
@@ -632,7 +612,7 @@ const StartupsManagement = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={fetchCompanies} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchCompanies} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -640,9 +620,9 @@ const StartupsManagement = () => {
       </Card>
 
       {/* Companies Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Building2 className="h-5 w-5" />
             Companies ({filteredCompanies.length})
           </CardTitle>
@@ -651,20 +631,20 @@ const StartupsManagement = () => {
           <ScrollArea className="h-[500px]">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Journey</TableHead>
-                  <TableHead>Funding</TableHead>
-                  <TableHead>Team</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-white/[0.05]">
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Company</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Industry</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Stage</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Journey</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Funding</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Team</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Created</TableHead>
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCompanies.map((company) => (
-                  <TableRow key={company.id} className="cursor-pointer hover:bg-muted/30" onClick={() => handleViewCompany(company)}>
+                  <TableRow key={company.id} className="cursor-pointer hover:bg-white/[0.04]" onClick={() => handleViewCompany(company)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
@@ -730,7 +710,7 @@ const StartupsManagement = () => {
 
       {/* Enhanced Company Detail Dialog with Tabs */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[85vh]">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-2xl max-h-[85vh]">
           <DialogHeader>
             {selectedCompany && (
               <div className="flex items-center gap-4">
@@ -739,7 +719,7 @@ const StartupsManagement = () => {
                   <AvatarFallback className="text-xl">{selectedCompany.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <DialogTitle className="text-xl">{selectedCompany.name}</DialogTitle>
+                  <DialogTitle className="text-xl font-['Space_Grotesk'] tracking-wide">{selectedCompany.name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="outline">{selectedCompany.industry || 'N/A'}</Badge>
                     <Badge variant="outline" className={getStageBadgeColor(selectedCompany.stage)}>
@@ -764,17 +744,17 @@ const StartupsManagement = () => {
               <ScrollArea className="h-[400px] mt-4">
                 <TabsContent value="overview" className="mt-0 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <Card className="tech-card border-0">
+                    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
                       <CardContent className="p-4 text-center">
-                        <DollarSign className="h-5 w-5 mx-auto text-green-400 mb-1" />
-                        <p className="text-lg font-bold">{formatFunding(selectedCompany.funding_amount)}</p>
+                        <DollarSign className="h-5 w-5 mx-auto text-[#2EF8A0] mb-1" />
+                        <p className="text-lg font-bold font-['JetBrains_Mono']">{formatFunding(selectedCompany.funding_amount)}</p>
                         <p className="text-xs text-muted-foreground">Funding Raised</p>
                       </CardContent>
                     </Card>
-                    <Card className="tech-card border-0">
+                    <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
                       <CardContent className="p-4 text-center">
-                        <Users className="h-5 w-5 mx-auto text-purple-400 mb-1" />
-                        <p className="text-lg font-bold">{selectedCompany.team_size || 1}</p>
+                        <Users className="h-5 w-5 mx-auto text-[#00E5FF] mb-1" />
+                        <p className="text-lg font-bold font-['JetBrains_Mono']">{selectedCompany.team_size || 1}</p>
                         <p className="text-xs text-muted-foreground">Team Members</p>
                       </CardContent>
                     </Card>
@@ -864,17 +844,17 @@ const StartupsManagement = () => {
                       
                       return (
                         <div key={i} className={`flex items-center gap-3 p-3 rounded-lg ${
-                          isCompleted ? 'bg-emerald-500/10' : isCurrent ? 'bg-amber-500/10' : 'bg-muted/30'
+                          isCompleted ? 'bg-[#2EF8A0]/10' : isCurrent ? 'bg-[#FFB86A]/10' : 'bg-white/[0.03]'
                         }`}>
                           {isCompleted ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                            <CheckCircle2 className="h-5 w-5 text-[#2EF8A0]" />
                           ) : isCurrent ? (
-                            <Clock className="h-5 w-5 text-amber-400" />
+                            <Clock className="h-5 w-5 text-[#FFB86A]" />
                           ) : (
-                            <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
+                            <div className="h-5 w-5 rounded-full border-2 border-white/20" />
                           )}
                           <div>
-                            <p className={`font-medium ${isCompleted ? 'text-emerald-400' : isCurrent ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                            <p className={`font-medium ${isCompleted ? 'text-[#2EF8A0]' : isCurrent ? 'text-[#FFB86A]' : 'text-muted-foreground'}`}>
                               Step {i + 1}: {step}
                             </p>
                           </div>
