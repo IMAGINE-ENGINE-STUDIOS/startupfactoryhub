@@ -5,6 +5,7 @@ import UpdateAvailableBubble from "@/components/UpdateAvailableBubble";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import RouteSeo from "@/components/seo/RouteSeo";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -162,6 +163,7 @@ const App = () => (
                 }}
               >
                 <Suspense fallback={<PageLoader />}>
+                  <RouteSeo />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/imagine-studio" element={<ImagineEngineStudioPage />} />
