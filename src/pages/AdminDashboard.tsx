@@ -9,7 +9,8 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  BarChart3, 
+  BarChart3,
+  LayoutDashboard,
   Users, 
   Building2, 
   Settings, 
@@ -40,6 +41,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import ProfileSalesManagement from '@/components/admin/ProfileSalesManagement';
+import SuperAdminCommand from '@/components/admin/SuperAdminCommand';
 
 import AutoPostingHub from '@/components/marketing/AutoPostingHub';
 
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useRememberedTab('admin', searchParams.get('tab'), "overview");
+  const [activeTab, setActiveTab] = useRememberedTab('admin', searchParams.get('tab'), "command");
   // People can hold several roles (e.g. startup + admin); check admin directly.
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   useEffect(() => {
@@ -139,6 +141,10 @@ const AdminDashboard = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <TabsTrigger value="command" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden lg:inline">Command</span>
+            </TabsTrigger>
             <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
@@ -283,6 +289,7 @@ const AdminDashboard = () => {
 
 
 
+          <TabsContent value="command"><SuperAdminCommand /></TabsContent>
           <TabsContent value="overview"><AdminOverview /></TabsContent>
           <TabsContent value="users"><UsersManagement /></TabsContent>
           <TabsContent value="investors"><InvestorsManagement /></TabsContent>
