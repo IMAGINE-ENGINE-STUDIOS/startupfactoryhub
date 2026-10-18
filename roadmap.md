@@ -143,7 +143,8 @@
 - [x] Email template asking users to finish their profile and add a photo
 
 ## Imagine Engine phases 2 and 3
-- [ ] End-to-end streaming with incremental completed-file application
-- [ ] Bounded continuation for truncated multi-file output
-- [ ] Structured records, atomic safe fuzzy patches and relevance-ranked context
-- [ ] Regression tests, deployment and available live checks
+- [x] End-to-end streaming with incremental completed-file application
+- [x] Bounded continuation for truncated multi-file output
+- [x] Structured records, atomic safe fuzzy patches and relevance-ranked context
+- [x] 25 regression tests, service deployment, anonymous rejection and browser file/patch validation
+- [ ] Signed-in provider generation: blocked by external unmanaged Supabase authentication
