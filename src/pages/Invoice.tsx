@@ -593,7 +593,7 @@ const Invoice = () => {
 
   if (authLoading || roleLoading) {
     return (
-      <div className="min-h-screen bg-[#061016] flex items-center justify-center">
+      <div className="matrix-page min-h-screen bg-[#061016] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -601,7 +601,7 @@ const Invoice = () => {
 
   if (role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#061016] flex items-center justify-center px-6">
+      <div className="matrix-page min-h-screen bg-[#061016] flex items-center justify-center px-6">
         <Card className="max-w-md w-full bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
             <CardTitle className="font-['Space_Grotesk'] tracking-wide">Restricted</CardTitle>
@@ -618,7 +618,7 @@ const Invoice = () => {
   const editableText = "bg-transparent border-0 border-b border-dashed border-slate-200 hover:border-slate-300 focus-visible:border-emerald-500 focus-visible:ring-0 px-1 h-auto py-0.5 text-slate-900 rounded-none";
 
   return (
-    <div className="min-h-screen bg-[#061016]">
+    <div className="matrix-page min-h-screen bg-[#061016]">
       {/* Toolbar — hidden on print */}
       <div className="print:hidden border-b border-cyan-400/15 bg-[#0A1418]/90 backdrop-blur sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-3 flex-wrap">

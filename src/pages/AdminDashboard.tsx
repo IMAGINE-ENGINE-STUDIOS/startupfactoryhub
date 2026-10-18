@@ -132,7 +132,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#02070E]">
+    <div className="matrix-page min-h-screen bg-[#02070E]">
       <DashboardHeader />
       
       <main className="container mx-auto px-4 py-6 pt-16 lg:pt-20">
