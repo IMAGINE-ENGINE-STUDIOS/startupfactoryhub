@@ -889,16 +889,16 @@ const EmailMonitor = () => {
             <Mail className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Email Command Center</h2>
+            <h2 className="text-xl font-bold font-['Space_Grotesk'] tracking-wide">Email Command Center</h2>
             <p className="text-sm text-muted-foreground">Select recipients, compose emails, and send to your platform users</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
             <Users className="h-3 w-3 mr-1" />
             {platformUsers.length} users
           </Badge>
-          <Badge variant="outline" className={`${selectedEmails.size > 0 ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-muted text-muted-foreground'}`}>
+          <Badge variant="outline" className={`${selectedEmails.size > 0 ? 'bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20' : 'bg-muted text-muted-foreground'} font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider`}>
             <CheckCheck className="h-3 w-3 mr-1" />
             {selectedEmails.size} selected
           </Badge>
@@ -924,7 +924,7 @@ const EmailMonitor = () => {
       {/* Email Type Selector */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {EMAIL_TYPES.map(t => (
-          <Card key={t.id} className={`tech-card border-0 cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
+          <Card key={t.id} className={`bg-[#0A1418] border border-cyan-400/15 rounded-md cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveType(t.id)}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className={`p-2 rounded-lg ${activeType === t.id ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
@@ -953,11 +953,11 @@ const EmailMonitor = () => {
 
       {/* Recipients Tab */}
       {activeTab === 'recipients' && (
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
                   <Users className="h-4 w-4 text-primary" />
                   Platform Recipients
                 </CardTitle>
@@ -984,7 +984,7 @@ const EmailMonitor = () => {
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 tech-card border-0"
+                  className="pl-9 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
             </div>
@@ -1000,14 +1000,14 @@ const EmailMonitor = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">
+                      <TableHead className="w-12 font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">
                         <Checkbox
                           checked={allFilteredSelected}
                           onCheckedChange={toggleSelectAll}
                         />
                       </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
+                      <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Name</TableHead>
+                      <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Email</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1046,16 +1046,16 @@ const EmailMonitor = () => {
       {activeTab === 'compose' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card className="tech-card border-0">
+            <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
+                <CardTitle className="flex items-center gap-2 text-base font-['Space_Grotesk'] tracking-wide">
                   {currentType.icon}
                   {currentType.label}
                 </CardTitle>
                 <CardDescription>{currentType.desc}</CardDescription>
                 {selectedEmails.size > 0 && (
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge className="bg-primary/10 text-primary border-primary/20">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                       <Users className="h-3 w-3 mr-1" />
                       Sending to {selectedEmails.size} recipient{selectedEmails.size !== 1 ? 's' : ''}
                     </Badge>
@@ -1070,7 +1070,7 @@ const EmailMonitor = () => {
                     <div className="space-y-1">
                       <Label>Notification Type</Label>
                       <Select value={notifType} onValueChange={setNotifType}>
-                        <SelectTrigger className="tech-card border-0"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {NOTIFICATION_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                         </SelectContent>
@@ -1078,25 +1078,25 @@ const EmailMonitor = () => {
                     </div>
                     <div className="space-y-1">
                       <Label>Subject / Title *</Label>
-                      <Input value={notifTitle} onChange={e => setNotifTitle(e.target.value)} className="tech-card border-0" />
+                      <Input value={notifTitle} onChange={e => setNotifTitle(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="space-y-1">
                       <Label>Message *</Label>
-                      <Textarea value={notifMessage} onChange={e => setNotifMessage(e.target.value)} rows={3} className="tech-card border-0" />
+                      <Textarea value={notifMessage} onChange={e => setNotifMessage(e.target.value)} rows={3} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>Actor Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={notifActorName} onChange={e => setNotifActorName(e.target.value)} placeholder="e.g. John Doe" className="tech-card border-0" />
+                        <Input value={notifActorName} onChange={e => setNotifActorName(e.target.value)} placeholder="e.g. John Doe" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>Actor Role <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={notifActorRole} onChange={e => setNotifActorRole(e.target.value)} placeholder="e.g. mentor, investor" className="tech-card border-0" />
+                        <Input value={notifActorRole} onChange={e => setNotifActorRole(e.target.value)} placeholder="e.g. mentor, investor" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
                     <div className="space-y-1">
                       <Label>Actor Avatar URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                      <Input value={notifActorAvatar} onChange={e => setNotifActorAvatar(e.target.value)} placeholder="https://..." className="tech-card border-0" />
+                      <Input value={notifActorAvatar} onChange={e => setNotifActorAvatar(e.target.value)} placeholder="https://..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                   </>
                 )}
@@ -1111,7 +1111,7 @@ const EmailMonitor = () => {
                     <p className="text-sm text-muted-foreground">
                       Send a personalized invitation to each selected user. Each email includes the event features (Live Stream, Video Room, Arcade, 3D Explorer, Chat) and a direct CTA to join the Watch Party.
                     </p>
-                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1">
+                    <div className="rounded-md bg-white/[0.03] p-3 space-y-1">
                       <p className="text-xs font-medium text-foreground">📧 Email Preview:</p>
                       <p className="text-xs text-muted-foreground"><strong>Subject:</strong> 🚀 You're Invited to the Artemis II Watch Party!</p>
                       <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub</p>
@@ -1130,20 +1130,20 @@ const EmailMonitor = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>Job Title</Label>
-                        <Input value={inviteJobTitle} onChange={e => setInviteJobTitle(e.target.value)} className="tech-card border-0" />
+                        <Input value={inviteJobTitle} onChange={e => setInviteJobTitle(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>Company Name</Label>
-                        <Input value={inviteCompany} onChange={e => setInviteCompany(e.target.value)} className="tech-card border-0" />
+                        <Input value={inviteCompany} onChange={e => setInviteCompany(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
                     <div className="space-y-1">
                       <Label>Invitation Token</Label>
-                      <Input value={inviteToken} onChange={e => setInviteToken(e.target.value)} className="tech-card border-0" />
+                      <Input value={inviteToken} onChange={e => setInviteToken(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="space-y-1">
                       <Label>Application ID</Label>
-                      <Input value={inviteAppId} onChange={e => setInviteAppId(e.target.value)} className="tech-card border-0" />
+                      <Input value={inviteAppId} onChange={e => setInviteAppId(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                   </>
                 )}
@@ -1158,7 +1158,7 @@ const EmailMonitor = () => {
                     <p className="text-sm text-muted-foreground">
                       Sends the branded welcome email featuring IWG office spaces (130+ countries) and HSBC Innovation Banking (free accounts in USA) to your selected recipients.
                     </p>
-                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                    <div className="flex items-center gap-2 text-[#FFB86A] text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Emails will be personalized with each recipient's name.
                     </div>
@@ -1174,7 +1174,7 @@ const EmailMonitor = () => {
                     <p className="text-sm text-muted-foreground">
                       Sends the branded "What's New" product update email (Resource Map, Emergency/ATLAS, Venezuela Rebuild, Genius AI, LightPaper, CRM & Marketing) to your selected recipients.
                     </p>
-                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                    <div className="flex items-center gap-2 text-[#FFB86A] text-sm">
                       <AlertCircle className="h-4 w-4" />
                       For large sends in batches of 100, use the broadcast panel at the top.
                     </div>
@@ -1190,7 +1190,7 @@ const EmailMonitor = () => {
                     <p className="text-sm text-muted-foreground">
                       Sends the branded partnership announcement (M1 Innovation Grant + 3-Month Fundraising Sprint) to your selected recipients.
                     </p>
-                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                    <div className="flex items-center gap-2 text-[#FFB86A] text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Emails are personalized with each recipient's name.
                     </div>
@@ -1207,45 +1207,45 @@ const EmailMonitor = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>Founder / Recipient Name</Label>
-                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="tech-card border-0" />
+                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>Startup Name</Label>
-                        <Input value={programEmailStartup} onChange={e => setProgramEmailStartup(e.target.value)} placeholder="Your startup" className="tech-card border-0" />
+                        <Input value={programEmailStartup} onChange={e => setProgramEmailStartup(e.target.value)} placeholder="Your startup" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
                     <div className="space-y-1">
                       <Label>Cohort / Program Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                      <Input value={programEmailCohort} onChange={e => setProgramEmailCohort(e.target.value)} placeholder="MVP Program or Accelerated Fundraising" className="tech-card border-0" />
+                      <Input value={programEmailCohort} onChange={e => setProgramEmailCohort(e.target.value)} placeholder="MVP Program or Accelerated Fundraising" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     {['mvp-acceptance', 'mvp-payment-reminder'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Amount (cents) <span className="text-muted-foreground text-xs">500000 = $5,000 USD</span></Label>
-                        <Input type="number" value={programEmailAmountCents} onChange={e => setProgramEmailAmountCents(Number(e.target.value))} className="tech-card border-0" />
+                        <Input type="number" value={programEmailAmountCents} onChange={e => setProgramEmailAmountCents(Number(e.target.value))} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     )}
                     {['mvp-payment-reminder', 'af-follow-up'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Deadline / Due Date</Label>
-                        <Input value={programEmailDeadline} onChange={e => setProgramEmailDeadline(e.target.value)} placeholder="September 29, 2026" className="tech-card border-0" />
+                        <Input value={programEmailDeadline} onChange={e => setProgramEmailDeadline(e.target.value)} placeholder="September 29, 2026" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     )}
                     {['mvp-no-show', 'af-acceptance', 'af-no-show'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Interview Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="September 15, 2026" className="tech-card border-0" />
+                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="September 15, 2026" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     )}
                     {['mvp-no-show', 'af-no-show'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Reschedule URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={programEmailRescheduleUrl} onChange={e => setProgramEmailRescheduleUrl(e.target.value)} placeholder="https://calendly.com/..." className="tech-card border-0" />
+                        <Input value={programEmailRescheduleUrl} onChange={e => setProgramEmailRescheduleUrl(e.target.value)} placeholder="https://calendly.com/..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     )}
                     {['af-invitation', 'af-welcome'].includes(activeType) && (
                       <div className="space-y-1">
                         <Label>Direct Application URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={programEmailApplyUrl} onChange={e => setProgramEmailApplyUrl(e.target.value)} placeholder="https://startupfactoryhub.com/cohorts/.../apply" className="tech-card border-0" />
+                        <Input value={programEmailApplyUrl} onChange={e => setProgramEmailApplyUrl(e.target.value)} placeholder="https://startupfactoryhub.com/cohorts/.../apply" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     )}
                   </div>
@@ -1253,8 +1253,8 @@ const EmailMonitor = () => {
 
                 {activeType === 'hot-deals-feedback' && (
 
-                  <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-orange-400 font-semibold">
+                  <div className="rounded-lg bg-[#FF8A3D]/5 border border-[#FF8A3D]/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-[#FF8A3D] font-semibold">
                       <Star className="h-4 w-4" />
                       Hot Deals Feedback Invite
                     </div>
@@ -1262,7 +1262,7 @@ const EmailMonitor = () => {
                       Sends a personalized 1:1 invite asking each selected recipient to rate the Hot Deals event (anonymous, ~30 seconds).
                       Each email is transactional and addressed individually — no bulk lists.
                     </p>
-                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                    <div className="flex items-center gap-2 text-[#FFB86A] text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Sends are throttled (250ms between recipients) to protect deliverability.
                     </div>
@@ -1280,7 +1280,7 @@ const EmailMonitor = () => {
                       Sends a personalized 1:1 invitation to each selected recipient to join the Referral Program. The email walks them through the 3 steps:
                       apply &amp; get approved → connect their Stripe payout account → get their unique referral link.
                     </p>
-                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1.5">
+                    <div className="rounded-md bg-white/[0.03] p-3 space-y-1.5">
                       <p className="text-xs font-medium text-foreground">📧 Email preview</p>
                       <p className="text-xs text-muted-foreground"><strong>Subject:</strong> Earn 20% commission — refer startups to Startup Factory Hub</p>
                       <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub &lt;info@startupfactoryhub.com&gt;</p>
@@ -1307,14 +1307,14 @@ const EmailMonitor = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>Active Investor Count</Label>
-                        <Input type="number" value={investorCount} onChange={e => setInvestorCount(Number(e.target.value))} className="tech-card border-0" />
+                        <Input type="number" value={investorCount} onChange={e => setInvestorCount(Number(e.target.value))} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>Custom Headline <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                        <Input value={investorHeadline} onChange={e => setInvestorHeadline(e.target.value)} placeholder="Leave blank for default" className="tech-card border-0" />
+                        <Input value={investorHeadline} onChange={e => setInvestorHeadline(e.target.value)} placeholder="Leave blank for default" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
-                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1.5">
+                    <div className="rounded-md bg-white/[0.03] p-3 space-y-1.5">
                       <p className="text-xs font-medium text-foreground">Email preview</p>
                       <p className="text-xs text-muted-foreground"><strong>Subject:</strong> {investorCount}+ active investors are looking — and you can refer founders for 20%</p>
                       <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub &lt;info@startupfactoryhub.com&gt;</p>
@@ -1333,33 +1333,33 @@ const EmailMonitor = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>Partner Name *</Label>
-                        <Input value={partnerName} onChange={e => setPartnerName(e.target.value)} placeholder="e.g. Google for Startups" className="tech-card border-0" />
+                        <Input value={partnerName} onChange={e => setPartnerName(e.target.value)} placeholder="e.g. Google for Startups" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>Partner Website</Label>
-                        <Input value={partnerWebsite} onChange={e => setPartnerWebsite(e.target.value)} placeholder="https://..." className="tech-card border-0" />
+                        <Input value={partnerWebsite} onChange={e => setPartnerWebsite(e.target.value)} placeholder="https://..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
                     <div className="space-y-1">
                       <Label>Partner Logo URL</Label>
-                      <Input value={partnerLogo} onChange={e => setPartnerLogo(e.target.value)} placeholder="https://..." className="tech-card border-0" />
+                      <Input value={partnerLogo} onChange={e => setPartnerLogo(e.target.value)} placeholder="https://..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="space-y-1">
                       <Label>Partner Description *</Label>
-                      <Textarea value={partnerDesc} onChange={e => setPartnerDesc(e.target.value)} rows={3} placeholder="Describe the partner..." className="tech-card border-0" />
+                      <Textarea value={partnerDesc} onChange={e => setPartnerDesc(e.target.value)} rows={3} placeholder="Describe the partner..." className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="space-y-1">
                       <Label>Benefits for Startups (one per line)</Label>
-                      <Textarea value={partnerBenefits} onChange={e => setPartnerBenefits(e.target.value)} rows={3} placeholder="$5,000 in cloud credits&#10;Free consulting" className="tech-card border-0" />
+                      <Textarea value={partnerBenefits} onChange={e => setPartnerBenefits(e.target.value)} rows={3} placeholder="$5,000 in cloud credits&#10;Free consulting" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label>CTA Button Label</Label>
-                        <Input value={partnerCTALabel} onChange={e => setPartnerCTALabel(e.target.value)} className="tech-card border-0" />
+                        <Input value={partnerCTALabel} onChange={e => setPartnerCTALabel(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                       <div className="space-y-1">
                         <Label>CTA URL</Label>
-                        <Input value={partnerCTAUrl} onChange={e => setPartnerCTAUrl(e.target.value)} className="tech-card border-0" />
+                        <Input value={partnerCTAUrl} onChange={e => setPartnerCTAUrl(e.target.value)} className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
                       </div>
                     </div>
                   </>
@@ -1386,7 +1386,7 @@ const EmailMonitor = () => {
                       type="datetime-local"
                       value={scheduleAt}
                       onChange={e => setScheduleAt(e.target.value)}
-                      className="tech-card border-0"
+                      className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                     />
                     <Button onClick={scheduleSend} disabled={scheduling} variant="outline" className="shrink-0">
                       {scheduling
@@ -1403,9 +1403,9 @@ const EmailMonitor = () => {
 
           {/* Send Log */}
           <div>
-            <Card className="tech-card border-0 h-full">
+            <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md h-full">
               <CardHeader>
-                <CardTitle className="text-base flex items-center justify-between">
+                <CardTitle className="text-base flex items-center justify-between font-['Space_Grotesk'] tracking-wide">
                   <span className="flex items-center gap-2"><RefreshCw className="h-4 w-4" /> Send Log</span>
                   {results.length > 0 && (
                     <Button variant="ghost" size="sm" onClick={() => setResults([])} className="text-xs h-6 px-2">Clear</Button>
@@ -1423,11 +1423,11 @@ const EmailMonitor = () => {
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-3">
                       {results.map((r, i) => (
-                        <div key={i} className={`rounded-lg p-3 border ${r.success ? 'border-green-500/20 bg-green-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
+                        <div key={i} className={`rounded-md p-3 border ${r.success ? 'border-[#2EF8A0]/20 bg-[#2EF8A0]/5' : 'border-[#FF3D6E]/20 bg-[#FF3D6E]/5'}`}>
                           <div className="flex items-start gap-2">
                             {r.success
-                              ? <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
-                              : <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                              ? <CheckCircle className="h-4 w-4 text-[#2EF8A0] mt-0.5 shrink-0" />
+                              : <XCircle className="h-4 w-4 text-[#FF3D6E] mt-0.5 shrink-0" />
                             }
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium truncate">{r.label}</p>
@@ -1447,9 +1447,9 @@ const EmailMonitor = () => {
       )}
 
       {/* Automatic Trigger Reference */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Zap className="h-4 w-4 text-primary" />
             Automatic Email Triggers (Active)
           </CardTitle>
@@ -1472,11 +1472,11 @@ const EmailMonitor = () => {
               { label: 'Password Reset', trigger: 'auth recovery', status: 'active' },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
+                <CheckCircle className="h-4 w-4 text-[#2EF8A0] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">{item.label}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.trigger}</p>
-                  <Badge variant="outline" className="text-xs mt-1 bg-green-500/10 text-green-400 border-green-500/20">
+                  <Badge variant="outline" className="mt-1 bg-[#2EF8A0]/10 text-[#2EF8A0] border-[#2EF8A0]/20 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                     {item.status}
                   </Badge>
                 </div>

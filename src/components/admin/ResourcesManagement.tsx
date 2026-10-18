@@ -102,24 +102,24 @@ const RESOURCE_TYPES = [
 
 // Resource type colors matching GlobalResourcesMap RESOURCE_CONFIG
 const RESOURCE_COLORS: Record<string, string> = {
-  office: '#ef4444',
-  lab: '#f97316',
-  venue: '#eab308',
-  perk: '#22c55e',
-  chamber_of_commerce: '#06b6d4',
-  technology_transfer: '#8b5cf6',
-  community: '#ec4899',
-  government_grant: '#3b82f6',
-  accelerator_incubator: '#6366f1',
-  university: '#dc2626',
-  coworking: '#14b8a6',
-  investor_network: '#facc15',
-  human_capital: '#0ea5e9',
-  event: '#f43f5e',
-  banking: '#dc2626',
-  national_archives: '#7c3aed',
-  workplace: '#0d9488',
-  other: '#64748b',
+  office: '#FF3D6E',
+  lab: '#FF8A3D',
+  venue: '#FFB86A',
+  perk: '#2EF8A0',
+  chamber_of_commerce: '#00E5FF',
+  technology_transfer: '#7BC4B6',
+  community: '#FF3D6E',
+  government_grant: '#00E5FF',
+  accelerator_incubator: '#7BC4B6',
+  university: '#FF3D6E',
+  coworking: '#00FFCC',
+  investor_network: '#FFB86A',
+  human_capital: '#00E5FF',
+  event: '#FF3D6E',
+  banking: '#FF3D6E',
+  national_archives: '#7BC4B6',
+  workplace: '#00FFCC',
+  other: '#4E7A73',
 };
 
 const LOCATION_TYPES = ['physical', 'online', 'hybrid'];
@@ -228,10 +228,10 @@ const ResourcesManagement = () => {
     map.current.on('style.load', () => {
       if (!map.current) return;
       map.current.setFog({
-        color: '#0f172a',
-        'high-color': '#1e293b',
+        color: '#061016',
+        'high-color': '#0A1418',
         'horizon-blend': 0.02,
-        'space-color': '#020617',
+        'space-color': '#02070E',
         'star-intensity': 0.15
       });
     });
@@ -255,7 +255,7 @@ const ResourcesManagement = () => {
     allResources.forEach(resource => {
       if (!resource.latitude || !resource.longitude) return;
 
-      const color = RESOURCE_COLORS[resource.resource_type] || '#64748b';
+      const color = RESOURCE_COLORS[resource.resource_type] || '#4E7A73';
       const isFlagship = resource.is_flagship;
       const isPartner = resource.is_official_partner;
       const markerSize = isFlagship ? 44 : isPartner ? 32 : 28;
@@ -279,12 +279,12 @@ const ResourcesManagement = () => {
         transition: transform 0.2s;
         ${resource.logo_url ? `background: url(${resource.logo_url}) center/cover,` : ''} linear-gradient(135deg, ${color}, ${color}dd);
         ${isFlagship 
-          ? `border: 3px solid gold; box-shadow: 0 4px 16px ${color}80, 0 0 20px ${color}40;` 
+          ? `border: 3px solid #FFB86A; box-shadow: 0 4px 16px ${color}80, 0 0 20px ${color}40;` 
           : isPartner 
-            ? `border: 2px solid #fbbf24; box-shadow: 0 2px 8px ${color}60;`
+            ? `border: 2px solid #FFB86A; box-shadow: 0 2px 8px ${color}60;`
             : `border: 2px solid white; box-shadow: 0 2px 8px ${color}40;`
         }
-        ${!resource.is_verified ? 'opacity: 0.6; border-color: #f97316;' : ''}
+        ${!resource.is_verified ? 'opacity: 0.6; border-color: #FF8A3D;' : ''}
       `;
 
       if (!resource.logo_url) {
@@ -785,58 +785,58 @@ const ResourcesManagement = () => {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Globe className="h-5 w-5 text-blue-400 mb-2" />
-            <p className="text-2xl font-bold">{resources.length}</p>
-            <p className="text-xs text-muted-foreground">Total Resources</p>
+            <Globe className="h-5 w-5 text-[#00E5FF] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{resources.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Total Resources</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0 cursor-pointer" onClick={() => setViewMode('pending')}>
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md cursor-pointer" onClick={() => setViewMode('pending')}>
           <CardContent className="p-4">
-            <RefreshCw className="h-5 w-5 text-amber-400 mb-2" />
-            <p className="text-2xl font-bold">{pendingResources.length}</p>
-            <p className="text-xs text-muted-foreground">Pending Approval</p>
+            <RefreshCw className="h-5 w-5 text-[#FFB86A] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{pendingResources.length}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Pending Approval</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Star className="h-5 w-5 text-amber-400 mb-2" />
-            <p className="text-2xl font-bold">{partnerCount}</p>
-            <p className="text-xs text-muted-foreground">Official Partners</p>
+            <Star className="h-5 w-5 text-[#FFB86A] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{partnerCount}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Official Partners</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <Crown className="h-5 w-5 text-yellow-400 mb-2" />
-            <p className="text-2xl font-bold">{flagshipCount}</p>
-            <p className="text-xs text-muted-foreground">Flagship Locations</p>
+            <Crown className="h-5 w-5 text-[#FFB86A] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">{flagshipCount}</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">Flagship Locations</p>
           </CardContent>
         </Card>
-        <Card className="tech-card border-0">
+        <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
           <CardContent className="p-4">
-            <MapPin className="h-5 w-5 text-rose-400 mb-2" />
-            <p className="text-2xl font-bold">
+            <MapPin className="h-5 w-5 text-[#FF3D6E] mb-2" />
+            <p className="text-2xl font-bold font-['JetBrains_Mono']">
               {resources.filter(r => r.latitude && r.longitude).length}
             </p>
-            <p className="text-xs text-muted-foreground">With Locations</p>
+            <p className="font-['JetBrains_Mono'] uppercase tracking-[0.18em] text-[10px] text-[#4E7A73]">With Locations</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Map Viewport */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Globe className="h-5 w-5" />
             Resource Map
-            <Badge variant="outline" className="ml-2">Click markers to edit</Badge>
+            <Badge variant="outline" className="ml-2 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">Click markers to edit</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 relative">
-          <div ref={mapContainer} className="h-[400px] rounded-b-lg" />
+          <div ref={mapContainer} className="h-[400px] rounded-b-md" />
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-b-lg">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-b-md">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
@@ -844,7 +844,7 @@ const ResourcesManagement = () => {
       </Card>
 
       {/* Filters */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -853,11 +853,11 @@ const ResourcesManagement = () => {
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 tech-card border-0"
+                className="pl-10 bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <Select value={viewMode} onValueChange={(v: 'all' | 'pending') => setViewMode(v)}>
-              <SelectTrigger className="w-[180px] tech-card border-0">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -866,7 +866,7 @@ const ResourcesManagement = () => {
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[180px] tech-card border-0">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -877,7 +877,7 @@ const ResourcesManagement = () => {
               </SelectContent>
             </Select>
             <Select value={journeyFilter} onValueChange={setJourneyFilter}>
-              <SelectTrigger className="w-[180px] tech-card border-0">
+              <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/10">
                 <SelectValue placeholder="Journey Step" />
               </SelectTrigger>
               <SelectContent>
@@ -887,7 +887,7 @@ const ResourcesManagement = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => setShowAddDialog(true)} className="tech-card border-0">
+            <Button onClick={() => setShowAddDialog(true)} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <Plus className="h-4 w-4 mr-2" />
               Add Resource
             </Button>
@@ -895,13 +895,13 @@ const ResourcesManagement = () => {
               <Button 
                 variant="outline" 
                 onClick={handleBulkCategorize} 
-                className="tech-card border-0 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30"
+                className="bg-[#FFB86A]/10 hover:bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Categorize ({uncategorizedCount})
               </Button>
             )}
-            <Button variant="outline" onClick={fetchResources} className="tech-card border-0">
+            <Button variant="outline" onClick={fetchResources} className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -909,13 +909,13 @@ const ResourcesManagement = () => {
       </Card>
 
       {/* Resources Table */}
-      <Card className="tech-card border-0">
+      <Card className="bg-[#0A1418] border border-cyan-400/15 rounded-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-['Space_Grotesk'] tracking-wide">
             <Globe className="h-5 w-5" />
             {viewMode === 'pending' ? 'Pending Approval' : 'Resources'} ({filteredResources.length})
             {viewMode === 'pending' && pendingResources.length > 0 && (
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+              <Badge className="bg-[#FFB86A]/20 text-[#FFB86A] border-[#FFB86A]/30 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                 Requires Review
               </Badge>
             )}
@@ -926,12 +926,12 @@ const ResourcesManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Resource</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Location</TableHead>
-                  {viewMode === 'all' && <TableHead>Partner</TableHead>}
-                  {viewMode === 'all' && <TableHead>Flagship</TableHead>}
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Resource</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Type</TableHead>
+                  <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Location</TableHead>
+                  {viewMode === 'all' && <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Partner</TableHead>}
+                  {viewMode === 'all' && <TableHead className="font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Flagship</TableHead>}
+                  <TableHead className="text-right font-['JetBrains_Mono'] uppercase tracking-[0.14em] text-[10px] text-[#4E7A73]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -955,12 +955,12 @@ const ResourcesManagement = () => {
                         {resource.journey_steps && resource.journey_steps.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {resource.journey_steps.slice(0, 2).map(step => (
-                              <Badge key={step} variant="secondary" className="text-xs">
+                              <Badge key={step} variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">
                                 {step}
                               </Badge>
                             ))}
                             {resource.journey_steps.length > 2 && (
-                              <Badge variant="secondary" className="text-xs">+{resource.journey_steps.length - 2}</Badge>
+                              <Badge variant="secondary" className="font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">+{resource.journey_steps.length - 2}</Badge>
                             )}
                           </div>
                         )}
@@ -970,12 +970,12 @@ const ResourcesManagement = () => {
                       <div className="flex flex-col gap-1">
                         <span>{resource.city || resource.country ? `${resource.city || ''}, ${resource.country || ''}` : 'N/A'}</span>
                         {resource.location_type === 'physical' && (!resource.latitude || !resource.longitude) && (
-                          <Badge variant="outline" className="text-orange-500 border-orange-500/50 text-xs w-fit">
+                          <Badge variant="outline" className="text-[#FF8A3D] border-[#FF8A3D]/50 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider w-fit">
                             No coordinates
                           </Badge>
                         )}
                         {resource.location_type === 'online' && (
-                          <Badge variant="outline" className="text-blue-500 border-blue-500/50 text-xs w-fit">
+                          <Badge variant="outline" className="text-[#00E5FF] border-[#00E5FF]/50 font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider w-fit">
                             Online
                           </Badge>
                         )}
@@ -992,7 +992,7 @@ const ResourcesManagement = () => {
                     {viewMode === 'all' && (
                       <TableCell>
                         {resource.is_flagship && (
-                          <Crown className="h-4 w-4 text-yellow-400" />
+                          <Crown className="h-4 w-4 text-[#FFB86A]" />
                         )}
                       </TableCell>
                     )}
@@ -1001,7 +1001,7 @@ const ResourcesManagement = () => {
                         <div className="flex items-center gap-2 justify-end">
                           <Button 
                             size="sm" 
-                            className="bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                            className="bg-[#2EF8A0]/20 text-[#2EF8A0] hover:bg-[#2EF8A0]/30"
                             onClick={() => handleApproveResource(resource)}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
@@ -1038,7 +1038,7 @@ const ResourcesManagement = () => {
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteResource(resource.id)} className="text-red-500">
+                            <DropdownMenuItem onClick={() => handleDeleteResource(resource.id)} className="text-[#FF3D6E]">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
@@ -1056,9 +1056,9 @@ const ResourcesManagement = () => {
 
       {/* Add Resource Dialog - Full Fields */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Resource</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Add Resource</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -1066,13 +1066,13 @@ const ResourcesManagement = () => {
               <Input
                 value={newResource.title}
                 onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
               <Label>Type *</Label>
               <Select value={newResource.resource_type} onValueChange={(v) => setNewResource({ ...newResource, resource_type: v })}>
-                <SelectTrigger className="tech-card border-0">
+                <SelectTrigger className="bg-white/[0.03] border-white/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1087,7 +1087,7 @@ const ResourcesManagement = () => {
               <Textarea
                 value={newResource.description}
                 onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1096,7 +1096,7 @@ const ResourcesManagement = () => {
                 value={newResource.logo_url}
                 onChange={(e) => setNewResource({ ...newResource, logo_url: e.target.value })}
                 placeholder="https://..."
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1105,7 +1105,7 @@ const ResourcesManagement = () => {
                 value={newResource.website_url}
                 onChange={(e) => setNewResource({ ...newResource, website_url: e.target.value })}
                 placeholder="https://..."
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1113,13 +1113,13 @@ const ResourcesManagement = () => {
               <Input
                 value={newResource.contact_email}
                 onChange={(e) => setNewResource({ ...newResource, contact_email: e.target.value })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
               <Label>Location Type</Label>
               <Select value={newResource.location_type} onValueChange={(v) => setNewResource({ ...newResource, location_type: v })}>
-                <SelectTrigger className="tech-card border-0">
+                <SelectTrigger className="bg-white/[0.03] border-white/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1136,13 +1136,13 @@ const ResourcesManagement = () => {
                   value={newResource.address}
                   onChange={(e) => setNewResource({ ...newResource, address: e.target.value })}
                   placeholder="Full address for geocoding..."
-                  className="tech-card border-0 flex-1"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 flex-1"
                 />
                 <Button 
                   variant="outline" 
                   onClick={() => geocodeAddress(newResource.address)}
                   disabled={isGeocoding}
-                  className="tech-card border-0"
+                  className="bg-[#0A1418] border border-cyan-400/15 rounded-md"
                 >
                   {isGeocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Locate className="h-4 w-4" />}
                 </Button>
@@ -1153,7 +1153,7 @@ const ResourcesManagement = () => {
               <Input
                 value={newResource.city}
                 onChange={(e) => setNewResource({ ...newResource, city: e.target.value })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1161,7 +1161,7 @@ const ResourcesManagement = () => {
               <Input
                 value={newResource.country}
                 onChange={(e) => setNewResource({ ...newResource, country: e.target.value })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1171,7 +1171,7 @@ const ResourcesManagement = () => {
                 step="any"
                 value={newResource.latitude || ''}
                 onChange={(e) => setNewResource({ ...newResource, latitude: e.target.value ? parseFloat(e.target.value) : null })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div>
@@ -1181,7 +1181,7 @@ const ResourcesManagement = () => {
                 step="any"
                 value={newResource.longitude || ''}
                 onChange={(e) => setNewResource({ ...newResource, longitude: e.target.value ? parseFloat(e.target.value) : null })}
-                className="tech-card border-0"
+                className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -1231,9 +1231,9 @@ const ResourcesManagement = () => {
 
       {/* View Resource Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="tech-card border-0 !transition-none">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none">
           <DialogHeader>
-            <DialogTitle>Resource Details</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Resource Details</DialogTitle>
           </DialogHeader>
           {selectedResource && (
             <div className="space-y-4">
@@ -1245,8 +1245,8 @@ const ResourcesManagement = () => {
                 <div>
                   <h3 className="text-lg font-semibold">{selectedResource.title}</h3>
                   <Badge variant="outline">{selectedResource.resource_type?.replace(/_/g, ' ')}</Badge>
-                  {selectedResource.is_official_partner && <Badge className="ml-2 bg-amber-500/20 text-amber-400">⭐ Partner</Badge>}
-                  {selectedResource.is_flagship && <Badge className="ml-2 bg-yellow-500/20 text-yellow-400">👑 Flagship</Badge>}
+                  {selectedResource.is_official_partner && <Badge className="ml-2 bg-[#FFB86A]/20 text-[#FFB86A] font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">⭐ Partner</Badge>}
+                  {selectedResource.is_flagship && <Badge className="ml-2 bg-[#FFB86A]/20 text-[#FFB86A] font-['JetBrains_Mono'] uppercase text-[10px] tracking-wider">👑 Flagship</Badge>}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">{selectedResource.description}</p>
@@ -1278,9 +1278,9 @@ const ResourcesManagement = () => {
 
       {/* Edit Resource Dialog - Full Fields */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A1418] border border-cyan-400/15 rounded-md !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Resource</DialogTitle>
+            <DialogTitle className="font-['Space_Grotesk'] tracking-wide">Edit Resource</DialogTitle>
           </DialogHeader>
           {editResource && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1289,13 +1289,13 @@ const ResourcesManagement = () => {
                 <Input
                   value={editResource.title}
                   onChange={(e) => setEditResource({ ...editResource, title: e.target.value })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
                 <Label>Type *</Label>
                 <Select value={editResource.resource_type} onValueChange={(v) => setEditResource({ ...editResource, resource_type: v })}>
-                  <SelectTrigger className="tech-card border-0">
+                  <SelectTrigger className="bg-white/[0.03] border-white/10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1310,7 +1310,7 @@ const ResourcesManagement = () => {
                 <Textarea
                   value={editResource.description || ''}
                   onChange={(e) => setEditResource({ ...editResource, description: e.target.value })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1319,7 +1319,7 @@ const ResourcesManagement = () => {
                   value={editResource.logo_url || ''}
                   onChange={(e) => setEditResource({ ...editResource, logo_url: e.target.value })}
                   placeholder="https://..."
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1328,7 +1328,7 @@ const ResourcesManagement = () => {
                   value={editResource.website_url || ''}
                   onChange={(e) => setEditResource({ ...editResource, website_url: e.target.value })}
                   placeholder="https://..."
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1336,13 +1336,13 @@ const ResourcesManagement = () => {
                 <Input
                   value={editResource.contact_email || ''}
                   onChange={(e) => setEditResource({ ...editResource, contact_email: e.target.value })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
                 <Label>Location Type</Label>
                 <Select value={editResource.location_type || 'physical'} onValueChange={(v) => setEditResource({ ...editResource, location_type: v })}>
-                  <SelectTrigger className="tech-card border-0">
+                  <SelectTrigger className="bg-white/[0.03] border-white/10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1359,13 +1359,13 @@ const ResourcesManagement = () => {
                     value={editResource.address || ''}
                     onChange={(e) => setEditResource({ ...editResource, address: e.target.value })}
                     placeholder="Full address for geocoding..."
-                    className="tech-card border-0 flex-1"
+                    className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50 flex-1"
                   />
                   <Button 
                     variant="outline" 
                     onClick={() => geocodeAddress(editResource.address || '', true)}
                     disabled={isGeocoding}
-                    className="tech-card border-0"
+                    className="bg-[#0A1418] border border-cyan-400/15 rounded-md"
                   >
                     {isGeocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Locate className="h-4 w-4" />}
                   </Button>
@@ -1376,7 +1376,7 @@ const ResourcesManagement = () => {
                 <Input
                   value={editResource.city || ''}
                   onChange={(e) => setEditResource({ ...editResource, city: e.target.value })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1384,7 +1384,7 @@ const ResourcesManagement = () => {
                 <Input
                   value={editResource.country || ''}
                   onChange={(e) => setEditResource({ ...editResource, country: e.target.value })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1394,7 +1394,7 @@ const ResourcesManagement = () => {
                   step="any"
                   value={editResource.latitude || ''}
                   onChange={(e) => setEditResource({ ...editResource, latitude: e.target.value ? parseFloat(e.target.value) : null })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div>
@@ -1404,7 +1404,7 @@ const ResourcesManagement = () => {
                   step="any"
                   value={editResource.longitude || ''}
                   onChange={(e) => setEditResource({ ...editResource, longitude: e.target.value ? parseFloat(e.target.value) : null })}
-                  className="tech-card border-0"
+                  className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 />
               </div>
               <div className="flex items-center gap-2">
