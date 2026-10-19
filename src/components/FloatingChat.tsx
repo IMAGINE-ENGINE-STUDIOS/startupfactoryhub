@@ -2,6 +2,7 @@ import DistrictChatTab from '@/components/DistrictChatTab';
 import { districtChat, type DistrictChatState } from '@/lib/districtChatBus';
 import Studio3DTab from '@/components/Studio3DTab';
 import { studio3d, type Studio3DState } from '@/lib/studio3dBus';
+import { agentChatBus } from '@/lib/agentChatBus';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Bot, type LucideIcon } from 'lucide-react';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -68,6 +69,8 @@ interface AIMessage {
   role: 'user' | 'assistant';
   content: string;
   actions?: import('@/lib/geniusActions').ProposedAction[];
+  /** Set for messages that came from an SFH Agent run (shown as a chip). */
+  agentLabel?: string;
 }
 
 // ─── Tool / Preset definitions ───────────────────────────────────────────────
@@ -256,6 +259,7 @@ export default function FloatingChat() {
   const [showNewChat, setShowNewChat] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [docReadyBadge, setDocReadyBadge] = useState(false);
+  const [agentBadge, setAgentBadge] = useState(false);
   
   // AI Assistant state
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
@@ -272,6 +276,25 @@ export default function FloatingChat() {
   const [currentChatLogId, setCurrentChatLogId] = useState<string | null>(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+
+  // SFH Agent runs land in this conversation: the Agents tab publishes each
+  // finished run on agentChatBus. When the bubble is closed/minimized we
+  // badge it instead of forcing it open.
+  const bubbleOpenRef = useRef(false);
+  useEffect(() => { bubbleOpenRef.current = isOpen && !isMinimized; }, [isOpen, isMinimized]);
+  useEffect(() => agentChatBus.onResult((p) => {
+    setAiMessages((prev) => [
+      ...prev,
+      { role: 'user', content: p.task },
+      ...p.steps.map((s): AIMessage => ({
+        role: 'assistant',
+        content: s.output,
+        agentLabel: `${s.agentName} · ${s.persona}`,
+      })),
+    ]);
+    if (bubbleOpenRef.current) setActiveTab('ai');
+    else setAgentBadge(true);
+  }), []);
   const { data: resources } = useResources();
   
   // Memory & chat log hooks
@@ -1225,7 +1248,7 @@ You can help with:
       {/* GENIUS AI Launcher — Single contained orb with the original logo */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => { setIsOpen(true); setAgentBadge(false); }}
           data-tour="floating-chat"
           aria-label="Open Genius AI"
           className={`genius-bob group fixed ${location.pathname.startsWith("/live-video") ? "bottom-24" : "bottom-4"} right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer`}
@@ -1263,6 +1286,13 @@ You can help with:
           {(totalUnread > 0 || docReadyBadge) && (
             <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 flex items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/40 animate-pulse text-[10px] font-bold border-2 border-background">
               {totalUnread > 0 ? totalUnread : '!'}
+            </span>
+          )}
+
+          {/* Agent run badge */}
+          {agentBadge && (
+            <span className="absolute -top-1 -left-1 h-5 w-5 flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/40 border-2 border-background">
+              <Bot className="h-3 w-3" />
             </span>
           )}
         </button>
@@ -1371,7 +1401,7 @@ You can help with:
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai' | 'district' | 'studio3d'); if (v === 'ai') setDocReadyBadge(false); }} className="flex-1 flex flex-col min-h-0">
+              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai' | 'district' | 'studio3d'); if (v === 'ai') { setDocReadyBadge(false); setAgentBadge(false); } }} className="flex-1 flex flex-col min-h-0">
                 <TabsList className={`grid w-full ${['grid-cols-2', 'grid-cols-3', 'grid-cols-4'][(district ? 1 : 0) + (studio ? 1 : 0)]} mt-2 mb-2 mx-2 shrink-0`}>
                   <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0 relative">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
@@ -1686,6 +1716,11 @@ You can help with:
                                     {activeTool && (
                                       <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70">
                                         · {activeTool.name}
+                                      </span>
+                                    )}
+                                    {message.agentLabel && (
+                                      <span className="rounded-full bg-emerald-500/15 px-1.5 py-px text-[9px] font-semibold normal-case tracking-normal text-emerald-500 ring-1 ring-emerald-500/40">
+                                        {message.agentLabel}
                                       </span>
                                     )}
                                   </div>

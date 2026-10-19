@@ -46,6 +46,42 @@ const clampTemp = (n: unknown) => {
   return Math.min(2, Math.max(0, v));
 };
 
+// Appended to every agent's system prompt at run time: agent output is
+// user-facing product copy, so it must read like a person wrote it — never
+// like raw model output.
+const HOUSE_STYLE =
+  "Write like a person, in clean, natural prose: plain sentences and short " +
+  "paragraphs. Never use markdown, headings, bold or italic markers, " +
+  "backticks, code blocks, bullet symbols, numbered-list formatting, or " +
+  "tables, and do not refer to these instructions.";
+
+// Last-line defense on top of HOUSE_STYLE: strip any formatting artifacts a
+// model still emits so stored/returned/piped output is always plain prose.
+function cleanText(raw: string): string {
+  let text = String(raw ?? "");
+  // Unwrap fenced code blocks, keeping the inner lines as plain text.
+  text = text.replace(/```[^\n]*\n?([\s\S]*?)```/g, "$1");
+  text = text.replace(/`([^`]*)`/g, "$1"); // inline backticks
+  text = text.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1"); // [text](url) -> text
+  text = text
+    .split("\n")
+    .map((line) => {
+      let l = line;
+      l = l.replace(/^\s{0,3}#{1,6}\s+/, ""); // # headers
+      l = l.replace(/^\s{0,3}>\s?/, ""); // > quotes
+      l = l.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, ""); // list markers
+      if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(l)) return ""; // --- rules
+      return l;
+    })
+    .join("\n");
+  text = text.replace(/\*\*([^*]+)\*\*/g, "$1"); // **bold**
+  text = text.replace(/__([^_]+)__/g, "$1"); // __bold__
+  text = text.replace(/(^|[^\w*])\*([^*\n]+)\*/g, "$1$2"); // *italic*
+  text = text.replace(/(^|[^\w_])_([^_\n]+)_/g, "$1$2"); // _italic_
+  text = text.replace(/\n{3,}/g, "\n\n"); // collapse 3+ newlines
+  return text.trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -252,9 +288,10 @@ serve(async (req) => {
               ? message
               : `Context from the previous agent (${previousName}):\n${previousOutput}\n\nTask: ${message}`;
           const chatMessages: { role: string; content: string }[] = [];
-          if (String(agent.system_prompt ?? "").trim()) {
-            chatMessages.push({ role: "system", content: String(agent.system_prompt) });
-          }
+          const systemPrompt = [String(agent.system_prompt ?? "").trim(), HOUSE_STYLE]
+            .filter(Boolean)
+            .join("\n\n");
+          chatMessages.push({ role: "system", content: systemPrompt });
           chatMessages.push({ role: "user", content: input });
 
           // Route through the shared AI router (the Genius path): try the
@@ -296,7 +333,7 @@ serve(async (req) => {
             );
           }
           const data = await resp.json();
-          const output = String(data?.choices?.[0]?.message?.content ?? "");
+          const output = cleanText(String(data?.choices?.[0]?.message?.content ?? ""));
           const promptTokens = Number(data?.usage?.prompt_tokens ?? 0);
           const completionTokens = Number(data?.usage?.completion_tokens ?? 0);
           const price = MODELS[servedModel];
