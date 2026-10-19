@@ -96,7 +96,7 @@ const MemberDashboard = () => {
               { value: 'startups', icon: Building, label: 'My Startups' },
               { value: 'resources', icon: Globe, label: t('nav.resources') },
               { value: 'tools', icon: Wrench, label: t('nav.tools') },
-              { value: 'call-agents', icon: Bot, label: 'SFH Call Agents' },
+              { value: 'call-agents', icon: Bot, label: 'Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network', icon: Network, label: t('nav.network') },
               { value: 'calendar', icon: Video, label: 'Meetings' },

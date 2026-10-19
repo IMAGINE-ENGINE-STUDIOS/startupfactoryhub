@@ -360,7 +360,7 @@ const AcceleratorDashboard = () => {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
-              { value: 'call-agents', icon: Bot, label: 'SFH Call Agents' },
+              { value: 'call-agents', icon: Bot, label: 'Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
