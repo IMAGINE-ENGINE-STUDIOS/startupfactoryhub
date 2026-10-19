@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BookOpen, Bot, Check, Code2, Coins, FileText, Globe, KanbanSquare, Loader2,
   Lock, Pencil, Play, Plus, Route, Share2, Sparkles, Trash2, Wand2,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark, agentGreeter, agentGuardian } from "@/assets/agents/characters";
 import { agentChatBus } from "@/lib/agentChatBus";
+import { flushDraftNow } from "@/lib/lightpaperDraft";
 
 // ── Startup Factory Hub glassmorphism: light, airy glass panels in the
 // platform's emerald + teal palette — the same language as AIFeaturesHub —
@@ -292,6 +294,7 @@ function SegmentedControl({
 
 export default function SFHCallAgents() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [agents, setAgents] = useState<CallAgent[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -666,7 +669,11 @@ export default function SFHCallAgents() {
   // Send one step's output into another SFH app (client-side, the user's own
   // session/RLS — the same write paths those apps use themselves).
   const sendStepToApp = async (step: RunStep, key: IntegrationKey) => {
-    if (!user) return;
+    if (!user) {
+      const appLabel = INTEGRATION_DEFS.find((d) => d.key === key)?.label ?? "that app";
+      toast.error(`Sign in to send to ${appLabel}`);
+      return;
+    }
     const title = message.trim().slice(0, 80) || "Agent output";
     const body = step.output;
     const busyKey = `${step.agent_id}:${key}`;
@@ -685,27 +692,42 @@ export default function SFHCallAgents() {
                 `<p style="font-size: 14pt; color: inherit;">${escapeHtml(p).replace(/\n/g, "<br/>")}</p>`
             )
             .join("") || `<p style="font-size: 14pt; color: inherit;"></p>`;
-        const { error } = await supabase.from("lightpaper_projects").insert({
-          user_id: user.id,
-          project_type: "document",
-          title,
-          content: {
-            html: pageHtml,
-            pages: [pageHtml],
-            font: "Arial",
-            size: "14",
-            darkMode: false,
-            currentPage: 1,
-            totalPages: 1,
-            pageFormat: "a4",
-            orientation: "portrait",
-            viewMode: false,
-            viewModeImages: [],
-            overlayTextBoxes: [],
-          },
-        });
+        const content = {
+          html: pageHtml,
+          pages: [pageHtml],
+          font: "Arial",
+          size: "14",
+          darkMode: false,
+          currentPage: 1,
+          totalPages: 1,
+          pageFormat: "a4",
+          orientation: "portrait",
+          viewMode: false,
+          viewModeImages: [],
+          overlayTextBoxes: [],
+        };
+        const { data: created, error } = await supabase
+          .from("lightpaper_projects")
+          .insert({
+            user_id: user.id,
+            project_type: "document",
+            title,
+            content,
+            last_accessed_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
         if (error) throw error;
-        toast.success("Sent to Lite Paper");
+        // Hand the document straight to the Lite Paper editor: it restores
+        // this draft on mount, so the new document opens ready to read/edit.
+        await flushDraftNow({
+          projectId: created.id,
+          title,
+          content,
+          savedAt: Date.now(),
+        });
+        toast.success("Sent to Lite Paper — opening it now");
+        navigate("/lightpaper");
       } else if (key === "crm") {
         // Same lazy bootstrap as CRMBoard.initializePipeline: first pipeline
         // (creating it with the default stages when the user has none).
@@ -837,7 +859,7 @@ export default function SFHCallAgents() {
   const tempPct = ((form.temperature - 0) / 2) * 100;
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 overflow-x-hidden px-3 sm:px-6">
       <style>{GLASS_CSS}</style>
       {/* ambient emerald / teal wash */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
@@ -846,17 +868,17 @@ export default function SFHCallAgents() {
         <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-emerald-200/20 blur-3xl" />
       </div>
 
-      <div className="relative space-y-8">
+      <div className="relative min-w-0 space-y-8">
         {/* ── 1 · Hero strip ─────────────────────────────── */}
         <section className="rounded-[2rem] bg-gradient-to-br from-emerald-400/60 via-border to-teal-400/60 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.10)]">
-          <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 px-6 py-6 backdrop-blur-xl sm:px-8">
+          <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 px-4 py-5 backdrop-blur-xl sm:px-8 sm:py-6">
             <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-teal-300/30 blur-3xl" />
-            <div className="relative flex flex-wrap items-center gap-5">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_10px_24px_rgba(16,185,129,0.4)]">
+            <div className="relative flex flex-wrap items-center gap-4 sm:gap-5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_10px_24px_rgba(16,185,129,0.4)] sm:h-14 sm:w-14">
                 <Bot className="h-7 w-7" />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   Agents
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -982,7 +1004,7 @@ export default function SFHCallAgents() {
                         <img
                           src={personaForModel(agent.model).img}
                           alt={`${personaForModel(agent.model).role} character`}
-                          className="h-44 w-full object-contain px-2 pt-2 drop-shadow-[0_18px_24px_rgba(6,78,59,0.28)]"
+                          className="h-32 w-full object-contain px-2 pt-2 drop-shadow-[0_18px_24px_rgba(6,78,59,0.28)] sm:h-44"
                         />
                       </div>
                       {/* selected ribbon */}
@@ -1034,7 +1056,7 @@ export default function SFHCallAgents() {
                       ))}
                     </div>
                     <div
-                      className="mt-3 flex gap-2 border-t border-border px-0.5 pt-2.5"
+                      className="mt-3 flex flex-wrap gap-2 border-t border-border px-0.5 pt-2.5"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Button
@@ -1079,13 +1101,13 @@ export default function SFHCallAgents() {
           <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
             <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-emerald-300/25 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 right-10 h-56 w-56 rounded-full bg-teal-300/20 blur-3xl" />
-            <div className="relative flex flex-col gap-6 px-6 py-6 sm:px-8 lg:flex-row lg:items-center">
-              <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+            <div className="relative flex flex-col gap-6 px-4 py-5 sm:px-8 sm:py-6 lg:flex-row lg:items-center">
+              <div className="flex min-w-0 flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
                 <div className="ca-float shrink-0">
                   <img
                     src={agentGuardian}
                     alt="Fundraiser character"
-                    className="h-36 w-36 object-contain drop-shadow-[0_18px_24px_rgba(6,78,59,0.30)]"
+                    className="h-28 w-28 object-contain drop-shadow-[0_18px_24px_rgba(6,78,59,0.30)] sm:h-36 sm:w-36"
                   />
                 </div>
                 <div className="max-w-md">
@@ -1134,7 +1156,8 @@ export default function SFHCallAgents() {
                   {fundraiserRunning ? "Working…" : "Run Fundraiser"}
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Your shortlist and draft appear with the run results below.
+                  Your shortlist and draft land in your Genius chat when the run
+                  finishes.
                 </p>
               </div>
             </div>
@@ -1142,7 +1165,7 @@ export default function SFHCallAgents() {
         </section>
 
         {/* ── Credential vault ─────────────────────────── */}
-        <section className={`${GLASS_PANEL} relative overflow-hidden px-6 py-6 sm:px-8`}>
+        <section className={`${GLASS_PANEL} relative overflow-hidden px-4 py-5 sm:px-8 sm:py-6`}>
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-teal-300/25 blur-3xl" />
           <div className="relative">
             <div className="flex items-center gap-3">
@@ -1262,7 +1285,7 @@ export default function SFHCallAgents() {
                     <Button
                       onClick={handleVaultSave}
                       disabled={vaultSaving}
-                      className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-6 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600"
+                      className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-6 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 sm:w-auto"
                     >
                       {vaultSaving ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1279,14 +1302,14 @@ export default function SFHCallAgents() {
         </section>
 
         {/* ── 3 · Workspace ──────────────────────────────── */}
-        <div className="grid items-start gap-6 xl:grid-cols-2">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
           {/* ── Design studio (configure) ── */}
           <section
             id="ca-design-studio"
-            className="scroll-mt-24 rounded-[2rem] bg-gradient-to-b from-emerald-400/40 via-border to-teal-400/40 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
+            className="min-w-0 scroll-mt-24 rounded-[2rem] bg-gradient-to-b from-emerald-400/40 via-border to-teal-400/40 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
           >
             <div className="rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
-              <header className="flex items-center justify-between px-6 pb-1 pt-5">
+              <header className="flex items-center justify-between px-4 pb-1 pt-5 sm:px-6">
                 <div>
                   <h3 className="text-lg font-bold tracking-tight text-foreground">
                     Design studio
@@ -1300,11 +1323,11 @@ export default function SFHCallAgents() {
                   {editingId ? "Editing" : "Create"}
                 </span>
               </header>
-              <div className="space-y-5 px-6 py-5">
+              <div className="space-y-5 px-4 py-5 sm:px-6">
                 {/* Import a shared agent (link or bare token) */}
                 <div className="rounded-2xl border border-dashed border-border bg-muted/40 px-4 py-3">
                   <p className={FIELD_LABEL}>Import a shared agent</p>
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                     <Input
                       value={shareImportInput}
                       onChange={(e) => setShareImportInput(e.target.value)}
@@ -1358,7 +1381,7 @@ export default function SFHCallAgents() {
                 {/* Character-select specialist picker */}
                 <div className="space-y-2.5">
                   <Label className={FIELD_LABEL}>Specialist — choose your character</Label>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
                     {MODEL_ORDER.map((id) => {
                       const persona = PERSONAS[id];
                       const active = form.model === id;
@@ -1367,7 +1390,7 @@ export default function SFHCallAgents() {
                           key={id}
                           type="button"
                           onClick={() => setForm({ ...form, model: id })}
-                          className="group flex w-[4.5rem] flex-col items-center gap-1.5"
+                          className="group flex w-full flex-col items-center gap-1.5"
                           aria-pressed={active}
                         >
                           <span
@@ -1429,7 +1452,7 @@ export default function SFHCallAgents() {
                     onChange={(e) => setForm({ ...form, systemPrompt: e.target.value })}
                     placeholder="You are a sharp pitch reviewer for early-stage startups…"
                     rows={4}
-                    className={`${GLASS_INPUT} resize-none`}
+                    className={`${GLASS_INPUT} min-h-[44px] resize-none`}
                   />
                 </div>
 
@@ -1590,12 +1613,12 @@ export default function SFHCallAgents() {
 
           {/* ── Mission control (run) ── */}
           <section
-            className={`rounded-[2rem] bg-gradient-to-b from-teal-400/40 via-border to-emerald-400/40 p-[1.5px] ${
+            className={`min-w-0 rounded-[2rem] bg-gradient-to-b from-teal-400/40 via-border to-emerald-400/40 p-[1.5px] ${
               running ? "ca-running" : "shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
             }`}
           >
             <div className="rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
-              <header className="flex items-center justify-between px-6 pb-1 pt-5">
+              <header className="flex items-center justify-between px-4 pb-1 pt-5 sm:px-6">
                 <div>
                   <h3 className="text-lg font-bold tracking-tight text-foreground">
                     Mission control
@@ -1619,9 +1642,9 @@ export default function SFHCallAgents() {
                   {running ? "Executing…" : result ? "Last run complete" : "Standby"}
                 </span>
               </header>
-              <div className="space-y-5 px-6 py-5">
+              <div className="space-y-5 px-4 py-5 sm:px-6">
                 <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Play className="h-4 w-4 text-emerald-500" />
+                  <Play className="h-4 w-4 shrink-0 text-emerald-500" />
                   Run agents — solo runs one agent. Pipeline runs the agents you pick, in
                   the order you pick them, feeding each output into the next agent.
                 </p>
@@ -1688,8 +1711,8 @@ export default function SFHCallAgents() {
                                 {order + 1}
                               </span>
                             )}
-                            <span className="font-medium">{a.name}</span>
-                            <span className="ml-auto text-xs text-muted-foreground">
+                            <span className="min-w-0 truncate font-medium">{a.name}</span>
+                            <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                               {personaForModel(a.model).role}
                             </span>
                           </label>
@@ -1701,7 +1724,7 @@ export default function SFHCallAgents() {
 
                 {/* Avatar chain — the run, as characters */}
                 {vizAgents.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-muted/40 px-4 py-3.5 backdrop-blur">
+                  <div className="min-w-0 rounded-3xl border border-border bg-muted/40 px-4 py-3.5 backdrop-blur">
                     <p className={FIELD_LABEL}>
                       {runMode === "pipeline" ? "Run sequence" : "On deck"}
                     </p>
@@ -1779,7 +1802,7 @@ export default function SFHCallAgents() {
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Give your team a task…"
                     rows={3}
-                    className={`${GLASS_INPUT} resize-none`}
+                    className={`${GLASS_INPUT} min-h-[44px] resize-none`}
                   />
                 </div>
 
@@ -1808,6 +1831,16 @@ export default function SFHCallAgents() {
                             (d) => integrationsOf(stepAgent)[d.key]
                           )
                         : [];
+                      // Receipt row only — the step's answer text itself lives
+                      // in the Genius chat (mirrored on run). Output stays in
+                      // state for the Send-to chips below.
+                      const totalRunTokens =
+                        result.usage.prompt_tokens + result.usage.completion_tokens;
+                      const stepTokens = step.prompt_tokens + step.completion_tokens;
+                      const stepCredits =
+                        totalRunTokens > 0
+                          ? (Number(result.credits.charged) * stepTokens) / totalRunTokens
+                          : 0;
                       return (
                       <div
                         key={`${step.agent_id}-${i}`}
@@ -1818,22 +1851,28 @@ export default function SFHCallAgents() {
                           <img
                             src={personaForModel(step.model).img}
                             alt=""
-                            className="h-9 w-9 rounded-full object-contain ring-2 ring-emerald-400/50"
+                            className="h-9 w-9 shrink-0 rounded-full object-contain ring-2 ring-emerald-400/50"
                           />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-foreground">
                               {step.name}
                             </p>
-                            <p className="text-[11px] text-muted-foreground">
-                              Step {String(i + 1).padStart(2, "0")}
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {personaForModel(step.model).role} · Step{" "}
+                              {String(i + 1).padStart(2, "0")}
                             </p>
                           </div>
-                          <span className="rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-foreground">
-                            {personaForModel(step.model).role}
+                          <span className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <Check className="h-3 w-3" />
+                            Done
                           </span>
                         </div>
-                        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/85">
-                          {step.output}
+                        <p className="mt-2.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11px] text-muted-foreground">
+                          <span>
+                            {stepTokens} tokens · {step.prompt_tokens} in /{" "}
+                            {step.completion_tokens} out
+                          </span>
+                          <span>{stepCredits.toFixed(2)} credits</span>
                         </p>
                         {stepIntegrations.length > 0 && (
                           <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -1861,13 +1900,13 @@ export default function SFHCallAgents() {
                             })}
                           </div>
                         )}
-                        <p className="mt-3 border-t border-border pt-2 font-mono text-[11px] text-muted-foreground">
-                          {step.prompt_tokens + step.completion_tokens} tokens ·{" "}
-                          {step.prompt_tokens} in / {step.completion_tokens} out
-                        </p>
                       </div>
                       );
                     })}
+                    <p className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      The full answer is in your Genius chat.
+                    </p>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-full border border-border bg-muted/50 px-5 py-3 text-sm text-muted-foreground backdrop-blur">
                       <span>
                         Total tokens:{" "}

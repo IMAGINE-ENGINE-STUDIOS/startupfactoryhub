@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Bot, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, type LucideIcon } from 'lucide-react';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -259,8 +259,7 @@ export default function FloatingChat() {
   const [showNewChat, setShowNewChat] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [docReadyBadge, setDocReadyBadge] = useState(false);
-  const [agentBadge, setAgentBadge] = useState(false);
-  
+
   // AI Assistant state
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
@@ -278,10 +277,8 @@ export default function FloatingChat() {
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
 
   // SFH Agent runs land in this conversation: the Agents tab publishes each
-  // finished run on agentChatBus. When the bubble is closed/minimized we
-  // badge it instead of forcing it open.
-  const bubbleOpenRef = useRef(false);
-  useEffect(() => { bubbleOpenRef.current = isOpen && !isMinimized; }, [isOpen, isMinimized]);
+  // finished run on agentChatBus, and the bubble opens on the AI tab to show
+  // the result — the full answer lives here, not in the Agents tab.
   useEffect(() => agentChatBus.onResult((p) => {
     setAiMessages((prev) => [
       ...prev,
@@ -292,8 +289,9 @@ export default function FloatingChat() {
         agentLabel: `${s.agentName} · ${s.persona}`,
       })),
     ]);
-    if (bubbleOpenRef.current) setActiveTab('ai');
-    else setAgentBadge(true);
+    setIsOpen(true);
+    setIsMinimized(false);
+    setActiveTab('ai');
   }), []);
   const { data: resources } = useResources();
   
@@ -1248,7 +1246,7 @@ You can help with:
       {/* GENIUS AI Launcher — Single contained orb with the original logo */}
       {!isOpen && (
         <button
-          onClick={() => { setIsOpen(true); setAgentBadge(false); }}
+          onClick={() => { setIsOpen(true); }}
           data-tour="floating-chat"
           aria-label="Open Genius AI"
           className={`genius-bob group fixed ${location.pathname.startsWith("/live-video") ? "bottom-24" : "bottom-4"} right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer`}
@@ -1289,12 +1287,6 @@ You can help with:
             </span>
           )}
 
-          {/* Agent run badge */}
-          {agentBadge && (
-            <span className="absolute -top-1 -left-1 h-5 w-5 flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/40 border-2 border-background">
-              <Bot className="h-3 w-3" />
-            </span>
-          )}
         </button>
       )}
 
@@ -1308,12 +1300,12 @@ You can help with:
                 ? `rounded-2xl slide-in-from-left-4
                    inset-x-2 bottom-2 top-16
                    sm:inset-x-auto sm:inset-y-0 sm:left-0 sm:rounded-none sm:rounded-r-3xl
-                   sm:w-[400px] lg:w-[420px] sm:h-screen sm:border-l-0`
+                   sm:w-[min(400px,100vw)] lg:w-[min(420px,100vw)] sm:h-screen sm:border-l-0`
                 : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
                  inset-x-2 bottom-2 top-16
                  sm:inset-x-auto sm:top-auto
                  sm:right-6 sm:bottom-24
-                 sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+                 sm:w-[min(420px,calc(100vw-3rem))] sm:h-[min(640px,calc(100vh-8rem))]`
           }`}
         >
 
@@ -1401,7 +1393,7 @@ You can help with:
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai' | 'district' | 'studio3d'); if (v === 'ai') { setDocReadyBadge(false); setAgentBadge(false); } }} className="flex-1 flex flex-col min-h-0">
+              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai' | 'district' | 'studio3d'); if (v === 'ai') { setDocReadyBadge(false); } }} className="flex-1 flex flex-col min-h-0">
                 <TabsList className={`grid w-full ${['grid-cols-2', 'grid-cols-3', 'grid-cols-4'][(district ? 1 : 0) + (studio ? 1 : 0)]} mt-2 mb-2 mx-2 shrink-0`}>
                   <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0 relative">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
@@ -1979,7 +1971,7 @@ You can help with:
                                      inset-x-2 bottom-2 top-16
                                      sm:inset-x-auto sm:top-auto
                                      sm:right-6 sm:bottom-24
-                                     sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+                                     sm:w-[min(420px,calc(100vw-3rem))] sm:h-[min(640px,calc(100vh-8rem))]`
                               }`}
                             >
                               {/* Ambient glow */}
