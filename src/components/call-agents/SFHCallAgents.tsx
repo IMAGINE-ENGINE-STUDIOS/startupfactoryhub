@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark } from "@/assets/agents/characters";
+import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark, agentGreeter } from "@/assets/agents/characters";
 
 // ── Startup Factory Hub glassmorphism: light, airy glass panels in the
 // platform's emerald + teal palette — the same language as AIFeaturesHub —
@@ -531,8 +531,8 @@ export default function SFHCallAgents() {
             <div className={`${GLASS_PANEL} flex flex-col items-center gap-5 px-6 py-6 text-center sm:flex-row sm:text-left`}>
               <div className="ca-float shrink-0">
                 <img
-                  src={agentLlama33}
-                  alt="Llama 3.3 70B character"
+                  src={agentGreeter}
+                  alt="Agent greeter character"
                   className="h-20 w-20 rounded-3xl object-cover object-top shadow-[0_16px_36px_rgba(16,185,129,0.30)] ring-1 ring-border"
                 />
               </div>
