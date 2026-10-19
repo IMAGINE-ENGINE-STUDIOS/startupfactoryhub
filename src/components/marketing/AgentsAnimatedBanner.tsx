@@ -1,9 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Bot, Loader2 } from 'lucide-react';
+import { Download, Factory, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import GIF from 'gif.js';
-import cosmicBg from '@/assets/ignition-cosmic-bg.jpg';
 import {
   agentLlama33,
   agentMaverick,
@@ -15,387 +14,375 @@ import {
 const W = 1200;
 const H = 630;
 
-// Agents banner — same design system as the Ignition Program banners
-// (cosmic bg, emerald matrix rain, HUD brackets, mono status ribbon,
-// huge gradient title, chips + numbered bottom row) applied to the new
-// SFH Agents platform feature: 5 Llama-powered specialists users can
-// create, customize, chain into pipelines and run from the Agents tab.
+// THE AGENT FACTORY — an original design for the Agents feature:
+// a factory production line inside Startup Factory Hub. Riveted
+// steel sign plate, hanging lamps, rotating gears, and the five
+// agents as units on a moving conveyor belt with station plates.
+// Distinct from the Ignition banners (no cosmic bg, no matrix rain).
 
-const TEAM = [
-  { role: 'BUILDER', src: agentLlama33 },
-  { role: 'LAUNCHER', src: agentMaverick },
-  { role: 'ANALYST', src: agentScout },
-  { role: 'ARCHITECT', src: agentSpark },
-  { role: 'IDEATOR', src: agentInstant },
+export const AGENTS_TEAM = [
+  { role: 'BUILDER', skill: 'Builds & ships', src: agentLlama33 },
+  { role: 'LAUNCHER', skill: 'Launches ideas', src: agentMaverick },
+  { role: 'ANALYST', skill: 'Research & data', src: agentScout },
+  { role: 'ARCHITECT', skill: 'Systems & strategy', src: agentSpark },
+  { role: 'IDEATOR', skill: 'Fast ideas', src: agentInstant },
 ];
+const AGENT_X = [140, 370, 600, 830, 1060];
+const BELT_TOP = 492;
+const BELT_BOT = 596;
 
-type Column = {
-  x: number;
-  y: number;
-  speed: number;
-  trailLen: number;
-  chars: string[];
-  charSwapTimer: number;
-};
+const SPARKS = Array.from({ length: 26 }, (_, i) => ({
+  x: 30 + ((i * 173) % (W - 60)),
+  speed: 22 + ((i * 37) % 24),
+  phase: ((i * 29) % 100) / 100,
+  amber: i % 3 === 0,
+}));
 
-const CHARSET = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ<>{}[]/\\=+';
-const COL_COUNT = 70;
-const COL_W = W / COL_COUNT;
-
-const initColumns = (): Column[] => {
-  const cols: Column[] = [];
-  for (let i = 0; i < COL_COUNT; i++) {
-    const trailLen = 8 + Math.floor(Math.random() * 16);
-    const chars: string[] = [];
-    for (let j = 0; j < trailLen; j++) {
-      chars.push(CHARSET[Math.floor(Math.random() * CHARSET.length)]);
-    }
-    cols.push({
-      x: i * COL_W + (Math.random() * 4 - 2),
-      y: Math.random() * H,
-      speed: 1.2 + Math.random() * 2.4,
-      trailLen,
-      chars,
-      charSwapTimer: Math.random() * 6,
+const drawGear = (
+  ctx: CanvasRenderingContext2D,
+  cx: number, cy: number, R: number, teeth: number,
+  rot: number, color: string, alpha: number, lw = 5,
+) => {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.beginPath();
+  const root = R * 0.84;
+  const step = (Math.PI * 2) / teeth;
+  for (let i = 0; i < teeth; i++) {
+    const a = i * step;
+    const pts: Array<[number, number]> = [
+      [0.0, root], [0.18, root], [0.32, R], [0.62, R], [0.78, root],
+    ];
+    pts.forEach(([frac, r], j) => {
+      const ang = a + step * frac;
+      const px = Math.cos(ang) * r;
+      const py = Math.sin(ang) * r;
+      if (i === 0 && j === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
     });
   }
-  return cols;
-};
-
-const stepColumns = (cols: Column[], dt: number) => {
-  for (const c of cols) {
-    c.y += c.speed * dt * 16;
-    if (c.y - c.trailLen * 16 > H) {
-      c.y = -Math.random() * 80;
-      c.speed = 1.2 + Math.random() * 2.4;
-    }
-    c.charSwapTimer -= dt;
-    if (c.charSwapTimer <= 0) {
-      const idx = Math.floor(Math.random() * c.chars.length);
-      c.chars[idx] = CHARSET[Math.floor(Math.random() * CHARSET.length)];
-      c.charSwapTimer = 0.05 + Math.random() * 0.15;
-    }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, 0, root * 0.78, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.22, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let k = 0; k < 6; k++) {
+    const ang = (k * Math.PI) / 3;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(ang) * R * 0.24, Math.sin(ang) * R * 0.24);
+    ctx.lineTo(Math.cos(ang) * root * 0.74, Math.sin(ang) * root * 0.74);
+    ctx.stroke();
   }
+  ctx.restore();
+  ctx.globalAlpha = 1;
 };
 
-const drawFrame = (
+const rivet = (ctx: CanvasRenderingContext2D, x: number, y: number, r = 3) => {
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.beginPath(); ctx.arc(x + 1, y + 1, r, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#9ff5e0';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#e6fff8';
+  ctx.beginPath(); ctx.arc(x - r / 3, y - r / 3, r / 2.4, 0, Math.PI * 2); ctx.fill();
+};
+
+export const drawAgentsFrame = (
   ctx: CanvasRenderingContext2D,
-  bg: HTMLImageElement,
   faces: HTMLImageElement[],
-  cols: Column[],
   t: number,
 ) => {
-  const bgRatio = bg.width / bg.height;
-  const cRatio = W / H;
-  let dw = W, dh = H, ox = 0, oy = 0;
-  if (bgRatio > cRatio) { dw = H * bgRatio; ox = -(dw - W) / 2; }
-  else { dh = W / bgRatio; oy = -(dh - H) / 2; }
-  const drift = Math.sin(t * 0.4) * 6;
-  ctx.drawImage(bg, ox + drift, oy, dw, dh);
-
-  const overlay = ctx.createLinearGradient(0, 0, 0, H);
-  overlay.addColorStop(0, 'rgba(0, 8, 6, 0.55)');
-  overlay.addColorStop(0.6, 'rgba(0, 10, 8, 0.78)');
-  overlay.addColorStop(1, 'rgba(0, 0, 0, 0.93)');
-  ctx.fillStyle = overlay;
+  // === factory hall background ===
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, '#07332a');
+  bgGrad.addColorStop(0.55, '#04231c');
+  bgGrad.addColorStop(1, '#02120e');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // Matrix rain
-  ctx.font = '14px "Courier New", monospace';
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'left';
-  for (const c of cols) {
-    for (let i = 0; i < c.trailLen; i++) {
-      const y = c.y - i * 16;
-      if (y < -16 || y > H + 16) continue;
-      const alphaBase = (1 - i / c.trailLen);
-      if (i === 0) {
-        ctx.fillStyle = `rgba(200, 255, 230, ${0.85})`;
-        ctx.shadowColor = 'rgba(34, 197, 94, 0.9)';
-        ctx.shadowBlur = 6;
-      } else {
-        ctx.fillStyle = `rgba(34, 197, 94, ${alphaBase * 0.55})`;
-        ctx.shadowBlur = 0;
-      }
-      ctx.fillText(c.chars[i], c.x, y);
-    }
-  }
-  ctx.shadowBlur = 0;
-
-  // Grid
-  ctx.strokeStyle = 'rgba(34, 197, 94, 0.07)';
+  // blueprint grid
+  ctx.strokeStyle = 'rgba(45, 212, 191, 0.05)';
   ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 60) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += 60) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
 
-  // Scan sweep
-  const scanY = ((t * 90) % (H + 200)) - 100;
-  const scanGrad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
-  scanGrad.addColorStop(0, 'rgba(34, 197, 94, 0)');
-  scanGrad.addColorStop(0.5, 'rgba(110, 231, 183, 0.18)');
-  scanGrad.addColorStop(1, 'rgba(34, 197, 94, 0)');
-  ctx.fillStyle = scanGrad;
-  ctx.fillRect(0, scanY - 40, W, 80);
-
-  const vig = ctx.createRadialGradient(W / 2, H / 2, 200, W / 2, H / 2, 820);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.72)');
-  ctx.fillStyle = vig;
+  // light pool
+  const pool = ctx.createRadialGradient(W / 2, 30, 40, W / 2, 30, 560);
+  pool.addColorStop(0, 'rgba(52, 211, 153, 0.20)');
+  pool.addColorStop(1, 'rgba(52, 211, 153, 0)');
+  ctx.fillStyle = pool;
   ctx.fillRect(0, 0, W, H);
 
-  // HUD corner brackets
-  const drawBracket = (cx: number, cy: number, dx: number, dy: number, len = 50) => {
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'square';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy + dy * len);
-    ctx.lineTo(cx, cy);
-    ctx.lineTo(cx + dx * len, cy);
-    ctx.stroke();
-  };
-  drawBracket(28, 28, 1, 1);
-  drawBracket(W - 28, 28, -1, 1);
-  drawBracket(28, H - 28, 1, -1);
-  drawBracket(W - 28, H - 28, -1, -1);
-
-  // Top status ribbon
-  ctx.fillStyle = 'rgba(0, 20, 14, 0.88)';
-  ctx.fillRect(0, 0, W, 32);
-  ctx.strokeStyle = 'rgba(34, 197, 94, 0.6)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0, 32); ctx.lineTo(W, 32); ctx.stroke();
-  ctx.font = '600 11px "Courier New", monospace';
-  ctx.fillStyle = 'rgba(134, 239, 172, 0.95)';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  const cursor = Math.floor(t * 2) % 2 === 0 ? '█' : ' ';
-  ctx.fillText(`> SYS://AGENTS.INIT  ●  STATUS: NOW_LIVE  ●  NEW_PLATFORM_FEATURE ${cursor}`, 18, 16);
-  ctx.textAlign = 'right';
-  ctx.fillText('STARTUPFACTORYHUB.COM', W - 18, 16);
-
-  // === LEFT: hero agent portrait in orbit ring + team thumbs ===
-  const heroCX = 265;
-  const heroCY = 292;
-  const heroR = 148;
-
-  const breath = 0.5 + 0.5 * Math.sin(t * 1.6);
-  const haloR = heroR + 70 + breath * 34;
-  const halo = ctx.createRadialGradient(heroCX, heroCY, 20, heroCX, heroCY, haloR);
-  halo.addColorStop(0, `rgba(34, 197, 94, ${0.32 + breath * 0.22})`);
-  halo.addColorStop(0.5, 'rgba(20, 184, 166, 0.15)');
-  halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = halo;
-  ctx.beginPath();
-  ctx.arc(heroCX, heroCY, haloR, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Rotating dashed orbit ring
-  ctx.save();
-  ctx.strokeStyle = 'rgba(52, 211, 153, 0.65)';
+  // roof trusses
+  ctx.fillStyle = 'rgba(1, 12, 10, 0.92)';
+  ctx.beginPath(); ctx.moveTo(0, 46); ctx.lineTo(300, 46); ctx.lineTo(0, 150); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W, 46); ctx.lineTo(W - 300, 46); ctx.lineTo(W, 150); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(45, 212, 191, 0.2)';
   ctx.lineWidth = 2;
-  ctx.setLineDash([10, 8]);
-  ctx.lineDashOffset = -t * 22;
-  ctx.beginPath();
-  ctx.arc(heroCX, heroCY, heroR + 16, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  // Orbit satellite dots
-  [0, Math.PI * 0.66, Math.PI * 1.33].forEach((off) => {
-    const a = t * 0.5 + off;
-    const dx = heroCX + Math.cos(a) * (heroR + 16);
-    const dy = heroCY + Math.sin(a) * (heroR + 16);
-    ctx.fillStyle = '#6ee7b7';
-    ctx.shadowColor = 'rgba(16, 185, 129, 0.9)';
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.arc(dx, dy, 4, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.shadowBlur = 0;
-  ctx.restore();
+  ctx.beginPath(); ctx.moveTo(0, 150); ctx.lineTo(300, 46); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W, 150); ctx.lineTo(W - 300, 46); ctx.stroke();
 
-  // Hero portrait (cover-cropped into the circle)
-  const hero = faces[0];
-  if (hero) {
-    ctx.save();
+  // gears
+  drawGear(ctx, 1005, 208, 150, 12, t * 0.12, '#14b8a6', 0.30);
+  drawGear(ctx, 836, 116, 64, 9, -t * 0.26, '#6ee7b7', 0.26);
+  drawGear(ctx, 1152, 356, 88, 10, -t * 0.17, '#14b8a6', 0.20);
+
+  // hanging lamps
+  [330, 668].forEach((lx) => {
+    const pulse = 0.78 + 0.22 * Math.sin(t * 2.1 + lx);
+    const cone = ctx.createLinearGradient(0, 96, 0, 314);
+    cone.addColorStop(0, `rgba(150, 255, 215, ${0.16 * pulse})`);
+    cone.addColorStop(1, 'rgba(150, 255, 215, 0)');
+    ctx.fillStyle = cone;
     ctx.beginPath();
-    ctx.arc(heroCX, heroCY, heroR, 0, Math.PI * 2);
-    ctx.clip();
-    const s = Math.max((heroR * 2) / hero.width, (heroR * 2) / hero.height);
-    const iw = hero.width * s;
-    const ih = hero.height * s;
-    ctx.drawImage(hero, heroCX - iw / 2, heroCY - ih / 2, iw, ih);
-    ctx.restore();
-    ctx.strokeStyle = 'rgba(110, 231, 183, 0.85)';
-    ctx.lineWidth = 2.5;
+    ctx.moveTo(lx - 24, 96);
+    ctx.lineTo(lx + 24, 96);
+    ctx.lineTo(lx + 75, 314);
+    ctx.lineTo(lx - 75, 314);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0a2821';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(lx, 46); ctx.lineTo(lx, 76); ctx.stroke();
+    ctx.fillStyle = '#08221b';
     ctx.beginPath();
-    ctx.arc(heroCX, heroCY, heroR, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.moveTo(lx - 26, 96); ctx.lineTo(lx + 26, 96); ctx.lineTo(lx + 12, 74); ctx.lineTo(lx - 12, 74);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#6ee7b7';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(lx - 26, 96); ctx.lineTo(lx + 26, 96); ctx.stroke();
+    const bulb = ctx.createRadialGradient(lx, 101, 2, lx, 101, 30);
+    bulb.addColorStop(0, `rgba(190, 255, 230, ${0.35 * pulse})`);
+    bulb.addColorStop(1, 'rgba(190, 255, 230, 0)');
+    ctx.fillStyle = bulb;
+    ctx.fillRect(lx - 32, 69, 64, 64);
+  });
+
+  // sparks
+  SPARKS.forEach((s) => {
+    const yy = 470 - ((t * s.speed + s.phase * 300) % 300);
+    const xx = s.x + Math.sin(t * 1.3 + s.phase * 9) * 8;
+    const a = 0.6 * Math.max(0, 1 - (470 - yy) / 300) * (0.6 + 0.4 * Math.sin(t * 7 + s.phase * 20));
+    if (a <= 0.02) return;
+    ctx.fillStyle = s.amber ? `rgba(245, 158, 11, ${a})` : `rgba(110, 231, 183, ${a})`;
+    ctx.beginPath(); ctx.arc(xx, yy, 1.6, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // === left text block ===
+  const x0 = 64;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  const blink = Math.floor(t * 2) % 2 === 0;
+  ctx.fillStyle = blink ? '#34ffaa' : '#107855';
+  ctx.beginPath(); ctx.arc(x0 + 4, 108, 4.5, 0, Math.PI * 2); ctx.fill();
+  ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = '#6ee7b7';
+  ctx.fillText('NEW ON THE PLATFORM · NOW LIVE IN YOUR DASHBOARD', x0 + 18, 113);
+
+  ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('THE AGENT', x0, 202);
+
+  const shine = 0.5 + 0.5 * Math.sin(t * 1.4);
+  ctx.font = '800 122px "Helvetica Neue", Arial, sans-serif';
+  const fgrad = ctx.createLinearGradient(0, 232, 0, 348);
+  fgrad.addColorStop(0, '#d1fae5');
+  fgrad.addColorStop(1, '#0d946e');
+  ctx.fillStyle = fgrad;
+  ctx.shadowColor = `rgba(16, 185, 129, ${0.30 + 0.22 * shine})`;
+  ctx.shadowBlur = 24;
+  ctx.fillText('FACTORY', x0, 348);
+  ctx.shadowBlur = 0;
+
+  // steel beam divider
+  const beamBarGrad = ctx.createLinearGradient(x0, 0, x0 + 430, 0);
+  beamBarGrad.addColorStop(0, 'rgba(16, 185, 129, 0.92)');
+  beamBarGrad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+  ctx.fillStyle = beamBarGrad;
+  ctx.fillRect(x0, 356, 430, 5);
+  [x0 + 6, x0 + 220, x0 + 424].forEach((rx) => rivet(ctx, rx, 358, 2));
+
+  ctx.font = '700 17px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.96)';
+  ctx.fillText('Five AI specialists. One production line.', x0, 392);
+  ctx.font = '400 14px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = 'rgba(167, 243, 208, 0.8)';
+  ctx.fillText('They build, launch, research and ship — around the clock.', x0, 418);
+
+  // pill — steel plate style
+  const pill = 'FIND THEM IN THE "AGENTS" TAB — RIGHT AFTER TOOLS';
+  ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
+  const pw = ctx.measureText(pill).width + 34;
+  ctx.fillStyle = 'rgba(7, 40, 32, 0.92)';
+  ctx.beginPath(); ctx.roundRect(x0, 424, pw, 28, 4); ctx.fill();
+  ctx.strokeStyle = 'rgba(110, 231, 183, 0.78)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  rivet(ctx, x0 + 9, 438, 2);
+  rivet(ctx, x0 + pw - 9, 438, 2);
+  ctx.fillStyle = '#e6fff6';
+  ctx.fillText(pill, x0 + 20, 442);
+
+  // === conveyor belt ===
+  ctx.fillStyle = '#041612';
+  ctx.fillRect(0, BELT_TOP, W, BELT_BOT - BELT_TOP);
+  ctx.fillStyle = '#0d4235';
+  ctx.fillRect(0, BELT_TOP, W, 5);
+  ctx.strokeStyle = 'rgba(110, 231, 183, 0.66)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, BELT_TOP); ctx.lineTo(W, BELT_TOP); ctx.stroke();
+
+  // scrolling chevrons
+  const off = -((t * 72) % 48);
+  ctx.strokeStyle = 'rgba(110, 231, 183, 0.13)';
+  ctx.lineWidth = 3;
+  for (let cx = off; cx < W + 48; cx += 48) {
+    [BELT_TOP + 16, BELT_BOT - 26].forEach((yy) => {
+      ctx.beginPath();
+      ctx.moveTo(cx, yy);
+      ctx.lineTo(cx + 12, yy + 8);
+      ctx.lineTo(cx, yy + 16);
+      ctx.stroke();
+    });
   }
 
-  // Team thumbs — the other four specialists
-  const thumbR = 27;
-  const thumbY = 520;
-  const thumbGap = 66;
-  const thumbStartX = heroCX - (thumbGap * (TEAM.length - 1)) / 2;
-  TEAM.forEach((member, i) => {
-    const tx = thumbStartX + i * thumbGap;
+  // scanner beam
+  const p = (t % 3.0) / 3.0;
+  const beamX = -90 + p * (W + 180);
+  const beamGrad = ctx.createLinearGradient(beamX - 55, 0, beamX + 55, 0);
+  beamGrad.addColorStop(0, 'rgba(140, 255, 210, 0)');
+  beamGrad.addColorStop(0.5, 'rgba(140, 255, 210, 0.20)');
+  beamGrad.addColorStop(1, 'rgba(140, 255, 210, 0)');
+  ctx.fillStyle = beamGrad;
+  ctx.fillRect(beamX - 55, BELT_TOP - 44, 110, BELT_BOT - BELT_TOP + 44);
+  ctx.strokeStyle = 'rgba(190, 255, 226, 0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(beamX, BELT_TOP - 44); ctx.lineTo(beamX, BELT_BOT); ctx.stroke();
+
+  // agents on the belt
+  AGENTS_TEAM.forEach((member, i) => {
+    const ax = AGENT_X[i];
+    const bob = Math.sin(t * 2.2 + i * 1.1) * 2.5;
+    const cy = 548 + bob;
+    // station plate
+    ctx.font = '700 13px "Helvetica Neue", Arial, sans-serif';
+    const roleW = ctx.measureText(member.role).width;
+    ctx.font = '400 10px "Helvetica Neue", Arial, sans-serif';
+    const skillW = ctx.measureText(member.skill).width;
+    const pw2 = Math.max(roleW, skillW) + 30;
+    const px0 = ax - pw2 / 2;
+    const py0 = 460;
+    ctx.strokeStyle = 'rgba(120, 200, 180, 0.62)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ax - 20, 448); ctx.lineTo(ax - 20, py0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax + 20, 448); ctx.lineTo(ax + 20, py0); ctx.stroke();
+    ctx.fillStyle = 'rgba(8, 42, 34, 0.97)';
+    ctx.beginPath(); ctx.roundRect(px0, py0, pw2, 36, 4); ctx.fill();
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.75)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    const ledOn = (Math.floor(t * 1.6) + i) % 5 !== 4;
+    ctx.fillStyle = ledOn ? '#4affb2' : '#0e5a42';
+    ctx.beginPath(); ctx.arc(px0 + 11, py0 + 12, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.font = '700 13px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(member.role, ax + 6, py0 + 16);
+    ctx.font = '400 10px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(167, 243, 208, 0.75)';
+    ctx.fillText(member.skill, ax + 6, py0 + 30);
+    ctx.textAlign = 'left';
+    // portrait
     const img = faces[i];
-    const active = Math.floor(t * 1.2) % TEAM.length === i;
+    const near = Math.abs(beamX - ax) < 78;
     if (img) {
+      if (near) {
+        const halo = ctx.createRadialGradient(ax, cy, 10, ax, cy, 62);
+        halo.addColorStop(0, 'rgba(52, 255, 180, 0.28)');
+        halo.addColorStop(1, 'rgba(52, 255, 180, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(ax, cy, 62, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.save();
       ctx.beginPath();
-      ctx.arc(tx, thumbY, thumbR, 0, Math.PI * 2);
+      ctx.arc(ax, cy, 42, 0, Math.PI * 2);
       ctx.clip();
-      const s = Math.max((thumbR * 2) / img.width, (thumbR * 2) / img.height);
-      ctx.drawImage(img, tx - (img.width * s) / 2, thumbY - (img.height * s) / 2, img.width * s, img.height * s);
+      const s = Math.max(84 / img.width, 84 / img.height);
+      ctx.drawImage(img, ax - (img.width * s) / 2, cy - (img.height * s) / 2, img.width * s, img.height * s);
       ctx.restore();
     }
-    ctx.strokeStyle = active ? 'rgba(110, 231, 183, 1)' : 'rgba(52, 211, 153, 0.45)';
-    ctx.lineWidth = active ? 2.5 : 1.5;
-    ctx.shadowColor = active ? 'rgba(16, 185, 129, 0.8)' : 'rgba(0,0,0,0)';
-    ctx.shadowBlur = active ? 10 : 0;
+    ctx.strokeStyle = near ? 'rgba(160, 255, 220, 1)' : 'rgba(52, 211, 153, 0.55)';
+    ctx.lineWidth = near ? 3 : 2;
+    ctx.beginPath(); ctx.arc(ax, cy, 42, 0, Math.PI * 2); ctx.stroke();
+    // base stand
+    ctx.fillStyle = '#0a3026';
     ctx.beginPath();
-    ctx.arc(tx, thumbY, thumbR, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.font = '600 8.5px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = active ? 'rgba(167, 243, 208, 1)' : 'rgba(255, 255, 255, 0.65)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(member.role, tx, thumbY + thumbR + 15);
+    ctx.moveTo(ax - 26, cy + 44);
+    ctx.lineTo(ax + 26, cy + 44);
+    ctx.lineTo(ax + 18, cy + 52);
+    ctx.lineTo(ax - 18, cy + 52);
+    ctx.closePath(); ctx.fill();
   });
 
-  // === RIGHT CONTENT BLOCK ===
-  const rightX = 530;
+  // fascia
+  ctx.fillStyle = '#051a15';
+  ctx.fillRect(0, BELT_BOT, W, H - BELT_BOT);
+  ctx.strokeStyle = 'rgba(110, 231, 183, 0.47)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, BELT_BOT); ctx.lineTo(W, BELT_BOT); ctx.stroke();
+  ctx.font = '700 12px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(190, 245, 228, 0.92)';
+  ctx.textAlign = 'center';
+  ctx.fillText('CREATE ▸ CUSTOMIZE ▸ CHAIN ▸ RUN   ·   POWERED BY META LLAMA', W / 2, BELT_BOT + 18);
   ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
 
-  ctx.font = '600 12px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
-  ctx.fillText('NEW PLATFORM FEATURE  ·  NOW LIVE IN EVERY DASHBOARD', rightX, 130);
+  // hazard stripe (scrolling)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, H - 12, W, 12);
+  ctx.clip();
+  const hoff = (t * 20) % 32;
+  for (let hx = -32 + hoff; hx < W + 32; hx += 32) {
+    ctx.fillStyle = '#10b981';
+    ctx.beginPath();
+    ctx.moveTo(hx, H); ctx.lineTo(hx + 16, H); ctx.lineTo(hx + 28, H - 12); ctx.lineTo(hx + 12, H - 12);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#020e0b';
+    ctx.beginPath();
+    ctx.moveTo(hx + 16, H); ctx.lineTo(hx + 32, H); ctx.lineTo(hx + 44, H - 12); ctx.lineTo(hx + 28, H - 12);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
 
-  const flicker = 0.85 + 0.15 * Math.sin(t * 14) + 0.05 * Math.sin(t * 33);
-  const glowPulse = 22 + 16 * (0.5 + 0.5 * Math.sin(t * 2.2));
-  ctx.font = '800 124px "Helvetica Neue", Arial, sans-serif';
-  const titleGrad = ctx.createLinearGradient(rightX, 150, rightX, 240);
-  titleGrad.addColorStop(0, '#ecfdf5');
-  titleGrad.addColorStop(1, '#10b981');
-  ctx.fillStyle = titleGrad;
-  ctx.shadowColor = `rgba(16, 185, 129, ${0.55 * flicker})`;
-  ctx.shadowBlur = glowPulse;
-  ctx.globalAlpha = flicker;
-  ctx.fillText('AGENTS', rightX, 240);
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
-
-  ctx.font = '900 italic 52px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
-  const progGrad = ctx.createLinearGradient(rightX, 250, rightX, 295);
-  progGrad.addColorStop(0, '#ffffff');
-  progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.9)');
-  ctx.fillStyle = progGrad;
-  ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
-  ctx.shadowBlur = 14;
-  ctx.fillText('YOUR AI TEAM', rightX, 290);
-  ctx.shadowBlur = 0;
-
-  const divGrad = ctx.createLinearGradient(rightX, 0, rightX + 400, 0);
-  divGrad.addColorStop(0, 'rgba(34, 197, 94, 0.9)');
-  divGrad.addColorStop(1, 'rgba(34, 197, 94, 0)');
-  ctx.strokeStyle = divGrad;
+  // === top sign plate (above everything) ===
+  const plate = ctx.createLinearGradient(0, 0, 0, 46);
+  plate.addColorStop(0, '#14503f');
+  plate.addColorStop(1, '#0a3529');
+  ctx.fillStyle = plate;
+  ctx.fillRect(0, 0, W, 46);
+  ctx.strokeStyle = 'rgba(110, 231, 183, 0.86)';
   ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(rightX, 308);
-  ctx.lineTo(rightX + 400, 308);
-  ctx.stroke();
-
-  ctx.font = '500 16px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-  ctx.fillText('Create your own AI agents — chain them into pipelines', rightX, 332);
-
-  ctx.font = '400 12.5px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-  ctx.fillText('Powered by Meta Llama · 5 specialists · Solo or pipeline runs', rightX, 352);
-
-  // Highlight pill
-  const ddY = 370;
-  const ddText = 'NOW LIVE — FIND THE "AGENTS" TAB AFTER TOOLS';
-  ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
-  const ddW = ctx.measureText(ddText).width + 24;
-  ctx.fillStyle = '#10b981';
-  ctx.beginPath();
-  ctx.roundRect(rightX, ddY, ddW, 26, 4);
-  ctx.fill();
-  ctx.strokeStyle = `rgba(167, 243, 208, ${0.7 + 0.3 * Math.sin(t * 3)})`;
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
-  ctx.fillStyle = '#022c22';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(ddText, rightX + 12, ddY + 14);
-  ctx.textBaseline = 'alphabetic';
-
-  // Specialist chips
-  const chips = TEAM.map((m) => m.role);
-  let chipX = rightX;
-  const chipY = 410;
-  ctx.font = '600 10.5px "Helvetica Neue", Arial, sans-serif';
-  chips.forEach((c) => {
-    const tw = ctx.measureText(c).width;
-    const cw = tw + 18;
-    ctx.fillStyle = 'rgba(6, 78, 59, 0.78)';
-    ctx.beginPath();
-    ctx.roundRect(chipX, chipY, cw, 22, 3);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = '#a7f3d0';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(c, chipX + 9, chipY + 12);
-    chipX += cw + 6;
-  });
-  ctx.textBaseline = 'alphabetic';
-
-  // Workflow row — lights up in sequence
-  const steps = [
-    { n: '01', t: 'CREATE' },
-    { n: '02', t: 'CUSTOMIZE' },
-    { n: '03', t: 'CHAIN' },
-    { n: '04', t: 'RUN' },
-  ];
-  const pY = 510;
-  const pSpan = 600;
-  const pStep = pSpan / steps.length;
-  steps.forEach((p, i) => {
-    const px = rightX + i * pStep;
-    const phase = (t * 1.2) % steps.length;
-    const dist = Math.abs(((phase - i + steps.length) % steps.length));
-    const hi = Math.max(0, 1 - dist * 0.8);
-    ctx.font = '800 30px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = `rgba(${110 + hi * 145}, ${231 + hi * 24}, ${183 + hi * 50}, ${0.9 + hi * 0.1})`;
-    ctx.shadowColor = 'rgba(16, 185, 129, 0.7)';
-    ctx.shadowBlur = 8 + hi * 14;
-    ctx.fillText(p.n, px, pY);
-    ctx.shadowBlur = 0;
-    ctx.font = '600 11px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
-    ctx.fillText(p.t, px, pY + 20);
-  });
-
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
+  ctx.beginPath(); ctx.moveTo(0, 45); ctx.lineTo(W, 45); ctx.stroke();
+  rivet(ctx, 18, 23, 4);
+  rivet(ctx, W - 18, 23, 4);
+  ctx.font = '800 16px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('STARTUP FACTORY HUB', 40, 29);
+  ctx.font = '400 11px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(110, 231, 183, 0.94)';
+  const rtxt = 'AGENT PRODUCTION LINE · BAY 01 · SHIFT 24/7';
+  ctx.fillText(rtxt, W - 40 - ctx.measureText(rtxt).width, 28);
 };
 
 const AgentsAnimatedBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const bgRef = useRef<HTMLImageElement | null>(null);
   const facesRef = useRef<HTMLImageElement[]>([]);
-  const colsRef = useRef<Column[]>(initColumns());
   const rafRef = useRef<number | null>(null);
   const lastTRef = useRef<number>(performance.now());
   const tSecRef = useRef<number>(0);
@@ -404,23 +391,18 @@ const AgentsAnimatedBanner = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const bg = new window.Image();
-    const faces: HTMLImageElement[] = TEAM.map(() => new window.Image());
+    const faces: HTMLImageElement[] = AGENTS_TEAM.map(() => new window.Image());
     let loaded = 0;
-    const total = 1 + faces.length;
     const done = () => {
       loaded++;
-      if (loaded === total) {
-        bgRef.current = bg;
+      if (loaded === faces.length) {
         facesRef.current = faces;
         setReady(true);
       }
     };
-    bg.onload = done;
-    bg.src = cosmicBg;
     faces.forEach((img, i) => {
       img.onload = done;
-      img.src = TEAM[i].src;
+      img.src = AGENTS_TEAM[i].src;
     });
   }, []);
 
@@ -442,8 +424,7 @@ const AgentsAnimatedBanner = () => {
       const dt = Math.min(0.05, (now - lastTRef.current) / 1000);
       lastTRef.current = now;
       tSecRef.current += dt;
-      stepColumns(colsRef.current, dt);
-      drawFrame(ctx, bgRef.current!, facesRef.current, colsRef.current, tSecRef.current);
+      drawAgentsFrame(ctx, facesRef.current, tSecRef.current);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -453,7 +434,7 @@ const AgentsAnimatedBanner = () => {
   }, [ready]);
 
   const handleDownloadGif = useCallback(async () => {
-    if (!ready || !bgRef.current) {
+    if (!ready) {
       toast.error('Assets not loaded yet');
       return;
     }
@@ -479,8 +460,6 @@ const AgentsAnimatedBanner = () => {
       work.height = H;
       const wCtx = work.getContext('2d')!;
 
-      const exportCols = initColumns();
-
       const gif = new GIF({
         workers: 2,
         quality: 8,
@@ -492,8 +471,7 @@ const AgentsAnimatedBanner = () => {
 
       for (let f = 0; f < FRAMES; f++) {
         const t = (f / FRAMES) * DURATION;
-        stepColumns(exportCols, 1 / FPS);
-        drawFrame(wCtx, bgRef.current!, facesRef.current, exportCols, t);
+        drawAgentsFrame(wCtx, facesRef.current, t);
         exCtx.clearRect(0, 0, EXPORT_W, EXPORT_H);
         exCtx.imageSmoothingEnabled = true;
         exCtx.imageSmoothingQuality = 'high';
@@ -511,7 +489,7 @@ const AgentsAnimatedBanner = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'agents-animated.gif';
+        a.download = 'agents-factory-animated.gif';
         a.click();
         URL.revokeObjectURL(url);
         setIsGenerating(false);
@@ -533,11 +511,11 @@ const AgentsAnimatedBanner = () => {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Bot className="w-5 h-5 text-emerald-400" />
-            Agents — Animated GIF
+            <Factory className="w-5 h-5 text-emerald-400" />
+            Agents — The Agent Factory — Animated GIF
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Live matrix rain · pulsing AGENTS glow · rotating orbit ring · team thumbs light in sequence · sequential workflow wave
+            Rotating gears · moving conveyor belt · scanner beam sweeps the line · blinking station LEDs · scrolling hazard stripe
           </p>
         </div>
         <Button onClick={handleDownloadGif} disabled={!ready || isGenerating} size="sm">
