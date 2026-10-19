@@ -148,7 +148,7 @@ const INTEGRATION_DEFS: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { key: "lightpaper", label: "Lite Paper", icon: FileText },
+  { key: "lightpaper", label: "LightPaper", icon: FileText },
   { key: "crm", label: "CRM", icon: KanbanSquare },
   { key: "journey", label: "Journey", icon: Route },
   { key: "resourcemap", label: "Resource Map", icon: Globe },
@@ -680,7 +680,7 @@ export default function SFHCallAgents() {
     setSendingKey(busyKey);
     try {
       if (key === "lightpaper") {
-        // Lite Paper documents store the editor payload from buildSaveContent()
+        // LightPaper documents store the editor payload from buildSaveContent()
         // in LightPaperDocument: page HTML + editor defaults.
         const escapeHtml = (s: string) =>
           s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -718,7 +718,7 @@ export default function SFHCallAgents() {
           .select("id")
           .single();
         if (error) throw error;
-        // Hand the document straight to the Lite Paper editor: it restores
+        // Hand the document straight to the LightPaper editor: it restores
         // this draft on mount, so the new document opens ready to read/edit.
         await flushDraftNow({
           projectId: created.id,
@@ -726,7 +726,7 @@ export default function SFHCallAgents() {
           content,
           savedAt: Date.now(),
         });
-        toast.success("Sent to Lite Paper — opening it now");
+        toast.success("Sent to LightPaper — opening it now");
         navigate("/lightpaper");
       } else if (key === "crm") {
         // Same lazy bootstrap as CRMBoard.initializePipeline: first pipeline
