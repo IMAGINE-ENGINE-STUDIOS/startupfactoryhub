@@ -24,6 +24,8 @@ import AcceleratedFundraisingBanner from '@/components/marketing/AcceleratedFund
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import BasicPlanBanner from '@/components/marketing/BasicPlanBanner';
+import AgentsBanner from '@/components/marketing/AgentsBanner';
+import AgentsAnimatedBanner from '@/components/marketing/AgentsAnimatedBanner';
 
 
 
@@ -3130,6 +3132,12 @@ const Marketing = () => {
 
           {/* Banner 16 — Venezuela Rebuild Initiative */}
           <VenezuelaRebuildBanner />
+
+          {/* Banner 17 - Agents (new platform feature) */}
+          <AgentsBanner />
+
+          {/* Banner 18 - Agents ANIMATED GIF */}
+          <AgentsAnimatedBanner />
 
 
 
