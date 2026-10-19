@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
+import { Bot, DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import LiveRooms from '@/components/LiveRooms';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import { format, parseISO } from 'date-fns';
 
@@ -638,6 +639,7 @@ export default function InvestorDashboard() {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'call-agents', icon: Bot, label: 'SFH Call Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -922,6 +924,10 @@ export default function InvestorDashboard() {
           <TabsContent value="tools" className="space-y-4">
             <MVPReferralCard />
             <AIFeaturesHub />
+          </TabsContent>
+
+          <TabsContent value="call-agents" className="space-y-4">
+            <SFHCallAgents />
           </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">

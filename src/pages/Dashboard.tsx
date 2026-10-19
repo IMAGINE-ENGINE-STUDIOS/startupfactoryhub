@@ -9,6 +9,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 
 import MatchingSystem from '@/components/MatchingSystem';
@@ -36,7 +37,7 @@ import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import BookingsList from '@/components/BookingsList';
 import BookingLinkBar from '@/components/BookingLinkBar';
 import MeetingTranscriptDialog, { type MeetingTranscriptMeta } from '@/components/MeetingTranscriptDialog';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink, FileText } from "lucide-react";
+import { Bot, Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink, FileText } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
@@ -381,6 +382,7 @@ const Dashboard = () => {
               { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
               { value: 'resources',    icon: Globe,          label: t('nav.resources') },
               { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
+              { value: 'call-agents', icon: Bot,            label: 'SFH Call Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network',      icon: Network,        label: 'Net' },
               { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
@@ -619,6 +621,13 @@ const Dashboard = () => {
               
               <MVPReferralCard />
               <AIFeaturesHub />
+            </TabsContent>
+          }
+
+          {/* SFH Call Agents Tab */}
+          {activeTab === "call-agents" &&
+        <TabsContent value="call-agents" className="space-y-4">
+              <SFHCallAgents />
             </TabsContent>
           }
 

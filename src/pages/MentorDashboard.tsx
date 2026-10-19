@@ -15,6 +15,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
+import SFHCallAgents from "@/components/call-agents/SFHCallAgents";
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MentorshipRequests from "@/components/MentorshipRequests";
 
@@ -41,7 +42,7 @@ import MeetingsHubHeader from "@/components/MeetingsHubHeader";
 import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
-import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
+import { Bot, Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -125,6 +126,7 @@ const MentorDashboard = () => {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'call-agents', icon: Bot, label: 'SFH Call Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -320,6 +322,10 @@ const MentorDashboard = () => {
           <TabsContent value="tools" className="space-y-6">
             <MVPReferralCard />
             <AIFeaturesHub />
+          </TabsContent>
+
+          <TabsContent value="call-agents" className="space-y-6">
+            <SFHCallAgents />
           </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">
