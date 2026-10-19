@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark, agentGreeter } from "@/assets/agents/characters";
+import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark, agentGreeter, agentGuardian } from "@/assets/agents/characters";
 import { agentChatBus } from "@/lib/agentChatBus";
 
 // ── Startup Factory Hub glassmorphism: light, airy glass panels in the
@@ -173,7 +173,7 @@ interface CallAgent {
 }
 
 interface RunStep {
-  agent_id: string;
+  agent_id: string | null;
   name: string;
   model: string;
   output: string;
@@ -301,6 +301,9 @@ export default function SFHCallAgents() {
   const [result, setResult] = useState<RunResult | null>(null);
   const [sendingKey, setSendingKey] = useState<string | null>(null);
 
+  const [fundraiserFocus, setFundraiserFocus] = useState("");
+  const [fundraiserRunning, setFundraiserRunning] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -417,6 +420,41 @@ export default function SFHCallAgents() {
     );
   };
 
+  // Mirror a finished run into the Genius bubble (live, via the bus) and
+  // into the saved Genius chat logs. Best-effort only — a mirror failure
+  // must never fail a completed run.
+  const mirrorRunToGenius = async (
+    runData: RunResult,
+    task: string,
+    busSteps: { agentName: string; persona: string; output: string }[]
+  ) => {
+    try {
+      const first = busSteps[0];
+      if (first && user) {
+        await (supabase as any).from("genius_ai_chat_logs").insert({
+          user_id: user.id,
+          title: `Agent · ${first.agentName} (${first.persona})`,
+          messages: [
+            { role: "user", content: task },
+            ...runData.steps.map((s) => ({ role: "assistant", content: s.output })),
+          ],
+          tool_used: "sfh-agent",
+        });
+      }
+      if (first) {
+        agentChatBus.publish({
+          agentName: first.agentName,
+          persona: first.persona,
+          task,
+          steps: busSteps,
+          at: Date.now(),
+        });
+      }
+    } catch {
+      /* Genius mirroring is best-effort. */
+    }
+  };
+
   const handleRun = async () => {
     if (!message.trim()) {
       setError("Write a message for the agent to work on.");
@@ -442,46 +480,51 @@ export default function SFHCallAgents() {
       const runData = data as RunResult;
       setResult(runData);
       if (data.credits?.balance != null) setBalance(data.credits.balance);
-      // Mirror the finished run into the Genius bubble (live, via the bus)
-      // and into the saved Genius chat logs. Best-effort only — a mirror
-      // failure must never fail a completed run.
-      try {
-        const busSteps = runData.steps.map((s) => {
-          const agent = agents.find((a) => a.id === s.agent_id);
-          return {
-            agentName: s.name,
-            persona: personaForModel(agent?.model ?? s.model).role,
-            output: s.output,
-          };
-        });
-        const first = busSteps[0];
-        if (first && user) {
-          await (supabase as any).from("genius_ai_chat_logs").insert({
-            user_id: user.id,
-            title: `Agent · ${first.agentName} (${first.persona})`,
-            messages: [
-              { role: "user", content: message.trim() },
-              ...runData.steps.map((s) => ({ role: "assistant", content: s.output })),
-            ],
-            tool_used: "sfh-agent",
-          });
-        }
-        if (first) {
-          agentChatBus.publish({
-            agentName: first.agentName,
-            persona: first.persona,
-            task: message.trim(),
-            steps: busSteps,
-            at: Date.now(),
-          });
-        }
-      } catch {
-        /* Genius mirroring is best-effort. */
-      }
+      const busSteps = runData.steps.map((s) => {
+        const agent = agents.find((a) => a.id === s.agent_id);
+        return {
+          agentName: s.name,
+          persona: personaForModel(agent?.model ?? s.model).role,
+          output: s.output,
+        };
+      });
+      await mirrorRunToGenius(runData, message.trim(), busSteps);
     } catch (e) {
       setError(e instanceof Error ? e.message : "The run failed.");
     } finally {
       setRunning(false);
+    }
+  };
+
+  // The Fundraiser special agent: one featured run that feeds the exact
+  // same result state and Genius mirror as a normal run.
+  const handleFundraiserRun = async () => {
+    setFundraiserRunning(true);
+    setError(null);
+    setResult(null);
+    try {
+      const focus = fundraiserFocus.trim();
+      const data = await callAgentsApi({
+        action: "run_fundraiser",
+        ...(focus ? { focus } : {}),
+      });
+      const runData = data as RunResult;
+      setResult(runData);
+      if (data.credits?.balance != null) setBalance(data.credits.balance);
+      const task = focus || "Find investors and draft my application";
+      await mirrorRunToGenius(
+        runData,
+        task,
+        runData.steps.map((s) => ({
+          agentName: "Fundraiser",
+          persona: "Fundraising specialist",
+          output: s.output,
+        }))
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The Fundraiser run failed.");
+    } finally {
+      setFundraiserRunning(false);
     }
   };
 
@@ -884,6 +927,72 @@ export default function SFHCallAgents() {
               })}
             </div>
           )}
+        </section>
+
+        {/* ── Special agent — Fundraiser ─────────────────── */}
+        <section className="rounded-[2rem] bg-gradient-to-br from-emerald-400/50 via-border to-teal-400/50 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.10)]">
+          <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
+            <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-emerald-300/25 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 right-10 h-56 w-56 rounded-full bg-teal-300/20 blur-3xl" />
+            <div className="relative flex flex-col gap-6 px-6 py-6 sm:px-8 lg:flex-row lg:items-center">
+              <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                <div className="ca-float shrink-0">
+                  <img
+                    src={agentGuardian}
+                    alt="Fundraiser character"
+                    className="h-36 w-36 object-contain drop-shadow-[0_18px_24px_rgba(6,78,59,0.30)]"
+                  />
+                </div>
+                <div className="max-w-md">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <h3 className="text-2xl font-bold tracking-tight text-foreground">
+                      Fundraiser
+                    </h3>
+                    <span className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_6px_14px_rgba(16,185,129,0.3)]">
+                      Special agent
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    Fundraising specialist
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Finds investors who fit your startup and drafts your applications
+                    from your profile, deck, investor Q&amp;A, company profile and
+                    journey stage.
+                  </p>
+                </div>
+              </div>
+              <div className="flex w-full flex-col gap-3 lg:ml-auto lg:max-w-sm">
+                <div className="space-y-2">
+                  <Label htmlFor="ca-fundraiser-focus" className={FIELD_LABEL}>
+                    Focus (optional)
+                  </Label>
+                  <Input
+                    id="ca-fundraiser-focus"
+                    value={fundraiserFocus}
+                    onChange={(e) => setFundraiserFocus(e.target.value)}
+                    placeholder="Focus — e.g. seed investors in Florida, or a firm you have in mind"
+                    className={GLASS_INPUT}
+                  />
+                </div>
+                <Button
+                  onClick={handleFundraiserRun}
+                  disabled={fundraiserRunning}
+                  className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 py-6 text-base font-semibold text-white shadow-[0_10px_26px_rgba(16,185,129,0.4)] transition hover:from-emerald-600 hover:to-teal-600 disabled:shadow-none"
+                >
+                  {fundraiserRunning ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-5 w-5" />
+                  )}
+                  {fundraiserRunning ? "Working…" : "Run Fundraiser"}
+                </Button>
+                <p className="text-center text-xs text-muted-foreground">
+                  Your shortlist and draft appear with the run results below.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ── 3 · Workspace ──────────────────────────────── */}
