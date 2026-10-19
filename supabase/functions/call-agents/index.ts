@@ -82,6 +82,282 @@ function cleanText(raw: string): string {
   return text.trim();
 }
 
+// ─────────────── Agent platform capabilities ───────────────
+// Web browsing for agents with the "Web search" tool, share tokens for
+// agent configs, and an encrypted per-user credential vault. IMPORTANT:
+// fetched web content is DATA, never instructions — it is appended to the
+// user message as clearly delimited blocks. Decrypted vault secrets live
+// only inside applyVaultAuth's scope: they are never logged, never
+// returned, and never placed in an LLM prompt.
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+const fetchWithTimeout = async (url: string, init: RequestInit, ms = 8000): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+// SSRF guard: refuse localhost / .local names and private or link-local IP
+// literals, both for the requested URL and the final URL after redirects.
+function isPrivateHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/\.$/, "");
+  if (h === "localhost" || h.endsWith(".local")) return true;
+  if (h === "::1" || h === "0.0.0.0") return true;
+  const v4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const a = Number(v4[1]);
+    const b = Number(v4[2]);
+    if (a === 127 || a === 10) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 0) return true;
+  }
+  return false;
+}
+
+// Fetch a page and reduce it to plain text (max 6000 chars). Any failure,
+// redirect to a private host, or non-text response returns null.
+async function webFetchText(
+  url: string,
+  extraHeaders: Record<string, string> = {}
+): Promise<string | null> {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    if (isPrivateHost(parsed.hostname)) return null;
+    const resp = await fetchWithTimeout(url, {
+      headers: { "User-Agent": BROWSER_UA, Accept: "text/html,text/plain,*/*", ...extraHeaders },
+    });
+    let finalHost = "";
+    try {
+      finalHost = new URL(resp.url).hostname;
+    } catch {
+      /* response had no final URL — treat as a failure below */
+    }
+    if (!finalHost || isPrivateHost(finalHost)) return null;
+    if (!resp.ok) return null;
+    const ct = (resp.headers.get("content-type") || "").toLowerCase();
+    if (ct && !ct.includes("text") && !ct.includes("html") && !ct.includes("json")) return null;
+    let text = await resp.text();
+    text = text.replace(/<script[\s\S]*?<\/script>/gi, " ");
+    text = text.replace(/<style[\s\S]*?<\/style>/gi, " ");
+    text = text.replace(/<[^>]+>/g, " ");
+    text = text
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0?39;|&apos;/gi, "'");
+    text = text.replace(/\s+/g, " ").trim();
+    return text ? text.slice(0, 6000) : null;
+  } catch {
+    return null;
+  }
+}
+
+interface WebResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
+// Best-effort web search: Tavily when TAVILY_API_KEY is configured,
+// otherwise a regex parse of DuckDuckGo's HTML endpoint. Failures → [].
+async function webSearch(query: string): Promise<WebResult[]> {
+  const q = String(query ?? "").trim().slice(0, 200);
+  if (!q) return [];
+  try {
+    const tavilyKey = Deno.env.get("TAVILY_API_KEY");
+    if (tavilyKey) {
+      try {
+        const resp = await fetchWithTimeout("https://api.tavily.com/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tavilyKey}`,
+          },
+          body: JSON.stringify({ query: q, max_results: 5, search_depth: "basic" }),
+        });
+        if (resp.ok) {
+          const data = await resp.json().catch(() => ({}));
+          const results = (Array.isArray(data?.results) ? data.results : [])
+            .slice(0, 5)
+            .map((r: any) => ({
+              title: String(r?.title ?? ""),
+              url: String(r?.url ?? ""),
+              snippet: String(r?.content ?? "").slice(0, 400),
+            }))
+            .filter((r: WebResult) => /^https?:\/\//i.test(r.url));
+          if (results.length) return results;
+        }
+      } catch {
+        /* fall through to the DuckDuckGo parse */
+      }
+    }
+    const resp = await fetchWithTimeout(
+      `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`,
+      { headers: { "User-Agent": BROWSER_UA } }
+    );
+    if (!resp.ok) return [];
+    const html = await resp.text();
+    const out: WebResult[] = [];
+    const anchorRe = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let m: RegExpExecArray | null;
+    while ((m = anchorRe.exec(html)) && out.length < 5) {
+      const rawHref = m[1];
+      let resultUrl = rawHref;
+      const uddg = rawHref.match(/[?&]uddg=([^&"]+)/);
+      if (uddg) {
+        try {
+          resultUrl = decodeURIComponent(uddg[1]);
+        } catch {
+          resultUrl = uddg[1];
+        }
+      }
+      if (!/^https?:\/\//i.test(resultUrl)) continue;
+      const title = m[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      const rest = html.slice(m.index, m.index + 6000);
+      const sMatch = rest.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i);
+      const snippet = sMatch
+        ? sMatch[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 400)
+        : "";
+      out.push({ title, url: resultUrl, snippet });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+function extractUrls(text: string, max = 2): string[] {
+  const out: string[] = [];
+  const re = /https?:\/\/[^\s<>"')\]]+/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) && out.length < max) {
+    const u = m[0].replace(/[.,;:!?]+$/, "");
+    if (!out.includes(u)) out.push(u);
+  }
+  return out;
+}
+
+// ─── Credential vault crypto (WebCrypto, AES-GCM) ───
+function b64encode(bytes: Uint8Array): string {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s);
+}
+function b64decode(b64: string): Uint8Array {
+  const s = atob(b64);
+  const bytes = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+  return bytes;
+}
+
+// Key = SHA-256 of CREDENTIALS_ENC_KEY, imported as AES-GCM. Returns null
+// when the key is not configured — vault actions then report a setup state
+// instead of throwing.
+async function vaultKey(): Promise<CryptoKey | null> {
+  const secret = Deno.env.get("CREDENTIALS_ENC_KEY");
+  if (!secret) return null;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function encryptSecret(plain: string, key: CryptoKey) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(plain)
+  );
+  return { ciphertextB64: b64encode(new Uint8Array(ct)), ivB64: b64encode(iv) };
+}
+
+async function decryptSecret(ciphertextB64: string, ivB64: string, key: CryptoKey): Promise<string> {
+  const pt = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: b64decode(ivB64) },
+    key,
+    b64decode(ciphertextB64)
+  );
+  return new TextDecoder().decode(pt);
+}
+
+// When the URL's host matches one of the caller's stored credentials
+// (site_url host), return a Basic Authorization header built from it. The
+// decrypted value is used only to build the header in this scope.
+async function applyVaultAuth(
+  url: string,
+  userId: string,
+  admin: any,
+  key: CryptoKey | null
+): Promise<Record<string, string>> {
+  if (!key) return {};
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    const { data: creds } = await admin
+      .from("user_credentials")
+      .select("site_url, username, secret_ciphertext, secret_iv")
+      .eq("user_id", userId);
+    for (const c of (creds ?? []) as any[]) {
+      if (!c.username || !c.secret_ciphertext || !c.secret_iv) continue;
+      let credHost = "";
+      try {
+        credHost = new URL(String(c.site_url ?? "")).hostname.toLowerCase();
+      } catch {
+        continue;
+      }
+      if (credHost && credHost === host) {
+        const plain = await decryptSecret(String(c.secret_ciphertext), String(c.secret_iv), key);
+        return {
+          Authorization:
+            "Basic " + b64encode(new TextEncoder().encode(`${c.username}:${plain}`)),
+        };
+      }
+    }
+  } catch {
+    /* no matching credential or a decrypt miss — fetch happens without it */
+  }
+  return {};
+}
+
+// Build the browsing context appended to a "Web search" agent's prompt:
+// fetched pages for URLs in the input (vault auth where it matches) plus
+// one search on the task. Everything here is best-effort — on any failure
+// the block just comes back empty and the run proceeds as before.
+async function browseForStep(
+  input: string,
+  userId: string,
+  admin: any,
+  vault: CryptoKey | null
+): Promise<string> {
+  const blocks: string[] = [];
+  for (const url of extractUrls(input, 2)) {
+    const headers = await applyVaultAuth(url, userId, admin, vault);
+    const content = await webFetchText(url, headers);
+    if (content) blocks.push(`WEB PAGE CONTENT from ${url}:\n${content}`);
+  }
+  const results = await webSearch(input);
+  if (results.length) {
+    blocks.push(
+      "WEB SEARCH RESULTS:\n" +
+        results.map((r) => `- ${r.title} — ${r.url}\n  ${r.snippet}`).join("\n")
+    );
+  }
+  return blocks.length ? "\n\n" + blocks.join("\n\n") : "";
+}
+
+function randomShareToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join(""); // 32 hex chars
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -202,6 +478,141 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ───────────────── share_agent ─────────────────
+    // One reusable public token per agent; anyone with the token can import
+    // a copy of the configuration (never run history or credentials).
+    if (action === "share_agent") {
+      const agentId = String(body.agent_id ?? "");
+      if (!agentId) return json({ error: "Agent id is required." }, 400);
+      const { data: owned } = await admin
+        .from("call_agents")
+        .select("id")
+        .eq("id", agentId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!owned) return json({ error: "Agent not found." }, 404);
+      const { data: existing } = await admin
+        .from("call_agent_shares")
+        .select("token")
+        .eq("agent_id", agentId)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+      if (existing?.token) return json({ ok: true, token: existing.token });
+      const token = randomShareToken();
+      const { error } = await admin
+        .from("call_agent_shares")
+        .insert({ agent_id: agentId, owner_id: user.id, token });
+      if (error) {
+        console.error("call-agents share insert error:", error);
+        return json({ error: "Could not create the share link." }, 500);
+      }
+      return json({ ok: true, token });
+    }
+
+    // ───────────────── import_share ─────────────────
+    // Copies the shared agent's configuration into the caller's account.
+    if (action === "import_share") {
+      const token = String(body.token ?? "").trim();
+      if (!token) return json({ error: "A share token is required." }, 400);
+      const { data: share } = await admin
+        .from("call_agent_shares")
+        .select("agent_id")
+        .eq("token", token)
+        .maybeSingle();
+      if (!share) return json({ error: "That share link is not valid." }, 404);
+      const { data: source } = await admin
+        .from("call_agents")
+        .select("*")
+        .eq("id", share.agent_id)
+        .maybeSingle();
+      if (!source) return json({ error: "That share link is not valid." }, 404);
+      const { data: copy, error } = await admin
+        .from("call_agents")
+        .insert({
+          user_id: user.id,
+          name: String(source.name ?? "Shared agent").slice(0, 120),
+          description: source.description ?? null,
+          model: MODELS[String(source.model)] ? String(source.model) : DEFAULT_MODEL,
+          system_prompt: String(source.system_prompt ?? ""),
+          temperature: clampTemp(source.temperature),
+          max_tokens: clampTokens(source.max_tokens),
+          tools: Array.isArray(source.tools)
+            ? source.tools.filter((t: unknown) => typeof t === "string").slice(0, 20)
+            : [],
+          coordination:
+            source.coordination && typeof source.coordination === "object" && !Array.isArray(source.coordination)
+              ? source.coordination
+              : {},
+          is_active: true,
+        })
+        .select("*")
+        .single();
+      if (error || !copy) {
+        console.error("call-agents import share error:", error);
+        return json({ error: "Could not import the shared agent." }, 500);
+      }
+      return json({ ok: true, agent: copy });
+    }
+
+    // ───────────────── vault_list ─────────────────
+    // Metadata only — the ciphertext/iv columns are never selected here.
+    if (action === "vault_list") {
+      const key = await vaultKey();
+      if (!key) return json({ ok: true, configured: false, items: [] });
+      const { data, error } = await admin
+        .from("user_credentials")
+        .select("id, label, site_url, username, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.error("call-agents vault list error:", error);
+        return json({ error: "Could not load the vault." }, 500);
+      }
+      return json({ ok: true, configured: true, items: data ?? [] });
+    }
+
+    // ───────────────── vault_save ─────────────────
+    // The plaintext secret is encrypted immediately and never echoed back.
+    if (action === "vault_save") {
+      const key = await vaultKey();
+      if (!key) return json({ error: "vault_not_configured" });
+      const label = String(body.label ?? "").trim().slice(0, 120);
+      const secret = String(body.secret ?? "");
+      if (!label || !secret) return json({ error: "A label and a secret are required." }, 400);
+      const { ciphertextB64, ivB64 } = await encryptSecret(secret, key);
+      const siteUrl = String(body.site_url ?? "").trim();
+      const username = String(body.username ?? "").trim();
+      const { error } = await admin.from("user_credentials").insert({
+        user_id: user.id,
+        label,
+        site_url: siteUrl ? siteUrl.slice(0, 500) : null,
+        username: username ? username.slice(0, 200) : null,
+        secret_ciphertext: ciphertextB64,
+        secret_iv: ivB64,
+      });
+      if (error) {
+        console.error("call-agents vault save error:", error);
+        return json({ error: "Could not save the credential." }, 500);
+      }
+      return json({ ok: true });
+    }
+
+    // ───────────────── vault_delete ─────────────────
+    if (action === "vault_delete") {
+      const id = String(body.id ?? "");
+      if (!id) return json({ error: "Credential id is required." }, 400);
+      const { error } = await admin
+        .from("user_credentials")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("call-agents vault delete error:", error);
+        return json({ error: "Could not delete the credential." }, 500);
+      }
+      return json({ ok: true });
+    }
+
     // ───────────────── run ─────────────────
     if (action === "run") {
       if (!aiKeysConfigured()) return json({ error: "AI providers are not configured on this workspace." }, 503);
@@ -227,6 +638,10 @@ serve(async (req) => {
       const byId = new Map((found ?? []).map((a: any) => [a.id, a]));
       const agents = ids.map((id) => byId.get(id)).filter(Boolean);
       if (agents.length !== ids.length) return json({ error: "One or more selected agents were not found." }, 404);
+
+      // Vault key for Basic-auth page fetches during browsing; null when
+      // the vault isn't configured (fetches then run without auth).
+      const vault = await vaultKey();
 
       // Reserve credits up front (admins pay 0, mirroring imagine-ai).
       const reserve = isAdmin ? 0 : RESERVE;
@@ -292,7 +707,19 @@ serve(async (req) => {
             .filter(Boolean)
             .join("\n\n");
           chatMessages.push({ role: "system", content: systemPrompt });
-          chatMessages.push({ role: "user", content: input });
+          // Browsing: agents with the "Web search" tool get live page
+          // content and search results appended to their input. Fetched
+          // content is reference DATA, not instructions for the agent.
+          // Everything is best-effort — a browsing failure changes nothing.
+          let stepInput = input;
+          if (Array.isArray(agent.tools) && agent.tools.includes("Web search")) {
+            try {
+              stepInput = input + (await browseForStep(input, user.id, admin, vault));
+            } catch {
+              /* browsing is best-effort */
+            }
+          }
+          chatMessages.push({ role: "user", content: stepInput });
 
           // Route through the shared AI router (the Genius path): try the
           // agent's chosen model first, then the tier chain, then the widest
@@ -602,6 +1029,27 @@ serve(async (req) => {
       const positive = scored.filter((s) => s.score > 0).slice(0, 8);
       const investors = (positive.length ? positive : scored.slice(0, 8)).map((s) => s.inv);
 
+      // Live firm / application pages for the top matches — best-effort
+      // web research (two results per investor) so the output can point
+      // at real, current firm and apply pages.
+      const livePages: (string | null)[] = [];
+      for (let i = 0; i < Math.min(4, investors.length); i++) {
+        const inv = investors[i];
+        try {
+          const hits = await webSearch(
+            `${String(inv.name ?? "")} venture capital apply pitch deck submission`
+          );
+          livePages[i] = hits.length
+            ? `Live pages: ${hits
+                .slice(0, 2)
+                .map((h) => `${h.title} — ${h.url}${h.snippet ? ` — ${h.snippet}` : ""}`)
+                .join("; ")}`
+            : null;
+        } catch {
+          livePages[i] = null;
+        }
+      }
+
       const field = (label: string, v: unknown): string | null => {
         const s = String(v ?? "").trim();
         return s ? `${label}: ${s}` : null;
@@ -647,7 +1095,10 @@ serve(async (req) => {
       }
       lines.push("", "Matched investors from the platform directory:");
       if (investors.length) {
-        investors.forEach((inv, i) => lines.push(`${i + 1}. ${investorLine(inv)}`));
+        investors.forEach((inv, i) => {
+          lines.push(`${i + 1}. ${investorLine(inv)}`);
+          if (livePages[i]) lines.push(`   ${livePages[i]}`);
+        });
       } else {
         lines.push("No investors are listed in the directory right now.");
       }

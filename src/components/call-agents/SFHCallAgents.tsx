@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   BookOpen, Bot, Check, Code2, Coins, FileText, Globe, KanbanSquare, Loader2,
-  Pencil, Play, Plus, Route, Sparkles, Trash2, Wand2,
+  Lock, Pencil, Play, Plus, Route, Share2, Sparkles, Trash2, Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,6 +187,16 @@ interface RunResult {
   credits: { charged: number; balance: number | null };
 }
 
+// Credential vault list items — metadata only; the server never returns
+// the stored secret itself.
+interface VaultItem {
+  id: string;
+  label: string;
+  site_url: string | null;
+  username: string | null;
+  created_at: string;
+}
+
 interface AgentForm {
   name: string;
   description: string;
@@ -304,6 +314,15 @@ export default function SFHCallAgents() {
   const [fundraiserFocus, setFundraiserFocus] = useState("");
   const [fundraiserRunning, setFundraiserRunning] = useState(false);
 
+  const [shareImportInput, setShareImportInput] = useState("");
+  const [importingShare, setImportingShare] = useState(false);
+
+  const [vaultConfigured, setVaultConfigured] = useState<boolean | null>(null);
+  const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
+  const [vaultLoading, setVaultLoading] = useState(false);
+  const [vaultForm, setVaultForm] = useState({ label: "", siteUrl: "", username: "", secret: "" });
+  const [vaultSaving, setVaultSaving] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -320,8 +339,60 @@ export default function SFHCallAgents() {
     }
   }, [soloId]);
 
+  const loadVault = useCallback(async () => {
+    setVaultLoading(true);
+    try {
+      const data = await callAgentsApi({ action: "vault_list" });
+      setVaultConfigured(data.configured !== false);
+      setVaultItems((data.items ?? []) as VaultItem[]);
+    } catch {
+      /* a failed vault load just leaves the panel in its last state */
+    } finally {
+      setVaultLoading(false);
+    }
+  }, []);
+
+  // Import a shared agent from a full share link or a bare token.
+  const handleImportShare = useCallback(
+    async (raw: string) => {
+      let token = raw.trim();
+      const match = token.match(/agent_share=([^&\s#]+)/);
+      if (match) token = match[1];
+      if (!token) {
+        toast.error("Paste a share link or token.");
+        return;
+      }
+      setImportingShare(true);
+      try {
+        const data = await callAgentsApi({ action: "import_share", token });
+        setShareImportInput("");
+        setNotice(`Imported "${data.agent?.name ?? "agent"}" from the shared link.`);
+        await load();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Could not import the shared agent.");
+      } finally {
+        setImportingShare(false);
+      }
+    },
+    [load]
+  );
+
   useEffect(() => {
     load();
+    loadVault();
+    // Arriving from a share link imports the agent copy and cleans the URL.
+    const params = new URLSearchParams(window.location.search);
+    const shareToken = params.get("agent_share");
+    if (shareToken) {
+      params.delete("agent_share");
+      const rest = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`
+      );
+      void handleImportShare(shareToken);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -411,6 +482,70 @@ export default function SFHCallAgents() {
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not delete the agent.");
+    }
+  };
+
+  // Build this agent's share link and copy it to the clipboard.
+  const handleShareAgent = async (agent: CallAgent) => {
+    try {
+      const data = await callAgentsApi({ action: "share_agent", agent_id: agent.id });
+      const link = `${window.location.origin}/dashboard?agent_share=${data.token}`;
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch {
+        // Clipboard permission denied — fall back to a scratch textarea.
+        const ta = document.createElement("textarea");
+        ta.value = link;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      toast.success("Share link copied — anyone with it can import a copy of this agent");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not create the share link.");
+    }
+  };
+
+  const handleVaultSave = async () => {
+    if (!vaultForm.label.trim() || !vaultForm.secret) {
+      toast.error("Give the credential a label and a secret.");
+      return;
+    }
+    setVaultSaving(true);
+    try {
+      await callAgentsApi({
+        action: "vault_save",
+        label: vaultForm.label.trim(),
+        site_url: vaultForm.siteUrl.trim() || undefined,
+        username: vaultForm.username.trim() || undefined,
+        secret: vaultForm.secret,
+      });
+      // Clear the whole form — the secret above all — then refresh the list.
+      setVaultForm({ label: "", siteUrl: "", username: "", secret: "" });
+      await loadVault();
+      toast.success("Saved to your vault");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      toast.error(
+        msg === "vault_not_configured"
+          ? "The vault needs one setup step by the platform owner before it can be used."
+          : msg || "Could not save the credential."
+      );
+    } finally {
+      setVaultSaving(false);
+    }
+  };
+
+  const handleVaultDelete = async (id: string) => {
+    try {
+      await callAgentsApi({ action: "vault_delete", id });
+      await loadVault();
+      toast.success("Credential deleted.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete the credential.");
     }
   };
 
@@ -916,6 +1051,16 @@ export default function SFHCallAgents() {
                       <Button
                         size="sm"
                         variant="outline"
+                        title="Share this agent"
+                        aria-label={`Share ${agent.name}`}
+                        className="rounded-full border-border bg-background/60 px-2.5 backdrop-blur hover:bg-muted"
+                        onClick={() => handleShareAgent(agent)}
+                      >
+                        <Share2 className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
                         className="rounded-full border-destructive/30 bg-background/60 text-destructive backdrop-blur hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => handleDelete(agent)}
                       >
@@ -958,7 +1103,8 @@ export default function SFHCallAgents() {
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     Finds investors who fit your startup and drafts your applications
                     from your profile, deck, investor Q&amp;A, company profile and
-                    journey stage.
+                    journey stage. It browses the web for live firm and application
+                    pages.
                   </p>
                 </div>
               </div>
@@ -995,6 +1141,143 @@ export default function SFHCallAgents() {
           </div>
         </section>
 
+        {/* ── Credential vault ─────────────────────────── */}
+        <section className={`${GLASS_PANEL} relative overflow-hidden px-6 py-6 sm:px-8`}>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-teal-300/25 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)]">
+                <Lock className="h-5 w-5" />
+              </span>
+              <h3 className="text-xl font-bold tracking-tight text-foreground">
+                Credential vault
+              </h3>
+            </div>
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+              Encrypted passwords and keys your agents can use. Stored encrypted on
+              the server — never shown again, never sent to the AI.
+            </p>
+
+            {vaultConfigured === false ? (
+              <p className="mt-4 rounded-2xl border border-dashed border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                The vault needs one setup step by the platform owner before it can be
+                used.
+              </p>
+            ) : (
+              <>
+                {vaultLoading && vaultItems.length === 0 ? (
+                  <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
+                    Loading your vault…
+                  </p>
+                ) : vaultItems.length === 0 ? (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    No credentials yet. Add one below and your browsing agents can sign
+                    in to that site when they fetch its pages.
+                  </p>
+                ) : (
+                  <div className="mt-4 space-y-2">
+                    {vaultItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 rounded-2xl border border-border bg-background/50 px-4 py-2.5 backdrop-blur"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {item.label}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {[item.site_url, item.username].filter(Boolean).join(" · ") ||
+                              "No site linked"}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          title="Delete this credential"
+                          aria-label={`Delete ${item.label}`}
+                          className="rounded-full border-destructive/30 bg-background/60 px-2.5 text-destructive backdrop-blur hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleVaultDelete(item.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-5 grid gap-4 rounded-3xl border border-border bg-muted/40 p-4 backdrop-blur sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ca-vault-label" className={FIELD_LABEL}>
+                      Label
+                    </Label>
+                    <Input
+                      id="ca-vault-label"
+                      value={vaultForm.label}
+                      onChange={(e) => setVaultForm({ ...vaultForm, label: e.target.value })}
+                      placeholder="e.g. My Crunchbase login"
+                      className={GLASS_INPUT}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ca-vault-site" className={FIELD_LABEL}>
+                      Site URL
+                    </Label>
+                    <Input
+                      id="ca-vault-site"
+                      value={vaultForm.siteUrl}
+                      onChange={(e) => setVaultForm({ ...vaultForm, siteUrl: e.target.value })}
+                      placeholder="https://example.com"
+                      className={GLASS_INPUT}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ca-vault-username" className={FIELD_LABEL}>
+                      Username
+                    </Label>
+                    <Input
+                      id="ca-vault-username"
+                      value={vaultForm.username}
+                      onChange={(e) => setVaultForm({ ...vaultForm, username: e.target.value })}
+                      placeholder="you@example.com"
+                      autoComplete="off"
+                      className={GLASS_INPUT}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ca-vault-secret" className={FIELD_LABEL}>
+                      Password / secret
+                    </Label>
+                    <Input
+                      id="ca-vault-secret"
+                      type="password"
+                      autoComplete="off"
+                      value={vaultForm.secret}
+                      onChange={(e) => setVaultForm({ ...vaultForm, secret: e.target.value })}
+                      placeholder="Stored encrypted — never shown again"
+                      className={GLASS_INPUT}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Button
+                      onClick={handleVaultSave}
+                      disabled={vaultSaving}
+                      className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-6 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600"
+                    >
+                      {vaultSaving ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Lock className="mr-2 h-4 w-4" />
+                      )}
+                      Save to vault
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
         {/* ── 3 · Workspace ──────────────────────────────── */}
         <div className="grid items-start gap-6 xl:grid-cols-2">
           {/* ── Design studio (configure) ── */}
@@ -1018,6 +1301,27 @@ export default function SFHCallAgents() {
                 </span>
               </header>
               <div className="space-y-5 px-6 py-5">
+                {/* Import a shared agent (link or bare token) */}
+                <div className="rounded-2xl border border-dashed border-border bg-muted/40 px-4 py-3">
+                  <p className={FIELD_LABEL}>Import a shared agent</p>
+                  <div className="mt-2 flex gap-2">
+                    <Input
+                      value={shareImportInput}
+                      onChange={(e) => setShareImportInput(e.target.value)}
+                      placeholder="Paste a share link or token"
+                      className={GLASS_INPUT}
+                    />
+                    <Button
+                      onClick={() => handleImportShare(shareImportInput)}
+                      disabled={importingShare}
+                      className="shrink-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600"
+                    >
+                      {importingShare && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                      Import
+                    </Button>
+                  </div>
+                </div>
+
                 <p className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Plus className="h-4 w-4 text-emerald-500" />
                   {editingId ? "Edit agent" : "Create an agent"} — pick a specialist, give
@@ -1211,7 +1515,8 @@ export default function SFHCallAgents() {
                     })}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Tools are saved with the agent's configuration.
+                    Tools are saved with the agent's configuration. Web search is
+                    live: agents with it on browse the web during runs.
                   </p>
                 </div>
 
