@@ -1,12 +1,13 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Image as ImageIcon, Factory } from 'lucide-react';
+import { Download, Image as ImageIcon, Bot } from 'lucide-react';
 import { toast } from 'sonner';
+import sfhLogoSphere from '@/assets/sfh-logo-sphere.png';
 import { AGENTS_TEAM, drawAgentsFrame } from '@/components/marketing/AgentsAnimatedBanner';
 
-// Static twin of the Agent Factory animated banner — same original
-// factory production-line design (sign plate, gears, conveyor belt,
-// station plates), drawn once at a lively moment for a PNG download.
+// Static twin of the Meet Your Agent Team animated banner — same
+// light glass-stage design with the founder's personalized agent
+// characters, drawn once at a lively moment for a PNG download.
 const AgentsBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRendering, setIsRendering] = useState(true);
@@ -28,14 +29,18 @@ const AgentsBanner = () => {
     ctx.scale(dpr, dpr);
 
     const faces = AGENTS_TEAM.map(() => new window.Image());
+    const logo = new window.Image();
     let loaded = 0;
+    const total = faces.length + 1;
     const ready = () => {
       loaded++;
-      if (loaded === faces.length) {
-        drawAgentsFrame(ctx, faces, 1.4);
+      if (loaded === total) {
+        drawAgentsFrame(ctx, faces, logo, 1.4);
         setIsRendering(false);
       }
     };
+    logo.onload = ready;
+    logo.src = sfhLogoSphere;
     faces.forEach((img, i) => {
       img.onload = ready;
       img.src = AGENTS_TEAM[i].src;
@@ -46,7 +51,7 @@ const AgentsBanner = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = 'agents-factory-banner.png';
+    link.download = 'agents-team-banner.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
     toast.success('Banner downloaded');
@@ -57,11 +62,11 @@ const AgentsBanner = () => {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Factory className="w-5 h-5 text-emerald-400" />
-            Agents — The Agent Factory — Marketing Banner
+            <Bot className="w-5 h-5 text-emerald-400" />
+            Agents — Meet Your Agent Team — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            New platform feature · Five AI specialists on one production line · Create · Customize · Chain · Run
+            New platform feature · Her personalized agent characters · Create · Customize · Chain · Run
           </p>
         </div>
         <Button onClick={handleDownload} disabled={isRendering} size="sm">
@@ -83,7 +88,7 @@ const AgentsBanner = () => {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        1200×630px · Factory production-line aesthetic · Optimized for social & email headers
+        1200×630px · Light glass-stage aesthetic · Optimized for social & email headers
       </p>
     </div>
   );
