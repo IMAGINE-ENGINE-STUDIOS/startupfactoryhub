@@ -533,7 +533,7 @@ export default function SFHCallAgents() {
                 <img
                   src={agentGreeter}
                   alt="Agent greeter character"
-                  className="h-20 w-20 rounded-3xl object-cover object-top shadow-[0_16px_36px_rgba(16,185,129,0.30)] ring-1 ring-border"
+                  className="h-20 w-20 object-contain drop-shadow-[0_16px_24px_rgba(16,185,129,0.35)]"
                 />
               </div>
               <div className="flex-1">
@@ -584,7 +584,7 @@ export default function SFHCallAgents() {
                         <img
                           src={characterForModel(agent.model)}
                           alt={`${modelLabel(agent.model)} character`}
-                          className="h-40 w-full rounded-2xl object-cover object-top shadow-[0_14px_30px_rgba(6,78,59,0.18)] ring-1 ring-border"
+                          className="h-44 w-full object-contain px-2 pt-2 drop-shadow-[0_18px_24px_rgba(6,78,59,0.28)]"
                         />
                       </div>
                       {/* selected ribbon */}
@@ -746,7 +746,7 @@ export default function SFHCallAgents() {
                             <img
                               src={MODEL_CHARACTERS[m.value]}
                               alt={m.label}
-                              className="h-14 w-14 object-cover object-top"
+                              className="h-14 w-14 object-contain drop-shadow-[0_6px_10px_rgba(6,78,59,0.25)]"
                             />
                             {active && (
                               <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white shadow">
@@ -1010,7 +1010,7 @@ export default function SFHCallAgents() {
                             <img
                               src={characterForModel(a.model)}
                               alt=""
-                              className="h-8 w-8 shrink-0 rounded-xl object-cover object-top ring-1 ring-border"
+                              className="h-8 w-8 shrink-0 object-contain"
                             />
                             {order >= 0 && (
                               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-[10px] font-bold text-white">
@@ -1051,7 +1051,7 @@ export default function SFHCallAgents() {
                                 <img
                                   src={characterForModel(a.model)}
                                   alt={a.name}
-                                  className={`h-12 w-12 rounded-full object-cover object-top ring-2 ${
+                                  className={`h-12 w-12 rounded-full object-contain ring-2 ${
                                     done
                                       ? "ring-emerald-400"
                                       : "ring-border"
@@ -1140,7 +1140,7 @@ export default function SFHCallAgents() {
                           <img
                             src={characterForModel(step.model)}
                             alt=""
-                            className="h-9 w-9 rounded-full object-cover object-top ring-2 ring-emerald-400/50"
+                            className="h-9 w-9 rounded-full object-contain ring-2 ring-emerald-400/50"
                           />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-foreground">
