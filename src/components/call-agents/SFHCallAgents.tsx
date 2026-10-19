@@ -27,7 +27,7 @@ import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark } fro
 const GLASS_CSS = `
 @keyframes ca-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  50% { transform: translateY(-4px); }
 }
 @keyframes ca-fadeup {
   from { opacity: 0; transform: translateY(10px); }
@@ -53,22 +53,22 @@ const GLASS_CSS = `
 .ca-range { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 9999px; outline: none; }
 .ca-range::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 9999px;
-  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid #ffffff;
+  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid hsl(var(--background));
   box-shadow: 0 2px 10px rgba(16,185,129,0.45); cursor: pointer;
 }
 .ca-range::-moz-range-thumb {
   width: 22px; height: 22px; border-radius: 9999px;
-  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid #ffffff;
+  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid hsl(var(--background));
   box-shadow: 0 2px 10px rgba(16,185,129,0.45); cursor: pointer;
 }
 `;
 
 const GLASS_PANEL =
-  "rounded-[2rem] border border-white/60 bg-white/60 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
+  "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
 const GLASS_INPUT =
-  "rounded-2xl border-emerald-100 bg-white/50 backdrop-blur transition focus-visible:ring-2 focus-visible:ring-emerald-400/60";
+  "rounded-2xl border-input bg-background/60 backdrop-blur transition focus-visible:ring-2 focus-visible:ring-emerald-400/60";
 const FIELD_LABEL =
-  "text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700/80";
+  "text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
 
 const MODEL_OPTIONS = [
   { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
@@ -195,7 +195,7 @@ function SegmentedControl({
     options.findIndex((o) => o.value === value)
   );
   return (
-    <div className="relative flex rounded-full border border-emerald-100 bg-white/50 p-1 backdrop-blur">
+    <div className="relative flex rounded-full border border-border bg-muted/50 p-1 backdrop-blur">
       <span
         className="absolute inset-y-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-transform duration-300 ease-out"
         style={{
@@ -210,7 +210,7 @@ function SegmentedControl({
           type="button"
           onClick={() => onChange(o.value)}
           className={`relative z-10 flex-1 rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-300 ${
-            value === o.value ? "text-white" : "text-emerald-900/55 hover:text-emerald-800"
+            value === o.value ? "text-white" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {o.label}
@@ -405,9 +405,9 @@ export default function SFHCallAgents() {
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)]">
               <Bot className="h-5 w-5" />
             </span>
-            <h2 className="text-2xl font-bold tracking-tight text-emerald-950">Agents</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Agents</h2>
           </div>
-          <p className="relative mt-3 text-sm text-emerald-950/60">
+          <p className="relative mt-3 text-sm text-muted-foreground">
             Please sign in to configure and run your agents.
           </p>
         </div>
@@ -450,28 +450,28 @@ export default function SFHCallAgents() {
 
       <div className="relative space-y-8">
         {/* ── 1 · Hero strip ─────────────────────────────── */}
-        <section className="rounded-[2rem] bg-gradient-to-br from-emerald-300/70 via-white/50 to-teal-300/60 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.10)]">
-          <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-white/60 px-6 py-6 backdrop-blur-xl sm:px-8">
+        <section className="rounded-[2rem] bg-gradient-to-br from-emerald-400/60 via-border to-teal-400/60 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.10)]">
+          <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 px-6 py-6 backdrop-blur-xl sm:px-8">
             <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-teal-300/30 blur-3xl" />
             <div className="relative flex flex-wrap items-center gap-5">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_10px_24px_rgba(16,185,129,0.4)]">
                 <Bot className="h-7 w-7" />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-3xl font-bold tracking-tight text-emerald-950">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">
                   Agents
                 </h2>
-                <p className="mt-1 text-sm text-emerald-950/60">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Build your AI team. They run on Llama + Groq.
                 </p>
-                <p className="mt-1 max-w-xl text-xs text-emerald-950/45">
+                <p className="mt-1 max-w-xl text-xs text-muted-foreground">
                   Configure your own AI agents, coordinate them in pipelines, and run them
                   on Meta models. Runs are billed from your AI credits based on actual
                   token usage.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="flex items-center gap-2 rounded-full border border-emerald-200/80 bg-white/60 px-4 py-2 text-sm font-medium text-emerald-900 shadow-sm backdrop-blur">
+                <span className="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur">
                   <Coins className="h-4 w-4 text-emerald-500" />
                   {isAdmin
                     ? "Admin — unlimited"
@@ -495,12 +495,12 @@ export default function SFHCallAgents() {
         </section>
 
         {error && (
-          <div className="rounded-3xl border border-rose-200 bg-rose-50/70 px-5 py-3.5 text-sm text-rose-700 backdrop-blur">
+          <div className="rounded-3xl border border-destructive/30 bg-destructive/10 px-5 py-3.5 text-sm text-destructive backdrop-blur">
             {error}
           </div>
         )}
         {notice && (
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50/70 px-5 py-3.5 text-sm text-emerald-700 backdrop-blur">
+          <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3.5 text-sm text-emerald-700 backdrop-blur dark:text-emerald-300">
             {notice}
           </div>
         )}
@@ -509,36 +509,36 @@ export default function SFHCallAgents() {
         <section className="space-y-4">
           <div className="flex items-end justify-between px-1">
             <div>
-              <h3 className="text-xl font-bold tracking-tight text-emerald-950">Your team</h3>
-              <p className="text-xs text-emerald-950/50">
+              <h3 className="text-xl font-bold tracking-tight text-foreground">Your team</h3>
+              <p className="text-xs text-muted-foreground">
                 {loading
                   ? "Loading your agents…"
                   : `${agents.length} agent${agents.length === 1 ? "" : "s"} · tap a character to add it to the run`}
               </p>
             </div>
-            <span className="hidden items-center gap-1.5 rounded-full border border-emerald-200/70 bg-white/50 px-3 py-1 text-[11px] font-medium text-emerald-800 backdrop-blur sm:flex">
+            <span className="hidden items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-[11px] font-medium text-foreground backdrop-blur sm:flex">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
               Groq link live
             </span>
           </div>
 
           {loading ? (
-            <div className={`${GLASS_PANEL} flex items-center gap-3 px-6 py-8 text-sm text-emerald-950/60`}>
+            <div className={`${GLASS_PANEL} flex items-center gap-3 px-6 py-8 text-sm text-muted-foreground`}>
               <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
               Loading your agents…
             </div>
           ) : agents.length === 0 ? (
-            <div className={`${GLASS_PANEL} flex flex-col items-center gap-5 px-6 py-8 text-center sm:flex-row sm:text-left`}>
+            <div className={`${GLASS_PANEL} flex flex-col items-center gap-5 px-6 py-6 text-center sm:flex-row sm:text-left`}>
               <div className="ca-float shrink-0">
                 <img
                   src={agentLlama33}
                   alt="Llama 3.3 70B character"
-                  className="h-28 w-28 rounded-3xl object-cover shadow-[0_16px_36px_rgba(16,185,129,0.30)] ring-1 ring-white/70"
+                  className="h-20 w-20 rounded-3xl object-cover object-top shadow-[0_16px_36px_rgba(16,185,129,0.30)] ring-1 ring-border"
                 />
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-semibold text-emerald-950">No agents yet</h4>
-                <p className="mt-1 max-w-md text-sm text-emerald-950/55">
+                <h4 className="text-lg font-semibold text-foreground">No agents yet</h4>
+                <p className="mt-1 max-w-md text-sm text-muted-foreground">
                   Your team is empty. Create your first agent — pick a character, give it
                   instructions, and put it to work.
                 </p>
@@ -551,7 +551,7 @@ export default function SFHCallAgents() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {agents.map((agent, idx) => {
                 const selected = isSelectedForRun(agent);
                 const order = pipelineIds.indexOf(agent.id);
@@ -559,16 +559,16 @@ export default function SFHCallAgents() {
                   <article
                     key={agent.id}
                     onClick={() => handleCardSelect(agent)}
-                    className={`group relative cursor-pointer rounded-[2rem] border bg-white/55 p-4 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_44px_rgba(6,78,59,0.14)] ${
+                    className={`group relative cursor-pointer rounded-3xl border bg-card/70 p-3 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(6,78,59,0.13)] ${
                       selected
-                        ? "border-emerald-300 shadow-[0_16px_40px_rgba(16,185,129,0.20)] ring-2 ring-emerald-400"
-                        : "border-white/60 shadow-[0_10px_32px_rgba(6,78,59,0.07)]"
+                        ? "border-emerald-400/60 shadow-[0_14px_34px_rgba(16,185,129,0.20)] ring-2 ring-emerald-400/70"
+                        : "border-border shadow-[0_8px_26px_rgba(6,78,59,0.07)]"
                     }`}
                   >
                     {/* aura behind active agents */}
                     {agent.is_active && (
                       <div
-                        className="pointer-events-none absolute inset-x-8 top-4 h-40 rounded-full bg-emerald-400/25 blur-2xl"
+                        className="pointer-events-none absolute inset-x-6 top-3 h-24 rounded-full bg-emerald-400/20 blur-2xl"
                         aria-hidden
                       />
                     )}
@@ -584,7 +584,7 @@ export default function SFHCallAgents() {
                         <img
                           src={characterForModel(agent.model)}
                           alt={`${modelLabel(agent.model)} character`}
-                          className="aspect-square w-full rounded-3xl object-cover shadow-[0_18px_38px_rgba(6,78,59,0.18)] ring-1 ring-white/70"
+                          className="h-40 w-full rounded-2xl object-cover object-top shadow-[0_14px_30px_rgba(6,78,59,0.18)] ring-1 ring-border"
                         />
                       </div>
                       {/* selected ribbon */}
@@ -595,19 +595,22 @@ export default function SFHCallAgents() {
                         </span>
                       )}
                       {/* status pill */}
-                      <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-medium text-emerald-900 backdrop-blur">
+                      <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-background/70 px-2.5 py-1 text-[11px] font-medium text-foreground backdrop-blur">
                         <span
-                          className={`h-1.5 w-1.5 rounded-full ${agent.is_active ? "animate-pulse bg-emerald-500" : "bg-emerald-950/30"}`}
+                          className={`h-1.5 w-1.5 rounded-full ${agent.is_active ? "animate-pulse bg-emerald-500" : "bg-muted-foreground/40"}`}
                         />
                         {agent.is_active ? "Active" : "Paused"}
                       </span>
                     </div>
 
-                    <div className="relative mt-4 flex items-start justify-between gap-2 px-1">
-                      <h4 className="text-lg font-bold tracking-tight text-emerald-950">
+                    <div className="relative mt-3 flex items-center gap-2 px-0.5">
+                      <h4 className="min-w-0 flex-1 truncate text-sm font-bold tracking-tight text-foreground">
                         {agent.name}
                       </h4>
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <span className="shrink-0 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                        {modelLabel(agent.model)}
+                      </span>
+                      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                         <Switch
                           checked={agent.is_active}
                           onCheckedChange={(checked) => handleToggleActive(agent, checked)}
@@ -615,34 +618,31 @@ export default function SFHCallAgents() {
                       </div>
                     </div>
                     {agent.description && (
-                      <p className="mt-1 line-clamp-2 px-1 text-sm text-emerald-950/55">
+                      <p className="mt-1 line-clamp-2 px-0.5 text-xs text-muted-foreground">
                         {agent.description}
                       </p>
                     )}
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1">
-                      <span className="rounded-full border border-emerald-200/80 bg-white/60 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 backdrop-blur">
-                        {modelLabel(agent.model)}
-                      </span>
-                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5 px-0.5">
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
                         {agent.coordination?.mode === "pipeline" ? "Pipeline" : "Solo"}
                       </span>
                       {(agent.tools ?? []).map((tool) => (
                         <span
                           key={tool}
-                          className="rounded-full bg-white/50 px-2.5 py-0.5 text-[11px] text-emerald-950/60 ring-1 ring-emerald-100"
+                          className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px] text-muted-foreground ring-1 ring-border"
                         >
                           {tool}
                         </span>
                       ))}
                     </div>
                     <div
-                      className="mt-4 flex gap-2 border-t border-emerald-900/5 px-1 pt-3"
+                      className="mt-3 flex gap-2 border-t border-border px-0.5 pt-2.5"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Button
                         size="sm"
                         variant="outline"
-                        className="rounded-full border-emerald-200 bg-white/60 backdrop-blur hover:bg-emerald-50"
+                        className="rounded-full border-border bg-background/60 backdrop-blur hover:bg-muted"
                         onClick={() => {
                           handleEdit(agent);
                           scrollToStudio();
@@ -653,7 +653,7 @@ export default function SFHCallAgents() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="rounded-full border-rose-200 bg-white/60 text-rose-600 backdrop-blur hover:bg-rose-50 hover:text-rose-700"
+                        className="rounded-full border-destructive/30 bg-background/60 text-destructive backdrop-blur hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => handleDelete(agent)}
                       >
                         <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
@@ -671,15 +671,15 @@ export default function SFHCallAgents() {
           {/* ── Design studio (configure) ── */}
           <section
             id="ca-design-studio"
-            className="scroll-mt-24 rounded-[2rem] bg-gradient-to-b from-emerald-200/70 via-white/40 to-teal-200/50 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
+            className="scroll-mt-24 rounded-[2rem] bg-gradient-to-b from-emerald-400/40 via-border to-teal-400/40 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
           >
-            <div className="rounded-[calc(2rem-1.5px)] bg-white/65 backdrop-blur-xl">
+            <div className="rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
               <header className="flex items-center justify-between px-6 pb-1 pt-5">
                 <div>
-                  <h3 className="text-lg font-bold tracking-tight text-emerald-950">
+                  <h3 className="text-lg font-bold tracking-tight text-foreground">
                     Design studio
                   </h3>
-                  <p className="text-xs text-emerald-950/50">
+                  <p className="text-xs text-muted-foreground">
                     {editingId ? "Edit unit" : "New unit"} ·{" "}
                     {editingId ? "Mode: update" : "Mode: create"}
                   </p>
@@ -689,7 +689,7 @@ export default function SFHCallAgents() {
                 </span>
               </header>
               <div className="space-y-5 px-6 py-5">
-                <p className="flex items-center gap-2 text-sm text-emerald-950/55">
+                <p className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Plus className="h-4 w-4 text-emerald-500" />
                   {editingId ? "Edit agent" : "Create an agent"} — pick a model, give it
                   instructions, and choose how it coordinates.
@@ -733,20 +733,20 @@ export default function SFHCallAgents() {
                           key={m.value}
                           type="button"
                           onClick={() => setForm({ ...form, model: m.value })}
-                          className="group flex w-[4.75rem] flex-col items-center gap-1.5"
+                          className="group flex w-16 flex-col items-center gap-1.5"
                           aria-pressed={active}
                         >
                           <span
                             className={`relative block overflow-hidden rounded-2xl transition-all duration-300 ${
                               active
                                 ? "scale-105 shadow-[0_10px_24px_rgba(16,185,129,0.35)] ring-[3px] ring-emerald-400"
-                                : "ring-1 ring-emerald-100 group-hover:scale-[1.03] group-hover:ring-emerald-300"
+                                : "ring-1 ring-border group-hover:scale-[1.03] group-hover:ring-emerald-400/60"
                             }`}
                           >
                             <img
                               src={MODEL_CHARACTERS[m.value]}
                               alt={m.label}
-                              className="h-16 w-16 object-cover"
+                              className="h-14 w-14 object-cover object-top"
                             />
                             {active && (
                               <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white shadow">
@@ -756,7 +756,7 @@ export default function SFHCallAgents() {
                           </span>
                           <span
                             className={`text-center text-[11px] font-medium leading-tight ${
-                              active ? "text-emerald-800" : "text-emerald-950/50"
+                              active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
                             }`}
                           >
                             {m.label.replace(" (preview)", "")}
@@ -766,7 +766,7 @@ export default function SFHCallAgents() {
                     })}
                   </div>
                   {form.model === "meta/muse-spark-open" && (
-                    <p className="text-xs text-emerald-950/45">
+                    <p className="text-xs text-muted-foreground">
                       Muse Spark Open is a preview model.
                     </p>
                   )}
@@ -804,7 +804,7 @@ export default function SFHCallAgents() {
                       <Label htmlFor="ca-temperature" className={FIELD_LABEL}>
                         Temperature
                       </Label>
-                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-emerald-700">
+                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         {form.temperature.toFixed(1)}
                       </span>
                     </div>
@@ -821,11 +821,11 @@ export default function SFHCallAgents() {
                         }
                         className="ca-range w-full"
                         style={{
-                          background: `linear-gradient(to right, #10b981 0%, #14b8a6 ${tempPct}%, #d1fae5 ${tempPct}%, #d1fae5 100%)`,
+                          background: `linear-gradient(to right, #10b981 0%, #14b8a6 ${tempPct}%, hsl(var(--muted)) ${tempPct}%, hsl(var(--muted)) 100%)`,
                         }}
                       />
                     </div>
-                    <p className="text-xs text-emerald-950/45">
+                    <p className="text-xs text-muted-foreground">
                       Lower is more focused, higher is more creative.
                     </p>
                   </div>
@@ -869,7 +869,7 @@ export default function SFHCallAgents() {
                           className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium backdrop-blur transition-all duration-200 ${
                             active
                               ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]"
-                              : "border border-emerald-200/80 bg-white/50 text-emerald-900/70 hover:border-emerald-300 hover:text-emerald-900"
+                              : "border border-border bg-background/60 text-muted-foreground hover:border-emerald-400/50 hover:text-foreground"
                           }`}
                         >
                           {ToolIcon && <ToolIcon className="h-3.5 w-3.5" />}
@@ -879,12 +879,12 @@ export default function SFHCallAgents() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-emerald-950/45">
+                  <p className="text-xs text-muted-foreground">
                     Tools are saved with the agent's configuration.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 border-t border-emerald-900/5 pt-4">
+                <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={form.isActive}
@@ -895,7 +895,7 @@ export default function SFHCallAgents() {
                   {editingId && (
                     <Button
                       variant="outline"
-                      className="rounded-full border-emerald-200 bg-white/60 backdrop-blur hover:bg-emerald-50"
+                      className="rounded-full border-border bg-background/60 backdrop-blur hover:bg-muted"
                       onClick={() => {
                         setEditingId(null);
                         setForm(EMPTY_FORM);
@@ -919,27 +919,27 @@ export default function SFHCallAgents() {
 
           {/* ── Mission control (run) ── */}
           <section
-            className={`rounded-[2rem] bg-gradient-to-b from-teal-200/70 via-white/40 to-emerald-200/50 p-[1.5px] ${
+            className={`rounded-[2rem] bg-gradient-to-b from-teal-400/40 via-border to-emerald-400/40 p-[1.5px] ${
               running ? "ca-running" : "shadow-[0_10px_40px_rgba(6,78,59,0.08)]"
             }`}
           >
-            <div className="rounded-[calc(2rem-1.5px)] bg-white/65 backdrop-blur-xl">
+            <div className="rounded-[calc(2rem-1.5px)] bg-card/70 backdrop-blur-xl">
               <header className="flex items-center justify-between px-6 pb-1 pt-5">
                 <div>
-                  <h3 className="text-lg font-bold tracking-tight text-emerald-950">
+                  <h3 className="text-lg font-bold tracking-tight text-foreground">
                     Mission control
                   </h3>
-                  <p className="text-xs text-emerald-950/50">
+                  <p className="text-xs text-muted-foreground">
                     {runMode === "pipeline" ? "Pipeline // sequence" : "Solo // unit"}
                   </p>
                 </div>
                 <span
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
                     running
-                      ? "bg-emerald-500/15 text-emerald-700"
+                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                       : result
-                        ? "bg-teal-500/15 text-teal-700"
-                        : "bg-emerald-950/5 text-emerald-950/50"
+                        ? "bg-teal-500/15 text-teal-600 dark:text-teal-400"
+                        : "bg-muted text-muted-foreground"
                   }`}
                 >
                   <span
@@ -949,7 +949,7 @@ export default function SFHCallAgents() {
                 </span>
               </header>
               <div className="space-y-5 px-6 py-5">
-                <p className="flex items-center gap-2 text-sm text-emerald-950/55">
+                <p className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Play className="h-4 w-4 text-emerald-500" />
                   Run agents — solo runs one agent. Pipeline runs the agents you pick, in
                   the order you pick them, feeding each output into the next agent.
@@ -988,7 +988,7 @@ export default function SFHCallAgents() {
                     <Label className={FIELD_LABEL}>Pipeline agents (in run order)</Label>
                     <div className="space-y-1.5">
                       {agents.length === 0 && (
-                        <p className="text-sm text-emerald-950/50">Create an agent first.</p>
+                        <p className="text-sm text-muted-foreground">Create an agent first.</p>
                       )}
                       {agents.map((a) => {
                         const order = pipelineIds.indexOf(a.id);
@@ -997,8 +997,8 @@ export default function SFHCallAgents() {
                             key={a.id}
                             className={`flex cursor-pointer items-center gap-2.5 rounded-2xl border px-3 py-2 text-sm backdrop-blur transition ${
                               order >= 0
-                                ? "border-emerald-300 bg-emerald-50/70 text-emerald-950"
-                                : "border-emerald-100/70 bg-white/40 text-emerald-950/75 hover:border-emerald-200"
+                                ? "border-emerald-400/60 bg-emerald-500/10 text-foreground"
+                                : "border-border bg-background/50 text-foreground/80 hover:border-emerald-400/40"
                             }`}
                           >
                             <Checkbox
@@ -1010,7 +1010,7 @@ export default function SFHCallAgents() {
                             <img
                               src={characterForModel(a.model)}
                               alt=""
-                              className="h-8 w-8 shrink-0 rounded-xl object-cover ring-1 ring-white/70"
+                              className="h-8 w-8 shrink-0 rounded-xl object-cover object-top ring-1 ring-border"
                             />
                             {order >= 0 && (
                               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-[10px] font-bold text-white">
@@ -1018,7 +1018,7 @@ export default function SFHCallAgents() {
                               </span>
                             )}
                             <span className="font-medium">{a.name}</span>
-                            <span className="ml-auto text-xs text-emerald-950/45">
+                            <span className="ml-auto text-xs text-muted-foreground">
                               {modelLabel(a.model)}
                             </span>
                           </label>
@@ -1030,7 +1030,7 @@ export default function SFHCallAgents() {
 
                 {/* Avatar chain — the run, as characters */}
                 {vizAgents.length > 0 && (
-                  <div className="rounded-3xl border border-emerald-100/80 bg-white/40 px-4 py-3.5 backdrop-blur">
+                  <div className="rounded-3xl border border-border bg-muted/40 px-4 py-3.5 backdrop-blur">
                     <p className={FIELD_LABEL}>
                       {runMode === "pipeline" ? "Run sequence" : "On deck"}
                     </p>
@@ -1051,19 +1051,19 @@ export default function SFHCallAgents() {
                                 <img
                                   src={characterForModel(a.model)}
                                   alt={a.name}
-                                  className={`h-12 w-12 rounded-full object-cover ring-2 ${
+                                  className={`h-12 w-12 rounded-full object-cover object-top ring-2 ${
                                     done
                                       ? "ring-emerald-400"
-                                      : "ring-white/80"
+                                      : "ring-border"
                                   } shadow-[0_8px_18px_rgba(6,78,59,0.18)]`}
                                 />
                                 {done && (
-                                  <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
+                                  <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-background">
                                     <Check className="h-3 w-3" />
                                   </span>
                                 )}
                               </span>
-                              <span className="max-w-[4.5rem] truncate text-[10px] font-medium text-emerald-950/60">
+                              <span className="max-w-[4.5rem] truncate text-[10px] font-medium text-muted-foreground">
                                 {a.name}
                               </span>
                             </span>
@@ -1133,50 +1133,50 @@ export default function SFHCallAgents() {
                     {result.steps.map((step, i) => (
                       <div
                         key={`${step.agent_id}-${i}`}
-                        className="ca-fadeup rounded-3xl border border-white/60 bg-white/55 p-4 shadow-[0_8px_24px_rgba(6,78,59,0.06)] backdrop-blur"
+                        className="ca-fadeup rounded-3xl border border-border bg-card/60 p-4 shadow-[0_8px_24px_rgba(6,78,59,0.06)] backdrop-blur"
                         style={{ animationDelay: `${i * 140}ms` }}
                       >
                         <div className="flex items-center gap-2.5">
                           <img
                             src={characterForModel(step.model)}
                             alt=""
-                            className="h-9 w-9 rounded-full object-cover ring-2 ring-emerald-200"
+                            className="h-9 w-9 rounded-full object-cover object-top ring-2 ring-emerald-400/50"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-emerald-950">
+                            <p className="truncate text-sm font-semibold text-foreground">
                               {step.name}
                             </p>
-                            <p className="text-[11px] text-emerald-950/50">
+                            <p className="text-[11px] text-muted-foreground">
                               Step {String(i + 1).padStart(2, "0")}
                             </p>
                           </div>
-                          <span className="rounded-full border border-emerald-200/80 bg-white/60 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800">
+                          <span className="rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-foreground">
                             {modelLabel(step.model)}
                           </span>
                         </div>
-                        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-emerald-950/80">
+                        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/85">
                           {step.output}
                         </p>
-                        <p className="mt-3 border-t border-emerald-900/5 pt-2 font-mono text-[11px] text-emerald-950/45">
+                        <p className="mt-3 border-t border-border pt-2 font-mono text-[11px] text-muted-foreground">
                           {step.prompt_tokens + step.completion_tokens} tokens ·{" "}
                           {step.prompt_tokens} in / {step.completion_tokens} out
                         </p>
                       </div>
                     ))}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-full border border-emerald-200/70 bg-gradient-to-r from-emerald-50/80 to-teal-50/80 px-5 py-3 text-sm text-emerald-950/70 backdrop-blur">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-full border border-border bg-muted/50 px-5 py-3 text-sm text-muted-foreground backdrop-blur">
                       <span>
                         Total tokens:{" "}
-                        <strong className="font-semibold text-emerald-900">
+                        <strong className="font-semibold text-foreground">
                           {result.usage.prompt_tokens + result.usage.completion_tokens}
                         </strong>{" "}
-                        <span className="text-xs text-emerald-950/45">
+                        <span className="text-xs text-muted-foreground">
                           ({result.usage.prompt_tokens} in / {result.usage.completion_tokens}{" "}
                           out)
                         </span>
                       </span>
                       <span className="ml-auto">
                         Credits charged:{" "}
-                        <strong className="font-semibold text-emerald-900">
+                        <strong className="font-semibold text-foreground">
                           {Number(result.credits.charged).toFixed(2)}
                         </strong>
                         {result.credits.balance != null &&

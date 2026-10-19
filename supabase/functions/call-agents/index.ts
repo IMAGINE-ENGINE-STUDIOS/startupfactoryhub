@@ -7,6 +7,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { aiKeysConfigured, costUsd, routeChat } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,7 +33,6 @@ const MODELS: Record<string, { inPrice: number; outPrice: number }> = {
 const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 const MARKUP = 10; // credits charged = real USD cost x MARKUP
 const RESERVE = 1; // credits held per run, settled against actual usage
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const clampTokens = (n: unknown) => {
@@ -168,8 +168,7 @@ serve(async (req) => {
 
     // ───────────────── run ─────────────────
     if (action === "run") {
-      const groqKey = Deno.env.get("GROQ_API_KEY");
-      if (!groqKey) return json({ error: "Groq is not configured on this workspace." }, 503);
+      if (!aiKeysConfigured()) return json({ error: "AI providers are not configured on this workspace." }, 503);
       const message = String(body.message ?? "").trim();
       if (!message) return json({ error: "A message is required to run an agent." }, 400);
 
@@ -258,22 +257,30 @@ serve(async (req) => {
           }
           chatMessages.push({ role: "user", content: input });
 
-          const resp = await fetch(GROQ_URL, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${groqKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: agent.model,
-              messages: chatMessages,
-              temperature: clampTemp(agent.temperature),
-              max_tokens: clampTokens(agent.max_tokens),
-            }),
-          });
+          // Route through the shared AI router (the Genius path): try the
+          // agent's chosen model first, then the tier chain, then the widest
+          // "standard" chain — a model this key can't serve (e.g. a Groq
+          // 404) falls back instead of hard-failing the run.
+          const chatBody = {
+            model: String(agent.model),
+            messages: chatMessages,
+            temperature: clampTemp(agent.temperature),
+            max_tokens: clampTokens(agent.max_tokens),
+          };
+          const tier: "llama" | "standard" = /llama/i.test(String(agent.model)) ? "llama" : "standard";
+          let routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
+          if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
+          if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+          const resp = routed.resp;
+          const servedModel = routed.model || String(agent.model);
           if (!resp.ok) {
-            const t = await resp.text();
-            console.error("call-agents Groq error:", resp.status, t);
+            let t = "";
+            try {
+              t = await resp.clone().text();
+            } catch {
+              /* response body already consumed */
+            }
+            console.error("call-agents provider error:", resp.status, t);
             await admin.from("call_agent_runs").insert({
               agent_id: agent.id,
               user_id: user.id,
@@ -284,18 +291,22 @@ serve(async (req) => {
               credits_charged: 0,
               status: "error",
             });
-            throw new Error(`The model provider returned an error (${resp.status}).`);
+            throw new Error(
+              `The model provider returned an error (${resp.status}).${t ? ` ${t.slice(0, 200)}` : ""}`
+            );
           }
           const data = await resp.json();
           const output = String(data?.choices?.[0]?.message?.content ?? "");
           const promptTokens = Number(data?.usage?.prompt_tokens ?? 0);
           const completionTokens = Number(data?.usage?.completion_tokens ?? 0);
-          const price = MODELS[String(agent.model)] ?? MODELS[DEFAULT_MODEL];
-          const usd = (promptTokens / 1e6) * price.inPrice + (completionTokens / 1e6) * price.outPrice;
+          const price = MODELS[servedModel];
+          const usd = price
+            ? (promptTokens / 1e6) * price.inPrice + (completionTokens / 1e6) * price.outPrice
+            : costUsd(servedModel, promptTokens, completionTokens);
           steps.push({
             agent_id: agent.id,
             name: agent.name,
-            model: agent.model,
+            model: servedModel,
             input,
             output,
             prompt_tokens: promptTokens,
