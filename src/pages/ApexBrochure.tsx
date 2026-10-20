@@ -255,10 +255,6 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
        { key: 'perks', node: <ApexPerksPage /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
   {
-    key: 'how',
-    node: <ValueForEveryonePage />,
-  },
-  {
     key: 'outcomes',
     node: <ExpectedOutcomesPage />,
   },
