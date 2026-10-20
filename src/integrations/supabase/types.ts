@@ -1263,6 +1263,133 @@ export type Database = {
         }
         Relationships: []
       }
+      call_agent_runs: {
+        Row: {
+          agent_id: string | null
+          completion_tokens: number | null
+          created_at: string
+          credits_charged: number
+          id: string
+          input: string | null
+          output: string | null
+          prompt_tokens: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          credits_charged?: number
+          id?: string
+          input?: string | null
+          output?: string | null
+          prompt_tokens?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          credits_charged?: number
+          id?: string
+          input?: string | null
+          output?: string | null
+          prompt_tokens?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_agent_runs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "call_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_agent_shares: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          owner_id: string
+          token: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          token: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_agent_shares_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "call_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_agents: {
+        Row: {
+          coordination: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_tokens: number
+          model: string
+          name: string
+          system_prompt: string
+          temperature: number
+          tools: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coordination?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number
+          model?: string
+          name: string
+          system_prompt?: string
+          temperature?: number
+          tools?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coordination?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number
+          model?: string
+          name?: string
+          system_prompt?: string
+          temperature?: number
+          tools?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       camera_catalog: {
         Row: {
           country: string | null
@@ -8834,6 +8961,42 @@ export type Database = {
           plan_credits_monthly?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_credentials: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          secret_ciphertext: string
+          secret_iv: string
+          site_url: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          secret_ciphertext: string
+          secret_iv: string
+          site_url?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          secret_ciphertext?: string
+          secret_iv?: string
+          site_url?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
         }
         Relationships: []
       }
