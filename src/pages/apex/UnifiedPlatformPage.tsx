@@ -31,7 +31,7 @@ export const UnifiedPlatformPage = ({ logo, url }: { logo: string; url: string }
         One unified<br /><span style={{ color: NEO, textShadow: `0 0 18px ${NEO}88` }}>innovation platform</span>
       </h2>
       <p className="mt-2" style={{ fontSize: 15, lineHeight: 1.5, color: '#a7f3d0cc' }}>
-        Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help Apex's startups build faster and grow further.
+        Centralized resources, a managed mentor network, AI-driven strategy, a clear path from idea to investment, powerful administration, embedded partner resources and real-time analytics. Together, we can help APEX's startups build faster and grow further.
       </p>
       <div className="flex-1 min-h-0 flex items-center justify-center my-2">
         <EcosystemOrbit logo={logo} size={340} />

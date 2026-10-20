@@ -46,7 +46,7 @@ const PROBLEMS = [
   { icon: Search, tint: V, title: 'Missed connections', text: 'Founders struggle to find the right investors, mentors and partners for their stage.' },
   { icon: Users, tint: '#2563EB', title: 'Isolated players', text: 'Investors, mentors and corporates each work in their own circle, unaware of each other.' },
   { icon: Compass, tint: '#D97706', title: 'Duplicated effort', text: 'Programs and partners repeat work because no one sees what others already offer.' },
-  { icon: EyeOff, tint: '#DC2626', title: 'No shared view', text: 'Apex cannot see how players interact, or which connections drive outcomes.' },
+  { icon: EyeOff, tint: '#DC2626', title: 'No shared view', text: 'APEX cannot see how players interact, or which connections drive outcomes.' },
 ];
 
 const PILLARS = [
@@ -68,7 +68,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
         </div>
         <div className="flex justify-center" style={{ marginTop: 18 }}>
           <span className="flex items-center gap-[10px] rounded-full" style={{ padding: '7px 16px', background: V, boxShadow: '0 6px 18px rgba(124,58,237,0.35)', ...mono(10, '#FFFFFF') }}>
-            <span className="rounded-full bg-white" style={{ width: 5, height: 5 }} />The opportunity · Apex Accelerators
+            <span className="rounded-full bg-white" style={{ width: 5, height: 5 }} />The opportunity · APEX Accelerators
           </span>
         </div>
 
@@ -140,7 +140,7 @@ export const FragmentedToolsPage = ({ total }: { total: string }) => {
           </div>
         </div>
         <div className="flex items-center justify-between" style={{ padding: '12px 34px', background: '#FCFCFA', borderTop: '1px solid #E8E8E6' }}>
-          <span style={mono(9)}>Startup Factory Hub × Apex Accelerators</span>
+          <span style={mono(9)}>Startup Factory Hub × APEX Accelerators</span>
           <span style={mono(9)}>{total} pp.</span>
         </div>
       </div>

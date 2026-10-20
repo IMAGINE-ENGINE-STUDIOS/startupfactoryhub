@@ -203,7 +203,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
               <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
             </div>
             <h2 className="mt-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 38, fontWeight: 800, lineHeight: 1.04, color: '#f8fafc' }}>Acceleration at scale</h2>
-            <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for Apex: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while Apex manages and measures the whole program.</p>
+            <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for APEX: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while APEX manages and measures the whole program.</p>
             <div className="mt-4 grid grid-cols-3" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
               {[['Right resources, right time', 'The right resource to the right founder at the right moment.'], ['The right people', 'Mentors, advisors and investors who can help.'], ['Knowing what works', 'Visibility into progress, resource use and outcomes.']].map(([t, d], i) => (
                 <div key={t} className="pt-2.5 pr-3" style={{ paddingLeft: i ? 12 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>

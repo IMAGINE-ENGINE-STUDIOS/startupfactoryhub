@@ -71,8 +71,8 @@ export const ApexTeamPage = () => (
 );
 
 const PHASES = [
-  { t: 'Setup', tag: 'Configure', d: 'Apex branding, resource library, mentor network and journey stages configured on the platform.', out: ['White-label platform', 'Resources loaded', 'Mentors onboarded'] },
-  { t: 'Scale', tag: 'All Apex', d: 'Roll the platform out to every Apex program, startup, mentor and partner.', out: ['All Apex centers', 'Shared reporting', 'Partner perks unlocked'] },
+  { t: 'Setup', tag: 'Configure', d: 'APEX branding, resource library, mentor network and journey stages configured on the platform.', out: ['White-label platform', 'Resources loaded', 'Mentors onboarded'] },
+  { t: 'Scale', tag: 'All APEX', d: 'Roll the platform out to every APEX program, startup, mentor and partner.', out: ['All APEX centers', 'Shared reporting', 'Partner perks unlocked'] },
   { t: 'Nationwide', tag: 'Full adoption', d: 'Full nationwide adaptation across states and regions.', out: ['National coverage', 'Regional hubs', 'Unified analytics'] },
   { t: 'Optimize', tag: 'Continuous', d: 'Ongoing optimization and adjustment based on feedback and program data.', out: ['Impact reviews', 'Feature refinements', 'Expanded capabilities'] },
 ];
@@ -82,7 +82,7 @@ export const ApexRoadmapPage = () => (
     <h2 className="mt-3" style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#f8fafc' }}>
       Implementation <span style={{ background: `linear-gradient(90deg, ${CY}, ${PU})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>roadmap</span>
     </h2>
-    <p className="mt-1" style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.35 }}>From platform setup to nationwide adoption in four steps. Timelines, scope and commercial terms to be defined together with Apex.</p>
+    <p className="mt-1" style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.35 }}>From platform setup to nationwide adoption in four steps. Timelines, scope and commercial terms to be defined together with APEX.</p>
     <div className="relative mt-3 flex-1 min-h-0 flex flex-col gap-2">
       <div className="absolute top-3 bottom-3" style={{ left: 17, width: 2, background: `linear-gradient(180deg, ${CY}, ${PU})`, boxShadow: `0 0 12px ${CY}` }} />
       {PHASES.map((p, i) => (
@@ -105,7 +105,7 @@ export const ApexRoadmapPage = () => (
 );
 
 const NEXT_STEPS = [
-  { t: 'Discovery', tag: 'Align', d: 'Discovery session with the Apex team to confirm priorities and current resources.' },
+  { t: 'Discovery', tag: 'Align', d: 'Discovery session with the APEX team to confirm priorities and current resources.' },
   { t: 'Demo', tag: 'See it live', d: 'Live platform demonstration of the full Startup Factory Hub experience.' },
   { t: 'Scope', tag: 'Define', d: 'Agree on the setup scope and success metrics.' },
   { t: 'Agreement', tag: 'Sign', d: 'Finalize the partnership terms.' },
@@ -127,7 +127,7 @@ export const ApexNextStepsPage = () => (
       <h2 className="mt-3" style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.02, letterSpacing: '-0.02em', color: '#0f172a' }}>
         Getting <span style={{ background: `linear-gradient(90deg, ${EM}, ${IN})`, WebkitBackgroundClip: 'text', color: 'transparent' }}>started</span>
       </h2>
-      <p className="mt-1" style={{ fontSize: 13, color: '#475569', lineHeight: 1.35 }}>Four simple steps to bring Startup Factory Hub to Apex.</p>
+      <p className="mt-1" style={{ fontSize: 13, color: '#475569', lineHeight: 1.35 }}>Four simple steps to bring Startup Factory Hub to APEX.</p>
       <div className="relative mt-3 flex-1 min-h-0 flex flex-col gap-2">
         <div className="absolute top-3 bottom-3" style={{ left: 17, width: 2, background: `linear-gradient(180deg, ${EM}, ${IN})` }} />
         {NEXT_STEPS.map((p, i) => {

@@ -78,7 +78,7 @@ export const FEATURES: Feature[] = [
     lead: 'Mentorship is the most valuable asset an accelerator has, and the hardest to measure. The platform turns it into a managed, visible program.',
     body: [
       'Mentors and advisors publish their expertise, industry and availability. Founders book directly through built-in calendars, without email chains.',
-      'Meeting records, follow-ups, ratings and feedback are kept in one place, so Apex can see which relationships move companies forward.',
+      'Meeting records, follow-ups, ratings and feedback are kept in one place, so APEX can see which relationships move companies forward.',
     ],
     quote: 'Every meeting recorded, every follow-up tracked, every outcome visible.',
     facts: [['Built-in', 'Scheduling and calendars'], ['Rated', 'Mentor feedback'], ['Tracked', 'Follow-ups']],
@@ -102,7 +102,7 @@ export const FEATURES: Feature[] = [
     lead: 'Founders progress faster when they know what comes next. Journey Mapping makes the path explicit, from first idea to scaled operations.',
     body: [
       'Idea, MVP, Technology Readiness, Commercialization, Investment and Growth: each stage carries defined milestones and the resources that support them.',
-      'Technology readiness is tracked through TRL stages, giving Apex and its government partners a common language for maturity.',
+      'Technology readiness is tracked through TRL stages, giving APEX and its government partners a common language for maturity.',
     ],
     quote: 'Each stage has milestones, resources and the right mentors attached.',
     facts: [['6', 'Journey stages'], ['TRL', 'Readiness tracking'], ['1', 'Shared roadmap']],
@@ -111,7 +111,7 @@ export const FEATURES: Feature[] = [
     no: '05', title: 'Administrator Management', section: 'Administration',
     headline: 'A control center for the whole program',
     deck: 'Add resources, manage mentors, onboard cohorts and assign pathways, without technical support.',
-    lead: 'Program staff should run programs, not software. Administrator Management gives Apex one place to operate everything.',
+    lead: 'Program staff should run programs, not software. Administrator Management gives APEX one place to operate everything.',
     body: [
       'Staff add and update resources, manage mentors and advisors, onboard cohorts and assign startups to pathways from a single console.',
       'Activity across the program is visible at a glance, so administrators intervene where it matters instead of chasing status updates.',
@@ -126,7 +126,7 @@ export const FEATURES: Feature[] = [
     lead: 'Partner perks often go unused because founders never find them. On the platform, they appear at the stage where they matter.',
     body: [
       'Offers, software credits and partner programs are already integrated. Founders see them in context, alongside the milestone they support.',
-      'There is no integration work for Apex or for partners, and partners gain visibility and measurable engagement with qualified companies.',
+      'There is no integration work for APEX or for partners, and partners gain visibility and measurable engagement with qualified companies.',
     ],
     quote: 'Partner resources that founders actually find, and actually use.',
     facts: [['Embedded', 'Partner offers'], ['0', 'Integration work'], ['Measured', 'Engagement']],
@@ -135,7 +135,7 @@ export const FEATURES: Feature[] = [
     no: '07', title: 'Data Analytics', section: 'Analytics',
     headline: 'A live view of the ecosystem',
     deck: 'Data that guides decisions, informs stakeholders and demonstrates impact.',
-    lead: 'Decisions about public programs deserve current data. Analytics gives Apex a continuous picture of the ecosystem and its own performance.',
+    lead: 'Decisions about public programs deserve current data. Analytics gives APEX a continuous picture of the ecosystem and its own performance.',
     body: [
       'Industry growth trends, investment activity, resource allocation and utilization, stage progression and commercialization outcomes are tracked live.',
       'Leadership sees what is working, reallocates effort with evidence and reports to stakeholders without manual data collection.',
@@ -147,9 +147,9 @@ export const FEATURES: Feature[] = [
     no: '08', title: 'Space for National and International Expansion', section: 'Expansion',
     headline: 'Space for national and international growth',
     deck: '5,800 locations in 130 countries, including 1,500 in the United States.',
-    lead: 'Opening a new hub usually means site-by-site negotiation. Through one partner, Apex can operate in new cities and run the same program everywhere.',
+    lead: 'Opening a new hub usually means site-by-site negotiation. Through one partner, APEX can operate in new cities and run the same program everywhere.',
     body: [
-      'Access to a global network of flexible workspaces lets Apex extend its footprint without long leases or local procurement.',
+      'Access to a global network of flexible workspaces lets APEX extend its footprint without long leases or local procurement.',
       'Every location runs on the same platform, so founders in any city receive the same resources, mentors and standards.',
     ],
     quote: 'One partner, one program, thousands of locations.',
@@ -162,7 +162,7 @@ export const FEATURES: Feature[] = [
     lead: 'When a company reaches the investment stage, the right introduction is decisive. The Investor Network makes that match deliberate.',
     body: [
       'Investors maintain profiles with focus areas and stage preferences. Startups that reach investment readiness are connected to relevant investors.',
-      'Apex tracks every introduction and its outcome, building a record of capital mobilized through the program.',
+      'APEX tracks every introduction and its outcome, building a record of capital mobilized through the program.',
     ],
     quote: 'Every introduction deliberate, every outcome on record.',
     facts: [['Focus', 'Matched profiles'], ['Stage', 'Preferences respected'], ['Tracked', 'Introductions']],
@@ -174,7 +174,7 @@ export const FEATURES: Feature[] = [
     lead: 'Grant opportunities are numerous and fragmented. AI matching puts the right programs in front of the right companies.',
     body: [
       'Each startup is matched to grants and non-dilutive funding according to its industry, stage and technology readiness level.',
-      'Apex sees how much funding its companies pursue and win, a direct measure of the program\u2019s economic contribution.',
+      'APEX sees how much funding its companies pursue and win, a direct measure of the program\u2019s economic contribution.',
     ],
     quote: 'More founders pursuing, and winning, the funding they qualify for.',
     facts: [['AI', 'Grant matching'], ['TRL', 'Aware filters'], ['Visible', 'Funding won']],
@@ -182,11 +182,11 @@ export const FEATURES: Feature[] = [
   {
     no: '11', title: 'Global Soft-Landing', section: 'Global',
     headline: 'A soft landing in any market',
-    deck: 'Test and enter a new country from inside the Apex program.',
+    deck: 'Test and enter a new country from inside the APEX program.',
     lead: 'International expansion is risky for small companies. Global Soft-Landing lowers that risk by keeping founders inside a familiar program.',
     body: [
       'A startup can establish local presence in a new country with workspace, the same platform, mentors and resources it already uses.',
-      'Apex extends its reach abroad while its companies keep continuity of support across borders.',
+      'APEX extends its reach abroad while its companies keep continuity of support across borders.',
     ],
     quote: 'New markets, the same program, the same support.',
     facts: [['130', 'Countries reachable'], ['Same', 'Platform abroad'], ['Local', 'Workspace']],
@@ -205,15 +205,15 @@ export const FEATURES: Feature[] = [
   },
   {
     no: '13', title: 'White-Label Branding', section: 'Brand',
-    headline: 'Apex\u2019s own innovation platform',
+    headline: 'APEX\u2019s own innovation platform',
     deck: 'Full white-label branding for startups, mentors and partners.',
-    lead: 'The platform carries the Apex name. Founders, mentors and partners experience it as Apex\u2019s innovation platform, end to end.',
+    lead: 'The platform carries the APEX name. Founders, mentors and partners experience it as APEX\u2019s innovation platform, end to end.',
     body: [
-      'Branding, domain and identity reflect Apex throughout, reinforcing the institution\u2019s role at the center of its ecosystem.',
-      'Startup Factory Hub operates the technology in the background, so Apex owns the relationship and the experience.',
+      'Branding, domain and identity reflect APEX throughout, reinforcing the institution\u2019s role at the center of its ecosystem.',
+      'Startup Factory Hub operates the technology in the background, so APEX owns the relationship and the experience.',
     ],
-    quote: 'Apex owns the experience. We power it.',
-    facts: [['100%', 'Apex branding'], ['1', 'Unified identity'], ['0', 'Third-party logos']],
+    quote: 'APEX owns the experience. We power it.',
+    facts: [['100%', 'APEX branding'], ['1', 'Unified identity'], ['0', 'Third-party logos']],
   },
 ];
 

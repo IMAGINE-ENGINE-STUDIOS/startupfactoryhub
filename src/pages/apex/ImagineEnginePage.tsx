@@ -18,7 +18,7 @@ const IMAGINE: Feature = {
     'Build by chatting, edit on a visual canvas, automate with Flow, and start from ready blocks: CRM, store, kanban, games and 3D scenes.',
     'Apps connect to real databases (Supabase, SurrealDB), sync to GitHub, get Genius AI guidance and publish live in one click.',
   ],
-  quote: 'Every Apex startup gets its own AI development team.',
+  quote: 'Every APEX startup gets its own AI development team.',
   facts: [['AI', 'Coding by chat'], ['Real', 'Data & GitHub'], ['1-click', 'Publish live']],
 };
 
