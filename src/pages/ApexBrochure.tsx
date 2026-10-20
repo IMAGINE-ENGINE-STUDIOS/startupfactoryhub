@@ -27,6 +27,7 @@ import { ApexPerksPage } from './apex/PerksPage';
 import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
 import { ApexTeamPage, ApexRoadmapPage, ApexNextStepsPage } from './apex/TeamRoadmapPages';
 import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
+import { ProposalWhyPage, ProposalSevenPage, ProposalPricingPage, SupportingDividerPage } from './apex/ProposalPages';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -177,14 +178,22 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
           <div className="relative rounded-full p-8" style={{ background: 'radial-gradient(circle, #ffffff 0%, #ede9fe 60%, #c4b5fd 100%)', boxShadow: '0 0 0 1px #ffffff55, 0 0 80px #7c3aedaa, 0 20px 60px #000a' }}>
             <img src={APEX_LOGO} alt="APEX Accelerators" className="h-28 w-28 object-contain" />
           </div>
-          <h1 className="mt-10 font-futuristic" style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.05, letterSpacing: '0.04em', paddingBottom: 6, background: 'linear-gradient(180deg,#ffffff 0%,#e5e7eb 35%,#9ca3af 50%,#f5f3ff 65%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 18px #7c3aed88)' }}>APEX</h1>
-          <div className="mt-3 h-[2px] w-40 rounded-full" style={{ background: 'linear-gradient(90deg, transparent, #a855f7, #e9d5ff, #a855f7, transparent)', boxShadow: '0 0 14px #a855f7' }} />
-          <div className="mt-4 font-mono uppercase font-bold" style={{ fontSize: 15, letterSpacing: '0.42em', color: '#ddd6fe' }}>Powered by Startup Factory</div>
+          <div className="mt-8 font-mono uppercase font-bold" style={{ fontSize: 12, letterSpacing: '0.36em', color: '#c4b5fd' }}>A partnership proposal for</div>
+          <h1 className="mt-3 font-futuristic" style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.08, letterSpacing: '0.03em', paddingBottom: 6, background: 'linear-gradient(180deg,#ffffff 0%,#e5e7eb 35%,#9ca3af 50%,#f5f3ff 65%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 0 18px #7c3aed88)' }}>APEX Accelerators</h1>
+          <p className="mt-3" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 21, lineHeight: 1.3, color: '#f5f3ff', maxWidth: '24ch' }}>Helping more businesses get ready to compete for government contracts</p>
+          <div className="mt-4 h-[2px] w-40 rounded-full" style={{ background: 'linear-gradient(90deg, transparent, #a855f7, #e9d5ff, #a855f7, transparent)', boxShadow: '0 0 14px #a855f7' }} />
+          <div className="mt-4 font-mono uppercase" style={{ fontSize: 11.5, letterSpacing: '0.3em', color: '#ddd6fe' }}>Prepared for the Department of War APEX Accelerators · October 2026</div>
+          <div className="mt-2 font-mono uppercase font-bold" style={{ fontSize: 12, letterSpacing: '0.34em', color: '#ddd6fe' }}>Powered by Startup Factory Hub · startupfactoryhub.com/apex</div>
         </div>
         <div className="relative rounded-2xl px-6 py-3" style={{ background: 'linear-gradient(180deg,#ffffff,#ede9fe)', boxShadow: '0 0 0 1px #ffffff66, 0 0 40px #7c3aed88' }}><img src={sfhLogo} alt="Startup Factory Hub" className="h-10 w-auto object-contain" /></div>
       </section>
     ),
   },
+  { key: 'proposal-why', node: <ProposalWhyPage /> },
+  { key: 'proposal-seven', node: <ProposalSevenPage /> },
+  { key: 'proposal-pricing', node: <ProposalPricingPage url={CONTACT_URL} /> },
+  { key: 'appendix', node: <SupportingDividerPage /> },
+  { key: 'how', node: <ValueForEveryonePage /> },
   { key: 'about', node: <PartnersAboutPage /> },
   { key: 'ecosystem', node: <PartnersEcosystemPage /> },
   {
@@ -203,7 +212,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
               <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
             </div>
             <h2 className="mt-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 38, fontWeight: 800, lineHeight: 1.04, color: '#f8fafc' }}>Acceleration at scale</h2>
-            <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for Apex: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while Apex manages and measures the whole program.</p>
+            <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for APEX: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while APEX manages and measures the whole program.</p>
             <div className="mt-4 grid grid-cols-3" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
               {[['Right resources, right time', 'The right resource to the right founder at the right moment.'], ['The right people', 'Mentors, advisors and investors who can help.'], ['Knowing what works', 'Visibility into progress, resource use and outcomes.']].map(([t, d], i) => (
                 <div key={t} className="pt-2.5 pr-3" style={{ paddingLeft: i ? 12 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>
@@ -245,10 +254,6 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
     ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} /> },
        { key: 'perks', node: <ApexPerksPage /> }]
     : [{ key: `feature-${f.no}-${i}`, node: f.no === '13' ? <EditorialPage f={f} total={TOTAL} /> : <TechFeaturePage f={f} index={i} total={TOTAL} /> }]),
-  {
-    key: 'how',
-    node: <ValueForEveryonePage />,
-  },
   {
     key: 'outcomes',
     node: <ExpectedOutcomesPage />,

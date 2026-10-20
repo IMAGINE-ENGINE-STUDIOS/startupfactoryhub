@@ -261,7 +261,7 @@ const MODULE_ICONS: LucideIcon[][] = [
 const MENTOR_TAGS = ['PROFILES_AND_BOOKING', 'RECORDS_AND_FEEDBACK'];
 
 
-/** Mock of the platform's Journey tab as Apex would see it, white-labeled. */
+/** Mock of the platform's Journey tab as APEX would see it, white-labeled. */
 const BrandedJourney = ({ th }: { th: Theme }) => (
   <div className="flex-1 min-h-0 flex flex-col rounded-xl overflow-hidden" style={{ background: 'rgba(5,8,18,0.82)', border: BORDER, boxShadow: `0 30px 60px -30px rgba(0,0,0,0.8), 0 0 40px ${th.a}18` }}>
     <div className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: BORDER, background: `linear-gradient(90deg, ${th.a}22, transparent)` }}>

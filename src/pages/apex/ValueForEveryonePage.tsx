@@ -12,7 +12,7 @@ const GR = '#00FF88';
 const MODS = [
   { icon: Rocket, c: OR, title: 'Startups', tag: 'FOR STARTUPS', text: 'One login: a personalized journey, relevant resources, mentors and AI-suggested next steps.' },
   { icon: GraduationCap, c: '#22d3ee', title: 'Mentors and advisors', tag: 'FOR MENTORS', text: 'Simple scheduling, clear context on each startup, recognition through ratings.' },
-  { icon: SlidersHorizontal, c: '#8b5cf6', title: 'Apex administrators', tag: 'FOR ADMINS', text: 'One place to run the program, manage resources and see what is working.' },
+  { icon: SlidersHorizontal, c: '#8b5cf6', title: 'APEX administrators', tag: 'FOR ADMINS', text: 'One place to run the program, manage resources and see what is working.' },
   { icon: Handshake, c: GR, title: 'Corporate partners', tag: 'FOR PARTNERS', text: 'Visibility and engagement with startups, with no integration work.' },
 ];
 

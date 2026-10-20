@@ -1,5 +1,5 @@
 /**
- * APEX brochure — "What Apex can expect" (premium outcomes design, silver edition).
+ * APEX brochure — "What APEX can expect" (premium outcomes design, silver edition).
  * Credits: Imagine Engine Studios Corp.
  */
 import { Check } from 'lucide-react';
@@ -16,7 +16,7 @@ const ITEMS: [string, string][] = [
   ['More', 'effective, better-measured mentor engagement'],
   ['Better-prepared', 'startups at the investment stage'],
   ['Clear,', 'data-backed reporting on program impact'],
-  ['Less', 'administrative effort for Apex staff'],
+  ['Less', 'administrative effort for APEX staff'],
   ['Industry analytics', 'showing which sectors and technologies startups work in'],
   ['Demographics', 'of founders and teams across every program'],
   ['Regional insights', 'on where startups, mentors and partners are located'],
@@ -38,7 +38,7 @@ export const ExpectedOutcomesPage = () => (
       <div className="h-[3px] w-10 rounded-full" style={{ background: `linear-gradient(90deg, ${OR}, ${GR})` }} />
       <div className="mt-4" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: GR }}>— SEC // 19 — EXPECTED OUTCOMES</div>
       <h2 className="mt-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 44, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.03em', color: INK }}>
-        What <span style={{ color: OR }}>Apex</span> can expect
+        What <span style={{ color: OR }}>APEX</span> can expect
       </h2>
       <div className="mt-4 h-px" style={{ background: 'rgba(15,23,42,0.12)' }} />
 
