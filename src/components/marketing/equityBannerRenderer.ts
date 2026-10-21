@@ -66,7 +66,7 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    const scale = 3.9 / Math.max(size.x, size.y, size.z);
+    const scale = 3.35 / Math.max(size.x, size.y, size.z);
     model.position.copy(center).multiplyScalar(-scale);
     model.scale.setScalar(scale);
     const pivot = new THREE.Group();
