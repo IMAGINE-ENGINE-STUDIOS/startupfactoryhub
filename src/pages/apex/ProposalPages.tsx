@@ -26,7 +26,7 @@ const Shell = ({ no, label, children }: { no: string; label: string; children: R
 
 /** Page 1 — why APEX should care. */
 export const ProposalWhyPage = () => (
-  <Shell no="01" label="WHY THIS MATTERS TO APEX">
+  <Shell no="02" label="WHY THIS MATTERS TO APEX">
     <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.06 }}>More businesses ready to compete, with the same counselors</h2>
     <p className="mt-4" style={{ fontSize: 15, lineHeight: 1.6, color: BODY }}>
       APEX Accelerators are the front door for American businesses entering government contracting, with more than 300 offices giving one-on-one help.
@@ -60,7 +60,7 @@ const SEVEN = [
 
 /** Page 2 — the seven APEX services, and how the platform strengthens each. */
 export const ProposalSevenPage = () => (
-  <Shell no="02" label="ALIGNED TO THE SEVEN APEX SERVICES">
+  <Shell no="04" label="ALIGNED TO THE SEVEN APEX SERVICES">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>An innovation platform built around what APEX already does</h2>
     <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>We don’t replace counselors. We give them and their clients one place to carry each service forward.</p>
     <div className="mt-4 flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
@@ -81,12 +81,12 @@ export const ProposalSevenPage = () => (
 export const ProposalPricingPage = ({ url }: { url: string }) => (
   <Shell no="03" label="HOW PRICING IS STRUCTURED">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Simple to start, grows with the program</h2>
-    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} for white-label setup, then ${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per APEX {APEX_LICENSING.billingUnit}, plus AI credits.</p>
+    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per {APEX_LICENSING.billingUnit}, plus AI credits and ${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} for one-time white-label and setup.</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
       {[
-        ['White-label setup', 'One-time', `$${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} to set up the APEX-branded platform.`],
-        ['Platform license', 'Annual', `$${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per location per year, covering counselors, clients and reporting.`],
-        ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual location license.' : 'AI credits are purchased separately, in addition to the annual location license.'],
+        ['White-label and setup', 'One-time', `$${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} to set up the APEX-branded platform.`],
+        ['Platform license', 'Annual', `$${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per ${APEX_LICENSING.billingUnit} per year, covering counselors, clients and reporting.`],
+        ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual APEX license.' : 'AI credits are purchased separately, in addition to the annual APEX license.'],
       ].map(([t, k, d]) => (
         <div key={t} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(15,23,42,0.08)', borderTop: `3px solid ${P}` }}>
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">

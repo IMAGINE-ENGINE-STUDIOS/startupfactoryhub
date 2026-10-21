@@ -2,8 +2,8 @@
 export const APEX_LICENSING = {
   whiteLabelSetupUsd: 10_000,
   setupBillingPeriod: 'one-time',
-  annualPriceUsd: 5_000,
+  annualPriceUsd: 950,
   billingPeriod: 'year',
-  billingUnit: 'location',
+  billingUnit: 'APEX',
   aiCreditsIncluded: false,
 } as const;
