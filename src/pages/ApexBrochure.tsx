@@ -361,8 +361,15 @@ export default function ApexBrochure() {
           >
             {PAGES.map((p, i) => (
               <BookPage key={p.key} hard={i === 0 || i === PAGES.length - 1}>
-                <div className="relative w-full h-full">
-                  <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
+                <div className="relative w-full h-full overflow-hidden">
+                  {size.w < 560 ? (
+                    /* Phone: lay the page out at its design size, then scale it down to fit so nothing overlaps or clips. */
+                    <div style={{ width: 560, height: 560 * (size.h / size.w), transform: `scale(${size.w / 560})`, transformOrigin: 'top left' }}>
+                      <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
+                    </div>
+                  ) : (
+                    <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
+                  )}
                 </div>
               </BookPage>
             ))}
