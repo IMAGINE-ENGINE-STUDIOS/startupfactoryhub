@@ -1,4 +1,5 @@
 # Project architecture rules
+- Equity marketing artwork lives in src/components/marketing/EquityProgramBanner.tsx and equityBannerRenderer.ts, reusing the existing rover GLB and a shared Canvas/Three renderer for preview, GIF and JPG; why: animated exports and stills stay visually identical without remote rendering.
 
 - Event participants pay only the displayed ticket price; the 5% platform fee is deducted from the organizer payout and is never shown on participant-facing event pages.
 

@@ -26,6 +26,7 @@ import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanne
 import BasicPlanBanner from '@/components/marketing/BasicPlanBanner';
 import AgentsBanner from '@/components/marketing/AgentsBanner';
 import AgentsAnimatedBanner from '@/components/marketing/AgentsAnimatedBanner';
+import EquityProgramBanner from '@/components/marketing/EquityProgramBanner';
 
 
 
@@ -2899,7 +2900,7 @@ const Marketing = () => {
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto space-y-10">
           {/* Campaign automation now lives in Admin Dashboard → Marketing */}
-
+          <EquityProgramBanner />
 
 
 
