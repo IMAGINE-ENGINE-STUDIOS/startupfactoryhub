@@ -35,7 +35,7 @@ export const ProposalWhyPage = () => (
     <div className="mt-5 grid grid-cols-1 gap-3">
       {[
         ['The challenge', 'Clients arrive at different stages of readiness. Counselors repeat the same groundwork, and offices see little of what happens between meetings.'],
-        ['What we propose', 'A shared platform, branded for APEX Accelerators, that supports the seven services APEX already delivers. Clients keep moving between sessions, and counselors spend their time where it matters most.'],
+        ['What we propose', 'An innovation platform built around what APEX already does, branded for APEX Accelerators and supporting the seven services APEX already delivers. Clients keep moving between sessions, and counselors spend their time where it matters most.'],
         ['What APEX gains', 'More clients served per counselor, a stronger pipeline of suppliers ready to compete and deliver, and clear reporting on progress across offices.'],
       ].map(([t, d]) => (
         <div key={t} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(15,23,42,0.08)', borderLeft: `3px solid ${P}` }}>
@@ -61,7 +61,7 @@ const SEVEN = [
 /** Page 2 — the seven APEX services, and how the platform strengthens each. */
 export const ProposalSevenPage = () => (
   <Shell no="02" label="ALIGNED TO THE SEVEN APEX SERVICES">
-    <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Built around what APEX already does</h2>
+    <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>An innovation platform built around what APEX already does</h2>
     <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>We don’t replace counselors. We give them and their clients one place to carry each service forward.</p>
     <div className="mt-4 flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
       {SEVEN.map(([t, d], i) => (
