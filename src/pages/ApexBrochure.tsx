@@ -189,9 +189,9 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
       </section>
     ),
   },
-  { key: 'proposal-why', node: <ProposalWhyPage /> },
-  { key: 'proposal-pricing', node: <ProposalPricingPage url={CONTACT_URL} /> },
   { key: 'proposal-seven', node: <ProposalSevenPage /> },
+  { key: 'proposal-pricing', node: <ProposalPricingPage url={CONTACT_URL} /> },
+  { key: 'proposal-why', node: <ProposalWhyPage /> },
   { key: 'appendix', node: <SupportingDividerPage /> },
   { key: 'how', node: <ValueForEveryonePage /> },
   { key: 'about', node: <PartnersAboutPage /> },
