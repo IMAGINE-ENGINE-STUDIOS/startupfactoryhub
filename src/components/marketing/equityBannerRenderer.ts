@@ -2,7 +2,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import dracoDecoderUrl from 'three/examples/jsm/libs/draco/gltf/draco_decoder.js?url';
 import roverAsset from '@/assets/perseverance-rover.glb.asset.json';
 import logoUrl from '@/assets/sfh-logo-sphere.png';
 
@@ -25,7 +24,7 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
   };
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
   const draco = new DRACOLoader();
-  draco.setDecoderPath(dracoDecoderUrl.slice(0, dracoDecoderUrl.lastIndexOf('/') + 1));
+  draco.setDecoderPath('/vendor/draco/');
   draco.setDecoderConfig({ type: 'js' });
   renderer.setSize(560, 510);
   renderer.setPixelRatio(1);
