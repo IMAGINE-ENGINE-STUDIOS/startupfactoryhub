@@ -5,6 +5,7 @@
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
+import { APEX_LICENSING } from './licensing';
 
 const SERIF = "'Playfair Display', Georgia, serif";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
@@ -76,17 +77,15 @@ export const ProposalSevenPage = () => (
   </Shell>
 );
 
-/** Page 3 — how pricing is structured (no amounts) and the next step. */
+/** Page 3 — annual location licensing, additional AI credits and the next step. */
 export const ProposalPricingPage = ({ url }: { url: string }) => (
   <Shell no="03" label="HOW PRICING IS STRUCTURED">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Simple to start, grows with the program</h2>
-    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>Final pricing is set together once the scope is agreed. This is how it is structured.</p>
+    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per {APEX_LICENSING.billingUnit}, plus AI credits.</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
       {[
-        ['Setup', 'One-time', 'APEX branding, configuring the seven services, loading resources and training counselors.'],
-        ['Platform license', 'Annual', 'Per participating office, covering counselors, clients and reporting.'],
-        ['Scale', 'Volume based', 'Lower per-office cost as more offices and regions join.'],
-        ['Optional services', 'As needed', 'Events, custom reporting and dedicated program support.'],
+        ['Platform license', 'Annual', `$${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per location per year, covering counselors, clients and reporting.`],
+        ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual location license.' : 'AI credits are purchased separately, in addition to the annual location license.'],
       ].map(([t, k, d]) => (
         <div key={t} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(15,23,42,0.08)', borderTop: `3px solid ${P}` }}>
           <div className="flex items-baseline justify-between">
