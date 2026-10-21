@@ -8,10 +8,10 @@ test('APEX white-label setup costs $10,000 once', () => {
   assert.equal(APEX_LICENSING.setupBillingPeriod, 'one-time');
 });
 
-test('APEX license costs $5,000 per year per location', () => {
-  assert.equal(APEX_LICENSING.annualPriceUsd, 5_000);
+test('APEX license costs $950 per year per APEX', () => {
+  assert.equal(APEX_LICENSING.annualPriceUsd, 950);
   assert.equal(APEX_LICENSING.billingPeriod, 'year');
-  assert.equal(APEX_LICENSING.billingUnit, 'location');
+  assert.equal(APEX_LICENSING.billingUnit, 'APEX');
 });
 
 test('AI credits are additional to the APEX license', () => {
