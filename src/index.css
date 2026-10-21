@@ -9,6 +9,12 @@ All colors MUST be HSL.
 */
 
   :root {
+    /* Fixed artwork palette: exports retain SFH branding in either site theme. */
+    --equity-banner-background: 220 25% 6%;
+    --equity-banner-ink: 156 100% 95%;
+    --equity-banner-muted: 156 20% 72%;
+    --equity-banner-accent: 160 84% 55%;
+    --equity-banner-rule: 160 35% 17%;
     /* Light theme - Green & Fresh tones */
     --background: 160 60% 98%;
     --foreground: 160 50% 15%;

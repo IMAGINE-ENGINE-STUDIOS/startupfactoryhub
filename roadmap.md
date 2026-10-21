@@ -143,8 +143,13 @@
 - [x] Email template asking users to finish their profile and add a photo
 
 ## Imagine Engine phases 2 and 3
+ 
 - [x] End-to-end streaming with incremental completed-file application
 - [x] Bounded continuation for truncated multi-file output
 - [x] Structured records, atomic safe fuzzy patches and relevance-ranked context
 - [x] 25 regression tests, service deployment, anonymous rejection and browser file/patch validation
 - [ ] Signed-in provider generation: blocked by external unmanaged Supabase authentication
+
+## Equity program marketing banner
+- [x] Create branded moving-rover banner with 1–10% equity and idea-to-investable-company message
+- [x] Add GIF and JPG downloads to /marketing and verify exports (1200×630 JPG; 60-frame looping GIF; browser animation and downloads checked)
