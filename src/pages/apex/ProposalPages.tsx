@@ -54,7 +54,7 @@ const SEVEN = [
   ['Registration Assistance', 'A guided checklist in each client’s journey, with status visible to their counselor.'],
   ['Proposals', 'AI writing help and a shared document workspace for preparing solicitation packages with counselor review.'],
   ['Market Research', 'Strategic business intelligence tools that help clients see which agencies and markets fit their product or service.'],
-  ['Contract Support', 'Access to legal, finance and industry advisors when clients need help after an award.'],
+  ['Centralized Resources & Strategic Business Intelligence', 'One place for resources, advisors and business intelligence to help counselors and clients make informed decisions.'],
   ['Bid Opportunity Identification', 'Opportunity updates matched to each client’s profile, set up with APEX during the setup phase.'],
 ];
 
