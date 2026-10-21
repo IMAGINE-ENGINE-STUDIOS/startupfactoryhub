@@ -1,6 +1,8 @@
 /** Copyright Imagine Engine Studios Corp. All rights reserved. */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import dracoDecoderUrl from 'three/examples/jsm/libs/draco/gltf/draco_decoder.js?url';
 import roverAsset from '@/assets/perseverance-rover.glb.asset.json';
 import logoUrl from '@/assets/sfh-logo-sphere.png';
 
@@ -22,6 +24,9 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     rule: token('--equity-banner-rule'),
   };
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+  const draco = new DRACOLoader();
+  draco.setDecoderPath(dracoDecoderUrl.slice(0, dracoDecoderUrl.lastIndexOf('/') + 1));
+  draco.setDecoderConfig({ type: 'js' });
   renderer.setSize(560, 510);
   renderer.setPixelRatio(1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -50,12 +55,13 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     });
     renderer.dispose();
     renderer.forceContextLoss();
+    draco.dispose();
   };
   const logo = new Image();
   logo.src = logoUrl;
   try {
     const [gltf] = await Promise.all([
-      new GLTFLoader().loadAsync(roverAsset.url), logo.decode(), document.fonts.ready,
+      new GLTFLoader().setDRACOLoader(draco).loadAsync(roverAsset.url), logo.decode(), document.fonts.ready,
     ]);
     model = gltf.scene;
     const box = new THREE.Box3().setFromObject(model);
