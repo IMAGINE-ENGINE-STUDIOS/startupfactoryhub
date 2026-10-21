@@ -89,7 +89,7 @@ export const ProposalPricingPage = ({ url }: { url: string }) => (
         ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual location license.' : 'AI credits are purchased separately, in addition to the annual location license.'],
       ].map(([t, k, d]) => (
         <div key={t} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(15,23,42,0.08)', borderTop: `3px solid ${P}` }}>
-          <div className="flex items-baseline justify-between">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
             <span style={{ fontSize: 16, fontWeight: 800 }}>{t}</span>
             <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '0.16em', color: P }}>{k.toUpperCase()}</span>
           </div>
