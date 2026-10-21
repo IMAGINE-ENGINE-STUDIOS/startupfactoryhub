@@ -81,9 +81,10 @@ export const ProposalSevenPage = () => (
 export const ProposalPricingPage = ({ url }: { url: string }) => (
   <Shell no="03" label="HOW PRICING IS STRUCTURED">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Simple to start, grows with the program</h2>
-    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per {APEX_LICENSING.billingUnit}, plus AI credits.</p>
+    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} for white-label setup, then ${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per APEX {APEX_LICENSING.billingUnit}, plus AI credits.</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
       {[
+        ['White-label setup', 'One-time', `$${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} to set up the APEX-branded platform.`],
         ['Platform license', 'Annual', `$${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per location per year, covering counselors, clients and reporting.`],
         ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual location license.' : 'AI credits are purchased separately, in addition to the annual location license.'],
       ].map(([t, k, d]) => (
