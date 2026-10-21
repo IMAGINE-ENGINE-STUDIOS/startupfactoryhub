@@ -155,4 +155,4 @@
 - [x] Add GIF and JPG downloads to /marketing and verify exports (1200×630 JPG; 60-frame looping GIF; browser animation and downloads checked)
 
 ## APEX pricing update
-- [ ] Move pricing to the third brochure page and update to $950 yearly per APEX, additional AI credits and $10,000 one-time white-label and setup; verify pricing rules and page order.
+- [x] Move pricing to the third brochure page and update to $950 yearly per APEX, additional AI credits and $10,000 one-time white-label and setup; three pricing tests passed and opened page 03 verified in the browser.
