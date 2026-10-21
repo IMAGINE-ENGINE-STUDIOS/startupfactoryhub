@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import roverAsset from '@/assets/perseverance-rover.glb.asset.json';
-import logoUrl from '@/assets/sfh-logo-sphere.png';
+import logoAsset from '@/assets/sfh-main-logo.png.asset.json';
 import backgroundUrl from '@/assets/accelerated-fundraising-bg.jpg';
 
 export const EQUITY_BANNER_WIDTH = 1200;
@@ -60,7 +60,7 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     draco.dispose();
   };
   const logo = new Image();
-  logo.src = logoUrl;
+  logo.src = logoAsset.url;
   const background = new Image();
   background.src = backgroundUrl;
   try {
@@ -106,8 +106,9 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1200, y); ctx.stroke();
       }
       ctx.restore();
-      ctx.drawImage(logo, 48, 37, 54, 54);
-      text('STARTUP FACTORY HUB', 117, 70, `700 19px ${fontFamily}`);
+      const logoHeight = 120;
+      const logoWidth = logoHeight * logo.naturalWidth / logo.naturalHeight;
+      ctx.drawImage(logo, 40, 0, logoWidth, logoHeight);
       text('EQUITY PROGRAM', 50, 137, `500 15px ${fontFamily}`, colors.accent);
       text('From idea to', 47, 214, `900 56px ${fontFamily}`);
       text('investable company.', 47, 277, `900 56px ${fontFamily}`);
