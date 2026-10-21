@@ -151,5 +151,5 @@
 - [ ] Signed-in provider generation: blocked by external unmanaged Supabase authentication
 
 ## Equity program marketing banner
-- [ ] Create branded moving-rover banner with 1–10% equity and idea-to-investable-company message
-- [ ] Add GIF and JPG downloads to /marketing and verify exports
+- [x] Create branded moving-rover banner with 1–10% equity and idea-to-investable-company message
+- [x] Add GIF and JPG downloads to /marketing and verify exports (1200×630 JPG; 60-frame looping GIF; browser animation and downloads checked)
