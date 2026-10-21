@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import roverAsset from '@/assets/perseverance-rover.glb.asset.json';
 import logoUrl from '@/assets/sfh-logo-sphere.png';
+import backgroundUrl from '@/assets/accelerated-fundraising-bg.jpg';
 
 export const EQUITY_BANNER_WIDTH = 1200;
 export const EQUITY_BANNER_HEIGHT = 630;
@@ -21,7 +22,9 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     muted: token('--equity-banner-muted'),
     accent: token('--equity-banner-accent'),
     rule: token('--equity-banner-rule'),
+    overlay: token('--equity-banner-overlay'),
   };
+  const fontFamily = '"Helvetica Neue", Arial, sans-serif';
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
   const draco = new DRACOLoader();
   draco.setDecoderPath('/vendor/draco/');
@@ -58,9 +61,11 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
   };
   const logo = new Image();
   logo.src = logoUrl;
+  const background = new Image();
+  background.src = backgroundUrl;
   try {
     const [gltf] = await Promise.all([
-      new GLTFLoader().setDRACOLoader(draco).loadAsync(roverAsset.url), logo.decode(), document.fonts.ready,
+      new GLTFLoader().setDRACOLoader(draco).loadAsync(roverAsset.url), logo.decode(), background.decode(), document.fonts.ready,
     ]);
     model = gltf.scene;
     const box = new THREE.Box3().setFromObject(model);
@@ -80,33 +85,46 @@ export async function createEquityBannerRenderer(canvas: HTMLCanvasElement) {
     const draw = (time: number) => {
       ctx.fillStyle = colors.background;
       ctx.fillRect(0, 0, 1200, 630);
+      const imageScale = Math.max(1200 / background.naturalWidth, 630 / background.naturalHeight);
+      const imageWidth = background.naturalWidth * imageScale;
+      const imageHeight = background.naturalHeight * imageScale;
+      ctx.drawImage(background, (1200 - imageWidth) / 2, (630 - imageHeight) / 2, imageWidth, imageHeight);
+      const overlay = ctx.createLinearGradient(0, 0, 1200, 0);
+      overlay.addColorStop(0, colors.background);
+      overlay.addColorStop(0.5, colors.overlay);
+      overlay.addColorStop(1, colors.overlay);
+      ctx.fillStyle = overlay;
+      ctx.fillRect(0, 0, 1200, 630);
+      ctx.save();
+      ctx.globalAlpha = 0.45;
       ctx.strokeStyle = colors.rule;
       ctx.lineWidth = 1;
-      for (let x = 690; x < 1200; x += 42) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 540); ctx.stroke();
+      for (let x = 0; x < 1200; x += 48) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 630); ctx.stroke();
       }
-      for (let y = 36; y < 540; y += 42) {
-        ctx.beginPath(); ctx.moveTo(690, y); ctx.lineTo(1200, y); ctx.stroke();
+      for (let y = 0; y < 630; y += 48) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1200, y); ctx.stroke();
       }
+      ctx.restore();
       ctx.drawImage(logo, 48, 37, 54, 54);
-      text('STARTUP FACTORY HUB', 117, 70, '700 19px "Space Grotesk", sans-serif');
-      text('EQUITY PROGRAM', 50, 137, '600 15px "Space Grotesk", sans-serif', colors.accent);
-      text('From idea to', 47, 214, '600 53px "Space Grotesk", sans-serif');
-      text('investable company.', 47, 277, '600 53px "Space Grotesk", sans-serif');
+      text('STARTUP FACTORY HUB', 117, 70, `700 19px ${fontFamily}`);
+      text('EQUITY PROGRAM', 50, 137, `500 15px ${fontFamily}`, colors.accent);
+      text('From idea to', 47, 214, `900 56px ${fontFamily}`);
+      text('investable company.', 47, 277, `900 56px ${fontFamily}`);
       ctx.fillStyle = colors.accent;
       ctx.fillRect(50, 310, 70, 3);
-      text('1–10%', 47, 416, '700 88px "Space Grotesk", sans-serif', colors.accent);
-      text('EQUITY', 330, 408, '600 20px "Space Grotesk", sans-serif');
-      text('Build your venture with Startup Factory Hub.', 50, 460, '400 23px "Space Grotesk", sans-serif', colors.muted);
+      text('1–10%', 47, 416, `900 88px ${fontFamily}`, colors.accent);
+      text('EQUITY', 330, 408, `700 20px ${fontFamily}`);
+      text('Build your venture with Startup Factory Hub.', 50, 460, `300 23px ${fontFamily}`, colors.muted);
       // A genuine 3D turntable, not a moving photograph: all rover views render from the existing model.
       pivot.rotation.y = 0.55 + time * Math.PI * 2 / 6;
       renderer.render(scene, camera);
       ctx.drawImage(renderer.domElement, 654, 38, 560, 510);
       ctx.strokeStyle = colors.rule;
       ctx.beginPath(); ctx.moveTo(50, 535); ctx.lineTo(1150, 535); ctx.stroke();
-      text('Explore the equity program', 50, 577, '600 22px "Space Grotesk", sans-serif');
-      text('startupfactoryhub.com/equity-program', 650, 577, '500 21px "Space Grotesk", sans-serif', colors.accent);
-      text('© Imagine Engine Studios Corp.', 50, 610, '400 11px "Space Grotesk", sans-serif', colors.muted);
+      text('Explore the equity program', 50, 577, `700 22px ${fontFamily}`);
+      text('startupfactoryhub.com/equity-program', 650, 577, `500 21px ${fontFamily}`, colors.accent);
+      text('© Imagine Engine Studios Corp.', 50, 610, `400 11px ${fontFamily}`, colors.muted);
     };
     return { draw, dispose };
   } catch (error) {
