@@ -78,7 +78,15 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
   const clean: Record<string, unknown> = { ...body };
   delete clean.modalities; delete clean.reasoning_effort; delete clean.reasoning; delete clean.provider;
   let last: RouteResult | null = null;
-  const chain: [Provider, string][] = selected ? [[selected.provider, selected.model]] : CHAINS[tier];
+  // The llama tier is Llama-only by design, but if every Llama hop fails
+  // (e.g. the Groq key loses Llama access) the whole platform must not go
+  // dark: fall through to the standard chain. Llama stays first, so it
+  // takes over again automatically when it serves.
+  const chain: [Provider, string][] = selected
+    ? [[selected.provider, selected.model]]
+    : tier === "llama"
+      ? [...CHAINS.llama, ...CHAINS.standard.filter(([p, m]) => !CHAINS.llama.some(([lp, lm]) => lp === p && lm === m))]
+      : CHAINS[tier];
   for (const [prov, model] of chain) {
     const url = prov === "ollama" ? ollamaUrl() : URLS[prov];
     const key = keyOf(prov) || String(keyOverrides[prov] || "");
