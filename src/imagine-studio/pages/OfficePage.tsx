@@ -65,17 +65,41 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
   useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); }; }, [bot.key]);
-  // Every bot sits on its chair: a real Sitting clip when the model ships
-  // one (RobotExpressive), otherwise a calibrated procedural sit pose.
+  // Every bot sits on its chair. Two mechanisms, both corrected after live
+  // testing: (1) a real Sitting clip (RobotExpressive) is a sit-DOWN
+  // transition — play it ONCE and clamp on its final frame, never loop it;
+  // (2) models without one get a calibrated procedural sit pose — applied
+  // from the frame loop with retries, and any idle clip the mixer already
+  // started is stopped, because a running clip overwrites bone poses every
+  // frame (that is why the other characters "just stood").
   const sitClip = useMemo(() => names.find((x) => /sitting/i.test(x)) ?? null, [names]);
   const posedRef = useRef(false);
-  useEffect(() => {
-    if (!seated || sitClip || posedRef.current) return;
-    root.current?.updateMatrixWorld(true);
-    try { posedRef.current = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { posedRef.current = false; }
-  }, [model, sitClip, seatY, rotY, seated]);
+  const sitStartedRef = useRef(false);
+  const sitAttemptsRef = useRef(0);
   useFrame(() => {
-    const clipName = seated ? (sitClip ?? (posedRef.current ? null : (names.find((x) => /idle/i.test(x)) ?? names[0]))) : (names.find((x) => /idle/i.test(x)) ?? names[0]);
+    if (seated && sitClip) {
+      const a = actions[sitClip];
+      if (a && !sitStartedRef.current) {
+        sitStartedRef.current = true;
+        a.setLoop(THREE.LoopOnce, 1);
+        a.clampWhenFinished = true;
+        Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); });
+        a.reset().fadeIn(0.2).play();
+      }
+      return;
+    }
+    if (seated) {
+      if (posedRef.current) return;
+      if (sitAttemptsRef.current < 120) {
+        sitAttemptsRef.current += 1;
+        root.current?.updateMatrixWorld(true);
+        let ok = false;
+        try { ok = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { ok = false; }
+        if (ok) { posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); }
+      }
+      return;
+    }
+    const clipName = names.find((x) => /idle/i.test(x)) ?? names[0];
     if (!clipName) return;
     const a = actions[clipName];
     if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }

@@ -65,17 +65,40 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
   const posedRef = useRef(false);
+  const sitStartedRef = useRef(false);
+  const sitAttemptsRef = useRef(0);
+  const sitClipName = useMemo(() => (o.startSeated ? names.find((n) => /sitting/i.test(n)) ?? null : null), [names, o.startSeated]);
   useEffect(() => {
-    if (Array.isArray(o.pose) && o.pose.length) { try { applyPose(model as any, o.pose as any); posedRef.current = true; } catch { /* keep clips */ } return; }
-    if (o.startSeated && !names.some((n) => /sitting/i.test(n))) {
-      root.current?.updateMatrixWorld(true);
-      try { posedRef.current = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(o.rotation?.[1] || 0), 0, Math.cos(o.rotation?.[1] || 0)), seatHeight: o.seatHeight ?? 0.52 }); } catch { posedRef.current = false; }
-    }
-  }, [model, o, names]);
+    if (Array.isArray(o.pose) && o.pose.length) { try { applyPose(model as any, o.pose as any); posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); } catch { /* keep clips */ } }
+  }, [model, o]);
   useFrame(() => {
     if (posedRef.current) return;
+    if (o.startSeated && sitClipName) {
+      // A Sitting clip is a sit-DOWN transition: play once, clamp on the
+      // last frame — never loop it.
+      const a = actions[sitClipName];
+      if (a && !sitStartedRef.current) {
+        sitStartedRef.current = true;
+        a.setLoop(THREE.LoopOnce, 1);
+        a.clampWhenFinished = true;
+        Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); });
+        a.reset().fadeIn(0.2).play();
+      }
+      return;
+    }
+    if (o.startSeated && !sitClipName) {
+      // Procedural sit, retried from the frame loop; a running idle clip
+      // would overwrite the pose every frame, so clips are stopped on success.
+      if (sitAttemptsRef.current < 120) {
+        sitAttemptsRef.current += 1;
+        root.current?.updateMatrixWorld(true);
+        let ok = false;
+        try { ok = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(o.rotation?.[1] || 0), 0, Math.cos(o.rotation?.[1] || 0)), seatHeight: o.seatHeight ?? 0.52 }); } catch { ok = false; }
+        if (ok) { posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); }
+      }
+      return;
+    }
     const want = (o.currentAnimation && names.includes(o.currentAnimation)) ? o.currentAnimation
-      : o.startSeated ? (names.find((n) => /sitting/i.test(n)) ?? names.find((n) => /idle/i.test(n)) ?? names[0])
       : (names.find((n) => /idle/i.test(n)) ?? names[0]);
     if (!want) return;
     const a = actions[want];
