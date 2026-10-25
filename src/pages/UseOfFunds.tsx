@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Rocket, Users, GraduationCap, HandCoins, Zap, Building2, Server, Cloud,
@@ -27,6 +27,11 @@ import "./UseOfFunds.css";
 
 const SEED = 1_500_000;
 const TOTAL = 1_500_000;
+
+/* Unified runway — one number everywhere (page, deck, raise): 18 months.
+   Average burn is the seed spread over that runway: $1,500,000 / 18. */
+const RUNWAY_MONTHS = 18;
+const AVG_BURN = Math.round(SEED / RUNWAY_MONTHS); // $83,333/mo
 
 const fmt = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -153,22 +158,11 @@ function SectionTag({ children }: { children: React.ReactNode }) {
 
 export default function UseOfFunds() {
   const [period, setPeriod] = useState<"annual" | "monthly">("annual");
-  const [scenario, setScenario] = useState<"ops" | "core" | "full">("full");
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const runway = useMemo(() => {
-    if (scenario === "ops") {
-      return { monthly: 64_300, months: 18, display: "18", label: "Operational — Team + Operations" };
-    }
-    if (scenario === "core") {
-      return { monthly: 90_967, months: 16.22, display: "16.22", label: "Core + Growth" };
-    }
-    return { monthly: 125_000, months: 12, display: "12.0", label: "Full Deployment" };
-  }, [scenario]);
-
-  const runwayPct = Math.min(100, (runway.months / 24) * 100);
+  const runwayPct = (RUNWAY_MONTHS / 24) * 100;
   const val = (annual: number) => (period === "annual" ? fmt(annual) : fmt(Math.round(annual / 12)));
   const per = period === "annual" ? "/ yr" : "/ mo";
 
@@ -187,9 +181,10 @@ export default function UseOfFunds() {
       ["Working Capital", "Total Working Capital", 10_000, WC_TOTAL],
       ["Summary", "Total", 125_000, TOTAL],
       ["Summary", "Seed Raise", "", SEED],
-      ["Summary", "Runway — Operational (Team + Ops)", 64_300, "18.0 months"],
-      ["Summary", "Runway — Core + Growth", 90_967, "16.22 months"],
-      ["Summary", "Runway — Full Deployment", 125_000, "12.0 months"],
+      ["Summary", "Runway — Unified", AVG_BURN, "18 months"],
+      ["Summary", "Deployment pacing — Base (Team + Operations)", 64_300, ""],
+      ["Summary", "Deployment pacing — Core + Growth", 90_967, ""],
+      ["Summary", "Deployment pacing — Full deployment peak", 125_000, ""],
       ["Projections (from /deck)", "Year 1 Revenue", "", 6_090_000],
       ["Projections (from /deck)", "Year 2 Revenue", "", 10_830_000],
       ["Projections (from /deck)", "Year 3 Revenue", "", 19_260_000],
@@ -316,7 +311,7 @@ export default function UseOfFunds() {
               <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
                   { k: "SEED", v: "$1,500,000" },
-                  { k: "BURN", v: "$125,000/mo" },
+                  { k: "RUNWAY", v: "18 months" },
                   { k: "YEAR 1 REVENUE", v: "$6.09M" },
                   { k: "YEAR 5 REVENUE", v: "$60.9M" },
                 ].map((s) => (
@@ -621,25 +616,22 @@ export default function UseOfFunds() {
           <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[rgba(45,212,191,0.10)] blur-3xl" aria-hidden />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6">
             <SectionTag>RUNWAY · $1,500,000</SectionTag>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Runway</h2>
-
-            <div className="uof-no-print mt-8 inline-flex flex-wrap rounded-full border border-[var(--uof-line)] bg-[rgba(14,22,34,0.9)] p-1" role="group" aria-label="Runway scenario">
-              <button onClick={() => setScenario("ops")} className={`rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition sm:px-5 ${scenario === "ops" ? "bg-[var(--uof-teal)] text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}>OPERATIONAL</button>
-              <button onClick={() => setScenario("core")} className={`rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition sm:px-5 ${scenario === "core" ? "bg-[#a78bfa] text-white" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}>CORE + GROWTH</button>
-              <button onClick={() => setScenario("full")} className={`rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition sm:px-5 ${scenario === "full" ? "bg-[var(--uof-cyan)] text-[#02121a]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}>FULL</button>
-            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Runway — 18 months</h2>
+            <p className="mt-3 max-w-2xl text-[var(--uof-ink-dim)]">
+              One unified number across the raise, the deck and this page: the $1.5M seed funds 18 months, an average burn of $83,333/mo. Deployment is phased — the base run-rate starts lower and peaks at full deployment — averaging to the 18-month runway.
+            </p>
 
             <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
                 <Timer className="h-6 w-6 text-[var(--uof-teal)]" />
-                <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">MONTHLY BURN</p>
-                <p className="uof-mono mt-1 text-3xl font-bold">{fmt(runway.monthly)}</p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">{runway.label}</p>
+                <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">AVERAGE MONTHLY BURN</p>
+                <p className="uof-mono mt-1 text-3xl font-bold">{fmt(AVG_BURN)}</p>
+                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">$1,500,000 spread over the 18-month runway, phased by deployment stage below.</p>
               </div>
               <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6 uof-glow">
                 <CalendarRange className="h-6 w-6 text-[var(--uof-teal)]" />
                 <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">RUNWAY</p>
-                <p className="uof-mono mt-1 text-4xl font-bold text-[var(--uof-teal)]">{runway.display} <span className="text-lg">months</span></p>
+                <p className="uof-mono mt-1 text-4xl font-bold text-[var(--uof-teal)]">18 <span className="text-lg">months</span></p>
                 <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">On $1,500,000 seed.</p>
               </div>
               <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
@@ -661,9 +653,9 @@ export default function UseOfFunds() {
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
-                  { t: "18.0 mo · Operational", d: "$64,300/mo — Team + Operations ($771,600/yr)." },
-                  { t: "16.22 mo · Core + Growth", d: "$90,967/mo — Team + Operations + Growth." },
-                  { t: "12.0 mo · Full", d: "$125,000/mo — Full deployment." },
+                  { t: "Base · $64,300/mo", d: "Team + Operations ($771,600/yr) — the starting run-rate." },
+                  { t: "Core + Growth · $90,967/mo", d: "Adds the Growth engine ($320,000/yr) as distribution ramps." },
+                  { t: "Full deployment · $125,000/mo", d: "Peak rate with Product Development at full pace — phased in, not run for all 18 months." },
                 ].map((m) => (
                   <div key={m.t} className="rounded-2xl bg-[var(--uof-surface-2)] p-4">
                     <p className="uof-mono text-xs font-bold text-[var(--uof-cyan)]">{m.t}</p>
