@@ -13,7 +13,7 @@ import { mobileAxes, mobileLook, inputPulse, controllerPrefs } from "@/imagine-s
  *   - Left: virtual thumbstick (drag to move).
  *   - Right: Jump (large), Run (toggle), Interact (E).
  */
-export default function MobileTouchControls({ visible }: { visible: boolean }) {
+export default function MobileTouchControls({ visible, layerClass = "z-50" }: { visible: boolean; layerClass?: string }) {
   const [supported, setSupported] = useState(false);
   const [runOn, setRunOn] = useState(false);
   const stickRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ export default function MobileTouchControls({ visible }: { visible: boolean }) {
   if (!visible || pref === "off" || (!supported && pref !== "always")) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 select-none" style={{ touchAction: "none" }}>
+    <div className={`pointer-events-none fixed inset-0 ${layerClass} select-none`} style={{ touchAction: "none" }}>
       {/* Right-side full-height look pad — drag to yaw/pitch the camera.
           Sits behind the action buttons (lower z) so taps on Jump/Run/
           Interact still reach them. Transparent, no visible chrome. */}

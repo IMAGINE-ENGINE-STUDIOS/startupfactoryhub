@@ -23,6 +23,9 @@ const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, buildOfficeScene, fetchPublishedOfficeMeta, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
+import { playerControllerFor } from '@/imagine-studio/lib/controllers';
+import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
 import { applyPose, buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import StudioMobileNav from '@/imagine-studio/components/shared/StudioMobileNav';
@@ -168,80 +171,6 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
 /* ---------------- Player ---------------- */
 const playerPos = new THREE.Vector3(4, 0, 0);
 
-export function OfficePlayer({ joyRef, camRef }: { joyRef: any; camRef: any }) {
-  const { scene, animations } = useGLTF('/models/plaza/Xbot.glb');
-  const model = useMemo(() => { const m = skeletonClone(scene) as THREE.Object3D; m.traverse((o: any) => { if (o.isMesh) o.frustumCulled = false; }); return m; }, [scene]);
-  const root = useRef<THREE.Group>(null);
-  const { actions, names } = useAnimations(animations, root);
-  const keys = useRef<Record<string, boolean>>({});
-  useEffect(() => {
-    const dn = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = true; };
-    const up = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = false; };
-    window.addEventListener('keydown', dn); window.addEventListener('keyup', up);
-    return () => { window.removeEventListener('keydown', dn); window.removeEventListener('keyup', up); };
-  }, []);
-  const vel = useRef({ x: 0, z: 0 });
-  const smCam = useRef<{ yaw: number; pitch: number } | null>(null);
-  useFrame(({ camera }, dt) => {
-    const g = root.current; if (!g) return;
-    const k = keys.current; const joy = joyRef.current || { x: 0, y: 0 };
-    let ix = (k['a'] || k['arrowleft'] ? -1 : 0) + (k['d'] || k['arrowright'] ? 1 : 0) + (joy.x || 0);
-    let iz = (k['s'] || k['arrowdown'] ? -1 : 0) + (k['w'] || k['arrowup'] ? 1 : 0) + (joy.y || 0);
-    const len = Math.hypot(ix, iz); if (len > 1) { ix /= len; iz /= len; }
-    // Camera smoothing: ease yaw/pitch toward the drag target every frame so
-    // touch drags (sparse, jittery events) still glide.
-    if (!smCam.current) smCam.current = { yaw: camRef.current.yaw, pitch: camRef.current.pitch };
-    const kc = 1 - Math.exp(-dt * 9);
-    let dyaw = camRef.current.yaw - smCam.current.yaw; while (dyaw > Math.PI) dyaw -= Math.PI * 2; while (dyaw < -Math.PI) dyaw += Math.PI * 2;
-    smCam.current.yaw += dyaw * kc;
-    smCam.current.pitch += (camRef.current.pitch - smCam.current.pitch) * kc;
-    const yaw = smCam.current.yaw;
-    const sin = Math.sin(yaw), cos = Math.cos(yaw);
-    const wx = iz * sin - ix * cos, wz = iz * cos + ix * sin;
-    const speed = k['shift'] ? 7 : 4.2;
-    const hasInput = Math.abs(wx) + Math.abs(wz) > 0.05;
-    // Velocity smoothing: accelerate / decelerate instead of instant steps.
-    const kv = 1 - Math.exp(-dt * 8);
-    vel.current.x += ((hasInput ? wx * speed : 0) - vel.current.x) * kv;
-    vel.current.z += ((hasInput ? wz * speed : 0) - vel.current.z) * kv;
-    const vMag = Math.abs(vel.current.x) + Math.abs(vel.current.z);
-    const isMoving = vMag > 0.3;
-    if (vMag > 0.02) {
-      const nx = THREE.MathUtils.clamp(g.position.x + vel.current.x * dt, -OFFICE_BOUNDS.x, OFFICE_BOUNDS.x);
-      const nz = THREE.MathUtils.clamp(g.position.z + vel.current.z * dt, -OFFICE_BOUNDS.z, OFFICE_BOUNDS.z);
-      let blocked = false;
-      for (const d of OFFICE_DESKS) { if (Math.hypot(nx - d.x, nz - d.z) < 1.0) { blocked = true; break; } }
-      if (!blocked) { g.position.x = nx; g.position.z = nz; } else { vel.current.x *= 0.3; vel.current.z *= 0.3; }
-      if (isMoving) {
-        const targetYaw = Math.atan2(vel.current.x, vel.current.z);
-        let cur = g.rotation.y; let diff = targetYaw - cur; while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
-        g.rotation.y = cur + diff * Math.min(1, dt * 10);
-      }
-    }
-    playerPos.copy(g.position);
-    playerYaw.current = g.rotation.y;
-    const pitch = smCam.current.pitch;
-    const back = 6.5, height = 2.6 + pitch * 4;
-    camera.position.set(g.position.x - Math.sin(yaw) * back * Math.cos(pitch), height, g.position.z - Math.cos(yaw) * back * Math.cos(pitch));
-    // The camera never leaves the room: orbiting at a wall used to park it
-    // behind the glass, looking in through the windows.
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -21, 21);
-    camera.position.y = THREE.MathUtils.clamp(camera.position.y, 0.7, 6.5);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -13.2, 13.2);
-    camera.lookAt(g.position.x, 1.5, g.position.z);
-    const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
-    const walkName = names.find((x) => /walk/i.test(x)) ?? idleName;
-    const a = (isMoving ? walkName : idleName) ? actions[isMoving ? walkName : idleName] : undefined;
-    if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
-  });
-  return (
-    <group ref={root} position={[4, 0, 0]}>
-      <primitive object={model} />
-      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.45, 0.55, 32]} /><meshBasicMaterial color="#f59e0b" /></mesh>
-    </group>
-  );
-}
-
 function Proximity({ onNear }: { onNear: (key: string | null) => void }) {
   const last = useRef<string | null>(null);
   const acc = useRef(0);
@@ -363,6 +292,8 @@ export default function OfficePage() {
   const brand = useOfficeBrand();
   const [published, setPublished] = useState<any>(undefined);
   const [pubMeta, setPubMeta] = useState<{ publishedAt: string | null; live: boolean } | null>(null);
+  // The world's own player controller (scene.playerControllerId + scene.controllers), default otherwise.
+  const playerDef = useMemo(() => playerControllerFor(published ?? undefined), [published]);
   useEffect(() => {
     let off = false;
     fetchPublishedOfficeMeta()
@@ -396,7 +327,6 @@ export default function OfficePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [agentsKey, setAgentsKey] = useState(0);
   const [introGone, setIntroGone] = useState(false);
-  const joyRef = useRef({ x: 0, y: 0 });
   const camRef = useRef({ yaw: Math.PI, pitch: 0.25 });
   const dragRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -677,7 +607,7 @@ export default function OfficePage() {
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
           {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
-          {scene && <OfficePlayer joyRef={joyRef} camRef={camRef} />}
+          {scene && <UnifiedPlayer def={playerDef} world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 6.5, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
@@ -788,16 +718,8 @@ export default function OfficePage() {
         </button>
       )}
 
-      {/* Mobile joystick */}
-      {!openBot && (
-        <div data-office-ui className="sm:hidden absolute bottom-20 left-4 z-20 w-28 h-28 rounded-full bg-background/40 border border-white/25 backdrop-blur-sm touch-none"
-          onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture(e.pointerId); }}
-          onPointerMove={(e) => { if (!(e.buttons & 1)) return; const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); const x = ((e.clientX - r.left) / r.width - 0.5) * 2, y = ((e.clientY - r.top) / r.height - 0.5) * 2; joyRef.current = { x: Math.max(-1, Math.min(1, x)), y: -Math.max(-1, Math.min(1, y)) }; }}
-          onPointerUp={() => { joyRef.current = { x: 0, y: 0 }; }}
-          onPointerCancel={() => { joyRef.current = { x: 0, y: 0 }; }}>
-          <div className="absolute inset-0 flex items-center justify-center text-white/70 text-[10px] font-medium">MOVE</div>
-        </div>
-      )}
+      {/* Mobile controls — the SAME shared touch UI as every world (joystick + jump/run/interact + look pad) */}
+      {!openBot && <MobileTouchControls visible layerClass="z-10" />}
 
       {/* Agents console — the dashboard Agents tab (2D Muse AI console), inside the office */}
       {openBot && (
