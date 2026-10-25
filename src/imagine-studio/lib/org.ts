@@ -40,7 +40,7 @@ export interface FireRecord { name: string; generation: number; scoreAtFire: num
 export interface PersonnelRecord { generation: number; personaName: string; prompt: string; since: number; retiredAgentIds: string[]; warnedGeneration: boolean; history: FireRecord[] }
 export interface Department { id: string; company: string; name: string; floorId: number | null; leadKey: string | null; leadLabel: string }
 export interface CompanyDirection { vision: string; mission: string; goals: string }
-export interface ReportRecord { id: string; at: number; floorKey: string; floorId: number; company: string; goal: string; report: string }
+export interface ReportRecord { id: string; at: number; floorKey: string; floorId: number; company: string; goal: string; report: string; decisions?: string[] }
 export interface EvalRow { scope: string; role: string; label: string; company: string; floorKey: string; accuracy: number | null; judged: number }
 export interface Evaluation { at: number; reportId: string; rows: EvalRow[] }
 export interface ActionRecord { at: number; by: string; kind: string; text: string }
@@ -123,6 +123,25 @@ export function scoreEntries(entries: PerfEntry[]): PersonScore {
 }
 
 export const personScore = (scope: string): PersonScore => scoreEntries(doc.perf[scope] || []);
+
+/** Raw outcome counts behind a score — the numbers the Wall Street
+ * performance appendix prints. Judged = first-pass + revised +
+ * best-effort + errors (unreviewed outcomes never count). */
+export interface PerfStats { judged: number; firstPass: number; revised: number; bestEffort: number; errors: number; revisions: number; accuracy: number | null }
+export const perfStats = (scope: string): PerfStats => {
+  const es = doc.perf[scope] || [];
+  const count = (o: JudgedOutcome) => es.filter((e) => e.outcome === o).length;
+  const judgedEntries = es.filter((e) => e.outcome === "first-pass" || e.outcome === "revised" || e.outcome === "best-effort" || e.outcome === "error");
+  return {
+    judged: judgedEntries.length,
+    firstPass: count("first-pass"),
+    revised: count("revised"),
+    bestEffort: count("best-effort"),
+    errors: count("error"),
+    revisions: judgedEntries.reduce((a, e) => a + (e.attempts || 0), 0),
+    accuracy: personScore(scope).accuracy,
+  };
+};
 
 const weighted = (parts: { v: number | null; w: number }[]): number | null => {
   const live = parts.filter((p) => p.v !== null);
@@ -351,7 +370,8 @@ export const setChairmanAuthority = (on: boolean, by: string) => {
  * (when his authority is on) — applied between shifts by the office.
  */
 export function registerReport(rec: Omit<ReportRecord, "id" | "at">, rows: EvalRow[]): ReportRecord {
-  const full: ReportRecord = { ...rec, id: `rep-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() };
+  const decisions: string[] = [];
+  const full: ReportRecord = { ...rec, decisions, id: `rep-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, at: Date.now() };
   mutate((d) => {
     d.reports = [full, ...d.reports].slice(0, 60);
     d.evaluations = [...d.evaluations, { at: full.at, reportId: full.id, rows }].slice(-40);
@@ -362,6 +382,7 @@ export function registerReport(rec: Omit<ReportRecord, "id" | "at">, rows: EvalR
       const wkey = `${row.scope}:g${generationOf(row.scope)}`;
       if (!doc.warned[wkey]) {
         mutate((d) => { d.warned[wkey] = true; });
+        decisions.push(`Warning issued: ${row.label} (${row.role}, ${row.company}) at ${row.accuracy}% — under the ${SURVIVAL_THRESHOLD}% line.`);
         logAction("Chairman", "warning", `Performance warning: ${row.label} (${row.role} at ${row.company}) is at ${row.accuracy}% accuracy — under the ${SURVIVAL_THRESHOLD}% line. One more report under the line and they are replaced.`);
       }
     }
@@ -378,10 +399,14 @@ export function registerReport(rec: Omit<ReportRecord, "id" | "at">, rows: EvalR
         const under = (r?: EvalRow) => !!r && r.accuracy !== null && r.judged >= 4 && r.accuracy < SURVIVAL_THRESHOLD;
         if (under(row) && under(before) && !doc.pendingFirings.some((p) => p.scope === row.scope)) {
           addPendingFiring({ scope: row.scope, floorKey: row.floorKey, botKey: "ceo", reason: `accuracy ${row.accuracy}% — under the ${SURVIVAL_THRESHOLD}% line at two consecutive reports`, by: "Chairman" });
+          decisions.push(`Replacement decided: the CEO of ${row.company} (${row.label}, ${row.accuracy}%) — lands between shifts.`);
           logAction("Chairman", "decision", `The Chairman decided to replace the CEO of ${row.company} (${row.label}, ${row.accuracy}%). The replacement lands between shifts so the company keeps running.`);
         }
       }
     }
+  }
+  if (decisions.length) {
+    mutate((d) => { const r = d.reports.find((x) => x.id === full.id); if (r) r.decisions = decisions; });
   }
   return full;
 }

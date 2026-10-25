@@ -31,15 +31,15 @@ import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
 import { OfficeAdminTab } from '@/imagine-studio/components/office/OfficeAdmin';
 import { ExecPanel, type ExecTools } from '@/imagine-studio/components/office/ExecPanel';
-import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot, type FloorDef } from '@/imagine-studio/lib/floors';
+import { FLOORS, allFloors, createDynamicFloor, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot, type FloorDef } from '@/imagine-studio/lib/floors';
 import { runOutput } from '@/imagine-studio/lib/shiftEngine';
-import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, retiredAgentIds, setPersonnelPrompt, addPendingFiring, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, retiredAgentIds, setPersonnelPrompt, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
 import { applyPose, buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
-import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
+import { findWorldLevelId, worldForKey } from '@/imagine-studio/lib/worldBindings';
 
 const LINKS_KEY = 'sfh:office-bots:v1';
 type BotLink = { agentId?: string; aiOn?: boolean };
@@ -755,7 +755,7 @@ export default function OfficePage() {
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
   }, []);
-  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : buildOfficeScene()), [floor]);
+  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : floor.id === 100 ? buildOfficeScene() : buildSceneWithCast(floor.bots)), [floor]);
   // Each floor is its own LiveKit room, its own moderation and its own
   // access rules (founder directive 2026-10-25). Floor 100 keeps the
   // historic "office" room name so nothing already joined breaks.
@@ -1236,7 +1236,7 @@ export default function OfficePage() {
   const botOnFloor = (f: FloorDef, botKey: string): OfficeBot | undefined =>
     botKey === 'manager' ? f.manager : [...f.bots, ...f.executives, ...loadCustomBots(f).map(customBotToOfficeBot)].find((b) => b.key === botKey);
   useEffect(() => {
-    for (const f of FLOORS) {
+    for (const f of allFloors()) {
       if (f.key === floor.key) continue;
       setFloorTeamExtras(f.key, loadCustomBots(f).map(customBotToRole));
       engineFor(f).bind({
@@ -1358,7 +1358,7 @@ export default function OfficePage() {
     if (!bot) return;
     const scope = scopeFor(f, botKey);
     const linkId = f.key === floor.key ? (linksRef.current[botKey] || {}).agentId : (loadScopedLinks(f.key)[botKey] || {}).agentId;
-    const taken = FLOORS.flatMap((x) => [...x.bots.map((b) => b.name), ...loadCustomBots(x).map((c) => c.name), personaName(managerScope(x.key), ''), personaName(ceoScope(x.key), '')]).filter(Boolean);
+    const taken = allFloors().flatMap((x) => [...x.bots.map((b) => b.name), ...loadCustomBots(x).map((c) => c.name), personaName(managerScope(x.key), ''), personaName(ceoScope(x.key), '')]).filter(Boolean);
     const rec = recordFiring({
       scope, roleLabel: roleLabelFor(f, bot), company: botKey === 'chairman' ? 'The Building' : f.company,
       oldName: personaName(scope, bot.name), basePrompt: basePromptFor(f, bot), reason, by, takenNames: taken, retireAgentId: linkId || null,
@@ -1376,7 +1376,7 @@ export default function OfficePage() {
     if (botKey === 'manager') { try { localStorage.removeItem(f.managerChatKey); } catch { /* noop */ } }
   };
   const firePerson = async (floorKey: string, botKey: string, by: string, reason: string): Promise<{ queued: boolean }> => {
-    const f = FLOORS.find((x) => x.key === floorKey);
+    const f = allFloors().find((x) => x.key === floorKey);
     if (!f) return { queued: false };
     const st = engineFor(f).getState();
     if (st && (st.status === 'running' || st.status === 'planning')) {
@@ -1390,7 +1390,7 @@ export default function OfficePage() {
   /* Queued replacements land between shifts. */
   useEffect(() => {
     for (const p of getPendingFirings()) {
-      const f = FLOORS.find((x) => x.key === p.floorKey);
+      const f = allFloors().find((x) => x.key === p.floorKey);
       if (!f) continue;
       const st = engineFor(f).getState();
       if (!st || (st.status !== 'running' && st.status !== 'planning')) void applyFireNow(f, p.botKey, p.by, p.reason);
@@ -1409,6 +1409,11 @@ export default function OfficePage() {
     },
     dispatch: async (f, goal) => { await engineFor(f).startShift(goal); },
     openFloor: (floorId) => { window.location.href = floorId === 100 ? '/office' : `/office?floor=${floorId}`; },
+    createFloorForDepartment: async (deptId, name) => {
+      const f = createDynamicFloor(floor.company, name, deptId);
+      updateDepartment(deptId, { floorId: f.id }, 'CEO');
+      return f.id;
+    },
   };
   const uiGuard = (e: any) => !!(e.target as HTMLElement)?.closest?.('[data-office-ui]');
 
@@ -1488,9 +1493,9 @@ export default function OfficePage() {
 
       <div data-office-ui className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
         <div className="px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Building</div>
-        {FLOORS.map((f) => (
+        {allFloors().map((f) => (
           <button key={f.id} onClick={() => { if (f.id !== floor.id) window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className={`rounded-full border px-3 py-1.5 text-left text-xs shadow ${f.id === floor.id ? 'bg-emerald-500 text-emerald-950 font-semibold border-transparent' : 'bg-background/90 border-border hover:bg-muted'}`}>
-            Floor {f.id} · {f.company}
+            Floor {f.id} · {f.id < 99 ? f.tagline : f.company}
           </button>
         ))}
         <OfficeAdminTab
@@ -1510,9 +1515,11 @@ export default function OfficePage() {
             </button>
           )}
           {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
-          {floor.id === 100 && <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
-            <BoxIcon className="w-4 h-4" />Edit in 3D Studio
-          </button>}
+          {(() => { const wkey = floor.id === 100 ? 'office' : floor.id === 99 ? 'office99' : `floor${floor.id}`; return (
+            <button onClick={async () => { const bid = findWorldLevelId(wkey); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const w = worldForKey(wkey); if (w) { const l = await w.syncLevel(); window.location.href = `/imagine-studio/${l.id}`; } }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
+              <BoxIcon className="w-4 h-4" />Edit in 3D Studio
+            </button>
+          ); })()}
           {socialFlags.theater && (
           <div className="relative">
             <button onClick={() => setTheaterMenu((o) => !o)} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs font-medium flex items-center gap-1.5">
@@ -1659,7 +1666,7 @@ export default function OfficePage() {
           <LayoutDashboard className="w-4 h-4" /> Chairman · Building
         </button>
       </div>
-      {shiftOpen && <ShiftPanel engine={engine} team={applyPersonnelToRoles(floor.key, [...floor.team, ...customBots.map(customBotToRole)])} company={floor.company} floorLabel={`Floor ${floor.id}`} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
+      {shiftOpen && <ShiftPanel engine={engine} team={applyPersonnelToRoles(floor.key, [...floor.team, ...customBots.map(customBotToRole)])} company={floor.company} floorLabel={`Floor ${floor.id}`} floorKey={floor.key} floorId={floor.id} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
       {execOpen && <ExecPanel kind={execOpen} floor={floor} tools={execTools} signedIn={signedIn} isAdmin={isAdmin} onClose={() => setExecOpen(null)} />}
 
       {/* Branded intro — the signed-in account's name + logo, not a fixed brand */}

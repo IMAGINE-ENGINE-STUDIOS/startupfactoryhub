@@ -378,7 +378,11 @@ const engine = {
 
   async buildReport() {
     if (!state || state.reportBusy || !deps) return;
-    const archivistId = await deps.resolveAgentId(cfg.archivistKey);
+    // Floors whose team has no Archivist yet (a brand-new department
+    // floor) still get their report: the floor's Manager compiles it.
+    let archivistId = await deps.resolveAgentId(cfg.archivistKey);
+    let viaManager = false;
+    if (!archivistId) { archivistId = await deps.resolveAgentId("manager"); viaManager = !!archivistId; }
     if (!archivistId) return;
     state.reportBusy = true;
     save();
@@ -397,7 +401,7 @@ const engine = {
           `Do not invent results that are not in the deliverables. Length is not limited — completeness is the standard.\n\nFINISHED DELIVERABLES:\n${pack.slice(0, 45000)}`,
       });
       state.report = runOutput(r) || state.report;
-      log("The Archivist compiled the shift report.");
+      log(viaManager ? "The Manager compiled the shift report (this floor has no Archivist yet)." : "The Archivist compiled the shift report.");
       if (state.report) fireHook(() => cfg.hooks?.onReport?.(state as ShiftState));
     } catch (e: any) {
       log(`Report build failed: ${e?.message || "unknown error"}`);

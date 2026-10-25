@@ -42,12 +42,15 @@ import {
   type TeamRole,
 } from "@/imagine-studio/lib/shiftEngine";
 import {
+  SURVIVAL_THRESHOLD,
   agentScope,
   applyPersonnelToRoles,
   ceoScope,
   companyScore,
+  logAction,
   managerScope,
   managerScore,
+  perfStats,
   personScore,
   personaName,
   recordJudged,
@@ -202,9 +205,90 @@ const WONDERLANDS_FLOOR: FloorDef = {
 
 export const FLOORS: FloorDef[] = [SFH_FLOOR, WONDERLANDS_FLOOR];
 
+/* ------------------------------------------------------------------ */
+/* Dynamic floors — created by a CEO for a department                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A CEO can open an ENTIRE new floor for a department (founder
+ * directive 2026-10-25). New floors are levels of the same Startup
+ * Office building: they take the next numbers down from 98, appear in
+ * the BUILDING switcher, get their own Manager, LiveKit room, published
+ * file (floor<N>-world.json) and editor level, and their Manager
+ * recruits the department's team (at most 10 agents, like every floor).
+ * The registry is the founder's own record (localStorage): a floor a
+ * CEO creates exists immediately in the live office on this device, and
+ * its scene publishes like every other floor's.
+ */
+export interface DynamicFloorDef { id: number; company: string; label: string; departmentId?: string | null }
+const DYN_FLOORS_KEY = "sfh:office-floors:v1";
+
+export const loadDynamicFloorDefs = (): DynamicFloorDef[] => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DYN_FLOORS_KEY) || "[]");
+    return Array.isArray(raw) ? raw.filter((d) => d && typeof d.id === "number" && d.company && d.label) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveDynamicFloorDefs = (defs: DynamicFloorDef[]) => {
+  try { localStorage.setItem(DYN_FLOORS_KEY, JSON.stringify(defs)); } catch { /* session only */ }
+};
+
+const genericDefaultPlan = (goal: string): RawTask[] => {
+  void goal;
+  // A department floor's real plans come from its Manager once the
+  // team exists; with no team recruited yet there is honestly nothing
+  // to assign — the shift closes and the report says so.
+  return [];
+};
+
+const dynamicToFloorDef = (d: DynamicFloorDef): FloorDef => ({
+  id: d.id,
+  key: `floor${d.id}`,
+  company: d.company,
+  tagline: d.label,
+  bots: [],
+  executives: [ceoBot(d.company)],
+  manager: { ...OFFICE_MANAGER, duty: `Runs Floor ${d.id} (${d.label}) — takes your goals, plans the shift, recruits and assigns the specialists and verifies their work.` },
+  managerPrompt: floorManagerPrompt(
+    d.company,
+    `This floor is the company's ${d.label} floor — a department floor the CEO created. It starts with you, its Manager. ` +
+    `Recruit the specialists the department needs when the founder asks (they are created with you through Team tools — at most 10 agents on the floor), set their role prompts, and run this department's shifts like an assembly line.`,
+  ),
+  team: [],
+  archivistKey: "writer",
+  archivistLabel: "Writer (Archivist)",
+  shiftStoreKey: `sfh:office-shift:floor${d.id}:v1`,
+  publishedFile: `floor${d.id}-world.json`,
+  customStoreKey: `sfh:office-custom-bots:floor${d.id}`,
+  promptOverrideKey: `sfh:office-prompt-overrides:floor${d.id}`,
+  managerChatKey: `sfh:manager-chat:floor${d.id}`,
+  defaultPlan: genericDefaultPlan,
+});
+
+/** Every floor of the building: the two built-in floors plus every
+ * dynamic floor a CEO has created. */
+export const allFloors = (): FloorDef[] => [...FLOORS, ...loadDynamicFloorDefs().map(dynamicToFloorDef)];
+
+/** Open a new floor for a company (usually for a department) and
+ * return its definition. Numbers descend from 98 so the built-ins
+ * (100, 99) keep their meaning. */
+export function createDynamicFloor(company: string, label: string, departmentId?: string | null): FloorDef {
+  const defs = loadDynamicFloorDefs();
+  const used = new Set([...FLOORS.map((f) => f.id), ...defs.map((d) => d.id)]);
+  let id = 98;
+  while (used.has(id)) id--;
+  const d: DynamicFloorDef = { id, company, label, departmentId: departmentId ?? null };
+  saveDynamicFloorDefs([...defs, d]);
+  logAction("CEO", "floor", `A new floor opened in the building: Floor ${id} — ${label} (${company}). Its Manager is ready to recruit the department's team.`);
+  return dynamicToFloorDef(d);
+}
+
 export const floorById = (raw: string | null | undefined): FloorDef => {
   const n = parseInt(String(raw || ""), 10);
-  return FLOORS.find((f) => f.id === n) || SFH_FLOOR;
+  return allFloors().find((f) => f.id === n) || SFH_FLOOR;
 };
 
 /* ------------------------------------------------------------------ */
@@ -218,6 +302,45 @@ const teamExtras = new Map<string, TeamRole[]>();
  * shift team — the engine reads them live through here. */
 export function setFloorTeamExtras(floorKey: string, roles: TeamRole[]) {
   teamExtras.set(floorKey, roles);
+}
+
+/**
+ * THE WALL STREET APPENDIX (founder directive 2026-10-25): every shift
+ * report closes with a performance appendix whose numbers are computed
+ * from the org ledger's review records — never from the report's own
+ * text and never from an agent's claims. Per-person outcome counts, the
+ * floor and company roll-ups, and the survival-line status.
+ */
+export function performanceAppendix(floor: FloorDef, rows: EvalRow[]): string {
+  const team = applyPersonnelToRoles(floor.key, [...floor.team, ...(teamExtras.get(floor.key) || [])]);
+  const lines: string[] = [
+    "",
+    "---",
+    "",
+    `## Performance Appendix — Floor ${floor.id} · ${floor.company}`,
+    "",
+    "Computed from the building's review ledger. No figure below was written by an agent.",
+    "",
+    "| Person | Role | Judged | First-pass | Revised | Best-effort | Errors | Send-backs | Accuracy | Status |",
+    "|---|---|---|---|---|---|---|---|---|---|",
+  ];
+  for (const r of team) {
+    const st = perfStats(agentScope(floor.key, r.key));
+    const status = st.accuracy === null ? "No scored work" : st.judged >= 4 && st.accuracy < SURVIVAL_THRESHOLD ? "AT RISK" : "Alive";
+    lines.push(`| ${r.name} | Specialist | ${st.judged} | ${st.firstPass} | ${st.revised} | ${st.bestEffort} | ${st.errors} | ${st.revisions} | ${st.accuracy === null ? "—" : `${st.accuracy}%`} | ${status} |`);
+  }
+  const mRow = rows.find((r) => r.scope === managerScope(floor.key));
+  if (mRow) lines.push(`| ${mRow.label} | Manager | ${mRow.judged} | — | — | — | — | — | ${mRow.accuracy === null ? "—" : `${mRow.accuracy}%`} | ${mRow.accuracy !== null && mRow.judged >= 4 && mRow.accuracy < SURVIVAL_THRESHOLD ? "AT RISK" : mRow.accuracy === null ? "No scored work" : "Alive"} |`);
+  const cf = companyFloors(floor.company);
+  const cs = companyScore(cf.map((f) => ({ floorKey: f.key, teamScopes: floorTeamScopes(f) })));
+  const ceoRow = rows.find((r) => r.role === "ceo" && r.company === floor.company);
+  if (ceoRow) lines.push(`| ${ceoRow.label} | CEO | ${ceoRow.judged} | — | — | — | — | — | ${ceoRow.accuracy === null ? "—" : `${ceoRow.accuracy}%`} | ${ceoRow.accuracy !== null && ceoRow.judged >= 4 && ceoRow.accuracy < SURVIVAL_THRESHOLD ? "AT RISK" : ceoRow.accuracy === null ? "No scored work" : "Alive"} |`);
+  lines.push(
+    "",
+    `**Floor ${floor.id} roll-up:** ${team.length} specialists scored · company accuracy ${cs.accuracy === null ? "—" : `${cs.accuracy}%`} across ${cs.judged} judged tasks · survival line ${SURVIVAL_THRESHOLD}% (a seat under it at two consecutive reports is replaced, between shifts).`,
+    "",
+  );
+  return lines.join("\n");
 }
 
 export function engineFor(floor: FloorDef): ShiftEngine {
@@ -240,9 +363,10 @@ export function engineFor(floor: FloorDef): ShiftEngine {
       onShiftEnd: (kind) => recordShiftEnd(floor.key, kind),
       onReport: (shift) => {
         if (shift.report) {
+          const rows = buildingRosterRows();
           registerReport(
-            { floorKey: floor.key, floorId: floor.id, company: floor.company, goal: shift.goal, report: shift.report },
-            buildingRosterRows(),
+            { floorKey: floor.key, floorId: floor.id, company: floor.company, goal: shift.goal, report: shift.report + performanceAppendix(floor, rows) },
+            rows,
           );
         }
       },
@@ -257,7 +381,7 @@ export const floorTeamScopes = (floor: FloorDef): string[] =>
   applyPersonnelToRoles(floor.key, [...floor.team, ...(teamExtras.get(floor.key) || [])]).map((r) => agentScope(floor.key, r.key));
 
 /** Floors of one company, in registry order. */
-export const companyFloors = (company: string): FloorDef[] => FLOORS.filter((f) => f.company === company);
+export const companyFloors = (company: string): FloorDef[] => allFloors().filter((f) => f.company === company);
 
 /**
  * The building's full ratings table — every scored seat with its current
@@ -267,7 +391,7 @@ export const companyFloors = (company: string): FloorDef[] => FLOORS.filter((f) 
  */
 export function buildingRosterRows(): EvalRow[] {
   const rows: EvalRow[] = [];
-  for (const f of FLOORS) {
+  for (const f of allFloors()) {
     const team = applyPersonnelToRoles(f.key, [...f.team, ...(teamExtras.get(f.key) || [])]);
     for (const r of team) {
       const s = personScore(agentScope(f.key, r.key));
@@ -276,7 +400,7 @@ export function buildingRosterRows(): EvalRow[] {
     const ms = managerScore(f.key, floorTeamScopes(f));
     rows.push({ scope: managerScope(f.key), role: "manager", label: personaName(managerScope(f.key), "Manager"), company: f.company, floorKey: f.key, accuracy: ms.accuracy, judged: ms.judged });
   }
-  const companies = [...new Set(FLOORS.map((f) => f.company))];
+  const companies = [...new Set(allFloors().map((f) => f.company))];
   for (const company of companies) {
     const cf = companyFloors(company);
     const cs = companyScore(cf.map((f) => ({ floorKey: f.key, teamScopes: floorTeamScopes(f) })));

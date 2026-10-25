@@ -12,6 +12,8 @@ import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, 
 import { jsPDF } from "jspdf";
 import type { ShiftEngine, ShiftState, ShiftTask, TeamRole } from "@/imagine-studio/lib/shiftEngine";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
+import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
+import { buildingRosterRows } from "@/imagine-studio/lib/floors";
 
 const STATUS_STYLE: Record<string, string> = {
   queued: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
@@ -104,7 +106,7 @@ export interface TeamTools {
   fire?: (botKey: string) => Promise<{ queued: boolean }>;
 }
 
-export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, managerChatKey, teamTools, signedIn, onClose }: { engine: ShiftEngine; team: TeamRole[]; company: string; floorLabel: string; archivistLabel: string; managerChatKey: string; teamTools: TeamTools; signedIn: boolean; onClose: () => void }) {
+export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorId, archivistLabel, managerChatKey, teamTools, signedIn, onClose }: { engine: ShiftEngine; team: TeamRole[]; company: string; floorLabel: string; floorKey?: string; floorId?: number; archivistLabel: string; managerChatKey: string; teamTools: TeamTools; signedIn: boolean; onClose: () => void }) {
   const [, force] = useReducer((x: number) => x + 1, 0);
   useEffect(() => engine.subscribe(force), []);
   const shift = engine.getState();
@@ -263,11 +265,18 @@ export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, 
                       <button onClick={() => downloadPdf("Shift Report", shift.report || "")} className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground"><Download className="h-3.5 w-3.5" /> PDF</button>
                       <button onClick={() => download("shift-report.md", shift.report || "", "text/markdown")} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .md</button>
                       <button onClick={() => download("shift-report.doc", `<html><body><pre style="font-family:Georgia,serif;white-space:pre-wrap">${(shift.report || "").replace(/</g, "&lt;")}</pre></body></html>`, "application/msword")} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .doc</button>
+                      <button onClick={() => downloadHtml("shift-report-wall-street.html", reportToHtml({ company, floorId: floorId ?? 0, goal: shift.goal, at: Date.now(), reportMd: shift.report || "", rows: buildingRosterRows().filter((r) => !floorKey || r.floorKey === floorKey) }))} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> Wall Street HTML</button>
                       <button onClick={() => void engine.buildReport()} disabled={shift.reportBusy} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted disabled:opacity-50"><RefreshCw className="h-3.5 w-3.5" /> Rebuild</button>
                     </>
                   )}
                 </span>
               </div>
+              {shift.report && floorKey && (
+                <div className="mt-3 rounded-lg bg-muted/40 px-3.5 py-3 text-foreground">
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Team accuracy — computed from the review ledger</div>
+                  <AccuracyChart rows={buildingRosterRows().filter((r) => r.floorKey === floorKey)} />
+                </div>
+              )}
               {shift.report && <div className="mt-3 max-h-[28rem] overflow-y-auto overscroll-contain whitespace-pre-wrap rounded-lg bg-muted/50 px-3.5 py-3 text-xs leading-relaxed">{shift.report}</div>}
             </div>
           )}

@@ -362,15 +362,17 @@ const stableStringify = (v: any): string => {
  * Same rule as the Plaza: the editable Office level always opens on the CURRENT
  * published scene; a divergent local copy is first preserved as a draft level.
  */
-/** Floor 99's built-in scene: the same room one story BELOW Floor 100,
- * populated with the Wonderlands cast and its Manager. It inherits
- * Floor 100's photo skybox until an admin gives the floor its own city
- * from edit mode (the choice lives on the scene and publishes with it). */
-export function buildFloor99Scene(): LevelScene {
+/** The office room populated with a given cast: the same room every
+ * floor of the building shares, with that floor's own characters at the
+ * desks and its Manager at the head of the room. An empty cast is a
+ * brand-new department floor — the room and its Manager, ready for the
+ * Manager to recruit the team (recruits live in the floor's own records,
+ * not in this scene). */
+export function buildSceneWithCast(cast: OfficeBot[]): LevelScene {
   const base = buildOfficeScene();
   const objects = (base.objects as any[]).filter((o) => o.kind !== "character");
-  const characters = WONDERLANDS_BOTS.map((b, i) => {
-    const d = OFFICE_DESKS[i];
+  const characters = cast.map((b, i) => {
+    const d = OFFICE_DESKS[i % OFFICE_DESKS.length];
     return {
       id: `office_bot_${b.key}`, kind: "character", name: `Bot — ${b.name}`, url: b.model, source: "Plaza character rigs",
       position: [d.x, 0, d.z + d.facing * 0.85], rotation: [0, d.facing === 1 ? Math.PI : 0, 0], scale: [1, 1, 1], visible: true,
@@ -384,6 +386,15 @@ export function buildFloor99Scene(): LevelScene {
   };
   return { ...base, objects: [...objects, ...characters, managerChar] as any } as LevelScene;
 }
+
+/** A new floor's starting scene: the room and its Manager only. */
+export const buildBareFloorScene = (): LevelScene => buildSceneWithCast([]);
+
+/** Floor 99's built-in scene: the same room one story BELOW Floor 100,
+ * populated with the Wonderlands cast and its Manager. It inherits
+ * Floor 100's photo skybox until an admin gives the floor its own city
+ * from edit mode (the choice lives on the scene and publishes with it). */
+export const buildFloor99Scene = (): LevelScene => buildSceneWithCast(WONDERLANDS_BOTS);
 
 /** Fetches Floor 99's OWN published scene (floor99-world.json) — never
  * Floor 100's file. Null until an admin first publishes the floor. */
@@ -405,6 +416,27 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
     updateLocalLevel(backup.id, {
       name: `${FLOOR99_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
       description: "Local edits preserved when the Floor 99 level was re-synced to the published version",
+    });
+    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
+  }
+  return getLocalLevel(existing.id) ?? existing;
+}
+
+/** A department floor's editable level, same published-mirror rule as
+ * every named level: it opens on its published scene when one exists,
+ * and otherwise seeds from the bare room (Manager only) until the
+ * floor's team exists in the floor's own records. */
+export async function syncDynamicFloorLevel(levelName: string, file: string): Promise<LocalLevelRecord> {
+  const m = await fetchPublishedOfficeMeta(publishedWorldUrl(file));
+  const publishedScene = stripRetiredBackground(m?.scene ?? null);
+  const existing = listLocalLevels().find((l) => l.name === levelName);
+  if (!publishedScene) return existing ?? _ensure(buildBareFloorScene, levelName);
+  if (!existing) return _ensure(() => publishedScene, levelName);
+  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
+    const backup = createLocalLevel(existing.scene);
+    updateLocalLevel(backup.id, {
+      name: `${levelName} — local draft ${new Date().toISOString().slice(0, 10)}`,
+      description: "Local edits preserved when the floor level was re-synced to the published version",
     });
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
 import { syncOfficeLevelToPublished, syncFloor99LevelToPublished } from "@/imagine-studio/lib/officeWorld";
+import { dynamicWorlds } from "@/imagine-studio/lib/worldSync";
 import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
@@ -33,6 +34,9 @@ export default function StudioProjectsPage() {
       await syncPlazaLevelToPublished();
       await syncOfficeLevelToPublished();
       await syncFloor99LevelToPublished();
+      // Department floors a CEO created are levels of the same building —
+      // seed their editor levels the same way.
+      for (const w of dynamicWorlds()) { try { await w.syncLevel(); } catch { /* offline: seed on open instead */ } }
       refresh();
     });
   }, []);

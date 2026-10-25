@@ -6,7 +6,7 @@
 // matching everywhere (editor sync, publish target, open buttons, route
 // chips). Stored per level id in localStorage, so it works for both local
 // and cloud-stored levels without a schema change.
-import { NAMED_WORLDS, matchNamedWorld, type NamedWorld } from "./worldSync";
+import { allNamedWorlds, matchNamedWorld, type NamedWorld } from "./worldSync";
 import { listLocalLevels } from "./localLevels";
 
 const KEY = "sfh:level-worlds:v1";
@@ -20,7 +20,7 @@ function write(m: BindingMap) {
 }
 
 export function worldForKey(key?: string | null): NamedWorld | null {
-  return NAMED_WORLDS.find((w) => w.key === key) ?? null;
+  return allNamedWorlds().find((w) => w.key === key) ?? null;
 }
 
 export function getLevelWorldKey(levelId?: string | null): string | null {

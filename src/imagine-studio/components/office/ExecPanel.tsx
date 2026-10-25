@@ -22,6 +22,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { X, LayoutDashboard, MessageSquare, Building2, FileText, ScrollText, UserX, Play, Crown, Briefcase, AlertTriangle, Download, Plus, Trash2, Save, Loader2, Landmark } from "lucide-react";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
+import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
 import { FLOORS, companyFloors, engineFor, buildingRosterRows, floorTeamScopes, loadCustomBots, customBotToRole, type FloorDef } from "@/imagine-studio/lib/floors";
 import {
   SURVIVAL_THRESHOLD, addDepartment, applyPersonnelToRoles, ceoScope, companyScore, directionText,
@@ -36,6 +37,9 @@ export interface ExecTools {
   chatWith: (f: FloorDef, botKey: string, text: string) => Promise<string>;
   dispatch: (f: FloorDef, goal: string) => Promise<void>;
   openFloor: (floorId: number) => void;
+  /** Open an ENTIRE new floor of the building for a department — the
+   * CEO's floor-creation power. Returns the new floor's number. */
+  createFloorForDepartment: (deptId: string, name: string) => Promise<number>;
 }
 
 const fmtScore = (v: number | null) => (v === null ? "—" : `${v}%`);
@@ -82,6 +86,8 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
   const [reviewText, setReviewText] = useState("");
   const [dirDraft, setDirDraft] = useState<Record<string, { vision: string; mission: string; goals: string }>>({});
   const [newDept, setNewDept] = useState("");
+  const [creatingFloorFor, setCreatingFloorFor] = useState("");
+  const [floorNote, setFloorNote] = useState("");
 
   const rows = buildingRosterRows();
   const isCeo = kind === "ceo";
@@ -396,6 +402,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
               <div className="rounded-xl border border-border p-3.5">
                 <div className="text-sm font-semibold">Departments at {company}</div>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Departments organize the company — accounting, legal, marketing, anything you name. Give each department a floor and a lead; the CEO coordinates them through the floors' Managers.</p>
+                {floorNote && <p className="mt-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-[11px]">{floorNote}</p>}
                 <div className="mt-3 space-y-2.5">
                   {getDepartments(company).map((d) => {
                     const df = FLOORS.find((x) => x.id === d.floorId);
@@ -423,6 +430,21 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                           </label>
                         </div>
                         {d.leadLabel && <div className="mt-1.5 text-[11px] text-muted-foreground">Lead: {d.leadLabel}</div>}
+                        {d.floorId == null ? (
+                          <div className="mt-2.5 flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2.5">
+                            <span className="flex-1 text-[11px] leading-relaxed text-muted-foreground">This department has no floor of its own yet. The CEO can open an entire new floor of the building for it — its own Manager, room and team (max 10 agents).</span>
+                            <button
+                              disabled={creatingFloorFor === d.id}
+                              onClick={async () => { setCreatingFloorFor(d.id); try { const id = await tools.createFloorForDepartment(d.id, d.name); setFloorNote(`Floor ${id} is open — it is in the BUILDING switcher now, and its level is in the 3D Studio under Levels.`); } catch { setFloorNote("The floor could not be created."); } setCreatingFloorFor(""); }}
+                              className="flex shrink-0 items-center gap-1.5 rounded-full bg-sky-500 px-3.5 py-2 text-[11px] font-semibold text-white disabled:opacity-50"
+                            >{creatingFloorFor === d.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Building2 className="h-3.5 w-3.5" />} Create its floor</button>
+                          </div>
+                        ) : (
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <span className="text-[11px] text-muted-foreground">This department runs Floor {d.floorId}.</span>
+                            <button onClick={() => tools.openFloor(d.floorId as number)} className="rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted">Open Floor {d.floorId}</button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -446,9 +468,24 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold">{r.company} — Floor {r.floorId} shift report</span>
                       <span className="text-[11px] text-muted-foreground">{new Date(r.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
-                      <button onClick={() => download(`${r.company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-floor-${r.floorId}-report.md`, r.report)} className="ml-auto flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .md</button>
+                      <span className="ml-auto flex items-center gap-1.5">
+                        <button onClick={() => download(`${r.company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-floor-${r.floorId}-report.md`, r.report)} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .md</button>
+                        <button onClick={() => downloadHtml(`${r.company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-floor-${r.floorId}-report.html`, reportToHtml({ company: r.company, floorId: r.floorId, goal: r.goal, at: r.at, reportMd: r.report, rows: ev?.rows || [] }))} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> Wall Street HTML</button>
+                      </span>
                     </div>
                     <div className="mt-1 text-[11px] text-muted-foreground">Goal: “{r.goal.slice(0, 200)}”</div>
+                    {ev && (
+                      <div className="mt-3 rounded-lg bg-muted/40 px-3 py-2.5 text-foreground">
+                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Accuracy at this report — computed from the ledger</div>
+                        <AccuracyChart rows={ev.rows} />
+                      </div>
+                    )}
+                    {r.decisions && r.decisions.length > 0 && (
+                      <div className="mt-2.5 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Chairman's decisions on this report</div>
+                        {r.decisions.map((d, i) => <div key={i} className="mt-1 text-[11px] leading-relaxed">{d}</div>)}
+                      </div>
+                    )}
                     {ev && (
                       <div className="mt-2.5 overflow-x-auto">
                         <table className="w-full text-left text-[11px]">
