@@ -29,6 +29,7 @@ import { useSourceTexture, type TheaterSource } from '@/imagine-studio/component
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
+import { OfficeAdminTab } from '@/imagine-studio/components/office/OfficeAdmin';
 import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot } from '@/imagine-studio/lib/floors';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
@@ -709,6 +710,16 @@ export default function OfficePage() {
     return () => { off = true; };
   }, []);
   const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : buildOfficeScene()), [floor]);
+  // Each floor is its own LiveKit room, its own moderation and its own
+  // access rules (founder directive 2026-10-25). Floor 100 keeps the
+  // historic "office" room name so nothing already joined breaks.
+  const ROOM_NAME = floor.id === 100 ? 'office' : `office-${floor.id}`;
+  const [gate, setGate] = useState<null | { kind: string; msg: string }>(null);
+  const [gateDraft, setGateDraft] = useState('');
+  const [joinKey, setJoinKey] = useState(0);
+  const [myIdentity, setMyIdentity] = useState('');
+  const [myName, setMyName] = useState('Guest');
+  const gateCreds = useRef<{ passcode?: string; invite?: string }>({});
   // Scene version gate: when the published scene predates the built-in one
   // (white floor / tall ceiling / daylight update), play the built-in scene
   // merged with the published world's studio additions, until an admin
@@ -817,8 +828,28 @@ export default function OfficePage() {
         const identity = u.user?.id || gid;
         myColorRef.current = colorFor(identity);
         nameRef.current = u.user?.email?.split('@')[0] || 'Guest';
-        const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: 'office', identity, name: nameRef.current } });
-        if (error || !data?.token || cancelled) return;
+        setMyIdentity(identity); setMyName(nameRef.current);
+        // Floor access credentials: an invitation in the URL, or the
+        // passcode entered at this floor's gate (kept for the session).
+        const urlInvite = new URLSearchParams(window.location.search).get('invite') || undefined;
+        if (!gateCreds.current.passcode) { try { gateCreds.current.passcode = sessionStorage.getItem(`sfh:office-pass:${ROOM_NAME}`) || undefined; } catch { /* private mode */ } }
+        const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: ROOM_NAME, identity, name: nameRef.current, passcode: gateCreds.current.passcode || undefined, invite: gateCreds.current.invite || urlInvite } });
+        if (error || !data?.token) {
+          // A 403 from the join gate (ban / private / passcode) shows the
+          // gate screen; any other failure keeps the old silent behavior.
+          if (!cancelled && error) {
+            try {
+              const parsed = await (error as any).context?.json?.();
+              const code = parsed?.code;
+              if (code === 'banned' || code === 'invite_required' || code === 'passcode_required' || code === 'passcode_wrong') {
+                setGate({ kind: code, msg: parsed?.error || 'This floor is restricted.' });
+              }
+            } catch { /* not a gate denial */ }
+          }
+          return;
+        }
+        if (cancelled) return;
+        setGate(null);
         const r = new Room({ adaptiveStream: false, dynacast: true });
         roomRef.current = r;
         r.on(RoomEvent.DataReceived, (payload, p) => {
@@ -877,7 +908,7 @@ export default function OfficePage() {
       } catch { /* theater stays local to this browser */ }
     })();
     return () => { cancelled = true; if (posTimer) clearInterval(posTimer); if (volTimer) clearInterval(volTimer); roomRef.current?.disconnect(); roomRef.current = null; audioEls.current.forEach((el) => el.remove()); audioEls.current.clear(); };
-  }, []);
+  }, [joinKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const stopDoc = () => { if (docRef.current) { docRef.current = null; sendTheater({ kind: 'stop' }); setTheater(null); } };
   const stopPresenting = async () => {
@@ -1224,6 +1255,33 @@ export default function OfficePage() {
         </div>
       )}
 
+      {gate && (
+        <div data-office-ui className="fixed inset-0 z-[70] flex items-center justify-center bg-[#02070E]/95 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-2xl">
+            <div className="text-base font-semibold">Floor {floor.id} · {floor.company}</div>
+            {gate.kind === 'banned' ? (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">You are banned from this floor, so the door stays closed. If you think this is a mistake, ask a floor admin to lift the ban.</p>
+              </>
+            ) : gate.kind === 'invite_required' ? (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">This floor is private — you need an invitation. Paste the invitation link (or just its code) from a floor admin:</p>
+                <input value={gateDraft} onChange={(e) => setGateDraft(e.target.value)} placeholder="Invitation link or code" className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-base" />
+                <button disabled={!gateDraft.trim()} onClick={() => { const raw = gateDraft.trim(); const token = raw.includes('invite=') ? raw.split('invite=')[1].split(/[&\s]/)[0] : raw; gateCreds.current.invite = token; setGateDraft(''); setGate(null); setJoinKey((k) => k + 1); }} className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 disabled:opacity-50">Enter with invitation</button>
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">This floor is protected by a passcode.</p>
+                {gate.kind === 'passcode_wrong' && <p className="mt-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">That passcode did not work — try again.</p>}
+                <input type="password" value={gateDraft} onChange={(e) => setGateDraft(e.target.value)} placeholder="Floor passcode" className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-base" />
+                <button disabled={!gateDraft.trim()} onClick={() => { const v = gateDraft.trim(); gateCreds.current.passcode = v; try { sessionStorage.setItem(`sfh:office-pass:${ROOM_NAME}`, v); } catch { /* private mode */ } setGateDraft(''); setGate(null); setJoinKey((k) => k + 1); }} className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 disabled:opacity-50">Enter</button>
+              </>
+            )}
+            {floor.id !== 100 && <button onClick={() => { window.location.href = '/office'; }} className="mt-3 w-full rounded-full border border-border px-4 py-2 text-sm">Go to Floor 100 instead</button>}
+          </div>
+        </div>
+      )}
+
       <div data-office-ui className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
         <div className="px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Building</div>
         {FLOORS.map((f) => (
@@ -1231,6 +1289,13 @@ export default function OfficePage() {
             Floor {f.id} · {f.company}
           </button>
         ))}
+        <OfficeAdminTab
+          room={ROOM_NAME}
+          floorLabel={`Floor ${floor.id}`}
+          floorPath={floor.id === 100 ? '/office' : `/office?floor=${floor.id}`}
+          selfIdentity={myIdentity}
+          people={[...(myIdentity ? [{ identity: myIdentity, name: myName, me: true }] : []), ...Object.entries(peers).map(([identity, info]) => ({ identity, name: info.n }))]}
+        />
       </div>
 
       {isAdmin && (

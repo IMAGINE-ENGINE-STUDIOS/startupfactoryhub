@@ -1,4 +1,6 @@
-// Plaza moderation (kick, mute, mute all, grant admin) and level elections.
+// Room moderation (kick, mute, mute all, ban, grant admin), room access
+// (public / passcode / private-by-invite) and level elections. Works for any
+// LiveKit room — the Plaza uses room "plaza", each office floor its own room.
 // Moderation runs through the LiveKit server API so it cannot be ignored by clients.
 // Elections and granted admins are stored as JSON in the studio-published bucket
 // (permanent record per level). Only platform admins or granted Plaza admins can moderate.
@@ -41,6 +43,14 @@ Deno.serve(async (req) => {
     };
     const adminsPath = `moderation/${room}-admins.json`;
     const electionsPath = `elections/${level}.json`;
+    const bansPath = `moderation/${room}-bans.json`;
+    const accessPath = `moderation/${room}-access.json`;
+    const sha256 = async (v: string) => {
+      const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v));
+      return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    };
+    type BanRec = { id: string; name?: string; by: string; at: string };
+    type AccessRec = { mode: "public" | "private" | "passcode"; passHash?: string; invite?: string; updatedAt: string; updatedBy: string };
 
     // Public read: election record for a level.
     if (action === "elections") {
@@ -59,6 +69,15 @@ Deno.serve(async (req) => {
 
     if (action === "whoami") return json({ isAdmin, admins: granted });
 
+    // Room access, readable by any signed-in user (the level gate needs the
+    // mode before joining). The passcode hash and — for non-admins — the
+    // invite token never leave the server.
+    if (action === "getAccess") {
+      const access = await readJson<AccessRec>(accessPath, { mode: "public", updatedAt: "", updatedBy: "" });
+      const bans = await readJson<BanRec[]>(bansPath, []);
+      return json({ mode: access.mode, banned: bans.some((b) => b.id === user.id), ...(isAdmin ? { invite: access.invite || null, hasPasscode: !!access.passHash } : {}) });
+    }
+
     if (action === "vote") {
       const list = await readJson<Election[]>(electionsPath, []);
       const e = list.find((x) => x.id === body.electionId);
@@ -72,6 +91,32 @@ Deno.serve(async (req) => {
     }
 
     if (!isAdmin) return json({ error: "Only Plaza admins can do this" }, 403);
+
+    if (action === "setAccess") {
+      const mode = ["public", "private", "passcode"].includes(String(body.mode)) ? String(body.mode) as AccessRec["mode"] : "public";
+      const prev = await readJson<AccessRec>(accessPath, { mode: "public", updatedAt: "", updatedBy: "" });
+      const next: AccessRec = { mode, updatedAt: new Date().toISOString(), updatedBy: user.id };
+      if (mode === "passcode") {
+        const pw = text(body.passcode, 64);
+        next.passHash = pw ? await sha256(pw) : prev.passHash;
+        if (!next.passHash) return json({ error: "Set a passcode first" }, 400);
+      }
+      if (mode === "private") {
+        next.invite = body.rotateInvite || !prev.invite ? crypto.randomUUID().replace(/-/g, "") : prev.invite;
+      }
+      await writeJson(accessPath, next);
+      return json({ ok: true, mode: next.mode, invite: next.invite || null, hasPasscode: !!next.passHash });
+    }
+    if (action === "bans") {
+      const bans = await readJson<BanRec[]>(bansPath, []);
+      return json({ bans });
+    }
+    if (action === "unban") {
+      const ids = (Array.isArray(body.identities) ? body.identities : [body.identity]).map((x: unknown) => uidOf(clean(x, 120))).filter(Boolean);
+      const bans = await readJson<BanRec[]>(bansPath, []);
+      await writeJson(bansPath, bans.filter((b) => !ids.includes(b.id)));
+      return json({ ok: true });
+    }
 
     if (action === "createElection") {
       const options = (Array.isArray(body.options) ? body.options : []).map((o: unknown) => text(o, 80)).filter(Boolean).slice(0, 12);
@@ -120,6 +165,21 @@ Deno.serve(async (req) => {
         await svc.removeParticipant(room, id).catch(() => {});
       }
       return json({ ok: true });
+    }
+    if (action === "ban") {
+      // A ban is a kick that sticks: the identity is recorded and the
+      // livekit-token gate refuses to mint them a new token for this room.
+      const names = (body.names && typeof body.names === "object") ? body.names as Record<string, string> : {};
+      const bans = await readJson<BanRec[]>(bansPath, []);
+      const have = new Set(bans.map((b) => b.id));
+      for (const id of targets) {
+        const uid = uidOf(id);
+        if (!uid || uid === "guest" || granted.includes(uid)) continue; // admins are never banned
+        if (!have.has(uid)) { bans.push({ id: uid, name: text(names[id] || names[uid] || "", 80) || undefined, by: user.id, at: new Date().toISOString() }); have.add(uid); }
+        await svc.removeParticipant(room, id).catch(() => {});
+      }
+      await writeJson(bansPath, bans);
+      return json({ ok: true, bans });
     }
     if (action === "grant" || action === "revoke") {
       const ids = targets.map(uidOf).filter((x) => x && x !== "guest" && /^[0-9a-f-]{36}$/.test(x));
