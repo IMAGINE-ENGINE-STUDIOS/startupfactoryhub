@@ -17,7 +17,7 @@ import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-t
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, Briefcase, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
@@ -820,7 +820,13 @@ export default function OfficePage() {
 
   /* ---- Theater / LiveKit ---- */
   const [theater, setTheater] = useState<OfficeTheater>(null);
-  const [theaterMenu, setTheaterMenu] = useState(false);
+  /* Simplified chrome (founder directive 2026-10-25): the office's
+   * floating buttons are consolidated into THREE dropdowns — Building
+   * (top-left), Office (top-right, admin) and Team (bottom-right). */
+  const [buildingMenu, setBuildingMenu] = useState(false);
+  const [officeMenu, setOfficeMenu] = useState(false);
+  const [teamMenu, setTeamMenu] = useState(false);
+  const closeMenus = () => { setBuildingMenu(false); setOfficeMenu(false); setTeamMenu(false); };
 
   /* ---- Social (Plaza parity): presence, spatial voice, text chat ---- */
   const [peers, setPeers] = useState<Record<string, PeerInfo>>({});
@@ -1492,12 +1498,25 @@ export default function OfficePage() {
       )}
 
       <div data-office-ui className="absolute left-3 top-3 z-30 flex flex-col gap-1.5">
-        <div className="px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Building</div>
-        {allFloors().map((f) => (
-          <button key={f.id} onClick={() => { if (f.id !== floor.id) window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className={`rounded-full border px-3 py-1.5 text-left text-xs shadow ${f.id === floor.id ? 'bg-emerald-500 text-emerald-950 font-semibold border-transparent' : 'bg-background/90 border-border hover:bg-muted'}`}>
-            Floor {f.id} · {f.id < 99 ? f.tagline : f.company}
+        <div className="relative">
+          <button onClick={() => { setBuildingMenu((o) => !o); setOfficeMenu(false); setTeamMenu(false); }} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs shadow flex items-center gap-2">
+            <Building2 className="w-4 h-4" />
+            <span className="font-semibold">Floor {floor.id}</span>
+            <span className="text-muted-foreground hidden sm:inline">{floor.id < 99 ? floor.tagline : floor.company}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${buildingMenu ? 'rotate-180' : ''}`} />
           </button>
-        ))}
+          {buildingMenu && (
+            <div className="absolute left-0 top-[calc(100%+6px)] w-64 rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
+              <div className="px-2.5 pt-1.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">The building — go to a floor</div>
+              {allFloors().map((f) => (
+                <button key={f.id} onClick={() => { closeMenus(); if (f.id !== floor.id) window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className={`w-full rounded-lg px-2.5 py-2 text-left text-xs flex items-center gap-2 hover:bg-muted ${f.id === floor.id ? 'bg-emerald-500/10 font-semibold' : ''}`}>
+                  <span className="flex-1">Floor {f.id} · {f.id < 99 ? f.tagline : f.company}</span>
+                  {f.id === floor.id && <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">You are here</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <OfficeAdminTab
           room={ROOM_NAME}
           floorLabel={`Floor ${floor.id}`}
@@ -1509,46 +1528,53 @@ export default function OfficePage() {
 
       {isAdmin && (
         <div data-office-ui className="absolute top-3 right-3 z-30 flex flex-col items-end gap-2">
-          {floor.id === 100 && outdated && scene && (
-            <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
-              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (clean windows · team-board theater)'}
-            </button>
-          )}
-          {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
-          {(() => { const wkey = floor.id === 100 ? 'office' : floor.id === 99 ? 'office99' : `floor${floor.id}`; return (
-            <button onClick={async () => { const bid = findWorldLevelId(wkey); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const w = worldForKey(wkey); if (w) { const l = await w.syncLevel(); window.location.href = `/imagine-studio/${l.id}`; } }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
-              <BoxIcon className="w-4 h-4" />Edit in 3D Studio
-            </button>
-          ); })()}
-          {socialFlags.theater && (
           <div className="relative">
-            <button onClick={() => setTheaterMenu((o) => !o)} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs font-medium flex items-center gap-1.5">
-              <Clapperboard className="w-4 h-4" />Theater{theater ? ' · on air' : ''}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${theaterMenu ? 'rotate-180' : ''}`} />
+            <button onClick={() => { setOfficeMenu((o) => !o); setBuildingMenu(false); setTeamMenu(false); }} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs font-medium shadow flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4" />Office{theater ? ' · on air' : ''}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${officeMenu ? 'rotate-180' : ''}`} />
             </button>
-            {theaterMenu && (
-              <div className="absolute right-0 top-[calc(100%+6px)] w-60 max-h-[70vh] overflow-y-auto touch-pan-y rounded-xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
-                <TheaterMenuItem icon={presenting ? Square : MonitorUp} label={presenting ? 'Stop sharing' : 'Share screen'} onClick={() => { void shareScreen(false); setTheaterMenu(false); }} />
-                <TheaterMenuItem icon={Video} label="Share camera" onClick={() => { void shareScreen(true); setTheaterMenu(false); }} />
-                <TheaterMenuItem icon={docRef.current ? Square : FileUp} label={docRef.current ? 'Stop document' : 'Present document'} onClick={() => { if (docRef.current) stopDoc(); else fileInputRef.current?.click(); setTheaterMenu(false); }} />
-                <TheaterMenuItem icon={micOn ? Mic : MicOff} label={micOn ? 'Mic on' : 'Mic off'} onClick={() => { void toggleMic(); setTheaterMenu(false); }} />
-                {theater && theater.kind !== 'dashboard' && <TheaterMenuItem icon={Square} label="Stop theater" onClick={() => { stopTheater(); setTheaterMenu(false); }} />}
-                <div className="px-2.5 pt-2.5 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <LayoutDashboard className="w-3.5 h-3.5" />AI dashboard on theater
-                </div>
-                {theater?.kind === 'dashboard' && <TheaterMenuItem icon={Square} label="Stop dashboard" onClick={() => { stopTheater(); setTheaterMenu(false); }} />}
-                <div className="grid grid-cols-2 gap-1 p-1">
-                  {TEAM_BOTS.map((b) => (
-                    <button key={b.key} onClick={() => { void showDashboardOnTheater(b.key); setTheaterMenu(false); }} className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-muted text-left">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: b.tint }} />{b.name}
-                    </button>
-                  ))}
-                </div>
+            {officeMenu && (
+              <div className="absolute right-0 top-[calc(100%+6px)] w-72 max-h-[74vh] overflow-y-auto touch-pan-y rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
+                <div className="px-2.5 pt-1.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">This floor</div>
+                {floor.id === 100 && outdated && scene && (
+                  <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="w-full rounded-lg bg-emerald-500 px-2.5 py-2 text-left text-xs font-semibold text-emerald-950 flex items-center gap-2 disabled:opacity-60">
+                    {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office'}
+                  </button>
+                )}
+                {pubNote && <div className="mt-1 rounded-lg bg-muted px-2.5 py-2 text-[11px]">{pubNote}</div>}
+                {(() => { const wkey = floor.id === 100 ? 'office' : floor.id === 99 ? 'office99' : `floor${floor.id}`; return (
+                  <button onClick={async () => { closeMenus(); const bid = findWorldLevelId(wkey); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const w = worldForKey(wkey); if (w) { const l = await w.syncLevel(); window.location.href = `/imagine-studio/${l.id}`; } }} className="mt-1 w-full rounded-lg px-2.5 py-2 text-left text-xs flex items-center gap-2 hover:bg-muted">
+                    <BoxIcon className="w-4 h-4" />Edit in 3D Studio
+                  </button>
+                ); })()}
+                {socialFlags.theater && (
+                  <>
+                    <div className="px-2.5 pt-3 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+                      <Clapperboard className="w-3.5 h-3.5" />Theater{theater ? ' · on air' : ''}
+                    </div>
+                    <TheaterMenuItem icon={presenting ? Square : MonitorUp} label={presenting ? 'Stop sharing' : 'Share screen'} onClick={() => { void shareScreen(false); setOfficeMenu(false); }} />
+                    <TheaterMenuItem icon={Video} label="Share camera" onClick={() => { void shareScreen(true); setOfficeMenu(false); }} />
+                    <TheaterMenuItem icon={docRef.current ? Square : FileUp} label={docRef.current ? 'Stop document' : 'Present document'} onClick={() => { if (docRef.current) stopDoc(); else fileInputRef.current?.click(); setOfficeMenu(false); }} />
+                    <TheaterMenuItem icon={micOn ? Mic : MicOff} label={micOn ? 'Mic on' : 'Mic off'} onClick={() => { void toggleMic(); setOfficeMenu(false); }} />
+                    {theater && theater.kind !== 'dashboard' && <TheaterMenuItem icon={Square} label="Stop theater" onClick={() => { stopTheater(); setOfficeMenu(false); }} />}
+                    <div className="px-2.5 pt-2.5 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <LayoutDashboard className="w-3.5 h-3.5" />AI dashboard on theater
+                    </div>
+                    {theater?.kind === 'dashboard' && <TheaterMenuItem icon={Square} label="Stop dashboard" onClick={() => { stopTheater(); setOfficeMenu(false); }} />}
+                    <div className="grid grid-cols-2 gap-1 p-1">
+                      {TEAM_BOTS.map((b) => (
+                        <button key={b.key} onClick={() => { void showDashboardOnTheater(b.key); setOfficeMenu(false); }} className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-muted text-left">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: b.tint }} />{b.name}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {theaterNote && <div className="mt-1 rounded-lg bg-destructive/90 text-destructive-foreground px-2.5 py-2 text-[11px]">{theaterNote}</div>}
               </div>
             )}
           </div>
-          )}
-          {theaterNote && <div className="rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs max-w-[300px]">{theaterNote}</div>}
+          {theaterNote && !officeMenu && <div className="rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs max-w-[300px]">{theaterNote}</div>}
           <input ref={fileInputRef} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { onDocFile(e.target.files?.[0]); e.target.value = ''; }} />
         </div>
       )}
@@ -1651,20 +1677,35 @@ export default function OfficePage() {
         </div>
       )}
 
-      {/* Manager — Shift Control entry (also: walk up to the Manager in the room) */}
-      <button data-office-ui onClick={() => setShiftOpen(true)} className="absolute right-4 bottom-24 sm:bottom-6 z-20 flex items-center gap-2 rounded-full border border-[#FFD166]/60 bg-[#14100a]/85 px-4 py-2.5 text-xs font-semibold text-[#FFD166] shadow-lg backdrop-blur hover:bg-[#241a08]/90">
-        <Briefcase className="w-4 h-4" /> Manager · Shift
-      </button>
-      {/* The executive suite (founder directive 2026-10-25): the CEO runs
-          this company through its Managers; the Chairman runs the whole
-          building. Walk up to them in the room, or use these buttons. */}
-      <div data-office-ui className="absolute right-4 bottom-[9.5rem] sm:bottom-24 z-20 flex flex-col items-end gap-2">
-        <button data-office-ui onClick={() => setExecOpen('ceo')} className="flex items-center gap-2 rounded-full border border-sky-400/50 bg-[#0a1420]/85 px-4 py-2.5 text-xs font-semibold text-sky-300 shadow-lg backdrop-blur hover:bg-[#0e1e30]/90">
-          <LayoutDashboard className="w-4 h-4" /> CEO · {floor.company}
-        </button>
-        <button data-office-ui onClick={() => setExecOpen('chairman')} className="flex items-center gap-2 rounded-full border border-zinc-300/50 bg-[#101418]/85 px-4 py-2.5 text-xs font-semibold text-zinc-200 shadow-lg backdrop-blur hover:bg-[#1a2027]/90">
-          <LayoutDashboard className="w-4 h-4" /> Chairman · Building
-        </button>
+      {/* The Team dropdown (founder directive 2026-10-25 — simplified
+          chrome): the Manager's Shift Control and the executive suite
+          (CEO of this company, Chairman of the building) live behind
+          ONE button now, instead of a stack of floating buttons. They
+          are also in the room — walk up to them and tap. */}
+      <div data-office-ui className="absolute right-4 bottom-24 sm:bottom-6 z-20">
+        <div className="relative flex flex-col items-end">
+          {teamMenu && (
+            <div className="absolute bottom-[calc(100%+8px)] right-0 w-72 rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
+              <div className="px-2.5 pt-1.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Run the company</div>
+              <button onClick={() => { closeMenus(); setShiftOpen(true); }} className="w-full rounded-lg px-2.5 py-2.5 text-left hover:bg-muted flex items-start gap-2.5">
+                <Briefcase className="mt-0.5 h-4 w-4 shrink-0 text-[#FFD166]" />
+                <span><span className="block text-xs font-semibold">Manager · Shift Control</span><span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">Give Floor {floor.id} a goal — the Manager plans and runs the shift.</span></span>
+              </button>
+              <button onClick={() => { closeMenus(); setExecOpen('ceo'); }} className="w-full rounded-lg px-2.5 py-2.5 text-left hover:bg-muted flex items-start gap-2.5">
+                <LayoutDashboard className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
+                <span><span className="block text-xs font-semibold">CEO · {floor.company}</span><span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">The whole company: floors, Managers, departments, scores.</span></span>
+              </button>
+              <button onClick={() => { closeMenus(); setExecOpen('chairman'); }} className="w-full rounded-lg px-2.5 py-2.5 text-left hover:bg-muted flex items-start gap-2.5">
+                <Crown className="mt-0.5 h-4 w-4 shrink-0 text-zinc-300" />
+                <span><span className="block text-xs font-semibold">Chairman · Building</span><span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">Every company and floor — ratings, reports, decisions.</span></span>
+              </button>
+            </div>
+          )}
+          <button onClick={() => { setTeamMenu((o) => !o); setBuildingMenu(false); setOfficeMenu(false); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+            <Users className="w-4 h-4" /> Team
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${teamMenu ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </div>
       {shiftOpen && <ShiftPanel engine={engine} team={applyPersonnelToRoles(floor.key, [...floor.team, ...customBots.map(customBotToRole)])} company={floor.company} floorLabel={`Floor ${floor.id}`} floorKey={floor.key} floorId={floor.id} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
       {execOpen && <ExecPanel kind={execOpen} floor={floor} tools={execTools} signedIn={signedIn} isAdmin={isAdmin} onClose={() => setExecOpen(null)} />}
