@@ -125,6 +125,28 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const isPlaza = namedWorld?.key === "plaza";
   const isOffice = namedWorld?.key === "office";
   const [socialOpen, setSocialOpen] = useState(false);
+  const [myAgents, setMyAgents] = useState<any[] | null>(null);
+  const [agentPick, setAgentPick] = useState('');
+  const [agentModel, setAgentModel] = useState('/models/plaza/Xbot.glb');
+  const [agentSeated, setAgentSeated] = useState(true);
+  useEffect(() => {
+    if (!socialOpen || myAgents !== null) return;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('call-agents', { body: { action: 'list' } });
+        const list = (!error && data && !data.error) ? (data.agents || []) : [];
+        setMyAgents(list);
+        if (list[0]) setAgentPick(list[0].id);
+      } catch { setMyAgents([]); }
+    })();
+  }, [socialOpen]);
+  const addAgentCharacter = () => {
+    const a = (myAgents || []).find((x: any) => x.id === agentPick) || (myAgents || [])[0];
+    if (!a) { toast.error('Pick an agent first.'); return; }
+    const stamp = Date.now().toString(36);
+    updateScene((s: any) => ({ ...s, objects: [...(s.objects || []), { id: `agent_${stamp}`, kind: 'character', name: a.name, url: agentModel, position: [0, 0, 5], rotation: [0, Math.PI, 0], scale: [1, 1, 1], visible: true, playable: false, agentId: a.id, startSeated: agentSeated }] }));
+    toast.success(`${a.name} added to the scene`, { description: 'An AI agent character with its brain linked — publish, then click it in the live world to open its console.' });
+  };
   const social = (scene as any)?.social || {};
   const setSocial = (patch: Record<string, unknown>) =>
     updateScene((s: any) => ({ ...s, social: { ...(s.social || {}), ...patch } }));
@@ -424,6 +446,32 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
           <button onClick={addTheaterScreen} disabled={hasTheater} className="mt-3.5 w-full rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50">
             {hasTheater ? "Theater screen already in this scene" : "Add a theater screen to this scene"}
           </button>
+          <div className="border-t border-border mt-3 pt-3 space-y-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI agent characters</div>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">Drop one of your Agents-tab agents into this scene as a character with an AI brain. It renders in the published world; visitors click it to open its agent console.</p>
+            {myAgents === null ? (
+              <div className="text-[11px] text-muted-foreground">Loading your agents…</div>
+            ) : myAgents.length === 0 ? (
+              <div className="text-[11px] text-muted-foreground">No agents found for your account — create one in any dashboard&rsquo;s Agents tab first.</div>
+            ) : (
+              <>
+                <select value={agentPick} onChange={(e) => setAgentPick(e.target.value)} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
+                  {myAgents.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+                <select value={agentModel} onChange={(e) => setAgentModel(e.target.value)} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
+                  <option value="/models/plaza/Xbot.glb">Character: X Bot</option>
+                  <option value="/models/plaza/RobotExpressive.glb">Character: Robot</option>
+                  <option value="/models/plaza/Soldier.glb">Character: Soldier</option>
+                  <option value="/models/plaza/CesiumMan.glb">Character: Cesium Man</option>
+                  <option value="/models/plaza/RiggedFigure.glb">Character: Figure</option>
+                </select>
+                <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <input type="checkbox" checked={agentSeated} onChange={(e) => setAgentSeated(e.target.checked)} /> Starts seated (at a desk or chair)
+                </label>
+                <button onClick={addAgentCharacter} className="w-full h-8 rounded-md bg-fuchsia-600 text-white text-xs font-medium hover:bg-fuchsia-500">Add agent character to scene</button>
+              </>
+            )}
+          </div>
           <p className="text-[11px] text-muted-foreground mt-2.5 leading-relaxed">Tip: bind this level to a public route (the route selector next to Publish) so people can open it at its own address and join each other there.</p>
         </div>
       )}

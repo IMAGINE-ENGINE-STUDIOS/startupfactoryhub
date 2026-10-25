@@ -158,6 +158,9 @@ export default function PublishedPlayTest({ name, levelId, scene, onExit }: { na
           <PublishedWorld scene={snapshot} />
           {isOffice ? (
             <>
+              {snapshot.objects.filter((o: any) => o.kind === 'character' && o.agentId).map((o: any) => (
+                <OfficeBotCharacter key={`test_agent_${o.id}`} bot={{ key: `test_agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || '/models/plaza/Xbot.glb', tint: '#a78bfa' }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} onOpen={() => {}} />
+              ))}
               {bots.map(({ bot, home, rotY, seatY }) => (
                 <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={() => {}} />
               ))}

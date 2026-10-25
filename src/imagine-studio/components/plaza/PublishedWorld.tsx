@@ -1,8 +1,15 @@
 // @ts-nocheck -- Imagine Studio v2
-// Renders the Plaza District as published from the 3D Studio (primitives, models, lights).
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useGLTF } from '@react-three/drei';
+// Renders a published 3D Studio scene exactly as authored: lights,
+// primitives, models AND characters (NPCs and AI agent characters included —
+// a character dropped in the studio must exist in the published world).
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Html, useAnimations, useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import * as THREE from 'three';
 import { PLAZA_PUBLISHED_URL } from '@/imagine-studio/lib/plazaLevel';
+import { applyPose } from '@/imagine-studio/lib/rigSaves';
+import { applyActionPose } from '@/imagine-studio/lib/actionPoses';
 
 export function usePublishedPlaza() {
   const [scene, setScene] = useState<any>(null);
@@ -33,7 +40,63 @@ function Model({ o }) {
   return <primitive object={m} position={o.position} rotation={o.rotation} scale={o.scale} />;
 }
 
-export function PublishedWorld({ scene }: { scene: any }) {
+/** A scene character: NPC or AI agent. Plays its authored clip (or idle),
+ *  applies a saved rig pose when present, and sits procedurally when the
+ *  author marked it seated. Agent characters (agentId) are clickable. */
+export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (o: any) => void }) {
+  const url = typeof o.url === 'string' && !o.url.startsWith('blob:') ? o.url : '/models/plaza/Xbot.glb';
+  const { scene, animations } = useGLTF(url);
+  const model = useMemo(() => {
+    const m = skeletonClone(scene) as THREE.Object3D;
+    m.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m);
+    const h = (box.max.y - box.min.y) || 1;
+    const s = (1.8 / h) * (o.scale?.[1] ?? 1);
+    m.scale.setScalar(s);
+    m.position.y = -box.min.y * s;
+    if (Array.isArray(o.color)) {
+      const tint = new THREE.Color(col(o.color));
+      m.traverse((n: any) => { if (n.isMesh) { n.frustumCulled = false; const mats = Array.isArray(n.material) ? n.material : [n.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(tint); return c; }); n.material = Array.isArray(n.material) ? next : next[0]; } });
+    } else {
+      m.traverse((n: any) => { if (n.isMesh) n.frustumCulled = false; });
+    }
+    return m;
+  }, [scene, o]);
+  const root = useRef<THREE.Group>(null);
+  const { actions, names } = useAnimations(animations, root);
+  const posedRef = useRef(false);
+  useEffect(() => {
+    if (Array.isArray(o.pose) && o.pose.length) { try { applyPose(model as any, o.pose as any); posedRef.current = true; } catch { /* keep clips */ } return; }
+    if (o.startSeated && !names.some((n) => /sitting/i.test(n))) {
+      root.current?.updateMatrixWorld(true);
+      try { posedRef.current = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(o.rotation?.[1] || 0), 0, Math.cos(o.rotation?.[1] || 0)), seatHeight: o.seatHeight ?? 0.52 }); } catch { posedRef.current = false; }
+    }
+  }, [model, o, names]);
+  useFrame(() => {
+    if (posedRef.current) return;
+    const want = (o.currentAnimation && names.includes(o.currentAnimation)) ? o.currentAnimation
+      : o.startSeated ? (names.find((n) => /sitting/i.test(n)) ?? names.find((n) => /idle/i.test(n)) ?? names[0])
+      : (names.find((n) => /idle/i.test(n)) ?? names[0]);
+    if (!want) return;
+    const a = actions[want];
+    if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
+  });
+  const clickable = !!(o.agentId && onAgentOpen);
+  return (
+    <group ref={root} position={o.position} rotation={o.rotation} onClick={clickable ? (e) => { e.stopPropagation(); onAgentOpen!(o); } : undefined}>
+      <primitive object={model} />
+      {o.name && (
+        <Html position={[0, 2.05 * (o.scale?.[1] ?? 1), 0]} center zIndexRange={[15, 0]} style={{ pointerEvents: 'none' }}>
+          <div style={{ pointerEvents: 'none', font: '600 11px system-ui', lineHeight: 1.25, color: '#fff', background: 'rgba(5,10,20,.62)', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+            {o.name}{o.agentId ? ' · AI' : ''}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+export function PublishedWorld({ scene, renderCharacters = true, onAgentOpen }: { scene: any; renderCharacters?: boolean; onAgentOpen?: (o: any) => void }) {
   return (
     <group>
       {(scene.lights || []).filter((l) => l.kind === 'point').map((l) => <pointLight key={l.id} position={l.position} color={col(l.color)} intensity={l.intensity} distance={30} />)}
@@ -48,6 +111,7 @@ export function PublishedWorld({ scene }: { scene: any }) {
           );
         }
         if (o.kind === 'model' && typeof o.url === 'string' && !o.url.startsWith('blob:')) return <Suspense key={o.id} fallback={null}><Model o={o} /></Suspense>;
+        if (o.kind === 'character' && renderCharacters) return <Suspense key={o.id} fallback={null}><PublishedCharacter o={o} onAgentOpen={onAgentOpen} /></Suspense>;
         return null;
       })}
     </group>
