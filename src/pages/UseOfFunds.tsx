@@ -755,7 +755,7 @@ export default function UseOfFunds() {
                     {REVENUE_STREAMS.map((s) => (
                       <li key={s.name} className="flex items-center gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-2.5">
                         <s.icon className="h-4 w-4 shrink-0 text-[var(--uof-teal)]" />
-                        <span className="min-w-0 flex-1 truncate text-sm">{s.name}</span>
+                        <span className="min-w-0 flex-1 text-sm leading-snug">{s.name}</span>
                         <span className="uof-mono shrink-0 text-sm font-bold text-[var(--uof-teal)]">{s.price} <span className="text-[10px] font-medium text-[var(--uof-ink-faint)]">{s.unit}</span></span>
                       </li>
                     ))}
