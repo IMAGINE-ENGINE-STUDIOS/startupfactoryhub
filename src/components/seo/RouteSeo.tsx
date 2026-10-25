@@ -28,7 +28,7 @@ const ROUTES: Record<string, [string, string]> = {
   '/japan-accelerator': ['Japan Accelerator Program', 'The Startup Factory Hub Japan accelerator partnership for startups expanding across borders.'],
   '/resources': ['Startup Resources', 'Free and member resources for founders building with Startup Factory Hub.'],
   '/deck': ['Pitch Deck', 'The Startup Factory Hub company pitch deck.'],
-  '/uof': ['Use of Funds', 'How Startup Factory Hub allocates its $1.5M seed, line by line, with the 5-year financial projections from the deck: $6.09M in Year 1 to $60.9M in Year 5. Downloadable as PDF.'],
+  '/uof': ['Use of Funds', 'How Startup Factory Hub allocates its $1,622,440 plan ($1.5M seed + $122,440 added), line by line, with the 5-year financial projections from the deck: $6.09M in Year 1 to $60.9M in Year 5. Downloadable as PDF.'],
   '/overview': ['Company Overview', 'An overview of Startup Factory Hub, the AI startup accelerator and venture builder.'],
   '/hubs': ['Innovation Hubs', 'Find Startup Factory Hub innovation hubs and office spaces around the world.'],
   '/mvp-program': ['MVP Program', 'Build your minimum viable product with the Startup Factory Hub MVP program.'],

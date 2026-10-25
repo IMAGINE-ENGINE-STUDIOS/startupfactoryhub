@@ -20,18 +20,24 @@ import "./UseOfFunds.css";
 
 /* ──────────────────────────────────────────────────────────────────────────
    /uof — Use of Funds, unified with the Financial Projections from /deck.
-   Use-of-Funds figures: the founder-supplied Year-1 budget for the $1.5M seed.
+   Use-of-Funds figures: the founder-supplied Year-1 budget — $1.5M seed plus
+   the $122,440 founder revision of 2026-10-25, total plan $1,622,440.
    Projections: taken verbatim from the Deck's "5-Year Financial Projections"
    slide (Year 1 $6.09M → Year 5 $60.9M) and its Business Model slide.
    ────────────────────────────────────────────────────────────────────────── */
 
 const SEED = 1_500_000;
-const TOTAL = 1_500_000;
+/* Founder revision 2026-10-25: salaries set to $138K for CEO/CTO/COO/CFO and
+   $100K for CCO (Team $652K), Legal raised to $92K (Operations $172,040), and
+   a new Expansion chapter — Chile · Venezuela · UK teams — at $70K.
+   Added over the seed: $122,440. Total plan: $1,622,440. */
+const ADDED = 122_440;
+const TOTAL = 1_622_440;
 
 /* Unified runway — one number everywhere (page, deck, raise): 18 months.
-   Average burn is the seed spread over that runway: $1,500,000 / 18. */
+   Average burn is the total plan spread over that runway: $1,622,440 / 18. */
 const RUNWAY_MONTHS = 18;
-const AVG_BURN = Math.round(SEED / RUNWAY_MONTHS); // $83,333/mo
+const AVG_BURN = Math.round(TOTAL / RUNWAY_MONTHS); // $90,136/mo
 
 const fmt = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -39,25 +45,29 @@ const fmt = (n: number) =>
 /* ------------------------------ Use of Funds ----------------------------- */
 
 const TEAM = [
-  { role: "Chief Executive Officer", code: "CEO", annual: 144_000, tier: "$12K/MO" },
-  { role: "Chief Technology Officer", code: "CTO", annual: 144_000, tier: "$12K/MO" },
-  { role: "Chief Operating Officer", code: "COO", annual: 144_000, tier: "$12K/MO" },
-  { role: "Chief Financial Officer", code: "CFO", annual: 108_000, tier: "$9K/MO" },
-  { role: "Chief Commercial Officer", code: "CCO", annual: 108_000, tier: "$9K/MO" },
+  { role: "Chief Executive Officer", code: "CEO", annual: 138_000, tier: "$11.5K/MO" },
+  { role: "Chief Technology Officer", code: "CTO", annual: 138_000, tier: "$11.5K/MO" },
+  { role: "Chief Operating Officer", code: "COO", annual: 138_000, tier: "$11.5K/MO" },
+  { role: "Chief Financial Officer", code: "CFO", annual: 138_000, tier: "$11.5K/MO" },
+  { role: "Chief Commercial Officer", code: "CCO", annual: 100_000, tier: "$8,333/MO" },
 ];
 
 const OPS_ITEMS = [
   { icon: Building2, label: "Office", detail: "$584 / person / mo × 5", monthly: 2_920, annual: 35_040 },
   { icon: Server, label: "Hosting", detail: "Platform infrastructure", monthly: 1_500, annual: 18_000 },
   { icon: Cloud, label: "Cloud", detail: "$250 / person / mo × 5", monthly: 1_250, annual: 15_000 },
-  { icon: Scale, label: "Legal", detail: "Corporate · IP · Venture", monthly: 3_630, annual: 43_560 },
+  { icon: Scale, label: "Legal", detail: "Corporate · IP · Venture", monthly: 7_667, annual: 92_000 },
   { icon: ShieldCheck, label: "Insurance", detail: "GL · E&O · D&O · Cyber", monthly: 1_000, annual: 12_000 },
 ];
 
 const GROWTH_ITEMS = [
-  { icon: Megaphone, label: "Marketing + CAC", detail: "$20,000 / mo", monthly: 20_000, annual: 240_000, pct: "16.0%" },
-  { icon: Users, label: "Events", detail: "$2,500 / mo", monthly: 2_500, annual: 30_000, pct: "2.0%" },
-  { icon: Plane, label: "Travel", detail: "$4,167 / mo", monthly: 4_167, annual: 50_000, pct: "3.3%" },
+  { icon: Megaphone, label: "Marketing + CAC", detail: "$20,000 / mo", monthly: 20_000, annual: 240_000, pct: "14.8%" },
+  { icon: Users, label: "Events", detail: "$2,500 / mo", monthly: 2_500, annual: 30_000, pct: "1.8%" },
+  { icon: Plane, label: "Travel", detail: "$4,167 / mo", monthly: 4_167, annual: 50_000, pct: "3.1%" },
+];
+
+const EXPANSION_ITEMS = [
+  { icon: Globe, label: "Chile · Venezuela · UK", detail: "New chapter teams", monthly: 5_833, annual: 70_000, pct: "4.3%" },
 ];
 
 const PRODUCT_DEV_ITEMS = [
@@ -73,30 +83,33 @@ const WC_ITEMS = [
   { icon: FileCheck2, label: "Compliance", amount: 20_000, pct: "16.7%" },
 ];
 
-const TEAM_TOTAL = 648_000;
-const OPS_TOTAL = 123_600;
+const TEAM_TOTAL = 652_000;
+const OPS_TOTAL = 172_040;
 const GROWTH_TOTAL = 320_000;
 const PRODUCT_DEV_TOTAL = 288_400;
 const WC_TOTAL = 120_000;
+const EXPANSION_TOTAL = 70_000;
 
 /* Category colours remapped to the platform / Deck palette (teal → cyan →
-   sky → violet → amber) instead of the draft's neon set. */
+   sky → violet → amber → emerald) instead of the draft's neon set. */
 const CATEGORIES = [
-  { name: "Team", annual: TEAM_TOTAL, pctOfBurn: "43.2%", color: "#2dd4bf", note: "5 people · $54,000/mo" },
-  { name: "Operations", annual: OPS_TOTAL, pctOfBurn: "8.2%", color: "#22d3ee", note: "$10,300/mo" },
-  { name: "Growth", annual: GROWTH_TOTAL, pctOfBurn: "21.3%", color: "#38bdf8", note: "$26,667/mo" },
-  { name: "Product Development", annual: PRODUCT_DEV_TOTAL, pctOfBurn: "19.2%", color: "#a78bfa", note: "$24,033/mo" },
-  { name: "Working Capital", annual: WC_TOTAL, pctOfBurn: "8.0%", color: "#fbbf24", note: "$10,000/mo" },
+  { name: "Team", annual: TEAM_TOTAL, pctOfBurn: "40.2%", color: "#2dd4bf", note: "5 people · $54,333/mo" },
+  { name: "Operations", annual: OPS_TOTAL, pctOfBurn: "10.6%", color: "#22d3ee", note: "$14,337/mo" },
+  { name: "Growth", annual: GROWTH_TOTAL, pctOfBurn: "19.7%", color: "#38bdf8", note: "$26,667/mo" },
+  { name: "Product Development", annual: PRODUCT_DEV_TOTAL, pctOfBurn: "17.8%", color: "#a78bfa", note: "$24,033/mo" },
+  { name: "Working Capital", annual: WC_TOTAL, pctOfBurn: "7.4%", color: "#fbbf24", note: "$10,000/mo" },
+  { name: "Expansion", annual: EXPANSION_TOTAL, pctOfBurn: "4.3%", color: "#34d399", note: "Chile · Venezuela · UK · $5,833/mo" },
 ];
 
 const DONUT_DATA = CATEGORIES.map((c) => ({ name: c.name, value: c.annual, color: c.color }));
 
 const BAR_DATA = [
-  { name: "Team", annual: 648 },
-  { name: "Ops", annual: 123.6 },
+  { name: "Team", annual: 652 },
+  { name: "Ops", annual: 172.04 },
   { name: "Growth", annual: 320 },
   { name: "Product Dev", annual: 288.4 },
   { name: "Working Cap.", annual: 120 },
+  { name: "Expansion", annual: 70 },
 ];
 
 const ECOSYSTEM = [
@@ -173,21 +186,24 @@ export default function UseOfFunds() {
     const rows: (string | number)[][] = [
       ["Category", "Item", "Monthly USD", "Annual USD"],
       ...TEAM.map((m) => ["Team", `${m.role} (${m.code})`, m.annual / 12, m.annual]),
-      ["Team", "Total Team", 54_000, TEAM_TOTAL],
+      ["Team", "Total Team", 54_333, TEAM_TOTAL],
       ...OPS_ITEMS.map((i) => ["Operations", i.label, i.monthly, i.annual]),
-      ["Operations", "Total Operations", 10_300, OPS_TOTAL],
+      ["Operations", "Total Operations", 14_337, OPS_TOTAL],
       ...GROWTH_ITEMS.map((g) => ["Growth", g.label, g.monthly, g.annual]),
       ["Growth", "Total Growth", 26_667, GROWTH_TOTAL],
       ...PRODUCT_DEV_ITEMS.map((p) => ["Product Development", p.label, p.monthly, p.annual]),
       ["Product Development", "Total Product Development", 24_033, PRODUCT_DEV_TOTAL],
       ...WC_ITEMS.map((w) => ["Working Capital", w.label, Math.round(w.amount / 12), w.amount]),
       ["Working Capital", "Total Working Capital", 10_000, WC_TOTAL],
-      ["Summary", "Total", 125_000, TOTAL],
+      ...EXPANSION_ITEMS.map((e) => ["Expansion", e.label, e.monthly, e.annual]),
+      ["Expansion", "Total Expansion", 5_833, EXPANSION_TOTAL],
+      ["Summary", "Total", 135_203, TOTAL],
       ["Summary", "Seed Raise", "", SEED],
+      ["Summary", "Added (Expansion, Legal, salary adjustments)", "", ADDED],
       ["Summary", "Runway — Unified", AVG_BURN, "18 months"],
-      ["Summary", "Deployment pacing — Base (Team + Operations)", 64_300, ""],
-      ["Summary", "Deployment pacing — Core + Growth", 90_967, ""],
-      ["Summary", "Deployment pacing — Full deployment peak", 125_000, ""],
+      ["Summary", "Deployment pacing — Base (Team + Operations)", 68_670, ""],
+      ["Summary", "Deployment pacing — Core + Growth", 95_337, ""],
+      ["Summary", "Deployment pacing — Full deployment peak", 135_203, ""],
       ["Projections (from /deck)", "Year 1 Revenue", "", 6_090_000],
       ["Projections (from /deck)", "Year 2 Revenue", "", 10_830_000],
       ["Projections (from /deck)", "Year 3 Revenue", "", 19_260_000],
@@ -293,13 +309,13 @@ export default function UseOfFunds() {
 
           <div className="relative mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
-              <SectionTag>$1.5M SEED · USE OF FUNDS + PROJECTIONS</SectionTag>
+              <SectionTag>$1,622,440 PLAN · USE OF FUNDS + PROJECTIONS</SectionTag>
               <p className="uof-mono mt-6 text-[11px] font-bold tracking-[0.28em] text-[var(--uof-cyan)]">STARTUP FACTORY HUB</p>
               <h1 className="mt-3 text-4xl font-bold leading-[1.04] tracking-tight sm:text-6xl">
-                Use of Funds — <span className="uof-gradient-text">where the $1.5M goes</span>, and the growth it funds
+                Use of Funds — <span className="uof-gradient-text">where the money goes</span>, and the growth it funds
               </h1>
               <p className="mt-4 max-w-xl text-base text-[var(--uof-ink-dim)] sm:text-lg">
-                The Year-1 allocation of the seed, line by line — unified with the 5-year financial projections from the deck: $6.09M in Year 1 growing to $60.9M in Year 5.
+                The Year-1 allocation, line by line: the $1.5M seed plus $122,440 added for the Expansion chapter (Chile, Venezuela, UK), Legal at $92K and the updated salary structure — $1,622,440 in total. Unified with the 5-year financial projections from the deck: $6.09M in Year 1 growing to $60.9M in Year 5.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <a href="#use-of-funds" className="inline-flex items-center gap-2 rounded-full bg-[var(--uof-teal)] px-6 py-3 text-sm font-bold text-[#02110f] transition hover:brightness-110">
@@ -349,7 +365,7 @@ export default function UseOfFunds() {
                   ))}
                 </ul>
                 <div className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--uof-line)] bg-[rgba(2,6,23,0.6)] px-4 py-3">
-                  <p className="uof-mono text-sm font-bold">TOTAL $1,500,000</p>
+                  <p className="uof-mono text-sm font-bold">TOTAL $1,622,440</p>
                   <Rocket className="h-5 w-5 shrink-0 text-[var(--uof-teal)]" />
                 </div>
               </div>
@@ -363,7 +379,7 @@ export default function UseOfFunds() {
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div>
                 <SectionTag>USE OF FUNDS</SectionTag>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">$1,500,000 — allocated</h2>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">$1,622,440 — allocated</h2>
               </div>
               <div className="uof-no-print inline-flex rounded-full border border-[var(--uof-line)] bg-[var(--uof-surface)] p-1" role="group" aria-label="Toggle period">
                 {(["annual", "monthly"] as const).map((p) => (
@@ -484,7 +500,7 @@ export default function UseOfFunds() {
               <article className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-lg font-semibold"><Users className="h-5 w-5 shrink-0 text-[var(--uof-teal)]" /> Team — 5</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(45,212,191,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-teal)]">43.2%</span>
+                  <span className="uof-mono rounded-full bg-[rgba(45,212,191,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-teal)]">40.2%</span>
                 </div>
                 <ul className="mt-5 divide-y divide-[rgba(45,212,191,0.08)]">
                   {TEAM.map((m) => (
@@ -507,7 +523,7 @@ export default function UseOfFunds() {
               <article className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-lg font-semibold"><Cpu className="h-5 w-5 shrink-0 text-[var(--uof-cyan)]" /> Operations</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(34,211,238,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-cyan)]">8.2%</span>
+                  <span className="uof-mono rounded-full bg-[rgba(34,211,238,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-cyan)]">10.6%</span>
                 </div>
                 <ul className="mt-5 divide-y divide-[rgba(34,211,238,0.08)]">
                   {OPS_ITEMS.map((item) => (
@@ -532,7 +548,7 @@ export default function UseOfFunds() {
               <article className="rounded-3xl border border-[rgba(56,189,248,0.35)] bg-[var(--uof-surface)] p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-lg font-semibold"><Megaphone className="h-5 w-5 shrink-0 text-[#7dd3fc]" /> Growth</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(56,189,248,0.14)] px-3 py-1 text-xs font-bold text-[#7dd3fc]">21.3%</span>
+                  <span className="uof-mono rounded-full bg-[rgba(56,189,248,0.14)] px-3 py-1 text-xs font-bold text-[#7dd3fc]">19.7%</span>
                 </div>
                 <ul className="mt-5 divide-y divide-[rgba(56,189,248,0.10)]">
                   {GROWTH_ITEMS.map((item) => (
@@ -560,7 +576,7 @@ export default function UseOfFunds() {
               <article className="rounded-3xl border border-[rgba(167,139,250,0.35)] bg-[var(--uof-surface)] p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-lg font-semibold"><BrainCircuit className="h-5 w-5 shrink-0 text-[#c4b5fd]" /> Product Development</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(167,139,250,0.16)] px-3 py-1 text-xs font-bold text-[#c4b5fd]">19.2%</span>
+                  <span className="uof-mono rounded-full bg-[rgba(167,139,250,0.16)] px-3 py-1 text-xs font-bold text-[#c4b5fd]">17.8%</span>
                 </div>
                 <ul className="mt-5 divide-y divide-[rgba(167,139,250,0.12)]">
                   {PRODUCT_DEV_ITEMS.map((item) => (
@@ -582,10 +598,38 @@ export default function UseOfFunds() {
                 </div>
               </article>
 
+              <article className="rounded-3xl border border-[rgba(52,211,153,0.35)] bg-[var(--uof-surface)] p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Globe className="h-5 w-5 shrink-0 text-[#34d399]" /> Expansion — New Chapters</h3>
+                  <span className="uof-mono rounded-full bg-[rgba(52,211,153,0.14)] px-3 py-1 text-xs font-bold text-[#34d399]">4.3%</span>
+                </div>
+                <ul className="mt-5 divide-y divide-[rgba(52,211,153,0.12)]">
+                  {EXPANSION_ITEMS.map((item) => (
+                    <li key={item.label} className="flex items-center justify-between gap-3 py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <item.icon className="h-5 w-5 shrink-0 text-[#34d399]" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{item.label}</p>
+                          <p className="truncate text-xs text-[var(--uof-ink-faint)]">{item.detail} · salaries</p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <span className="uof-mono font-semibold">{period === "annual" ? fmt(item.annual) : fmt(item.monthly)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
+                        <p className="uof-mono text-[11px] text-[var(--uof-ink-faint)]">{item.pct} of total</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
+                  <span className="text-sm font-semibold">Total</span>
+                  <span className="uof-mono text-lg font-bold text-[#34d399]">{val(EXPANSION_TOTAL)} {per}</span>
+                </div>
+              </article>
+
               <article className="rounded-3xl border border-[rgba(251,191,36,0.3)] bg-[var(--uof-surface)] p-6 lg:col-span-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-lg font-semibold"><Wallet className="h-5 w-5 shrink-0 text-[#fbbf24]" /> Working Capital</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(251,191,36,0.14)] px-3 py-1 text-xs font-bold text-[#fbbf24]">8.0%</span>
+                  <span className="uof-mono rounded-full bg-[rgba(251,191,36,0.14)] px-3 py-1 text-xs font-bold text-[#fbbf24]">7.4%</span>
                 </div>
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {WC_ITEMS.map((item) => (
@@ -606,7 +650,7 @@ export default function UseOfFunds() {
 
             <div className="mt-6 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] px-5 py-4">
               <p className="uof-mono text-center text-xs tracking-[0.14em] text-[var(--uof-ink-dim)] sm:text-sm">
-                $648,000 + $123,600 + $320,000 + $288,400 + $120,000 = <span className="font-bold text-[var(--uof-teal)]">$1,500,000</span>
+                $652,000 + $172,040 + $320,000 + $288,400 + $120,000 + $70,000 = <span className="font-bold text-[var(--uof-teal)]">$1,622,440</span>
               </p>
             </div>
           </div>
@@ -618,10 +662,10 @@ export default function UseOfFunds() {
           <div className="absolute -top-24 left-1/3 h-80 w-80 rounded-full bg-[rgba(34,211,238,0.10)] blur-3xl" aria-hidden />
           <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[rgba(45,212,191,0.10)] blur-3xl" aria-hidden />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <SectionTag>RUNWAY · $1,500,000</SectionTag>
+            <SectionTag>RUNWAY · $1,622,440</SectionTag>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Runway — 18 months</h2>
             <p className="mt-3 max-w-2xl text-[var(--uof-ink-dim)]">
-              One unified number across the raise, the deck and this page: the $1.5M seed funds 18 months, an average burn of $83,333/mo. Deployment is phased — the base run-rate starts lower and peaks at full deployment — averaging to the 18-month runway.
+              One unified number across the raise, the deck and this page: the $1,622,440 plan funds 18 months, an average burn of $90,136/mo. Deployment is phased — the base run-rate starts lower and peaks at full deployment — averaging to the 18-month runway.
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -629,19 +673,19 @@ export default function UseOfFunds() {
                 <Timer className="h-6 w-6 text-[var(--uof-teal)]" />
                 <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">AVERAGE MONTHLY BURN</p>
                 <p className="uof-mono mt-1 text-3xl font-bold">{fmt(AVG_BURN)}</p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">$1,500,000 spread over the 18-month runway, phased by deployment stage below.</p>
+                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">$1,622,440 spread over the 18-month runway, phased by deployment stage below.</p>
               </div>
               <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6 uof-glow">
                 <CalendarRange className="h-6 w-6 text-[var(--uof-teal)]" />
                 <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">RUNWAY</p>
                 <p className="uof-mono mt-1 text-4xl font-bold text-[var(--uof-teal)]">18 <span className="text-lg">months</span></p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">On $1,500,000 seed.</p>
+                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">On the $1,622,440 plan — $1.5M seed + $122,440 added.</p>
               </div>
               <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
                 <Wallet className="h-6 w-6 text-[#fbbf24]" />
                 <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">WORKING CAPITAL</p>
                 <p className="uof-mono mt-1 text-3xl font-bold">$120,000</p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">8.0% · $10,000/mo</p>
+                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">7.4% · $10,000/mo</p>
               </div>
             </div>
 
@@ -656,9 +700,9 @@ export default function UseOfFunds() {
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
-                  { t: "Base · $64,300/mo", d: "Team + Operations ($771,600/yr) — the starting run-rate." },
-                  { t: "Core + Growth · $90,967/mo", d: "Adds the Growth engine ($320,000/yr) as distribution ramps." },
-                  { t: "Full deployment · $125,000/mo", d: "Peak rate with Product Development at full pace — phased in, not run for all 18 months." },
+                  { t: "Base · $68,670/mo", d: "Team + Operations ($824,040/yr) — the starting run-rate." },
+                  { t: "Core + Growth · $95,337/mo", d: "Adds the Growth engine ($320,000/yr) as distribution ramps." },
+                  { t: "Full deployment · $135,203/mo", d: "Peak rate with Product Development and Expansion at full pace — phased in, not run for all 18 months." },
                 ].map((m) => (
                   <div key={m.t} className="rounded-2xl bg-[var(--uof-surface-2)] p-4">
                     <p className="uof-mono text-xs font-bold text-[var(--uof-cyan)]">{m.t}</p>
@@ -797,7 +841,7 @@ export default function UseOfFunds() {
                 ))}
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                <span className="text-sm font-semibold">Raising $1.5M seed — allocated line by line above</span>
+                <span className="text-sm font-semibold">Raising $1.5M seed · $1,622,440 plan — allocated line by line above</span>
                 <a href="#use-of-funds" className="uof-mono inline-flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--uof-teal)] hover:text-[var(--uof-cyan)]">
                   USE OF FUNDS <ArrowUpRight className="h-3.5 w-3.5" />
                 </a>
@@ -852,10 +896,11 @@ export default function UseOfFunds() {
               </div>
               <div className="uof-mono mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-[11px] tracking-[0.18em] text-[var(--uof-ink-faint)]">
                 <span>SEED $1,500,000</span>
-                <span>TEAM 43.2%</span>
-                <span>GROWTH 21.3%</span>
-                <span>PRODUCT DEV 19.2%</span>
-                <span>WORKING CAPITAL 8.0%</span>
+                <span>TEAM 40.2%</span>
+                <span>GROWTH 19.7%</span>
+                <span>PRODUCT DEV 17.8%</span>
+                <span>WORKING CAPITAL 7.4%</span>
+                <span>EXPANSION 4.3%</span>
                 <span>YEAR 5 REVENUE $60.9M</span>
               </div>
               <p className="uof-mono mt-6 border-t border-[var(--uof-line)] pt-4 text-[11px] tracking-[0.14em] text-[var(--uof-ink-faint)]">Startup Factory Hub</p>
