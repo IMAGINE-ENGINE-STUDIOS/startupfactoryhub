@@ -5,8 +5,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ensurePlazaLevel } from "@/imagine-studio/lib/localLevels";
-import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, buildPlazaScene } from "@/imagine-studio/lib/plazaLevel";
+import { syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,11 +27,8 @@ export default function StudioProjectsPage() {
       const u = data.user; if (!u) return;
       const { data: admin } = await supabase.rpc("has_role", { _user_id: u.id, _role: "admin" });
       if (!admin) return;
-      if (listProjects().some((p) => p.levels.some((l) => l.name === PLAZA_LEVEL_NAME))) return;
-      let published: any = null;
-      try { const r = await fetch(PLAZA_PUBLISHED_URL, { cache: "no-store" }); if (r.ok) published = await r.json(); } catch {}
-      const scene = published?.scene ?? (published?.objects ? published : null);
-      ensurePlazaLevel(() => scene || buildPlazaScene(), PLAZA_LEVEL_NAME);
+      // Plaza District edit state always mirrors the published version the game plays.
+      await syncPlazaLevelToPublished();
       refresh();
     });
   }, []);

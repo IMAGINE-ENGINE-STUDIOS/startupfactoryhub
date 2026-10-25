@@ -1,6 +1,7 @@
 // @ts-nocheck -- Imagine Studio v2
 // Plaza District as an editable 3D Studio level (mirrors the built-in /plaza world).
 import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
+import { createLocalLevel, ensurePlazaLevel, getLocalLevel, listLocalLevels, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
 
 export const PLAZA_LEVEL_NAME = "Plaza District";
 /** Same bright daylight as the live /plaza game: sky/ground fill, no dark contact-shadow patch. */
@@ -21,6 +22,49 @@ const P = (name: string, shape: PrimitiveObject["shape"], position, scale, color
   id: `plaza_${++n}`, kind: "primitive", name, shape, position, rotation: [0, 0, 0], scale, visible: true,
   color: hex(color), metalness: 0, roughness: 0.85, ...extra,
 });
+
+/** Fetches the scene the live /plaza game is actually playing (the published JSON). */
+export async function fetchPublishedPlazaScene(): Promise<LevelScene | null> {
+  try {
+    const r = await fetch(`${PLAZA_PUBLISHED_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!r.ok) return null;
+    const d: any = await r.json();
+    const scene = d?.scene ?? (d?.objects ? d : null);
+    return scene?.objects ? (scene as LevelScene) : null;
+  } catch {
+    return null;
+  }
+}
+
+const stableStringify = (v: any): string => {
+  if (v === null || typeof v !== "object") return JSON.stringify(v) ?? "null";
+  if (Array.isArray(v)) return `[${v.map(stableStringify).join(",")}]`;
+  return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(v[k])}`).join(",")}}`;
+};
+
+/**
+ * Opens the Plaza District level for editing with its scene set to the CURRENT
+ * published version — the exact scene the /plaza game renders, models included.
+ * If the local copy has diverged (stale seed or unpublished edits), the divergent
+ * scene is first preserved as its own local level so no work is lost, then the
+ * Plaza level is reset to the published scene. Falls back to the existing local
+ * level (or the built-in mirror) only when the published JSON is unreachable.
+ */
+export async function syncPlazaLevelToPublished(): Promise<LocalLevelRecord> {
+  const publishedScene = await fetchPublishedPlazaScene();
+  const existing = listLocalLevels().find((l) => l.name === PLAZA_LEVEL_NAME);
+  if (!publishedScene) return existing ?? ensurePlazaLevel(buildPlazaScene, PLAZA_LEVEL_NAME);
+  if (!existing) return ensurePlazaLevel(() => publishedScene, PLAZA_LEVEL_NAME);
+  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
+    const backup = createLocalLevel(existing.scene);
+    updateLocalLevel(backup.id, {
+      name: `${PLAZA_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
+      description: "Local edits preserved when the Plaza District level was re-synced to the published version",
+    });
+    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
+  }
+  return getLocalLevel(existing.id) ?? existing;
+}
 
 export function buildPlazaScene(): LevelScene {
   n = 0;
