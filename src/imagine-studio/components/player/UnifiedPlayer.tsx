@@ -183,9 +183,12 @@ export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, rin
     const s = 1.8 / h;
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
+    const cullCenter = box.getCenter(new THREE.Vector3());
+    const cullRadius = (box.getSize(new THREE.Vector3()).length() / 2) * 1.6;
     m.traverse((o: any) => {
       if (o.isMesh) {
-        o.frustumCulled = false;
+        o.frustumCulled = true;
+        if (o.geometry && !o.geometry.boundingSphere) o.geometry.boundingSphere = new THREE.Sphere(cullCenter, cullRadius);
         if (tint) { o.material = o.material?.clone?.() ?? o.material; if (o.material) o.material.color = new THREE.Color(tint); }
         const mats = Array.isArray(o.material) ? o.material : [o.material];
         mats.forEach((c: any) => { if (c?.isMeshStandardMaterial) { if (c.metalness > 0.6) c.metalness = 0.5; c.roughness = Math.max(c.roughness ?? 0.5, 0.35); c.envMapIntensity = 1.35; } });

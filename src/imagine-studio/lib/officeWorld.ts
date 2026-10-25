@@ -18,7 +18,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 3;
+export const OFFICE_SCENE_VERSION = 4;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
 /** The agent character body: the founder's OWN uploaded character
@@ -114,16 +114,23 @@ export function buildOfficeScene(): LevelScene {
   wallRun("S", W, 0, D / 2, 0, [[-W / 2, -1.8], [1.8, W / 2]]); // door gap in the middle
   wallRun("W", D, -W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
   wallRun("E", D, W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
-  o.push(P("Entrance Lintel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T], "#d7dee5", { roughness: 0.5, metalness: 0.3 }));
+  // The entrance lintel was a solid pale slab interrupting the glass —
+  // hidden (founder directive 2026-10-25: no white panels in the windows);
+  // the gap is glazed instead (Entrance Glass panes, appended below) so
+  // the window pattern runs continuously. Kept as an invisible object so
+  // scene object ids stay stable for published-scene merges.
+  o.push(P("Entrance Lintel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T], "#d7dee5", { roughness: 0.5, metalness: 0.3, visible: false }));
   // Theater screen — BIG (founder directive 2026-10-25), centered on the
   // north wall; live content is rendered INTO it by /office.
   o.push(P("Theater Screen", "box", [0, 3.55, -15.72], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
   o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -15.72], [0.35, 6.6, 0.35], "#0a0f16"));
   o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -15.72], [0.35, 6.6, 0.35], "#0a0f16"));
   o.push(P("Theater Glow Strip", "box", [0, 0.12, -15.5], [15.6, 0.06, 0.1], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.2 } as any));
-  // Whiteboard on the south interior + corner plants.
-  o.push(P("Whiteboard", "box", [-10, 1.7, D / 2 - 0.35], [6, 2.2, 0.08], "#f7fafc", { roughness: 0.25 }));
-  o.push(P("Whiteboard Frame", "box", [-10, 1.7, D / 2 - 0.42], [6.3, 2.5, 0.05], "#b9c6d2", { roughness: 0.6 }));
+  // The whiteboard + frame were two stray white panels against the glass
+  // — hidden (founder directive 2026-10-25); kept invisible so scene
+  // object ids stay stable for published-scene merges.
+  o.push(P("Whiteboard", "box", [-10, 1.7, D / 2 - 0.35], [6, 2.2, 0.08], "#f7fafc", { roughness: 0.25, visible: false }));
+  o.push(P("Whiteboard Frame", "box", [-10, 1.7, D / 2 - 0.42], [6.3, 2.5, 0.05], "#b9c6d2", { roughness: 0.6, visible: false }));
   for (const [px, pz] of [[-22, -14], [22, -14], [-22, 14], [22, 14]] as const) {
     o.push(P("Plant Pot", "box", [px, 0.3, pz], [0.7, 0.6, 0.7], "#101820"));
     o.push(P("Plant", "cone", [px, 1.15, pz], [1.1, 1.2, 1.1], "#14532d", { roughness: 1 }));
@@ -189,6 +196,12 @@ export function buildOfficeScene(): LevelScene {
     o.push(P(`Agent Chair ${k}`, "box", [d.x, 0.48, d.z + f * 0.85], [0.55, 0.07, 0.55], "#0d1622", { roughness: 0.9 }));
     o.push(P(`Agent Chair ${k} Back`, "box", [d.x, 0.95, d.z + f * 1.08], [0.55, 0.85, 0.07], "#0d1622", { roughness: 0.9 }));
   });
+  // Entrance glazing — the south door gap gets the SAME glass as every
+  // other window (founder directive 2026-10-25: continue the window
+  // pattern, no solid panels). Appended last so existing object ids
+  // never shift.
+  o.push(P("Entrance Glass Door", "box", [0, 1.3, D / 2], [3.6, 2.6, T * 0.35], glass, { roughness: 0.08, metalness: 0.1 }));
+  o.push(P("Entrance Glass Panel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T * 0.35], glass, { roughness: 0.08, metalness: 0.1 }));
   const characters = OFFICE_BOTS.map((b, i) => {
     const d = OFFICE_DESKS[i];
     return {

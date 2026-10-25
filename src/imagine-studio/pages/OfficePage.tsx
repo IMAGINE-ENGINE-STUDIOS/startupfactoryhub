@@ -11,19 +11,20 @@
  * (PDF/image) with audio, or put any bot's AI dashboard on the big screen,
  * synced to everyone in the room over LiveKit (same pattern as the Plaza).
  */
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
-import TaskPipeline from '@/components/call-agents/TaskPipeline';
+const TaskPipeline = lazy(() => import('@/components/call-agents/TaskPipeline'));
+import { inputPulse } from '@/imagine-studio/components/level/locomotion/locomotionState';
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
@@ -77,60 +78,19 @@ function officePath(from: { x: number; z: number }, to: { x: number; z: number }
   return out;
 }
 
-type CalJoint = { bone: any; axis: 'x' | 'y' | 'z'; sign: 1 | -1 };
-const _cq = new THREE.Quaternion();
-const _cv = new THREE.Vector3();
-/** Finds the local rotation on `bone` that swings `child` most toward
- * `dirWorld` — the same calibration trick the Rig Room poses use, so the
- * typing pose fits whatever humanoid rig the body carries. */
-function calibrateJoint(rootObj: THREE.Object3D, bone: any, child: any, dirWorld: THREE.Vector3): CalJoint | null {
-  rootObj.updateMatrixWorld(true);
-  const before = child.getWorldPosition(new THREE.Vector3());
-  const saved = bone.quaternion.clone();
-  let best: (CalJoint & { score: number }) | null = null;
-  for (const axis of ['x', 'y', 'z'] as const) {
-    for (const sign of [1, -1] as const) {
-      bone.quaternion.copy(saved);
-      _cq.setFromAxisAngle(axis === 'x' ? _cv.set(1, 0, 0) : axis === 'y' ? _cv.set(0, 1, 0) : _cv.set(0, 0, 1), sign * 0.4);
-      bone.quaternion.multiply(_cq);
-      rootObj.updateMatrixWorld(true);
-      const after = child.getWorldPosition(new THREE.Vector3());
-      const score = after.sub(before).dot(dirWorld);
-      if (!best || score > best.score) best = { bone, axis, sign, score };
-    }
-  }
-  bone.quaternion.copy(saved);
-  rootObj.updateMatrixWorld(true);
-  return best && best.score > 1e-4 ? { bone: best.bone, axis: best.axis, sign: best.sign } : null;
-}
 const boneByName = (rootObj: THREE.Object3D, pats: string[]) => {
   let f: any = null;
   rootObj.traverse((o: any) => { if (!f && o.isBone && pats.some((p) => o.name.toLowerCase().includes(p))) f = o; });
   return f;
 };
-/** Calibrated typing rig for one body: upper arms raised toward the desk,
- * forearms bent, palms tapping — or null when the body has no arms to pose. */
-function buildTypingRig(rootObj: THREE.Object3D, model: THREE.Object3D, rotY: number) {
-  const fwd = new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY));
-  const fwdUp = fwd.clone().add(new THREE.Vector3(0, 0.35, 0)).normalize();
-  const side = (s: 'l' | 'r') => {
-    const up = boneByName(model, [`upperarm.${s}`, `upperarm_${s}`, `${s === 'l' ? 'left' : 'right'}upperarm`, `${s === 'l' ? 'left' : 'right'}arm`]);
-    const lo = boneByName(model, [`lowerarm.${s}`, `lowerarm_${s}`, `${s === 'l' ? 'left' : 'right'}forearm`, `${s === 'l' ? 'left' : 'right'}lowerarm`]);
-    const palm = boneByName(model, [`palm1.${s}`, `palm.${s}`, `${s === 'l' ? 'left' : 'right'}hand`]);
-    if (!up || !lo) return null;
-    const u = calibrateJoint(rootObj, up, lo, fwd);
-    const l = calibrateJoint(rootObj, lo, palm || lo.children?.[0] || lo, fwdUp);
-    const p = palm ? calibrateJoint(rootObj, palm, palm, fwd) : null;
-    return u && l ? { up: { ...u, bone: up }, lo: { ...l, bone: lo }, palm: p && palm ? { ...p, bone: palm } : null } : null;
-  };
-  const L = side('l'), R = side('r');
-  return L || R ? { L, R } : null;
-}
-const stampJoint = (j: CalJoint | null, angle: number) => {
-  if (!j) return;
-  _cq.setFromAxisAngle(j.axis === 'x' ? _cv.set(1, 0, 0) : j.axis === 'y' ? _cv.set(0, 1, 0) : _cv.set(0, 0, 1), j.sign * angle);
-  j.bone.quaternion.multiply(_cq);
-};
+// Typing pose temps (v3): the seated typing motion SETS each forearm's
+// quaternion from a captured base pose every frame — base × a small slow
+// up/down bob. Nothing accumulates, nothing can spin: the old calibrated
+// per-frame stamp multiplied rotations into bones the sit clip never
+// resets, which wound the arms up like fans.
+const _tq = new THREE.Quaternion();
+const _AXIS_X = new THREE.Vector3(1, 0, 0);
+const _AXIS_Y = new THREE.Vector3(0, 1, 0);
 
 export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = true, roam = false, pinnedWork = false }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void; seated?: boolean; roam?: boolean; pinnedWork?: boolean }) {
   const { scene, animations } = useGLTF(bot.model);
@@ -143,7 +103,14 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
     const skin = new THREE.Color(bot.tint);
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); if (c.isMeshStandardMaterial) { if (c.metalness > 0.6) c.metalness = 0.5; c.roughness = Math.max(c.roughness ?? 0.5, 0.35); c.envMapIntensity = 1.35; } return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    // Frustum culling ON with a generous static sphere (box is measured in
+    // model space, before scaling): off-screen bots skip their 266k-vert
+    // skinning entirely. The sphere is padded 1.6x so animated limbs can
+    // never pop out of it. The geometry is shared by every clone, so the
+    // first bot to load sets it for all.
+    const cullCenter = box.getCenter(new THREE.Vector3());
+    const cullRadius = (box.getSize(new THREE.Vector3()).length() / 2) * 1.6;
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = true; if (o.geometry && !o.geometry.boundingSphere) o.geometry.boundingSphere = new THREE.Sphere(cullCenter, cullRadius); const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); if (c.isMeshStandardMaterial) { if (c.metalness > 0.6) c.metalness = 0.5; c.roughness = Math.max(c.roughness ?? 0.5, 0.35); c.envMapIntensity = 1.35; } return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
     return m;
   }, [scene, bot]);
   const root = useRef<THREE.Group>(null);
@@ -183,7 +150,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   const setPhase = (p: 'work' | 'walk' | 'hang') => { st.current.phase = p; setStatus(p === 'work' ? 'Working' : p === 'walk' ? 'Walking' : 'On a break'); };
   const legsPoseRef = useRef<any[] | null>(null);
   const legsTriedRef = useRef(0);
-  const typeRigRef = useRef<any | undefined>(undefined);
+  const typePoseRef = useRef<any | undefined>(undefined);
   useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); }; }, [bot.key]); // eslint-disable-line
   useFrame((state, dtRaw) => {
     const g = root.current; if (!g) return;
@@ -194,8 +161,8 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
     if (pinnedRef.current && s.phase === 'hang') { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; setPhase('walk'); }
     if (s.phase === 'work') {
       // Sit (clip clamped on its last frame, or the procedural legs pose)
-      // and TYPE: the calibrated arm rig is stamped after the mixer, the
-      // hands alternating like keystrokes.
+      // and TYPE: a small slow forearm bob set from the clip's pose (see
+      // the typing block below) — never an accumulated stamp.
       if (seated) {
         if (clipOf.sit) playClip(clipOf.sit, true);
         else {
@@ -207,17 +174,37 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
           if (legsPoseRef.current) { playClip(clipOf.idle); applyPose(model as any, legsPoseRef.current as any); }
           else playClip(clipOf.idle);
         }
-        if (typeRigRef.current === undefined) { g.updateMatrixWorld(true); try { typeRigRef.current = buildTypingRig(g as any, model, rotY); } catch { typeRigRef.current = null; } }
-        const rig = typeRigRef.current;
-        if (rig) {
-          const t = state.clock.elapsedTime * 9;
-          for (const [sideRig, ph] of [[rig.L, 0], [rig.R, Math.PI]] as const) {
-            if (!sideRig) continue;
-            stampJoint(sideRig.up, 0.52);
-            stampJoint(sideRig.lo, 0.6 + Math.sin(t + ph) * 0.1);
-            // hands are NOT stamped: they stay locked to the forearms.
-            // (A per-frame palm stamp here accumulated rotation on a bone
-            // the sit clip never resets — the hands spun like fans.)
+        // TYPING (v3): the sit clip already poses the arms on the desk.
+        // All that is added here is a SMALL, SLOW up/down bob of the
+        // forearms (alternating, like keystrokes) and a slight natural
+        // head sway — each SET from a captured base pose every frame, so
+        // no rotation can ever accumulate or spin. Shoulders and hands
+        // are never touched.
+        if (typePoseRef.current === undefined) {
+          const fl = boneByName(model, ['leftforearm', 'leftlowerarm']);
+          const fr = boneByName(model, ['rightforearm', 'rightlowerarm']);
+          const head = boneByName(model, ['head']);
+          typePoseRef.current = (fl && fr) ? { fl, fr, head, baseL: null, baseR: null, baseH: null, locked: false, since: state.clock.elapsedTime } : null;
+        }
+        const tp = typePoseRef.current;
+        if (tp) {
+          const t = state.clock.elapsedTime;
+          if (!tp.locked) {
+            // Re-capture the clip's own pose while the sit transition
+            // settles, then lock it as the base for the whole session.
+            tp.baseL = tp.fl.quaternion.clone(); tp.baseR = tp.fr.quaternion.clone();
+            tp.baseH = tp.head ? tp.head.quaternion.clone() : null;
+            if (t - tp.since > 1.2) tp.locked = true;
+          }
+          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3) * 0.055);
+          tp.fl.quaternion.copy(tp.baseL).multiply(_tq);
+          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3 + Math.PI) * 0.055);
+          tp.fr.quaternion.copy(tp.baseR).multiply(_tq);
+          if (tp.head && tp.baseH) {
+            _tq.setFromAxisAngle(_AXIS_Y, Math.sin(t * 0.43 + seed) * 0.05);
+            tp.head.quaternion.copy(tp.baseH).multiply(_tq);
+            _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 0.31 + seed * 1.7) * 0.018);
+            tp.head.quaternion.multiply(_tq);
           }
         }
       } else {
@@ -233,6 +220,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
         if (s.path.length) setPhase('walk'); else { s.t = 8; }
       }
     } else if (s.phase === 'walk') {
+      typePoseRef.current = undefined; // re-capture the typing base next sit
       playClip(clipOf.walk || clipOf.idle);
       const target = s.path[0];
       if (!target) { setPhase(s.after === 'hang' ? 'hang' : 'work'); s.t = s.after === 'hang' ? 6 + (seed % 9) : 22 + (seed % 34); }
@@ -250,6 +238,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
         if (dist <= 0.06) s.path.shift();
       }
     } else {
+      typePoseRef.current = undefined; // re-capture the typing base next sit
       // Hanging around: idle, a slow look around the room, the odd wave.
       if (clipOf.wave && !s.waved && seed % 2 === 0) { s.waved = true; playClip(clipOf.wave, true); }
       else {
@@ -260,7 +249,10 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       s.t -= dt;
       if (s.t <= 0) { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; if (s.path.length) setPhase('walk'); else { setPhase('work'); s.t = 22 + (seed % 34); } }
     }
-    botPos.set(bot.key, new THREE.Vector3(g.position.x, 0, g.position.z));
+    // Mutate the stored vector in place — no per-frame allocation.
+    const bp = botPos.get(bot.key);
+    if (bp) { bp.x = g.position.x; bp.y = 0; bp.z = g.position.z; }
+    else botPos.set(bot.key, new THREE.Vector3(g.position.x, 0, g.position.z));
   });
   const dot = status === 'Working' ? '#34d399' : status === 'Walking' ? '#38bdf8' : '#fbbf24';
   return (
@@ -292,7 +284,9 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
     const skin = new THREE.Color(info.c);
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    const cullCenter = box.getCenter(new THREE.Vector3());
+    const cullRadius = (box.getSize(new THREE.Vector3()).length() / 2) * 1.6;
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = true; if (o.geometry && !o.geometry.boundingSphere) o.geometry.boundingSphere = new THREE.Sphere(cullCenter, cullRadius); const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
     return m;
   }, [scene, info.c]);
   const root = useRef<THREE.Group>(null);
@@ -371,29 +365,83 @@ export function useOfficeBrand(): OfficeBrand {
   return brand;
 }
 
-export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent, screenRuns, onPages }: {
+/* Theater canvas helpers — the Agents tab's glass-widget look, drawn. */
+function glassCard(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r = 20) {
+  g.beginPath(); g.roundRect(x, y, w, h, r);
+  g.fillStyle = 'rgba(255,255,255,.055)'; g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1.5; g.stroke();
+}
+function truncToWidth(g: CanvasRenderingContext2D, text: string, maxW: number): string {
+  const t = String(text || '');
+  if (g.measureText(t).width <= maxW) return t;
+  let lo = 0, hi = t.length;
+  while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (g.measureText(`${t.slice(0, mid)}…`).width <= maxW) lo = mid; else hi = mid - 1; }
+  return `${t.slice(0, lo)}…`;
+}
+export type BoardRow = { bot: OfficeBot; working: boolean; current: string; queued: number; done: number };
+
+export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent, screenRuns, board, screenQueue, onPages }: {
   source: OfficeTheater;
   screenBot: OfficeBot | null; screenLink: BotLink; screenAgent: any; screenRuns: any[];
+  board: BoardRow[]; screenQueue: any[];
   onPages: (n: number) => void;
 }) {
   const texSrc = source && source.kind !== 'dashboard' ? (source as TheaterSource) : null;
   const { tex, pages } = useSourceTexture(texSrc);
   useEffect(() => { onPages(pages); }, [pages]); // eslint-disable-line
   const brand = useOfficeBrand();
-  const idle = useMemo(() => {
+  /* DEFAULT theater face (founder directive 2026-10-25): a board of ALL
+   * agents' tasks and queues, in the Agents tab's glass style, until the
+   * user takes over and presents something else. */
+  const boardTex = useMemo(() => {
     const c = document.createElement('canvas'); c.width = 1600; c.height = 600;
-    const g = c.getContext('2d')!; g.fillStyle = '#0d1117'; g.fillRect(0, 0, 1600, 600);
-    g.fillStyle = '#e6edf3'; g.textAlign = 'center';
-    const title = `${brand.name} Theater`;
-    let size = 76; g.font = `600 ${size}px sans-serif`;
-    while (g.measureText(title).width > 1460 && size > 30) { size -= 4; g.font = `600 ${size}px sans-serif`; }
-    g.fillText(title, 800, 282); g.font = '30px sans-serif'; g.fillStyle = '#8b949e';
-    g.fillText('Floor 100 · New York — share a screen, camera, document or AI dashboard here', 800, 344);
+    const g = c.getContext('2d')!;
+    const grad = g.createLinearGradient(0, 0, 0, 600); grad.addColorStop(0, '#08131f'); grad.addColorStop(1, '#050b14');
+    g.fillStyle = grad; g.fillRect(0, 0, 1600, 600);
+    const strip = g.createLinearGradient(0, 0, 1600, 0); strip.addColorStop(0, '#22d3ee'); strip.addColorStop(1, '#34d399');
+    g.fillStyle = strip; g.fillRect(0, 0, 1600, 6);
+    g.textAlign = 'left'; g.fillStyle = '#eef4ff'; g.font = '700 34px system-ui, sans-serif';
+    g.fillText('Team board', 48, 60);
+    g.font = '400 21px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.55)';
+    g.fillText('All agents · tasks & queue', 48, 92);
+    g.textAlign = 'right'; g.font = '600 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.5)';
+    g.fillText(String(brand.name || '').toUpperCase().slice(0, 40), 1552, 56);
+    g.textAlign = 'left';
+    const cols = 5, cw = 288, ch = 104, gx = 16, gy = 12, x0 = 48, y0 = 116;
+    board.slice(0, 20).forEach((row, i) => {
+      const x = x0 + (i % cols) * (cw + gx), y = y0 + Math.floor(i / cols) * (ch + gy);
+      glassCard(g, x, y, cw, ch, 18);
+      g.beginPath(); g.arc(x + 24, y + 27, 8, 0, Math.PI * 2); g.fillStyle = row.bot.tint; g.fill();
+      g.font = '600 24px system-ui, sans-serif'; g.fillStyle = '#eef4ff';
+      g.fillText(truncToWidth(g, row.bot.name, cw - 110), x + 42, y + 35);
+      if (row.queued > 0) {
+        g.beginPath(); g.roundRect(x + cw - 56, y + 13, 44, 27, 13);
+        g.fillStyle = 'rgba(251,191,36,.16)'; g.fill(); g.strokeStyle = 'rgba(251,191,36,.55)'; g.lineWidth = 1.2; g.stroke();
+        g.font = '600 17px system-ui, sans-serif'; g.fillStyle = '#fbbf24'; g.textAlign = 'center';
+        g.fillText(`+${row.queued}`, x + cw - 34, y + 32); g.textAlign = 'left';
+      }
+      if (row.working) {
+        g.beginPath(); g.arc(x + 24, y + 58, 5, 0, Math.PI * 2); g.fillStyle = '#34d399'; g.fill();
+        g.font = '600 16px system-ui, sans-serif'; g.fillStyle = '#34d399'; g.fillText('WORKING', x + 37, y + 63);
+      } else {
+        g.font = '600 16px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.4)'; g.fillText('IDLE', x + 19, y + 63);
+      }
+      if (row.done > 0) {
+        g.font = '500 16px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.5)'; g.textAlign = 'right';
+        g.fillText(`✓ ${row.done}`, x + cw - 14, y + 63); g.textAlign = 'left';
+      }
+      g.font = '400 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.82)';
+      g.fillText(truncToWidth(g, row.current, cw - 36), x + 18, y + 90);
+    });
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-  }, [brand]);
+  }, [board, brand]);
+  useEffect(() => () => { boardTex?.dispose(); }, [boardTex]);
   const isDash = source?.kind === 'dashboard';
   /* Dashboards are drawn INTO the screen as a texture (founder directive
    * 2026-10-25) — no floating widget in front of the glass. */
+  /* An agent on the theater = its task ROADMAP (founder directive
+   * 2026-10-25): queued → in progress → done as glass cards in the
+   * Agents tab style, task titles only — very little text. */
   const dashTex = useMemo(() => {
     if (!isDash || !screenBot) return null;
     const c = document.createElement('canvas'); c.width = 1600; c.height = 600;
@@ -401,51 +449,78 @@ export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent
     const grad = g.createLinearGradient(0, 0, 0, 600); grad.addColorStop(0, '#08131f'); grad.addColorStop(1, '#050b14');
     g.fillStyle = grad; g.fillRect(0, 0, 1600, 600);
     g.fillStyle = screenBot.tint; g.fillRect(0, 0, 1600, 6);
-    g.beginPath(); g.arc(64, 66, 20, 0, Math.PI * 2); g.fillStyle = screenBot.tint; g.fill();
-    g.fillStyle = '#eef4ff'; g.font = '700 52px system-ui, sans-serif'; g.textAlign = 'left';
-    g.fillText(screenBot.name, 104, 84);
-    const nameW = g.measureText(screenBot.name).width;
-    g.font = '400 27px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.72)';
-    const duty = screenBot.duty.length > 50 ? `${screenBot.duty.slice(0, 49)}…` : screenBot.duty;
-    g.fillText(duty, 104 + nameW + 22, 84);
-    g.textAlign = 'right'; g.font = '600 21px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.5)';
-    g.fillText(`${brand.name} · AGENT DASHBOARD`.toUpperCase().slice(0, 46), 1552, 60);
+    g.beginPath(); g.arc(62, 60, 17, 0, Math.PI * 2); g.fillStyle = screenBot.tint; g.fill();
+    g.fillStyle = '#eef4ff'; g.font = '700 46px system-ui, sans-serif'; g.textAlign = 'left';
+    g.fillText(truncToWidth(g, screenBot.name, 700), 96, 76);
+    g.textAlign = 'right'; g.font = '600 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.5)';
+    g.fillText(`${brand.name} · ROADMAP`.toUpperCase().slice(0, 44), 1552, 66);
     g.textAlign = 'left';
-    g.font = '400 26px system-ui, sans-serif'; g.fillStyle = screenAgent ? '#34d399' : 'rgba(230,240,255,.6)';
-    g.fillText(screenAgent ? `Powered by AI — ${screenAgent.name}` : 'Agent dashboard — live from the Agents tab', 48, 138);
-    g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(48, 158, 1504, 2);
-    g.font = '600 19px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.55)';
-    g.fillText('L A T E S T   J O B S', 48, 196);
-    const wrap1 = (text: string, max: number) => { const words = String(text).split(/\s+/); let cur = ''; for (const w of words) { if ((`${cur} ${w}`).trim().length > max) break; cur = (`${cur} ${w}`).trim(); } return cur.length < String(text).length ? `${cur}…` : cur; };
-    let y = 238;
-    if (!screenRuns.length) {
-      g.font = '400 26px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.75)';
-      g.fillText(`No jobs yet — click ${screenBot.name} in the office and give it a task.`, 48, y + 8);
-    }
-    for (const r of screenRuns.slice(0, 3)) {
-      const ok = r.status === 'ok'; const col = ok ? '#34d399' : r.status === 'error' ? '#f87171' : '#fbbf24';
-      g.beginPath(); g.arc(58, y - 8, 9, 0, Math.PI * 2); g.fillStyle = col; g.fill();
-      g.font = '600 21px system-ui, sans-serif'; g.fillStyle = col;
-      g.fillText(ok ? 'DONE' : String(r.status || '').toUpperCase(), 78, y);
-      g.font = '400 21px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.55)'; g.textAlign = 'right';
-      g.fillText(new Date(r.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }), 1552, y);
-      g.textAlign = 'left';
-      g.font = '500 25px system-ui, sans-serif'; g.fillStyle = '#eef4ff';
-      const inp = String(r.input || 'Task'); g.fillText(inp.length > 88 ? `${inp.slice(0, 87)}…` : inp, 78, y + 34);
-      if (r.output) { g.font = '400 23px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.7)'; g.fillText(wrap1(String(r.output), 96), 78, y + 64); }
-      y += 96;
-    }
-    g.font = '400 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.45)';
-    g.fillText('Startup Factory Hub · Floor 100 · Live from the Agents tab', 48, 566);
+    const running = screenRuns.filter((r: any) => r.status !== 'ok' && r.status !== 'error');
+    const doneRuns = screenRuns.filter((r: any) => r.status === 'ok' || r.status === 'error');
+    const lanes: { title: string; count: number; items: { text: string; color: string }[] }[] = [
+      { title: 'Q U E U E D', count: screenQueue.length, items: screenQueue.map((i: any) => ({ text: String(i.message || 'Task'), color: '#fbbf24' })) },
+      { title: 'I N   P R O G R E S S', count: running.length, items: running.map((r: any) => ({ text: String(r.input || 'Task'), color: '#38bdf8' })) },
+      { title: 'D O N E', count: doneRuns.length, items: doneRuns.map((r: any) => ({ text: String(r.input || 'Task'), color: r.status === 'ok' ? '#34d399' : '#f87171' })) },
+    ];
+    const cw = 472, chh = 392, y0 = 118, xs = [48, 564, 1080];
+    lanes.forEach((lane, li) => {
+      const x = xs[li];
+      glassCard(g, x, y0, cw, chh, 22);
+      g.font = '600 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.6)';
+      g.fillText(lane.title, x + 28, y0 + 44);
+      g.font = '700 52px system-ui, sans-serif'; g.fillStyle = '#eef4ff'; g.textAlign = 'right';
+      g.fillText(String(lane.count), x + cw - 26, y0 + 58); g.textAlign = 'left';
+      let iy = y0 + 108;
+      if (!lane.items.length) {
+        g.font = '400 26px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.35)';
+        g.fillText('—', x + 28, iy);
+      }
+      for (const it of lane.items.slice(0, 4)) {
+        g.beginPath(); g.arc(x + 34, iy - 8, 7, 0, Math.PI * 2); g.fillStyle = it.color; g.fill();
+        g.font = '500 25px system-ui, sans-serif'; g.fillStyle = '#eef4ff';
+        g.fillText(truncToWidth(g, it.text, cw - 84), x + 54, iy);
+        iy += 64;
+      }
+      if (li < 2) {
+        g.font = '400 62px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.35)'; g.textAlign = 'center';
+        g.fillText('›', xs[li] + cw + 22, y0 + chh / 2 + 22); g.textAlign = 'left';
+      }
+    });
+    g.font = '400 19px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.4)';
+    g.fillText(`${brand.name} · Floor 100`, 48, 566);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-  }, [isDash, screenBot, screenAgent, screenRuns, brand]);
+  }, [isDash, screenBot, screenRuns, screenQueue, brand]);
   useEffect(() => () => { dashTex?.dispose(); }, [dashTex]);
+  /* Aspect-correct fit (founder directive 2026-10-25: the screen DEFORMED
+   * content): the texture keeps its own aspect and letterboxes inside the
+   * bezel instead of stretching to the glass. Video dimensions arrive
+   * async, so they are tracked in state. */
+  const [vidAsp, setVidAsp] = useState(0);
+  useEffect(() => {
+    setVidAsp(0);
+    if (!texSrc || texSrc.kind !== 'video') return;
+    const v = texSrc.el;
+    const upd = () => { if (v.videoWidth && v.videoHeight) setVidAsp(v.videoWidth / v.videoHeight); };
+    upd();
+    v.addEventListener('loadeddata', upd); v.addEventListener('resize', upd);
+    return () => { v.removeEventListener('loadeddata', upd); v.removeEventListener('resize', upd); };
+  }, [texSrc]);
+  const activeTex = isDash ? (dashTex || boardTex) : source ? (tex || boardTex) : boardTex;
+  const aspect = (() => {
+    if (vidAsp && source && source.kind !== 'dashboard') return vidAsp;
+    const img: any = (activeTex as any)?.image;
+    const w = img?.videoWidth || img?.width, h = img?.videoHeight || img?.height;
+    return w && h ? w / h : 1600 / 600;
+  })();
+  const SCREEN_A = 15.35 / 5.75;
+  const fitSx = aspect < SCREEN_A ? aspect / SCREEN_A : 1;
+  const fitSy = aspect < SCREEN_A ? 1 : SCREEN_A / aspect;
   return (
     <group position={[0, 3.6, -15.55]}>
       <mesh position={[0, 0, -0.16]}><boxGeometry args={[15.9, 6.2, 0.18]} /><meshStandardMaterial color="#14171c" /></mesh>
-      <mesh>
+      <mesh scale={[fitSx, fitSy, 1]}>
         <planeGeometry args={[15.35, 5.75]} />
-        <meshBasicMaterial map={isDash ? (dashTex || idle) : (tex || idle)} toneMapped={false} />
+        <meshBasicMaterial map={activeTex} toneMapped={false} />
       </mesh>
       {source && !isDash && (
         <Html position={[0, -3.85, 0.2]} center distanceFactor={18} style={{ pointerEvents: 'none' }}>
@@ -528,9 +603,13 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
   const [msgs, setMsgs] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  // The chat is ISOLATED full-screen (founder direction): the task pipeline
+  // and the rest of the Agents tab live behind the Tasks button, never
+  // stacked into the chat.
+  const [view, setView] = useState<'chat' | 'tasks'>('chat');
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { setMsgs([]); setInput(''); }, [bot.key]);
-  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+  useEffect(() => { setMsgs([]); setInput(''); setView('chat'); }, [bot.key]);
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy, view]);
   const send = async () => {
     const text = input.trim();
     if (!text || busy || !agentId) return;
@@ -546,48 +625,77 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
     }
     setBusy(false);
   };
+  if (view === 'tasks') {
+    return (
+      <div className="flex h-full w-full min-w-0 flex-col bg-background text-foreground">
+        <style>{GLASS_CSS}</style>
+        <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-3">
+          <button onClick={() => setView('chat')} className="flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"><ChevronLeft className="h-4 w-4" />Chat</button>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold">Tasks — {linkedAgent?.name || bot.name}</div>
+            <div className="truncate text-[11px] text-muted-foreground">Queue work, watch it run, open finished results</div>
+          </div>
+        </div>
+        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y px-4 py-4">
+          {signedIn && agentId ? (
+            <Suspense fallback={<p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Loading the pipeline…</p>}>
+              <TaskPipeline agents={agents} onRunComplete={() => {}} />
+            </Suspense>
+          ) : (
+            <p className="text-sm text-muted-foreground">{signedIn ? `Connecting ${bot.name} to its agent…` : `Sign in to hand ${bot.name} tasks.`}</p>
+          )}
+        </div>
+        <div className="shrink-0 border-t border-border bg-background/80 px-4 py-3 backdrop-blur">
+          <button onClick={onOpenConsole} className={`${GRADIENT_BUTTON} flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold`}>
+            <LayoutDashboard className="h-4 w-4" />See the entire Agents tab
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="flex h-full flex-col bg-background text-foreground">
+    <div className="flex h-full w-full min-w-0 flex-col bg-background text-foreground">
       <style>{GLASS_CSS}</style>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 space-y-4">
+      <div className="shrink-0 px-4 pt-4">
         <div className={`${GLASS_PANEL} p-4 ca-fadeup`}>
           <div className={FIELD_LABEL}>This agent</div>
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <span className="h-3 w-3 rounded-full shrink-0" style={{ background: bot.tint }} />
-            <span className="font-semibold truncate">{linkedAgent?.name || bot.name}</span>
+            <span className="min-w-0 truncate font-semibold">{linkedAgent?.name || bot.name}</span>
             <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${working || busy ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{working || busy ? 'On a job now' : 'Idle'}</span>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{bot.duty}</p>
+          <p className="mt-1 break-words text-sm text-muted-foreground">{bot.duty}</p>
           {!signedIn && <p className="mt-2 text-xs text-muted-foreground">Sign in to chat with {bot.name} and hand it tasks.</p>}
           {signedIn && !agentId && <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />Connecting {bot.name}…</p>}
         </div>
-        <div className="space-y-3 px-1">
-          {msgs.length === 0 && <div className="text-sm text-muted-foreground leading-relaxed">Chat with {bot.name} — give it a task below and it runs right here. Line up more work in the pipeline underneath, or open the entire Agents tab for everything else.</div>}
+      </div>
+      <div ref={scrollRef} className="min-w-0 flex-1 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y px-4 py-4">
+        <div className="space-y-3">
+          {msgs.length === 0 && <div className="text-sm text-muted-foreground leading-relaxed">Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</div>}
           {msgs.map((m, i) => (
             m.role === 'user' ? (
-              <div key={i} className="ml-auto w-fit max-w-[88%] rounded-[1.4rem] rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-2.5 text-sm leading-relaxed text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]">{m.content}</div>
+              <div key={i} className="ml-auto w-fit min-w-0 max-w-[88%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-2.5 text-sm leading-relaxed text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]">{m.content}</div>
             ) : (
-              <div key={i} className={`${GLASS_PANEL} w-fit max-w-[94%] rounded-[1.4rem] rounded-bl-md px-4 py-3 text-sm leading-relaxed`}>
-                <div className="[&>p]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:font-mono"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+              <div key={i} className={`${GLASS_PANEL} w-fit min-w-0 max-w-[94%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-bl-md px-4 py-3 text-sm leading-relaxed`}>
+                <div className="[&>p]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:font-mono [&_pre]:overflow-x-auto"><ReactMarkdown>{m.content}</ReactMarkdown></div>
               </div>
             )
           ))}
           {busy && <div className="flex items-center gap-2 text-xs text-muted-foreground px-1"><Loader2 className="w-4 h-4 animate-spin" />{bot.name} is working…</div>}
         </div>
-        {signedIn && agentId && <TaskPipeline agents={agents} onRunComplete={() => {}} />}
       </div>
-      <div className="shrink-0 border-t border-border bg-background/80 px-4 py-3 space-y-2.5 backdrop-blur">
-        {signedIn && agentId ? (
-          <div className="flex gap-2">
-            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/60`} />
-            <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} px-4 py-2.5 disabled:opacity-50`} aria-label="Send task"><Send className="h-4 w-4" /></button>
-          </div>
-        ) : signedIn ? (
-          <div className="px-1 text-xs text-muted-foreground">Connecting {bot.name} to its agent…</div>
-        ) : null}
-        <button onClick={onOpenConsole} className={`${GRADIENT_BUTTON} flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold`}>
-          <LayoutDashboard className="h-4 w-4" />See the entire Agents tab
-        </button>
+      <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="flex items-center gap-2">
+          {signedIn && agentId ? (
+            <>
+              <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/60`} />
+              <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} shrink-0 px-4 py-2.5 disabled:opacity-50`} aria-label="Send task"><Send className="h-4 w-4" /></button>
+            </>
+          ) : (
+            <div className="min-w-0 flex-1 px-1 py-2 text-xs text-muted-foreground">{signedIn ? `Connecting ${bot.name} to its agent…` : `Sign in to chat with ${bot.name}.`}</div>
+          )}
+          <button onClick={() => setView('tasks')} className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 text-sm font-medium hover:bg-muted" aria-label="Open tasks and pipeline"><ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Tasks</span></button>
+        </div>
       </div>
     </div>
   );
@@ -685,6 +793,11 @@ export default function OfficePage() {
   const [pdfPages, setPdfPages] = useState(0);
   const [theaterNote, setTheaterNote] = useState('');
   const [screenRuns, setScreenRuns] = useState<any[]>([]);
+  /* Theater board data: EVERY agent's recent runs + the local task queue,
+   * polled together — the theater's default face is the all-agents board,
+   * and an agent's theater view is its task roadmap. */
+  const [allRuns, setAllRuns] = useState<any[]>([]);
+  const [queueItems, setQueueItems] = useState<any[]>([]);
   const roomRef = useRef<Room | null>(null);
   const camTrackRef = useRef<any>(null);
   const docRef = useRef<{ kind: 'image' | 'pdf'; url: string; name: string; page: number } | null>(null);
@@ -879,6 +992,33 @@ export default function OfficePage() {
     if (!screenBot || !screenLink.aiOn || !screenLink.agentId) { setScreenRuns([]); return; }
     supabase.from('call_agent_runs').select('id, input, output, status, created_at').eq('agent_id', screenLink.agentId).order('created_at', { ascending: false }).limit(5).then(({ data }) => setScreenRuns(data || []));
   }, [screenBot?.key, screenLink.agentId, screenLink.aiOn]);
+  /* Poll all runs + the task queue for the theater board / roadmaps. */
+  useEffect(() => {
+    if (!signedIn) return;
+    let off = false;
+    const tick = async () => {
+      try { const raw = localStorage.getItem('sfh:agents-task-queue:v1'); const q = raw ? JSON.parse(raw) : []; if (!off && Array.isArray(q)) setQueueItems(q); } catch { /* queue unreadable */ }
+      const { data } = await supabase.from('call_agent_runs').select('id, agent_id, input, status, created_at').order('created_at', { ascending: false }).limit(80);
+      if (!off && data) setAllRuns(data);
+    };
+    void tick();
+    const iv = setInterval(tick, 20_000);
+    return () => { off = true; clearInterval(iv); };
+  }, [signedIn]);
+  const screenQueue = useMemo(() => (screenLink.agentId ? queueItems.filter((i: any) => i.agentId === screenLink.agentId) : []), [queueItems, screenLink.agentId]);
+  /* The green hand button (mobile controls) fires inputPulse.interact —
+   * it had NO consumer in the office, so it did nothing. Now it opens the
+   * nearest agent, same as tapping the proximity button. */
+  const nearBotRef = useRef<OfficeBot | null>(null);
+  useEffect(() => {
+    const iv = setInterval(() => {
+      if (inputPulse.interact) {
+        inputPulse.interact = false;
+        if (nearBotRef.current) setOpenBot(nearBotRef.current);
+      }
+    }, 120);
+    return () => clearInterval(iv);
+  }, []);
 
   /* ---- Agents / dashboards ---- */
   // Session comes from the LOCAL session + the auth-state listener, never a
@@ -916,6 +1056,7 @@ export default function OfficePage() {
   const saveLink = (patch: BotLink) => { if (openBot) saveLinkFor(openBot.key, patch); };
   const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
   const nearBot = nearKey ? OFFICE_BOTS.find((b) => b.key === nearKey) : null;
+  nearBotRef.current = (nearBot as OfficeBot | null) ?? null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
   /* ---- Who is on a job right now: a bot whose linked agent produced a run
    * in the last 3 minutes is pinned to its desk (sitting + typing). ---- */
@@ -969,6 +1110,19 @@ export default function OfficePage() {
     const iv = setInterval(tick, 25_000);
     return () => { off = true; clearInterval(iv); };
   }, []);
+  /* One row per agent for the theater's default team board. */
+  const boardRows = useMemo(() => OFFICE_BOTS.map((bot) => {
+    const l = links[bot.key] || {};
+    const runs = l.agentId ? allRuns.filter((r: any) => r.agent_id === l.agentId) : [];
+    const q = l.agentId ? queueItems.filter((i: any) => i.agentId === l.agentId) : [];
+    return {
+      bot,
+      working: workingKeys.has(bot.key),
+      current: String(runs[0]?.input || q[0]?.message || ''),
+      queued: q.length,
+      done: runs.filter((r: any) => r.status === 'ok').length,
+    };
+  }), [links, allRuns, queueItems, workingKeys]);
   useEffect(() => { if (!scene) return; const t = setTimeout(() => setIntroGone(true), 2100); return () => clearTimeout(t); }, [scene]);
   const uiGuard = (e: any) => !!(e.target as HTMLElement)?.closest?.('[data-office-ui]');
 
@@ -999,7 +1153,7 @@ export default function OfficePage() {
             <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
-          {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
+          {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} board={boardRows} screenQueue={screenQueue} onPages={setPdfPages} />}
           {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
@@ -1016,7 +1170,7 @@ export default function OfficePage() {
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           {outdated && scene && (
             <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
-              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (floor 100 · skyscraper view · big theater)'}
+              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (clean windows · team-board theater)'}
             </button>
           )}
           {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
@@ -1122,7 +1276,7 @@ export default function OfficePage() {
 
       {/* Agents console — the dashboard Agents tab (2D Muse AI console), inside the office */}
       {openBot && (
-        <div data-office-ui className="absolute z-30 inset-0 sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[min(940px,100vw)] bg-background sm:border-l border-border shadow-2xl flex flex-col">
+        <div data-office-ui className="absolute z-30 inset-0 w-full min-w-0 overflow-hidden bg-background shadow-2xl flex flex-col">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
             <span className="w-9 h-9 rounded-full shrink-0 border border-border" style={{ background: openBot.tint }} />
             <div className="mr-auto min-w-0">
@@ -1137,11 +1291,11 @@ export default function OfficePage() {
             <button onClick={() => { setOpenBot(null); void refreshAgents(); }} className="p-1.5 rounded-full hover:bg-muted" aria-label="Close agents"><X className="w-5 h-5" /></button>
           </div>
           {panelView === 'genius' ? (
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 min-w-0">
               <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} />
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+            <div className="flex-1 min-w-0 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y">
               {signedIn ? (
                 <Suspense fallback={<div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading the Agents console…</div>}>
                   <SFHCallAgents key={agentsKey} botLink={botLink} />
