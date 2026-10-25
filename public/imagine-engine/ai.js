@@ -26,7 +26,7 @@
   function ieBearer(c) { if (c && c.platform) { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); if (t && t.access_token) return t.access_token; } catch (e) {} } return c.key; }
   var FN = "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/imagine-ai";
   var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
-  var LOGO = "/__l5e/assets-v1/78c75160-d976-42d1-8c63-d01bef660475/imagine-engine-logo.png";
+  var LOGO = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/imagine-engine-logo.png";
   var STORE = "imagine-ai-chat-v1";
   var messages = [];
   try { messages = JSON.parse(localStorage.getItem(STORE) || "[]"); } catch (e) {}

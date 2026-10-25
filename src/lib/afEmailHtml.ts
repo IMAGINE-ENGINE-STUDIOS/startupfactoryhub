@@ -9,7 +9,7 @@ export const AF_COHORT_ID = "21bbf578-1347-43f8-bc56-d31fbd4af03d";
 export const AF_APPLY_URL = `https://startupfactoryhub.com/cohorts/${AF_COHORT_ID}/apply?_v=mtneb0jw`;
 export const AF_PROGRAM_URL = "https://startupfactoryhub.com/accelerated-fundraising";
 export const AF_BANNER_GIF_URL =
-  "https://startupfactoryhub.com/__l5e/assets-v1/a2887fc7-2d4b-4241-983e-48a1271993b1/accelerated-fundraising-banner.gif";
+  "https://startupfactoryhub.comhttps://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/accelerated-fundraising-banner.gif";
 
 const esc = (s: unknown) =>
   String(s ?? "")
