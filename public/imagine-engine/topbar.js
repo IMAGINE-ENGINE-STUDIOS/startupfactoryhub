@@ -64,6 +64,32 @@
     document.body.appendChild(pin);
     apply();
   }
+  /* ---------- Mobile header: the top bar must never overlap itself ----------
+     On narrow screens the bundle's fixed header row keeps every group
+     (logo, panel button, integration logos, undo/redo, Record, Run) on one
+     line until they crush into each other. Fix: the header and the history
+     slot become horizontally swipeable strips — every button keeps its real
+     size and stays tappable, nothing overlaps, desktop is untouched. */
+  var mcss = document.createElement("style");
+  mcss.textContent = "@media (max-width: 900px){" +
+    ".ie-hdr{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}" +
+    ".ie-hdr::-webkit-scrollbar{display:none}" +
+    ".ie-hdr>*{flex:0 0 auto!important}" +
+    "#ie-hist-slot{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:58vw}" +
+    "#ie-hist-slot::-webkit-scrollbar{display:none}" +
+    "#ie-hist-slot>*{flex:0 0 auto!important}" +
+    "#ie-rp-btn{font-size:10px;padding:0 7px;height:26px}}" ;
+  document.head.appendChild(mcss);
+  setInterval(function () {
+    var slot = document.getElementById("ie-hist-slot"); if (!slot) return;
+    if (!slot.dataset.ieHdr) {
+      slot.dataset.ieHdr = "1";
+      var hdr = slot.closest("header");
+      if (!hdr) { var p = slot; for (var i = 0; i < 5 && p; i++) { p = p.parentElement; if (p && p.getBoundingClientRect().width >= window.innerWidth * 0.95) { hdr = p; break; } } }
+      if (hdr) hdr.classList.add("ie-hdr");
+    }
+  }, 700);
+
   /* clicking the canvas closes the drop menu (clicks inside the panel keep it open) */
   document.addEventListener("mousedown", function (e) {
     if (!document.body.classList.contains("ie-rp-open")) return;

@@ -268,8 +268,8 @@ export function loadOfficeBrand(): Promise<OfficeBrand> {
   if (!brandPromise) {
     brandPromise = (async () => {
       try {
-        const { data: au } = await supabase.auth.getUser();
-        const uid = au?.user?.id;
+        const { data: ss } = await supabase.auth.getSession();
+        const uid = ss.session?.user?.id;
         if (!uid) { cachedBrand = SFH_BRAND; return cachedBrand; }
         const [{ data: comp }, { data: prof }] = await Promise.all([
           supabase.from('companies').select('name, logo_url').eq('user_id', uid).order('created_at', { ascending: true }).limit(1).maybeSingle(),
@@ -623,14 +623,22 @@ export default function OfficePage() {
   }, [screenBot?.key, screenLink.agentId, screenLink.aiOn]);
 
   /* ---- Agents / dashboards ---- */
+  // Session comes from the LOCAL session + the auth-state listener, never a
+  // one-shot getUser(): that network validation can return null during the
+  // page-load token refresh and used to strand signed-in users on the
+  // "Sign in" note forever.
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
-      setSignedIn(true);
-      const { data: a } = await supabase.rpc('has_role', { _user_id: data.user.id, _role: 'admin' });
-      setIsAdmin(!!a);
-      try { const r = await callAgentsApi({ action: 'list' }); setAgents(r.agents || []); } catch {}
-    });
+    let live = true;
+    const apply = async (uid: string | null) => {
+      if (!live) return;
+      setSignedIn(!!uid);
+      if (!uid) { setIsAdmin(false); return; }
+      try { const { data: a } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' }); if (live) setIsAdmin(!!a); } catch { /* role probe is best-effort */ }
+      try { const r = await callAgentsApi({ action: 'list' }); if (live) setAgents(r.agents || []); } catch { /* list retries on open */ }
+    };
+    supabase.auth.getSession().then(({ data }) => apply(data.session?.user?.id ?? null)).catch(() => {});
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => { void apply(session?.user?.id ?? null); });
+    return () => { live = false; sub.subscription.unsubscribe(); };
   }, []);
 
   const link = openBot ? links[openBot.key] || {} : {};
