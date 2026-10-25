@@ -17,7 +17,7 @@ import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-t
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, Briefcase, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
@@ -27,7 +27,9 @@ const TaskPipeline = lazy(() => import('@/components/call-agents/TaskPipeline'))
 import { inputPulse } from '@/imagine-studio/components/level/locomotion/locomotionState';
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
+import { shiftEngine, TEAM, MANAGER_PROMPT } from '@/imagine-studio/lib/shiftEngine';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_MANAGER, MANAGER_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
@@ -752,6 +754,7 @@ export default function OfficePage() {
   }, [scene]);
 
   const [openBot, setOpenBot] = useState<OfficeBot | null>(null);
+  const [shiftOpen, setShiftOpen] = useState(false);
   const [panelView, setPanelView] = useState<'genius' | 'console'>('genius');
   useEffect(() => { setPanelView('genius'); }, [openBot?.key]);
   const [nearKey, setNearKey] = useState<string | null>(null);
@@ -1075,7 +1078,8 @@ export default function OfficePage() {
     if (autoBindTried.current.has(bot.key)) return undefined;
     autoBindTried.current.add(bot.key);
     try {
-      const r = await callAgentsApi({ action: 'save', name: bot.name, description: bot.duty, system_prompt: `You are ${bot.name}, an AI agent working in the Startup Factory Hub office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`, model: 'llama-3.3-70b-versatile', tools: [] });
+      const persona = bot.key === 'manager' ? MANAGER_PROMPT : (TEAM.find((t) => t.key === bot.key)?.prompt || `You are ${bot.name}, an AI agent working in the Startup Factory Hub office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`);
+      const r = await callAgentsApi({ action: 'save', name: bot.name, description: bot.duty, system_prompt: persona, model: 'llama-3.3-70b-versatile', tools: [] });
       const created = r?.agent;
       if (created?.id) {
         setAgents((cur) => (cur.some((a) => a.id === created.id) ? cur : [...cur, created]));
@@ -1085,6 +1089,18 @@ export default function OfficePage() {
     } catch { autoBindTried.current.delete(bot.key); /* a later open retries */ }
     return undefined;
   };
+  /* Shift Mode: the engine resolves each specialist (and the Manager) to a
+   * call-agent through the same auto-bind the bot panels use. */
+  useEffect(() => {
+    shiftEngine.bind({
+      resolveAgentId: async (botKey: string) => {
+        const bot = botKey === 'manager' ? OFFICE_MANAGER : OFFICE_BOTS.find((b) => b.key === botKey);
+        if (!bot) return null;
+        const id = await ensureBotAgent(bot);
+        return id ?? null;
+      },
+    });
+  }, [agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!openBot || !signedIn || !agentsLoaded) return;
     if (!OFFICE_BOTS.some((b) => b.key === openBot.key)) return; // studio agent characters arrive pre-linked
@@ -1149,6 +1165,7 @@ export default function OfficePage() {
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
+          {scene && <OfficeBotCharacter bot={OFFICE_MANAGER} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
           {scene && agentChars.map((o) => (
             <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
           ))}
@@ -1307,6 +1324,12 @@ export default function OfficePage() {
           )}
         </div>
       )}
+
+      {/* Manager — Shift Control entry (also: walk up to the Manager in the room) */}
+      <button data-office-ui onClick={() => setShiftOpen(true)} className="absolute right-4 bottom-24 sm:bottom-6 z-20 flex items-center gap-2 rounded-full border border-[#FFD166]/60 bg-[#14100a]/85 px-4 py-2.5 text-xs font-semibold text-[#FFD166] shadow-lg backdrop-blur hover:bg-[#241a08]/90">
+        <Briefcase className="w-4 h-4" /> Manager · Shift
+      </button>
+      {shiftOpen && <ShiftPanel signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
 
       {/* Branded intro — the signed-in account's name + logo, not a fixed brand */}
       {!introGone && (

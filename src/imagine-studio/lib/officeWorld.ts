@@ -18,7 +18,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 4;
+export const OFFICE_SCENE_VERSION = 5;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
 /** The agent character body: the founder's OWN uploaded character
@@ -68,6 +68,20 @@ const ROSTER: [string, string][] = [
   ["Finance", "Tracks money, credits and payouts"],
   ["Support", "Answers users and resolves issues"],
 ];
+/** The Manager — a 21st character who runs the office (founder directive
+ * 2026-10-25): he takes the user's goals, plans the shift, assigns the
+ * specialists, and verifies their work (see lib/shiftEngine). He stands at
+ * the head of the room in front of the theater screen, facing the team —
+ * not a desk bot. Gold tint so he reads as leadership at a glance. */
+export const OFFICE_MANAGER: OfficeBot = {
+  key: "manager",
+  name: "Manager",
+  duty: "Runs the office — takes your goals, plans the shift, assigns the specialists and verifies their work.",
+  model: AGENT_MODEL_URL,
+  tint: "#FFD166",
+};
+export const MANAGER_HOME: [number, number, number] = [0, 0, -12.6];
+
 export const OFFICE_BOTS: OfficeBot[] = ROSTER.map(([name, duty], i) => ({
   key: name.toLowerCase(),
   name,
@@ -221,9 +235,14 @@ export function buildOfficeScene(): LevelScene {
       animationSpeed: 1, paused: false, crossfade: 0.25, playable: false, controlScheme: "both", cameraMode: "third", mobileJoystick: "auto",
     };
   });
+  const managerChar = {
+    id: "office_bot_manager", kind: "character", name: "Bot — Manager", url: AGENT_MODEL_URL, source: "Plaza character rigs",
+    position: MANAGER_HOME, rotation: [0, 0, 0], scale: [1, 1, 1], visible: true,
+    animationSpeed: 1, paused: false, crossfade: 0.25, playable: false, controlScheme: "both", cameraMode: "third", mobileJoystick: "auto",
+  };
   return {
     ...EMPTY_SCENE,
-    objects: [...o, ...characters] as any,
+    objects: [...o, ...characters, managerChar] as any,
     lights: [
       { id: "office_sun", name: "Sunlight", kind: "directional", position: [26, 34, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
       { id: "office_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.8 },
