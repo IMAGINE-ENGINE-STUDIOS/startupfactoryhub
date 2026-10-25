@@ -8,6 +8,8 @@
 import { DEFAULT_CHARACTER_URL, EMPTY_SCENE, newId, type LevelScene } from "@/imagine-studio/lib/levelTypes";
 import { createLocalLevel, getLocalLevel, listLocalLevels, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
 import { PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
+import { matchNamedWorld, type NamedWorld } from "@/imagine-studio/lib/worldSync";
+import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 
 export interface LocalProjectRecord {
   id: string;
@@ -32,10 +34,58 @@ function newProjectRecord(name: string): LocalProjectRecord {
   return { id: `proj_${crypto.randomUUID()}`, name: name.slice(0, 80) || "Untitled Project", description: null, defaultLevelId: null, created_at: now, updated_at: now };
 }
 
+/**
+ * The home project of a named-world level: every level of a building is
+ * ONE project (founder rule 2026-10-25 — the Startup Office project
+ * holds Floor 100, Floor 99 and any department floor; the Plaza is its
+ * own project). Draft backups belong to their world's project too, so
+ * they can never appear as separate "projects" again. Resolution is
+ * binding-first (resolveLevelWorld): a level's pinned route decides
+ * its home, never its display name alone. Returns null for ordinary
+ * user levels, whose own organization is never touched.
+ */
+function worldHome(l: LocalLevelRecord): { projectName: string; world: NamedWorld } | null {
+  const base = l.name.split(" — local draft")[0];
+  const w = resolveLevelWorld(l.id, l.name) ?? (base !== l.name ? matchNamedWorld(base) : null);
+  if (!w) return null;
+  return { projectName: w.building ?? w.name, world: w };
+}
+
 /** Wrap any level without a project (Plaza joins "Plaza District"). */
 function migrate(): LocalProjectRecord[] {
   let list = read();
   let changed = false;
+  // 1) Named-world levels (and their draft backups) always live in
+  // their world's ONE home project — including levels an older version
+  // filed into duplicate or draft-named projects. This repair is what
+  // stops the projects grid from growing a new card on every visit.
+  for (const l of listLocalLevels()) {
+    const home = worldHome(l);
+    if (!home) continue;
+    let p = list.find((x) => x.name === home.projectName);
+    if (!p) {
+      p = newProjectRecord(home.projectName);
+      p.created_at = l.created_at; p.updated_at = l.updated_at;
+      list = [p, ...list];
+      changed = true;
+    }
+    if ((l as any).projectId !== p.id) {
+      updateLocalLevel(l.id, { projectId: p.id } as any);
+      changed = true;
+    }
+  }
+  // 2) Each home project's start level: the world's top floor (or the
+  // Plaza level), never a draft backup when a real level exists.
+  for (const p of list) {
+    const mine = listLocalLevels().filter((l) => (l as any).projectId === p.id);
+    if (!mine.length) continue;
+    const worlds = mine.map((l) => ({ l, w: resolveLevelWorld(l.id, l.name) })).filter((x) => x.w);
+    if (!worlds.length) continue;
+    const top = worlds.sort((a, b) => (b.w!.floor ?? 0) - (a.w!.floor ?? 0))[0].l;
+    if (p.defaultLevelId !== top.id) { p.defaultLevelId = top.id; changed = true; }
+  }
+  // 3) Ordinary levels without a project keep the original behavior:
+  // each is wrapped into a project of its own.
   for (const l of listLocalLevels()) {
     if (l.projectId && list.some((p) => p.id === l.projectId)) continue;
     let p: LocalProjectRecord | undefined;
@@ -48,6 +98,11 @@ function migrate(): LocalProjectRecord[] {
     updateLocalLevel(l.id, { projectId: p.id } as any);
     changed = true;
   }
+  // 4) Draft-named projects the repair emptied are machine-made
+  // wrappers — remove them so the grid shows only real projects.
+  const used = new Set(listLocalLevels().map((l) => (l as any).projectId as string));
+  const kept = list.filter((p) => used.has(p.id) || !p.name.includes("— local draft"));
+  if (kept.length !== list.length) { list = kept; changed = true; }
   if (changed) write(list);
   return list;
 }

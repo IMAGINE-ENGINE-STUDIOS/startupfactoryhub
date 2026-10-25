@@ -5,7 +5,7 @@
 // /office plays the published version and each bot carries a live dashboard.
 import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
 import { DEFAULT_SKYBOX } from "@/imagine-studio/lib/skyboxes";
-import { createLocalLevel, ensurePlazaLevel as _ensure, getLocalLevel, listLocalLevels, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
+import { createLocalLevel, ensurePlazaLevel as _ensure, getLocalLevel, listLocalLevels, normLevelName, preserveLocalDraft, resolveWorldSyncLevel, setBoundWorldKey, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
 
 export const OFFICE_LEVEL_NAME = "Startup Office";
 /** The office level's name before the founder renamed the world
@@ -408,15 +408,19 @@ export async function fetchPublishedFloor99Scene(): Promise<LevelScene | null> {
  * Same rule as Floor 100 and the Plaza. */
 export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
   const publishedScene = stripRetiredBackground(await fetchPublishedFloor99Scene());
-  const existing = listLocalLevels().find((l) => l.name === FLOOR99_LEVEL_NAME);
-  if (!publishedScene) return existing ?? _ensure(buildFloor99Scene, FLOOR99_LEVEL_NAME);
-  if (!existing) return _ensure(() => publishedScene, FLOOR99_LEVEL_NAME);
+  // Binding-first identity (founder segregation rule 2026-10-25): the
+  // level pinned to "office99" is Floor 99 whatever it is named; a level
+  // bound to Floor 100 or the Plaza is never eligible here.
+  let existing = resolveWorldSyncLevel("office99", FLOOR99_LEVEL_NAME);
+  if (!existing) {
+    existing = _ensure(publishedScene ? () => publishedScene : buildFloor99Scene, FLOOR99_LEVEL_NAME);
+    setBoundWorldKey(existing.id, "office99");
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, "office99");
+  if (!publishedScene) return existing;
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
-    const backup = createLocalLevel(existing.scene);
-    updateLocalLevel(backup.id, {
-      name: `${FLOOR99_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
-      description: "Local edits preserved when the Floor 99 level was re-synced to the published version",
-    });
+    preserveLocalDraft(existing, FLOOR99_LEVEL_NAME, "Local edits preserved when the Floor 99 level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }
   return getLocalLevel(existing.id) ?? existing;
@@ -429,15 +433,17 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
 export async function syncDynamicFloorLevel(levelName: string, file: string): Promise<LocalLevelRecord> {
   const m = await fetchPublishedOfficeMeta(publishedWorldUrl(file));
   const publishedScene = stripRetiredBackground(m?.scene ?? null);
-  const existing = listLocalLevels().find((l) => l.name === levelName);
-  if (!publishedScene) return existing ?? _ensure(buildBareFloorScene, levelName);
-  if (!existing) return _ensure(() => publishedScene, levelName);
+  const key = `floor${file.match(/^floor(\d+)-world\.json$/)?.[1] ?? ""}`;
+  let existing = resolveWorldSyncLevel(key, levelName);
+  if (!existing) {
+    existing = _ensure(publishedScene ? () => publishedScene : buildBareFloorScene, levelName);
+    setBoundWorldKey(existing.id, key);
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, key);
+  if (!publishedScene) return existing;
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
-    const backup = createLocalLevel(existing.scene);
-    updateLocalLevel(backup.id, {
-      name: `${levelName} — local draft ${new Date().toISOString().slice(0, 10)}`,
-      description: "Local edits preserved when the floor level was re-synced to the published version",
-    });
+    preserveLocalDraft(existing, levelName, "Local edits preserved when the floor level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }
   return getLocalLevel(existing.id) ?? existing;
@@ -445,24 +451,27 @@ export async function syncDynamicFloorLevel(levelName: string, file: string): Pr
 
 export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
   const publishedScene = stripRetiredBackground(await fetchPublishedOfficeScene());
-  let existing = listLocalLevels().find((l) => l.name === OFFICE_LEVEL_NAME);
-  if (!existing) {
+  // Binding-first identity (founder segregation rule 2026-10-25): the
+  // level pinned to "office" is Floor 100 whatever it is named; a level
+  // bound to the Plaza or Floor 99 is never eligible here.
+  let existing = resolveWorldSyncLevel("office", OFFICE_LEVEL_NAME, [LEGACY_OFFICE_LEVEL_NAME]);
+  if (existing && normLevelName(existing.name) === normLevelName(LEGACY_OFFICE_LEVEL_NAME)) {
     // Rename migration: a level still carrying the old "Muse HQ" name IS
     // this level — rename it in place instead of seeding a duplicate.
-    const legacy = listLocalLevels().find((l) => l.name === LEGACY_OFFICE_LEVEL_NAME);
-    if (legacy) {
-      updateLocalLevel(legacy.id, { name: OFFICE_LEVEL_NAME });
-      existing = getLocalLevel(legacy.id) ?? legacy;
-    }
+    // (Only the legacy name is migrated; a user's own rename is kept —
+    // the binding, not the name, is the level's identity.)
+    updateLocalLevel(existing.id, { name: OFFICE_LEVEL_NAME });
+    existing = getLocalLevel(existing.id) ?? existing;
   }
-  if (!publishedScene) return existing ?? _ensure(buildOfficeScene, OFFICE_LEVEL_NAME);
-  if (!existing) return _ensure(() => publishedScene, OFFICE_LEVEL_NAME);
+  if (!existing) {
+    existing = _ensure(publishedScene ? () => publishedScene : buildOfficeScene, OFFICE_LEVEL_NAME);
+    setBoundWorldKey(existing.id, "office");
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, "office");
+  if (!publishedScene) return existing;
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
-    const backup = createLocalLevel(existing.scene);
-    updateLocalLevel(backup.id, {
-      name: `${OFFICE_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
-      description: "Local edits preserved when the Office level was re-synced to the published version",
-    });
+    preserveLocalDraft(existing, OFFICE_LEVEL_NAME, "Local edits preserved when the Office level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }
   return getLocalLevel(existing.id) ?? existing;

@@ -1,7 +1,7 @@
 // @ts-nocheck -- Imagine Studio v2
 // Plaza District as an editable 3D Studio level (mirrors the built-in /plaza world).
 import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
-import { createLocalLevel, ensurePlazaLevel, getLocalLevel, listLocalLevels, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
+import { createLocalLevel, ensurePlazaLevel, getLocalLevel, listLocalLevels, preserveLocalDraft, resolveWorldSyncLevel, setBoundWorldKey, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
 
 export const PLAZA_LEVEL_NAME = "Plaza District";
 /** Same bright daylight as the live /plaza game: sky/ground fill, no dark contact-shadow patch. */
@@ -52,15 +52,20 @@ const stableStringify = (v: any): string => {
  */
 export async function syncPlazaLevelToPublished(): Promise<LocalLevelRecord> {
   const publishedScene = await fetchPublishedPlazaScene();
-  const existing = listLocalLevels().find((l) => l.name === PLAZA_LEVEL_NAME);
-  if (!publishedScene) return existing ?? ensurePlazaLevel(buildPlazaScene, PLAZA_LEVEL_NAME);
-  if (!existing) return ensurePlazaLevel(() => publishedScene, PLAZA_LEVEL_NAME);
+  // Identity is binding-first (founder segregation rule 2026-10-25): the
+  // level pinned to "plaza" is the Plaza level whatever it is named, and
+  // a level bound to another world is never eligible — this sync can
+  // never overwrite the Office, or vice versa.
+  let existing = resolveWorldSyncLevel("plaza", PLAZA_LEVEL_NAME);
+  if (!existing) {
+    existing = ensurePlazaLevel(publishedScene ? () => publishedScene : buildPlazaScene, PLAZA_LEVEL_NAME);
+    setBoundWorldKey(existing.id, "plaza");
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, "plaza");
+  if (!publishedScene) return existing;
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
-    const backup = createLocalLevel(existing.scene);
-    updateLocalLevel(backup.id, {
-      name: `${PLAZA_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
-      description: "Local edits preserved when the Plaza District level was re-synced to the published version",
-    });
+    preserveLocalDraft(existing, PLAZA_LEVEL_NAME, "Local edits preserved when the Plaza District level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }
   return getLocalLevel(existing.id) ?? existing;

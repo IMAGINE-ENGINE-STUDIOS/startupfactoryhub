@@ -126,6 +126,100 @@ export function updateLocalLevel(id: string, patch: Partial<Omit<LocalLevelRecor
 export function deleteLocalLevel(id: string) {
   writeLocalLevels(readLocalLevels().filter((level) => level.id !== id));
 }
+
+/* ------------------------------------------------------------------ */
+/* Level → world bindings: the SINGLE store (key shared with            */
+/* lib/worldBindings, which builds its public API on these helpers).   */
+/* A binding is a level's pinned identity — "THIS level is Floor 100" — */
+/* and it outranks the level's name everywhere, so a renamed,          */
+/* duplicated or draft level can never steal a world's route, and a    */
+/* world's sync can never overwrite another world's level.             */
+/* ------------------------------------------------------------------ */
+
+export const normLevelName = (s: string): string =>
+  (s || "").toLowerCase().replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
+
+const WORLD_BINDINGS_KEY = "sfh:level-worlds:v1";
+
+export function readLevelWorldBindings(): Record<string, string> {
+  try { return JSON.parse(window.localStorage.getItem(WORLD_BINDINGS_KEY) || "{}"); } catch { return {}; }
+}
+
+export function getBoundWorldKey(levelId?: string | null): string | null {
+  if (!levelId) return null;
+  return readLevelWorldBindings()[levelId] ?? null;
+}
+
+export function setBoundWorldKey(levelId: string, key: string | null) {
+  try {
+    const m = readLevelWorldBindings();
+    if (key) m[levelId] = key; else delete m[levelId];
+    window.localStorage.setItem(WORLD_BINDINGS_KEY, JSON.stringify(m));
+  } catch { /* storage unavailable */ }
+}
+
+/** The level pinned to a world key, when it still exists. */
+export function findBoundLevelId(key: string): string | null {
+  const m = readLevelWorldBindings();
+  const id = Object.keys(m).find((k) => m[k] === key);
+  return id && getLocalLevel(id) ? id : null;
+}
+
+const isDraftName = (name: string) => normLevelName(name).includes("- local draft");
+
+/**
+ * Resolves THE editable level of a named world for its sync helper:
+ * the bound level first (whatever it is currently named — a binding is
+ * identity), otherwise an UNBOUND level carrying the world's canonical
+ * name. Levels bound to a DIFFERENT world and draft backups are never
+ * eligible, so one world's sync can never touch another world's level.
+ */
+export function resolveWorldSyncLevel(key: string, canonicalName: string, aliases: string[] = []): LocalLevelRecord | null {
+  const boundId = findBoundLevelId(key);
+  if (boundId) return getLocalLevel(boundId);
+  const bindings = readLevelWorldBindings();
+  const names = [canonicalName, ...aliases].map(normLevelName);
+  return (
+    listLocalLevels().find(
+      (l) => !bindings[l.id] && !isDraftName(l.name) && names.includes(normLevelName(l.name)),
+    ) ?? null
+  );
+}
+
+function stableStringifyLocal(v: unknown): string {
+  if (v === null || typeof v !== "object") return JSON.stringify(v) ?? "null";
+  if (Array.isArray(v)) return `[${v.map(stableStringifyLocal).join(",")}]`;
+  const keys = Object.keys(v as Record<string, unknown>).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringifyLocal((v as Record<string, unknown>)[k])}`).join(",")}}`;
+}
+
+/**
+ * Preserves a world's divergent local scene as a draft level before the
+ * sync resets it to the published scene. Three guards keep this from
+ * ever flooding the library (founder report 2026-10-25 — drafts were
+ * multiplying into separate "projects" on every visit):
+ *  - identical divergence is backed up ONCE, not on every sync;
+ *  - the draft joins the SAME project as the world's level;
+ *  - only the newest 2 drafts per world are kept.
+ */
+export function preserveLocalDraft(existing: LocalLevelRecord, canonicalName: string, note: string) {
+  const prefix = `${canonicalName} — local draft`;
+  const drafts = listLocalLevels()
+    .filter((l) => l.name.startsWith(prefix))
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  const sceneStr = stableStringifyLocal(existing.scene);
+  if (!drafts.some((d) => stableStringifyLocal(d.scene) === sceneStr)) {
+    const backup = createLocalLevel(existing.scene);
+    updateLocalLevel(backup.id, {
+      name: `${prefix} ${new Date().toISOString().slice(0, 10)}`,
+      description: note,
+      ...(((existing as any).projectId ? { projectId: (existing as any).projectId } : {}) as any),
+    });
+  }
+  for (const stale of listLocalLevels().filter((l) => l.name.startsWith(prefix)).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(2)) {
+    deleteLocalLevel(stale.id);
+  }
+}
 /** Finds (or seeds) the editable Plaza District level. */
 export function ensurePlazaLevel(build: () => LevelScene, name: string): LocalLevelRecord {
   const found = readLocalLevels().find((l) => l.name === name);

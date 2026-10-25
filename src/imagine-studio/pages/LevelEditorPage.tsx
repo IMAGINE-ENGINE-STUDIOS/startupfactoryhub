@@ -1908,10 +1908,10 @@ export default function LevelEditorPage() {
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-background text-foreground">
       {/* Top bar */}
       <header
-        className={`shrink-0 border-b border-border/40 backdrop-blur-xl bg-background/60 z-20 flex items-center gap-3 ${
+        className={`shrink-0 border-b border-border/40 backdrop-blur-xl bg-background/60 z-20 flex items-center gap-3 [&>*]:shrink-0 ${
           isMobile
             ? "px-2 py-1.5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            : "px-4 py-2"
+            : "px-4 py-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         }`}
       >
         <Link to="/levels" className="text-muted-foreground hover:text-foreground">
@@ -1928,7 +1928,7 @@ export default function LevelEditorPage() {
             />
           </>
         )}
-        <div className={`flex items-center gap-2 ${isMobile ? "ml-0" : "ml-auto"}`}>
+        <div className={`flex items-center gap-2 shrink-0 ${isMobile ? "ml-0" : "ml-auto"}`}>
           <ActiveToolBadges
             tools={[
               {

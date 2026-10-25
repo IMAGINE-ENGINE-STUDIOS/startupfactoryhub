@@ -7,16 +7,15 @@
 // chips). Stored per level id in localStorage, so it works for both local
 // and cloud-stored levels without a schema change.
 import { allNamedWorlds, matchNamedWorld, type NamedWorld } from "./worldSync";
-import { listLocalLevels } from "./localLevels";
+import { listLocalLevels, readLevelWorldBindings, getBoundWorldKey, setBoundWorldKey } from "./localLevels";
 
-const KEY = "sfh:level-worlds:v1";
-type BindingMap = Record<string, string>;
+/* The binding store itself lives in lib/localLevels (readLevelWorld-
+ * Bindings / getBoundWorldKey / setBoundWorldKey) so the world sync
+ * helpers in officeWorld/plazaLevel can use it without an import cycle
+ * through worldSync. This module remains the public API. */
 
-function read(): BindingMap {
-  try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
-}
-function write(m: BindingMap) {
-  try { localStorage.setItem(KEY, JSON.stringify(m)); } catch { /* storage unavailable */ }
+function read(): Record<string, string> {
+  return readLevelWorldBindings();
 }
 
 export function worldForKey(key?: string | null): NamedWorld | null {
@@ -24,14 +23,11 @@ export function worldForKey(key?: string | null): NamedWorld | null {
 }
 
 export function getLevelWorldKey(levelId?: string | null): string | null {
-  if (!levelId) return null;
-  return read()[levelId] ?? null;
+  return getBoundWorldKey(levelId);
 }
 
 export function setLevelWorld(levelId: string, key: string | null) {
-  const m = read();
-  if (key) m[levelId] = key; else delete m[levelId];
-  write(m);
+  setBoundWorldKey(levelId, key);
 }
 
 /** The world a level publishes to: explicit binding first, then its name. */
