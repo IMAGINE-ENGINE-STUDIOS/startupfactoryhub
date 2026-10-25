@@ -18,7 +18,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 5;
+export const OFFICE_SCENE_VERSION = 6;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
 /** The agent character body: the founder's OWN uploaded character
@@ -218,8 +218,15 @@ export function buildOfficeScene(): LevelScene {
     o.push(P(`Agent Screen ${k}`, "box", [d.x, 1.18, d.z - f * 0.22], [0.98, 0.58, 0.04], "#04070c", { rotation: [f * -0.1, f === 1 ? Math.PI : 0, 0], roughness: 0.3, metalness: 0.3 }));
     o.push(P(`Agent Screen ${k} Glow`, "box", [d.x, 1.18, d.z - f * 0.19], [0.9, 0.5, 0.015], "#062a33", { rotation: [f * -0.1, f === 1 ? Math.PI : 0, 0], roughness: 0.4, emissive: hex("#00e5ff"), emissiveIntensity: 1.5 } as any));
     o.push(P(`Agent Screen ${k} Stand`, "box", [d.x, 0.92, d.z - f * 0.22], [0.08, 0.36, 0.08], "#0a1018"));
-    o.push(P(`Agent Chair ${k}`, "box", [d.x, 0.48, d.z + f * 0.85], [0.55, 0.07, 0.55], "#0d1622", { roughness: 0.9 }));
-    o.push(P(`Agent Chair ${k} Back`, "box", [d.x, 0.95, d.z + f * 1.08], [0.55, 0.85, 0.07], "#0d1622", { roughness: 0.9 }));
+    // A chair built for THIS character (founder directive 2026-10-25): a
+    // wide seat the belly actually rests on (top at 0.56 — OfficePage's
+    // seatY reads it from this object), a pedestal + base that stay
+    // visible under the body, and a tall back placed BEHIND the body's
+    // surface (home + 1.50) so the body can no longer swallow it.
+    o.push(P(`Agent Chair ${k}`, "box", [d.x, 0.52, d.z + f * 0.85], [1.05, 0.08, 1.05], "#111c2c", { roughness: 0.9 }));
+    o.push(P(`Agent Chair ${k} Pedestal`, "box", [d.x, 0.24, d.z + f * 0.85], [0.46, 0.48, 0.46], "#0d1622", { roughness: 0.9 }));
+    o.push(P(`Agent Chair ${k} Base`, "box", [d.x, 0.025, d.z + f * 0.85], [0.84, 0.05, 0.84], "#0d1622", { roughness: 0.9 }));
+    o.push(P(`Agent Chair ${k} Back`, "box", [d.x, 1.03, d.z + f * 1.50], [0.98, 0.98, 0.09], "#0d1622", { roughness: 0.9 }));
   });
   // Entrance glazing — the south door gap gets the SAME glass as every
   // other window (founder directive 2026-10-25: continue the window

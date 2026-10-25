@@ -157,6 +157,16 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   useFrame((state, dtRaw) => {
     const g = root.current; if (!g) return;
     const dt = Math.min(dtRaw, 0.05);
+    // SEAT SNAP (founder directive 2026-10-25): the Sitting clip's final
+    // frame puts the belly's underside 0.111 BELOW the group origin, so a
+    // group left at floor level buries the body in the floor and the chair
+    // vanishes inside it. When seated, lift the group so the belly rests
+    // exactly ON the chair's seat top (the seatY prop) — the little legs
+    // dangle in front of the chair, as stub legs should.
+    {
+      const targetY = (s.phase === 'work' && seated && clipOf.sit) ? seatY + 0.111 : 0;
+      g.position.y += (targetY - g.position.y) * Math.min(1, dt * 5);
+    }
     const s = st.current;
     const pos = { x: g.position.x, z: g.position.z };
     // A fresh job pins the bot to its desk, from wherever it is.
