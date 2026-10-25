@@ -828,31 +828,49 @@ export default function Deck() {
               <h2 className="mt-3 text-[80px] leading-none font-bold tracking-tight bg-gradient-to-r from-white via-teal-100 to-emerald-300 bg-clip-text text-transparent">Business Model</h2>
               <p className="mt-5 text-[26px] text-slate-300">Recurring subscriptions at the core. <span className="text-white font-semibold">Programs, partners and transactions on top.</span></p>
 
-              <div className="mt-12 flex items-center gap-4">
+              <div className="mt-10 flex items-center gap-4">
                 <span className="w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_16px_rgba(94,234,212,1)]" />
                 <span className="text-[20px] tracking-[0.3em] uppercase text-teal-300">Core recurring revenue · in projections</span>
                 <div className="flex-1 h-px bg-gradient-to-r from-teal-300/50 to-transparent" />
               </div>
-              <div className="mt-6 grid grid-cols-5 gap-6">
+              <div className="mt-6 grid grid-cols-6 gap-5">
                 {[
-                  { icon: Building2, name: "Global Desk", price: "$550", unit: "/ month" },
-                  { icon: Globe, name: "Global Office", price: "$950", unit: "/ month" },
                   { icon: Award, name: "Members Club", price: "$50", unit: "/ month" },
-                  { icon: Rocket, name: "Accelerator as a Service", price: "$5K", unit: "software + $5K / startup" },
-                  { icon: Cpu, name: "AI Credits", price: "$9–$29", unit: "/ month + usage packs" },
+                  { icon: Users, name: "Community", price: "$350", unit: "/ month" },
+                  { icon: Building2, name: "Venture Resident", price: "$550", unit: "/ month" },
+                  { icon: Handshake, name: "Venture Advisor", price: "$550", unit: "/ month" },
+                  { icon: Globe, name: "Global Venture Partner", price: "$950", unit: "/ month" },
+                  { icon: Briefcase, name: "Corporate", price: "$1,500", unit: "/ month" },
                 ].map((r) => (
-                  <div key={r.name} className="group rounded-3xl bg-white/[0.04] ring-1 ring-teal-300/25 p-7 shadow-[0_0_40px_rgba(45,212,191,0.12)] transition-all duration-500 hover:-translate-y-1 hover:ring-teal-200/60 hover:shadow-[0_0_60px_rgba(45,212,191,0.35)]">
-                    <div className="w-[60px] h-[60px] rounded-full bg-slate-950 ring-1 ring-teal-300/50 flex items-center justify-center shadow-[0_0_25px_rgba(45,212,191,0.4)]">
-                      <r.icon className="w-7 h-7 text-teal-300" />
+                  <div key={r.name} className="group rounded-3xl bg-white/[0.04] ring-1 ring-teal-300/25 p-5 shadow-[0_0_40px_rgba(45,212,191,0.12)] transition-all duration-500 hover:-translate-y-1 hover:ring-teal-200/60 hover:shadow-[0_0_60px_rgba(45,212,191,0.35)]">
+                    <div className="w-[48px] h-[48px] rounded-full bg-slate-950 ring-1 ring-teal-300/50 flex items-center justify-center shadow-[0_0_25px_rgba(45,212,191,0.4)]">
+                      <r.icon className="w-6 h-6 text-teal-300" />
                     </div>
-                    <p className="mt-6 text-[22px] font-semibold text-white leading-tight">{r.name}</p>
-                    <p className="mt-3 text-[52px] font-bold leading-none bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">{r.price}</p>
-                    <p className="mt-2 text-[17px] text-slate-400">{r.unit}</p>
+                    <p className="mt-4 text-[19px] font-semibold text-white leading-tight">{r.name}</p>
+                    <p className="mt-2 text-[38px] font-bold leading-none bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">{r.price}</p>
+                    <p className="mt-1.5 text-[15px] text-slate-400">{r.unit}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-5">
+                {[
+                  { icon: Rocket, name: "Accelerator as a Service", price: "$5K", unit: "software / month + $5K / startup" },
+                  { icon: Cpu, name: "Genius AI Plans", price: "$9–$60", unit: "/ month · Imagine Starter $9 · Pro $29 · Studio $60" },
+                ].map((r) => (
+                  <div key={r.name} className="group flex items-center gap-6 rounded-3xl bg-white/[0.04] ring-1 ring-teal-300/25 px-7 py-5 shadow-[0_0_40px_rgba(45,212,191,0.12)] transition-all duration-500 hover:ring-teal-200/60 hover:shadow-[0_0_60px_rgba(45,212,191,0.35)]">
+                    <div className="w-[48px] h-[48px] shrink-0 rounded-full bg-slate-950 ring-1 ring-teal-300/50 flex items-center justify-center shadow-[0_0_25px_rgba(45,212,191,0.4)]">
+                      <r.icon className="w-6 h-6 text-teal-300" />
+                    </div>
+                    <p className="flex-1 text-[21px] font-semibold text-white leading-tight">{r.name}</p>
+                    <div className="text-right">
+                      <p className="text-[38px] font-bold leading-none bg-gradient-to-r from-teal-200 to-emerald-300 bg-clip-text text-transparent">{r.price}</p>
+                      <p className="mt-1.5 text-[15px] text-slate-400">{r.unit}</p>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-12 flex items-center gap-4">
+              <div className="mt-10 flex items-center gap-4">
                 <span className="w-3 h-3 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,1)]" />
                 <span className="text-[20px] tracking-[0.3em] uppercase text-emerald-300">Additional revenue · upside, not in projections</span>
                 <div className="flex-1 h-px bg-gradient-to-r from-emerald-300/50 to-transparent" />
@@ -956,11 +974,11 @@ export default function Deck() {
                 <p className="text-[64px] font-bold text-white leading-none mt-2">$6.09M</p>
                 <div className="mt-8 space-y-5">
                   {[
-                    { icon: Briefcase, t: "500 Global Desk", s: "$550 / month", v: "$3.3M", w: 54.2 },
-                    { icon: Building2, t: "100 Global Office", s: "$950 / month", v: "$1.14M", w: 18.7 },
+                    { icon: Briefcase, t: "500 Venture Resident", s: "$550 / month", v: "$3.3M", w: 54.2 },
+                    { icon: Building2, t: "100 Global Venture Partner", s: "$950 / month", v: "$1.14M", w: 18.7 },
                     { icon: Users, t: "1,000 Members", s: "$50 / month", v: "$600K", w: 9.9 },
                     { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", w: 9.0 },
-                    { icon: Cpu, t: "2,200 AI Credit Plans", s: "20% of 11,000 users (incl. free) · $19 avg / mo", v: "$500K", w: 8.2 },
+                    { icon: Cpu, t: "2,200 Genius AI Plans", s: "20% of 11,000 users (incl. free) · $19 avg / mo", v: "$500K", w: 8.2 },
                   ].map((r, i) => (
                     <div key={i} className="group">
                       <div className="flex items-center gap-4">

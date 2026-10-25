@@ -120,20 +120,23 @@ const PROJECTION_YEARS = [
 
 /* Deck, same slide: the Year 1 revenue engine behind the $6.09M. */
 const Y1_ENGINE = [
-  { icon: Briefcase, t: "500 Global Desk", s: "$550 / month", v: "$3.3M", amount: 3_300_000, w: 54.2 },
-  { icon: Building2, t: "100 Global Office", s: "$950 / month", v: "$1.14M", amount: 1_140_000, w: 18.7 },
+  { icon: Briefcase, t: "500 Venture Resident", s: "$550 / month", v: "$3.3M", amount: 3_300_000, w: 54.2 },
+  { icon: Building2, t: "100 Global Venture Partner", s: "$950 / month", v: "$1.14M", amount: 1_140_000, w: 18.7 },
   { icon: Users, t: "1,000 Members", s: "$50 / month", v: "$600K", amount: 600_000, w: 9.9 },
   { icon: Rocket, t: "10 Accelerators-as-a-Service", s: "$5K software + $5K / startup (min 10)", v: "$550K", amount: 550_000, w: 9.0 },
-  { icon: Cpu, t: "2,200 AI Credit Plans", s: "20% of 11,000 users (incl. free) · $19 avg / mo", v: "$500K", amount: 500_000, w: 8.2 },
+  { icon: Cpu, t: "2,200 Genius AI Plans", s: "20% of 11,000 users (incl. free) · $19 avg / mo", v: "$500K", amount: 500_000, w: 8.2 },
 ];
 
 /* Deck, "Business Model & Revenue Streams" slide: core recurring revenue. */
 const REVENUE_STREAMS = [
-  { icon: Building2, name: "Global Desk", price: "$550", unit: "/ month" },
-  { icon: Globe, name: "Global Office", price: "$950", unit: "/ month" },
   { icon: Award, name: "Members Club", price: "$50", unit: "/ month" },
+  { icon: Users, name: "Community", price: "$350", unit: "/ month" },
+  { icon: Building2, name: "Venture Resident", price: "$550", unit: "/ month" },
+  { icon: HandCoins, name: "Venture Advisor", price: "$550", unit: "/ month" },
+  { icon: Globe, name: "Global Venture Partner", price: "$950", unit: "/ month" },
+  { icon: Briefcase, name: "Corporate", price: "$1,500", unit: "/ month" },
   { icon: Rocket, name: "Accelerator as a Service", price: "$5K", unit: "software + $5K / startup" },
-  { icon: Cpu, name: "AI Credits", price: "$9–$29", unit: "/ month + usage packs" },
+  { icon: Cpu, name: "Genius AI Plans", price: "$9–$60", unit: "/ month · Starter / Pro / Studio" },
 ];
 
 const CHART_TOOLTIP = {
