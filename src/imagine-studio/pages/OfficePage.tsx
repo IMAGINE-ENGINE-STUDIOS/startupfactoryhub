@@ -1491,7 +1491,7 @@ export default function OfficePage() {
         </div>
       )}
 
-      <div data-office-ui className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
+      <div data-office-ui className="absolute left-3 top-3 z-30 flex flex-col gap-1.5">
         <div className="px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Building</div>
         {allFloors().map((f) => (
           <button key={f.id} onClick={() => { if (f.id !== floor.id) window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className={`rounded-full border px-3 py-1.5 text-left text-xs shadow ${f.id === floor.id ? 'bg-emerald-500 text-emerald-950 font-semibold border-transparent' : 'bg-background/90 border-border hover:bg-muted'}`}>
@@ -1508,7 +1508,7 @@ export default function OfficePage() {
       </div>
 
       {isAdmin && (
-        <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
+        <div data-office-ui className="absolute top-3 right-3 z-30 flex flex-col items-end gap-2">
           {floor.id === 100 && outdated && scene && (
             <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
               {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (clean windows · team-board theater)'}
@@ -1658,7 +1658,7 @@ export default function OfficePage() {
       {/* The executive suite (founder directive 2026-10-25): the CEO runs
           this company through its Managers; the Chairman runs the whole
           building. Walk up to them in the room, or use these buttons. */}
-      <div className="absolute right-4 bottom-[9.5rem] sm:bottom-24 z-20 flex flex-col items-end gap-2">
+      <div data-office-ui className="absolute right-4 bottom-[9.5rem] sm:bottom-24 z-20 flex flex-col items-end gap-2">
         <button data-office-ui onClick={() => setExecOpen('ceo')} className="flex items-center gap-2 rounded-full border border-sky-400/50 bg-[#0a1420]/85 px-4 py-2.5 text-xs font-semibold text-sky-300 shadow-lg backdrop-blur hover:bg-[#0e1e30]/90">
           <LayoutDashboard className="w-4 h-4" /> CEO · {floor.company}
         </button>

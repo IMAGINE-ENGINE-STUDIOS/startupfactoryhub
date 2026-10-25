@@ -40,7 +40,11 @@ export function BuildingView({ current, currentScene, onSelect, onClose }: {
 
   /* Sibling levels render from their own editor level (or their
    * published scene) — geometry only. No agents, no other level's
-   * content loads into the editor itself. */
+   * content loads into the editor itself. A level that has NEITHER yet
+   * (never opened, never published — Floor 99 before its first publish)
+   * is seeded on the spot, exactly the way opening it would seed it,
+   * so EVERY floor of the building is represented in the stack, in
+   * both directions. */
   useEffect(() => {
     let off = false;
     (async () => {
@@ -50,7 +54,12 @@ export function BuildingView({ current, currentScene, onSelect, onClose }: {
         const local = lid ? getLocalLevel(lid) : null;
         if (local?.scene) { if (!off) setScenes((s) => ({ ...s, [w.key]: local.scene })); continue; }
         const pub = await w.fetchPublished().catch(() => null);
-        if (!off && pub) setScenes((s) => ({ ...s, [w.key]: pub }));
+        if (pub) { if (!off) setScenes((s) => ({ ...s, [w.key]: pub })); continue; }
+        try {
+          const rec = await w.syncLevel();
+          const sc = (rec as any)?.scene ?? getLocalLevel((rec as any)?.id)?.scene;
+          if (!off && sc) setScenes((s) => ({ ...s, [w.key]: sc }));
+        } catch { /* the slab + label still represent the level */ }
       }
     })();
     return () => { off = true; };

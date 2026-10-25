@@ -84,12 +84,15 @@ export default function MobileTouchControls({ visible, layerClass = "z-50" }: { 
 
   return (
     <div className={`pointer-events-none fixed inset-0 ${layerClass} select-none`} style={{ touchAction: "none" }}>
-      {/* Right-side full-height look pad — drag to yaw/pitch the camera.
-          Sits behind the action buttons (lower z) so taps on Jump/Run/
-          Interact still reach them. Transparent, no visible chrome. */}
+      {/* Look pad — drag to yaw/pitch the camera. It starts BELOW the
+          header band (top 5.5rem): the full-screen version swallowed
+          taps meant for the header buttons on touch devices (founder
+          report 2026-10-25), because a captured look-drag begins before
+          the button ever sees its click. The header strip is UI-only
+          now; the pad keeps the rest of the screen. Transparent. */}
       <div
-        className="pointer-events-auto absolute top-0 right-0 h-full"
-        style={{ width: "100%", touchAction: "none", zIndex: 0 }}
+        className="pointer-events-auto absolute right-0"
+        style={{ top: "5.5rem", height: "calc(100% - 5.5rem)", width: "100%", touchAction: "none", zIndex: 0 }}
         onPointerDown={(e) => {
           if (lookId.current !== null) return;
           lookId.current = e.pointerId;
