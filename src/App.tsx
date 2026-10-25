@@ -57,6 +57,7 @@ const JapanAccelerator = lazy(() => import("./pages/JapanAccelerator"));
 const PublicEventRegistration = lazy(() => import("./pages/PublicEventRegistration"));
 const PublicResources = lazy(() => import("./pages/PublicResources"));
 const Deck = lazy(() => import("./pages/Deck"));
+const UseOfFunds = lazy(() => import("./pages/UseOfFunds"));
 const DeckPublic = lazy(() => import("./pages/DeckPublic"));
 const Hubs = lazy(() => import("./pages/Hubs"));
 const HubsLab = lazy(() => import("./pages/HubsLab"));
@@ -208,6 +209,7 @@ const App = () => (
                     <Route path="/events/:eventId/register" element={<PublicEventRegistration />} />
                     <Route path="/resources" element={<PublicResources />} />
                     <Route path="/deck" element={<Deck />} />
+                    <Route path="/uof" element={<UseOfFunds />} />
                     <Route path="/overview" element={<DeckPublic />} />
                     <Route path="/hubs" element={<Hubs />} />
                     <Route path="/hubs-lab" element={<HubsLab />} />

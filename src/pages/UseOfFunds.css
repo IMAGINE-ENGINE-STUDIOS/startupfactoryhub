@@ -1,0 +1,65 @@
+/* ── /uof — Use of Funds + Projections ────────────────────────────────────
+   Scoped to .uof-root so it never leaks into the rest of the platform.
+   Fonts and palette are the platform's own: Space Grotesk for display/body
+   and JetBrains Mono for numbers (both already loaded by src/index.css),
+   on the Deck's slate-950 stage with teal → cyan → emerald gradients. */
+.uof-root {
+  --uof-bg: #020617;            /* slate-950 — the Deck stage */
+  --uof-deep: #010813;
+  --uof-surface: #0e1622;
+  --uof-surface-2: #111d2e;
+  --uof-line: rgba(45, 212, 191, 0.16);   /* teal-400 hairline */
+  --uof-line-cyan: rgba(34, 211, 238, 0.18);
+  --uof-teal: #2dd4bf;          /* teal-400 */
+  --uof-cyan: #22d3ee;          /* cyan-400 */
+  --uof-emerald: #34d399;       /* emerald-400 */
+  --uof-ink: #f0fdfa;
+  --uof-ink-dim: #94a3b8;       /* slate-400 */
+  --uof-ink-faint: #64748b;     /* slate-500 */
+  background: var(--uof-bg);
+  color: var(--uof-ink);
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+.uof-mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.uof-grid {
+  background-image:
+    linear-gradient(rgba(45, 212, 191, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.uof-dots {
+  background-image: radial-gradient(rgba(34, 211, 238, 0.10) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+.uof-glow {
+  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.25), 0 0 34px rgba(45, 212, 191, 0.12);
+}
+.uof-text-glow {
+  text-shadow: 0 0 22px rgba(45, 212, 191, 0.45);
+}
+.uof-bar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+.uof-gradient-text {
+  background: linear-gradient(to right, #ffffff, #ccfbf1, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@keyframes uof-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.35); }
+  70% { box-shadow: 0 0 0 16px rgba(45, 212, 191, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
+}
+.uof-pulse-ring { animation: uof-pulse-ring 2.6s ease-out infinite; }
+.uof-root ::selection {
+  background: rgba(45, 212, 191, 0.35);
+  color: #02110f;
+}
+
+@media print {
+  .uof-no-print { display: none !important; }
+  .uof-root { background: #020617 !important; }
+}
