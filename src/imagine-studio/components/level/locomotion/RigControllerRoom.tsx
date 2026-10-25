@@ -31,6 +31,7 @@ import {
   type RigSave,
   type BonePose,
 } from "@/imagine-studio/lib/rigSaves";
+import { buildActionPose, type ActionKind } from "@/imagine-studio/lib/actionPoses";
 
 /** Imperative bridge between <Rig/> and the parent panel. */
 interface RigBridge {
@@ -1710,6 +1711,19 @@ export default function RigControllerRoom({
     setTimeout(() => setUrl(u), 10);
   };
 
+  // One-click action poses (sit / kneel low / jump), auto-calibrated to this
+  // rig from its controller map. The result lands as the pending pose so she
+  // can refine it with the gizmos, save it as a rig, or apply it to a scene
+  // character — the same poses the runtime falls back to in play mode.
+  const handleActionPose = (action: ActionKind) => {
+    const root = bridgeRef.current.root;
+    if (!root) { toast.error("Rig not ready yet"); return; }
+    const pose = buildActionPose(root, action, { map: controllerMap as any, seatHeight: 0.5 });
+    if (!pose) { toast.error("This rig's legs could not be auto-mapped — map the hip and knee controllers first."); return; }
+    setPendingPose(pose);
+    toast.success(`${action === "sit" ? "Sit" : action === "kneel" ? "Kneel low" : "Jump"} pose applied — refine it, then Save or Apply to a character.`);
+  };
+
   const handleUploadFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -1913,6 +1927,32 @@ export default function RigControllerRoom({
             )}
           </div>
         )}
+
+        {/* ═══════════ ACTION POSES — one-click sit / kneel / jump ═══════════ */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 px-1">
+            <span className="font-mono text-[9px] text-primary/60 tracking-[0.18em]">{`>`}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 font-semibold">ACTION POSES</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1">
+            {([["sit", "Sit"], ["kneel", "Kneel"], ["jump", "Jump"]] as const).map(([a, label]) => (
+              <button
+                key={a}
+                onClick={() => handleActionPose(a)}
+                className="px-2 py-1.5 border border-white/10 bg-white/[0.02] text-[11px] font-medium text-white/80 hover:border-primary/60 hover:bg-primary/10 hover:text-white transition"
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              onClick={handleResetPose}
+              className="px-2 py-1.5 border border-white/10 bg-white/[0.02] text-[11px] font-medium text-white/80 hover:border-white/40 hover:bg-white/[0.05] hover:text-white transition"
+            >
+              Stand
+            </button>
+          </div>
+          <p className="font-mono text-[9px] leading-relaxed text-white/30 px-1">{`// auto-posed from the controller map + this rig's own proportions. Refine with the gizmos, then save — play mode and the office use these poses when a model has no sit/kneel clip.`}</p>
+        </div>
 
         {/* ═══════════ ASSET DECK — clips + library dropdown ═══════════ */}
         <div className="space-y-2">

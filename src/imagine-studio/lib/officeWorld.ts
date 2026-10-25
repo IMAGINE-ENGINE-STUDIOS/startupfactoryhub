@@ -176,12 +176,19 @@ export function buildOfficeScene(): LevelScene {
 
 /** Fetches the scene the live /office world is actually playing (the published JSON). */
 export async function fetchPublishedOfficeScene(): Promise<LevelScene | null> {
+  const m = await fetchPublishedOfficeMeta();
+  return m?.scene ?? null;
+}
+
+/** Scene + publish timestamp, so the /office player can show exactly which
+ *  published version it is playing (and flag the offline fallback copy). */
+export async function fetchPublishedOfficeMeta(): Promise<{ scene: LevelScene; publishedAt: string | null } | null> {
   try {
     const r = await fetch(`${OFFICE_PUBLISHED_URL}?t=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
     const d: any = await r.json();
     const scene = d?.scene ?? (d?.objects ? d : null);
-    return scene?.objects ? (scene as LevelScene) : null;
+    return scene?.objects ? { scene: scene as LevelScene, publishedAt: typeof d?.publishedAt === "string" ? d.publishedAt : null } : null;
   } catch {
     return null;
   }

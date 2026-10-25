@@ -22,7 +22,9 @@ import { Command, CommandInput, CommandList, CommandEmpty, CommandItem, CommandG
 import { supabase } from "@/integrations/supabase/client";
 import { ensureLevelSession, withTimeout } from "@/imagine-studio/lib/levelSession";
 import { stripHdriBlobs, rehydrateHdriBlobs } from "@/imagine-studio/lib/hdriBlobStore";
-import { getLocalLevel, getLocalLevelOwnerId, isLocalLevelId, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { createLocalLevel, getLocalLevel, getLocalLevelOwnerId, isLocalLevelId, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
+import { matchNamedWorld, stableStringify } from "@/imagine-studio/lib/worldSync";
+import PublishedPlayTest from "@/imagine-studio/components/level/PublishedPlayTest";
 import {
   writeSnapshot as writeLevelSnapshot,
   markCommitted as markLevelSnapshotCommitted,
@@ -532,6 +534,11 @@ export default function LevelEditorPage() {
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [scene, setScene] = useState<LevelScene>(EMPTY_SCENE);
+  const sceneRef = useRef<LevelScene>(EMPTY_SCENE);
+  sceneRef.current = scene;
+  // Play-testing runs the published experience (PublishedPlayTest overlay),
+  // never a separate editor simulation.
+  const [testOpen, setTestOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState(false);
@@ -844,6 +851,42 @@ export default function LevelEditorPage() {
     return () => { cancelled = true; };
   }, [id, loading]);
 
+  // ---- Named-world invariant: edit mode ALWAYS starts from the published
+  // scene. Opening a world that has a live published twin (Plaza, Office, …)
+  // re-syncs the editor to the published file — any divergent local scene is
+  // preserved as a dated local draft first, never silently kept or lost.
+  // This makes editor ≠ published impossible for named worlds, on every
+  // entry path (buttons, project list, direct URL), not just special-cased
+  // entry buttons.
+  const worldAlignedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!id || loading || rigRoomMode) return;
+    if (worldAlignedRef.current === id) return;
+    const w = matchNamedWorld(name);
+    if (!w) return;
+    worldAlignedRef.current = id;
+    let cancelled = false;
+    (async () => {
+      const published = await w.fetchPublished();
+      if (cancelled || !published) return;
+      const current = sceneRef.current;
+      if (stableStringify(current) === stableStringify(published)) return;
+      if (isLocalLevelId(id)) {
+        const draft = createLocalLevel(current);
+        updateLocalLevel(draft.id, {
+          name: `${w.name} — local draft ${new Date().toISOString().slice(0, 10)}`,
+          description: "Local edits preserved when this world was re-synced to the published version on open",
+        });
+        updateLocalLevel(id, { scene: JSON.parse(JSON.stringify(published)) });
+      }
+      setScene({ ...EMPTY_SCENE, ...(published as any) });
+      toast.success(`Synced to the live published ${w.key === "office" ? "Office" : "Plaza"}`, {
+        description: "Edit mode always starts from what's live. Your previous local edits were kept as a local draft level.",
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [id, loading, name, rigRoomMode]);
+
   const lastSavedAtRef = useRef<number>(0);
   const [autosaveStatus, setAutosaveStatus] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
 
@@ -1113,8 +1156,9 @@ export default function LevelEditorPage() {
             (window as any).__levelFocusObject(selectedId);
           }
         } else if (e.key === "Escape") {
-          // Priority: exit Play mode → clear gizmo → clear selection.
-          if (playing) setPlaying(false);
+          // Priority: exit play test → exit Play mode → clear gizmo → clear selection.
+          if (testOpen) setTestOpen(false);
+          else if (playing) setPlaying(false);
           else if (transformMode) setTransformMode(null);
           else {
             setSelectedIds(new Set());
@@ -1125,7 +1169,7 @@ export default function LevelEditorPage() {
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
-  }, [save, undo, redo, selectedIds, selectedLightIds, editingPolygonId, scene.objects, playing, transformMode, selectedId]);
+  }, [save, undo, redo, selectedIds, selectedLightIds, editingPolygonId, scene.objects, playing, testOpen, transformMode, selectedId]);
 
   /* ---------- scene mutators ---------- */
 
@@ -2028,13 +2072,13 @@ export default function LevelEditorPage() {
           )}
           <Button
             size="sm"
-            variant={playing ? "destructive" : "default"}
-            onClick={() => setPlaying((p) => !p)}
-            title={playing ? "Stop simulation" : "Play: simulate your game"}
+            variant={testOpen ? "destructive" : "default"}
+            onClick={() => setTestOpen((o) => !o)}
+            title="Play: test exactly as published — same renderer and scene data as the live page"
             className={isMobile ? "h-7 px-2 text-[11px]" : "h-8"}
           >
-            {playing ? <Square className="w-3.5 h-3.5 sm:mr-1" /> : <Play className="w-3.5 h-3.5 sm:mr-1" />}
-            <span className="hidden sm:inline">{playing ? "Stop" : "Play"}</span>
+            {testOpen ? <Square className="w-3.5 h-3.5 sm:mr-1" /> : <Play className="w-3.5 h-3.5 sm:mr-1" />}
+            <span className="hidden sm:inline">{testOpen ? "Stop" : "Play"}</span>
           </Button>
           {!rigRoomMode && id && (
             <StudioIntegrations
@@ -2741,14 +2785,14 @@ export default function LevelEditorPage() {
           <button
             onClick={() => {
               setMobilePanel(null);
-              setPlaying((p) => !p);
+              setTestOpen((o) => !o);
             }}
             className={`flex flex-col items-center justify-center gap-0.5 text-[10px] uppercase tracking-wider transition-colors ${
-              playing ? "text-primary" : "text-muted-foreground"
+              testOpen ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-            {playing ? "Pause" : "Play"}
+            {testOpen ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            {testOpen ? "Stop" : "Play"}
           </button>
           <button
             onClick={() => {
@@ -2776,7 +2820,8 @@ export default function LevelEditorPage() {
 
       {/* Play-mode runtime + HUD (mounted only while playing) */}
       <PlayBehaviorRuntime objects={scene.objects} playing={playing} />
-      <LevelLinkHandler inStudio={inStudio} levelId={id} onAutoPlay={() => setPlaying(true)} />
+      <LevelLinkHandler inStudio={inStudio} levelId={id} onAutoPlay={() => setTestOpen(true)} />
+      {testOpen && <PublishedPlayTest name={name} scene={scene} onExit={() => setTestOpen(false)} />}
       <PlayInputManager playing={playing} />
       <PlayHUD visible={playing} onExit={() => setPlaying(false)} />
       <MobileTouchControls visible={playing} />

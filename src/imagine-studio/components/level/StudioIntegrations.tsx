@@ -12,8 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
-import { PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
-import { OFFICE_LEVEL_NAME } from "@/imagine-studio/lib/officeWorld";
+import { matchNamedWorld } from "@/imagine-studio/lib/worldSync";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
  *  prompt so complex scenes can be described in a few ops instead of hundreds. */
@@ -121,8 +120,9 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const live = useRef({ scene, selectedId, name, busy, msgs });
   live.current = { scene, selectedId, name, busy, msgs };
   const embedded = typeof window !== "undefined" && window.parent !== window;
-  const isPlaza = name === PLAZA_LEVEL_NAME;
-  const isOffice = name === OFFICE_LEVEL_NAME;
+  const namedWorld = matchNamedWorld(name);
+  const isPlaza = namedWorld?.key === "plaza";
+  const isOffice = namedWorld?.key === "office";
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -314,8 +314,26 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     try {
       await save();
       const sc = await hostAssets(live.current.scene);
-      const data = await callPublish({ target: isPlaza ? "plaza" : isOffice ? "office" : "level", levelId, name, scene: sc });
-      toast.success(isPlaza ? "Published. Everyone in /plaza now sees this version." : isOffice ? "Published. Everyone in /office now sees this version." : "Level published", isPlaza || isOffice ? undefined : { description: data.url });
+      const target = namedWorld ? namedWorld.key : "level";
+      const data = await callPublish({ target, levelId, name, scene: sc });
+      // VERIFY the publish landed in the exact file the player reads, holding
+      // exactly this scene. A publish that writes anywhere else is an error,
+      // never a success — for every level, current and future.
+      const expectedPath = namedWorld ? namedWorld.path : null;
+      if (expectedPath && data?.path !== expectedPath) {
+        throw new Error(`Publish went to "${data?.path || "an unknown file"}" instead of ${expectedPath} — the live ${isPlaza ? "Plaza" : "Office"} did NOT change. The studio-publish function is out of date.`);
+      }
+      if (!expectedPath && !(typeof data?.path === "string" && data.path.endsWith(`/${levelId}.json`))) {
+        throw new Error(`Publish went to "${data?.path || "an unknown file"}" — the live level did NOT change.`);
+      }
+      try {
+        const check = await fetch(`${data.url}?t=${Date.now()}`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null));
+        const landed = check?.scene?.objects?.length;
+        if (typeof landed === "number" && landed !== sc.objects.length) {
+          throw new Error(`Publish check failed: the live file holds ${landed} objects, this scene has ${sc.objects.length}. The live world did NOT change.`);
+        }
+      } catch (e: any) { if (/Publish check failed/.test(e?.message || "")) throw e; }
+      toast.success(isPlaza ? "Published. Everyone in /plaza now sees this version." : isOffice ? "Published. Everyone in /office now sees this version." : "Level published", { description: data.path });
     } catch (e: any) { toast.error(e.message || "Publish failed"); }
     setPublishing(false);
   };

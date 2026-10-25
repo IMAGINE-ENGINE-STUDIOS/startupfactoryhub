@@ -54,7 +54,7 @@ export function subscribeInteractionPrompt(cb: (p: InteractionPrompt) => void) {
 }
 
 /** "E" key pulse for `use`/`sit`. Set true on keydown, consumed by runtime. */
-export const inputPulse = { interact: false };
+export const inputPulse = { interact: false, kneel: false };
 
 /**
  * Virtual axes written by the on-screen mobile controls (joystick + buttons).
@@ -65,8 +65,8 @@ export const controllerPrefs: { scheme: string; mobileJoystick: "auto" | "always
 /** Click-to-move destination (world XZ) for the "click" control scheme. */
 export const clickTarget: { x: number; z: number; active: boolean; at: number } = { x: 0, z: 0, active: false, at: 0 };
 
-export const mobileAxes: { x: number; z: number; jump: boolean; run: boolean } = {
-  x: 0, z: 0, jump: false, run: false,
+export const mobileAxes: { x: number; z: number; jump: boolean; run: boolean; kneel: boolean } = {
+  x: 0, z: 0, jump: false, run: false, kneel: false,
 };
 
 /**

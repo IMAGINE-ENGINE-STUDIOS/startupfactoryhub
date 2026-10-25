@@ -19,6 +19,17 @@ import {
   mobileLook,
   controllerPrefs, clickTarget,
 } from "./locomotionState";
+import { applyActionPose } from "@/imagine-studio/lib/actionPoses";
+import { capturePose, applyPose, getCachedRigSaves, type BonePose } from "@/imagine-studio/lib/rigSaves";
+
+/** A rig-save pose authored in the Rig Room for this model + action, if one is cached on this device. */
+function findRigPose(modelUrl: string, action: "sit" | "kneel"): BonePose[] | null {
+  try {
+    const needle = action === "sit" ? /sit/i : /kneel|crouch/i;
+    const hit = getCachedRigSaves().find((s) => s.model_url === modelUrl && needle.test(s.name) && Array.isArray(s.pose) && s.pose.length > 0);
+    return hit ? (hit.pose as BonePose[]) : null;
+  } catch { return null; }
+}
 
 /* ----------------------------- input -------------------------------- */
 
@@ -57,6 +68,7 @@ function useInput(scheme: string) {
       keys.current.Shift = shift;
       if (shift) { keys.current.ShiftLeft = true; }
       if (e.code === "KeyE") inputPulse.interact = true;
+      if (e.code === "KeyC") inputPulse.kneel = true;
       if (["KeyW","KeyA","KeyS","KeyD","Space","ShiftLeft","ShiftRight","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) {
         e.preventDefault();
       }
@@ -112,6 +124,8 @@ function useInput(scheme: string) {
           if (pad.buttons[0]?.pressed) jump = true;     // A / Cross
           if (pad.buttons[6]?.pressed || pad.buttons[10]?.pressed) run = true; // LT / L3
           if (pad.buttons[2]?.pressed) inputPulse.interact = true; // X / Square
+          if (pad.buttons[1]?.pressed) inputPulse.kneel = true; // B / Circle — kneel toggle
+          if (mobileAxes.kneel) inputPulse.kneel = true;
           break;
         }
       } catch {
@@ -144,6 +158,7 @@ type LocoState =
   | "climb"         // climbing up a ledge / obstacle
   | "stepUp"        // walking up a small step
   | "sit"
+  | "kneel"         // kneeling low (toggle, crawl-speed movement)
   | "use";
 
 function pickClip(names: string[], state: LocoState): string | null {
@@ -167,8 +182,20 @@ function pickClip(names: string[], state: LocoState): string | null {
     case "climb": return find("climbing", "climb_up", "climb", "hanging_climb", "ledge_climb", "vault") ?? find("jump") ?? names[0];
     case "stepUp": return find("step_up", "walk_up_stairs", "stairs_up", "stair_walk") ?? find("walk") ?? names[0];
     case "sit":  return find("sitting", "sit") ?? find("idle") ?? names[0];
+    case "kneel": return find("kneel", "crouch", "sneak", "crawl") ?? find("sitting", "sit") ?? find("idle") ?? names[0];
     case "use":  return find("use", "press", "interact", "wave") ?? find("idle") ?? names[0];
   }
+}
+
+/** Strict clip lookup for pose states: no idle fallback, so the caller can use a rig pose instead. */
+function pickClipStrict(names: string[], state: "sit" | "kneel"): string | null {
+  const lower = names.map((n) => n.toLowerCase());
+  const needles = state === "sit" ? ["sitting", "sit"] : ["kneel", "crouch", "sneak", "crawl", "sitting"];
+  for (const n of needles) {
+    const i = lower.findIndex((s) => s.includes(n));
+    if (i !== -1) return names[i];
+  }
+  return null;
 }
 
 /* ----------------------- collision helpers -------------------------- */
@@ -277,6 +304,18 @@ export default function PlayableCharacter({
   const activeAction = useRef<THREE.AnimationAction | null>(null);
   const lockedActionUntil = useRef(0);
   const sittingOn = useRef<string | null>(null);
+  // Kneel toggle + AAA jump feel (coyote time, input buffering, variable
+  // jump height) + acceleration smoothing + pose-driven sit/kneel fallback.
+  const kneelOn = useRef(false);
+  const lastKneelToggle = useRef(0);
+  const speedSmooth = useRef(0);
+  const lastGroundedAt = useRef(-1e9);
+  const jumpBufferAt = useRef(0);
+  const prevJump = useRef(false);
+  const jumpCut = useRef(false);
+  const seatYRef = useRef(0.5);
+  const bindPoseRef = useRef<BonePose[] | null>(null);
+  const poseFor = useRef<"sit" | "kneel" | null>(null);
   // Climb tween (forces the root along a curve over `duration` seconds while
   // input + gravity are suspended). Animation set to "climb".
   const climb = useRef<{
@@ -319,7 +358,22 @@ export default function PlayableCharacter({
         n.frustumCulled = false;
       }
     });
+    // Bind pose, captured before any action runs — restored when a
+    // pose-driven sit/kneel ends.
+    try { bindPoseRef.current = capturePose(cloned); } catch { bindPoseRef.current = null; }
   }, [cloned]);
+
+  // Facing direction in world space (for procedural pose calibration).
+  const facingForward = () => {
+    const f = new THREE.Vector3(Math.sin(yawRef.current), 0, Math.cos(yawRef.current));
+    const parent = rootRef.current?.parent;
+    if (parent) {
+      const q = new THREE.Quaternion();
+      parent.getWorldQuaternion(q);
+      f.applyQuaternion(q);
+    }
+    return f;
+  };
 
   // Respect the authored object scale (don't auto-resize the rig — that was
   // producing giant characters when the source glb already shipped at human
@@ -419,6 +473,11 @@ export default function PlayableCharacter({
   const setState = (next: LocoState, fade = 0.18) => {
     if (stateRef.current === next) return;
     stateRef.current = next;
+    // Leaving a pose-driven state: restore the bind pose first.
+    if (poseFor.current && poseFor.current !== next) {
+      if (bindPoseRef.current) { try { applyPose(cloned, bindPoseRef.current); } catch {} }
+      poseFor.current = null;
+    }
     // When the user explicitly picked a clip from the animation gallery,
     // honor it for the idle / sit / use states (jumps and locomotion still
     // come from the locomotion state machine so movement feels right).
@@ -427,6 +486,22 @@ export default function PlayableCharacter({
         ? obj.currentAnimation
         : null;
     const overrideStates: LocoState[] = ["idle", "sit", "use"];
+    // Sit / kneel with no suitable clip: drive the bones instead — a rig
+    // pose she authored in the Rig Room wins, else a calibrated procedural
+    // pose. This is what makes sit/kneel work on rigs that ship no clip.
+    if ((next === "sit" || next === "kneel") && !userPick && !pickClipStrict(names, next)) {
+      const saved = findRigPose(obj.url, next);
+      let applied = false;
+      if (saved) { try { applyPose(cloned, saved); applied = true; } catch {} }
+      if (!applied) {
+        try { applied = applyActionPose(cloned, next, { forward: facingForward(), seatHeight: next === "sit" ? seatYRef.current : undefined }); } catch {}
+      }
+      if (applied) {
+        if (activeAction.current) { activeAction.current.fadeOut(fade); activeAction.current = null; }
+        poseFor.current = next;
+        return;
+      }
+    }
     const clip =
       userPick && overrideStates.includes(next)
         ? userPick
@@ -606,7 +681,12 @@ export default function PlayableCharacter({
       }
     }
     const moving = tmp.move.lengthSq() > 1e-4;
-    const speed = inp.run ? runSpeed : walkSpeed;
+    // Acceleration smoothing: speed ramps toward the target instead of
+    // snapping, and the clip rate follows the real speed (no foot sliding).
+    const targetSpeed = moving ? (inp.run ? runSpeed : walkSpeed) * (kneelOn.current ? 0.35 : 1) : 0;
+    speedSmooth.current = THREE.MathUtils.lerp(speedSmooth.current, targetSpeed, Math.min(1, dt * (moving ? 7 : 10)));
+    const speed = speedSmooth.current;
+    const gliding = moving || speedSmooth.current > 0.25;
     if (moving) {
       tmp.move.normalize().multiplyScalar(speed * dt);
       root.position.x += tmp.move.x;
@@ -739,7 +819,18 @@ export default function PlayableCharacter({
     velocityY.current -= gravity * dt;
 
     // ---- jump button branch: climb > jump-down > regular jump ----
-    if (inp.jump && grounded.current) {
+    // Coyote time + press buffering: a jump pressed just before landing, or
+    // just after walking off a ledge, still fires — standard AAA feel.
+    const nowMs = performance.now();
+    if (inp.jump && !prevJump.current) jumpBufferAt.current = nowMs;
+    prevJump.current = inp.jump;
+    if (grounded.current) lastGroundedAt.current = nowMs;
+    const jumpWanted = inp.jump || nowMs - jumpBufferAt.current < 150;
+    const canJump = grounded.current || nowMs - lastGroundedAt.current < 120;
+    if (jumpWanted && canJump) {
+      jumpBufferAt.current = 0;
+      jumpCut.current = false;
+      kneelOn.current = false;
       const stepLimit = Math.max(0.45, cfg.maxStepHeight ?? 0.6);
       if (ledge && ledge.obstacleHeight > stepLimit && ledge.obstacleHeight <= 2.0) {
         // CLIMB up the ledge.
@@ -780,6 +871,11 @@ export default function PlayableCharacter({
         sittingOn.current = null;
         peakY.current = root.position.y;
       }
+    }
+    // Variable jump height: releasing jump early cuts the rise short.
+    if (!inp.jump && !grounded.current && velocityY.current > jumpVel * 0.4 && !jumpCut.current) {
+      velocityY.current *= 0.45;
+      jumpCut.current = true;
     }
     if (!grounded.current) {
       peakY.current = Math.max(peakY.current, root.position.y);
@@ -926,6 +1022,7 @@ export default function PlayableCharacter({
         if (nearestMarker.kind === "sit") {
           root.position.copy(nearestMarker.pos);
           sittingOn.current = nearestMarker.id;
+          seatYRef.current = nearestMarker.pos.y + 0.05;
           setState("sit", 0.3);
           lockedActionUntil.current = performance.now() + 999999;
         } else {
@@ -942,17 +1039,38 @@ export default function PlayableCharacter({
     inputPulse.interact = false;
     setInteractionPrompt(prompt);
 
+    // Kneel toggle (C key / gamepad B / touch): grounded only, debounced.
+    if (inputPulse.kneel) {
+      inputPulse.kneel = false;
+      if (grounded.current && performance.now() - lastKneelToggle.current > 300) {
+        kneelOn.current = !kneelOn.current;
+        lastKneelToggle.current = performance.now();
+        if (sittingOn.current) { sittingOn.current = null; lockedActionUntil.current = 0; }
+        if (!kneelOn.current && stateRef.current === "kneel") setState("idle", 0.15);
+      }
+    }
+    if (mobileAxes.kneel) { inputPulse.kneel = true; mobileAxes.kneel = false; }
+
     // ---- animation state ----
     if (performance.now() > lockedActionUntil.current && !sittingOn.current) {
       if (!grounded.current) {
         setState(velocityY.current > 0.1 ? "jump" : "fall");
+      } else if (kneelOn.current) {
+        setState("kneel");
       } else if (performance.now() < stepUpUntil.current && moving) {
         setState("stepUp");
-      } else if (moving) {
+      } else if (gliding) {
         setState(inp.run ? "run" : "walk");
       } else {
         setState("idle");
       }
+    }
+    // Match the clip rate to the actual (smoothed) speed so feet plant
+    // instead of skating when walk/run speeds are tuned per character.
+    const aa = activeAction.current;
+    if (aa && (stateRef.current === "walk" || stateRef.current === "run")) {
+      const nominal = stateRef.current === "run" ? ((cfg as any).runClipSpeed ?? runSpeed) : ((cfg as any).walkClipSpeed ?? walkSpeed);
+      aa.timeScale = THREE.MathUtils.clamp(speedSmooth.current / Math.max(0.1, nominal), 0.5, 1.8) * (obj.animationSpeed ?? 1);
     }
 
     // ---- visual yaw ----
