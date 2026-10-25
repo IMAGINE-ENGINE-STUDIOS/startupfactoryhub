@@ -12,7 +12,7 @@ import {
   X, ArrowUpRight, User, Camera, Boxes, Link2, Unlink,
 } from "lucide-react";
 import { Spline as SplineIcon, Paintbrush, Tv, Gamepad2 } from "lucide-react";
-import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight } from "lucide-react";
+import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight, Bot, Users } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CharacterAnimationGallery from "@/imagine-studio/components/level/animations/CharacterAnimationGallery";
 import ObjectAnimationGallery from "@/imagine-studio/components/level/animations/ObjectAnimationGallery";
@@ -23,7 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ensureLevelSession, withTimeout } from "@/imagine-studio/lib/levelSession";
 import { stripHdriBlobs, rehydrateHdriBlobs } from "@/imagine-studio/lib/hdriBlobStore";
 import { createLocalLevel, getLocalLevel, getLocalLevelOwnerId, isLocalLevelId, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
-import { matchNamedWorld, stableStringify } from "@/imagine-studio/lib/worldSync";
+import { stableStringify } from "@/imagine-studio/lib/worldSync";
+import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 import PublishedPlayTest from "@/imagine-studio/components/level/PublishedPlayTest";
 import {
   writeSnapshot as writeLevelSnapshot,
@@ -862,7 +863,7 @@ export default function LevelEditorPage() {
   useEffect(() => {
     if (!id || loading || rigRoomMode) return;
     if (worldAlignedRef.current === id) return;
-    const w = matchNamedWorld(name);
+    const w = resolveLevelWorld(id, name);
     if (!w) return;
     worldAlignedRef.current = id;
     let cancelled = false;
@@ -2173,13 +2174,22 @@ export default function LevelEditorPage() {
           {isMobile && (
             <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-background/95 backdrop-blur-xl">
               <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Scene</span>
-              <button
-                onClick={() => setMobilePanel(null)}
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Close panel"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { setMobilePanel(null); openPlaceDialog(); }}
+                  disabled={!isOwner}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50"
+                >
+                  <MapPin className="w-3.5 h-3.5" />Place on Atlas
+                </button>
+                <button
+                  onClick={() => setMobilePanel(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Close panel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
           <div className="p-3 border-b border-border/40 sticky top-0 z-10 shrink-0 bg-card/80 backdrop-blur-xl">
@@ -2763,7 +2773,7 @@ export default function LevelEditorPage() {
 
       {/* Mobile bottom tab bar — toggles slide-up panels and quick play/save */}
       {isMobile && (
-        <nav className="fixed inset-x-0 bottom-0 h-14 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl grid grid-cols-5 [padding-bottom:env(safe-area-inset-bottom)]">
+        <nav className="fixed inset-x-0 bottom-0 h-14 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl grid grid-cols-6 [padding-bottom:env(safe-area-inset-bottom)]">
           <button
             onClick={() => setMobilePanel((p) => (p === "left" ? null : "left"))}
             className={`flex flex-col items-center justify-center gap-0.5 text-[10px] uppercase tracking-wider transition-colors ${
@@ -2795,15 +2805,18 @@ export default function LevelEditorPage() {
             {testOpen ? "Stop" : "Play"}
           </button>
           <button
-            onClick={() => {
-              setMobilePanel(null);
-              openPlaceDialog();
-            }}
-            disabled={!isOwner}
-            className="flex flex-col items-center justify-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground disabled:opacity-50"
+            onClick={() => navigate("/plaza")}
+            className="flex flex-col items-center justify-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors"
           >
-            <MapPin className="w-5 h-5" />
-            Map
+            <Users className="w-5 h-5" />
+            Plaza
+          </button>
+          <button
+            onClick={() => navigate("/office")}
+            className="flex flex-col items-center justify-center gap-0.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors"
+          >
+            <Bot className="w-5 h-5" />
+            Office
           </button>
           <button
             onClick={() => {
@@ -2821,7 +2834,7 @@ export default function LevelEditorPage() {
       {/* Play-mode runtime + HUD (mounted only while playing) */}
       <PlayBehaviorRuntime objects={scene.objects} playing={playing} />
       <LevelLinkHandler inStudio={inStudio} levelId={id} onAutoPlay={() => setTestOpen(true)} />
-      {testOpen && <PublishedPlayTest name={name} scene={scene} onExit={() => setTestOpen(false)} />}
+      {testOpen && <PublishedPlayTest name={name} levelId={id} scene={scene} onExit={() => setTestOpen(false)} />}
       <PlayInputManager playing={playing} />
       <PlayHUD visible={playing} onExit={() => setPlaying(false)} />
       <MobileTouchControls visible={playing} />

@@ -15,13 +15,14 @@ import { Html, useGLTF, useAnimations } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, Mic, MicOff, MonitorUp, Play, RefreshCw, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, RefreshCw, Send, Square, Video, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, buildOfficeScene, fetchPublishedOfficeMeta, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { applyActionPose } from '@/imagine-studio/lib/actionPoses';
+import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import StudioMobileNav from '@/imagine-studio/components/shared/StudioMobileNav';
 
 const LINKS_KEY = 'sfh:office-bots:v1';
@@ -45,7 +46,7 @@ type OfficeTheater = TheaterSource | { kind: 'dashboard'; botKey: string; by: st
 /* ---------------- Bots (stationary, at their desks) ---------------- */
 const botPos = new Map<string, THREE.Vector3>();
 
-function BotCharacter({ bot, home, rotY, seatY, onOpen }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void }) {
+export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void }) {
   const { scene, animations } = useGLTF(bot.model);
   const model = useMemo(() => {
     const m = skeletonClone(scene) as THREE.Object3D;
@@ -87,10 +88,55 @@ function BotCharacter({ bot, home, rotY, seatY, onOpen }: { bot: OfficeBot; home
   );
 }
 
+/* ---------------- Social presence (Plaza parity) ---------------- */
+type PeerInfo = { x: number; z: number; ry: number; m: boolean; n: string; c: string };
+const PEER_COLORS = ['#f59e0b', '#38bdf8', '#a78bfa', '#34d399', '#fb7185', '#facc15', '#f472b6', '#4ade80'];
+const colorFor = (id: string) => { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return PEER_COLORS[Math.abs(h) % PEER_COLORS.length]; };
+const playerYaw = { current: 0 };
+
+function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
+  const { scene, animations } = useGLTF('/models/plaza/Xbot.glb');
+  const model = useMemo(() => {
+    const m = skeletonClone(scene) as THREE.Object3D;
+    m.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m);
+    const h = box.max.y - box.min.y || 1;
+    const s = 1.8 / h;
+    m.scale.setScalar(s);
+    m.position.y = -box.min.y * s;
+    const skin = new THREE.Color(info.c);
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    return m;
+  }, [scene, info.c]);
+  const root = useRef<THREE.Group>(null);
+  const { actions, names } = useAnimations(animations, root);
+  const cur = useRef(new THREE.Vector3(info.x, 0, info.z));
+  useFrame((_, dt) => {
+    const g = root.current; if (!g) return;
+    const k = Math.min(1, dt * 8);
+    cur.current.x += (info.x - cur.current.x) * k;
+    cur.current.z += (info.z - cur.current.z) * k;
+    g.position.set(cur.current.x, 0, cur.current.z);
+    let diff = info.ry - g.rotation.y; while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
+    g.rotation.y += diff * k;
+    const clip = info.m ? (names.find((x) => /walk/i.test(x)) ?? names[0]) : (names.find((x) => /idle/i.test(x)) ?? names[0]);
+    const a = clip ? actions[clip] : undefined;
+    if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
+  });
+  return (
+    <group ref={root} position={[info.x, 0, info.z]}>
+      <primitive object={model} />
+      <Html position={[0, 2.02, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+        <div style={{ pointerEvents: 'none', font: '600 11px system-ui', lineHeight: 1.25, color: '#fff', background: speaking ? 'rgba(16,185,129,.88)' : 'rgba(5,10,20,.62)', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>{info.n}</div>
+      </Html>
+    </group>
+  );
+}
+
 /* ---------------- Player ---------------- */
 const playerPos = new THREE.Vector3(0, 0, 12);
 
-function Player({ joyRef, camRef }: { joyRef: any; camRef: any }) {
+export function OfficePlayer({ joyRef, camRef }: { joyRef: any; camRef: any }) {
   const { scene, animations } = useGLTF('/models/plaza/Xbot.glb');
   const model = useMemo(() => { const m = skeletonClone(scene) as THREE.Object3D; m.traverse((o: any) => { if (o.isMesh) o.frustumCulled = false; }); return m; }, [scene]);
   const root = useRef<THREE.Group>(null);
@@ -141,6 +187,7 @@ function Player({ joyRef, camRef }: { joyRef: any; camRef: any }) {
       }
     }
     playerPos.copy(g.position);
+    playerYaw.current = g.rotation.y;
     const pitch = smCam.current.pitch;
     const back = 6.5, height = 2.6 + pitch * 4;
     camera.position.set(g.position.x - Math.sin(yaw) * back * Math.cos(pitch), height, g.position.z - Math.cos(yaw) * back * Math.cos(pitch));
@@ -171,7 +218,7 @@ function Proximity({ onNear }: { onNear: (key: string | null) => void }) {
 }
 
 /* ---------------- Theater screen (north wall) ---------------- */
-function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent, screenRuns, onPages }: {
+export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent, screenRuns, onPages }: {
   source: OfficeTheater;
   screenBot: OfficeBot | null; screenLink: BotLink; screenAgent: any; screenRuns: any[];
   onPages: (n: number) => void;
@@ -282,6 +329,25 @@ export default function OfficePage() {
   /* ---- Theater / LiveKit ---- */
   const [theater, setTheater] = useState<OfficeTheater>(null);
   const [theaterMenu, setTheaterMenu] = useState(false);
+
+  /* ---- Social (Plaza parity): presence, spatial voice, text chat ---- */
+  const [peers, setPeers] = useState<Record<string, PeerInfo>>({});
+  const [speakingIds, setSpeakingIds] = useState<string[]>([]);
+  const [chatMsgs, setChatMsgs] = useState<{ from: string; text: string; at: number; me?: boolean }[]>([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatText, setChatText] = useState('');
+  const [unread, setUnread] = useState(0);
+  const peersRef = useRef(new Map<string, PeerInfo>());
+  const myColorRef = useRef('#38bdf8');
+  const chatOpenRef = useRef(false); chatOpenRef.current = chatOpen;
+  const socialFlags = useMemo(() => { const s = ((scene as any)?.social || {}) as Record<string, unknown>; const on = (k: string) => s[k] !== false; return { presence: on('presence'), voice: on('voice'), chat: on('chat'), theater: on('theater') }; }, [scene]);
+  const socialRef = useRef(socialFlags); socialRef.current = socialFlags;
+  const sendChat = () => {
+    const t = chatText.trim(); if (!t) return;
+    setChatText('');
+    setChatMsgs((cur) => [...cur.slice(-60), { from: nameRef.current, text: t, at: Date.now(), me: true }]);
+    roomRef.current?.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'chat', text: t, n: nameRef.current })), { reliable: true }).catch(() => {});
+  };
   const [presenting, setPresenting] = useState(false);
   const [micOn, setMicOn] = useState(false);
   const [pdfPages, setPdfPages] = useState(0);
@@ -300,12 +366,15 @@ export default function OfficePage() {
 
   useEffect(() => {
     let cancelled = false;
+    let posTimer: any = null;
+    let volTimer: any = null;
     (async () => {
       try {
         const { data: u } = await supabase.auth.getUser();
         let gid = sessionStorage.getItem('office-guest-id');
         if (!gid) { gid = `guest-${Math.random().toString(36).slice(2, 10)}`; sessionStorage.setItem('office-guest-id', gid); }
         const identity = u.user?.id || gid;
+        myColorRef.current = colorFor(identity);
         nameRef.current = u.user?.email?.split('@')[0] || 'Guest';
         const { data, error } = await supabase.functions.invoke('livekit-token', { body: { roomName: 'office', identity, name: nameRef.current } });
         if (error || !data?.token || cancelled) return;
@@ -314,7 +383,18 @@ export default function OfficePage() {
         r.on(RoomEvent.DataReceived, (payload, p) => {
           try {
             const m = JSON.parse(dec.decode(payload));
-            if (!m || m.t !== 'theater') return;
+            if (!m) return;
+            if (m.t === 'pos' && p?.identity && socialRef.current.presence) {
+              peersRef.current.set(p.identity, { x: +m.x || 0, z: +m.z || 0, ry: +m.ry || 0, m: !!m.m, n: String(m.n || 'Guest'), c: String(m.c || '#38bdf8') });
+              setPeers(Object.fromEntries(peersRef.current));
+              return;
+            }
+            if (m.t === 'chat' && typeof m.text === 'string' && socialRef.current.chat) {
+              setChatMsgs((cur) => [...cur.slice(-60), { from: String(m.n || 'Guest'), text: m.text.slice(0, 500), at: Date.now() }]);
+              if (!chatOpenRef.current) setUnread((n) => n + 1);
+              return;
+            }
+            if (m.t !== 'theater') return;
             if (m.kind === 'stop') setTheater((cur) => (cur && cur.kind !== 'video' ? null : cur));
             else if (m.kind === 'pdf') setTheater({ kind: 'pdf', url: m.url, name: String(m.name || ''), page: Number(m.page) || 1, by: String(m.by || p?.name || 'Host') });
             else if (m.kind === 'image') setTheater({ kind: 'image', url: m.url, name: String(m.name || ''), by: String(m.by || p?.name || 'Host') });
@@ -327,6 +407,8 @@ export default function OfficePage() {
         });
         r.on(RoomEvent.TrackUnsubscribed, (track, pub, p) => { track.detach().forEach((el) => el.remove()); audioEls.current.delete(`${p.identity}:${pub.trackSid}`); if (pub.source === Track.Source.ScreenShare) setTheater((cur) => (cur?.kind === 'video' ? null : cur)); });
         r.on(RoomEvent.LocalTrackUnpublished, (pub) => { if (pub.source === Track.Source.ScreenShare) { setPresenting(false); setTheater((cur) => (cur?.kind === 'video' ? null : cur)); } });
+        r.on(RoomEvent.ParticipantDisconnected, (p) => { if (peersRef.current.delete(p.identity)) setPeers(Object.fromEntries(peersRef.current)); });
+        r.on(RoomEvent.ActiveSpeakersChanged, (sp) => setSpeakingIds((sp as any[]).map((s: any) => s.identity)));
         r.on(RoomEvent.ParticipantConnected, () => {
           const th = theaterRef.current;
           if (presentingRef.current) sendTheater({ kind: 'video' });
@@ -334,9 +416,26 @@ export default function OfficePage() {
           else if (th?.kind === 'dashboard') sendTheater({ kind: 'dashboard', botKey: th.botKey, agentName: th.agentName });
         });
         await r.connect(data.url || import.meta.env.VITE_LIVEKIT_URL, data.token);
+        // Social (Plaza parity): mic on, position broadcast, spatial voice.
+        if (socialRef.current.voice) { try { await r.localParticipant.setMicrophoneEnabled(true); setMicOn(true); } catch { /* mic stays off until toggled */ } }
+        let lx = Infinity, lz = Infinity;
+        posTimer = setInterval(() => {
+          if (!socialRef.current.presence) return;
+          const moved = Math.hypot(playerPos.x - lx, playerPos.z - lz) > 0.02;
+          if (!moved && Math.random() > 0.1) return;
+          lx = playerPos.x; lz = playerPos.z;
+          r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'pos', x: +playerPos.x.toFixed(2), z: +playerPos.z.toFixed(2), ry: +playerYaw.current.toFixed(2), m: moved, n: nameRef.current, c: myColorRef.current })), { reliable: false }).catch(() => {});
+        }, 120);
+        volTimer = setInterval(() => {
+          audioEls.current.forEach((el, key) => {
+            const peer = peersRef.current.get(key.split(':')[0]);
+            const d = peer ? Math.hypot(peer.x - playerPos.x, peer.z - playerPos.z) : 999;
+            (el as HTMLMediaElement).volume = socialRef.current.voice ? THREE.MathUtils.clamp(1 - d / 22, 0, 1) : 0;
+          });
+        }, 350);
       } catch { /* theater stays local to this browser */ }
     })();
-    return () => { cancelled = true; roomRef.current?.disconnect(); roomRef.current = null; audioEls.current.forEach((el) => el.remove()); audioEls.current.clear(); };
+    return () => { cancelled = true; if (posTimer) clearInterval(posTimer); if (volTimer) clearInterval(volTimer); roomRef.current?.disconnect(); roomRef.current = null; audioEls.current.forEach((el) => el.remove()); audioEls.current.clear(); };
   }, []);
 
   const stopDoc = () => { if (docRef.current) { docRef.current = null; sendTheater({ kind: 'stop' }); setTheater(null); } };
@@ -466,9 +565,10 @@ export default function OfficePage() {
         <directionalLight position={[18, 26, 12]} intensity={0.95} color="#cfe6ff" />
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} />}
-          {scene && bots.map(({ bot, home, rotY, seatY }) => <BotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} />)}
-          {scene && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
-          {scene && <Player joyRef={joyRef} camRef={camRef} />}
+          {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} />)}
+          {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
+          {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
+          {scene && <OfficePlayer joyRef={joyRef} camRef={camRef} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
@@ -489,14 +589,18 @@ export default function OfficePage() {
               ? <span className="text-amber-500 font-medium">● Built-in copy — the live published world could not be loaded</span>
               : <span className="text-muted-foreground">Loading live world…</span>}
         </div>
+        {socialFlags.presence && (
+          <div className="text-[11px] text-muted-foreground mt-0.5">● {Object.keys(peers).length + 1} in the office{Object.values(peers).length ? ` — ${Object.values(peers).slice(0, 3).map((p) => p.n).join(', ')}` : ''}</div>
+        )}
         <div className="text-[11px] text-muted-foreground mt-0.5">Walk with WASD or the joystick, drag to look around. Click a bot — or walk up to it — to open its dashboard.</div>
       </div>
 
       {isAdmin && (
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
-          <button onClick={async () => { const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
+          <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
             <BoxIcon className="w-4 h-4" />Edit in 3D Studio
           </button>
+          {socialFlags.theater && (
           <div className="relative">
             <button onClick={() => setTheaterMenu((o) => !o)} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs font-medium flex items-center gap-1.5">
               <Clapperboard className="w-4 h-4" />Theater{theater ? ' · on air' : ''}
@@ -523,13 +627,14 @@ export default function OfficePage() {
               </div>
             )}
           </div>
+          )}
           {theaterNote && <div className="rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs max-w-[300px]">{theaterNote}</div>}
           <input ref={fileInputRef} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { onDocFile(e.target.files?.[0]); e.target.value = ''; }} />
         </div>
       )}
 
       {theater && (
-        <div data-office-ui className="absolute bottom-24 sm:bottom-6 right-4 z-20 flex items-center gap-2">
+        <div data-office-ui className="absolute bottom-24 sm:bottom-20 right-4 z-20 flex items-center gap-2">
           {theater.kind === 'pdf' && docRef.current && (
             <>
               <button onClick={() => turnPage(-1)} className="rounded-full bg-background/90 border border-border p-2"><ChevronLeft className="w-4 h-4" /></button>
@@ -541,6 +646,37 @@ export default function OfficePage() {
             <Maximize2 className="w-4 h-4" />Watch full screen
           </button>
         </div>
+      )}
+
+      {socialFlags.chat && (
+        <>
+          <button data-office-ui onClick={() => { setChatOpen((o) => !o); setUnread(0); }} className="absolute bottom-40 sm:bottom-6 right-4 z-20 rounded-full bg-background/90 border border-border p-3 shadow-lg" aria-label="Office chat">
+            <MessageCircle className="w-5 h-5" />
+            {unread > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{unread}</span>}
+          </button>
+          {chatOpen && (
+            <div data-office-ui className="absolute bottom-56 sm:bottom-20 right-4 z-30 w-[320px] max-w-[88vw] h-[380px] max-h-[52vh] flex flex-col rounded-xl bg-background/95 backdrop-blur border border-border shadow-2xl overflow-hidden">
+              <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+                <span className="text-sm font-medium">Office chat</span>
+                <span className="text-[11px] text-muted-foreground">{Object.keys(peers).length + 1} online</span>
+              </div>
+              <div className="flex-1 overflow-y-auto touch-pan-y p-3 space-y-2.5">
+                {chatMsgs.length === 0 && <div className="text-xs text-muted-foreground">No messages yet — say hi to the room.</div>}
+                {chatMsgs.map((m, i) => (
+                  <div key={i} className={`text-xs leading-relaxed ${m.me ? 'text-right' : ''}`}>
+                    <span className="font-semibold">{m.me ? 'You' : m.from}</span>
+                    <span className="text-muted-foreground"> · {new Date(m.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+                    <div><span className={`inline-block rounded-lg px-2.5 py-1.5 mt-0.5 text-left ${m.me ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{m.text}</span></div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2 border-t border-border flex gap-2">
+                <input value={chatText} onChange={(e) => setChatText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') sendChat(); }} placeholder="Message the room…" className="flex-1 min-w-0 bg-transparent border border-border rounded-lg px-2.5 py-2 text-sm outline-none" />
+                <button onClick={sendChat} className="rounded-lg bg-primary text-primary-foreground px-3" aria-label="Send chat message"><Send className="w-4 h-4" /></button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {nearBot && !openBot && (

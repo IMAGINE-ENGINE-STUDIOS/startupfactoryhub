@@ -12,7 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
-import { matchNamedWorld } from "@/imagine-studio/lib/worldSync";
+import { resolveLevelWorld, setLevelWorld, worldForKey } from "@/imagine-studio/lib/worldBindings";
+import { Users } from "lucide-react";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
  *  prompt so complex scenes can be described in a few ops instead of hundreds. */
@@ -120,9 +121,35 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const live = useRef({ scene, selectedId, name, busy, msgs });
   live.current = { scene, selectedId, name, busy, msgs };
   const embedded = typeof window !== "undefined" && window.parent !== window;
-  const namedWorld = matchNamedWorld(name);
+  const namedWorld = resolveLevelWorld(levelId, name);
   const isPlaza = namedWorld?.key === "plaza";
   const isOffice = namedWorld?.key === "office";
+  const [socialOpen, setSocialOpen] = useState(false);
+  const social = (scene as any)?.social || {};
+  const setSocial = (patch: Record<string, unknown>) =>
+    updateScene((s: any) => ({ ...s, social: { ...(s.social || {}), ...patch } }));
+  const hasTheater = ((scene as any)?.objects || []).some((o: any) => /theater/i.test(o?.name || ""));
+  const addTheaterScreen = () => {
+    const hexA = (h: string): [number, number, number, number] => { const v = parseInt(h.replace("#", ""), 16); return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255, 1]; };
+    const stamp = Date.now().toString(36);
+    updateScene((s: any) => {
+      if ((s.objects || []).some((o: any) => /theater/i.test(o?.name || ""))) return s;
+      const frame = { id: `theater_frame_${stamp}`, kind: "primitive", name: "Theater Frame", shape: "box", position: [0, 2.2, -10.12], rotation: [0, 0, 0], scale: [7.7, 3.7, 0.1], visible: true, color: hexA("#14171c"), metalness: 0, roughness: 0.85 };
+      const screen = { id: `theater_screen_${stamp}`, kind: "primitive", name: "Theater Screen", shape: "box", position: [0, 2.2, -10], rotation: [0, 0, 0], scale: [7.2, 3.3, 0.12], visible: true, color: hexA("#0a0f16"), metalness: 0, roughness: 0.4, emissive: "#00e5ff", emissiveIntensity: 0.25 };
+      return { ...s, objects: [...(s.objects || []), frame, screen], social: { ...(s.social || {}), theater: true } };
+    });
+    toast.success("Theater screen added", { description: "It's at the north side of the level — select it in the Scene panel and drag it where you want." });
+  };
+  const assignRoute = (key: string) => {
+    setLevelWorld(levelId, key || null);
+    if (key) {
+      const w = worldForKey(key);
+      toast.success(`Route assigned: startupfactoryhub.com${w?.livePath}`, { description: "Reloading so the editor syncs with the live world." });
+      setTimeout(() => window.location.reload(), 700);
+    } else {
+      toast.success("Public route removed", { description: "This level now publishes to your library only." });
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -351,6 +378,54 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         <Button size="sm" variant="outline" className={cls} onClick={publish} disabled={!canEdit || publishing} title={isPlaza ? "Publish to the live Plaza" : isOffice ? "Publish to the live Office" : "Publish this level"}>
           {publishing ? <Loader2 className="w-3.5 h-3.5 sm:mr-1 animate-spin" /> : <Rocket className="w-3.5 h-3.5 sm:mr-1" />}<span className="hidden sm:inline">{isPlaza ? "Publish Plaza" : isOffice ? "Publish Office" : "Publish"}</span>
         </Button>
+      )}
+      <select
+        value={namedWorld?.key ?? ""}
+        disabled={!isAdmin}
+        onChange={(e) => assignRoute(e.target.value)}
+        title={isAdmin ? "Public route this level publishes to — assign it yourself" : "Public route this level publishes to (only admins can change it)"}
+        className={`${compact ? "h-7 text-[11px]" : "h-8 text-xs"} bg-transparent border border-input rounded-md px-1 max-w-[104px] sm:max-w-[150px] text-foreground [&>option]:text-black`}
+      >
+        <option value="">No route</option>
+        <option value="plaza">/plaza</option>
+        <option value="office">/office</option>
+      </select>
+      {namedWorld && (
+        <a href={namedWorld.livePath} target="_blank" rel="noreferrer" className={`${cls} hidden md:inline-flex items-center text-muted-foreground hover:text-foreground`} title={`Open the live world: startupfactoryhub.com${namedWorld.livePath}`}>
+          Live
+        </a>
+      )}
+      <Button size="sm" variant="ghost" className={cls} onClick={() => setSocialOpen((o) => !o)} disabled={!canEdit} title="Social features: let people join this world together, like the Plaza">
+        <Users className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Social</span>
+      </Button>
+      {socialOpen && (
+        <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-sm flex items-center gap-2"><Users className="w-4 h-4" />Social features</div>
+            <button onClick={() => setSocialOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Let people join this world together — the same social layer as the Plaza. Settings save inside the level and travel with it when published. Named worlds (/plaza, /office) have these on by default.</p>
+          <div className="mt-3 space-y-2.5">
+            {([
+              ["presence", "Multiplayer presence", "Visitors see each other as avatars, live."],
+              ["voice", "Voice chat", "Spatial voice — people sound closer when they are closer."],
+              ["chat", "Text chat", "A chat panel inside the world."],
+              ["theater", "Theater sharing", "Admins can share a screen, camera, document or dashboard on the big screen."],
+            ] as const).map(([key, label, hint]) => (
+              <label key={key} className="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" className="mt-0.5" checked={social[key] !== undefined ? !!social[key] : !!namedWorld} onChange={(e) => setSocial({ [key]: e.target.checked })} />
+                <span>
+                  <span className="block text-xs font-medium">{label}</span>
+                  <span className="block text-[11px] text-muted-foreground">{hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <button onClick={addTheaterScreen} disabled={hasTheater} className="mt-3.5 w-full rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50">
+            {hasTheater ? "Theater screen already in this scene" : "Add a theater screen to this scene"}
+          </button>
+          <p className="text-[11px] text-muted-foreground mt-2.5 leading-relaxed">Tip: bind this level to a public route (the route selector next to Publish) so people can open it at its own address and join each other there.</p>
+        </div>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />
       {dragging && (

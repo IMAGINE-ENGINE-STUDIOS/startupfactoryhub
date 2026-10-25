@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
 import { syncOfficeLevelToPublished } from "@/imagine-studio/lib/officeWorld";
+import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 import StudioMobileNav from "@/imagine-studio/components/shared/StudioMobileNav";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
@@ -61,6 +62,7 @@ export default function StudioProjectsPage() {
                   <button onClick={() => openLevel(l.id)} className="text-left mr-auto min-w-0">
                     <div className="font-medium truncate">{l.name}{current.defaultLevelId === l.id ? " · start" : ""}</div>
                     <div className="text-xs text-muted-foreground">{l.scene?.objects?.length ?? 0} objects</div>
+                    {(() => { const w = resolveLevelWorld(l.id, l.name); return w ? <div className="text-[11px] font-medium text-emerald-500">startupfactoryhub.com{w.livePath}</div> : null; })()}
                   </button>
                   <Button size="icon" variant="ghost" title="Make start level" onClick={() => { updateProject(current.id, { defaultLevelId: l.id }); refresh(); }}><Flag className="w-4 h-4" /></Button>
                   <Button size="icon" variant="ghost" title="Rename" onClick={() => { const n = prompt("Level name", l.name); if (n?.trim()) { updateLocalLevel(l.id, { name: n.trim() }); refresh(); } }}><Pencil className="w-4 h-4" /></Button>

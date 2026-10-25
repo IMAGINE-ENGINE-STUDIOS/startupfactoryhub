@@ -74,7 +74,9 @@ export default function ImagineEngineStudioPage() {
   return (
     <>
       <LevelEditorPage key={isRigRoom ? "rig" : id} />
-      <StudioMobileNav />
+      {/* The editor and rig room carry their own mobile control bars — the
+          wayfinding nav would cover them, so it only shows elsewhere. */}
+      {!id && !isRigRoom && <StudioMobileNav />}
     </>
   );
 }

@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
 import { syncPlazaLevelToPublished } from '@/imagine-studio/lib/plazaLevel';
+import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import { Box as BoxIcon, Sparkles } from 'lucide-react';
 import { PeopleMenu, LevelElectionsPanel, plazaAdmin, type PlazaPerson } from '@/imagine-studio/components/plaza/PlazaModeration';
 
@@ -750,10 +751,10 @@ export default function PlazaPage() {
       {isAdmin && (
         <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           <div className="flex gap-2">
-            <button onClick={async () => { const l = await syncPlazaLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+            <button onClick={async () => { const bid = findWorldLevelId('plaza'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncPlazaLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
               <BoxIcon className="w-4 h-4" />Edit in 3D Studio
             </button>
-            <button onClick={async () => { const p = window.prompt('What should Genius AI change in the Plaza?'); if (!p?.trim()) return; const l = await syncPlazaLevelToPublished(); window.location.href = `/imagine-studio/${l.id}?genius=${encodeURIComponent(p.trim())}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
+            <button onClick={async () => { const p = window.prompt('What should Genius AI change in the Plaza?'); if (!p?.trim()) return; const bid = findWorldLevelId('plaza'); if (bid) { window.location.href = `/imagine-studio/${bid}?genius=${encodeURIComponent(p.trim())}`; return; } const l = await syncPlazaLevelToPublished(); window.location.href = `/imagine-studio/${l.id}?genius=${encodeURIComponent(p.trim())}`; }} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
               <Sparkles className="w-4 h-4" />Ask Genius AI
             </button>
             <button onClick={shareScreen} className="rounded-full bg-background/90 px-3 py-2 text-xs flex items-center gap-1.5">
