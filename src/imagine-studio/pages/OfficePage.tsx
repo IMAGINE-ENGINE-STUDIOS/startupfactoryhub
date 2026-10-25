@@ -174,12 +174,12 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
           if (legsPoseRef.current) { playClip(clipOf.idle); applyPose(model as any, legsPoseRef.current as any); }
           else playClip(clipOf.idle);
         }
-        // TYPING (v3): the sit clip already poses the arms on the desk.
-        // All that is added here is a SMALL, SLOW up/down bob of the
-        // forearms (alternating, like keystrokes) and a slight natural
-        // head sway — each SET from a captured base pose every frame, so
-        // no rotation can ever accumulate or spin. Shoulders and hands
-        // are never touched.
+        // SEATED = RIGID (founder directive 2026-10-25): while seated the
+        // body does not bend or move at all — only the legs ever move, and
+        // only for walking/running. The v3 typing bob and head sway are
+        // therefore ZEROED (amplitudes kept as literals so the motion can
+        // be restored by changing two numbers); the block below now just
+        // re-sets the captured base pose every frame.
         if (typePoseRef.current === undefined) {
           const fl = boneByName(model, ['leftforearm', 'leftlowerarm']);
           const fr = boneByName(model, ['rightforearm', 'rightlowerarm']);
@@ -196,14 +196,14 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
             tp.baseH = tp.head ? tp.head.quaternion.clone() : null;
             if (t - tp.since > 1.2) tp.locked = true;
           }
-          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3) * 0.055);
+          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3) * 0);
           tp.fl.quaternion.copy(tp.baseL).multiply(_tq);
-          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3 + Math.PI) * 0.055);
+          _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 2.3 + Math.PI) * 0);
           tp.fr.quaternion.copy(tp.baseR).multiply(_tq);
           if (tp.head && tp.baseH) {
-            _tq.setFromAxisAngle(_AXIS_Y, Math.sin(t * 0.43 + seed) * 0.05);
+            _tq.setFromAxisAngle(_AXIS_Y, Math.sin(t * 0.43 + seed) * 0);
             tp.head.quaternion.copy(tp.baseH).multiply(_tq);
-            _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 0.31 + seed * 1.7) * 0.018);
+            _tq.setFromAxisAngle(_AXIS_X, Math.sin(t * 0.31 + seed * 1.7) * 0);
             tp.head.quaternion.multiply(_tq);
           }
         }
