@@ -166,7 +166,7 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
 }
 
 /* ---------------- Player ---------------- */
-const playerPos = new THREE.Vector3(0, 0, 12);
+const playerPos = new THREE.Vector3(4, 0, 0);
 
 export function OfficePlayer({ joyRef, camRef }: { joyRef: any; camRef: any }) {
   const { scene, animations } = useGLTF('/models/plaza/Xbot.glb');
@@ -223,6 +223,11 @@ export function OfficePlayer({ joyRef, camRef }: { joyRef: any; camRef: any }) {
     const pitch = smCam.current.pitch;
     const back = 6.5, height = 2.6 + pitch * 4;
     camera.position.set(g.position.x - Math.sin(yaw) * back * Math.cos(pitch), height, g.position.z - Math.cos(yaw) * back * Math.cos(pitch));
+    // The camera never leaves the room: orbiting at a wall used to park it
+    // behind the glass, looking in through the windows.
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -21, 21);
+    camera.position.y = THREE.MathUtils.clamp(camera.position.y, 0.7, 6.5);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -13.2, 13.2);
     camera.lookAt(g.position.x, 1.5, g.position.z);
     const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
     const walkName = names.find((x) => /walk/i.test(x)) ?? idleName;
@@ -230,7 +235,7 @@ export function OfficePlayer({ joyRef, camRef }: { joyRef: any; camRef: any }) {
     if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
   });
   return (
-    <group ref={root} position={[0, 0, 12]}>
+    <group ref={root} position={[4, 0, 0]}>
       <primitive object={model} />
       <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[0.45, 0.55, 32]} /><meshBasicMaterial color="#f59e0b" /></mesh>
     </group>
@@ -379,6 +384,7 @@ export default function OfficePage() {
   };
   const [presenting, setPresenting] = useState(false);
   const [micOn, setMicOn] = useState(false);
+  const [micNote, setMicNote] = useState('');
   const [pdfPages, setPdfPages] = useState(0);
   const [theaterNote, setTheaterNote] = useState('');
   const [screenRuns, setScreenRuns] = useState<any[]>([]);
@@ -517,7 +523,20 @@ export default function OfficePage() {
   };
   const toggleMic = async () => {
     const r = roomRef.current; if (!r) { setTheaterNote('Theater audio needs the live room connection.'); return; }
-    try { await r.localParticipant.setMicrophoneEnabled(!micOn); setMicOn(!micOn); } catch { setTheaterNote('Microphone blocked by the browser.'); }
+    try { await r.localParticipant.setMicrophoneEnabled(!micOn); setMicOn(!micOn); setMicNote(''); } catch { setTheaterNote('Microphone blocked by the browser.'); setMicNote('Microphone blocked — allow mic access in your browser, then tap the mic button again.'); }
+  };
+  // The connect-time mic attempt has no user gesture, and iOS blocks mic
+  // capture without one — so the FIRST tap anywhere retries it (and unlocks
+  // remote audio playback via startAudio). The visible mic button below is
+  // the manual control for everyone, not just admins.
+  const micGestureTriedRef = useRef(false);
+  const maybeAutoMic = async () => {
+    if (micGestureTriedRef.current || micOn || !socialRef.current.voice) return;
+    micGestureTriedRef.current = true;
+    const r = roomRef.current; if (!r) return;
+    try { await (r as any).startAudio?.().catch(() => {}); } catch { /* playback unlock is best-effort */ }
+    try { await r.localParticipant.setMicrophoneEnabled(true); setMicOn(true); setMicNote(''); }
+    catch { setMicNote('Microphone is blocked — tap the mic button and allow access in your browser.'); }
   };
   const showDashboardOnTheater = async (botKey: string) => {
     const bot = OFFICE_BOTS.find((b) => b.key === botKey); if (!bot) return;
@@ -570,10 +589,10 @@ export default function OfficePage() {
 
   return (
     <div className="fixed inset-0 bg-[#02070E] text-foreground select-none touch-none"
-      onPointerDown={(e) => { if (uiGuard(e)) return; dragRef.current = { x: e.clientX, y: e.clientY }; }}
+      onPointerDown={(e) => { if (uiGuard(e)) return; void maybeAutoMic(); dragRef.current = { x: e.clientX, y: e.clientY }; }}
       onPointerMove={(e) => { if (!dragRef.current) return; const evs = (e.nativeEvent as any).getCoalescedEvents?.() as PointerEvent[] | undefined; const last = evs?.length ? evs[evs.length - 1] : e.nativeEvent; const dx = last.clientX - dragRef.current.x, dy = last.clientY - dragRef.current.y; dragRef.current = { x: last.clientX, y: last.clientY }; const sens = e.pointerType === 'touch' ? 0.0042 : 0.005; camRef.current.yaw -= dx * sens; camRef.current.pitch = THREE.MathUtils.clamp(camRef.current.pitch + dy * 0.003, -0.1, 0.9); }}
       onPointerUp={() => { dragRef.current = null; }}>
-      <Canvas dpr={[1, 1.75]} camera={{ position: [0, 3.5, 19], fov: 55 }}>
+      <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
         <color attach="background" args={['#02070E']} />
         <ambientLight intensity={0.5} />
         <directionalLight position={[18, 26, 12]} intensity={0.95} color="#cfe6ff" />
@@ -663,6 +682,15 @@ export default function OfficePage() {
             <Maximize2 className="w-4 h-4" />Watch full screen
           </button>
         </div>
+      )}
+
+      {socialFlags.voice && (
+        <>
+          <button data-office-ui onClick={() => void toggleMic()} className={`absolute left-4 bottom-52 sm:bottom-6 z-20 rounded-full border p-3 shadow-lg ${micOn ? 'bg-emerald-500/90 text-white border-emerald-300/50' : 'bg-background/90 border-border'}`} aria-label={micOn ? 'Mute microphone' : 'Unmute microphone'}>
+            {micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+          </button>
+          {micNote && <div data-office-ui className="absolute left-4 bottom-[15.5rem] sm:bottom-20 z-20 max-w-[240px] rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs">{micNote}</div>}
+        </>
       )}
 
       {socialFlags.chat && (

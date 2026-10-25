@@ -150,7 +150,7 @@ export default function PublishedPlayTest({ name, levelId, scene, onExit }: { na
       }}
       onPointerUp={() => { dragRef.current = null; }}
     >
-      <Canvas dpr={[1, 1.75]} camera={{ position: [0, 3.5, 19], fov: 55 }} gl={{ antialias: true }}>
+      <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }} gl={{ antialias: true }}>
         <color attach="background" args={["#02070E"]} />
         <ambientLight intensity={0.5} />
         <directionalLight position={[18, 26, 12]} intensity={0.95} color="#cfe6ff" />
