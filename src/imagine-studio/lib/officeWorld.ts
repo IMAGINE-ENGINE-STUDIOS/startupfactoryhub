@@ -10,14 +10,26 @@ export const OFFICE_LEVEL_NAME = "Muse HQ — NYC Office";
 export const OFFICE_PUBLISHED_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/office-world.json`;
 /** Walkable interior bounds (half-extents) for the /office player. */
 export const OFFICE_BOUNDS = { x: 22.5, z: 14.5 };
-/** Places bots stroll to between desk work. */
-export const OFFICE_WAYPOINTS: [number, number][] = [[0, 12.8], [-19, -12], [19, 12], [12, -13.5], [-12, 13.5]];
+/** Places bots stroll to between desk work — all in clear corridors
+ * (window rows behind the desk banks, side columns, center aisle ends),
+ * so a straight aisle-routed path never crosses a desk. */
+export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 13], [12, -14], [-12, 14], [21, 0], [-21, 0], [6, 14]];
+
+/** Scene data version of the built-in office. When the published scene is
+ * OLDER than this, /office plays the built-in scene (preserving studio-added
+ * characters) until an admin publishes the update from the office itself. */
+export const OFFICE_SCENE_VERSION = 2;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
-/** The signature agent model (founder-supplied 2026-10-25): one unrigged
- * black-and-emerald robot mesh for every agent character. Hosted in the
- * public site-assets bucket; the renderers normalize it to 1.8m at runtime. */
-export const AGENT_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/agent.glb";
+/** The agent character body. NOTE (founder directive 2026-10-25): the bots
+ * must sit, type and walk via the rig controllers — the founder-supplied
+ * signature mesh (site-assets/models/agent.glb) is a single merged mesh with
+ * NO skeleton and NO clips (verified in the GLB: 1 mesh, 0 skins, 0
+ * animations), so no rig can pose it. The bots therefore run on the rigged
+ * robot body (Sitting / Walking / Idle clips, fully poseable arms) and the
+ * signature mesh remains a one-line swap away the day a rigged version of
+ * it exists: point AGENT_MODEL_URL back at it and every character follows. */
+export const AGENT_MODEL_URL = "/models/plaza/RobotExpressive.glb";
 const MODELS = [AGENT_MODEL_URL];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 const ROSTER: [string, string][] = [
@@ -72,26 +84,25 @@ const P = (name: string, shape: PrimitiveObject["shape"], position, scale, color
 export function buildOfficeScene(): LevelScene {
   n = 0;
   const o: PrimitiveObject[] = [];
-  const W = 48, D = 32, H = 4.2, T = 0.18;
-  // Floor — the simple world slab, Matrix-dark with a deep teal rug.
-  o.push(P("Office Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#0a1526", { roughness: 0.9, metalness: 0.15 }));
-  o.push(P("Center Rug", "box", [0, 0.005, 0], [30, 0.02, 20], "#05302b", { roughness: 1 }));
+  const W = 48, D = 32, H = 8, T = 0.18;
+  // Floor — flat white slab (founder directive 2026-10-25), no rug.
+  o.push(P("Office Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#ffffff", { roughness: 0.95, metalness: 0 }));
   // Exterior city ground so the skyline sits on something through the glass.
-  o.push(P("City Ground", "box", [0, -0.16, 0], [150, 0.1, 130], "#040910", { roughness: 1 }));
+  o.push(P("City Ground", "box", [0, -0.16, 0], [150, 0.1, 130], "#a9bccb", { roughness: 1 }));
   // Perimeter window walls (NYC high-rise glass) with a door gap on the south side.
-  const glass: [number, number, number, number] = [0.62, 0.81, 0.95, 0.3];
+  const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
   const wallRun = (side: string, len: number, px: number, pz: number, rotY: number, segments: [number, number][]) => {
     for (const [from, to] of segments) {
       const segLen = to - from, mid = (from + to) / 2;
       const mx = px + Math.cos(rotY) * mid, mz = pz - Math.sin(rotY) * mid;
       const sillH = 0.15, headH = 0.45, glassH = H - sillH - headH;
-      o.push(P(`Window Wall ${side} Sill`, "box", [mx, sillH / 2, mz], [segLen, sillH, T], "#0a0f16", { rotation: [0, rotY, 0], roughness: 0.6, metalness: 0.4 }));
+      o.push(P(`Window Wall ${side} Sill`, "box", [mx, sillH / 2, mz], [segLen, sillH, T], "#c7d2dc", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
       o.push(P(`Window Wall ${side} Glass`, "box", [mx, sillH + glassH / 2, mz], [segLen, glassH, T * 0.35], glass, { rotation: [0, rotY, 0], roughness: 0.08, metalness: 0.1 }));
-      o.push(P(`Window Wall ${side} Header`, "box", [mx, H - headH / 2, mz], [segLen, headH, T], "#0a0f16", { rotation: [0, rotY, 0], roughness: 0.6, metalness: 0.4 }));
+      o.push(P(`Window Wall ${side} Header`, "box", [mx, H - headH / 2, mz], [segLen, headH, T], "#c7d2dc", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
       const nM = Math.max(1, Math.floor(segLen / 3));
       for (let i = 0; i <= nM; i++) {
         const off = from + (segLen / nM) * i;
-        o.push(P(`Window Mullion ${side}`, "box", [px + Math.cos(rotY) * off, sillH + glassH / 2, pz - Math.sin(rotY) * off], [0.12, glassH, T * 0.7], "#060a10", { rotation: [0, rotY, 0], roughness: 0.6, metalness: 0.4 }));
+        o.push(P(`Window Mullion ${side}`, "box", [px + Math.cos(rotY) * off, sillH + glassH / 2, pz - Math.sin(rotY) * off], [0.12, glassH, T * 0.7], "#aebbc7", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
       }
     }
   };
@@ -99,49 +110,51 @@ export function buildOfficeScene(): LevelScene {
   wallRun("S", W, 0, D / 2, 0, [[-W / 2, -1.8], [1.8, W / 2]]); // door gap in the middle
   wallRun("W", D, -W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
   wallRun("E", D, W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
-  o.push(P("Entrance Lintel", "box", [0, 3.4, D / 2], [3.6, 1.6, T], "#0a0f16", { roughness: 0.6, metalness: 0.4 }));
+  o.push(P("Entrance Lintel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T], "#d7dee5", { roughness: 0.5, metalness: 0.3 }));
   // Theater screen, centered on the north wall (live content is rendered by /office).
   o.push(P("Theater Screen", "box", [0, 2.05, -15.72], [7.9, 3.7, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
   o.push(P("Theater Pylon Left", "box", [-4.15, 1.7, -15.72], [0.35, 3.4, 0.35], "#0a0f16"));
   o.push(P("Theater Pylon Right", "box", [4.15, 1.7, -15.72], [0.35, 3.4, 0.35], "#0a0f16"));
   o.push(P("Theater Glow Strip", "box", [0, 0.12, -15.5], [7.9, 0.06, 0.1], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.2 } as any));
-  // Glass board on the south interior + corner plants.
-  o.push(P("Whiteboard", "box", [-10, 1.7, D / 2 - 0.35], [6, 2.2, 0.08], "#0a1a2e", { roughness: 0.25, emissive: hex("#0e2a44"), emissiveIntensity: 0.35 } as any));
-  o.push(P("Whiteboard Frame", "box", [-10, 1.7, D / 2 - 0.42], [6.3, 2.5, 0.05], "#16283c", { roughness: 0.6 }));
+  // Whiteboard on the south interior + corner plants.
+  o.push(P("Whiteboard", "box", [-10, 1.7, D / 2 - 0.35], [6, 2.2, 0.08], "#f7fafc", { roughness: 0.25 }));
+  o.push(P("Whiteboard Frame", "box", [-10, 1.7, D / 2 - 0.42], [6.3, 2.5, 0.05], "#b9c6d2", { roughness: 0.6 }));
   for (const [px, pz] of [[-22, -14], [22, -14], [-22, 14], [22, 14]] as const) {
     o.push(P("Plant Pot", "box", [px, 0.3, pz], [0.7, 0.6, 0.7], "#101820"));
     o.push(P("Plant", "cone", [px, 1.15, pz], [1.1, 1.2, 1.1], "#14532d", { roughness: 1 }));
   }
+  // Ceiling — a real slab, MUCH higher than the old 4.2m walls (founder
+  // directive 2026-10-25) so the follow camera never feels boxed in.
+  o.push(P("Ceiling", "box", [0, H + 0.06, 0], [W, 0.12, D], "#eef2f5", { roughness: 0.95, metalness: 0 }));
   // Ceiling light bars + cyan floor glow strips (SFH/Matrix accents).
   for (const lx of [-16, 0, 16]) for (const lz of [-7, 7]) {
-    o.push(P("Ceiling Light Bar", "box", [lx, H - 0.06, lz], [5.5, 0.07, 0.45], "#0a1420", { emissive: hex("#bfe9ff"), emissiveIntensity: 1.1 } as any));
+    o.push(P("Ceiling Light Bar", "box", [lx, H - 0.06, lz], [5.5, 0.07, 0.45], "#d5dde4", { emissive: hex("#ffffff"), emissiveIntensity: 0.9 } as any));
   }
   o.push(P("Floor Glow N", "box", [0, 0.03, -15.85], [47.5, 0.04, 0.1], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow S", "box", [0, 0.03, 15.85], [47.5, 0.04, 0.1], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow W", "box", [-23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow E", "box", [23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
-  // NYC skyline outside the glass — layered silhouette towers with lit windows,
-  // all simple boxes so the scene stays fast and fully editable.
+  // NYC skyline outside the glass — DAYLIGHT towers (founder directive
+  // 2026-10-25): pale glass-and-steel bodies, unlit reflective window panes.
   let seed = 42;
   const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
   const tower = (cx: number, cz: number, w: number, h: number, d: number, tone: string, face: "N" | "S" | "E" | "W") => {
-    o.push(P("Skyline Tower", "box", [cx, h / 2 - 0.1, cz], [w, h, d], tone, { roughness: 1 }));
+    o.push(P("Skyline Tower", "box", [cx, h / 2 - 0.1, cz], [w, h, d], tone, { roughness: 0.7, metalness: 0.15 }));
     const rows = Math.max(2, Math.floor(h / 2.4));
     for (let rI = 0; rI < rows; rI++) {
-      if (rnd() < 0.45) continue;
+      if (rnd() < 0.4) continue;
       const wy = 1.3 + rI * 2.4;
-      const lit = rnd() < 0.78 ? "#ffb86a" : "#7ee7ff";
       const off = (rnd() - 0.5) * ((face === "N" || face === "S" ? w : d) - 1.4);
       const pos: [number, number, number] = face === "N" ? [cx + off, wy, cz + d / 2 + 0.04] : face === "S" ? [cx + off, wy, cz - d / 2 - 0.04] : face === "E" ? [cx - w / 2 - 0.04, wy, cz + off] : [cx + w / 2 + 0.04, wy, cz + off];
       const scl: [number, number, number] = face === "N" || face === "S" ? [0.55, 0.1, 0.06] : [0.06, 0.1, 0.55];
-      o.push(P("Skyline Window", "box", pos, scl, "#0a0a08", { emissive: hex(lit), emissiveIntensity: 1.3 } as any));
+      o.push(P("Skyline Window", "box", pos, scl, rnd() < 0.5 ? "#7e97ab" : "#93a9bb", { roughness: 0.35, metalness: 0.2 }));
     }
   };
-  for (let i = 0; i < 8; i++) tower(-30 + i * 8.6, -37, 5 + rnd() * 2.5, 13 + rnd() * 12, 5 + rnd() * 2, "#0a1424", "N");
-  for (let i = 0; i < 7; i++) tower(-27 + i * 9.2, -27.5, 4.5 + rnd() * 2, 7 + rnd() * 8, 4.5 + rnd() * 2, "#0d1830", "N");
-  for (let i = 0; i < 6; i++) tower(-26 + i * 10.4, 30, 5 + rnd() * 2, 8 + rnd() * 9, 5, "#0d1830", "S");
-  for (let i = 0; i < 6; i++) tower(34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#0d1830", "E");
-  for (let i = 0; i < 6; i++) tower(-34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#0d1830", "W");
+  for (let i = 0; i < 8; i++) tower(-30 + i * 8.6, -37, 5 + rnd() * 2.5, 13 + rnd() * 12, 5 + rnd() * 2, "#b7c9da", "N");
+  for (let i = 0; i < 7; i++) tower(-27 + i * 9.2, -27.5, 4.5 + rnd() * 2, 7 + rnd() * 8, 4.5 + rnd() * 2, "#a5bcd2", "N");
+  for (let i = 0; i < 6; i++) tower(-26 + i * 10.4, 30, 5 + rnd() * 2, 8 + rnd() * 9, 5, "#c9d8e4", "S");
+  for (let i = 0; i < 6; i++) tower(34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#a5bcd2", "E");
+  for (let i = 0; i < 6; i++) tower(-34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#9db4c9", "W");
   // 20 agent stations: desk, monitor with a glowing dashboard screen, chair, bot.
   OFFICE_DESKS.forEach((d, i) => {
     const k = i + 1, f = d.facing;
@@ -166,16 +179,47 @@ export function buildOfficeScene(): LevelScene {
     ...EMPTY_SCENE,
     objects: [...o, ...characters] as any,
     lights: [
-      { id: "office_sun", name: "Moonlight", kind: "directional", position: [18, 26, 12], color: [0.72, 0.84, 1, 1], intensity: 0.9, castShadow: false },
-      { id: "office_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [0.85, 0.92, 1, 1], intensity: 0.5 },
+      { id: "office_sun", name: "Sunlight", kind: "directional", position: [26, 34, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
+      { id: "office_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.8 },
     ],
     environment: {
       ...EMPTY_SCENE.environment,
-      background: "#02070E",
-      ambient: 0.5,
-      gi: { enabled: true, skyColor: "#0a1a2e", groundColor: "#02070E", hemisphereIntensity: 0.35, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
+      background: "#bfd9ec",
+      ambient: 0.8,
+      sceneVersion: OFFICE_SCENE_VERSION,
+      gi: { enabled: true, skyColor: "#d6e9f8", groundColor: "#e9e4da", hemisphereIntensity: 0.75, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
     },
   };
+}
+
+/**
+ * Plays the built-in (code) scene while PRESERVING what the Studio added on
+ * top of the published one: published-only objects (extra props, agent
+ * characters dropped in the editor) and agent characters are carried over,
+ * and the published social/player settings survive. Used when the published
+ * scene predates OFFICE_SCENE_VERSION, and as the exact payload the admin
+ * "publish the update" button sends — what you see is what gets published.
+ */
+export function mergeOfficeScenes(codeScene: LevelScene, published: LevelScene | null): LevelScene {
+  if (!published) return codeScene;
+  const codeById = new Map((codeScene.objects || []).map((o: any) => [o.id, o]));
+  const objects: any[] = [...(codeScene.objects || [])];
+  for (const o of (published.objects || []) as any[]) {
+    const inCode = codeById.get(o.id);
+    if (!inCode) { objects.push(o); continue; } // studio addition — keep it
+    // An agent character the studio edited (moved / re-bodied) wins over the
+    // built-in copy; everything else takes the refreshed built-in version.
+    if (o.kind === "character" && o.agentId) {
+      const i = objects.findIndex((x: any) => x.id === o.id);
+      if (i >= 0) objects[i] = o;
+    }
+  }
+  const merged: any = { ...codeScene, objects };
+  const pub: any = published as any;
+  if (pub.social) merged.social = pub.social;
+  if (pub.playerControllerId) merged.playerControllerId = pub.playerControllerId;
+  if (pub.controllers) merged.controllers = pub.controllers;
+  return merged as LevelScene;
 }
 
 /** Fetches the scene the live /office world is actually playing (the published JSON). */

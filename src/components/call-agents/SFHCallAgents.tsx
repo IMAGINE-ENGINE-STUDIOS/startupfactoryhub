@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { agentLlama33, agentMaverick, agentScout, agentInstant, agentSpark, agentGreeter, agentGuardian } from "@/assets/agents/characters";
+import TaskPipeline from "@/components/call-agents/TaskPipeline";
 import { agentChatBus } from "@/lib/agentChatBus";
 import { flushDraftNow } from "@/lib/lightpaperDraft";
 
@@ -402,6 +403,20 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
       setLoading(false);
     }
   }, [soloId]);
+
+  // Quiet refresh for background completions (task-pipeline queue runs):
+  // same list data as load(), but without flipping the tab into its
+  // loading state or touching the current run selection.
+  const refreshAfterQueueRun = useCallback(async () => {
+    try {
+      const data = await callAgentsApi({ action: "list" });
+      setAgents(data.agents ?? []);
+      setBalance(data.balance ?? null);
+      setIsAdmin(!!data.isAdmin);
+    } catch {
+      /* keep the current list — the next manual load will catch up */
+    }
+  }, []);
 
   const loadVault = useCallback(async () => {
     setVaultLoading(true);
@@ -2018,6 +2033,9 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
             </div>
           </section>
         </div>
+
+        {/* ── Task pipeline ─────────────────────────────── */}
+        <TaskPipeline agents={agents} onRunComplete={refreshAfterQueueRun} />
       </div>
     </div>
   );

@@ -2,9 +2,11 @@
 /**
  * Muse HQ — NYC Office. A published world like the Plaza District: perimeter
  * window walls, 20 simple desk stations, and one NPC bot per Muse agent.
- * Bots stay at their desks; click a bot (or walk up to it) to open its
- * dashboard — link it to one of your SFH Agents, watch its job activity
- * (call_agent_runs), and assign new jobs (call-agents run). The north wall
+ * Bots work at their desks (sitting + typing) and stroll the office between
+ * jobs; click a bot (or walk up to it) to open its Genius panel — chat with
+ * the agent, watch its task pipeline, or jump into the full Agents console
+ * to link it to one of your SFH Agents and assign jobs (call-agents run).
+ * The north wall
  * carries a theater screen: admins can share a screen, a camera, documents
  * (PDF/image) with audio, or put any bot's AI dashboard on the big screen,
  * synced to everyone in the room over LiveKit (same pattern as the Plaza).
@@ -15,14 +17,15 @@ import { Html, useGLTF, useAnimations } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
-import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, buildOfficeScene, fetchPublishedOfficeMeta, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
@@ -48,10 +51,88 @@ async function callAgentsApi(body: Record<string, unknown>): Promise<any> {
 
 type OfficeTheater = TheaterSource | { kind: 'dashboard'; botKey: string; by: string; agentName?: string } | null;
 
-/* ---------------- Bots (stationary, at their desks) ---------------- */
+/* ---------------- Bots: rig-controller driven co-workers ----------------
+ * Each bot runs a small behavior controller on top of the rig (founder
+ * directive 2026-10-25): on a job it SITS at its desk and TYPES (a real
+ * Sitting clip where the body has one, the calibrated seated-legs pose
+ * otherwise, plus a calibrated arm pose stamped after the mixer so the
+ * hands work the keyboard); off a job it gets up, strolls the office
+ * corridors to a window/aisle spot, hangs around (idle, the odd wave),
+ * then walks back and sits down again. A bot whose linked agent produced
+ * a run in the last few minutes is PINNED to its desk — it is on a job. */
 const botPos = new Map<string, THREE.Vector3>();
 
-export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = true }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void; seated?: boolean }) {
+const hashStr = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return Math.abs(h); };
+const AISLE_Z = [-7, 0, 7];
+/** Desk-safe route: out to the nearest aisle, along it, then in — the desk
+ * banks (rows at z ±3.5/±10.5, columns every 8 in x) are never crossed. */
+function officePath(from: { x: number; z: number }, to: { x: number; z: number }): [number, number][] {
+  const nearest = (z: number) => AISLE_Z.reduce((b, a) => (Math.abs(a - z) < Math.abs(b - z) ? a : b), AISLE_Z[0]);
+  const azF = nearest(from.z), azT = nearest(to.z);
+  const raw: [number, number][] = [[from.x, azF], [to.x, azF], [to.x, azT], [to.x, to.z]];
+  const out: [number, number][] = [];
+  let px = from.x, pz = from.z;
+  for (const [x, z] of raw) { if (Math.hypot(x - px, z - pz) > 0.35) { out.push([x, z]); px = x; pz = z; } }
+  if (Math.hypot(to.x - px, to.z - pz) > 0.05) out.push([to.x, to.z]);
+  return out;
+}
+
+type CalJoint = { bone: any; axis: 'x' | 'y' | 'z'; sign: 1 | -1 };
+const _cq = new THREE.Quaternion();
+const _cv = new THREE.Vector3();
+/** Finds the local rotation on `bone` that swings `child` most toward
+ * `dirWorld` — the same calibration trick the Rig Room poses use, so the
+ * typing pose fits whatever humanoid rig the body carries. */
+function calibrateJoint(rootObj: THREE.Object3D, bone: any, child: any, dirWorld: THREE.Vector3): CalJoint | null {
+  rootObj.updateMatrixWorld(true);
+  const before = child.getWorldPosition(new THREE.Vector3());
+  const saved = bone.quaternion.clone();
+  let best: (CalJoint & { score: number }) | null = null;
+  for (const axis of ['x', 'y', 'z'] as const) {
+    for (const sign of [1, -1] as const) {
+      bone.quaternion.copy(saved);
+      _cq.setFromAxisAngle(axis === 'x' ? _cv.set(1, 0, 0) : axis === 'y' ? _cv.set(0, 1, 0) : _cv.set(0, 0, 1), sign * 0.4);
+      bone.quaternion.multiply(_cq);
+      rootObj.updateMatrixWorld(true);
+      const after = child.getWorldPosition(new THREE.Vector3());
+      const score = after.sub(before).dot(dirWorld);
+      if (!best || score > best.score) best = { bone, axis, sign, score };
+    }
+  }
+  bone.quaternion.copy(saved);
+  rootObj.updateMatrixWorld(true);
+  return best && best.score > 1e-4 ? { bone: best.bone, axis: best.axis, sign: best.sign } : null;
+}
+const boneByName = (rootObj: THREE.Object3D, pats: string[]) => {
+  let f: any = null;
+  rootObj.traverse((o: any) => { if (!f && o.isBone && pats.some((p) => o.name.toLowerCase().includes(p))) f = o; });
+  return f;
+};
+/** Calibrated typing rig for one body: upper arms raised toward the desk,
+ * forearms bent, palms tapping — or null when the body has no arms to pose. */
+function buildTypingRig(rootObj: THREE.Object3D, model: THREE.Object3D, rotY: number) {
+  const fwd = new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY));
+  const fwdUp = fwd.clone().add(new THREE.Vector3(0, 0.35, 0)).normalize();
+  const side = (s: 'l' | 'r') => {
+    const up = boneByName(model, [`upperarm.${s}`, `upperarm_${s}`, `${s === 'l' ? 'left' : 'right'}upperarm`, `${s === 'l' ? 'left' : 'right'}arm`]);
+    const lo = boneByName(model, [`lowerarm.${s}`, `lowerarm_${s}`, `${s === 'l' ? 'left' : 'right'}forearm`, `${s === 'l' ? 'left' : 'right'}lowerarm`]);
+    const palm = boneByName(model, [`palm1.${s}`, `palm.${s}`, `${s === 'l' ? 'left' : 'right'}hand`]);
+    if (!up || !lo) return null;
+    const u = calibrateJoint(rootObj, up, lo, fwd);
+    const l = calibrateJoint(rootObj, lo, palm || lo.children?.[0] || lo, fwdUp);
+    const p = palm ? calibrateJoint(rootObj, palm, palm, fwd) : null;
+    return u && l ? { up: { ...u, bone: up }, lo: { ...l, bone: lo }, palm: p && palm ? { ...p, bone: palm } : null } : null;
+  };
+  const L = side('l'), R = side('r');
+  return L || R ? { L, R } : null;
+}
+const stampJoint = (j: CalJoint | null, angle: number) => {
+  if (!j) return;
+  _cq.setFromAxisAngle(j.axis === 'x' ? _cv.set(1, 0, 0) : j.axis === 'y' ? _cv.set(0, 1, 0) : _cv.set(0, 0, 1), j.sign * angle);
+  j.bone.quaternion.multiply(_cq);
+};
+
+export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = true, roam = false, pinnedWork = false }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void; seated?: boolean; roam?: boolean; pinnedWork?: boolean }) {
   const { scene, animations } = useGLTF(bot.model);
   const model = useMemo(() => {
     const m = skeletonClone(scene) as THREE.Object3D;
@@ -67,57 +148,126 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   }, [scene, bot]);
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
-  useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); }; }, [bot.key]);
-  // Every bot sits on its chair. Two mechanisms, both corrected after live
-  // testing: (1) a real Sitting clip (RobotExpressive) is a sit-DOWN
-  // transition — play it ONCE and clamp on its final frame, never loop it;
-  // (2) models without one get a calibrated procedural sit pose — applied
-  // from the frame loop with retries, and any idle clip the mixer already
-  // started is stopped, because a running clip overwrites bone poses every
-  // frame (that is why the other characters "just stood").
-  const sitClip = useMemo(() => names.find((x) => /sitting/i.test(x)) ?? null, [names]);
-  const sitStartedRef = useRef(false);
+  const seed = useMemo(() => hashStr(bot.key), [bot.key]);
+  const clipOf = useMemo(() => ({
+    sit: names.find((x) => /sitting/i.test(x)) ?? null,
+    idle: names.find((x) => /idle/i.test(x)) ?? names[0] ?? null,
+    walk: names.find((x) => /walk/i.test(x) && !/jump/i.test(x)) ?? null,
+    wave: names.find((x) => /^wave$/i.test(x)) ?? null,
+  }), [names]);
+  const curClip = useRef<string | null>(null);
+  const playClip = (name: string | null, once = false) => {
+    if (!name) return;
+    const a = actions[name]; if (!a) return;
+    if (curClip.current === name) {
+      // Already the active clip: a clamped one-shot (Sitting) holds its final
+      // frame — never restart it. A looping clip restarts only if it stopped.
+      if (!once && !a.isRunning()) { a.reset().fadeIn(0.2).play(); }
+      return;
+    }
+    Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.25); });
+    a.reset();
+    if (once) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; } else { a.setLoop(THREE.LoopRepeat, Infinity); a.clampWhenFinished = false; }
+    a.fadeIn(0.25).play();
+    curClip.current = name;
+  };
+  const st = useRef({
+    phase: 'work' as 'work' | 'walk' | 'hang',
+    t: 18 + (seed % 30),                 // seconds left in the current phase
+    path: [] as [number, number][],
+    after: 'hang' as 'hang' | 'work',
+    waved: false,
+  });
+  const pinnedRef = useRef(pinnedWork); pinnedRef.current = pinnedWork;
+  const [status, setStatus] = useState<'Working' | 'Walking' | 'On a break'>('Working');
+  const setPhase = (p: 'work' | 'walk' | 'hang') => { st.current.phase = p; setStatus(p === 'work' ? 'Working' : p === 'walk' ? 'Walking' : 'On a break'); };
   const legsPoseRef = useRef<any[] | null>(null);
   const legsTriedRef = useRef(0);
-  useFrame(() => {
-    if (seated && sitClip) {
-      const a = actions[sitClip];
-      if (a && !sitStartedRef.current) {
-        sitStartedRef.current = true;
-        a.setLoop(THREE.LoopOnce, 1);
-        a.clampWhenFinished = true;
-        Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); });
-        a.reset().fadeIn(0.2).play();
+  const typeRigRef = useRef<any | undefined>(undefined);
+  useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); }; }, [bot.key]); // eslint-disable-line
+  useFrame((state, dtRaw) => {
+    const g = root.current; if (!g) return;
+    const dt = Math.min(dtRaw, 0.05);
+    const s = st.current;
+    const pos = { x: g.position.x, z: g.position.z };
+    // A fresh job pins the bot to its desk, from wherever it is.
+    if (pinnedRef.current && s.phase === 'hang') { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; setPhase('walk'); }
+    if (s.phase === 'work') {
+      // Sit (clip clamped on its last frame, or the procedural legs pose)
+      // and TYPE: the calibrated arm rig is stamped after the mixer, the
+      // hands alternating like keystrokes.
+      if (seated) {
+        if (clipOf.sit) playClip(clipOf.sit, true);
+        else {
+          if (!legsPoseRef.current && legsTriedRef.current < 5) {
+            legsTriedRef.current += 1;
+            g.updateMatrixWorld(true);
+            try { legsPoseRef.current = buildSeatedLegsPose(model, { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { legsPoseRef.current = null; }
+          }
+          if (legsPoseRef.current) { playClip(clipOf.idle); applyPose(model as any, legsPoseRef.current as any); }
+          else playClip(clipOf.idle);
+        }
+        if (typeRigRef.current === undefined) { g.updateMatrixWorld(true); try { typeRigRef.current = buildTypingRig(g as any, model, rotY); } catch { typeRigRef.current = null; } }
+        const rig = typeRigRef.current;
+        if (rig) {
+          const t = state.clock.elapsedTime * 9;
+          for (const [sideRig, ph] of [[rig.L, 0], [rig.R, Math.PI]] as const) {
+            if (!sideRig) continue;
+            stampJoint(sideRig.up, 0.52);
+            stampJoint(sideRig.lo, 0.6 + Math.sin(t + ph) * 0.1);
+            stampJoint(sideRig.palm, Math.sin(t + ph + 0.7) * 0.07);
+          }
+        }
+      } else {
+        playClip(clipOf.idle);
       }
-      return;
+      let dyaw = rotY - g.rotation.y; while (dyaw > Math.PI) dyaw -= Math.PI * 2; while (dyaw < -Math.PI) dyaw += Math.PI * 2;
+      g.rotation.y += dyaw * Math.min(1, dt * 6);
+      s.t -= dt;
+      if (s.t <= 0 && roam && !pinnedRef.current) {
+        const wp = OFFICE_WAYPOINTS[(seed + Math.floor(state.clock.elapsedTime / 47)) % OFFICE_WAYPOINTS.length];
+        s.path = officePath(pos, { x: wp[0], z: wp[1] });
+        s.after = 'hang'; s.waved = false;
+        if (s.path.length) setPhase('walk'); else { s.t = 8; }
+      }
+    } else if (s.phase === 'walk') {
+      playClip(clipOf.walk || clipOf.idle);
+      const target = s.path[0];
+      if (!target) { setPhase(s.after === 'hang' ? 'hang' : 'work'); s.t = s.after === 'hang' ? 6 + (seed % 9) : 22 + (seed % 34); }
+      else {
+        const dx = target[0] - pos.x, dz = target[1] - pos.z;
+        const dist = Math.hypot(dx, dz);
+        const step = Math.min(dist, dt * 1.3);
+        if (dist > 0.02) {
+          g.position.x += (dx / dist) * step;
+          g.position.z += (dz / dist) * step;
+          const targetYaw = Math.atan2(dx, dz);
+          let dyaw = targetYaw - g.rotation.y; while (dyaw > Math.PI) dyaw -= Math.PI * 2; while (dyaw < -Math.PI) dyaw += Math.PI * 2;
+          g.rotation.y += dyaw * Math.min(1, dt * 8);
+        }
+        if (dist <= 0.06) s.path.shift();
+      }
+    } else {
+      // Hanging around: idle, a slow look around the room, the odd wave.
+      if (clipOf.wave && !s.waved && seed % 2 === 0) { s.waved = true; playClip(clipOf.wave, true); }
+      else {
+        const wa = clipOf.wave ? actions[clipOf.wave] : null;
+        if (!(wa && wa.isRunning() && wa.time < wa.getClip().duration - 0.05)) playClip(clipOf.idle);
+      }
+      g.rotation.y = rotY + Math.sin(state.clock.elapsedTime * 0.35 + seed) * 0.45;
+      s.t -= dt;
+      if (s.t <= 0) { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; if (s.path.length) setPhase('walk'); else { setPhase('work'); s.t = 22 + (seed % 34); } }
     }
-    if (seated) {
-      // Legs-only seated pose, built once and re-stamped every frame AFTER
-      // the mixer updates: the idle clip keeps arms and upper body alive
-      // (no T-pose freeze) while hips/thighs/shins hold the chair.
-      if (!legsPoseRef.current && legsTriedRef.current < 5) {
-        legsTriedRef.current += 1;
-        root.current?.updateMatrixWorld(true);
-        try { legsPoseRef.current = buildSeatedLegsPose(model, { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { legsPoseRef.current = null; }
-      }
-      if (legsPoseRef.current) {
-        const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
-        const a = idleName ? actions[idleName] : null;
-        if (a && !a.isRunning()) { Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); }); a.reset().fadeIn(0.2).play(); }
-        applyPose(model as any, legsPoseRef.current as any);
-      }
-      return;
-    }
-    const clipName = names.find((x) => /idle/i.test(x)) ?? names[0];
-    if (!clipName) return;
-    const a = actions[clipName];
-    if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
+    botPos.set(bot.key, new THREE.Vector3(g.position.x, 0, g.position.z));
   });
+  const dot = status === 'Working' ? '#34d399' : status === 'Walking' ? '#38bdf8' : '#fbbf24';
   return (
     <group ref={root} position={home} rotation={[0, rotY, 0]} onClick={(e) => { e.stopPropagation(); onOpen(bot); }}>
       <primitive object={model} />
       <Html position={[0, 1.52, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
-        <div style={{ pointerEvents: 'none', font: '600 11px system-ui', lineHeight: 1.25, color: '#fff', background: 'rgba(5,10,20,.62)', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>{bot.name}</div>
+        <div style={{ pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 5, font: '600 11px system-ui', lineHeight: 1.25, color: '#fff', background: 'rgba(5,10,20,.62)', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+          <span style={{ width: 6, height: 6, borderRadius: 999, background: dot, display: 'inline-block' }} />{bot.name} · {status}
+        </div>
       </Html>
     </group>
   );
@@ -287,13 +437,117 @@ function TheaterMenuItem({ icon: Icon, label, onClick }: { icon: any; label: str
   );
 }
 
+/* ---------------- Per-agent Genius panel ----------------
+ * What a bot click opens (founder directive 2026-10-25): a chat in the
+ * Genius bubble's full-screen language — emerald glass, mono micro-labels —
+ * scoped to THIS agent, with its slice of the task pipeline (in progress /
+ * in queue / done) and a button into the entire Agents tab. The queue is
+ * the same localStorage queue the Agents tab runs ('sfh:agents-task-queue:v1'),
+ * so tasks line up identically in the office and in the dashboard. */
+function OfficeAgentPanel({ bot, link, agents, signedIn, working, onSaveLink, onOpenConsole }: {
+  bot: OfficeBot; link: BotLink; agents: any[]; signedIn: boolean; working: boolean;
+  onSaveLink: (patch: BotLink) => void; onOpenConsole: () => void;
+}) {
+  const agentId = link.agentId;
+  const linkedAgent = agents.find((a) => a.id === agentId);
+  const [msgs, setMsgs] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [input, setInput] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [runs, setRuns] = useState<any[]>([]);
+  const [queue, setQueue] = useState<any[]>([]);
+  const [pick, setPick] = useState('');
+  const threadRef = useRef<HTMLDivElement>(null);
+  const loadRuns = async () => {
+    if (!agentId) { setRuns([]); return; }
+    const { data } = await supabase.from('call_agent_runs').select('id, input, output, status, created_at').eq('agent_id', agentId).order('created_at', { ascending: false }).limit(6);
+    setRuns(data || []);
+  };
+  const loadQueue = () => {
+    try { const all = JSON.parse(localStorage.getItem('sfh:agents-task-queue:v1') || '[]'); setQueue(Array.isArray(all) ? all.filter((q: any) => q?.agentId === agentId) : []); } catch { setQueue([]); }
+  };
+  useEffect(() => { setMsgs([]); setInput(''); void loadRuns(); loadQueue(); const iv = setInterval(loadQueue, 5000); return () => clearInterval(iv); }, [bot.key, agentId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const el = threadRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy || !agentId) return;
+    setInput('');
+    setMsgs((m) => [...m, { role: 'user', content: text }]);
+    setBusy(true);
+    try {
+      const r = await callAgentsApi({ action: 'run', agent_id: agentId, message: text });
+      const out = (r?.steps || []).map((s: any) => s.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+      setMsgs((m) => [...m, { role: 'assistant', content: out }]);
+    } catch (e: any) {
+      setMsgs((m) => [...m, { role: 'assistant', content: `That run failed: ${e?.message || 'unknown error'}` }]);
+    }
+    setBusy(false);
+    void loadRuns(); loadQueue();
+  };
+  const laneLabel = "font-mono text-[10px] uppercase tracking-wider text-emerald-300/70 w-24 shrink-0 pt-0.5";
+  return (
+    <div className="flex h-full flex-col bg-[#050d0a] text-emerald-50">
+      <div className="shrink-0 border-b border-emerald-400/10 px-4 py-3 space-y-2.5">
+        <div className="flex items-center gap-2 text-xs">
+          <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: bot.tint }} />
+          {linkedAgent ? <span className="truncate">Powered by <b>{linkedAgent.name}</b></span> : <span className="text-emerald-100/70 truncate">NPC bot — not linked to one of your agents yet</span>}
+          <span className={`ml-auto shrink-0 font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${working ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-emerald-100/50'}`}>{working ? 'On a job now' : 'Idle'}</span>
+        </div>
+        <div className="grid gap-1.5 text-xs">
+          <div className="flex gap-2"><span className={laneLabel}>In progress</span>{busy ? <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" />Running your task…</span> : <span className="text-emerald-100/50">Nothing running</span>}</div>
+          <div className="flex gap-2"><span className={laneLabel}>In queue</span>{queue.length ? <span className="truncate">{queue.length} queued · next: “{String(queue[0].message || '').slice(0, 60)}”</span> : <span className="text-emerald-100/50">Empty — line tasks up in the Agents tab</span>}</div>
+          <div className="flex gap-2"><span className={laneLabel}>Done</span>
+            <div className="min-w-0 flex-1 space-y-1">
+              {runs.length === 0 && <span className="text-emerald-100/50">No finished tasks yet</span>}
+              {runs.slice(0, 4).map((r) => (
+                <div key={r.id} className="flex items-center gap-1.5 min-w-0">
+                  <span className={`flex h-4 w-4 items-center justify-center rounded-full shrink-0 ${r.status === 'ok' ? 'bg-emerald-500 text-emerald-950' : 'bg-red-500/80 text-white'}`}>{r.status === 'ok' ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}</span>
+                  <span className="truncate">{r.input || r.output || 'Task'}</span>
+                  <span className="ml-auto shrink-0 text-[10px] text-emerald-100/40">{new Date(r.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div ref={threadRef} className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 space-y-3">
+        {msgs.length === 0 && <div className="text-sm text-emerald-100/60 leading-relaxed">This is {bot.name} — {bot.duty} Give it a task below and it runs right here; finished work lands in Done above and in the Agents tab.</div>}
+        {msgs.map((m, i) => (
+          <div key={i} className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'ml-auto bg-emerald-500/15 border-emerald-400/25' : 'bg-white/5 border-white/10'}`}>
+            {m.role === 'assistant' ? <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1.5"><ReactMarkdown>{m.content}</ReactMarkdown></div> : m.content}
+          </div>
+        ))}
+        {busy && <div className="flex items-center gap-2 text-xs text-emerald-100/60"><Loader2 className="w-4 h-4 animate-spin" />{bot.name} is working…</div>}
+      </div>
+      <div className="shrink-0 border-t border-emerald-400/10 px-4 py-3 space-y-2.5">
+        {!signedIn ? (
+          <div className="text-xs text-emerald-100/60">Sign in to chat with {bot.name} and hand it tasks.</div>
+        ) : !agentId ? (
+          <div className="flex gap-2">
+            <select value={pick} onChange={(e) => setPick(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2.5 text-sm outline-none">
+              <option value="">Choose one of your agents…</option>
+              {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+            <button disabled={!pick} onClick={() => onSaveLink({ agentId: pick, aiOn: true })} className="rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-emerald-950 disabled:opacity-50">Link</button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className="min-w-0 flex-1 rounded-xl border border-emerald-400/20 bg-black/40 px-3.5 py-2.5 text-sm outline-none placeholder:text-emerald-100/35" />
+            <button onClick={() => void send()} disabled={busy || !input.trim()} className="rounded-xl bg-emerald-500 px-3.5 py-2.5 text-emerald-950 disabled:opacity-50" aria-label="Send task"><Send className="h-4 w-4" /></button>
+          </div>
+        )}
+        <button onClick={onOpenConsole} className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20">
+          <LayoutDashboard className="h-4 w-4" />See the entire Agents tab
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Page ---------------- */
 export default function OfficePage() {
   const brand = useOfficeBrand();
   const [published, setPublished] = useState<any>(undefined);
   const [pubMeta, setPubMeta] = useState<{ publishedAt: string | null; live: boolean } | null>(null);
-  // The world's own player controller (scene.playerControllerId + scene.controllers), default otherwise.
-  const playerDef = useMemo(() => playerControllerFor(published ?? undefined), [published]);
   useEffect(() => {
     let off = false;
     fetchPublishedOfficeMeta()
@@ -301,10 +555,30 @@ export default function OfficePage() {
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
   }, []);
-  const fallback = useMemo(() => buildOfficeScene(), []);
+  const codeScene = useMemo(() => buildOfficeScene(), []);
+  // Scene version gate: when the published scene predates the built-in one
+  // (white floor / tall ceiling / daylight update), play the built-in scene
+  // merged with the published world's studio additions, until an admin
+  // publishes the update from the button in this page — then the published
+  // file IS this scene and the gate never triggers again.
+  const pubVersion = (published as any)?.environment?.sceneVersion ?? 1;
+  const outdated = !!published && pubVersion < OFFICE_SCENE_VERSION;
   // Never silently show the built-in copy: wait for the live published file,
   // and only fall back (clearly badged) when it truly cannot be loaded.
-  const scene = published ?? (pubMeta ? fallback : null);
+  const scene = published && !outdated ? published : (pubMeta ? mergeOfficeScenes(codeScene, published ?? null) : null);
+  // The world's own player controller (scene.playerControllerId + scene.controllers), default otherwise.
+  const playerDef = useMemo(() => playerControllerFor(scene ?? undefined), [scene]);
+  const [publishing, setPublishing] = useState(false);
+  const [pubNote, setPubNote] = useState('');
+  const publishUpdatedScene = async () => {
+    if (!scene) return;
+    setPublishing(true); setPubNote('');
+    const { data, error } = await supabase.functions.invoke('studio-publish', { body: { target: 'office', name: OFFICE_LEVEL_NAME, scene } });
+    setPublishing(false);
+    if (error || (data as any)?.error) { setPubNote((data as any)?.error || error?.message || 'Publish failed — try again from the 3D Studio.'); return; }
+    setPublished(scene);
+    setPubNote('Published — everyone now loads this office.');
+  };
   const bots = useMemo(() => {
     const chars = (scene?.objects || []).filter((o: any) => o.kind === 'character');
     const chairs = (scene?.objects || []).filter((o: any) => /^Agent Chair \d+$/.test(o.name || ''));
@@ -320,6 +594,8 @@ export default function OfficePage() {
   }, [scene]);
 
   const [openBot, setOpenBot] = useState<OfficeBot | null>(null);
+  const [panelView, setPanelView] = useState<'genius' | 'console'>('genius');
+  useEffect(() => { setPanelView('genius'); }, [openBot?.key]);
   const [nearKey, setNearKey] = useState<string | null>(null);
   const [links, setLinks] = useState<Record<string, BotLink>>(loadLinks);
   const [agents, setAgents] = useState<any[]>([]);
@@ -587,6 +863,29 @@ export default function OfficePage() {
   const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
   const nearBot = nearKey ? OFFICE_BOTS.find((b) => b.key === nearKey) : null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
+  /* ---- Who is on a job right now: a bot whose linked agent produced a run
+   * in the last 3 minutes is pinned to its desk (sitting + typing). ---- */
+  const linksRef = useRef(links); linksRef.current = links;
+  const agentCharsRef = useRef<any[]>([]); agentCharsRef.current = agentChars;
+  const [workingKeys, setWorkingKeys] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let off = false;
+    const tick = async () => {
+      const byAgent = new Map<string, string>();
+      Object.entries(linksRef.current).forEach(([k, l]) => { if (l?.agentId && l?.aiOn) byAgent.set(l.agentId, k); });
+      agentCharsRef.current.forEach((o: any) => { if (o.agentId) byAgent.set(String(o.agentId), `agent_${o.id}`); });
+      if (!byAgent.size) { if (!off) setWorkingKeys(new Set()); return; }
+      const since = new Date(Date.now() - 3 * 60_000).toISOString();
+      const { data } = await supabase.from('call_agent_runs').select('agent_id').in('agent_id', [...byAgent.keys()]).gte('created_at', since);
+      if (off) return;
+      const next = new Set<string>();
+      (data || []).forEach((r: any) => { const k = byAgent.get(r.agent_id); if (k) next.add(k); });
+      setWorkingKeys(next);
+    };
+    void tick();
+    const iv = setInterval(tick, 25_000);
+    return () => { off = true; clearInterval(iv); };
+  }, []);
   useEffect(() => { if (!scene) return; const t = setTimeout(() => setIntroGone(true), 2100); return () => clearTimeout(t); }, [scene]);
   const uiGuard = (e: any) => !!(e.target as HTMLElement)?.closest?.('[data-office-ui]');
 
@@ -596,18 +895,18 @@ export default function OfficePage() {
       onPointerMove={(e) => { if (!dragRef.current) return; const evs = (e.nativeEvent as any).getCoalescedEvents?.() as PointerEvent[] | undefined; const last = evs?.length ? evs[evs.length - 1] : e.nativeEvent; const dx = last.clientX - dragRef.current.x, dy = last.clientY - dragRef.current.y; dragRef.current = { x: last.clientX, y: last.clientY }; const sens = e.pointerType === 'touch' ? 0.0042 : 0.005; camRef.current.yaw -= dx * sens; camRef.current.pitch = THREE.MathUtils.clamp(camRef.current.pitch + dy * 0.003, -0.1, 0.9); }}
       onPointerUp={() => { dragRef.current = null; }}>
       <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
-        <color attach="background" args={['#02070E']} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[18, 26, 12]} intensity={0.95} color="#cfe6ff" />
+        <color attach="background" args={['#bfd9ec']} />
+        <ambientLight intensity={0.85} />
+        <directionalLight position={[26, 34, 14]} intensity={1.7} color="#fff2df" />
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
-          {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} />)}
+          {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
           {scene && agentChars.map((o) => (
-            <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || '/models/plaza/Xbot.glb', tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
+            <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || '/models/plaza/RobotExpressive.glb', tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
           {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
-          {scene && <UnifiedPlayer def={playerDef} world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 6.5, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
+          {scene && <UnifiedPlayer def={playerDef} model="/models/plaza/RobotExpressive.glb" tint="#ffffff" world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
@@ -621,6 +920,12 @@ export default function OfficePage() {
 
       {isAdmin && (
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
+          {outdated && scene && (
+            <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
+              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (white floor · tall ceiling · daylight)'}
+            </button>
+          )}
+          {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
           <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
             <BoxIcon className="w-4 h-4" />Edit in 3D Studio
           </button>
@@ -727,21 +1032,31 @@ export default function OfficePage() {
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
             <span className="w-9 h-9 rounded-full shrink-0 border border-border" style={{ background: openBot.tint }} />
             <div className="mr-auto min-w-0">
-              <div className="font-semibold truncate">{openBot.name} — Agents</div>
-              <div className="text-[11px] text-muted-foreground truncate">{openBot.duty} · the Agents console — identical to your dashboard</div>
+              <div className="font-semibold truncate">{openBot.name} — {panelView === 'genius' ? 'Genius chat' : 'Agents'}</div>
+              <div className="text-[11px] text-muted-foreground truncate">{panelView === 'genius' ? `${openBot.duty} · chat with this agent and hand it tasks` : `${openBot.duty} · the Agents console — identical to your dashboard`}</div>
+            </div>
+            <div className="hidden md:flex rounded-full border border-border p-0.5 shrink-0">
+              <button onClick={() => setPanelView('genius')} className={`rounded-full px-3 py-1.5 text-xs ${panelView === 'genius' ? 'bg-emerald-500 text-emerald-950 font-semibold' : 'hover:bg-muted'}`}>Genius chat</button>
+              <button onClick={() => setPanelView('console')} className={`rounded-full px-3 py-1.5 text-xs ${panelView === 'console' ? 'bg-emerald-500 text-emerald-950 font-semibold' : 'hover:bg-muted'}`}>Agents tab</button>
             </div>
             {isAdmin && OFFICE_BOTS.some((b) => b.key === openBot.key) && <button onClick={() => { void showDashboardOnTheater(openBot.key); }} className="hidden sm:flex rounded-full border border-border px-3 py-1.5 text-xs items-center gap-1.5 hover:bg-muted"><LayoutDashboard className="w-3.5 h-3.5" />Theater</button>}
             <button onClick={() => { setOpenBot(null); void refreshAgents(); }} className="p-1.5 rounded-full hover:bg-muted" aria-label="Close agents"><X className="w-5 h-5" /></button>
           </div>
-          <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
-            {signedIn ? (
-              <Suspense fallback={<div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading the Agents console…</div>}>
-                <SFHCallAgents key={agentsKey} botLink={botLink} />
-              </Suspense>
-            ) : (
-              <div className="p-6 text-sm text-muted-foreground">This panel is the full Agents console from your Startup Factory Hub dashboard — the same agents, runs, pipelines, sharing and vault. Sign in to use it here, standing next to {openBot.name}.</div>
-            )}
-          </div>
+          {panelView === 'genius' ? (
+            <div className="flex-1 min-h-0">
+              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onSaveLink={saveLink} onOpenConsole={() => setPanelView('console')} />
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+              {signedIn ? (
+                <Suspense fallback={<div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading the Agents console…</div>}>
+                  <SFHCallAgents key={agentsKey} botLink={botLink} />
+                </Suspense>
+              ) : (
+                <div className="p-6 text-sm text-muted-foreground">This panel is the full Agents console from your Startup Factory Hub dashboard — the same agents, runs, pipelines, sharing and vault. Sign in to use it here, standing next to {openBot.name}.</div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -755,7 +1070,7 @@ export default function OfficePage() {
           <div className="mt-2 text-xs sm:text-sm tracking-[0.5em] text-[#2EF8A0]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{brand.kind === 'company' ? 'HEADQUARTERS' : brand.kind === 'person' ? 'VIRTUAL OFFICE' : 'NEW YORK CITY OFFICE'}</div>
           <div className="mt-5 max-w-md text-sm text-white/60">The 3D home of your AI agents. Walk in, meet the team, put them to work — together.</div>
           <div className="mt-8 h-[3px] w-56 overflow-hidden rounded bg-white/10"><div className="h-full w-1/3 rounded bg-[#00E5FF]" style={{ animation: 'sfhscan 1.15s ease-in-out infinite' }} /></div>
-          <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
+          <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (outdated ? 'UPDATED OFFICE READY — ADMIN PUBLISH PENDING' : pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
         </div>
       )}
       <StudioMobileNav />
