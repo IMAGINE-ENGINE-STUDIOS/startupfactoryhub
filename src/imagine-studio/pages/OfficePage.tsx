@@ -255,6 +255,41 @@ function Proximity({ onNear }: { onNear: (key: string | null) => void }) {
 }
 
 /* ---------------- Theater screen (north wall) ---------------- */
+/* ---------------- Account branding ----------------
+   The office wears the signed-in account's identity: a startup sees its own
+   company name + logo, an investor (no company on file) sees their own name.
+   Signed out it falls back to Startup Factory Hub. Never "Muse HQ". */
+export interface OfficeBrand { name: string; logoUrl: string | null; kind: 'company' | 'person' | 'guest' }
+const SFH_BRAND: OfficeBrand = { name: 'Startup Factory Hub', logoUrl: null, kind: 'guest' };
+let cachedBrand: OfficeBrand | null = null;
+let brandPromise: Promise<OfficeBrand> | null = null;
+export function loadOfficeBrand(): Promise<OfficeBrand> {
+  if (cachedBrand) return Promise.resolve(cachedBrand);
+  if (!brandPromise) {
+    brandPromise = (async () => {
+      try {
+        const { data: au } = await supabase.auth.getUser();
+        const uid = au?.user?.id;
+        if (!uid) { cachedBrand = SFH_BRAND; return cachedBrand; }
+        const [{ data: comp }, { data: prof }] = await Promise.all([
+          supabase.from('companies').select('name, logo_url').eq('user_id', uid).order('created_at', { ascending: true }).limit(1).maybeSingle(),
+          supabase.from('profiles').select('full_name, avatar_url').eq('id', uid).maybeSingle(),
+        ]);
+        if ((comp as any)?.name) cachedBrand = { name: (comp as any).name, logoUrl: (comp as any).logo_url || null, kind: 'company' };
+        else if ((prof as any)?.full_name) cachedBrand = { name: (prof as any).full_name, logoUrl: (prof as any).avatar_url || null, kind: 'person' };
+        else cachedBrand = SFH_BRAND;
+      } catch { cachedBrand = SFH_BRAND; }
+      return cachedBrand;
+    })();
+  }
+  return brandPromise;
+}
+export function useOfficeBrand(): OfficeBrand {
+  const [brand, setBrand] = useState<OfficeBrand>(cachedBrand ?? SFH_BRAND);
+  useEffect(() => { let live = true; loadOfficeBrand().then((b) => { if (live) setBrand(b); }); return () => { live = false; }; }, []);
+  return brand;
+}
+
 export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent, screenRuns, onPages }: {
   source: OfficeTheater;
   screenBot: OfficeBot | null; screenLink: BotLink; screenAgent: any; screenRuns: any[];
@@ -263,14 +298,18 @@ export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent
   const texSrc = source && source.kind !== 'dashboard' ? (source as TheaterSource) : null;
   const { tex, pages } = useSourceTexture(texSrc);
   useEffect(() => { onPages(pages); }, [pages]); // eslint-disable-line
+  const brand = useOfficeBrand();
   const idle = useMemo(() => {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 576;
     const g = c.getContext('2d')!; g.fillStyle = '#0d1117'; g.fillRect(0, 0, 1024, 576);
-    g.fillStyle = '#e6edf3'; g.font = '600 52px sans-serif'; g.textAlign = 'center';
-    g.fillText('Muse HQ Theater', 512, 268); g.font = '27px sans-serif'; g.fillStyle = '#8b949e';
+    g.fillStyle = '#e6edf3'; g.textAlign = 'center';
+    const title = `${brand.name} Theater`;
+    let size = 52; g.font = `600 ${size}px sans-serif`;
+    while (g.measureText(title).width > 940 && size > 22) { size -= 4; g.font = `600 ${size}px sans-serif`; }
+    g.fillText(title, 512, 268); g.font = '27px sans-serif'; g.fillStyle = '#8b949e';
     g.fillText('Ready — an admin can share a screen, camera, document or AI dashboard', 512, 328);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-  }, []);
+  }, [brand]);
   const isDash = source?.kind === 'dashboard';
   return (
     <group position={[0, 2.15, -15.55]}>
@@ -321,6 +360,7 @@ function TheaterMenuItem({ icon: Icon, label, onClick }: { icon: any; label: str
 
 /* ---------------- Page ---------------- */
 export default function OfficePage() {
+  const brand = useOfficeBrand();
   const [published, setPublished] = useState<any>(undefined);
   const [pubMeta, setPubMeta] = useState<{ publishedAt: string | null; live: boolean } | null>(null);
   useEffect(() => {
@@ -521,22 +561,47 @@ export default function OfficePage() {
     d.page = Math.min(Math.max(1, d.page + dir), pdfPages || 1);
     sendTheater(d); setTheater({ ...d, kind: 'pdf', by: nameRef.current });
   };
+  // Turning the mic ON asks the browser directly first: on iOS that surfaces
+  // the native permission prompt, where LiveKit's internal request can fail
+  // silently. Errors are named precisely — a sticky Safari denial needs the
+  // aA → Website Settings fix, and the note says so.
+  const enableMic = async (manual: boolean): Promise<boolean> => {
+    const r = roomRef.current;
+    if (!r) { if (manual) setMicNote('Still connecting — give it a second, then tap the mic again.'); return false; }
+    if (manual) {
+      try {
+        const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
+        probe.getTracks().forEach((t) => t.stop());
+      } catch (e: any) {
+        if (e?.name === 'NotAllowedError') setMicNote('Safari is blocking the mic for this site. Tap the aA icon in the address bar → Website Settings → Microphone → Allow, then reload and tap the mic again. (Tap this message to dismiss.)');
+        else if (e?.name === 'NotFoundError' || e?.name === 'OverconstrainedError') setMicNote('No microphone found on this device.');
+        else setMicNote('Microphone could not start — reload the page and tap the mic button.');
+        return false;
+      }
+    }
+    try {
+      await (r as any).startAudio?.().catch(() => {});
+      await r.localParticipant.setMicrophoneEnabled(true);
+      setMicOn(true); setMicNote('');
+      return true;
+    } catch {
+      if (manual) setMicNote('Microphone could not start — reload the page and tap the mic button.');
+      return false;
+    }
+  };
   const toggleMic = async () => {
-    const r = roomRef.current; if (!r) { setTheaterNote('Theater audio needs the live room connection.'); return; }
-    try { await r.localParticipant.setMicrophoneEnabled(!micOn); setMicOn(!micOn); setMicNote(''); } catch { setTheaterNote('Microphone blocked by the browser.'); setMicNote('Microphone blocked — allow mic access in your browser, then tap the mic button again.'); }
+    const r = roomRef.current; if (!r) { setMicNote('Still connecting — give it a second, then tap the mic again.'); return; }
+    if (micOn) { try { await r.localParticipant.setMicrophoneEnabled(false); } catch { /* already off */ } setMicOn(false); setMicNote(''); return; }
+    await enableMic(true);
   };
   // The connect-time mic attempt has no user gesture, and iOS blocks mic
-  // capture without one — so the FIRST tap anywhere retries it (and unlocks
-  // remote audio playback via startAudio). The visible mic button below is
-  // the manual control for everyone, not just admins.
+  // capture without one — so the FIRST tap anywhere retries it silently.
   const micGestureTriedRef = useRef(false);
   const maybeAutoMic = async () => {
     if (micGestureTriedRef.current || micOn || !socialRef.current.voice) return;
+    if (!roomRef.current) return; // room not ready: keep the one retry for later
     micGestureTriedRef.current = true;
-    const r = roomRef.current; if (!r) return;
-    try { await (r as any).startAudio?.().catch(() => {}); } catch { /* playback unlock is best-effort */ }
-    try { await r.localParticipant.setMicrophoneEnabled(true); setMicOn(true); setMicNote(''); }
-    catch { setMicNote('Microphone is blocked — tap the mic button and allow access in your browser.'); }
+    await enableMic(false);
   };
   const showDashboardOnTheater = async (botKey: string) => {
     const bot = OFFICE_BOTS.find((b) => b.key === botKey); if (!bot) return;
@@ -616,21 +681,6 @@ export default function OfficePage() {
         </div>
       )}
 
-      <div data-office-ui className="absolute top-3 left-3 z-20 rounded-xl bg-background/90 border border-border px-3.5 py-2.5 max-w-[78vw]">
-        <div className="text-sm font-semibold flex items-center gap-2"><BotIcon className="w-4 h-4" />{OFFICE_LEVEL_NAME}</div>
-        <div className="text-[11px] mt-0.5">
-          {pubMeta?.live
-            ? <span className="text-emerald-500 font-medium">● LIVE{pubMeta.publishedAt ? ` — published ${new Date(pubMeta.publishedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : ''}</span>
-            : pubMeta
-              ? <span className="text-amber-500 font-medium">● Built-in copy — the live published world could not be loaded</span>
-              : <span className="text-muted-foreground">Loading live world…</span>}
-        </div>
-        {socialFlags.presence && (
-          <div className="text-[11px] text-muted-foreground mt-0.5">● {Object.keys(peers).length + 1} in the office{Object.values(peers).length ? ` — ${Object.values(peers).slice(0, 3).map((p) => p.n).join(', ')}` : ''}</div>
-        )}
-        <div className="text-[11px] text-muted-foreground mt-0.5">Walk with WASD or the joystick, drag to look around. Click a bot — or walk up to it — to open its dashboard.</div>
-      </div>
-
       {isAdmin && (
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
@@ -689,7 +739,7 @@ export default function OfficePage() {
           <button data-office-ui onClick={() => void toggleMic()} className={`absolute left-4 bottom-52 sm:bottom-6 z-20 rounded-full border p-3 shadow-lg ${micOn ? 'bg-emerald-500/90 text-white border-emerald-300/50' : 'bg-background/90 border-border'}`} aria-label={micOn ? 'Mute microphone' : 'Unmute microphone'}>
             {micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
           </button>
-          {micNote && <div data-office-ui className="absolute left-4 bottom-[15.5rem] sm:bottom-20 z-20 max-w-[240px] rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs">{micNote}</div>}
+          {micNote && <div data-office-ui onClick={() => setMicNote('')} className="absolute left-4 bottom-[15.5rem] sm:bottom-20 z-20 max-w-[260px] cursor-pointer rounded-lg bg-destructive/90 text-destructive-foreground px-3 py-1.5 text-xs">{micNote}</div>}
         </>
       )}
 
@@ -765,13 +815,14 @@ export default function OfficePage() {
         </div>
       )}
 
-      {/* Branded intro — Startup Factory Hub // Muse HQ */}
+      {/* Branded intro — the signed-in account's name + logo, not a fixed brand */}
       {!introGone && (
         <div className={`absolute inset-0 z-50 flex flex-col items-center justify-center px-6 text-center transition-opacity duration-700 ${scene ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ background: 'radial-gradient(1200px 600px at 50% 30%, #0A1B2E 0%, #02070E 62%)' }}>
           <style>{`@keyframes sfhscan { 0% { transform: translateX(-110%); } 100% { transform: translateX(330%); } }`}</style>
-          <div className="text-[11px] tracking-[0.35em] text-[#00E5FF]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{'// STARTUP FACTORY HUB'}</div>
-          <div className="mt-3 text-5xl sm:text-7xl font-black tracking-tight text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>MUSE HQ</div>
-          <div className="mt-2 text-xs sm:text-sm tracking-[0.5em] text-[#2EF8A0]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>NEW YORK CITY OFFICE</div>
+          <div className="text-[11px] tracking-[0.35em] text-[#00E5FF]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{brand.kind === 'guest' ? '// STARTUP FACTORY HUB' : '// POWERED BY STARTUP FACTORY HUB'}</div>
+          {brand.logoUrl && <img src={brand.logoUrl} alt={brand.name} className="mt-5 h-16 w-16 rounded-2xl object-cover border border-white/20" />}
+          <div className="mt-3 max-w-[92vw] text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{brand.name.toUpperCase()}</div>
+          <div className="mt-2 text-xs sm:text-sm tracking-[0.5em] text-[#2EF8A0]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{brand.kind === 'company' ? 'HEADQUARTERS' : brand.kind === 'person' ? 'VIRTUAL OFFICE' : 'NEW YORK CITY OFFICE'}</div>
           <div className="mt-5 max-w-md text-sm text-white/60">The 3D home of your AI agents. Walk in, meet the team, put them to work — together.</div>
           <div className="mt-8 h-[3px] w-56 overflow-hidden rounded bg-white/10"><div className="h-full w-1/3 rounded bg-[#00E5FF]" style={{ animation: 'sfhscan 1.15s ease-in-out infinite' }} /></div>
           <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
