@@ -12,10 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
-import { resolveLevelWorld, setLevelWorld, worldForKey } from "@/imagine-studio/lib/worldBindings";
+import { resolveLevelWorld, setLevelWorld, worldForKey, findWorldLevelId } from "@/imagine-studio/lib/worldBindings";
 import { sceneControllers, normalizeController } from "@/imagine-studio/lib/controllers";
 import { AGENT_MODEL_URL } from "@/imagine-studio/lib/officeWorld";
-import { Users, Gamepad2 } from "lucide-react";
+import { SKYBOX_CITIES, skyboxCityLabel } from "@/imagine-studio/lib/skyboxes";
+import { buildingLevels, type NamedWorld } from "@/imagine-studio/lib/worldSync";
+import { BuildingView } from "@/imagine-studio/components/level/BuildingView";
+import { Users, Gamepad2, Image as ImageIcon, Building2 } from "lucide-react";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
  *  prompt so complex scenes can be described in a few ops instead of hundreds. */
@@ -128,6 +131,16 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const isOffice = namedWorld?.key === "office";
   const [socialOpen, setSocialOpen] = useState(false);
   const [ctrlOpen, setCtrlOpen] = useState(false);
+  const [skyOpen, setSkyOpen] = useState(false);
+  const [levelsOpen, setLevelsOpen] = useState(false);
+  const [buildingOpen, setBuildingOpen] = useState(false);
+  /** Open another level of this world in the editor: only that level
+   * loads (its own scene and agents) — the current one is left behind. */
+  const openWorldLevel = async (w: NamedWorld) => {
+    if (namedWorld && w.key === namedWorld.key) { setLevelsOpen(false); setBuildingOpen(false); return; }
+    const lid = findWorldLevelId(w.key) ?? (await w.syncLevel()).id;
+    window.location.href = `/imagine-studio/${lid}`;
+  };
   const [ctrlForm, setCtrlForm] = useState<any>(null);
   const [ctrlImport, setCtrlImport] = useState("");
   const [myAgents, setMyAgents] = useState<any[] | null>(null);
@@ -155,6 +168,14 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const social = (scene as any)?.social || {};
   const setSocial = (patch: Record<string, unknown>) =>
     updateScene((s: any) => ({ ...s, social: { ...(s.social || {}), ...patch } }));
+  // Photo skybox: a real-life city photo wrapped around the level. The
+  // choice lives on the scene, so each floor of the building can show
+  // its own city, and it publishes with the level.
+  const skybox = (scene as any)?.skybox as { city: string; url: string } | undefined;
+  const setSkybox = (c: { id: string; url: string } | null) => {
+    updateScene((s: any) => ({ ...s, skybox: c ? { city: c.id, url: c.url } : undefined }));
+    toast.success(c ? `Skybox: ${skyboxCityLabel(c.id)}` : "Skybox removed", { description: "Saved in this level — publish to make it live for everyone." });
+  };
   // Controllers: one system for every published world. Definitions live on
   // the scene (scene.controllers), the player uses scene.playerControllerId,
   // and every character carries a controllerId (default on drop).
@@ -438,6 +459,43 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       <Button size="sm" variant="ghost" className={cls} onClick={() => setCtrlOpen((o) => !o)} disabled={!canEdit} title="Controllers: the movement/camera system for this world and its characters">
         <Gamepad2 className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Controllers</span>
       </Button>
+      <Button size="sm" variant="ghost" className={cls} onClick={() => setSkyOpen((o) => !o)} disabled={!canEdit} title="Photo skybox: the real-life city photo wrapped around this level">
+        <ImageIcon className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Skybox</span>
+      </Button>
+      {namedWorld?.building && (
+        <Button size="sm" variant="ghost" className={cls} onClick={() => setLevelsOpen((o) => !o)} title={`Levels of the ${namedWorld.building} building — this world is one building of stacked levels`}>
+          <Building2 className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Levels</span>
+        </Button>
+      )}
+      {levelsOpen && namedWorld?.building && (
+        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-sm flex items-center gap-2"><Building2 className="w-4 h-4" />{namedWorld.building} — levels</div>
+            <button onClick={() => setLevelsOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">This world is ONE building. Each floor is a level inside it — opening a level loads only that level, with its own agents and content.</p>
+          <div className="mt-3 space-y-2">
+            {buildingLevels(namedWorld).map((w) => (
+              <button
+                key={w.key}
+                onClick={() => void openWorldLevel(w)}
+                className={`w-full rounded-lg border px-3 py-2.5 text-left ${w.key === namedWorld.key ? "border-emerald-500/60 bg-emerald-500/10" : "border-border hover:border-primary/60"}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold tracking-wide">LEVEL {w.floor}</span>
+                  <span className="text-xs font-semibold">{w.levelLabel?.split("—")[1]?.trim() || w.name}</span>
+                  {w.key === namedWorld.key && <span className="ml-auto text-[10px] font-medium text-emerald-600 dark:text-emerald-400">editing now</span>}
+                </div>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">Live at startupfactoryhub.com{w.livePath}{w.key === namedWorld.key ? "" : " — click to open this level"}</div>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => { setLevelsOpen(false); setBuildingOpen(true); }} className="mt-3 w-full h-9 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90">View the building — all levels stacked</button>
+        </div>
+      )}
+      {buildingOpen && namedWorld?.building && (
+        <BuildingView current={namedWorld} currentScene={scene} onSelect={(w) => void openWorldLevel(w)} onClose={() => setBuildingOpen(false)} />
+      )}
       {socialOpen && (
         <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
@@ -553,6 +611,31 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
             <textarea value={ctrlImport} onChange={(e) => setCtrlImport(e.target.value)} placeholder='Paste a controller JSON object — or paste raw script code and it becomes a scripted controller' rows={3} className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-[11px] font-mono" />
             <button onClick={importCtrl} className="w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">Import controller</button>
           </div>
+        </div>
+      )}
+      {skyOpen && (
+        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-sm flex items-center gap-2"><ImageIcon className="w-4 h-4" />Photo skybox</div>
+            <button onClick={() => setSkyOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">A real-life city photo wrapped around this level — what everyone sees through the windows. The choice saves inside this level and publishes with it, so each floor of the building can have its own city.</p>
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            {SKYBOX_CITIES.map((c) => {
+              const active = skybox?.city === c.id;
+              return (
+                <button key={c.id} onClick={() => setSkybox(c)} className={`rounded-lg overflow-hidden border text-left ${active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary/60"}`}>
+                  <img src={c.url} alt={c.label} className="w-full h-16 object-cover" />
+                  <span className="block px-2 py-1.5 text-[11px] font-medium">{c.label}{active ? " · current" : ""}</span>
+                </button>
+              );
+            })}
+          </div>
+          {skybox?.url ? (
+            <button onClick={() => setSkybox(null)} className="mt-3 w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">Remove skybox (plain background color)</button>
+          ) : (
+            <p className="text-[11px] text-muted-foreground mt-3">No skybox on this level right now — the plain background color shows instead.</p>
+          )}
         </div>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />

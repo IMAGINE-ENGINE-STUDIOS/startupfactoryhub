@@ -5,9 +5,10 @@
 // opening a named world in the editor re-syncs it to the published scene,
 // publishing verifies the exact file it wrote, and name matching tolerates
 // case / dash / spacing differences instead of demanding an exact string.
-import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, fetchPublishedPlazaScene } from "./plazaLevel";
-import { OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, publishedWorldUrl } from "./officeWorld";
+import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, fetchPublishedPlazaScene, syncPlazaLevelToPublished } from "./plazaLevel";
+import { OFFICE_LEVEL_NAME, LEGACY_OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, publishedWorldUrl, syncOfficeLevelToPublished, syncFloor99LevelToPublished } from "./officeWorld";
 import type { LevelScene } from "./levelTypes";
+import type { LocalLevelRecord } from "./localLevels";
 
 export interface NamedWorld {
   key: string;
@@ -18,15 +19,28 @@ export interface NamedWorld {
   livePath: string;
   publishedUrl: string;
   fetchPublished: () => Promise<LevelScene | null>;
+  /** Ensures this world's editable level exists locally, synced to the
+   * published scene — the same seeding the projects page runs. */
+  syncLevel: () => Promise<LocalLevelRecord>;
+  /** The building this world is a LEVEL of, when it is one (founder
+   * directive 2026-10-25: floors are levels inside ONE world — the
+   * Startup Office building — not separate worlds). */
+  building?: string;
+  /** Floor number inside the building (100 = the top office floor). */
+  floor?: number;
+  /** How the level is listed inside its building. */
+  levelLabel?: string;
+  /** Former names that still resolve to this world. */
+  aliases?: string[];
 }
 
 export const NAMED_WORLDS: NamedWorld[] = [
-  { key: "plaza", name: PLAZA_LEVEL_NAME, path: "plaza-district.json", livePath: "/plaza", publishedUrl: PLAZA_PUBLISHED_URL, fetchPublished: fetchPublishedPlazaScene },
-  { key: "office", name: OFFICE_LEVEL_NAME, path: "office-world.json", livePath: "/office", publishedUrl: OFFICE_PUBLISHED_URL, fetchPublished: fetchPublishedOfficeScene },
-  // Floor 99 — a real level of the same building (founder directive
-  // 2026-10-25): its own published file, played at /office?floor=99, and
-  // reachable from the editor like every named world.
-  { key: "office99", name: FLOOR99_LEVEL_NAME, path: "floor99-world.json", livePath: "/office?floor=99", publishedUrl: publishedWorldUrl("floor99-world.json"), fetchPublished: fetchPublishedFloor99Scene },
+  { key: "plaza", name: PLAZA_LEVEL_NAME, path: "plaza-district.json", livePath: "/plaza", publishedUrl: PLAZA_PUBLISHED_URL, fetchPublished: fetchPublishedPlazaScene, syncLevel: syncPlazaLevelToPublished },
+  { key: "office", name: OFFICE_LEVEL_NAME, path: "office-world.json", livePath: "/office", publishedUrl: OFFICE_PUBLISHED_URL, fetchPublished: fetchPublishedOfficeScene, syncLevel: syncOfficeLevelToPublished, building: "Startup Office", floor: 100, levelLabel: "Level 100 — Startup Factory Hub", aliases: [LEGACY_OFFICE_LEVEL_NAME] },
+  // Floor 99 — a LEVEL inside the Startup Office building (founder
+  // directive 2026-10-25), one story below Level 100: its own published
+  // file, played at /office?floor=99, edited like every level.
+  { key: "office99", name: FLOOR99_LEVEL_NAME, path: "floor99-world.json", livePath: "/office?floor=99", publishedUrl: publishedWorldUrl("floor99-world.json"), fetchPublished: fetchPublishedFloor99Scene, syncLevel: syncFloor99LevelToPublished, building: "Startup Office", floor: 99, levelLabel: "Level 99 — Wonderlands World" },
 ];
 
 const norm = (s: string) => (s || "").toLowerCase().replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
@@ -34,7 +48,13 @@ const norm = (s: string) => (s || "").toLowerCase().replace(/[—–]/g, "-").re
 export function matchNamedWorld(name?: string | null): NamedWorld | null {
   const n = norm(name || "");
   if (!n) return null;
-  return NAMED_WORLDS.find((w) => norm(w.name) === n) ?? null;
+  return NAMED_WORLDS.find((w) => norm(w.name) === n || (w.aliases || []).some((a) => norm(a) === n)) ?? null;
+}
+
+/** All levels of one building, top floor first. */
+export function buildingLevels(w: NamedWorld): NamedWorld[] {
+  if (!w.building) return [w];
+  return NAMED_WORLDS.filter((x) => x.building === w.building).sort((a, b) => (b.floor ?? 0) - (a.floor ?? 0));
 }
 
 /** Key-order-insensitive stringify for scene equality checks. */

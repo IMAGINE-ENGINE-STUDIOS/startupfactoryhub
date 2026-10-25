@@ -694,6 +694,13 @@ export interface LevelScene {
     };
   };
   /**
+   * Optional photo skybox: a real-life city photo wrapped around the
+   * level (see lib/skyboxes). `city` is a SKYBOX_CITIES id (or a custom
+   * label), `url` the image. Absent = no photo dome, just the
+   * environment background color.
+   */
+  skybox?: { city: string; url: string };
+  /**
    * Optional Train System configuration. When present, the TrainRuntime
    * mounts during Play mode and drives a locomotive + its cars along the
    * referenced scene path, holding at stop markers, opening doors for

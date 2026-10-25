@@ -30,7 +30,10 @@ import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/Theater
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
 import { OfficeAdminTab } from '@/imagine-studio/components/office/OfficeAdmin';
-import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot } from '@/imagine-studio/lib/floors';
+import { ExecPanel, type ExecTools } from '@/imagine-studio/components/office/ExecPanel';
+import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot, type FloorDef } from '@/imagine-studio/lib/floors';
+import { runOutput } from '@/imagine-studio/lib/shiftEngine';
+import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, retiredAgentIds, setPersonnelPrompt, addPendingFiring, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
@@ -692,13 +695,26 @@ export default function OfficePage() {
    * each company; the Chairman (floor 100) runs the building. */
   const floor = useMemo(() => floorById(new URLSearchParams(window.location.search).get('floor')), []);
   const engine = useMemo(() => engineFor(floor), [floor]);
+  /* Personnel state (lib/org) lives outside React — bump to re-render
+   * when a seat changes generation, a score lands or a firing queues. */
+  const [orgTick, setOrgTick] = useState(0);
+  useEffect(() => orgSubscribe(() => setOrgTick((x) => x + 1)), []);
   const [customBots, setCustomBots] = useState<CustomBot[]>(() => loadCustomBots(floor));
   const customBotsRef = useRef(customBots); customBotsRef.current = customBots;
   const promptOverridesRef = useRef<Record<string, string>>(loadPromptOverrides(floor));
   useEffect(() => { saveCustomBots(floor, customBots); setFloorTeamExtras(floor.key, customBots.map(customBotToRole)); }, [customBots, floor]); // eslint-disable-line react-hooks/exhaustive-deps
   const customOfficeBots = useMemo(() => customBots.map(customBotToOfficeBot), [customBots]);
-  const TEAM_BOTS = useMemo(() => [...floor.bots, ...customOfficeBots], [floor, customOfficeBots]);
-  const ALL_BOTS = useMemo(() => [...TEAM_BOTS, ...floor.executives], [TEAM_BOTS, floor]);
+  /* One identity per seat (lib/org): when a seat has been fired and
+   * replaced, the CURRENT generation's name is what the office shows,
+   * binds and plans with — the erased agent never reappears. */
+  const scopeFor = (f: FloorDef, botKey: string): string => botKey === 'manager' ? managerScope(f.key) : botKey === 'ceo' ? ceoScope(f.key) : botKey === 'chairman' ? CHAIRMAN_SCOPE : agentScope(f.key, botKey);
+  const displayBot = (f: FloorDef, bot: OfficeBot): OfficeBot => {
+    const rec = getPersonnel(scopeFor(f, bot.key));
+    return rec ? { ...bot, name: rec.personaName } : bot;
+  };
+  const TEAM_BOTS = useMemo(() => [...floor.bots.map((b) => displayBot(floor, b)), ...customOfficeBots], [floor, customOfficeBots, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ALL_BOTS = useMemo(() => [...TEAM_BOTS, ...floor.executives.map((b) => displayBot(floor, b))], [TEAM_BOTS, floor, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const managerBot = useMemo(() => displayBot(floor, floor.manager), [floor, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
   const allBotsRef = useRef(ALL_BOTS); allBotsRef.current = ALL_BOTS;
   const [published, setPublished] = useState<any>(undefined);
   const [pubMeta, setPubMeta] = useState<{ publishedAt: string | null; live: boolean } | null>(null);
@@ -753,9 +769,9 @@ export default function OfficePage() {
       // Seat height from the nearest chair object (top surface), fallback standard.
       let seatY = 0.52; let bd = 1.6;
       for (const ch of chairs) { const d = Math.hypot(ch.position[0] - home[0], ch.position[2] - home[2]); if (d < bd) { bd = d; seatY = ch.position[1] + (ch.scale?.[1] ?? 0.07) / 2; } }
-      return { bot, home, rotY, seatY };
+      return { bot: displayBot(floor, bot), home, rotY, seatY };
     });
-  }, [scene]);
+  }, [scene, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openBot, setOpenBot] = useState<OfficeBot | null>(null);
   const [shiftOpen, setShiftOpen] = useState(false);
@@ -1095,22 +1111,30 @@ export default function OfficePage() {
    * bot's own name and persona — so the chat never asks which agent. */
   const autoBindTried = useRef(new Set<string>());
   const ensureBotAgent = async (bot: OfficeBot): Promise<string | undefined> => {
+    /* Personnel first: a replaced seat binds ONLY its current generation —
+     * the erased agent's id is retired and is never re-linked, by id or
+     * by name, ever again. */
+    const scope = scopeFor(floor, bot.key);
+    const rec = getPersonnel(scope);
+    const retired = retiredAgentIds(scope);
+    const agentName = rec?.personaName || bot.name;
     const existing = (linksRef.current[bot.key] || {}).agentId;
-    if (existing) return existing;
-    const match = agents.find((a) => String(a.name || '').trim().toLowerCase() === bot.name.trim().toLowerCase());
+    if (existing && !retired.includes(existing)) return existing;
+    const match = agents.find((a) => !retired.includes(a.id) && String(a.name || '').trim().toLowerCase() === agentName.trim().toLowerCase());
     if (match) { saveLinkFor(bot.key, { agentId: match.id, aiOn: true }); return match.id; }
     if (autoBindTried.current.has(bot.key)) return undefined;
     autoBindTried.current.add(bot.key);
     try {
       const custom = customBotsRef.current.find((c) => c.key === bot.key);
-      const persona = promptOverridesRef.current[bot.key]
+      const persona = rec?.prompt
+        || promptOverridesRef.current[bot.key]
         || (bot.key === 'manager' ? floor.managerPrompt
           : bot.key === 'chairman' ? CHAIRMAN_PROMPT
           : bot.key === 'ceo' ? ceoPrompt(floor.company)
           : custom ? custom.prompt
           : ([...floor.team, ...customBotsRef.current.map(customBotToRole)].find((t) => t.key === bot.key)?.prompt
-            || `You are ${bot.name}, an AI agent working in the ${floor.company} office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`));
-      const r = await callAgentsApi({ action: 'save', name: bot.name, description: bot.duty, system_prompt: persona, model: 'llama-3.3-70b-versatile', tools: [] });
+            || `You are ${agentName}, an AI agent working in the ${floor.company} office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`));
+      const r = await callAgentsApi({ action: 'save', name: agentName, description: bot.duty, system_prompt: persona, model: 'llama-3.3-70b-versatile', tools: [] });
       const created = r?.agent;
       if (created?.id) {
         setAgents((cur) => (cur.some((a) => a.id === created.id) ? cur : [...cur, created]));
@@ -1131,6 +1155,69 @@ export default function OfficePage() {
         return id ?? null;
       },
     });
+  }, [agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* THE BUILDING runs from any floor (founder directive 2026-10-25): the
+   * CEO coordinates a whole company and the Chairman the building, so
+   * EVERY floor's engine is bound — each with its OWN floor-scoped agent
+   * links, customs and prompt overrides, so a shift dispatched to
+   * another floor runs that floor's real team with its real personas. */
+  const scopedTried = useRef(new Set<string>());
+  const scopedLinksKey = (fk: string) => `sfh:office-bots:${fk}:v1`;
+  const loadScopedLinks = (fk: string): Record<string, BotLink> => { try { return JSON.parse(localStorage.getItem(scopedLinksKey(fk)) || '{}'); } catch { return {}; } };
+  const saveScopedLink = (fk: string, key: string, patch: BotLink | null) => {
+    const all = loadScopedLinks(fk);
+    if (patch === null) delete all[key]; else all[key] = { ...(all[key] || {}), ...patch };
+    try { localStorage.setItem(scopedLinksKey(fk), JSON.stringify(all)); } catch {}
+  };
+  const ensureAgentForFloor = async (f: FloorDef, bot: OfficeBot): Promise<string | undefined> => {
+    const scope = scopeFor(f, bot.key);
+    const rec = getPersonnel(scope);
+    const retired = retiredAgentIds(scope);
+    const agentName = rec?.personaName || bot.name;
+    const links = loadScopedLinks(f.key);
+    const existing = (links[bot.key] || {}).agentId;
+    if (existing && !retried.includes(existing)) return existing;
+    const match = agents.find((a) => !retired.includes(a.id) && String(a.name || '').trim().toLowerCase() === agentName.trim().toLowerCase());
+    if (match) { saveScopedLink(f.key, bot.key, { agentId: match.id, aiOn: true }); return match.id; }
+    const triedKey = `${f.key}:${bot.key}`;
+    if (scopedTried.current.has(triedKey)) return undefined;
+    scopedTried.current.add(triedKey);
+    try {
+      const customs = loadCustomBots(f);
+      const custom = customs.find((c) => c.key === bot.key);
+      const persona = rec?.prompt
+        || loadPromptOverrides(f)[bot.key]
+        || (bot.key === 'manager' ? f.managerPrompt
+          : bot.key === 'chairman' ? CHAIRMAN_PROMPT
+          : bot.key === 'ceo' ? ceoPrompt(f.company)
+          : custom ? custom.prompt
+          : ([...f.team, ...customs.map(customBotToRole)].find((t) => t.key === bot.key)?.prompt
+            || `You are ${agentName}, an AI agent working in the ${f.company} office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`));
+      const r = await callAgentsApi({ action: 'save', name: agentName, description: bot.duty, system_prompt: persona, model: 'llama-3.3-70b-versatile', tools: [] });
+      const created = r?.agent;
+      if (created?.id) {
+        setAgents((cur) => (cur.some((a) => a.id === created.id) ? cur : [...cur, created]));
+        saveScopedLink(f.key, bot.key, { agentId: created.id, aiOn: true });
+        return created.id;
+      }
+    } catch { scopedTried.current.delete(triedKey); }
+    return undefined;
+  };
+  const botOnFloor = (f: FloorDef, botKey: string): OfficeBot | undefined =>
+    botKey === 'manager' ? f.manager : [...f.bots, ...f.executives, ...loadCustomBots(f).map(customBotToOfficeBot)].find((b) => b.key === botKey);
+  useEffect(() => {
+    for (const f of FLOORS) {
+      if (f.key === floor.key) continue;
+      setFloorTeamExtras(f.key, loadCustomBots(f).map(customBotToRole));
+      engineFor(f).bind({
+        resolveAgentId: async (botKey: string) => {
+          const bot = botOnFloor(f, botKey);
+          if (!bot) return null;
+          const id = await ensureAgentForFloor(f, bot);
+          return id ?? null;
+        },
+      });
+    }
   }, [agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!openBot || !signedIn || !agentsLoaded) return;
@@ -1172,6 +1259,9 @@ export default function OfficePage() {
   }), [links, allRuns, queueItems, workingKeys, TEAM_BOTS]);
   useEffect(() => { if (!scene) return; const t = setTimeout(() => setIntroGone(true), 2100); return () => clearTimeout(t); }, [scene]);
   const createCustomAgent = async ({ name, duty, prompt }: { name: string; duty: string; prompt: string }) => {
+    if (floor.bots.length + customBotsRef.current.length >= MAX_AGENTS_PER_FLOOR) {
+      throw new Error(`This floor is full — ${MAX_AGENTS_PER_FLOOR} agents max per floor. Replace someone first, or use another floor.`);
+    }
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 18) || 'agent';
     const cb: CustomBot = { key: `custom-${slug}-${Math.random().toString(36).slice(2, 6)}`, name, duty: duty || 'Custom specialist', prompt, tint: CUSTOM_TINTS[customBotsRef.current.length % CUSTOM_TINTS.length] };
     customBotsRef.current = [...customBotsRef.current, cb];
@@ -1186,15 +1276,17 @@ export default function OfficePage() {
     const existing = agents.find((a) => a.id === id);
     await callAgentsApi({ action: 'save', id, name: existing?.name || bot.name, description: bot.duty, model: existing?.model || 'llama-3.3-70b-versatile', system_prompt: prompt, tools: existing?.tools ?? [] });
     savePromptOverride(floor, botKey, prompt);
+    setPersonnelPrompt(scopeFor(floor, botKey), prompt);
     promptOverridesRef.current = { ...promptOverridesRef.current, [botKey]: prompt };
     const ci = customBotsRef.current.findIndex((c) => c.key === botKey);
     if (ci >= 0) { const next = [...customBotsRef.current]; next[ci] = { ...next[ci], prompt }; customBotsRef.current = next; setCustomBots(next); }
     if (botKey === 'manager') { try { localStorage.removeItem(floor.managerChatKey); } catch { /* noop */ } }
   };
   const teamTools = {
-    bots: [...ALL_BOTS, floor.manager].map((b) => ({ key: b.key, name: b.name, duty: b.duty })),
+    bots: [...ALL_BOTS, managerBot].map((b) => ({ key: b.key, name: b.name, duty: b.duty })),
     create: createCustomAgent,
     reset: resetAgentRole,
+    fire: (botKey: string) => firePerson(floor.key, botKey, 'Admin', 'removed by the admin'),
     resetAll: async (template: string): Promise<string> => {
       const targets = [...allBotsRef.current, floor.manager];
       let ok = 0; const failed: string[] = [];
@@ -1205,6 +1297,88 @@ export default function OfficePage() {
       }
       return failed.length ? `Reset ${ok} agents on this floor. Failed: ${failed.join(', ')}.` : `All ${ok} agents on this floor now work under the new role.`;
     },
+  };
+  /* ---------------- Firing & replacement (the 94% law) ----------------
+   * Anyone can be fired — agents, Managers, CEOs, the Chairman. The org
+   * store records the firing and generates the replacement (new name,
+   * new persona, clean slate); here we perform the live effects: the old
+   * call-agent is retired and unlinked everywhere at once, chats clear,
+   * and a custom agent's record is replaced by its successor. A firing
+   * ordered mid-shift QUEUES and lands the moment the shift ends, so a
+   * company never stops running. */
+  const roleLabelFor = (f: FloorDef, bot: OfficeBot): string =>
+    bot.key === 'manager' ? `Manager of ${f.company}`
+    : bot.key === 'ceo' ? `CEO of ${f.company}`
+    : bot.key === 'chairman' ? 'Chairman of the building'
+    : ([...f.team, ...loadCustomBots(f).map(customBotToRole)].find((t) => t.key === bot.key)?.title || bot.duty);
+  const basePromptFor = (f: FloorDef, bot: OfficeBot): string => {
+    const rec = getPersonnel(scopeFor(f, bot.key));
+    if (rec) return rec.prompt;
+    const custom = loadCustomBots(f).find((c) => c.key === bot.key);
+    return loadPromptOverrides(f)[bot.key]
+      || (bot.key === 'manager' ? f.managerPrompt
+        : bot.key === 'chairman' ? CHAIRMAN_PROMPT
+        : bot.key === 'ceo' ? ceoPrompt(f.company)
+        : custom ? custom.prompt
+        : ([...f.team, ...loadCustomBots(f).map(customBotToRole)].find((t) => t.key === bot.key)?.prompt
+          || `You are ${bot.name}, an AI agent working in the ${f.company} office. Your job: ${bot.duty}`));
+  };
+  const applyFireNow = async (f: FloorDef, botKey: string, by: string, reason: string) => {
+    const bot = botOnFloor(f, botKey);
+    if (!bot) return;
+    const scope = scopeFor(f, botKey);
+    const linkId = f.key === floor.key ? (linksRef.current[botKey] || {}).agentId : (loadScopedLinks(f.key)[botKey] || {}).agentId;
+    const taken = FLOORS.flatMap((x) => [...x.bots.map((b) => b.name), ...loadCustomBots(x).map((c) => c.name), personaName(managerScope(x.key), ''), personaName(ceoScope(x.key), '')]).filter(Boolean);
+    const rec = recordFiring({
+      scope, roleLabel: roleLabelFor(f, bot), company: botKey === 'chairman' ? 'The Building' : f.company,
+      oldName: personaName(scope, bot.name), basePrompt: basePromptFor(f, bot), reason, by, takenNames: taken, retireAgentId: linkId || null,
+    });
+    if (f.key === floor.key) { saveLinkFor(botKey, { agentId: undefined, aiOn: undefined }); autoBindTried.current.delete(botKey); }
+    else { saveScopedLink(f.key, botKey, null); scopedTried.current.delete(`${f.key}:${botKey}`); }
+    const customs = f.key === floor.key ? customBotsRef.current : loadCustomBots(f);
+    const ci = customs.findIndex((c) => c.key === botKey);
+    if (ci >= 0) {
+      const slug = rec.personaName.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 18) || 'agent';
+      const next = [...customs];
+      next[ci] = { ...next[ci], key: `custom-${slug}-${Math.random().toString(36).slice(2, 6)}`, name: rec.personaName, prompt: rec.prompt };
+      if (f.key === floor.key) { customBotsRef.current = next; setCustomBots(next); } else saveCustomBots(f, next);
+    }
+    if (botKey === 'manager') { try { localStorage.removeItem(f.managerChatKey); } catch { /* noop */ } }
+  };
+  const firePerson = async (floorKey: string, botKey: string, by: string, reason: string): Promise<{ queued: boolean }> => {
+    const f = FLOORS.find((x) => x.key === floorKey);
+    if (!f) return { queued: false };
+    const st = engineFor(f).getState();
+    if (st && (st.status === 'running' || st.status === 'planning')) {
+      addPendingFiring({ scope: scopeFor(f, botKey), floorKey, botKey, reason, by });
+      logAction(by, 'decision', `${by} ordered the replacement of the ${roleLabelFor(f, botOnFloor(f, botKey) || floor.manager)} on Floor ${f.id} — it lands the moment the current shift ends, so the company keeps running.`);
+      return { queued: true };
+    }
+    await applyFireNow(f, botKey, by, reason);
+    return { queued: false };
+  };
+  /* Queued replacements land between shifts. */
+  useEffect(() => {
+    for (const p of getPendingFirings()) {
+      const f = FLOORS.find((x) => x.key === p.floorKey);
+      if (!f) continue;
+      const st = engineFor(f).getState();
+      if (!st || (st.status !== 'running' && st.status !== 'planning')) void applyFireNow(f, p.botKey, p.by, p.reason);
+    }
+  }, [orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [execOpen, setExecOpen] = useState<'ceo' | 'chairman' | null>(null);
+  const execTools: ExecTools = {
+    fire: (floorKey, botKey, by, reason) => firePerson(floorKey, botKey, by, reason),
+    chatWith: async (f, botKey, text) => {
+      const bot = botOnFloor(f, botKey);
+      if (!bot) throw new Error('That executive is not in the building.');
+      const id = f.key === floor.key ? await ensureBotAgent(bot) : await ensureAgentForFloor(f, bot);
+      if (!id) throw new Error('Could not bring them online — sign in and try again.');
+      const r = await callAgentsApi({ action: 'run', agent_id: id, message: text });
+      return runOutput(r) || 'Done.';
+    },
+    dispatch: async (f, goal) => { await engineFor(f).startShift(goal); },
+    openFloor: (floorId) => { window.location.href = floorId === 100 ? '/office' : `/office?floor=${floorId}`; },
   };
   const uiGuard = (e: any) => !!(e.target as HTMLElement)?.closest?.('[data-office-ui]');
 
@@ -1231,10 +1405,10 @@ export default function OfficePage() {
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
-          {scene && <OfficeBotCharacter bot={floor.manager} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
-          {scene && floor.executives.map((b) => (
-            <OfficeBotCharacter key={b.key} bot={b} home={b.key === 'chairman' ? CHAIRMAN_HOME : CEO_HOME} rotY={0} seatY={0.52} seated={false} onOpen={setOpenBot} />
-          ))}
+          {scene && <OfficeBotCharacter bot={managerBot} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
+          {scene && floor.executives.map((raw) => { const b = displayBot(floor, raw); return (
+            <OfficeBotCharacter key={b.key} bot={b} home={b.key === 'chairman' ? CHAIRMAN_HOME : CEO_HOME} rotY={0} seatY={0.52} seated={false} onOpen={(bb) => setExecOpen(bb.key === 'chairman' ? 'chairman' : 'ceo')} />
+          ); })}
           {scene && customOfficeBots.map((b, i) => (
             <OfficeBotCharacter key={b.key} bot={b} home={[-19 + (i % 8) * 2.4, 0, 12.8]} rotY={Math.PI} seatY={0.52} seated={false} onOpen={setOpenBot} />
           ))}
@@ -1444,7 +1618,19 @@ export default function OfficePage() {
       <button data-office-ui onClick={() => setShiftOpen(true)} className="absolute right-4 bottom-24 sm:bottom-6 z-20 flex items-center gap-2 rounded-full border border-[#FFD166]/60 bg-[#14100a]/85 px-4 py-2.5 text-xs font-semibold text-[#FFD166] shadow-lg backdrop-blur hover:bg-[#241a08]/90">
         <Briefcase className="w-4 h-4" /> Manager · Shift
       </button>
-      {shiftOpen && <ShiftPanel engine={engine} team={[...floor.team, ...customBots.map(customBotToRole)]} company={floor.company} floorLabel={`Floor ${floor.id}`} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
+      {/* The executive suite (founder directive 2026-10-25): the CEO runs
+          this company through its Managers; the Chairman runs the whole
+          building. Walk up to them in the room, or use these buttons. */}
+      <div className="absolute right-4 bottom-[9.5rem] sm:bottom-24 z-20 flex flex-col items-end gap-2">
+        <button data-office-ui onClick={() => setExecOpen('ceo')} className="flex items-center gap-2 rounded-full border border-sky-400/50 bg-[#0a1420]/85 px-4 py-2.5 text-xs font-semibold text-sky-300 shadow-lg backdrop-blur hover:bg-[#0e1e30]/90">
+          <LayoutDashboard className="w-4 h-4" /> CEO · {floor.company}
+        </button>
+        <button data-office-ui onClick={() => setExecOpen('chairman')} className="flex items-center gap-2 rounded-full border border-zinc-300/50 bg-[#101418]/85 px-4 py-2.5 text-xs font-semibold text-zinc-200 shadow-lg backdrop-blur hover:bg-[#1a2027]/90">
+          <LayoutDashboard className="w-4 h-4" /> Chairman · Building
+        </button>
+      </div>
+      {shiftOpen && <ShiftPanel engine={engine} team={applyPersonnelToRoles(floor.key, [...floor.team, ...customBots.map(customBotToRole)])} company={floor.company} floorLabel={`Floor ${floor.id}`} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
+      {execOpen && <ExecPanel kind={execOpen} floor={floor} tools={execTools} signedIn={signedIn} isAdmin={isAdmin} onClose={() => setExecOpen(null)} />}
 
       {/* Branded intro — the signed-in account's name + logo, not a fixed brand */}
       {!introGone && (

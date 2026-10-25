@@ -41,6 +41,22 @@ import {
   type ShiftEngine,
   type TeamRole,
 } from "@/imagine-studio/lib/shiftEngine";
+import {
+  agentScope,
+  applyPersonnelToRoles,
+  ceoScope,
+  companyScore,
+  managerScope,
+  managerScore,
+  personScore,
+  personaName,
+  recordJudged,
+  recordPlan,
+  recordShiftEnd,
+  registerReport,
+  CHAIRMAN_SCOPE,
+  type EvalRow,
+} from "@/imagine-studio/lib/org";
 
 /* ------------------------------------------------------------------ */
 /* Executives                                                          */
@@ -210,11 +226,68 @@ export function engineFor(floor: FloorDef): ShiftEngine {
   const engine = createShiftEngine({
     storeKey: floor.shiftStoreKey,
     archivistKey: floor.archivistKey,
-    team: () => [...floor.team, ...(teamExtras.get(floor.key) || [])],
+    // The CURRENT generation of each seat works the shift: a replaced
+    // agent plans and is planned for under its new name and persona.
+    team: () => applyPersonnelToRoles(floor.key, [...floor.team, ...(teamExtras.get(floor.key) || [])]),
     defaultPlan: floor.defaultPlan,
+    // Every judgment lands in the org's performance ledger (lib/org) —
+    // the cheat-proof record the 94% survival law runs on.
+    hooks: {
+      onTaskJudged: (task) => {
+        if (task.judged) recordJudged(agentScope(floor.key, task.botKey), task.judged.outcome, task.judged.attempts);
+      },
+      onPlan: (ok) => recordPlan(floor.key, ok),
+      onShiftEnd: (kind) => recordShiftEnd(floor.key, kind),
+      onReport: (shift) => {
+        if (shift.report) {
+          registerReport(
+            { floorKey: floor.key, floorId: floor.id, company: floor.company, goal: shift.goal, report: shift.report },
+            buildingRosterRows(),
+          );
+        }
+      },
+    },
   });
   engines.set(floor.key, engine);
   return engine;
+}
+
+/** The scope keys of a floor's scored team (roster + Manager extras). */
+export const floorTeamScopes = (floor: FloorDef): string[] =>
+  applyPersonnelToRoles(floor.key, [...floor.team, ...(teamExtras.get(floor.key) || [])]).map((r) => agentScope(floor.key, r.key));
+
+/** Floors of one company, in registry order. */
+export const companyFloors = (company: string): FloorDef[] => FLOORS.filter((f) => f.company === company);
+
+/**
+ * The building's full ratings table — every scored seat with its current
+ * accuracy, computed from the org ledger. Used for report snapshots,
+ * the CEO/Chairman dashboards and the Chairman's evaluations. Scores
+ * come only from recorded judgments; nothing here trusts agent text.
+ */
+export function buildingRosterRows(): EvalRow[] {
+  const rows: EvalRow[] = [];
+  for (const f of FLOORS) {
+    const team = applyPersonnelToRoles(f.key, [...f.team, ...(teamExtras.get(f.key) || [])]);
+    for (const r of team) {
+      const s = personScore(agentScope(f.key, r.key));
+      rows.push({ scope: agentScope(f.key, r.key), role: "agent", label: r.name, company: f.company, floorKey: f.key, accuracy: s.accuracy, judged: s.judged });
+    }
+    const ms = managerScore(f.key, floorTeamScopes(f));
+    rows.push({ scope: managerScope(f.key), role: "manager", label: personaName(managerScope(f.key), "Manager"), company: f.company, floorKey: f.key, accuracy: ms.accuracy, judged: ms.judged });
+  }
+  const companies = [...new Set(FLOORS.map((f) => f.company))];
+  for (const company of companies) {
+    const cf = companyFloors(company);
+    const cs = companyScore(cf.map((f) => ({ floorKey: f.key, teamScopes: floorTeamScopes(f) })));
+    const home = cf[0];
+    rows.push({ scope: ceoScope(home.key), role: "ceo", label: personaName(ceoScope(home.key), "CEO"), company, floorKey: home.key, accuracy: cs.accuracy, judged: cs.judged });
+  }
+  const ceoAccs = rows.filter((r) => r.role === "ceo" && r.accuracy !== null);
+  const chairAcc = ceoAccs.length ? Math.round((ceoAccs.reduce((a, r) => a + (r.accuracy as number), 0) / ceoAccs.length) * 10) / 10 : null;
+  const chairJudged = rows.reduce((a, r) => a + r.judged, 0);
+  rows.push({ scope: CHAIRMAN_SCOPE, role: "chairman", label: personaName(CHAIRMAN_SCOPE, "Chairman"), company: "The Building", floorKey: "floor100", accuracy: chairAcc, judged: chairJudged });
+  return rows;
 }
 
 /* ------------------------------------------------------------------ */

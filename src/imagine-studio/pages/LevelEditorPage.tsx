@@ -881,7 +881,7 @@ export default function LevelEditorPage() {
         updateLocalLevel(id, { scene: JSON.parse(JSON.stringify(published)) });
       }
       setScene({ ...EMPTY_SCENE, ...(published as any) });
-      toast.success(`Synced to the live published ${w.key === "office" ? "Office" : "Plaza"}`, {
+      toast.success(`Synced to the live published ${w.levelLabel || w.name}`, {
         description: "Edit mode always starts from what's live. Your previous local edits were kept as a local draft level.",
       });
     })();

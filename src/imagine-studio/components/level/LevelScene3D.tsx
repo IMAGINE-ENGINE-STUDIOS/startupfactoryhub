@@ -38,6 +38,7 @@ import { TrajectoryRender, TrajectoryRunner } from "./trajectory/TrajectoryRunti
 import TrainRuntime from "./train/TrainRuntime";
 import GroupRuntime from "./GroupRuntime";
 import { ScenePathOverlay } from "./geometry/ScenePathOverlay";
+import SkyboxDome from "./SkyboxDome";
 import PerfSampler from "./perf/PerfSampler";
 import PerfHUD from "./perf/PerfHUD";
 import { buildNaniteLods, updateNanite } from "@/lib/nanite";
@@ -1417,6 +1418,9 @@ export function LevelSceneContents({
       {!skipBackground && !(hdriCfg && hdriCfg.asBackground && hdriCfg.activeId) && (
         <color attach="background" args={[scene.environment.background]} />
       )}
+      {/* Photo skybox (scene.skybox) — the same dome the published
+          player renders, so edit mode shows the real city photo. */}
+      {!skipBackground && (scene as any).skybox?.url ? <SkyboxDome url={(scene as any).skybox.url} /> : null}
       {hdriCfg && hdriCfg.activeId && (
         <HDRIEnvironmentRuntime cfg={hdriCfg} />
       )}

@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { PLAZA_PUBLISHED_URL } from '@/imagine-studio/lib/plazaLevel';
 import { applyPose } from '@/imagine-studio/lib/rigSaves';
 import { buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
+import SkyboxDome from '@/imagine-studio/components/level/SkyboxDome';
 
 export function usePublishedPlaza() {
   const [scene, setScene] = useState<any>(null);
@@ -127,6 +128,7 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
 export function PublishedWorld({ scene, renderCharacters = true, onAgentOpen }: { scene: any; renderCharacters?: boolean; onAgentOpen?: (o: any) => void }) {
   return (
     <group>
+      {scene.skybox?.url ? <SkyboxDome url={scene.skybox.url} /> : null}
       {(scene.lights || []).filter((l) => l.kind === 'point').map((l) => <pointLight key={l.id} position={l.position} color={col(l.color)} intensity={l.intensity} distance={30} />)}
       {scene.objects.filter((o) => o.visible !== false && !o.theater && !/theater\s*screen/i.test(o.name || '')).map((o) => {
         if (o.kind === 'primitive') {

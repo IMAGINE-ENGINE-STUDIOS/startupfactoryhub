@@ -4,9 +4,14 @@
 // with 20 NPC bots, one per Muse agent. Fully editable in the 3D Studio;
 // /office plays the published version and each bot carries a live dashboard.
 import { EMPTY_SCENE, type LevelScene, type PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
+import { DEFAULT_SKYBOX } from "@/imagine-studio/lib/skyboxes";
 import { createLocalLevel, ensurePlazaLevel as _ensure, getLocalLevel, listLocalLevels, updateLocalLevel, type LocalLevelRecord } from "@/imagine-studio/lib/localLevels";
 
-export const OFFICE_LEVEL_NAME = "Muse HQ — NYC Office";
+export const OFFICE_LEVEL_NAME = "Startup Office";
+/** The office level's name before the founder renamed the world
+ * (2026-10-25): the sync renames a local level carrying it in place, so
+ * her existing level, binding and drafts survive the rename. */
+export const LEGACY_OFFICE_LEVEL_NAME = "Muse HQ — NYC Office";
 export const OFFICE_PUBLISHED_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/office-world.json`;
 /** Public URL of any floor's published scene file in the studio-published
  * bucket. Floors are isolated: a floor only ever fetches its OWN file. */
@@ -22,7 +27,20 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 6;
+export const OFFICE_SCENE_VERSION = 7;
+
+/** Background geometry RETIRED by the photo skybox (founder directive
+ * 2026-10-25: "erase all the background buildings and geometries" — a
+ * real photo of NYC wraps the room instead). Built-in office objects
+ * carry `office_<n>` ids; a published object with such an id that the
+ * code no longer builds is a retired built-in and must never be merged
+ * back in, and these names are stripped wherever a published scene is
+ * consumed (merge + editor sync). */
+export const isRetiredBackground = (o: any): boolean =>
+  typeof o?.name === "string" &&
+  (o.name === "City Ground" || o.name.startsWith("Skyline Tower") || o.name.startsWith("Skyline Window") || o.name.startsWith("Cloud Layer"));
+export const stripRetiredBackground = (scene: any): any =>
+  scene && Array.isArray(scene.objects) ? { ...scene, objects: scene.objects.filter((o: any) => !isRetiredBackground(o)) } : scene;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
 /** The agent character body: the founder's OWN uploaded character
@@ -162,9 +180,10 @@ export function buildOfficeScene(): LevelScene {
   const W = 48, D = 32, H = 8, T = 0.18;
   // Floor — flat white slab (founder directive 2026-10-25), no rug.
   o.push(P("Office Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#ffffff", { roughness: 0.95, metalness: 0 }));
-  // The street, ~100 floors down (founder directive 2026-10-25): the city
-  // ground sits far below the windows, softened by aerial haze.
-  o.push(P("City Ground", "box", [0, -300, 0], [2400, 1, 2400], "#93a8ba", { roughness: 1 }));
+  // No built city outside the glass anymore (founder directive
+  // 2026-10-25): the background buildings and ground geometry are erased
+  // and a real-life photo skybox wraps the room instead (scene.skybox,
+  // NYC by default — admins swap the city from edit mode).
   // Perimeter window walls (NYC high-rise glass) with a door gap on the south side.
   const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
   const wallRun = (side: string, len: number, px: number, pz: number, rotY: number, segments: [number, number][]) => {
@@ -218,44 +237,6 @@ export function buildOfficeScene(): LevelScene {
   o.push(P("Floor Glow S", "box", [0, 0.03, 15.85], [47.5, 0.04, 0.1], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow W", "box", [-23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow E", "box", [23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
-  // NYC skyline outside the glass — DAYLIGHT towers (founder directive
-  // 2026-10-25): pale glass-and-steel bodies, unlit reflective window panes.
-  let seed = 42;
-  const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
-  // FLOOR 100 (founder directive 2026-10-25): every tower stands on the
-  // street ~320 m below; only its TOP matters — peer towers end around our
-  // floor, a farther ring fades into the haze, clouds drift underneath.
-  const tower = (cx: number, cz: number, w: number, top: number, d: number, tone: string, face: "N" | "S" | "E" | "W", windows: boolean) => {
-    const base = -320, h = top - base;
-    o.push(P("Skyline Tower", "box", [cx, base + h / 2, cz], [w, h, d], tone, { roughness: 0.7, metalness: 0.15 }));
-    if (!windows) return;
-    const rows = Math.max(2, Math.floor(Math.min(46, h) / 3.1));
-    for (let rI = 0; rI < rows; rI++) {
-      if (rnd() < 0.55) continue;
-      const wy = top - 1.6 - rI * 3.1;
-      const off = (rnd() - 0.5) * ((face === "N" || face === "S" ? w : d) - 1.4);
-      const pos: [number, number, number] = face === "N" ? [cx + off, wy, cz + d / 2 + 0.04] : face === "S" ? [cx + off, wy, cz - d / 2 - 0.04] : face === "E" ? [cx - w / 2 - 0.04, wy, cz + off] : [cx + w / 2 + 0.04, wy, cz + off];
-      const scl: [number, number, number] = face === "N" || face === "S" ? [0.6, 0.12, 0.06] : [0.06, 0.12, 0.6];
-      o.push(P("Skyline Window", "box", pos, scl, rnd() < 0.5 ? "#7e97ab" : "#93a9bb", { roughness: 0.35, metalness: 0.2 }));
-    }
-  };
-  // Peer towers — their tops end around our floor (some below, a few above).
-  for (let i = 0; i < 8; i++) tower(-32 + i * 9.2, -40, 6 + rnd() * 3, -14 + rnd() * 20, 6 + rnd() * 3, "#b7c9da", "N", true);
-  for (let i = 0; i < 7; i++) tower(-29 + i * 9.8, -29, 5 + rnd() * 2.5, -22 + rnd() * 16, 5 + rnd() * 2, "#a5bcd2", "N", true);
-  for (let i = 0; i < 6; i++) tower(-28 + i * 11, 33, 6 + rnd() * 2.5, -18 + rnd() * 18, 5.5, "#c9d8e4", "S", true);
-  for (let i = 0; i < 6; i++) tower(37, -24 + i * 9.8, 5.5, -20 + rnd() * 19, 5 + rnd() * 2, "#a5bcd2", "E", true);
-  for (let i = 0; i < 6; i++) tower(-37, -24 + i * 9.8, 5.5, -24 + rnd() * 18, 5 + rnd() * 2, "#9db4c9", "W", true);
-  // Distant ring — hazy silhouettes, no window detail.
-  for (let i = 0; i < 9; i++) tower(-120 + i * 30, -120 - rnd() * 40, 14 + rnd() * 10, -48 + rnd() * 30, 14, "#c6d5e2", "N", false);
-  for (let i = 0; i < 7; i++) tower(-110 + i * 34, 120 + rnd() * 40, 14 + rnd() * 10, -52 + rnd() * 28, 14, "#cdd9e4", "S", false);
-  for (let i = 0; i < 6; i++) tower(130 + rnd() * 40, -90 + i * 32, 14, -50 + rnd() * 30, 14 + rnd() * 8, "#bfcfdd", "E", false);
-  for (let i = 0; i < 6; i++) tower(-130 - rnd() * 40, -90 + i * 32, 14, -55 + rnd() * 28, 14 + rnd() * 8, "#c6d5e2", "W", false);
-  // Cloud layer drifting below the windows.
-  for (let i = 0; i < 7; i++) {
-    const cx = -120 + rnd() * 240, cz = -110 + rnd() * 220;
-    if (Math.abs(cx) < 34 && Math.abs(cz) < 26) continue;
-    o.push(P("Cloud Layer", "box", [cx, -30 - rnd() * 22, cz], [55 + rnd() * 85, 1.4, 36 + rnd() * 44], hex("#ffffff", 0.5), { roughness: 1 }));
-  }
   // 20 agent stations: desk, monitor with a glowing dashboard screen, chair, bot.
   OFFICE_DESKS.forEach((d, i) => {
     const k = i + 1, f = d.facing;
@@ -296,6 +277,7 @@ export function buildOfficeScene(): LevelScene {
   };
   return {
     ...EMPTY_SCENE,
+    skybox: { ...DEFAULT_SKYBOX },
     objects: [...o, ...characters, managerChar] as any,
     lights: [
       { id: "office_sun", name: "Sunlight", kind: "directional", position: [26, 34, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
@@ -324,7 +306,12 @@ export function mergeOfficeScenes(codeScene: LevelScene, published: LevelScene |
   const codeById = new Map((codeScene.objects || []).map((o: any) => [o.id, o]));
   const objects: any[] = [...(codeScene.objects || [])];
   for (const o of (published.objects || []) as any[]) {
+    // Retired built-ins never come back: the erased background geometry,
+    // and any `office_<n>` object the code no longer builds (its id
+    // range is code-owned; studio additions carry editor-minted ids).
+    if (isRetiredBackground(o)) continue;
     const inCode = codeById.get(o.id);
+    if (!inCode && /^office_\d+$/.test(String(o.id))) continue;
     if (!inCode) { objects.push(o); continue; } // studio addition — keep it
     // An agent character the studio edited (moved / re-bodied) wins over the
     // built-in copy; everything else takes the refreshed built-in version.
@@ -371,16 +358,13 @@ const stableStringify = (v: any): string => {
  * Same rule as the Plaza: the editable Office level always opens on the CURRENT
  * published scene; a divergent local copy is first preserved as a draft level.
  */
-/** Floor 99's built-in scene: the same room one story BELOW Floor 100 —
- * the outside world (peer towers, clouds) sits one floor higher relative
- * to the room — populated with the Wonderlands cast and its Manager. */
+/** Floor 99's built-in scene: the same room one story BELOW Floor 100,
+ * populated with the Wonderlands cast and its Manager. It inherits
+ * Floor 100's photo skybox until an admin gives the floor its own city
+ * from edit mode (the choice lives on the scene and publishes with it). */
 export function buildFloor99Scene(): LevelScene {
   const base = buildOfficeScene();
-  const objects = (base.objects as any[])
-    .filter((o) => o.kind !== "character")
-    .map((o) => (typeof o.name === "string" && (o.name.startsWith("Skyline") || o.name.startsWith("Cloud Layer"))
-      ? { ...o, position: [o.position[0], o.position[1] + 3.2, o.position[2]] }
-      : o));
+  const objects = (base.objects as any[]).filter((o) => o.kind !== "character");
   const characters = WONDERLANDS_BOTS.map((b, i) => {
     const d = OFFICE_DESKS[i];
     return {
@@ -408,7 +392,7 @@ export async function fetchPublishedFloor99Scene(): Promise<LevelScene | null> {
  * scene; a divergent local copy is first preserved as a draft level.
  * Same rule as Floor 100 and the Plaza. */
 export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
-  const publishedScene = await fetchPublishedFloor99Scene();
+  const publishedScene = stripRetiredBackground(await fetchPublishedFloor99Scene());
   const existing = listLocalLevels().find((l) => l.name === FLOOR99_LEVEL_NAME);
   if (!publishedScene) return existing ?? _ensure(buildFloor99Scene, FLOOR99_LEVEL_NAME);
   if (!existing) return _ensure(() => publishedScene, FLOOR99_LEVEL_NAME);
@@ -424,8 +408,17 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
 }
 
 export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
-  const publishedScene = await fetchPublishedOfficeScene();
-  const existing = listLocalLevels().find((l) => l.name === OFFICE_LEVEL_NAME);
+  const publishedScene = stripRetiredBackground(await fetchPublishedOfficeScene());
+  let existing = listLocalLevels().find((l) => l.name === OFFICE_LEVEL_NAME);
+  if (!existing) {
+    // Rename migration: a level still carrying the old "Muse HQ" name IS
+    // this level — rename it in place instead of seeding a duplicate.
+    const legacy = listLocalLevels().find((l) => l.name === LEGACY_OFFICE_LEVEL_NAME);
+    if (legacy) {
+      updateLocalLevel(legacy.id, { name: OFFICE_LEVEL_NAME });
+      existing = getLocalLevel(legacy.id) ?? legacy;
+    }
+  }
   if (!publishedScene) return existing ?? _ensure(buildOfficeScene, OFFICE_LEVEL_NAME);
   if (!existing) return _ensure(() => publishedScene, OFFICE_LEVEL_NAME);
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {

@@ -8,7 +8,7 @@
  * so the plan can change course; hard stop halts everything at once.
  */
 import { useEffect, useReducer, useState } from "react";
-import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw, MessageSquare, ClipboardList, Users, UserPlus, Wand2 } from "lucide-react";
+import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw, MessageSquare, ClipboardList, Users, UserPlus, UserX, Wand2 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import type { ShiftEngine, ShiftState, ShiftTask, TeamRole } from "@/imagine-studio/lib/shiftEngine";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
@@ -99,6 +99,9 @@ export interface TeamTools {
   create: (x: { name: string; duty: string; prompt: string }) => Promise<void>;
   reset: (botKey: string, prompt: string) => Promise<void>;
   resetAll: (prompt: string) => Promise<string>;
+  /** Fire & replace (the 94% law): erases the agent and generates a new
+   * one in its seat. Queues until the shift ends when one is running. */
+  fire?: (botKey: string) => Promise<{ queued: boolean }>;
 }
 
 export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, managerChatKey, teamTools, signedIn, onClose }: { engine: ShiftEngine; team: TeamRole[]; company: string; floorLabel: string; archivistLabel: string; managerChatKey: string; teamTools: TeamTools; signedIn: boolean; onClose: () => void }) {
@@ -115,6 +118,8 @@ export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, 
   const [newPrompt, setNewPrompt] = useState("");
   const [resetKey, setResetKey] = useState("");
   const [resetPrompt, setResetPrompt] = useState("");
+  const [fireKey, setFireKey] = useState("");
+  const [confirmFire, setConfirmFire] = useState(false);
   const [resetAllPrompt, setResetAllPrompt] = useState("");
   const [confirmResetAll, setConfirmResetAll] = useState(false);
   const [teamNote, setTeamNote] = useState("");
@@ -315,6 +320,26 @@ export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, 
               className="mt-3 flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
             >{busy === "reset" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} Reset this agent</button>
           </div>
+
+          {teamTools.fire && (
+            <div className="rounded-xl border border-red-500/30 p-3.5">
+              <div className="flex items-center gap-1.5 text-sm font-semibold"><UserX className="h-4 w-4" /> Fire &amp; replace an agent</div>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Firing ERASES the agent — its memory, its chats, its history — and a brand-new agent (new name, new persona, clean slate) takes the seat and the role. This is the enforcement behind the 94% accuracy law: scores live in the CEO and Chairman dashboards. If a shift is running, the replacement lands the moment it ends, so the company never stops.</p>
+              <select value={fireKey} onChange={(e) => { setFireKey(e.target.value); setConfirmFire(false); }} className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-base">
+                <option value="">Choose who to fire…</option>
+                {teamTools.bots.map((b) => <option key={b.key} value={b.key}>{b.name} — {b.duty}</option>)}
+              </select>
+              {confirmFire ? (
+                <button
+                  disabled={!signedIn || busy === "fire" || !fireKey}
+                  onClick={async () => { setBusy("fire"); setTeamErr(""); setTeamNote(""); try { const r = await teamTools.fire!(fireKey); const b = teamTools.bots.find((x) => x.key === fireKey); setTeamNote(r.queued ? `${b?.name || "That agent"} will be replaced the moment the current shift ends.` : `${b?.name || "That agent"} was fired and erased. A new agent has taken the seat — meet them on the floor.`); setFireKey(""); } catch (e: any) { setTeamErr(e?.message || "The firing did not finish."); } setBusy(""); setConfirmFire(false); }}
+                  className="mt-3 flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                >{busy === "fire" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserX className="h-4 w-4" />} Confirm — fire and erase this agent</button>
+              ) : (
+                <button disabled={!signedIn || !fireKey} onClick={() => setConfirmFire(true)} className="mt-3 flex items-center gap-1.5 rounded-full border border-red-500/50 px-4 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-50"><UserX className="h-4 w-4" /> Fire this agent…</button>
+              )}
+            </div>
+          )}
 
           <div className="rounded-xl border border-red-500/30 p-3.5">
             <div className="flex items-center gap-1.5 text-sm font-semibold"><Users className="h-4 w-4" /> Reset ALL agents on this floor</div>

@@ -124,6 +124,8 @@ export interface RawTask { agent: string; title: string; detail: string; deps: n
 export type ShiftStatus = "idle" | "planning" | "running" | "soft" | "hard" | "done";
 export type ShiftTaskStatus = "queued" | "running" | "review" | "done" | "error" | "cancelled";
 
+export type JudgedOutcome = "first-pass" | "revised" | "best-effort" | "unreviewed" | "review-unavailable" | "error";
+
 export interface ShiftTask {
   id: string;
   botKey: string;
@@ -136,6 +138,10 @@ export interface ShiftTask {
   result?: string;
   feedback?: string;
   error?: string;
+  /** The system's own record of how this task was judged (set exactly
+   * once, at the terminal transition). This is what performance scores
+   * are computed from — agents cannot write or influence it. */
+  judged?: { outcome: JudgedOutcome; attempts: number };
 }
 
 export interface ShiftState {
@@ -176,6 +182,14 @@ export interface ShiftEngineConfig {
    * mid-session (Manager team tools), and the engine must plan with them. */
   team: () => TeamRole[];
   defaultPlan: (goal: string) => RawTask[];
+  /** Building-level observers (the org's performance ledger). Hooks are
+   * fire-and-forget: a throwing hook must never break a shift. */
+  hooks?: {
+    onTaskJudged?: (task: ShiftTask) => void;
+    onPlan?: (ok: boolean) => void;
+    onShiftEnd?: (kind: "done" | "hard" | "planning-failed") => void;
+    onReport?: (state: ShiftState) => void;
+  };
 }
 
 /** One engine per floor (founder directive 2026-10-25): each floor's
@@ -224,6 +238,15 @@ function log(text: string) {
 
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 
+const fireHook = (fn?: () => void) => { try { fn?.(); } catch { /* hooks never break a shift */ } };
+/** Records the system's judgment of a task exactly once, at its terminal
+ * transition — the cheat-proof input to the org's performance scores. */
+const judge = (task: ShiftTask, outcome: JudgedOutcome) => {
+  if (task.judged) return;
+  task.judged = { outcome, attempts: task.attempts };
+  fireHook(() => cfg.hooks?.onTaskJudged?.(task));
+};
+
 /* ------------------------------------------------------------------ */
 /* The engine                                                          */
 /* ------------------------------------------------------------------ */
@@ -268,6 +291,7 @@ const engine = {
     } catch (e: any) {
       state.status = "hard";
       log(`Planning failed: ${e?.message || "unknown error"}`);
+      fireHook(() => cfg.hooks?.onShiftEnd?.("planning-failed"));
     }
     save();
     void tick();
@@ -282,12 +306,14 @@ const engine = {
 
   hardStop() {
     if (!state) return;
+    const wasActive = state.status === "running" || state.status === "planning" || state.status === "soft";
     generation++;
     state.status = "hard";
     for (const t of state.tasks) {
       if (t.status === "queued" || t.status === "running" || t.status === "review") t.status = "cancelled";
     }
     log("HARD STOP — all activity halted. Queued work cancelled, in-flight results will be discarded.");
+    if (wasActive) fireHook(() => cfg.hooks?.onShiftEnd?.("hard"));
     save();
   },
 
@@ -376,6 +402,7 @@ const engine = {
       });
       state.report = runOutput(r) || state.report;
       log("The Archivist compiled the shift report.");
+      if (state.report) fireHook(() => cfg.hooks?.onReport?.(state as ShiftState));
     } catch (e: any) {
       log(`Report build failed: ${e?.message || "unknown error"}`);
     }
@@ -454,9 +481,10 @@ async function planWithManager(managerId: string, goal: string, done: ShiftTask[
     try {
       const r = await callAgentsApi({ action: "run", agent_id: managerId, message: prompt });
       const raw = parseTaskLines(runOutput(r));
-      if (raw.length >= 3) return finalizeTasks(raw);
+      if (raw.length >= 3) { fireHook(() => cfg.hooks?.onPlan?.(true)); return finalizeTasks(raw); }
     } catch { /* try the next form, then the safety net */ }
   }
+  fireHook(() => cfg.hooks?.onPlan?.(false));
   log("The Manager's plan did not come through in a usable form, so a standard assembly-line plan was set instead — the shift runs either way.");
   return finalizeTasks(cfg.defaultPlan(goal));
 }
@@ -481,6 +509,7 @@ async function tick() {
   if (state.status === "running" && state.tasks.length > 0 && state.tasks.every((t) => t.status === "done" || t.status === "error" || t.status === "cancelled")) {
     state.status = "done";
     log("Shift complete — every task is finished. Building the report…");
+    fireHook(() => cfg.hooks?.onShiftEnd?.("done"));
     save();
     void engine.buildReport();
   }
@@ -513,6 +542,7 @@ async function runTask(task: ShiftTask, gen: number) {
     task.result = out;
     if (state.status === "soft") {
       task.status = "done";
+      judge(task, "unreviewed");
       log(`✓ ${task.agentName} finished "${task.title}" (recorded during soft stop, unreviewed).`);
       save();
       return;
@@ -524,6 +554,7 @@ async function runTask(task: ShiftTask, gen: number) {
     if (gen !== generation || !state || state.status === "hard") return;
     task.status = "error";
     task.error = e?.message || "run failed";
+    judge(task, "error");
     log(`✗ ${task.agentName} failed "${task.title}": ${task.error}`);
     save();
   } finally {
@@ -560,9 +591,13 @@ async function reviewTask(task: ShiftTask, gen: number) {
     if (!verdict || verdict.sufficient !== false) {
       task.status = "done";
       task.feedback = undefined;
+      // An unparseable review is NOT a pass — it is excluded from the
+      // accuracy record, so no one can gain score from a broken review.
+      judge(task, !verdict ? "review-unavailable" : task.attempts === 0 ? "first-pass" : "revised");
       log(`✓ Manager approved ${task.agentName}'s "${task.title}".`);
     } else if (task.attempts >= 2) {
       task.status = "done";
+      judge(task, "best-effort");
       log(`✓ Manager accepted ${task.agentName}'s "${task.title}" after 2 revision rounds (best effort — noted in the log).`);
     } else {
       task.attempts++;
@@ -575,6 +610,7 @@ async function reviewTask(task: ShiftTask, gen: number) {
     // A failed review never blocks the company: accept the work.
     if (state && task.status === "review") {
       task.status = "done";
+      judge(task, "review-unavailable");
       log(`✓ "${task.title}" accepted (review unavailable).`);
       save();
     }
