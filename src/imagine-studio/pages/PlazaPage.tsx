@@ -21,6 +21,9 @@ import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
 import { syncPlazaLevelToPublished } from '@/imagine-studio/lib/plazaLevel';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
+import { useUnifiedMovement } from '@/imagine-studio/components/player/UnifiedPlayer';
+import { playerControllerFor, type ControllerDef } from '@/imagine-studio/lib/controllers';
+import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
 import { Box as BoxIcon, Sparkles } from 'lucide-react';
 import { PeopleMenu, LevelElectionsPanel, plazaAdmin, type PlazaPerson } from '@/imagine-studio/components/plaza/PlazaModeration';
 
@@ -216,84 +219,42 @@ function PlazaWorld() {
   );
 }
 
-/* ---------- Player + peers ---------- */
-type Input = { joy: { x: number; y: number }; turn: number; look: { dx: number; dy: number } };
-
-function Game({ me, peers, input, onMove }: { me: { color: string; name: string; char: string }; peers: React.MutableRefObject<Map<string, Peer>>; input: React.MutableRefObject<Input>; onMove: (x: number, z: number, ry: number, moving: boolean) => void }) {
-  const self = useRef<THREE.Group>(null);
-  const keys = useRef<Record<string, boolean>>({});
+/* ---------- Player + peers ----------
+   The SELF player runs on the same UnifiedPlayer movement core as the
+   office and the play test (one controller system everywhere), driven by
+   the published scene's controller definition. Peers stay interpolated
+   here, exactly as before. */
+function Game({ me, peers, def, onMove }: { me: { color: string; name: string; char: string }; peers: React.MutableRefObject<Map<string, Peer>>; def: ControllerDef; onMove: (x: number, z: number, ry: number, moving: boolean) => void }) {
   // Spawn chosen ONCE — re-renders must never move the player.
   const spawn = useMemo<[number, number, number]>(() => { const a = Math.random() * Math.PI * 2; return [Math.cos(a) * 10, 0, Math.sin(a) * 10]; }, []);
   const [peerIds, setPeerIds] = useState<string[]>([]);
   const [peerMoving, setPeerMoving] = useState<Record<string, boolean>>({});
   const [moving, setMoving] = useState(false);
-  const { camera } = useThree();
   const groups = useRef(new Map<string, THREE.Group>());
   const lastSend = useRef(0);
-  const camYaw = useRef(Math.atan2(spawn[0], spawn[2]));
-  const camPitch = useRef(0.45);
-  const camInit = useRef(false);
+  const lookRef = useRef({ yaw: Math.atan2(spawn[0], spawn[2]), pitch: 0.45 });
+  const world = useMemo(() => ({
+    spawn,
+    radialBound: walk.bound,
+    pushOut: [...(walk.fountain ? [{ x: 0, z: 0, r: TANK_R + 0.5 }] : []), ...walk.blockers],
+  }), [spawn]);
+  const { groupRef } = useUnifiedMovement(def, world, lookRef, {
+    onMovingChange: setMoving,
+    onMove: (x, z, ry, mv) => { const now = performance.now(); if (now - lastSend.current > 100) { lastSend.current = now; onMove(x, z, ry, mv); } },
+  });
 
   useEffect(() => {
-    const d = (e: KeyboardEvent) => { if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return; keys.current[e.key.toLowerCase()] = true; };
-    const u = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = false; };
-    const blur = () => { keys.current = {}; };
-    window.addEventListener('keydown', d); window.addEventListener('keyup', u); window.addEventListener('blur', blur);
     const t = setInterval(() => {
       const ids = [...peers.current.keys()];
       setPeerIds((prev) => (prev.join() === ids.join() ? prev : ids));
       const mv: Record<string, boolean> = {}; peers.current.forEach((p, id) => { mv[id] = p.moving; });
       setPeerMoving((prev) => (JSON.stringify(prev) === JSON.stringify(mv) ? prev : mv));
     }, 250);
-    return () => { window.removeEventListener('keydown', d); window.removeEventListener('keyup', u); window.removeEventListener('blur', blur); clearInterval(t); };
+    return () => clearInterval(t);
   }, [peers]);
 
   useFrame((_, raw) => {
     const dt = Math.min(raw, 0.05);
-    const g = self.current; if (!g) return;
-    const k = keys.current, inp = input.current;
-    let turn = inp.turn; if (k['q']) turn += 1; if (k['e']) turn -= 1;
-    camYaw.current += turn * dt * 2;
-    // Finger drag look: right/left orbits, up/down tilts — always centered on the character.
-    if (inp.look.dx || inp.look.dy) {
-      camYaw.current -= inp.look.dx * 0.006;
-      camPitch.current = Math.max(-0.1, Math.min(1.2, camPitch.current + inp.look.dy * 0.004));
-      inp.look.dx = 0; inp.look.dy = 0;
-    }
-    let f = -inp.joy.y, s = inp.joy.x;
-    if (k['w'] || k['arrowup']) f += 1;
-    if (k['s'] || k['arrowdown']) f -= 1;
-    if (k['a'] || k['arrowleft']) s -= 1;
-    if (k['d'] || k['arrowright']) s += 1;
-    const mag = Math.min(1, Math.hypot(f, s));
-    const mv = mag > 0.15;
-    if (mv) {
-      const yaw = camYaw.current;
-      const dx = -Math.sin(yaw) * f + Math.cos(yaw) * s;
-      const dz = -Math.cos(yaw) * f - Math.sin(yaw) * s;
-      const len = Math.hypot(dx, dz) || 1;
-      let nx = g.position.x + (dx / len) * SPEED * mag * dt, nz = g.position.z + (dz / len) * SPEED * mag * dt;
-      const r = Math.hypot(nx, nz);
-      if (r > walk.bound) { nx *= walk.bound / r; nz *= walk.bound / r; }
-      const minR = TANK_R + 0.5;
-      const r2 = Math.hypot(nx, nz);
-      if (walk.fountain && r2 < minR) { nx *= minR / (r2 || 1); nz *= minR / (r2 || 1); }
-      for (const b of walk.blockers) {
-        const ddx = nx - b.x, ddz = nz - b.z, dd = Math.hypot(ddx, ddz);
-        if (dd < b.r) { nx = b.x + (ddx / (dd || 1)) * b.r; nz = b.z + (ddz / (dd || 1)) * b.r; }
-      }
-      g.position.x = nx; g.position.z = nz;
-      const target = Math.atan2(dx, dz);
-      let dr = target - g.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
-      g.rotation.y += dr * (1 - Math.exp(-12 * dt));
-    }
-    if (mv !== moving) setMoving(mv);
-    const yaw = camYaw.current;
-    const pit = camPitch.current, dist = 7.5;
-    const want = new THREE.Vector3(g.position.x + Math.sin(yaw) * dist * Math.cos(pit), 1.4 + dist * Math.sin(pit), g.position.z + Math.cos(yaw) * dist * Math.cos(pit));
-    if (!camInit.current) { camera.position.copy(want); camInit.current = true; }
-    else camera.position.lerp(want, 1 - Math.exp(-6 * dt));
-    camera.lookAt(g.position.x, 1.4, g.position.z);
     const a = 1 - Math.exp(-10 * dt);
     peers.current.forEach((p, id) => {
       p.x += (p.tx - p.x) * a; p.z += (p.tz - p.z) * a;
@@ -301,13 +262,11 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
       const pg = groups.current.get(id);
       if (pg) { pg.position.set(p.x, 0, p.z); pg.rotation.y = p.ry; }
     });
-    const now = performance.now();
-    if (now - lastSend.current > 100) { lastSend.current = now; onMove(g.position.x, g.position.z, g.rotation.y, mv); }
   });
 
   return (
     <>
-      <group ref={self} position={spawn}>
+      <group ref={groupRef} position={spawn}>
         <Avatar char={me.char} color={me.color} name={me.name} moving={moving} speaking={false} me />
       </group>
       {peerIds.map((id) => { const p = peers.current.get(id); if (!p) return null; return (
@@ -315,41 +274,6 @@ function Game({ me, peers, input, onMove }: { me: { color: string; name: string;
           <Avatar char={p.char} color={p.color} name={p.name} moving={!!peerMoving[id]} speaking={p.speaking} />
         </group>); })}
     </>
-  );
-}
-
-/* ---------- Mobile joystick ---------- */
-function Joystick({ input }: { input: React.MutableRefObject<Input> }) {
-  const base = useRef<HTMLDivElement>(null);
-  const [knob, setKnob] = useState({ x: 0, y: 0 });
-  const move = (e: React.PointerEvent) => {
-    const b = base.current!.getBoundingClientRect();
-    let x = (e.clientX - (b.left + b.width / 2)) / (b.width / 2);
-    let y = (e.clientY - (b.top + b.height / 2)) / (b.height / 2);
-    const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
-    input.current.joy = { x, y }; setKnob({ x, y });
-  };
-  const end = () => { input.current.joy = { x: 0, y: 0 }; setKnob({ x: 0, y: 0 }); };
-  return (
-    <div ref={base} className="relative w-32 h-32 rounded-full bg-background/40 backdrop-blur border border-border touch-none select-none"
-      onPointerDown={(e) => { (e.target as HTMLElement).setPointerCapture(e.pointerId); move(e); }}
-      onPointerMove={(e) => { if (e.buttons || e.pointerType === 'touch') move(e); }}
-      onPointerUp={end} onPointerCancel={end}>
-      <div className="absolute w-12 h-12 rounded-full bg-primary/80 left-1/2 top-1/2 pointer-events-none"
-        style={{ transform: `translate(calc(-50% + ${knob.x * 40}px), calc(-50% + ${knob.y * 40}px))` }} />
-    </div>
-  );
-}
-
-/** Full-screen finger drag area for the camera (sits under all buttons). */
-function LookPad({ input }: { input: React.MutableRefObject<Input> }) {
-  const last = useRef<{ id: number; x: number; y: number } | null>(null);
-  return (
-    <div className="absolute inset-0 z-[1] touch-none"
-      onPointerDown={(e) => { if (last.current) return; last.current = { id: e.pointerId, x: e.clientX, y: e.clientY }; (e.target as Element).setPointerCapture(e.pointerId); }}
-      onPointerMove={(e) => { const l = last.current; if (!l || l.id !== e.pointerId) return; input.current.look.dx += e.clientX - l.x; input.current.look.dy += e.clientY - l.y; l.x = e.clientX; l.y = e.clientY; }}
-      onPointerUp={(e) => { if (last.current?.id === e.pointerId) last.current = null; }}
-      onPointerCancel={() => { last.current = null; }} />
   );
 }
 
@@ -455,7 +379,6 @@ export default function PlazaPage() {
   const peers = useRef(new Map<string, Peer>());
   const audio = useRef(new Map<string, { track: RemoteAudioTrack; el: HTMLMediaElement }>());
   const mePos = useRef({ x: 0, z: 0 });
-  const input = useRef<Input>({ joy: { x: 0, y: 0 }, turn: 0, look: { dx: 0, dy: 0 } });
   const meRef = useRef({ name, color, char }); meRef.current = { name, color, char };
   const [isAdmin, setIsAdmin] = useState(false);
   const [admins, setAdmins] = useState<string[]>([]);
@@ -463,6 +386,9 @@ export default function PlazaPage() {
   const [electionTick, setElectionTick] = useState(0);
   const [people, setPeople] = useState<PlazaPerson[]>([]);
   const published = usePublishedPlaza();
+  // The published scene's player controller; the stock plaza framing applies
+  // only while the scene uses the untouched default controller.
+  const plazaDef = useMemo(() => { const d = playerControllerFor(published ?? undefined); return d.id === 'default' ? { ...d, cameraDistance: 7.5, cameraHeight: 2.2 } : d; }, [published]);
   setWalkFromScene(published);
   const [theater, setTheater] = useState<TheaterSource>(null);
   const [pdfPages, setPdfPages] = useState(0);
@@ -736,7 +662,7 @@ export default function PlazaPage() {
           shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} />
         {published ? <PublishedWorld scene={published} /> : <PlazaWorld />}
         <TheaterScreen source={theater} onPages={setPdfPages} />
-        <Game me={{ color, name, char }} peers={peers} input={input} onMove={onMove} />
+        <Game me={{ color, name, char }} peers={peers} def={plazaDef} onMove={onMove} />
       </Canvas>
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
         <PeopleMenu count={count} people={people} isAdmin={isAdmin} admins={admins} selfIdentity={room.current?.localParticipant.identity || ''}
@@ -776,8 +702,7 @@ export default function PlazaPage() {
       )}
       {panel === 'vote' && <LevelElectionsPanel isAdmin={isAdmin} refreshKey={electionTick} onClose={() => setPanel(null)} onChanged={() => sendMod('election')} />}
       {/* Camera look: mouse drag on desktop, finger drag on phones — always centered on the character. */}
-      <LookPad input={input} />
-      {touch && <div className="absolute left-4 bottom-24 z-10"><Joystick input={input} /></div>}
+      <MobileTouchControls visible layerClass="z-[5]" />
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-10">
         <button onClick={toggleMic} aria-label={mic ? 'Mute' : 'Unmute'}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${mic ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
