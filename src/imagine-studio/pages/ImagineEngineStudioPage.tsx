@@ -12,6 +12,7 @@ import LevelEditorPage from "@/imagine-studio/pages/LevelEditorPage";
 import { createLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
 import { addLevelToProject, createProject, getActiveLevel, levelsOfProject, listProjects, projectOfLevel, setActiveLevel } from "@/imagine-studio/lib/localProjects";
 import { PLAZA_ENVIRONMENT, PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
+import StudioMobileNav from "@/imagine-studio/components/shared/StudioMobileNav";
 
 /* One-time fix: older Plaza District copies had a dark contact-shadow "gloom" the live game never shows. */
 try {
@@ -70,5 +71,10 @@ export default function ImagineEngineStudioPage() {
       </div>
     );
   }
-  return <LevelEditorPage key={isRigRoom ? "rig" : id} />;
+  return (
+    <>
+      <LevelEditorPage key={isRigRoom ? "rig" : id} />
+      <StudioMobileNav />
+    </>
+  );
 }

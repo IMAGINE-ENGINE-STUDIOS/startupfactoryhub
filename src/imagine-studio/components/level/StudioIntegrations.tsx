@@ -13,6 +13,18 @@ import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
+import { OFFICE_LEVEL_NAME } from "@/imagine-studio/lib/officeWorld";
+
+/** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
+ *  prompt so complex scenes can be described in a few ops instead of hundreds. */
+const GENIUS_EXTENDED_OPS = `EXTENDED OPS (accepted by this studio — prefer them for large scenes):
+- {"op":"repeat","object":OBJ,"count":n,"step":[dx,dy,dz],"rotateStep":rad?} n copies of OBJ in a line (desks, lamps, fences).
+- {"op":"grid","object":OBJ,"rows":n,"cols":n,"spacing":[sx,sz],"origin":[x,y,z],"rotateY":rad?} a rows x cols bank of OBJ (desk banks, trees, seats).
+- {"op":"ring","object":OBJ,"count":n,"radius":r,"center":[x,y,z],"faceCenter":true?} copies on a circle.
+- {"op":"scatter","object":OBJ,"count":n,"bounds":[minX,minZ,maxX,maxZ],"seed":n,"minDist":m} scattered copies.
+- {"op":"room","name":str,"center":[x,z],"size":[w,d],"height":h,"windows":"band|full|none","color":"#hex","floorColor":"#hex","openSide":"N|S|E|W"?} floor slab + 4 walls; window walls include a glass band and mullions.
+- {"op":"add","object":{"kind":"character","name":str,"url":"/models/plaza/Xbot.glb","position":[x,0,z],"rotation":[0,ry,0],"playable":false}} a character/NPC (models under /models/plaza/: Xbot.glb, Soldier.glb, RobotExpressive.glb, CesiumMan.glb, RiggedFigure.glb).
+COMPLEX BUILDS: plan the whole scene first, then build it in parts with these compact ops. If the full request does not fit in one reply, build the next part and end your "reply" text with [MORE]; when everything requested exists, end the reply with [DONE]. Never repeat objects that already exist in the context.`;
 import { NATIVE_FORMATS, extOf, importModelFile } from "@/imagine-studio/lib/model-import";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -110,6 +122,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   live.current = { scene, selectedId, name, busy, msgs };
   const embedded = typeof window !== "undefined" && window.parent !== window;
   const isPlaza = name === PLAZA_LEVEL_NAME;
+  const isOffice = name === OFFICE_LEVEL_NAME;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -132,19 +145,38 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     setBusy(true);
     try {
       const { scene: sc, selectedId: sid, name: nm, msgs: hist } = live.current;
-      const { data, error } = await supabase.functions.invoke("studio-genius", {
-        body: { prompt, context: sceneContext(sc, nm, sid), history: hist.slice(-6).map((m) => ({ role: m.role, content: m.text })) },
-      });
-      if (error || data?.error) throw new Error(data?.error || error.message);
-      let applied = 0;
-      if (data.ops?.some((o: any) => o?.op === "sketchfab" || o?.op === "optimize" || (o?.op === "level" && o.ops?.some((x: any) => x?.op === "sketchfab")))) {
-        setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
-        data.ops = await resolveOptimizeOps(await resolveSketchfabOps(data.ops, (t) => toast.message(t)), scene, (t) => toast.message(t));
+      const history = hist.slice(-6).map((m) => ({ role: m.role, content: m.text }));
+      /* Complex scenes are built in parts: each round applies its ops, then the
+         updated scene goes back as context until Genius ends with [DONE]. */
+      let working = sc;
+      let appliedTotal = 0;
+      let rounds = 0;
+      let lastReply = "";
+      let roundPrompt = `${prompt.slice(0, 2400)}\n\n${GENIUS_EXTENDED_OPS}`;
+      for (;;) {
+        const { data, error } = await supabase.functions.invoke("studio-genius", {
+          body: { prompt: roundPrompt, context: sceneContext(working, nm, sid), history },
+        });
+        if (error || data?.error) throw new Error(data?.error || error.message);
+        let ops = data.ops || [];
+        if (ops.some((o: any) => o?.op === "sketchfab" || o?.op === "optimize" || (o?.op === "level" && o.ops?.some((x: any) => x?.op === "sketchfab")))) {
+          if (rounds === 0) setMsgs((m) => [...m, { role: "assistant", text: "Fetching models from Sketchfab…", at: Date.now() }]);
+          ops = await resolveOptimizeOps(await resolveSketchfabOps(ops, (t) => toast.message(t)), working, (t) => toast.message(t));
+        }
+        if (ops.length) {
+          const r = applyStudioOps(working, ops, layerId);
+          working = r.scene;
+          appliedTotal += r.applied;
+          updateScene(() => working);
+        }
+        lastReply = String(data.reply || "");
+        rounds++;
+        if (!/\[MORE\]/i.test(lastReply) || !ops.length || rounds >= 6) break;
+        setMsgs((m) => [...m, { role: "assistant", text: `Building… part ${rounds + 1}`, at: Date.now() }]);
+        roundPrompt = `Continue the SAME build for this request: "${prompt.slice(0, 600)}". The scene context shows what already exists — do NOT repeat it. Build the next part now. End your reply with [MORE] if parts still remain, or [DONE] when the full request is complete.\n\n${GENIUS_EXTENDED_OPS}`;
       }
-      if (data.ops?.length) {
-        updateScene((s) => { const r = applyStudioOps(s, data.ops, layerId); applied = r.applied; return r.scene; });
-      }
-      const text = `${data.reply}${data.ops?.length ? ` (${data.ops.length} change${data.ops.length === 1 ? "" : "s"})` : ""}`;
+      const cleanReply = lastReply.replace(/\[(MORE|DONE)\]/gi, "").trim() || "Done.";
+      const text = `${cleanReply}${appliedTotal ? ` (${appliedTotal} change${appliedTotal === 1 ? "" : "s"}${rounds > 1 ? ` in ${rounds} parts` : ""})` : ""}`;
       setMsgs((m) => [...m, { role: "assistant", text, at: Date.now() }]);
       if (fromEngine && embedded) window.parent.postMessage({ __IEStudio: "reply", text }, "*");
     } catch (e: any) {
@@ -247,7 +279,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     if (error) {
       let msg = error.message;
       try { const j = await (error as any).context?.json?.(); if (j?.error) msg = j.error; } catch {}
-      if (/non-2xx/i.test(msg)) msg = "Publishing failed. Make sure you are signed in" + (isPlaza ? " with an admin account." : ".");
+      if (/non-2xx/i.test(msg)) msg = "Publishing failed. Make sure you are signed in" + (isPlaza || isOffice ? " with an admin account." : ".");
       throw new Error(msg);
     }
     if (data?.error) throw new Error(data.error);
@@ -282,8 +314,8 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     try {
       await save();
       const sc = await hostAssets(live.current.scene);
-      const data = await callPublish({ target: isPlaza ? "plaza" : "level", levelId, name, scene: sc });
-      toast.success(isPlaza ? "Published. Everyone in /plaza now sees this version." : "Level published", isPlaza ? undefined : { description: data.url });
+      const data = await callPublish({ target: isPlaza ? "plaza" : isOffice ? "office" : "level", levelId, name, scene: sc });
+      toast.success(isPlaza ? "Published. Everyone in /plaza now sees this version." : isOffice ? "Published. Everyone in /office now sees this version." : "Level published", isPlaza || isOffice ? undefined : { description: data.url });
     } catch (e: any) { toast.error(e.message || "Publish failed"); }
     setPublishing(false);
   };
@@ -297,9 +329,9 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       <Button size="sm" variant="secondary" className={cls} onClick={() => studio3d.open()} title="Genius 3D: ask for changes to this level">
         {busy ? <Loader2 className="w-3.5 h-3.5 sm:mr-1 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 sm:mr-1" />}<span className="hidden sm:inline">Genius 3D</span>
       </Button>
-      {(!isPlaza || isAdmin) && (
-        <Button size="sm" variant="outline" className={cls} onClick={publish} disabled={!canEdit || publishing} title={isPlaza ? "Publish to the live Plaza" : "Publish this level"}>
-          {publishing ? <Loader2 className="w-3.5 h-3.5 sm:mr-1 animate-spin" /> : <Rocket className="w-3.5 h-3.5 sm:mr-1" />}<span className="hidden sm:inline">{isPlaza ? "Publish Plaza" : "Publish"}</span>
+      {((!isPlaza && !isOffice) || isAdmin) && (
+        <Button size="sm" variant="outline" className={cls} onClick={publish} disabled={!canEdit || publishing} title={isPlaza ? "Publish to the live Plaza" : isOffice ? "Publish to the live Office" : "Publish this level"}>
+          {publishing ? <Loader2 className="w-3.5 h-3.5 sm:mr-1 animate-spin" /> : <Rocket className="w-3.5 h-3.5 sm:mr-1" />}<span className="hidden sm:inline">{isPlaza ? "Publish Plaza" : isOffice ? "Publish Office" : "Publish"}</span>
         </Button>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />

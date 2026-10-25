@@ -53,17 +53,109 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
   const real = (id) => alias.get(id) ?? id;
   const newIds: string[] = [];
   let applied = 0;
+  /* One object from an op's object spec (shared by "add" and the composite ops). */
+  const buildObj = (o: any, pos?: number[], rotY?: number, suffix = "") => {
+    const id = uid("obj");
+    if (o.id) alias.set(String(o.id) + (suffix ? `_${suffix}` : ""), id);
+    const base = { id, name: (String(o.name || "Object").slice(0, 72) + (suffix ? ` ${suffix}` : "")).slice(0, 80), position: pos ?? v3(o.position, [0, 0.5, 0]), rotation: rotY != null ? [num(o.rotation?.[0], 0), rotY, num(o.rotation?.[2], 0)] : v3(o.rotation, [0, 0, 0]), scale: v3(o.scale, [1, 1, 1]), visible: true, ...(layerId ? { layerId } : {}) };
+    if (o.kind === "model" && typeof o.url === "string") return { ...base, kind: "model", url: o.url, fileName: o.fileName, ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
+    if (o.kind === "character" && typeof o.url === "string") return { ...base, kind: "character", url: o.url, source: o.source, animationSpeed: 1, paused: false, crossfade: 0.25, playable: !!o.playable, controlScheme: o.controlScheme || "both", cameraMode: "third", mobileJoystick: "auto", ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
+    if (o.kind === "theater") return { ...base, name: String(o.name || "Theater Screen").slice(0, 80), position: pos ?? v3(o.position, [0, 3, 0]), scale: v3(o.scale, [6, 6, 1]), kind: "primitive", theater: true, shape: "plane", color: [0.05, 0.05, 0.07, 1], metalness: 0, roughness: 1 };
+    return { ...base, kind: "primitive", shape: SHAPES.includes(o.shape) ? o.shape : "box", color: rgba(o.color, [0.8, 0.8, 0.8, 1]), metalness: num(o.metalness, 0), roughness: num(o.roughness, 0.7), ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
+  };
+  const pushObj = (o: any, pos?: number[], rotY?: number, suffix = "") => {
+    if (s.objects.length >= 2000) return null;
+    const obj = buildObj(o, pos, rotY, suffix);
+    s.objects.push(obj); newIds.push(obj.id); applied++;
+    return obj;
+  };
   for (const op of ops || []) {
     try {
       if (op.op === "add" && op.object) {
+        pushObj(op.object);
+      } else if (op.op === "repeat" && op.object) {
+        /* One template, N copies along a step vector — a row of desks, lamps, crates… */
         const o = op.object;
-        const id = uid("obj");
-        if (o.id) alias.set(String(o.id), id);
-        const base = { id, name: String(o.name || "Object").slice(0, 80), position: v3(o.position, [0, 0.5, 0]), rotation: v3(o.rotation, [0, 0, 0]), scale: v3(o.scale, [1, 1, 1]), visible: true, ...(layerId ? { layerId } : {}) };
-        if (o.kind === "model" && typeof o.url === "string") s.objects.push({ ...base, kind: "model", url: o.url, fileName: o.fileName });
-        else if (o.kind === "theater") s.objects.push({ ...base, name: String(o.name || "Theater Screen").slice(0, 80), position: v3(o.position, [0, 3, 0]), scale: v3(o.scale, [6, 6, 1]), kind: "primitive", theater: true, shape: "plane", color: [0.05, 0.05, 0.07, 1], metalness: 0, roughness: 1 });
-        else s.objects.push({ ...base, kind: "primitive", shape: SHAPES.includes(o.shape) ? o.shape : "box", color: rgba(o.color, [0.8, 0.8, 0.8, 1]), metalness: num(o.metalness, 0), roughness: num(o.roughness, 0.7) });
-        newIds.push(id); applied++;
+        const count = Math.max(1, Math.min(200, Math.floor(num(op.count, 2))));
+        const step = v3(op.step, [2, 0, 0]);
+        const origin = v3(o.position, [0, 0.5, 0]);
+        for (let i = 0; i < count; i++) {
+          const obj = pushObj(o, [origin[0] + step[0] * i, origin[1] + step[1] * i, origin[2] + step[2] * i], op.rotateStep != null ? num(o.rotation?.[1], 0) + num(op.rotateStep, 0) * i : undefined, count > 1 ? String(i + 1) : "");
+          if (i === 0 && obj && o.id) alias.set(String(o.id), obj.id);
+        }
+      } else if (op.op === "grid" && op.object) {
+        /* Rows x cols of one template (desk banks, forest, parking, seating…). */
+        const o = op.object;
+        const rows = Math.max(1, Math.min(40, Math.floor(num(op.rows, 2))));
+        const cols = Math.max(1, Math.min(40, Math.floor(num(op.cols, 2))));
+        const sp = Array.isArray(op.spacing) ? op.spacing : [3, 3];
+        const sx = num(sp[0], 3), sz = num(sp.length > 1 ? sp[1] : sp[0], 3);
+        const origin = v3(op.origin ?? o.position, [0, 0.5, 0]);
+        let k = 0;
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+          k++;
+          const obj = pushObj(o, [origin[0] + c * sx, origin[1], origin[2] + r * sz], op.rotateY != null ? num(op.rotateY, 0) : undefined, String(k));
+          if (k === 1 && obj && o.id) alias.set(String(o.id), obj.id);
+        }
+      } else if (op.op === "ring" && op.object) {
+        /* Copies around a circle (plaza trees, lamps, stalls), optionally facing the center. */
+        const o = op.object;
+        const count = Math.max(1, Math.min(200, Math.floor(num(op.count, 8))));
+        const center = v3(op.center ?? o.position, [0, 0.5, 0]);
+        const radius = num(op.radius, 10);
+        for (let i = 0; i < count; i++) {
+          const a = (i / count) * Math.PI * 2 + num(op.offsetAngle, 0);
+          const obj = pushObj(o, [center[0] + Math.cos(a) * radius, center[1], center[2] + Math.sin(a) * radius], op.faceCenter ? -a + Math.PI / 2 : undefined, String(i + 1));
+          if (i === 0 && obj && o.id) alias.set(String(o.id), obj.id);
+        }
+      } else if (op.op === "scatter" && op.object) {
+        /* Deterministic scattered placement inside bounds (rocks, bushes, props). */
+        const o = op.object;
+        const count = Math.max(1, Math.min(300, Math.floor(num(op.count, 10))));
+        const b = Array.isArray(op.bounds) && op.bounds.length === 4 ? op.bounds.map((x: any) => num(x, 0)) : [-20, -20, 20, 20];
+        let seed = Math.floor(num(op.seed, 42)) || 42;
+        const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+        const minDist = num(op.minDist, 1.5);
+        const base = v3(o.position, [0, 0.5, 0]);
+        const placed: number[][] = [];
+        for (let i = 0; i < count; i++) {
+          let p: number[] | null = null;
+          for (let t = 0; t < 12 && !p; t++) {
+            const cand = [b[0] + rnd() * (b[2] - b[0]), base[1], b[1] + rnd() * (b[3] - b[1])];
+            if (placed.every((q) => Math.hypot(q[0] - cand[0], q[2] - cand[2]) >= minDist)) p = cand;
+          }
+          if (!p) continue;
+          placed.push(p);
+          pushObj(o, p, Math.floor(rnd() * 4) * (Math.PI / 2), String(i + 1));
+        }
+      } else if (op.op === "room") {
+        /* A whole room from a few numbers: floor slab + 4 walls; window walls get a sill, glass band, header and mullions. */
+        const nm = String(op.name || "Room").slice(0, 60);
+        const ctr = Array.isArray(op.center) ? op.center : [0, 0];
+        const cx = num(ctr[0], 0), cz = num(ctr.length > 2 ? ctr[2] : ctr[1], 0);
+        const szv = Array.isArray(op.size) ? op.size : [12, 12];
+        const w = num(szv[0], 12), d = num(szv.length > 1 ? szv[1] : szv[0], 12), h = num(op.height, 3.2), t = num(op.thickness, 0.15);
+        const wallColor = op.color ?? "#d8dde3";
+        const win = ["band", "full", "none"].includes(op.windows) ? op.windows : "band";
+        const glass: [number, number, number, number] = [0.62, 0.81, 0.95, 0.32];
+        if (op.floor !== false) pushObj({ kind: "primitive", name: `${nm} Floor`, shape: "box", position: [cx, -0.05, cz], scale: [w, 0.1, d], color: op.floorColor ?? "#9aa0a6", roughness: 0.95 });
+        const wallRun = (side: string, len: number, px: number, pz: number, rotY: number) => {
+          if (win === "none") { pushObj({ kind: "primitive", name: `${nm} Wall ${side}`, shape: "box", position: [px, h / 2, pz], rotation: [0, rotY, 0], scale: [len, h, t], color: wallColor, roughness: 0.9 }); return; }
+          const sillH = win === "full" ? 0.15 : 0.9, headH = 0.5, glassH = Math.max(0.3, h - sillH - headH);
+          pushObj({ kind: "primitive", name: `${nm} Wall ${side} Sill`, shape: "box", position: [px, sillH / 2, pz], rotation: [0, rotY, 0], scale: [len, sillH, t], color: wallColor, roughness: 0.9 });
+          pushObj({ kind: "primitive", name: `${nm} Glass ${side}`, shape: "box", position: [px, sillH + glassH / 2, pz], rotation: [0, rotY, 0], scale: [len, glassH, t * 0.4], color: glass, roughness: 0.08, metalness: 0.1 });
+          pushObj({ kind: "primitive", name: `${nm} Wall ${side} Header`, shape: "box", position: [px, h - headH / 2, pz], rotation: [0, rotY, 0], scale: [len, headH, t], color: wallColor, roughness: 0.9 });
+          const nM = Math.max(2, Math.floor(len / 3));
+          for (let i = 0; i <= nM; i++) {
+            const off = -len / 2 + (len / nM) * i;
+            pushObj({ kind: "primitive", name: `${nm} Mullion ${side} ${i + 1}`, shape: "box", position: [px + Math.cos(rotY) * off, sillH + glassH / 2, pz - Math.sin(rotY) * off], rotation: [0, rotY, 0], scale: [0.12, glassH, t * 0.7], color: "#3a3f46", roughness: 0.6, metalness: 0.4 });
+          }
+        };
+        const open = typeof op.openSide === "string" ? op.openSide.toUpperCase() : "";
+        if (open !== "N") wallRun("N", w, cx, cz - d / 2, 0);
+        if (open !== "S") wallRun("S", w, cx, cz + d / 2, 0);
+        if (open !== "W") wallRun("W", d, cx - w / 2, cz, Math.PI / 2);
+        if (open !== "E") wallRun("E", d, cx + w / 2, cz, Math.PI / 2);
       } else if (op.op === "update") {
         const o = s.objects.find((x) => x.id === real(op.id)); if (!o) continue;
         const p = op.patch || {};

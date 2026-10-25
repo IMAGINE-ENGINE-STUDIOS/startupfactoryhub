@@ -9,7 +9,9 @@
     "#ie-studio-btn.on{background:rgba(60,100,255,.45)}" +
     "html.ie-studio-on,body.ie-studio-on{overflow:hidden!important;height:100%}body.ie-studio-on .ie-hdr{position:fixed;top:0;left:0;right:0;z-index:61}body.ie-studio-on .ie-hdr~*{display:none!important}body.ie-studio-on #ie-pages-slot,body.ie-studio-on #ie-pages-slot+button{display:none!important}body.ie-studio-on .ie-hdr button[data-mode]{background:transparent!important;color:#a1a1aa!important}body.ie-studio-on .ie-hdr button[data-mode]:hover{color:#fff!important}body.ie-studio-on .iea-fab{display:none!important}" +
     ".ie-bar{position:absolute;top:8px;right:8px;z-index:5;display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(10,14,24,.78);backdrop-filter:blur(8px);opacity:0;transition:opacity .15s;font:500 11px system-ui;color:#e6ecff}" +
-    ".ie-host:hover>.ie-bar,.ie-bar:focus-within{opacity:1}.ie-bar button{background:transparent;border:0;color:inherit;padding:4px 7px;border-radius:6px;cursor:pointer;font:inherit}.ie-bar button:hover{background:rgba(255,255,255,.12)}.ie-bar .fps{padding:4px 7px;opacity:.8;min-width:48px}";
+    ".ie-host:hover>.ie-bar,.ie-bar:focus-within{opacity:1}.ie-bar button{background:transparent;border:0;color:inherit;padding:4px 7px;border-radius:6px;cursor:pointer;font:inherit}.ie-bar button:hover{background:rgba(255,255,255,.12)}.ie-bar .fps{padding:4px 7px;opacity:.8;min-width:48px}" +
+    "#ie-studio-fab{display:none}" +
+    "@media (max-width:860px){#ie-studio-fab{display:inline-flex;position:fixed;right:14px;bottom:14px;z-index:65;align-items:center;gap:6px;padding:11px 15px;border-radius:9999px;border:1px solid rgba(120,160,255,.45);background:rgba(20,40,110,.94);color:#e6ecff;font:600 13px system-ui;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45)}#ie-studio-fab.on{background:rgba(60,100,255,.92)}.ie-sbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;height:44px}.ie-sbar button{white-space:nowrap;padding:6px 10px}.ie-sbar select{max-width:128px}#ie-studio-ws iframe{height:calc(100% - 44px)}}";
   document.head.appendChild(css);
 
   /* ---------- 3D Studio workspace ---------- */
@@ -25,7 +27,7 @@
     onTab = on;
     if (on && !ws) {
       ws = document.createElement("div"); ws.id = "ie-studio-ws";
-      ws.innerHTML = '<div class="ie-sbar"><b>3D Studio</b><button data-s="projects">My 3D projects</button><button data-s="newproj">+ New project</button><span class="pj" style="opacity:.75;margin-left:6px"></span><select class="lv" title="Levels in this project" style="height:28px;border-radius:8px;border:1px solid rgba(120,160,255,.3);background:#0b1020;color:inherit;font:inherit;padding:0 6px;display:none"></select><button data-s="new">+ New level</button><span class="sp"></span><button data-s="play" class="pl">Play</button></div>' +
+      ws.innerHTML = '<div class="ie-sbar"><b>3D Studio</b><button data-s="projects">Worlds &amp; levels</button><button data-s="newproj">+ New project</button><span class="pj" style="opacity:.75;margin-left:6px"></span><select class="lv" title="Levels in this project" style="height:28px;border-radius:8px;border:1px solid rgba(120,160,255,.3);background:#0b1020;color:inherit;font:inherit;padding:0 6px;display:none"></select><button data-s="new">+ New level</button><span class="sp"></span><button data-s="play" class="pl">Play</button><button data-s="close">Close ✕</button></div>' +
         '<iframe data-ie-3d="1" allow="fullscreen; xr-spatial-tracking" src="/imagine-studio?embedded=1"></iframe>';
       document.body.appendChild(ws);
       var fr = ws.querySelector("iframe");
@@ -34,6 +36,7 @@
         if (a === "projects") fr.src = "/levels?embedded=1";
         if (a === "new") fr.src = "/imagine-studio?embedded=1&new=1";
         if (a === "newproj") fr.src = "/imagine-studio?embedded=1&newProject=1";
+        if (a === "close") show(false);
         if (a === "play") { try { fr.contentWindow.postMessage({ __IEStudio: "play" }, "*"); } catch (er) {} }
       });
       var sel = ws.querySelector(".lv");
@@ -50,6 +53,7 @@
     document.body.classList.toggle("ie-studio-on", !!on); document.documentElement.classList.toggle("ie-studio-on", !!on);
     try { window.__IEHistPaint && window.__IEHistPaint(); } catch (e) {}
     if (btn) btn.classList.toggle("on", on);
+    var fab = document.getElementById("ie-studio-fab"); if (fab) fab.classList.toggle("on", on);
     place();
   }
   window.__IEStudio = { open: function () { show(true); }, close: function () { show(false); }, frame: function () { return ws && ws.querySelector("iframe"); } };
@@ -102,8 +106,18 @@
     }
     requestAnimationFrame(tick);
   }
+  /* Mobile entry point: the header mode row is unreliable on small screens, so a
+     floating button (shown by CSS only under 860px) always reaches the studio. */
+  function mountFab() {
+    if (document.getElementById("ie-studio-fab")) return;
+    var f = document.createElement("button"); f.id = "ie-studio-fab"; f.type = "button"; f.textContent = "3D Studio";
+    f.onclick = function () { show(!onTab); };
+    document.body.appendChild(f);
+  }
+
   function scan() {
     mountBtn();
+    mountFab();
     document.querySelectorAll('iframe[src*="/imagine-engine/blocks/"],iframe[src*="/imagine-studio"]').forEach(function (f) { if (!f.closest("#ie-studio-ws")) decorate(f); });
   }
   new MutationObserver(function () { clearTimeout(scan.t); scan.t = setTimeout(scan, 250); }).observe(document.documentElement, { childList: true, subtree: true });
