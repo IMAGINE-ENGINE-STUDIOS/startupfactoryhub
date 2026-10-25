@@ -8,6 +8,10 @@ import { createLocalLevel, ensurePlazaLevel as _ensure, getLocalLevel, listLocal
 
 export const OFFICE_LEVEL_NAME = "Muse HQ — NYC Office";
 export const OFFICE_PUBLISHED_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/office-world.json`;
+/** Public URL of any floor's published scene file in the studio-published
+ * bucket. Floors are isolated: a floor only ever fetches its OWN file. */
+export const publishedWorldUrl = (file: string): string =>
+  `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/studio-published/${file}`;
 /** Walkable interior bounds (half-extents) for the /office player. */
 export const OFFICE_BOUNDS = { x: 22.5, z: 14.5 };
 /** Places bots stroll to between desk work — all in clear corridors
@@ -81,6 +85,23 @@ export const OFFICE_MANAGER: OfficeBot = {
   tint: "#FFD166",
 };
 export const MANAGER_HOME: [number, number, number] = [0, 0, -12.6];
+export const OFFICE_CHAIRMAN: OfficeBot = {
+  key: "chairman",
+  name: "Chairman",
+  duty: "Runs the entire building — every company, every floor. The CEOs and Managers answer to him.",
+  model: AGENT_MODEL_URL,
+  tint: "#B8C0CC",
+};
+export const CHAIRMAN_HOME: [number, number, number] = [4.6, 0, -12.6];
+/** The CEO of whichever company owns the floor being viewed. */
+export const ceoBot = (company: string): OfficeBot => ({
+  key: "ceo",
+  name: "CEO",
+  duty: `Chief Executive of ${company} — sets the company's direction, directs its Manager, answers to the Chairman.`,
+  model: AGENT_MODEL_URL,
+  tint: "#7DD3FC",
+});
+export const CEO_HOME: [number, number, number] = [-4.6, 0, -12.6];
 
 export const OFFICE_BOTS: OfficeBot[] = ROSTER.map(([name, duty], i) => ({
   key: name.toLowerCase(),
@@ -302,9 +323,9 @@ export async function fetchPublishedOfficeScene(): Promise<LevelScene | null> {
 
 /** Scene + publish timestamp, so the /office player can show exactly which
  *  published version it is playing (and flag the offline fallback copy). */
-export async function fetchPublishedOfficeMeta(): Promise<{ scene: LevelScene; publishedAt: string | null } | null> {
+export async function fetchPublishedOfficeMeta(url: string = OFFICE_PUBLISHED_URL): Promise<{ scene: LevelScene; publishedAt: string | null } | null> {
   try {
-    const r = await fetch(`${OFFICE_PUBLISHED_URL}?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
     const d: any = await r.json();
     const scene = d?.scene ?? (d?.objects ? d : null);

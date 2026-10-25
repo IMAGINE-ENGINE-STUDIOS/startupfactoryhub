@@ -112,12 +112,14 @@ export const MANAGER_PROMPT =
   `You receive goals from the founder, decompose them into rigorous specialist work, assign each task to the one specialist whose craft it is, verify that finished work is genuinely sufficient (complete deliverables with specifics — never outlines, stubs or a few lines), and keep the whole company moving like an assembly line: research feeds writing, writing feeds design and outreach, review gates the final product. ` +
   `You are demanding about substance and precise about handoffs. When you plan, you return structured JSON exactly as instructed. When you review, you judge hard and give exact, actionable feedback.`;
 
-export const teamRosterText = (): string =>
-  TEAM.map((r) => `- ${r.name} (${r.title}, ${r.dept}): ${r.specialties.join("; ")} → produces ${r.deliverables.join("; ")}`).join("\n");
+export const teamRosterText = (team: TeamRole[] = TEAM): string =>
+  team.map((r) => `- ${r.name} (${r.title}, ${r.dept}): ${r.specialties.join("; ")} → produces ${r.deliverables.join("; ")}`).join("\n");
 
 /* ------------------------------------------------------------------ */
 /* Shift state                                                         */
 /* ------------------------------------------------------------------ */
+
+export interface RawTask { agent: string; title: string; detail: string; deps: number[] }
 
 export type ShiftStatus = "idle" | "planning" | "running" | "soft" | "hard" | "done";
 export type ShiftTaskStatus = "queued" | "running" | "review" | "done" | "error" | "cancelled";
@@ -148,7 +150,38 @@ export interface ShiftState {
   updatedAt: number;
 }
 
-const STORE_KEY = "sfh:office-shift:v1";
+/** The safety net: if the Manager's plan cannot be used at all, the shift
+ * still runs on a standard assembly-line plan built from the goal — a
+ * shift never dies at the planning step. The substitution is logged. */
+export function sfhDefaultPlan(goal: string): RawTask[] {
+  const g = goal.slice(0, 400);
+  return [
+    { agent: "Analyst", title: "Situation & market analysis", detail: `Analyze the situation behind this goal: ${g} — market, audience, competitors, pricing reality, and the numbers that decide success. Produce a full analysis report with tables where data is tabular.`, deps: [] },
+    { agent: "Researcher", title: "Deep research pack", detail: `Research everything relevant to this goal: ${g} — best practices, comparable successes, channels, tools and evidence. Produce a complete research pack the team can build on.`, deps: [] },
+    { agent: "Planner", title: "Execution plan & milestones", detail: `Turn the analysis and research into an execution plan for this goal: ${g} — phases, milestones, owners, deadlines and the metrics that prove progress.`, deps: [0, 1] },
+    { agent: "Architect", title: "Strategy & structure", detail: `Design the strategy and structure for this goal: ${g} — the offer, the funnel, the positioning and the decisions everything else depends on.`, deps: [0, 1] },
+    { agent: "Builder", title: "Core deliverable build", detail: `Build the core deliverable for this goal: ${g} — the main asset, complete and usable, following the plan and strategy.`, deps: [2, 3] },
+    { agent: "Writer", title: "Full written deliverable", detail: `Write the complete written deliverable for this goal: ${g} — the full document, ready to use, built on the plan and strategy.`, deps: [2, 3] },
+    { agent: "Designer", title: "Presentation & visual package", detail: `Design the presentation and visual package for this goal: ${g} — deck structure, page copy and visual direction for every asset.`, deps: [4, 5] },
+    { agent: "Marketer", title: "Go-to-market & content plan", detail: `Create the go-to-market and content plan for this goal: ${g} — channels, calendar, hooks and the growth loop.`, deps: [4, 5] },
+    { agent: "Outreach", title: "Campaign pack", detail: `Write the full outreach campaign pack for this goal: ${g} — sequences, scripts and follow-ups, ready to send.`, deps: [5, 7] },
+    { agent: "Guardian", title: "Quality & risk review", detail: `Review every deliverable produced for this goal: ${g} — quality, accuracy, compliance and risk. Produce a review memo listing what passes, what must change, and the risks.`, deps: [4, 5, 6, 7, 8] },
+  ];
+}
+
+export interface ShiftEngineConfig {
+  storeKey: string;
+  archivistKey: string;
+  /** Live team lookup — the office adds custom agents to a floor's team
+   * mid-session (Manager team tools), and the engine must plan with them. */
+  team: () => TeamRole[];
+  defaultPlan: (goal: string) => RawTask[];
+}
+
+/** One engine per floor (founder directive 2026-10-25): each floor's
+ * Manager plans with that floor's own team, keeps its own shift state in
+ * its own store, and never touches another floor's work. */
+export function createShiftEngine(cfg: ShiftEngineConfig) {
 const listeners = new Set<() => void>();
 let state: ShiftState | null = load();
 let generation = 0;
@@ -159,7 +192,7 @@ let reviewsInFlight = 0;
 
 function load(): ShiftState | null {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(cfg.storeKey);
     if (!raw) return null;
     const s = JSON.parse(raw);
     if (!s || typeof s.goal !== "string" || !Array.isArray(s.tasks)) return null;
@@ -179,7 +212,7 @@ function load(): ShiftState | null {
 function save() {
   if (state) {
     state.updatedAt = Date.now();
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch { /* session-only */ }
+    try { localStorage.setItem(cfg.storeKey, JSON.stringify(state)); } catch { /* session-only */ }
   }
   listeners.forEach((fn) => fn());
 }
@@ -195,7 +228,7 @@ const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice
 /* The engine                                                          */
 /* ------------------------------------------------------------------ */
 
-export const shiftEngine = {
+const engine = {
   bind(d: { resolveAgentId: (botKey: string) => Promise<string | null> }) {
     deps = d;
     if (!timer) timer = setInterval(() => { void tick(); }, 1800);
@@ -299,7 +332,7 @@ export const shiftEngine = {
   reassignTask(id: string, botKey: string) {
     if (!state) return;
     const t = state.tasks.find((x) => x.id === id);
-    const r = TEAM.find((x) => x.key === botKey);
+    const r = cfg.team().find((x) => x.key === botKey);
     if (t && r && (t.status === "queued" || t.status === "error")) {
       t.botKey = r.key;
       t.agentName = r.name;
@@ -323,7 +356,7 @@ export const shiftEngine = {
 
   async buildReport() {
     if (!state || state.reportBusy || !deps) return;
-    const archivistId = await deps.resolveAgentId(ARCHIVIST_KEY);
+    const archivistId = await deps.resolveAgentId(cfg.archivistKey);
     if (!archivistId) return;
     state.reportBusy = true;
     save();
@@ -355,12 +388,11 @@ export const shiftEngine = {
 /* Planning + dispatch                                                 */
 /* ------------------------------------------------------------------ */
 
-interface RawTask { agent: string; title: string; detail: string; deps: number[] }
-
 function finalizeTasks(raw: RawTask[]): ShiftTask[] {
   const ids = raw.map(() => uid());
   const tasks: ShiftTask[] = raw.slice(0, 16).map((t, i) => {
-    const r2 = TEAM.find((x) => x.name.toLowerCase() === String(t?.agent || "").toLowerCase()) || TEAM[i % TEAM.length];
+    const teamNow = cfg.team();
+    const r2 = teamNow.find((x) => x.name.toLowerCase() === String(t?.agent || "").toLowerCase()) || teamNow[i % teamNow.length];
     const depIdx: number[] = Array.isArray(t?.deps) ? t.deps.filter((d: any) => Number.isInteger(d) && d >= 0 && d < raw.length && d !== i) : [];
     return {
       id: ids[i],
@@ -409,32 +441,13 @@ function parseTaskLines(text: string): RawTask[] {
   return out;
 }
 
-/** The safety net: if the Manager's plan cannot be used at all, the shift
- * still runs on a standard assembly-line plan built from the goal — a
- * shift never dies at the planning step. The substitution is logged. */
-function defaultPlan(goal: string): RawTask[] {
-  const g = goal.slice(0, 400);
-  return [
-    { agent: "Analyst", title: "Situation & market analysis", detail: `Analyze the situation behind this goal: ${g} — market, audience, competitors, pricing reality, and the numbers that decide success. Produce a full analysis report with tables where data is tabular.`, deps: [] },
-    { agent: "Researcher", title: "Deep research pack", detail: `Research everything relevant to this goal: ${g} — best practices, comparable successes, channels, tools and evidence. Produce a complete research pack the team can build on.`, deps: [] },
-    { agent: "Planner", title: "Execution plan & milestones", detail: `Turn the analysis and research into an execution plan for this goal: ${g} — phases, milestones, owners, deadlines and the metrics that prove progress.`, deps: [0, 1] },
-    { agent: "Architect", title: "Strategy & structure", detail: `Design the strategy and structure for this goal: ${g} — the offer, the funnel, the positioning and the decisions everything else depends on.`, deps: [0, 1] },
-    { agent: "Builder", title: "Core deliverable build", detail: `Build the core deliverable for this goal: ${g} — the main asset, complete and usable, following the plan and strategy.`, deps: [2, 3] },
-    { agent: "Writer", title: "Full written deliverable", detail: `Write the complete written deliverable for this goal: ${g} — the full document, ready to use, built on the plan and strategy.`, deps: [2, 3] },
-    { agent: "Designer", title: "Presentation & visual package", detail: `Design the presentation and visual package for this goal: ${g} — deck structure, page copy and visual direction for every asset.`, deps: [4, 5] },
-    { agent: "Marketer", title: "Go-to-market & content plan", detail: `Create the go-to-market and content plan for this goal: ${g} — channels, calendar, hooks and the growth loop.`, deps: [4, 5] },
-    { agent: "Outreach", title: "Campaign pack", detail: `Write the full outreach campaign pack for this goal: ${g} — sequences, scripts and follow-ups, ready to send.`, deps: [5, 7] },
-    { agent: "Guardian", title: "Quality & risk review", detail: `Review every deliverable produced for this goal: ${g} — quality, accuracy, compliance and risk. Produce a review memo listing what passes, what must change, and the risks.`, deps: [4, 5, 6, 7, 8] },
-  ];
-}
-
 async function planWithManager(managerId: string, goal: string, done: ShiftTask[]): Promise<ShiftTask[]> {
   const doneNote = done.length
     ? `\n\nWork already finished in this shift (do not repeat it; build on it):\n${done.map((t) => `- [${t.agentName}] ${t.title}`).join("\n")}`
     : "";
   const format = `Reply with ONLY plan lines, one per task, in exactly this format (no prose, no markdown, no code fences):\nTASK|AgentFirstName|Short title|Full brief for the specialist|deps:0,2\nRules: 6 to 14 tasks; agent = exact first name from the team list; the brief is complete (what to produce, what it must contain, the quality bar) and every task produces a finished deliverable (document, table, plan, draft, analysis), never a chat reply; deps lists the line numbers (starting at 0) of tasks that must finish first, or "deps:" with nothing after it; build an assembly line (research before writing, writing before design/outreach, a Guardian review near the end); never use the | character inside a title or brief and never break a task across lines.`;
   const prompts = [
-    `Plan a full company shift for this goal.\n\nGOAL: ${goal}${doneNote}\n\nYOUR TEAM:\n${teamRosterText()}\n\n${format}`,
+    `Plan a full company shift for this goal.\n\nGOAL: ${goal}${doneNote}\n\nYOUR TEAM:\n${teamRosterText(cfg.team())}\n\n${format}`,
     `Give me the shift plan now, 8 tasks minimum, ONLY TASK lines in this format: TASK|AgentFirstName|Title|Brief|deps:0,1 — goal: ${goal}`,
   ];
   for (const prompt of prompts) {
@@ -445,7 +458,7 @@ async function planWithManager(managerId: string, goal: string, done: ShiftTask[
     } catch { /* try the next form, then the safety net */ }
   }
   log("The Manager's plan did not come through in a usable form, so a standard assembly-line plan was set instead — the shift runs either way.");
-  return finalizeTasks(defaultPlan(goal));
+  return finalizeTasks(cfg.defaultPlan(goal));
 }
 
 async function tick() {
@@ -469,7 +482,7 @@ async function tick() {
     state.status = "done";
     log("Shift complete — every task is finished. Building the report…");
     save();
-    void shiftEngine.buildReport();
+    void engine.buildReport();
   }
 }
 
@@ -570,3 +583,16 @@ async function reviewTask(task: ShiftTask, gen: number) {
     void tick();
   }
 }
+
+  return engine;
+}
+
+/** Floor 100's engine — Startup Factory Hub, the original store key and
+ * behavior from before floors existed. */
+export const shiftEngine = createShiftEngine({
+  storeKey: "sfh:office-shift:v1",
+  archivistKey: ARCHIVIST_KEY,
+  team: () => TEAM,
+  defaultPlan: sfhDefaultPlan,
+});
+export type ShiftEngine = ReturnType<typeof createShiftEngine>;

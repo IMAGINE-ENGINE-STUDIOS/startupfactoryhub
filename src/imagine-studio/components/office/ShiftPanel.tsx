@@ -8,9 +8,9 @@
  * so the plan can change course; hard stop halts everything at once.
  */
 import { useEffect, useReducer, useState } from "react";
-import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw, MessageSquare, ClipboardList } from "lucide-react";
+import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw, MessageSquare, ClipboardList, Users, UserPlus, Wand2 } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { shiftEngine, TEAM, type ShiftState, type ShiftTask } from "@/imagine-studio/lib/shiftEngine";
+import type { ShiftEngine, ShiftState, ShiftTask, TeamRole } from "@/imagine-studio/lib/shiftEngine";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
 
 const STATUS_STYLE: Record<string, string> = {
@@ -55,7 +55,7 @@ function downloadPdf(title: string, md: string) {
   doc.save(`${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60)}.pdf`);
 }
 
-function TaskRow({ task, shift, expanded, onToggle }: { task: ShiftTask; shift: ShiftState; expanded: boolean; onToggle: () => void }) {
+function TaskRow({ task, shift, expanded, onToggle, engine, team }: { task: ShiftTask; shift: ShiftState; expanded: boolean; onToggle: () => void; engine: ShiftEngine; team: TeamRole[] }) {
   const editable = shift.status === "soft" && (task.status === "queued" || task.status === "error");
   return (
     <div className="rounded-lg border border-border/70 bg-background/60">
@@ -77,15 +77,15 @@ function TaskRow({ task, shift, expanded, onToggle }: { task: ShiftTask; shift: 
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <select
                 value={task.botKey}
-                onChange={(e) => shiftEngine.reassignTask(task.id, e.target.value)}
+                onChange={(e) => engine.reassignTask(task.id, e.target.value)}
                 className="h-7 rounded-md border border-border bg-background px-1.5 text-[11px]"
               >
-                {TEAM.map((r) => <option key={r.key} value={r.key}>{r.name} — {r.title}</option>)}
+                {team.map((r) => <option key={r.key} value={r.key}>{r.name} — {r.title}</option>)}
               </select>
               {task.status === "error" && (
-                <button onClick={() => shiftEngine.retryTask(task.id)} className="flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] hover:bg-muted"><RotateCcw className="h-3 w-3" />Retry</button>
+                <button onClick={() => engine.retryTask(task.id)} className="flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] hover:bg-muted"><RotateCcw className="h-3 w-3" />Retry</button>
               )}
-              <button onClick={() => shiftEngine.removeTask(task.id)} className="flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] text-destructive hover:bg-muted"><Trash2 className="h-3 w-3" />Remove</button>
+              <button onClick={() => engine.removeTask(task.id)} className="flex h-7 items-center gap-1 rounded-md border border-border px-2 text-[11px] text-destructive hover:bg-muted"><Trash2 className="h-3 w-3" />Remove</button>
             </div>
           )}
         </div>
@@ -94,15 +94,31 @@ function TaskRow({ task, shift, expanded, onToggle }: { task: ShiftTask; shift: 
   );
 }
 
-export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: () => void }) {
+export interface TeamTools {
+  bots: { key: string; name: string; duty: string }[];
+  create: (x: { name: string; duty: string; prompt: string }) => Promise<void>;
+  reset: (botKey: string, prompt: string) => Promise<void>;
+  resetAll: (prompt: string) => Promise<string>;
+}
+
+export function ShiftPanel({ engine, team, company, floorLabel, archivistLabel, managerChatKey, teamTools, signedIn, onClose }: { engine: ShiftEngine; team: TeamRole[]; company: string; floorLabel: string; archivistLabel: string; managerChatKey: string; teamTools: TeamTools; signedIn: boolean; onClose: () => void }) {
   const [, force] = useReducer((x: number) => x + 1, 0);
-  useEffect(() => shiftEngine.subscribe(force), []);
-  const shift = shiftEngine.getState();
+  useEffect(() => engine.subscribe(force), []);
+  const shift = engine.getState();
   const [goalDraft, setGoalDraft] = useState("");
   const [goalTouched, setGoalTouched] = useState(false);
   const [confirmHard, setConfirmHard] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"chat" | "shift">("chat");
+  const [tab, setTab] = useState<"chat" | "shift" | "team">("chat");
+  const [newName, setNewName] = useState("");
+  const [newDuty, setNewDuty] = useState("");
+  const [newPrompt, setNewPrompt] = useState("");
+  const [resetKey, setResetKey] = useState("");
+  const [resetPrompt, setResetPrompt] = useState("");
+  const [resetAllPrompt, setResetAllPrompt] = useState("");
+  const [confirmResetAll, setConfirmResetAll] = useState(false);
+  const [teamNote, setTeamNote] = useState("");
+  const [teamErr, setTeamErr] = useState("");
   const [lastUserMsg, setLastUserMsg] = useState("");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
@@ -116,7 +132,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
     const g = (explicit ?? goal).trim();
     if (!g) return;
     setBusy("start"); setErr("");
-    try { await shiftEngine.startShift(g); setGoalTouched(false); }
+    try { await engine.startShift(g); setGoalTouched(false); }
     catch (e: any) { setErr(e?.message || "Could not start the shift."); }
     setBusy("");
   };
@@ -126,7 +142,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
       <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFD166]/20 text-[#b8860b] dark:text-[#FFD166]"><Briefcase className="h-5 w-5" /></span>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-semibold">Manager — Shift Control</div>
+          <div className="truncate text-sm font-semibold">Manager — Shift Control · {floorLabel} · {company}</div>
           <div className="truncate text-[11px] text-muted-foreground">The Manager plans, assigns, verifies. Specialists work in parallel, handing finished work down the line.</div>
         </div>
         {shift && <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${shift.status === "running" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : shift.status === "soft" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" : shift.status === "hard" ? "bg-red-500/15 text-red-600 dark:text-red-400" : "bg-muted text-muted-foreground"}`}>{shift.status === "soft" ? "soft-stopped" : shift.status}</span>}
@@ -136,6 +152,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
       <div className="flex shrink-0 items-center gap-1.5 border-b border-border px-4 py-2">
         <button onClick={() => setTab("chat")} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === "chat" ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><MessageSquare className="h-3.5 w-3.5" /> Chat with the Manager</button>
         <button onClick={() => setTab("shift")} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === "shift" ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><ClipboardList className="h-3.5 w-3.5" /> Shift &amp; team</button>
+        <button onClick={() => setTab("team")} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === "team" ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><Users className="h-3.5 w-3.5" /> Team tools</button>
       </div>
 
       {tab === "chat" ? (
@@ -152,16 +169,16 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
           <div className="min-h-0 flex-1">
             <AgentChat
               name="Manager"
-              onSend={(text) => shiftEngine.chatWithManager(text)}
+              onSend={(text) => engine.chatWithManager(text)}
               emptyText={<>Talk to the Manager — ask him anything, brief him on the company, or describe the work. When you&apos;re ready, turn your last message into a full shift with the gold button above: he&apos;ll plan it, assign the specialists, and verify every deliverable.</>}
               placeholder="Message the Manager…"
               disabledNote={!signedIn ? "Sign in to talk to the Manager — he works through your Agents account." : null}
-              persistKey="sfh:manager-chat:v1"
+              persistKey={managerChatKey}
               onUserMessage={setLastUserMsg}
             />
           </div>
         </div>
-      ) : (
+      ) : tab === "shift" ? (
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4">
         <div className="mx-auto w-full max-w-3xl space-y-4">
           {!signedIn && <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">Sign in to run a shift — the Manager and the team work through your Agents account.</p>}
@@ -183,17 +200,17 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
                 </button>
               )}
               {shift?.status === "running" && (
-                <button onClick={() => shiftEngine.softStop()} className="flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950"><PauseCircle className="h-4 w-4" /> Soft stop — change plans</button>
+                <button onClick={() => engine.softStop()} className="flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950"><PauseCircle className="h-4 w-4" /> Soft stop — change plans</button>
               )}
               {shift?.status === "soft" && (
                 <>
-                  <button onClick={() => shiftEngine.resume()} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950"><Play className="h-4 w-4" /> Resume shift</button>
-                  <button onClick={() => { void shiftEngine.replan(goal.trim() || shift.goal); setGoalTouched(false); }} className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted"><RefreshCw className="h-4 w-4" /> Replan with this goal</button>
+                  <button onClick={() => engine.resume()} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950"><Play className="h-4 w-4" /> Resume shift</button>
+                  <button onClick={() => { void engine.replan(goal.trim() || shift.goal); setGoalTouched(false); }} className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted"><RefreshCw className="h-4 w-4" /> Replan with this goal</button>
                 </>
               )}
               {active && (
                 confirmHard ? (
-                  <button onClick={() => { shiftEngine.hardStop(); setConfirmHard(false); }} className="flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white"><OctagonX className="h-4 w-4" /> Confirm HARD STOP — halt everything</button>
+                  <button onClick={() => { engine.hardStop(); setConfirmHard(false); }} className="flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white"><OctagonX className="h-4 w-4" /> Confirm HARD STOP — halt everything</button>
                 ) : (
                   <button onClick={() => setConfirmHard(true)} className="flex items-center gap-1.5 rounded-full border border-red-500/50 px-4 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10"><OctagonX className="h-4 w-4" /> Hard stop</button>
                 )
@@ -212,7 +229,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
 
           {shift && total > 0 && (
             <div className="space-y-3">
-              {TEAM.filter((r) => shift.tasks.some((t) => t.botKey === r.key)).map((r) => (
+              {team.filter((r) => shift.tasks.some((t) => t.botKey === r.key)).map((r) => (
                 <div key={r.key} className="rounded-xl border border-border p-3.5">
                   <div className="mb-2 flex items-baseline gap-2">
                     <span className="text-sm font-semibold">{r.name}</span>
@@ -221,7 +238,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
                   </div>
                   <div className="space-y-1.5">
                     {shift.tasks.filter((t) => t.botKey === r.key).map((t) => (
-                      <TaskRow key={t.id} task={t} shift={shift} expanded={expandedId === t.id} onToggle={() => setExpandedId(expandedId === t.id ? null : t.id)} />
+                      <TaskRow key={t.id} task={t} shift={shift} expanded={expandedId === t.id} onToggle={() => setExpandedId(expandedId === t.id ? null : t.id)} engine={engine} team={team} />
                     ))}
                   </div>
                 </div>
@@ -233,15 +250,15 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
             <div className="rounded-xl border border-border p-3.5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="flex items-center gap-1.5 text-sm font-semibold"><FileText className="h-4 w-4" /> Shift report</span>
-                <span className="text-[11px] text-muted-foreground">Compiled by the Writer (Archivist) from every approved deliverable</span>
+                <span className="text-[11px] text-muted-foreground">Compiled by the {archivistLabel} from every approved deliverable</span>
                 <span className="ml-auto flex gap-1.5">
-                  {!shift.report && <button onClick={() => void shiftEngine.buildReport()} disabled={shift.reportBusy} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted disabled:opacity-50">{shift.reportBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} {shift.reportBusy ? "Compiling…" : "Build report"}</button>}
+                  {!shift.report && <button onClick={() => void engine.buildReport()} disabled={shift.reportBusy} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted disabled:opacity-50">{shift.reportBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} {shift.reportBusy ? "Compiling…" : "Build report"}</button>}
                   {shift.report && (
                     <>
                       <button onClick={() => downloadPdf("Shift Report", shift.report || "")} className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground"><Download className="h-3.5 w-3.5" /> PDF</button>
                       <button onClick={() => download("shift-report.md", shift.report || "", "text/markdown")} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .md</button>
                       <button onClick={() => download("shift-report.doc", `<html><body><pre style="font-family:Georgia,serif;white-space:pre-wrap">${(shift.report || "").replace(/</g, "&lt;")}</pre></body></html>`, "application/msword")} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted"><Download className="h-3.5 w-3.5" /> .doc</button>
-                      <button onClick={() => void shiftEngine.buildReport()} disabled={shift.reportBusy} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted disabled:opacity-50"><RefreshCw className="h-3.5 w-3.5" /> Rebuild</button>
+                      <button onClick={() => void engine.buildReport()} disabled={shift.reportBusy} className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium hover:bg-muted disabled:opacity-50"><RefreshCw className="h-3.5 w-3.5" /> Rebuild</button>
                     </>
                   )}
                 </span>
@@ -260,6 +277,59 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
               </div>
             </div>
           )}
+        </div>
+      </div>
+      ) : (
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4">
+        <div className="mx-auto w-full max-w-3xl space-y-4">
+          {!signedIn && <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">Sign in to use the team tools — agents are created and reset through your Agents account.</p>}
+          {teamNote && <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs">{teamNote}</p>}
+          {teamErr && <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">{teamErr}</p>}
+
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5 text-sm font-semibold"><UserPlus className="h-4 w-4" /> Create a new agent on this floor</div>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">The Manager builds the team this floor needs. A new agent appears standing by the windows, joins the Manager's team for shift planning, and gets its own agent in your Agents account.</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Name — e.g. Prospector" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base" />
+              <input value={newDuty} onChange={(e) => setNewDuty(e.target.value)} placeholder="Role — e.g. Hunts new contractor partners" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base" />
+            </div>
+            <textarea value={newPrompt} onChange={(e) => setNewPrompt(e.target.value)} rows={4} placeholder="Role prompt — who this agent is, what it owns, how it works, what it hands back. This prompt IS the agent's role and memory." className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed" />
+            <button
+              disabled={!signedIn || busy === "create" || !newName.trim() || !newPrompt.trim()}
+              onClick={async () => { setBusy("create"); setTeamErr(""); setTeamNote(""); try { await teamTools.create({ name: newName.trim(), duty: newDuty.trim(), prompt: newPrompt.trim() }); setTeamNote(`${newName.trim()} joined ${floorLabel} — find them by the windows. They are on the Manager's team from the next plan on.`); setNewName(""); setNewDuty(""); setNewPrompt(""); } catch (e: any) { setTeamErr(e?.message || "Could not create the agent."); } setBusy(""); }}
+              className="mt-3 flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950 disabled:opacity-50"
+            >{busy === "create" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />} Create agent</button>
+          </div>
+
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5 text-sm font-semibold"><Wand2 className="h-4 w-4" /> Reset one agent with a new role</div>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">The agent keeps its name and its place on this floor; its role prompt — its instructions, which are its memory — is replaced with the new one below.</p>
+            <select value={resetKey} onChange={(e) => setResetKey(e.target.value)} className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-base">
+              <option value="">Choose an agent on this floor…</option>
+              {teamTools.bots.map((b) => <option key={b.key} value={b.key}>{b.name} — {b.duty}</option>)}
+            </select>
+            <textarea value={resetPrompt} onChange={(e) => setResetPrompt(e.target.value)} rows={4} placeholder="New role prompt for the chosen agent…" className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed" />
+            <button
+              disabled={!signedIn || busy === "reset" || !resetKey || !resetPrompt.trim()}
+              onClick={async () => { setBusy("reset"); setTeamErr(""); setTeamNote(""); try { await teamTools.reset(resetKey, resetPrompt.trim()); const b = teamTools.bots.find((x) => x.key === resetKey); setTeamNote(`${b?.name || "Agent"} was reset — new role, memory cleared. It works under the new role from its next task on.`); setResetPrompt(""); } catch (e: any) { setTeamErr(e?.message || "Could not reset that agent."); } setBusy(""); }}
+              className="mt-3 flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >{busy === "reset" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} Reset this agent</button>
+          </div>
+
+          <div className="rounded-xl border border-red-500/30 p-3.5">
+            <div className="flex items-center gap-1.5 text-sm font-semibold"><Users className="h-4 w-4" /> Reset ALL agents on this floor</div>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Every agent on {floorLabel} — the whole team, the executives and the Manager — gets the new role below and a cleared memory. Use placeholders: {"{name}"}, {"{title}"} and {"{company}"} are filled in per agent. Agents on other floors are not touched.</p>
+            <textarea value={resetAllPrompt} onChange={(e) => setResetAllPrompt(e.target.value)} rows={4} placeholder={"e.g. You are {name}, {title} at {company}. New directive: …"} className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed" />
+            {confirmResetAll ? (
+              <button
+                disabled={!signedIn || busy === "resetAll" || !resetAllPrompt.trim()}
+                onClick={async () => { setBusy("resetAll"); setTeamErr(""); setTeamNote(""); try { const msg = await teamTools.resetAll(resetAllPrompt.trim()); setTeamNote(msg); setResetAllPrompt(""); } catch (e: any) { setTeamErr(e?.message || "The reset-all did not finish."); } setBusy(""); setConfirmResetAll(false); }}
+                className="mt-3 flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              >{busy === "resetAll" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />} Confirm — reset every agent on this floor</button>
+            ) : (
+              <button disabled={!signedIn || !resetAllPrompt.trim()} onClick={() => setConfirmResetAll(true)} className="mt-3 flex items-center gap-1.5 rounded-full border border-red-500/50 px-4 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-50"><Users className="h-4 w-4" /> Reset all agents on this floor…</button>
+            )}
+          </div>
         </div>
       </div>
       )}

@@ -29,8 +29,8 @@ import { useSourceTexture, type TheaterSource } from '@/imagine-studio/component
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
-import { shiftEngine, TEAM, MANAGER_PROMPT } from '@/imagine-studio/lib/shiftEngine';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_MANAGER, MANAGER_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot } from '@/imagine-studio/lib/floors';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
@@ -685,11 +685,25 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
 /* ---------------- Page ---------------- */
 export default function OfficePage() {
   const brand = useOfficeBrand();
+  /* THE BUILDING (founder directive 2026-10-25): /office is one floor of a
+   * building — ?floor=99 loads Floor 99's own team, Manager, shift state and
+   * published scene file; it never loads another floor's world. A CEO runs
+   * each company; the Chairman (floor 100) runs the building. */
+  const floor = useMemo(() => floorById(new URLSearchParams(window.location.search).get('floor')), []);
+  const engine = useMemo(() => engineFor(floor), [floor]);
+  const [customBots, setCustomBots] = useState<CustomBot[]>(() => loadCustomBots(floor));
+  const customBotsRef = useRef(customBots); customBotsRef.current = customBots;
+  const promptOverridesRef = useRef<Record<string, string>>(loadPromptOverrides(floor));
+  useEffect(() => { saveCustomBots(floor, customBots); setFloorTeamExtras(floor.key, customBots.map(customBotToRole)); }, [customBots, floor]); // eslint-disable-line react-hooks/exhaustive-deps
+  const customOfficeBots = useMemo(() => customBots.map(customBotToOfficeBot), [customBots]);
+  const TEAM_BOTS = useMemo(() => [...floor.bots, ...customOfficeBots], [floor, customOfficeBots]);
+  const ALL_BOTS = useMemo(() => [...TEAM_BOTS, ...floor.executives], [TEAM_BOTS, floor]);
+  const allBotsRef = useRef(ALL_BOTS); allBotsRef.current = ALL_BOTS;
   const [published, setPublished] = useState<any>(undefined);
   const [pubMeta, setPubMeta] = useState<{ publishedAt: string | null; live: boolean } | null>(null);
   useEffect(() => {
     let off = false;
-    fetchPublishedOfficeMeta()
+    fetchPublishedOfficeMeta(publishedWorldUrl(floor.publishedFile))
       .then((m) => { if (off) return; if (m) { setPublished(m.scene); setPubMeta({ publishedAt: m.publishedAt, live: true }); } else setPubMeta({ publishedAt: null, live: false }); })
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
@@ -721,7 +735,7 @@ export default function OfficePage() {
   const bots = useMemo(() => {
     const chars = (scene?.objects || []).filter((o: any) => o.kind === 'character');
     const chairs = (scene?.objects || []).filter((o: any) => /^Agent Chair \d+$/.test(o.name || ''));
-    return OFFICE_BOTS.map((bot, i) => {
+    return floor.bots.map((bot, i) => {
       const c = chars.find((o: any) => (o.name || '').toLowerCase().includes(bot.name.toLowerCase())) || chars[i];
       const home: [number, number, number] = c ? [c.position[0], 0, c.position[2]] : [OFFICE_DESKS[i].x, 0, OFFICE_DESKS[i].z + OFFICE_DESKS[i].facing * 0.85];
       const rotY = c ? (c.rotation?.[1] ?? 0) : (OFFICE_DESKS[i].facing === 1 ? Math.PI : 0);
@@ -956,7 +970,7 @@ export default function OfficePage() {
     await enableMic(false);
   };
   const showDashboardOnTheater = async (botKey: string) => {
-    const bot = OFFICE_BOTS.find((b) => b.key === botKey); if (!bot) return;
+    const bot = allBotsRef.current.find((b) => b.key === botKey); if (!bot) return;
     if (presenting) await stopPresenting();
     stopDoc();
     if (signedIn && agentsLoaded) await ensureBotAgent(bot);
@@ -967,7 +981,7 @@ export default function OfficePage() {
   };
   const stopTheater = () => { stopDoc(); if (presenting) { void stopPresenting(); } setTheater(null); sendTheater({ kind: 'stop' }); };
 
-  const screenBot = theater?.kind === 'dashboard' ? OFFICE_BOTS.find((b) => b.key === theater.botKey) ?? null : null;
+  const screenBot = theater?.kind === 'dashboard' ? allBotsRef.current.find((b) => b.key === theater.botKey) ?? null : null;
   const screenLink = screenBot ? links[screenBot.key] || {} : {};
   const screenAgent = agents.find((a) => a.id === screenLink.agentId) || (theater?.kind === 'dashboard' && theater.agentName ? { name: theater.agentName } : undefined);
   useEffect(() => {
@@ -1037,7 +1051,7 @@ export default function OfficePage() {
   };
   const saveLink = (patch: BotLink) => { if (openBot) saveLinkFor(openBot.key, patch); };
   const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
-  const nearBot = nearKey ? OFFICE_BOTS.find((b) => b.key === nearKey) : null;
+  const nearBot = nearKey ? allBotsRef.current.find((b) => b.key === nearKey) : null;
   nearBotRef.current = (nearBot as OfficeBot | null) ?? null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
   /* ---- Who is on a job right now: a bot whose linked agent produced a run
@@ -1057,7 +1071,14 @@ export default function OfficePage() {
     if (autoBindTried.current.has(bot.key)) return undefined;
     autoBindTried.current.add(bot.key);
     try {
-      const persona = bot.key === 'manager' ? MANAGER_PROMPT : (TEAM.find((t) => t.key === bot.key)?.prompt || `You are ${bot.name}, an AI agent working in the Startup Factory Hub office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`);
+      const custom = customBotsRef.current.find((c) => c.key === bot.key);
+      const persona = promptOverridesRef.current[bot.key]
+        || (bot.key === 'manager' ? floor.managerPrompt
+          : bot.key === 'chairman' ? CHAIRMAN_PROMPT
+          : bot.key === 'ceo' ? ceoPrompt(floor.company)
+          : custom ? custom.prompt
+          : ([...floor.team, ...customBotsRef.current.map(customBotToRole)].find((t) => t.key === bot.key)?.prompt
+            || `You are ${bot.name}, an AI agent working in the ${floor.company} office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`));
       const r = await callAgentsApi({ action: 'save', name: bot.name, description: bot.duty, system_prompt: persona, model: 'llama-3.3-70b-versatile', tools: [] });
       const created = r?.agent;
       if (created?.id) {
@@ -1071,9 +1092,9 @@ export default function OfficePage() {
   /* Shift Mode: the engine resolves each specialist (and the Manager) to a
    * call-agent through the same auto-bind the bot panels use. */
   useEffect(() => {
-    shiftEngine.bind({
+    engine.bind({
       resolveAgentId: async (botKey: string) => {
-        const bot = botKey === 'manager' ? OFFICE_MANAGER : OFFICE_BOTS.find((b) => b.key === botKey);
+        const bot = botKey === 'manager' ? floor.manager : allBotsRef.current.find((b) => b.key === botKey);
         if (!bot) return null;
         const id = await ensureBotAgent(bot);
         return id ?? null;
@@ -1082,7 +1103,7 @@ export default function OfficePage() {
   }, [agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!openBot || !signedIn || !agentsLoaded) return;
-    if (!OFFICE_BOTS.some((b) => b.key === openBot.key)) return; // studio agent characters arrive pre-linked
+    if (!allBotsRef.current.some((b) => b.key === openBot.key)) return; // studio agent characters arrive pre-linked
     if ((links[openBot.key] || {}).agentId) return;
     void ensureBotAgent(openBot);
   }, [openBot?.key, signedIn, agentsLoaded, agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1106,7 +1127,7 @@ export default function OfficePage() {
     return () => { off = true; clearInterval(iv); };
   }, []);
   /* One row per agent for the theater's default team board. */
-  const boardRows = useMemo(() => OFFICE_BOTS.map((bot) => {
+  const boardRows = useMemo(() => TEAM_BOTS.map((bot) => {
     const l = links[bot.key] || {};
     const runs = l.agentId ? allRuns.filter((r: any) => r.agent_id === l.agentId) : [];
     const q = l.agentId ? queueItems.filter((i: any) => i.agentId === l.agentId) : [];
@@ -1117,8 +1138,43 @@ export default function OfficePage() {
       queued: q.length,
       done: runs.filter((r: any) => r.status === 'ok').length,
     };
-  }), [links, allRuns, queueItems, workingKeys]);
+  }), [links, allRuns, queueItems, workingKeys, TEAM_BOTS]);
   useEffect(() => { if (!scene) return; const t = setTimeout(() => setIntroGone(true), 2100); return () => clearTimeout(t); }, [scene]);
+  const createCustomAgent = async ({ name, duty, prompt }: { name: string; duty: string; prompt: string }) => {
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 18) || 'agent';
+    const cb: CustomBot = { key: `custom-${slug}-${Math.random().toString(36).slice(2, 6)}`, name, duty: duty || 'Custom specialist', prompt, tint: CUSTOM_TINTS[customBotsRef.current.length % CUSTOM_TINTS.length] };
+    customBotsRef.current = [...customBotsRef.current, cb];
+    setCustomBots(customBotsRef.current);
+    if (signedIn) await ensureBotAgent(customBotToOfficeBot(cb));
+  };
+  const resetAgentRole = async (botKey: string, prompt: string) => {
+    const bot = botKey === 'manager' ? floor.manager : allBotsRef.current.find((b) => b.key === botKey);
+    if (!bot) throw new Error('That agent is not on this floor.');
+    const id = await ensureBotAgent(bot);
+    if (!id) throw new Error(`Could not bring ${bot.name} online to reset it — sign in and try again.`);
+    const existing = agents.find((a) => a.id === id);
+    await callAgentsApi({ action: 'save', id, name: existing?.name || bot.name, description: bot.duty, model: existing?.model || 'llama-3.3-70b-versatile', system_prompt: prompt, tools: existing?.tools ?? [] });
+    savePromptOverride(floor, botKey, prompt);
+    promptOverridesRef.current = { ...promptOverridesRef.current, [botKey]: prompt };
+    const ci = customBotsRef.current.findIndex((c) => c.key === botKey);
+    if (ci >= 0) { const next = [...customBotsRef.current]; next[ci] = { ...next[ci], prompt }; customBotsRef.current = next; setCustomBots(next); }
+    if (botKey === 'manager') { try { localStorage.removeItem(floor.managerChatKey); } catch { /* noop */ } }
+  };
+  const teamTools = {
+    bots: [...ALL_BOTS, floor.manager].map((b) => ({ key: b.key, name: b.name, duty: b.duty })),
+    create: createCustomAgent,
+    reset: resetAgentRole,
+    resetAll: async (template: string): Promise<string> => {
+      const targets = [...allBotsRef.current, floor.manager];
+      let ok = 0; const failed: string[] = [];
+      for (const b of targets) {
+        const role = [...floor.team, ...customBotsRef.current.map(customBotToRole)].find((t) => t.key === b.key);
+        const prompt = template.split('{name}').join(b.name).split('{title}').join(role?.title || b.duty).split('{company}').join(floor.company);
+        try { await resetAgentRole(b.key, prompt); ok++; } catch { failed.push(b.name); }
+      }
+      return failed.length ? `Reset ${ok} agents on this floor. Failed: ${failed.join(', ')}.` : `All ${ok} agents on this floor now work under the new role.`;
+    },
+  };
   const uiGuard = (e: any) => !!(e.target as HTMLElement)?.closest?.('[data-office-ui]');
 
   return (
@@ -1144,7 +1200,13 @@ export default function OfficePage() {
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
-          {scene && <OfficeBotCharacter bot={OFFICE_MANAGER} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
+          {scene && <OfficeBotCharacter bot={floor.manager} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
+          {scene && floor.executives.map((b) => (
+            <OfficeBotCharacter key={b.key} bot={b} home={b.key === 'chairman' ? CHAIRMAN_HOME : CEO_HOME} rotY={0} seatY={0.52} seated={false} onOpen={setOpenBot} />
+          ))}
+          {scene && customOfficeBots.map((b, i) => (
+            <OfficeBotCharacter key={b.key} bot={b} home={[-19 + (i % 8) * 2.4, 0, 12.8]} rotY={Math.PI} seatY={0.52} seated={false} onOpen={setOpenBot} />
+          ))}
           {scene && agentChars.map((o) => (
             <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
           ))}
@@ -1162,17 +1224,26 @@ export default function OfficePage() {
         </div>
       )}
 
+      <div data-office-ui className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
+        <div className="px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Building</div>
+        {FLOORS.map((f) => (
+          <button key={f.id} onClick={() => { if (f.id !== floor.id) window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className={`rounded-full border px-3 py-1.5 text-left text-xs shadow ${f.id === floor.id ? 'bg-emerald-500 text-emerald-950 font-semibold border-transparent' : 'bg-background/90 border-border hover:bg-muted'}`}>
+            Floor {f.id} · {f.company}
+          </button>
+        ))}
+      </div>
+
       {isAdmin && (
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
-          {outdated && scene && (
+          {floor.id === 100 && outdated && scene && (
             <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
               {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (clean windows · team-board theater)'}
             </button>
           )}
           {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
-          <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
+          {floor.id === 100 && <button onClick={async () => { const bid = findWorldLevelId('office'); if (bid) { window.location.href = `/imagine-studio/${bid}`; return; } const l = await syncOfficeLevelToPublished(); window.location.href = `/imagine-studio/${l.id}`; }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
             <BoxIcon className="w-4 h-4" />Edit in 3D Studio
-          </button>
+          </button>}
           {socialFlags.theater && (
           <div className="relative">
             <button onClick={() => setTheaterMenu((o) => !o)} className="rounded-full bg-background/90 border border-border px-3.5 py-2 text-xs font-medium flex items-center gap-1.5">
@@ -1191,7 +1262,7 @@ export default function OfficePage() {
                 </div>
                 {theater?.kind === 'dashboard' && <TheaterMenuItem icon={Square} label="Stop dashboard" onClick={() => { stopTheater(); setTheaterMenu(false); }} />}
                 <div className="grid grid-cols-2 gap-1 p-1">
-                  {OFFICE_BOTS.map((b) => (
+                  {TEAM_BOTS.map((b) => (
                     <button key={b.key} onClick={() => { void showDashboardOnTheater(b.key); setTheaterMenu(false); }} className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-muted text-left">
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: b.tint }} />{b.name}
                     </button>
@@ -1283,7 +1354,7 @@ export default function OfficePage() {
               <button onClick={() => setPanelView('genius')} className={`rounded-full px-3 py-1.5 text-xs ${panelView === 'genius' ? 'bg-emerald-500 text-emerald-950 font-semibold' : 'hover:bg-muted'}`}>Genius chat</button>
               <button onClick={() => setPanelView('console')} className={`rounded-full px-3 py-1.5 text-xs ${panelView === 'console' ? 'bg-emerald-500 text-emerald-950 font-semibold' : 'hover:bg-muted'}`}>Agents tab</button>
             </div>
-            {isAdmin && OFFICE_BOTS.some((b) => b.key === openBot.key) && <button onClick={() => { void showDashboardOnTheater(openBot.key); }} className="hidden sm:flex rounded-full border border-border px-3 py-1.5 text-xs items-center gap-1.5 hover:bg-muted"><LayoutDashboard className="w-3.5 h-3.5" />Theater</button>}
+            {isAdmin && TEAM_BOTS.some((b) => b.key === openBot.key) && <button onClick={() => { void showDashboardOnTheater(openBot.key); }} className="hidden sm:flex rounded-full border border-border px-3 py-1.5 text-xs items-center gap-1.5 hover:bg-muted"><LayoutDashboard className="w-3.5 h-3.5" />Theater</button>}
             <button onClick={() => { setOpenBot(null); void refreshAgents(); }} className="p-1.5 rounded-full hover:bg-muted" aria-label="Close agents"><X className="w-5 h-5" /></button>
           </div>
           {panelView === 'genius' ? (
@@ -1308,7 +1379,7 @@ export default function OfficePage() {
       <button data-office-ui onClick={() => setShiftOpen(true)} className="absolute right-4 bottom-24 sm:bottom-6 z-20 flex items-center gap-2 rounded-full border border-[#FFD166]/60 bg-[#14100a]/85 px-4 py-2.5 text-xs font-semibold text-[#FFD166] shadow-lg backdrop-blur hover:bg-[#241a08]/90">
         <Briefcase className="w-4 h-4" /> Manager · Shift
       </button>
-      {shiftOpen && <ShiftPanel signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
+      {shiftOpen && <ShiftPanel engine={engine} team={[...floor.team, ...customBots.map(customBotToRole)]} company={floor.company} floorLabel={`Floor ${floor.id}`} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
 
       {/* Branded intro — the signed-in account's name + logo, not a fixed brand */}
       {!introGone && (
