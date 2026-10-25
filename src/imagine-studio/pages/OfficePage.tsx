@@ -62,7 +62,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
     const skin = new THREE.Color(bot.tint);
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
     return m;
   }, [scene, bot]);
   const root = useRef<THREE.Group>(null);
@@ -140,7 +140,7 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
     const skin = new THREE.Color(info.c);
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
     return m;
   }, [scene, info.c]);
   const root = useRef<THREE.Group>(null);

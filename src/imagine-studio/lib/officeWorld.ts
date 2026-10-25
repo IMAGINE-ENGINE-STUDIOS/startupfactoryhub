@@ -14,7 +14,11 @@ export const OFFICE_BOUNDS = { x: 22.5, z: 14.5 };
 export const OFFICE_WAYPOINTS: [number, number][] = [[0, 12.8], [-19, -12], [19, 12], [12, -13.5], [-12, 13.5]];
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
-const MODELS = ["Xbot.glb", "Soldier.glb", "RobotExpressive.glb"];
+/** The signature agent model (founder-supplied 2026-10-25): one unrigged
+ * black-and-emerald robot mesh for every agent character. Hosted in the
+ * public site-assets bucket; the renderers normalize it to 1.8m at runtime. */
+export const AGENT_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/agent.glb";
+const MODELS = [AGENT_MODEL_URL];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 const ROSTER: [string, string][] = [
   ["Builder", "Builds, writes and ships — pages, plans, code and documents."],
@@ -42,7 +46,7 @@ export const OFFICE_BOTS: OfficeBot[] = ROSTER.map(([name, duty], i) => ({
   key: name.toLowerCase(),
   name,
   duty,
-  model: `/models/plaza/${MODELS[i % MODELS.length]}`,
+  model: MODELS[i % MODELS.length],
   tint: TINTS[Math.floor(i / MODELS.length) % TINTS.length],
 }));
 

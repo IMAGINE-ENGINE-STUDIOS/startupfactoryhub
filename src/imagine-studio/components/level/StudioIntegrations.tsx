@@ -14,6 +14,7 @@ import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { resolveLevelWorld, setLevelWorld, worldForKey } from "@/imagine-studio/lib/worldBindings";
 import { sceneControllers, normalizeController } from "@/imagine-studio/lib/controllers";
+import { AGENT_MODEL_URL } from "@/imagine-studio/lib/officeWorld";
 import { Users, Gamepad2 } from "lucide-react";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
@@ -131,7 +132,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const [ctrlImport, setCtrlImport] = useState("");
   const [myAgents, setMyAgents] = useState<any[] | null>(null);
   const [agentPick, setAgentPick] = useState('');
-  const [agentModel, setAgentModel] = useState('/models/plaza/Xbot.glb');
+  const [agentModel, setAgentModel] = useState(AGENT_MODEL_URL);
   const [agentSeated, setAgentSeated] = useState(true);
   useEffect(() => {
     if (!socialOpen || myAgents !== null) return;
@@ -476,9 +477,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
                   {myAgents.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
                 <select value={agentModel} onChange={(e) => setAgentModel(e.target.value)} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
-                  <option value="/models/plaza/Xbot.glb">Character: X Bot</option>
-                  <option value="/models/plaza/RobotExpressive.glb">Character: Robot</option>
-                  <option value="/models/plaza/Soldier.glb">Character: Soldier</option>
+                  <option value={AGENT_MODEL_URL}>Character: Signature Agent</option>
                 </select>
                 <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
                   <input type="checkbox" checked={agentSeated} onChange={(e) => setAgentSeated(e.target.checked)} /> Starts seated (at a desk or chair)

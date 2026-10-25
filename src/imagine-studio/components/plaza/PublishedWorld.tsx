@@ -56,7 +56,7 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
     m.position.y = -box.min.y * s;
     if (Array.isArray(o.color)) {
       const tint = new THREE.Color(col(o.color));
-      m.traverse((n: any) => { if (n.isMesh) { n.frustumCulled = false; const mats = Array.isArray(n.material) ? n.material : [n.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color) c.color.copy(tint); return c; }); n.material = Array.isArray(n.material) ? next : next[0]; } });
+      m.traverse((n: any) => { if (n.isMesh) { n.frustumCulled = false; const mats = Array.isArray(n.material) ? n.material : [n.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(tint); return c; }); n.material = Array.isArray(n.material) ? next : next[0]; } });
     } else {
       m.traverse((n: any) => { if (n.isMesh) n.frustumCulled = false; });
     }
