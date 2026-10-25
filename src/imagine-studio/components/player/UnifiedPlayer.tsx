@@ -173,10 +173,22 @@ export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, rin
   const { scene, animations } = useGLTF(model);
   const modelObj = useMemo(() => {
     const m = skeletonClone(scene) as THREE.Object3D;
+    // Ground + normalize ANY model: authors ship feet-origin, center-origin
+    // and every scale; measure the box, stand the model on y=0 at 1.8 units
+    // tall. (The founder's character is authored center-origin — without
+    // this it renders half-buried, "underground".)
+    m.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m);
+    const h = box.max.y - box.min.y || 1;
+    const s = 1.8 / h;
+    m.scale.setScalar(s);
+    m.position.y = -box.min.y * s;
     m.traverse((o: any) => {
       if (o.isMesh) {
         o.frustumCulled = false;
         if (tint) { o.material = o.material?.clone?.() ?? o.material; if (o.material) o.material.color = new THREE.Color(tint); }
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach((c: any) => { if (c?.isMeshStandardMaterial) { if (c.metalness > 0.6) c.metalness = 0.5; c.roughness = Math.max(c.roughness ?? 0.5, 0.35); c.envMapIntensity = 1.35; } });
       }
     });
     return m;

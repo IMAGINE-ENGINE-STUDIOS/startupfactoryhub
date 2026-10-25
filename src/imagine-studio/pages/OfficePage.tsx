@@ -13,7 +13,7 @@
  */
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, useGLTF, useAnimations } from '@react-three/drei';
+import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
@@ -143,7 +143,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
     m.scale.setScalar(s);
     m.position.y = -box.min.y * s;
     const skin = new THREE.Color(bot.tint);
-    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
+    m.traverse((o: any) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; const mats = Array.isArray(o.material) ? o.material : [o.material]; const next = mats.map((mt: any) => { const c = mt.clone(); if (c.color && !c.map) c.color.copy(skin); if (c.isMeshStandardMaterial) { if (c.metalness > 0.6) c.metalness = 0.5; c.roughness = Math.max(c.roughness ?? 0.5, 0.35); c.envMapIntensity = 1.35; } return c; }); o.material = Array.isArray(o.material) ? next : next[0]; } });
     return m;
   }, [scene, bot]);
   const root = useRef<THREE.Group>(null);
@@ -215,7 +215,9 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
             if (!sideRig) continue;
             stampJoint(sideRig.up, 0.52);
             stampJoint(sideRig.lo, 0.6 + Math.sin(t + ph) * 0.1);
-            stampJoint(sideRig.palm, Math.sin(t + ph + 0.7) * 0.07);
+            // hands are NOT stamped: they stay locked to the forearms.
+            // (A per-frame palm stamp here accumulated rotation on a bone
+            // the sit clip never resets — the hands spun like fans.)
           }
         }
       } else {
@@ -977,8 +979,19 @@ export default function OfficePage() {
       onPointerUp={() => { dragRef.current = null; }}>
       <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
         <color attach="background" args={['#cfe2ef']} />
-        <ambientLight intensity={0.85} />
+        <ambientLight intensity={1.05} />
+        <hemisphereLight args={['#ffffff', '#b6c4cf', 0.55]} />
         <directionalLight position={[26, 34, 14]} intensity={1.7} color="#fff2df" />
+        {/* A locally rendered environment (no external HDR): soft ceiling
+            panels + window strips the characters' metal shells can reflect.
+            Without an env map the dark metal reads almost black. */}
+        <Environment resolution={256} frames={1} background={false}>
+          <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[11, 11, 1]} color="#ffffff" />
+          <Lightformer intensity={1.3} position={[0, 2.5, 7]} scale={[9, 3.5, 1]} color="#eaf4ff" />
+          <Lightformer intensity={1.5} position={[-7, 2.5, 0]} rotation-y={Math.PI / 2} scale={[9, 3, 1]} color="#cfe8ff" />
+          <Lightformer intensity={1.5} position={[7, 2.5, 0]} rotation-y={-Math.PI / 2} scale={[9, 3, 1]} color="#ffe9c9" />
+          <Lightformer intensity={0.9} position={[0, 2.5, -7]} rotation-y={Math.PI} scale={[9, 3, 1]} color="#dfeefc" />
+        </Environment>
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
