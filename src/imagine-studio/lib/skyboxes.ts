@@ -17,7 +17,26 @@ export const SKYBOX_CITIES: SkyboxCity[] = [
   { id: "orlando", label: "Orlando", url: "/skyboxes/orlando.jpg" },
 ];
 
+/**
+ * 360° environments (founder directive 2026-10-25): true equirectangular
+ * photos that wrap all the way around and overhead, shown in the Skybox
+ * panel BELOW the cities. All are openly licensed (CC BY / CC BY-SA,
+ * Wikimedia Commons), 8000×4000. NOTE: real Sketchfab downloads need a
+ * Sketchfab account token — if the founder connects one, Sketchfab
+ * skyboxes can be added here the same way.
+ */
+export const SKYBOX_ENVIRONMENTS: SkyboxCity[] = [
+  { id: "env-alpine-lake", label: "Alpine Lake", url: "/skyboxes/env-alpine-lake.jpg" },
+  { id: "env-starry-night", label: "Starry Night", url: "/skyboxes/env-starry-night.jpg" },
+  { id: "env-desert-sunrise", label: "Desert Sunrise", url: "/skyboxes/env-desert-sunrise.jpg" },
+  { id: "env-pacific-coast", label: "Pacific Coast", url: "/skyboxes/env-pacific-coast.jpg" },
+  { id: "env-redwood-forest", label: "Forest Valley", url: "/skyboxes/env-redwood-forest.jpg" },
+  { id: "env-london-park", label: "London Park", url: "/skyboxes/env-london-park.jpg" },
+];
+
+export const ALL_SKYBOXES: SkyboxCity[] = [...SKYBOX_CITIES, ...SKYBOX_ENVIRONMENTS];
+
 export const DEFAULT_SKYBOX: SkyboxChoice = { city: "nyc", url: "/skyboxes/nyc.jpg" };
 
 export const skyboxCityLabel = (id?: string | null): string =>
-  SKYBOX_CITIES.find((c) => c.id === id)?.label ?? "Custom photo";
+  ALL_SKYBOXES.find((c) => c.id === id)?.label ?? "Custom photo";

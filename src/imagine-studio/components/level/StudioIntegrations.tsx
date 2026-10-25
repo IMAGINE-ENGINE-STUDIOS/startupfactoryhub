@@ -15,7 +15,7 @@ import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { resolveLevelWorld, setLevelWorld, worldForKey, findWorldLevelId } from "@/imagine-studio/lib/worldBindings";
 import { sceneControllers, normalizeController } from "@/imagine-studio/lib/controllers";
 import { AGENT_MODEL_URL } from "@/imagine-studio/lib/officeWorld";
-import { SKYBOX_CITIES, skyboxCityLabel } from "@/imagine-studio/lib/skyboxes";
+import { SKYBOX_CITIES, SKYBOX_ENVIRONMENTS, skyboxCityLabel } from "@/imagine-studio/lib/skyboxes";
 import { buildingLevels, type NamedWorld } from "@/imagine-studio/lib/worldSync";
 import { BuildingView } from "@/imagine-studio/components/level/BuildingView";
 import { Users, Gamepad2, Image as ImageIcon, Building2 } from "lucide-react";
@@ -468,7 +468,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         </Button>
       )}
       {levelsOpen && namedWorld?.building && (
-        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Building2 className="w-4 h-4" />{namedWorld.building} — levels</div>
             <button onClick={() => setLevelsOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
@@ -497,7 +497,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         <BuildingView current={namedWorld} currentScene={scene} onSelect={(w) => void openWorldLevel(w)} onClose={() => setBuildingOpen(false)} />
       )}
       {socialOpen && (
-        <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+        <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Users className="w-4 h-4" />Social features</div>
             <button onClick={() => setSocialOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
@@ -548,7 +548,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         </div>
       )}
       {ctrlOpen && (
-        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] max-h-[84vh] overflow-y-auto rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] max-h-[84vh] overflow-y-auto rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Gamepad2 className="w-4 h-4" />Controllers</div>
             <button onClick={() => setCtrlOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
@@ -614,28 +614,48 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         </div>
       )}
       {skyOpen && (
-        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
-          <div className="flex items-center justify-between">
-            <div className="font-semibold text-sm flex items-center gap-2"><ImageIcon className="w-4 h-4" />Photo skybox</div>
-            <button onClick={() => setSkyOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+        /* Skybox picker as a proper modal (founder fix 2026-10-25): the
+         * old floating card rendered over the inspector with the panels'
+         * text showing through each other. A solid card on a scrim,
+         * centered, with its own scroll — nothing overlaps, ever. */
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" onClick={() => setSkyOpen(false)}>
+          <div className="w-[620px] max-w-[94vw] max-h-[86vh] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-background shadow-2xl p-5 text-left" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-sm flex items-center gap-2"><ImageIcon className="w-4 h-4" />Photo skybox</div>
+              <button onClick={() => setSkyOpen(false)} className="rounded-md border border-border px-2.5 py-1 text-xs hover:bg-muted">Close</button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">A real-life photo wrapped around this level — what everyone sees through the windows. The choice saves inside this level and publishes with it, so each floor of the building can have its own sky.</p>
+            <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cities</div>
+            <div className="grid grid-cols-2 gap-2.5 mt-2">
+              {SKYBOX_CITIES.map((c) => {
+                const active = skybox?.city === c.id;
+                return (
+                  <button key={c.id} onClick={() => setSkybox(c)} className={`rounded-lg overflow-hidden border text-left bg-card ${active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary/60"}`}>
+                    <img src={c.url} alt={c.label} className="w-full h-20 object-cover" />
+                    <span className="block px-2.5 py-2 text-xs font-medium">{c.label}{active ? " · current" : ""}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">360° environments</div>
+            <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">True 360° photos — they wrap all the way around and overhead, not just across the windows.</p>
+            <div className="grid grid-cols-2 gap-2.5 mt-2">
+              {SKYBOX_ENVIRONMENTS.map((c) => {
+                const active = skybox?.city === c.id;
+                return (
+                  <button key={c.id} onClick={() => setSkybox(c)} className={`rounded-lg overflow-hidden border text-left bg-card ${active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary/60"}`}>
+                    <img src={c.url} alt={c.label} className="w-full h-20 object-cover" />
+                    <span className="block px-2.5 py-2 text-xs font-medium">{c.label}{active ? " · current" : ""}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {skybox?.url ? (
+              <button onClick={() => setSkybox(null)} className="mt-5 w-full h-9 rounded-md border border-border text-xs font-medium hover:bg-muted">Remove skybox (plain background color)</button>
+            ) : (
+              <p className="text-[11px] text-muted-foreground mt-4">No skybox on this level right now — the plain background color shows instead.</p>
+            )}
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">A real-life city photo wrapped around this level — what everyone sees through the windows. The choice saves inside this level and publishes with it, so each floor of the building can have its own city.</p>
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            {SKYBOX_CITIES.map((c) => {
-              const active = skybox?.city === c.id;
-              return (
-                <button key={c.id} onClick={() => setSkybox(c)} className={`rounded-lg overflow-hidden border text-left ${active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary/60"}`}>
-                  <img src={c.url} alt={c.label} className="w-full h-16 object-cover" />
-                  <span className="block px-2 py-1.5 text-[11px] font-medium">{c.label}{active ? " · current" : ""}</span>
-                </button>
-              );
-            })}
-          </div>
-          {skybox?.url ? (
-            <button onClick={() => setSkybox(null)} className="mt-3 w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">Remove skybox (plain background color)</button>
-          ) : (
-            <p className="text-[11px] text-muted-foreground mt-3">No skybox on this level right now — the plain background color shows instead.</p>
-          )}
         </div>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />
