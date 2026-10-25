@@ -3,6 +3,7 @@
 import { EMPTY_SCENE, type LevelScene } from "@/imagine-studio/lib/levelTypes";
 import { createLocalLevel, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
 import { activeProjectLevels, addLevelToProject, getActiveLevel, projectOfLevel } from "@/imagine-studio/lib/localProjects";
+import { normalizeController } from "@/imagine-studio/lib/controllers";
 
 /** Finds a project level by id or name, creating an empty one when missing. */
 function ensureLevel(ref: string, ops?: any[]): { id: string; name: string } {
@@ -59,7 +60,7 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
     if (o.id) alias.set(String(o.id) + (suffix ? `_${suffix}` : ""), id);
     const base = { id, name: (String(o.name || "Object").slice(0, 72) + (suffix ? ` ${suffix}` : "")).slice(0, 80), position: pos ?? v3(o.position, [0, 0.5, 0]), rotation: rotY != null ? [num(o.rotation?.[0], 0), rotY, num(o.rotation?.[2], 0)] : v3(o.rotation, [0, 0, 0]), scale: v3(o.scale, [1, 1, 1]), visible: true, ...(layerId ? { layerId } : {}) };
     if (o.kind === "model" && typeof o.url === "string") return { ...base, kind: "model", url: o.url, fileName: o.fileName, ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
-    if (o.kind === "character" && typeof o.url === "string") return { ...base, kind: "character", url: o.url, source: o.source, animationSpeed: 1, paused: false, crossfade: 0.25, playable: !!o.playable, controlScheme: o.controlScheme || "both", cameraMode: "third", mobileJoystick: "auto", ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
+    if (o.kind === "character" && typeof o.url === "string") return { ...base, kind: "character", url: o.url, source: o.source, animationSpeed: 1, paused: false, crossfade: 0.25, playable: !!o.playable, controlScheme: o.controlScheme || "both", cameraMode: "third", mobileJoystick: "auto", controllerId: typeof o.controllerId === "string" ? o.controllerId : "default", ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
     if (o.kind === "theater") return { ...base, name: String(o.name || "Theater Screen").slice(0, 80), position: pos ?? v3(o.position, [0, 3, 0]), scale: v3(o.scale, [6, 6, 1]), kind: "primitive", theater: true, shape: "plane", color: [0.05, 0.05, 0.07, 1], metalness: 0, roughness: 1 };
     return { ...base, kind: "primitive", shape: SHAPES.includes(o.shape) ? o.shape : "box", color: rgba(o.color, [0.8, 0.8, 0.8, 1]), metalness: num(o.metalness, 0), roughness: num(o.roughness, 0.7), ...(o.playBehavior ? { playBehavior: o.playBehavior } : {}) };
   };
@@ -232,7 +233,16 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
         o.playable = c.playable !== undefined ? !!c.playable : o.controlScheme !== "patrol";
         if (c.walkSpeed || c.runSpeed || c.jumpHeight) o.locomotion = { ...(o.locomotion || {}), ...(c.walkSpeed ? { walkSpeed: +c.walkSpeed } : {}), ...(c.runSpeed ? { runSpeed: +c.runSpeed } : {}), ...(c.jumpHeight ? { jumpHeight: +c.jumpHeight } : {}) };
         if (o.playable) s.objects.forEach((x: any) => { if (x !== o && x.kind === "character" && x.playable) x.playable = false; });
+        if (c.defId) o.controllerId = String(c.defId);
+        if (c.def && typeof c.def === "object") { const def = normalizeController(c.def); if (def) { (s as any).controllers = [...(((s as any).controllers || []) as any[]).filter((x: any) => x.id !== def.id), def]; o.controllerId = def.id; } }
         applied++;
+      } else if (op.op === "create_controller" && op.controller) {
+        // Create/replace a reusable controller definition on the scene (the
+        // unified system: lib/controllers ControllerDef, optional script).
+        const def = normalizeController(op.controller);
+        if (def) { (s as any).controllers = [...(((s as any).controllers || []) as any[]).filter((x: any) => x.id !== def.id), def]; applied++; }
+      } else if (op.op === "player_controller") {
+        (s as any).playerControllerId = op.id ? String(op.id) : "default"; applied++;
       } else if (op.op === "play" && op.behavior) {
         const o = s.objects.find((x) => x.id === real(op.id)); if (!o) continue;
         o.playBehavior = { collision: "walkable", ...op.behavior }; applied++;

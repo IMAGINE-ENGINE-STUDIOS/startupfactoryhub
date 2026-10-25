@@ -13,7 +13,8 @@ import SketchfabModal from "@/imagine-studio/components/level/SketchfabModal";
 import { studio3d, type Studio3DMsg } from "@/lib/studio3dBus";
 import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { resolveLevelWorld, setLevelWorld, worldForKey } from "@/imagine-studio/lib/worldBindings";
-import { Users } from "lucide-react";
+import { sceneControllers, normalizeController } from "@/imagine-studio/lib/controllers";
+import { Users, Gamepad2 } from "lucide-react";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
  *  prompt so complex scenes can be described in a few ops instead of hundreds. */
@@ -125,6 +126,9 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const isPlaza = namedWorld?.key === "plaza";
   const isOffice = namedWorld?.key === "office";
   const [socialOpen, setSocialOpen] = useState(false);
+  const [ctrlOpen, setCtrlOpen] = useState(false);
+  const [ctrlForm, setCtrlForm] = useState<any>(null);
+  const [ctrlImport, setCtrlImport] = useState("");
   const [myAgents, setMyAgents] = useState<any[] | null>(null);
   const [agentPick, setAgentPick] = useState('');
   const [agentModel, setAgentModel] = useState('/models/plaza/Xbot.glb');
@@ -150,6 +154,16 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const social = (scene as any)?.social || {};
   const setSocial = (patch: Record<string, unknown>) =>
     updateScene((s: any) => ({ ...s, social: { ...(s.social || {}), ...patch } }));
+  // Controllers: one system for every published world. Definitions live on
+  // the scene (scene.controllers), the player uses scene.playerControllerId,
+  // and every character carries a controllerId (default on drop).
+  const selChar = (scene?.objects || []).find((o: any) => o.id === selectedId && o.kind === "character");
+  const customCtrls: any[] = (scene as any)?.controllers || [];
+  const upsertController = (def: any) => updateScene((sc: any) => ({ ...sc, controllers: [...((sc.controllers || []) as any[]).filter((c: any) => c.id !== def.id), def] }));
+  const setCharController = (cid: string) => updateScene((sc: any) => ({ ...sc, objects: (sc.objects || []).map((o: any) => (o.id === selectedId ? { ...o, controllerId: cid } : o)) }));
+  const saveCtrlForm = () => { const def = normalizeController(ctrlForm); if (!def) { toast.error("Controller needs at least a name"); return; } upsertController(def); setCtrlForm(null); toast.success(`Controller "${def.name}" saved to this world`); };
+  const importCtrl = () => { const t = ctrlImport.trim(); if (!t) return; let def: any = null; try { def = normalizeController(JSON.parse(t)); } catch { def = null; } if (!def) def = normalizeController({ id: `ctrl-${Date.now().toString(36)}`, name: "Scripted controller", mode: "third", script: t }); if (!def) { toast.error("Could not read that controller"); return; } upsertController(def); setCtrlImport(""); toast.success(`Controller "${def.name}" imported`); };
+
   const hasTheater = ((scene as any)?.objects || []).some((o: any) => /theater/i.test(o?.name || ""));
   const addTheaterScreen = () => {
     const hexA = (h: string): [number, number, number, number] => { const v = parseInt(h.replace("#", ""), 16); return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255, 1]; };
@@ -420,6 +434,9 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
       <Button size="sm" variant="ghost" className={cls} onClick={() => setSocialOpen((o) => !o)} disabled={!canEdit} title="Social features: let people join this world together, like the Plaza">
         <Users className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Social</span>
       </Button>
+      <Button size="sm" variant="ghost" className={cls} onClick={() => setCtrlOpen((o) => !o)} disabled={!canEdit} title="Controllers: the movement/camera system for this world and its characters">
+        <Gamepad2 className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Controllers</span>
+      </Button>
       {socialOpen && (
         <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
@@ -471,6 +488,72 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
             )}
           </div>
           <p className="text-[11px] text-muted-foreground mt-2.5 leading-relaxed">Tip: bind this level to a public route (the route selector next to Publish) so people can open it at its own address and join each other there.</p>
+        </div>
+      )}
+      {ctrlOpen && (
+        <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] max-h-[84vh] overflow-y-auto rounded-xl border border-border bg-background/97 backdrop-blur-xl shadow-2xl p-4 text-left">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-sm flex items-center gap-2"><Gamepad2 className="w-4 h-4" />Controllers</div>
+            <button onClick={() => setCtrlOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">One controller system drives every published world — plaza, office and the play test. Characters carry a controller (new ones get the default), and controllers can be created here by form, by pasting JSON or code, or by asking Genius. Everything saves inside the level and publishes with it.</p>
+          <div className="mt-3 space-y-2">
+            <label className="block">
+              <span className="block text-[11px] font-medium mb-1">Player controller (this world)</span>
+              <select value={(scene as any)?.playerControllerId || "default"} onChange={(e) => updateScene((sc: any) => ({ ...sc, playerControllerId: e.target.value }))} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
+                {sceneControllers(scene).map((d) => <option key={d.id} value={d.id}>{d.name} ({d.mode})</option>)}
+              </select>
+            </label>
+            {selChar ? (
+              <label className="block">
+                <span className="block text-[11px] font-medium mb-1">Selected character: {selChar.name}</span>
+                <select value={selChar.controllerId || "default"} onChange={(e) => setCharController(e.target.value)} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
+                  {sceneControllers(scene).map((d) => <option key={d.id} value={d.id}>{d.name} ({d.mode})</option>)}
+                </select>
+              </label>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">Select a character in the scene to give it a different controller.</p>
+            )}
+          </div>
+          <div className="border-t border-border mt-3 pt-3 space-y-1.5">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">This world&rsquo;s controllers</div>
+            {customCtrls.length === 0 && <p className="text-[11px] text-muted-foreground">Only the built-ins so far: Default (third person), First person, NPC.</p>}
+            {customCtrls.map((c: any) => (
+              <div key={c.id} className="flex items-center gap-2 text-xs">
+                <span className="flex-1 truncate">{c.name} <span className="text-muted-foreground">({c.mode})</span></span>
+                <button onClick={() => setCtrlForm({ ...c })} className="text-primary hover:underline">Edit</button>
+                <button onClick={() => updateScene((sc: any) => ({ ...sc, controllers: ((sc.controllers || []) as any[]).filter((x: any) => x.id !== c.id) }))} className="text-destructive hover:underline">Delete</button>
+              </div>
+            ))}
+            {!ctrlForm && <button onClick={() => setCtrlForm({ id: `ctrl-${Date.now().toString(36)}`, name: "New controller", mode: "third", walkSpeed: 4.2, sprintMultiplier: 1.7, canJump: true, jumpHeight: 1.1, cameraDistance: 6.5, cameraHeight: 2.6, script: "" })} className="w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">+ New controller</button>}
+          </div>
+          {ctrlForm && (
+            <div className="border-t border-border mt-3 pt-3 space-y-2">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Controller editor</div>
+              <input value={ctrlForm.name} onChange={(e) => setCtrlForm({ ...ctrlForm, name: e.target.value })} placeholder="Name" className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs" />
+              <select value={ctrlForm.mode} onChange={(e) => setCtrlForm({ ...ctrlForm, mode: e.target.value })} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
+                <option value="third">Third person</option><option value="first">First person</option><option value="npc">NPC (not player-controlled)</option>
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-[11px]">Walk speed<input type="number" step="0.1" value={ctrlForm.walkSpeed} onChange={(e) => setCtrlForm({ ...ctrlForm, walkSpeed: parseFloat(e.target.value) || 0 })} className="mt-0.5 w-full h-8 rounded-md border border-border bg-background px-2 text-xs" /></label>
+                <label className="text-[11px]">Sprint x<input type="number" step="0.1" value={ctrlForm.sprintMultiplier} onChange={(e) => setCtrlForm({ ...ctrlForm, sprintMultiplier: parseFloat(e.target.value) || 1 })} className="mt-0.5 w-full h-8 rounded-md border border-border bg-background px-2 text-xs" /></label>
+                <label className="text-[11px]">Jump height<input type="number" step="0.1" value={ctrlForm.jumpHeight} onChange={(e) => setCtrlForm({ ...ctrlForm, jumpHeight: parseFloat(e.target.value) || 0 })} className="mt-0.5 w-full h-8 rounded-md border border-border bg-background px-2 text-xs" /></label>
+                <label className="text-[11px]">Camera distance<input type="number" step="0.5" value={ctrlForm.cameraDistance} onChange={(e) => setCtrlForm({ ...ctrlForm, cameraDistance: parseFloat(e.target.value) || 0 })} className="mt-0.5 w-full h-8 rounded-md border border-border bg-background px-2 text-xs" /></label>
+                <label className="text-[11px]">Camera height<input type="number" step="0.1" value={ctrlForm.cameraHeight} onChange={(e) => setCtrlForm({ ...ctrlForm, cameraHeight: parseFloat(e.target.value) || 0 })} className="mt-0.5 w-full h-8 rounded-md border border-border bg-background px-2 text-xs" /></label>
+                <label className="text-[11px] flex items-end gap-2 pb-1"><input type="checkbox" checked={ctrlForm.canJump !== false} onChange={(e) => setCtrlForm({ ...ctrlForm, canJump: e.target.checked })} /> Can jump</label>
+              </div>
+              <textarea value={ctrlForm.script || ""} onChange={(e) => setCtrlForm({ ...ctrlForm, script: e.target.value })} placeholder="Optional script, runs every frame: api = { dt, input:{x,z,sprint,jump}, position (mutable Vector3), yaw, speed, setSpeed(mult) }" rows={4} className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-[11px] font-mono" />
+              <div className="flex gap-2">
+                <button onClick={saveCtrlForm} className="flex-1 h-8 rounded-md bg-primary text-primary-foreground text-xs font-medium">Save controller</button>
+                <button onClick={() => setCtrlForm(null)} className="h-8 px-3 rounded-md border border-border text-xs">Cancel</button>
+              </div>
+            </div>
+          )}
+          <div className="border-t border-border mt-3 pt-3 space-y-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Import by code</div>
+            <textarea value={ctrlImport} onChange={(e) => setCtrlImport(e.target.value)} placeholder='Paste a controller JSON object — or paste raw script code and it becomes a scripted controller' rows={3} className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-[11px] font-mono" />
+            <button onClick={importCtrl} className="w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">Import controller</button>
+          </div>
         </div>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />

@@ -22,7 +22,7 @@ import { PublishedWorld } from "@/imagine-studio/components/plaza/PublishedWorld
 import { OfficeBotCharacter, OfficeTheaterScreen } from "@/imagine-studio/pages/OfficePage";
 import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS } from "@/imagine-studio/lib/officeWorld";
 import { UnifiedPlayer } from "@/imagine-studio/components/player/UnifiedPlayer";
-import { playerControllerFor } from "@/imagine-studio/lib/controllers";
+import { playerControllerFor, controllerForCharacter } from "@/imagine-studio/lib/controllers";
 import MobileTouchControls from "@/imagine-studio/components/level/play/MobileTouchControls";
 import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 
@@ -64,7 +64,11 @@ export default function PublishedPlayTest({ name, levelId, scene, onExit }: { na
   }, [snapshot]);
 
   // The snapshot's own controller — the test plays with the world's real one.
-  const testDef = useMemo(() => playerControllerFor(snapshot ?? undefined), [snapshot]);
+  const testDef = useMemo(() => {
+    const chars = ((snapshot as any)?.objects ?? []).filter((o: any) => o?.kind === "character");
+    const pc = chars.find((o: any) => o.playable) ?? chars[0];
+    return pc?.controllerId ? controllerForCharacter(snapshot ?? undefined, pc) : playerControllerFor(snapshot ?? undefined);
+  }, [snapshot]);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onExit(); };
