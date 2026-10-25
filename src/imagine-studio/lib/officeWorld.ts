@@ -29,10 +29,21 @@ export type OfficeBot = { key: string; name: string; duty: string; model: string
  * walk as HER character. Built by /tmp/rig-venv/build_rig.py; the same
  * auto-skeleton now lives in the Rig Room for future characters. The
  * player wears the whitened-texture twin (AGENT_PLAYER_MODEL_URL). The
- * rigged files are hosted in the site-assets bucket next to the original
- * (the code-push route cannot carry 16 MB binaries). */
-export const AGENT_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/GeniusAgent.glb";
-export const AGENT_PLAYER_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/GeniusAgentWhite.glb";
+ * rigged files live in the repo at public/models/plaza (uploaded through
+ * the GitHub web UI — the code-push route cannot carry 16 MB binaries)
+ * and are served same-origin with the site. Rig v3 (2026-10-25): every
+ * connected piece of the mesh is bound rigidly to exactly ONE bone (no
+ * blends, so the body can never tear), the head and torso are solid,
+ * sitting moves ONLY the legs + hips drop, and typing is a small slow
+ * forearm bob applied from a captured base pose — nothing accumulates. */
+/* Same-origin hosting (changed 2026-10-25): the Supabase dashboard
+ * uploads of the v3 GLBs showed in the Storage listing but never
+ * materialized at their public URLs (404 NoSuchKey, verified against
+ * the dashboard's own copied URLs), so the models ship with the site
+ * itself — public/models/plaza in the repo, served by Cloudflare Pages
+ * from the same origin as the app. */
+export const AGENT_MODEL_URL = "/models/plaza/GeniusAgent.glb";
+export const AGENT_PLAYER_MODEL_URL = "/models/plaza/GeniusAgentWhite.glb";
 const MODELS = [AGENT_MODEL_URL];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 const ROSTER: [string, string][] = [
