@@ -11,8 +11,9 @@ import { Loader2 } from "lucide-react";
 import LevelEditorPage from "@/imagine-studio/pages/LevelEditorPage";
 import { createLocalLevel, listLocalLevels, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
 import { addLevelToProject, createProject, getActiveLevel, levelsOfProject, listProjects, projectOfLevel, setActiveLevel } from "@/imagine-studio/lib/localProjects";
-import { PLAZA_ENVIRONMENT, PLAZA_LEVEL_NAME } from "@/imagine-studio/lib/plazaLevel";
-import StudioMobileNav from "@/imagine-studio/components/shared/StudioMobileNav";
+import { PLAZA_ENVIRONMENT, PLAZA_LEVEL_NAME, syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
+import { syncOfficeLevelToPublished } from "@/imagine-studio/lib/officeWorld";
+import { findWorldLevelId } from "@/imagine-studio/lib/worldBindings";
 
 /* One-time fix: older Plaza District copies had a dark contact-shadow "gloom" the live game never shows. */
 try {
@@ -35,23 +36,43 @@ export default function ImagineEngineStudioPage() {
     const active = projectOfLevel(getActiveLevel());
     const prompt = qs.get("genius") || "";
     const wantsLevelInProject = /\b(new|another|next|add)\b.{0,20}\blevel\b/i.test(prompt) && !/\bnew (game|project)\b/i.test(prompt);
-    let target: any;
+    const go = (target: any) => {
+      qs.delete("new"); qs.delete("newProject");
+      navigate(`/imagine-studio/${target.id}${qs.toString() ? "?" + qs.toString() : ""}`, { replace: true });
+    };
     if (qs.has("new")) {
       // "+ New level" joins the open project
-      target = active ? addLevelToProject(active.id) : createProject().level;
-    } else if (qs.has("newProject") || (prompt && !(active && wantsLevelInProject))) {
+      go(active ? addLevelToProject(active.id) : createProject().level);
+      return;
+    }
+    if (qs.has("newProject") || (prompt && !(active && wantsLevelInProject))) {
       // Genius AI "build a 3D game/world" starts its own project with a playable starter level
       const title = prompt ? prompt.replace(/\s+/g, " ").slice(0, 40) : "Untitled Project";
-      target = createProject(title).level;
-    } else if (prompt && active) {
-      target = addLevelToProject(active.id);
-    } else {
-      const last = getActiveLevel();
-      const proj = listProjects()[0];
-      target = (last && listLocalLevels().find((l) => l.id === last)) || (proj && (levelsOfProject(proj.id).find((l) => l.id === proj.defaultLevelId) || levelsOfProject(proj.id)[0])) || createProject().level;
+      go(createProject(title).level);
+      return;
     }
-    qs.delete("new"); qs.delete("newProject");
-    navigate(`/imagine-studio/${target.id}${qs.toString() ? "?" + qs.toString() : ""}`, { replace: true });
+    if (prompt && active) {
+      go(addLevelToProject(active.id));
+      return;
+    }
+    // The last level the user opened is remembered (setActiveLevel) and wins.
+    const last = getActiveLevel();
+    const lastLevel = last && listLocalLevels().find((l) => l.id === last);
+    if (lastLevel) { go(lastLevel); return; }
+    // Founder directive 2026-10-25: with nothing remembered, the OFFICE is
+    // the default world. Seed the Office and the Plaza into this account's
+    // library from their published scenes (so both worlds belong to the
+    // account here), then open the Office. Opening any other level later
+    // is remembered above and becomes the new default.
+    void (async () => {
+      try { await syncOfficeLevelToPublished(); } catch { /* offline: fall through to the project default */ }
+      try { await syncPlazaLevelToPublished(); } catch { /* offline: fall through */ }
+      const officeId = findWorldLevelId("office");
+      const office = officeId && listLocalLevels().find((l) => l.id === officeId);
+      if (office) { go(office); return; }
+      const proj = listProjects()[0];
+      go((proj && (levelsOfProject(proj.id).find((l) => l.id === proj.defaultLevelId) || levelsOfProject(proj.id)[0])) || createProject().level);
+    })();
   }, [id, isRigRoom, navigate]);
 
   // Remember the open level and tell the Imagine Engine bar which project/levels exist.
@@ -76,7 +97,6 @@ export default function ImagineEngineStudioPage() {
       <LevelEditorPage key={isRigRoom ? "rig" : id} />
       {/* The editor and rig room carry their own mobile control bars — the
           wayfinding nav would cover them, so it only shows elsewhere. */}
-      {!id && !isRigRoom && <StudioMobileNav />}
     </>
   );
 }

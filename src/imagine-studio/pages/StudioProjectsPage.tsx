@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
 import { syncOfficeLevelToPublished } from "@/imagine-studio/lib/officeWorld";
 import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
-import StudioMobileNav from "@/imagine-studio/components/shared/StudioMobileNav";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,7 +50,6 @@ export default function StudioProjectsPage() {
             <Button variant="outline" onClick={() => { const n = prompt("Project name", current.name); if (n?.trim()) { updateProject(current.id, { name: n.trim() }); refresh(); } }}><Pencil className="w-4 h-4 mr-1" />Rename</Button>
             <Button onClick={() => openLevel(addLevelToProject(current.id).id)}><Plus className="w-4 h-4 mr-1" />New level</Button>
           </div>
-          <StudioMobileNav />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {levels.map((l) => (
               <div key={l.id} className="tech-card border-0 rounded-xl overflow-hidden flex flex-col">
@@ -88,7 +86,6 @@ export default function StudioProjectsPage() {
           </div>
           <Button onClick={() => openLevel(createProject().level.id)}><Plus className="w-4 h-4 mr-1" />New 3D project</Button>
         </div>
-        <StudioMobileNav />
         {shown.length === 0 ? (
           <div className="tech-card border-0 rounded-xl p-10 text-center text-muted-foreground">
             {projects.length ? "No projects match your search." : "You have no 3D projects yet. Create your first one."}

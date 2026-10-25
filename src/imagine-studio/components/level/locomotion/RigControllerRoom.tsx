@@ -32,6 +32,7 @@ import {
   type BonePose,
 } from "@/imagine-studio/lib/rigSaves";
 import { buildActionPose, type ActionKind } from "@/imagine-studio/lib/actionPoses";
+import { buildAutoSkeleton, type AutoSkeletonResult } from "@/imagine-studio/lib/autoSkeleton";
 
 /** Imperative bridge between <Rig/> and the parent panel. */
 interface RigBridge {
@@ -55,6 +56,14 @@ interface RigBridge {
    * user added at runtime (anything tagged with userData.__custom).
    */
   resetSkeleton: (() => void) | null;
+  /**
+   * Build a Mixamo-named skeleton for an UNRIGGED model (one merged mesh,
+   * no bones), in place on the live clone. Returns the generated rig +
+   * resolved controller mapping, or null when the mesh isn't
+   * humanoid-proportioned. Implemented inside <Rig/> like the other
+   * topology mutators so the SkeletonHelper rebuilds afterwards.
+   */
+  autoSkeleton: (() => AutoSkeletonResult | null) | null;
   /**
    * Skin (mesh) management. A "skin" is one or more SkinnedMeshes loaded
    * from a .glb / .gltf file and re-bound to the CURRENT skeleton by
@@ -632,6 +641,14 @@ function Rig({
       });
       setTopologyVersion((v) => v + 1);
     };
+    bridgeRef.current.autoSkeleton = () => {
+      const res = buildAutoSkeleton(cloned, cloned);
+      if (!res) return null;
+      // Same refresh path as add/delete bone: the topology effect rebuilds
+      // the SkeletonHelper and re-emits the bone list to the parent.
+      setTopologyVersion((v) => v + 1);
+      return res;
+    };
     // ---- Skin management ----------------------------------------------------
     const skinGroups = new Map<string, THREE.Group>();
     const gltfLoader = new GLTFLoader();
@@ -734,6 +751,7 @@ function Rig({
       bridgeRef.current.addBoneOnSpline = null;
       bridgeRef.current.deleteBone = null;
       bridgeRef.current.resetSkeleton = null;
+      bridgeRef.current.autoSkeleton = null;
       bridgeRef.current.addSkin = null;
       bridgeRef.current.removeSkin = null;
       bridgeRef.current.setSkinVisible = null;
@@ -1661,10 +1679,15 @@ export default function RigControllerRoom({
     addBoneOnSpline: null,
     deleteBone: null,
     resetSkeleton: null,
+    autoSkeleton: null,
     addSkin: null,
     removeSkin: null,
     setSkinVisible: null,
   });
+  // Result of the last auto-skeleton build on the CURRENT model (null = not
+  // built). Cleared whenever the model URL changes.
+  const [autoSkel, setAutoSkel] = useState<{ mapped: number; total: number } | null>(null);
+  useEffect(() => { setAutoSkel(null); }, [url]);
   const [pendingPose, setPendingPose] = useState<BonePose[] | null>(null);
   const [saves, setSaves] = useState<RigSave[]>(() => getCachedRigSaves());
   const [savesLoading, setSavesLoading] = useState(false);
@@ -1698,6 +1721,23 @@ export default function RigControllerRoom({
   const handleAutoSet = () => {
     if (bones.length === 0) return;
     setControllerMap(autoMapControllers(bones));
+  };
+
+  // Build a skeleton for a model that arrived with none. The bridge mutates
+  // the live clone and bumps topology, which re-emits the bone list into
+  // `bones` state; here we only adopt the resolved controller mapping.
+  const handleBuildAutoSkeleton = () => {
+    if (!bridgeRef.current.root) { toast.error("Model not ready yet"); return; }
+    const res = bridgeRef.current.autoSkeleton?.();
+    if (!res) {
+      toast.error("Couldn't build an auto skeleton — this mesh may not be humanoid-proportioned.");
+      return;
+    }
+    const map = res.mapping as Record<ControllerKey, string | null>;
+    setControllerMap(map);
+    const mapped = Object.values(map).filter(Boolean).length;
+    setAutoSkel({ mapped, total: CONTROLLERS.length });
+    toast.success(`Auto skeleton built — ${mapped}/${CONTROLLERS.length} controllers mapped`);
   };
 
   const handleClearControllers = () => {
@@ -1953,6 +1993,29 @@ export default function RigControllerRoom({
           </div>
           <p className="font-mono text-[9px] leading-relaxed text-white/30 px-1">{`// auto-posed from the controller map + this rig's own proportions. Refine with the gizmos, then save — play mode and the office use these poses when a model has no sit/kneel clip.`}</p>
         </div>
+
+        {/* ═══════════ AUTO SKELETON — rig an unrigged model in place ═══════════ */}
+        {(bones.length === 0 || autoSkel) && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <span className="font-mono text-[9px] text-primary/60 tracking-[0.18em]">{`>`}</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 font-semibold">AUTO SKELETON</span>
+            </div>
+            {bones.length === 0 ? (
+              <>
+                <p className="font-mono text-[9px] leading-relaxed text-white/30 px-1">{`// this model has no skeleton, so it can't be posed yet. Build one automatically — joints are estimated from the mesh's own proportions (hips, knees, shoulders, elbows), then every controller, action pose and rig save works exactly as it does for a native rig.`}</p>
+                <button
+                  onClick={handleBuildAutoSkeleton}
+                  className="w-full px-2 py-2 border border-primary/50 bg-primary/10 text-[11px] font-semibold text-white hover:bg-primary/20 hover:border-primary transition flex items-center justify-center gap-1.5"
+                >
+                  <BoneIcon className="w-3.5 h-3.5" /> Build auto skeleton
+                </button>
+              </>
+            ) : autoSkel ? (
+              <p className="font-mono text-[9px] leading-relaxed text-white/40 px-1">{`// auto skeleton built — ${autoSkel.mapped}/${autoSkel.total} controllers mapped. Proportions are estimated from the mesh — refine joint positions by re-posing with the gizmos, then pose and save as usual.`}</p>
+            ) : null}
+          </div>
+        )}
 
         {/* ═══════════ ASSET DECK — clips + library dropdown ═══════════ */}
         <div className="space-y-2">

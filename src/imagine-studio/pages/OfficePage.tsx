@@ -23,15 +23,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
+import TaskPipeline from '@/components/call-agents/TaskPipeline';
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
-import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
 import { applyPose, buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
-import StudioMobileNav from '@/imagine-studio/components/shared/StudioMobileNav';
 
 const LINKS_KEY = 'sfh:office-bots:v1';
 type BotLink = { agentId?: string; aiOn?: boolean };
@@ -379,49 +379,74 @@ export function OfficeTheaterScreen({ source, screenBot, screenLink, screenAgent
   useEffect(() => { onPages(pages); }, [pages]); // eslint-disable-line
   const brand = useOfficeBrand();
   const idle = useMemo(() => {
-    const c = document.createElement('canvas'); c.width = 1024; c.height = 576;
-    const g = c.getContext('2d')!; g.fillStyle = '#0d1117'; g.fillRect(0, 0, 1024, 576);
+    const c = document.createElement('canvas'); c.width = 1600; c.height = 600;
+    const g = c.getContext('2d')!; g.fillStyle = '#0d1117'; g.fillRect(0, 0, 1600, 600);
     g.fillStyle = '#e6edf3'; g.textAlign = 'center';
     const title = `${brand.name} Theater`;
-    let size = 52; g.font = `600 ${size}px sans-serif`;
-    while (g.measureText(title).width > 940 && size > 22) { size -= 4; g.font = `600 ${size}px sans-serif`; }
-    g.fillText(title, 512, 268); g.font = '27px sans-serif'; g.fillStyle = '#8b949e';
-    g.fillText('Ready — an admin can share a screen, camera, document or AI dashboard', 512, 328);
+    let size = 76; g.font = `600 ${size}px sans-serif`;
+    while (g.measureText(title).width > 1460 && size > 30) { size -= 4; g.font = `600 ${size}px sans-serif`; }
+    g.fillText(title, 800, 282); g.font = '30px sans-serif'; g.fillStyle = '#8b949e';
+    g.fillText('Floor 100 · New York — share a screen, camera, document or AI dashboard here', 800, 344);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }, [brand]);
   const isDash = source?.kind === 'dashboard';
+  /* Dashboards are drawn INTO the screen as a texture (founder directive
+   * 2026-10-25) — no floating widget in front of the glass. */
+  const dashTex = useMemo(() => {
+    if (!isDash || !screenBot) return null;
+    const c = document.createElement('canvas'); c.width = 1600; c.height = 600;
+    const g = c.getContext('2d')!;
+    const grad = g.createLinearGradient(0, 0, 0, 600); grad.addColorStop(0, '#08131f'); grad.addColorStop(1, '#050b14');
+    g.fillStyle = grad; g.fillRect(0, 0, 1600, 600);
+    g.fillStyle = screenBot.tint; g.fillRect(0, 0, 1600, 6);
+    g.beginPath(); g.arc(64, 66, 20, 0, Math.PI * 2); g.fillStyle = screenBot.tint; g.fill();
+    g.fillStyle = '#eef4ff'; g.font = '700 52px system-ui, sans-serif'; g.textAlign = 'left';
+    g.fillText(screenBot.name, 104, 84);
+    const nameW = g.measureText(screenBot.name).width;
+    g.font = '400 27px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.72)';
+    const duty = screenBot.duty.length > 50 ? `${screenBot.duty.slice(0, 49)}…` : screenBot.duty;
+    g.fillText(duty, 104 + nameW + 22, 84);
+    g.textAlign = 'right'; g.font = '600 21px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.5)';
+    g.fillText(`${brand.name} · AGENT DASHBOARD`.toUpperCase().slice(0, 46), 1552, 60);
+    g.textAlign = 'left';
+    g.font = '400 26px system-ui, sans-serif'; g.fillStyle = screenAgent ? '#34d399' : 'rgba(230,240,255,.6)';
+    g.fillText(screenAgent ? `Powered by AI — ${screenAgent.name}` : 'Agent dashboard — live from the Agents tab', 48, 138);
+    g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(48, 158, 1504, 2);
+    g.font = '600 19px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.55)';
+    g.fillText('L A T E S T   J O B S', 48, 196);
+    const wrap1 = (text: string, max: number) => { const words = String(text).split(/\s+/); let cur = ''; for (const w of words) { if ((`${cur} ${w}`).trim().length > max) break; cur = (`${cur} ${w}`).trim(); } return cur.length < String(text).length ? `${cur}…` : cur; };
+    let y = 238;
+    if (!screenRuns.length) {
+      g.font = '400 26px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.75)';
+      g.fillText(`No jobs yet — click ${screenBot.name} in the office and give it a task.`, 48, y + 8);
+    }
+    for (const r of screenRuns.slice(0, 3)) {
+      const ok = r.status === 'ok'; const col = ok ? '#34d399' : r.status === 'error' ? '#f87171' : '#fbbf24';
+      g.beginPath(); g.arc(58, y - 8, 9, 0, Math.PI * 2); g.fillStyle = col; g.fill();
+      g.font = '600 21px system-ui, sans-serif'; g.fillStyle = col;
+      g.fillText(ok ? 'DONE' : String(r.status || '').toUpperCase(), 78, y);
+      g.font = '400 21px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.55)'; g.textAlign = 'right';
+      g.fillText(new Date(r.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }), 1552, y);
+      g.textAlign = 'left';
+      g.font = '500 25px system-ui, sans-serif'; g.fillStyle = '#eef4ff';
+      const inp = String(r.input || 'Task'); g.fillText(inp.length > 88 ? `${inp.slice(0, 87)}…` : inp, 78, y + 34);
+      if (r.output) { g.font = '400 23px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.7)'; g.fillText(wrap1(String(r.output), 96), 78, y + 64); }
+      y += 96;
+    }
+    g.font = '400 20px system-ui, sans-serif'; g.fillStyle = 'rgba(230,240,255,.45)';
+    g.fillText('Startup Factory Hub · Floor 100 · Live from the Agents tab', 48, 566);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }, [isDash, screenBot, screenAgent, screenRuns, brand]);
+  useEffect(() => () => { dashTex?.dispose(); }, [dashTex]);
   return (
-    <group position={[0, 2.15, -15.55]}>
-      <mesh position={[0, 0, -0.16]}><boxGeometry args={[7.5, 3.55, 0.18]} /><meshStandardMaterial color="#14171c" /></mesh>
-      {!isDash && (
-        <mesh>
-          <planeGeometry args={[7.2, 3.3]} />
-          <meshBasicMaterial map={tex || idle} toneMapped={false} />
-        </mesh>
-      )}
-      {isDash && screenBot && (
-        <Html position={[0, 0, 0.05]} center distanceFactor={10.4} zIndexRange={[15, 0]} style={{ pointerEvents: 'none' }}>
-          <div style={{ pointerEvents: 'none', width: 720, height: 330, boxSizing: 'border-box', background: '#0b1220', color: '#e6ecff', borderRadius: 14, padding: '20px 24px', font: '400 15px system-ui', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 16, height: 16, borderRadius: 999, background: screenBot.tint, display: 'inline-block' }} />
-              <span style={{ font: '700 24px system-ui' }}>{screenBot.name}</span>
-              <span style={{ opacity: 0.75 }}>{screenBot.duty}</span>
-            </div>
-            <div style={{ marginTop: 6, opacity: 0.85 }}>{screenAgent ? `Powered by AI — ${screenAgent.name}` : 'NPC bot — not linked to an agent yet'}</div>
-            <div style={{ marginTop: 14, font: '600 13px system-ui', letterSpacing: 1, opacity: 0.6 }}>LATEST JOBS</div>
-            {screenRuns.length === 0 && <div style={{ marginTop: 8, opacity: 0.75 }}>No jobs yet. Open this bot&rsquo;s dashboard and assign the first one.</div>}
-            {screenRuns.slice(0, 3).map((r) => (
-              <div key={r.id} style={{ marginTop: 10, background: 'rgba(255,255,255,.05)', borderRadius: 10, padding: '8px 12px' }}>
-                <div style={{ font: '600 12px system-ui', opacity: 0.7 }}>{r.status === 'ok' ? 'DONE' : String(r.status).toUpperCase()} · {new Date(r.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
-                {r.input && <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.input}</div>}
-                {r.output && <div style={{ opacity: 0.75, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.output}</div>}
-              </div>
-            ))}
-          </div>
-        </Html>
-      )}
+    <group position={[0, 3.6, -15.55]}>
+      <mesh position={[0, 0, -0.16]}><boxGeometry args={[15.9, 6.2, 0.18]} /><meshStandardMaterial color="#14171c" /></mesh>
+      <mesh>
+        <planeGeometry args={[15.35, 5.75]} />
+        <meshBasicMaterial map={isDash ? (dashTex || idle) : (tex || idle)} toneMapped={false} />
+      </mesh>
       {source && !isDash && (
-        <Html position={[0, -2.25, 0.2]} center distanceFactor={18} style={{ pointerEvents: 'none' }}>
+        <Html position={[0, -3.85, 0.2]} center distanceFactor={18} style={{ pointerEvents: 'none' }}>
           <div style={{ pointerEvents: 'none', whiteSpace: 'nowrap', borderRadius: 999, background: 'rgba(5,10,20,.7)', color: '#fff', padding: '3px 10px', font: '500 12px system-ui' }}>Presenting: {(source as any).by}</div>
         </Html>
       )}
@@ -437,36 +462,73 @@ function TheaterMenuItem({ icon: Icon, label, onClick }: { icon: any; label: str
   );
 }
 
-/* ---------------- Per-agent Genius panel ----------------
- * What a bot click opens (founder directive 2026-10-25): a chat in the
- * Genius bubble's full-screen language — emerald glass, mono micro-labels —
- * scoped to THIS agent, with its slice of the task pipeline (in progress /
- * in queue / done) and a button into the entire Agents tab. The queue is
- * the same localStorage queue the Agents tab runs ('sfh:agents-task-queue:v1'),
- * so tasks line up identically in the office and in the dashboard. */
-function OfficeAgentPanel({ bot, link, agents, signedIn, working, onSaveLink, onOpenConsole }: {
+/* ---------------- Per-agent panel ----------------
+ * What a bot click opens (founder directive 2026-10-25): the Agents tab's
+ * OWN widgets — the same glass panels, inputs, labels and gradient buttons
+ * as SFHCallAgents — arranged as a chat with THIS bot's agent, the real
+ * Task Pipeline widget underneath, and one button into the entire Agents
+ * tab. Clicking the bot already chose the agent, so there is no agent
+ * picker anywhere in here: the page auto-binds the bot to its agent when
+ * the panel opens (see ensureBotAgent). */
+const GLASS_CSS = `
+@keyframes ca-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes ca-fadeup {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ca-pulsering {
+  0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); }
+  70% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+}
+@keyframes ca-dashflow {
+  to { stroke-dashoffset: -28; }
+}
+@keyframes ca-borderrun {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(16,185,129,0.25), 0 12px 40px rgba(16,185,129,0.10); }
+  50% { box-shadow: 0 0 0 2px rgba(20,184,166,0.55), 0 12px 48px rgba(20,184,166,0.22); }
+}
+.ca-float { animation: ca-float 5.5s ease-in-out infinite; }
+.ca-fadeup { animation: ca-fadeup 0.5s ease both; }
+.ca-avatar-live { animation: ca-pulsering 1.4s ease-out infinite; }
+.ca-running { animation: ca-borderrun 1.8s ease-in-out infinite; }
+.ca-tilt { transition: transform 0.25s ease-out; transform-style: preserve-3d; will-change: transform; }
+.ca-range { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 9999px; outline: none; }
+.ca-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 9999px;
+  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid hsl(var(--background));
+  box-shadow: 0 2px 10px rgba(16,185,129,0.45); cursor: pointer;
+}
+.ca-range::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 9999px;
+  background: linear-gradient(135deg, #10b981, #14b8a6); border: 3px solid hsl(var(--background));
+  box-shadow: 0 2px 10px rgba(16,185,129,0.45); cursor: pointer;
+}
+`;
+const GLASS_PANEL =
+  "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
+const GLASS_INPUT =
+  "rounded-2xl border-input bg-background/60 backdrop-blur transition focus-visible:ring-2 focus-visible:ring-emerald-400/60";
+const FIELD_LABEL =
+  "text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
+const GRADIENT_BUTTON =
+  "rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 disabled:shadow-none";
+
+function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole }: {
   bot: OfficeBot; link: BotLink; agents: any[]; signedIn: boolean; working: boolean;
-  onSaveLink: (patch: BotLink) => void; onOpenConsole: () => void;
+  onOpenConsole: () => void;
 }) {
   const agentId = link.agentId;
   const linkedAgent = agents.find((a) => a.id === agentId);
   const [msgs, setMsgs] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [runs, setRuns] = useState<any[]>([]);
-  const [queue, setQueue] = useState<any[]>([]);
-  const [pick, setPick] = useState('');
-  const threadRef = useRef<HTMLDivElement>(null);
-  const loadRuns = async () => {
-    if (!agentId) { setRuns([]); return; }
-    const { data } = await supabase.from('call_agent_runs').select('id, input, output, status, created_at').eq('agent_id', agentId).order('created_at', { ascending: false }).limit(6);
-    setRuns(data || []);
-  };
-  const loadQueue = () => {
-    try { const all = JSON.parse(localStorage.getItem('sfh:agents-task-queue:v1') || '[]'); setQueue(Array.isArray(all) ? all.filter((q: any) => q?.agentId === agentId) : []); } catch { setQueue([]); }
-  };
-  useEffect(() => { setMsgs([]); setInput(''); void loadRuns(); loadQueue(); const iv = setInterval(loadQueue, 5000); return () => clearInterval(iv); }, [bot.key, agentId]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { const el = threadRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setMsgs([]); setInput(''); }, [bot.key]);
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
   const send = async () => {
     const text = input.trim();
     if (!text || busy || !agentId) return;
@@ -481,61 +543,47 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onSaveLink, on
       setMsgs((m) => [...m, { role: 'assistant', content: `That run failed: ${e?.message || 'unknown error'}` }]);
     }
     setBusy(false);
-    void loadRuns(); loadQueue();
   };
-  const laneLabel = "font-mono text-[10px] uppercase tracking-wider text-emerald-300/70 w-24 shrink-0 pt-0.5";
   return (
-    <div className="flex h-full flex-col bg-[#050d0a] text-emerald-50">
-      <div className="shrink-0 border-b border-emerald-400/10 px-4 py-3 space-y-2.5">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: bot.tint }} />
-          {linkedAgent ? <span className="truncate">Powered by <b>{linkedAgent.name}</b></span> : <span className="text-emerald-100/70 truncate">NPC bot — not linked to one of your agents yet</span>}
-          <span className={`ml-auto shrink-0 font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${working ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-emerald-100/50'}`}>{working ? 'On a job now' : 'Idle'}</span>
+    <div className="flex h-full flex-col bg-background text-foreground">
+      <style>{GLASS_CSS}</style>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 space-y-4">
+        <div className={`${GLASS_PANEL} p-4 ca-fadeup`}>
+          <div className={FIELD_LABEL}>This agent</div>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full shrink-0" style={{ background: bot.tint }} />
+            <span className="font-semibold truncate">{linkedAgent?.name || bot.name}</span>
+            <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${working || busy ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{working || busy ? 'On a job now' : 'Idle'}</span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">{bot.duty}</p>
+          {!signedIn && <p className="mt-2 text-xs text-muted-foreground">Sign in to chat with {bot.name} and hand it tasks.</p>}
+          {signedIn && !agentId && <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />Connecting {bot.name}…</p>}
         </div>
-        <div className="grid gap-1.5 text-xs">
-          <div className="flex gap-2"><span className={laneLabel}>In progress</span>{busy ? <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" />Running your task…</span> : <span className="text-emerald-100/50">Nothing running</span>}</div>
-          <div className="flex gap-2"><span className={laneLabel}>In queue</span>{queue.length ? <span className="truncate">{queue.length} queued · next: “{String(queue[0].message || '').slice(0, 60)}”</span> : <span className="text-emerald-100/50">Empty — line tasks up in the Agents tab</span>}</div>
-          <div className="flex gap-2"><span className={laneLabel}>Done</span>
-            <div className="min-w-0 flex-1 space-y-1">
-              {runs.length === 0 && <span className="text-emerald-100/50">No finished tasks yet</span>}
-              {runs.slice(0, 4).map((r) => (
-                <div key={r.id} className="flex items-center gap-1.5 min-w-0">
-                  <span className={`flex h-4 w-4 items-center justify-center rounded-full shrink-0 ${r.status === 'ok' ? 'bg-emerald-500 text-emerald-950' : 'bg-red-500/80 text-white'}`}>{r.status === 'ok' ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}</span>
-                  <span className="truncate">{r.input || r.output || 'Task'}</span>
-                  <span className="ml-auto shrink-0 text-[10px] text-emerald-100/40">{new Date(r.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="space-y-3 px-1">
+          {msgs.length === 0 && <div className="text-sm text-muted-foreground leading-relaxed">Chat with {bot.name} — give it a task below and it runs right here. Line up more work in the pipeline underneath, or open the entire Agents tab for everything else.</div>}
+          {msgs.map((m, i) => (
+            m.role === 'user' ? (
+              <div key={i} className="ml-auto w-fit max-w-[88%] rounded-[1.4rem] rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-2.5 text-sm leading-relaxed text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]">{m.content}</div>
+            ) : (
+              <div key={i} className={`${GLASS_PANEL} w-fit max-w-[94%] rounded-[1.4rem] rounded-bl-md px-4 py-3 text-sm leading-relaxed`}>
+                <div className="[&>p]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:font-mono"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+              </div>
+            )
+          ))}
+          {busy && <div className="flex items-center gap-2 text-xs text-muted-foreground px-1"><Loader2 className="w-4 h-4 animate-spin" />{bot.name} is working…</div>}
         </div>
+        {signedIn && agentId && <TaskPipeline agents={agents} onRunComplete={() => {}} />}
       </div>
-      <div ref={threadRef} className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 space-y-3">
-        {msgs.length === 0 && <div className="text-sm text-emerald-100/60 leading-relaxed">This is {bot.name} — {bot.duty} Give it a task below and it runs right here; finished work lands in Done above and in the Agents tab.</div>}
-        {msgs.map((m, i) => (
-          <div key={i} className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'ml-auto bg-emerald-500/15 border-emerald-400/25' : 'bg-white/5 border-white/10'}`}>
-            {m.role === 'assistant' ? <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1.5"><ReactMarkdown>{m.content}</ReactMarkdown></div> : m.content}
-          </div>
-        ))}
-        {busy && <div className="flex items-center gap-2 text-xs text-emerald-100/60"><Loader2 className="w-4 h-4 animate-spin" />{bot.name} is working…</div>}
-      </div>
-      <div className="shrink-0 border-t border-emerald-400/10 px-4 py-3 space-y-2.5">
-        {!signedIn ? (
-          <div className="text-xs text-emerald-100/60">Sign in to chat with {bot.name} and hand it tasks.</div>
-        ) : !agentId ? (
+      <div className="shrink-0 border-t border-border bg-background/80 px-4 py-3 space-y-2.5 backdrop-blur">
+        {signedIn && agentId ? (
           <div className="flex gap-2">
-            <select value={pick} onChange={(e) => setPick(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2.5 text-sm outline-none">
-              <option value="">Choose one of your agents…</option>
-              {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
-            <button disabled={!pick} onClick={() => onSaveLink({ agentId: pick, aiOn: true })} className="rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-emerald-950 disabled:opacity-50">Link</button>
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/60`} />
+            <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} px-4 py-2.5 disabled:opacity-50`} aria-label="Send task"><Send className="h-4 w-4" /></button>
           </div>
-        ) : (
-          <div className="flex gap-2">
-            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className="min-w-0 flex-1 rounded-xl border border-emerald-400/20 bg-black/40 px-3.5 py-2.5 text-sm outline-none placeholder:text-emerald-100/35" />
-            <button onClick={() => void send()} disabled={busy || !input.trim()} className="rounded-xl bg-emerald-500 px-3.5 py-2.5 text-emerald-950 disabled:opacity-50" aria-label="Send task"><Send className="h-4 w-4" /></button>
-          </div>
-        )}
-        <button onClick={onOpenConsole} className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20">
+        ) : signedIn ? (
+          <div className="px-1 text-xs text-muted-foreground">Connecting {bot.name} to its agent…</div>
+        ) : null}
+        <button onClick={onOpenConsole} className={`${GRADIENT_BUTTON} flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold`}>
           <LayoutDashboard className="h-4 w-4" />See the entire Agents tab
         </button>
       </div>
@@ -599,6 +647,7 @@ export default function OfficePage() {
   const [nearKey, setNearKey] = useState<string | null>(null);
   const [links, setLinks] = useState<Record<string, BotLink>>(loadLinks);
   const [agents, setAgents] = useState<any[]>([]);
+  const [agentsLoaded, setAgentsLoaded] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [agentsKey, setAgentsKey] = useState(0);
@@ -813,8 +862,9 @@ export default function OfficePage() {
     const bot = OFFICE_BOTS.find((b) => b.key === botKey); if (!bot) return;
     if (presenting) await stopPresenting();
     stopDoc();
-    const l = links[botKey] || {};
-    const agentName = agents.find((a) => a.id === l.agentId)?.name;
+    if (signedIn && agentsLoaded) await ensureBotAgent(bot);
+    const l = linksRef.current[botKey] || {};
+    const agentName = agents.find((a) => a.id === l.agentId)?.name || bot.name;
     setTheater({ kind: 'dashboard', botKey, by: nameRef.current, agentName });
     sendTheater({ kind: 'dashboard', botKey, agentName });
   };
@@ -840,7 +890,7 @@ export default function OfficePage() {
       setSignedIn(!!uid);
       if (!uid) { setIsAdmin(false); return; }
       try { const { data: a } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' }); if (live) setIsAdmin(!!a); } catch { /* role probe is best-effort */ }
-      try { const r = await callAgentsApi({ action: 'list' }); if (live) setAgents(r.agents || []); } catch { /* list retries on open */ }
+      try { const r = await callAgentsApi({ action: 'list' }); if (live) { setAgents(r.agents || []); setAgentsLoaded(true); } } catch { /* list retries on open */ }
     };
     supabase.auth.getSession().then(({ data }) => apply(data.session?.user?.id ?? null)).catch(() => {});
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => { void apply(session?.user?.id ?? null); });
@@ -850,16 +900,18 @@ export default function OfficePage() {
   const link = openBot ? links[openBot.key] || {} : {};
   const linkedAgent = agents.find((a) => a.id === link.agentId);
   const refreshAgents = async () => {
-    try { const r = await callAgentsApi({ action: 'list' }); setAgents(r.agents || []); } catch { /* keep the current list */ }
+    try { const r = await callAgentsApi({ action: 'list' }); setAgents(r.agents || []); setAgentsLoaded(true); } catch { /* keep the current list */ }
     setAgentsKey((k) => k + 1);
   };
 
-  const saveLink = (patch: BotLink) => {
-    if (!openBot) return;
-    const next = { ...links, [openBot.key]: { ...links[openBot.key], ...patch } };
-    setLinks(next);
-    try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {}
+  const saveLinkFor = (key: string, patch: BotLink) => {
+    setLinks((cur) => {
+      const next = { ...cur, [key]: { ...cur[key], ...patch } };
+      try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
+  const saveLink = (patch: BotLink) => { if (openBot) saveLinkFor(openBot.key, patch); };
   const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
   const nearBot = nearKey ? OFFICE_BOTS.find((b) => b.key === nearKey) : null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
@@ -867,6 +919,35 @@ export default function OfficePage() {
    * in the last 3 minutes is pinned to its desk (sitting + typing). ---- */
   const linksRef = useRef(links); linksRef.current = links;
   const agentCharsRef = useRef<any[]>([]); agentCharsRef.current = agentChars;
+  /* ---- Click = chosen (founder directive 2026-10-25): opening a bot IS
+   * choosing its agent. A roster bot with no link auto-binds — first to a
+   * same-named agent of yours, otherwise to a new agent created in the
+   * bot's own name and persona — so the chat never asks which agent. */
+  const autoBindTried = useRef(new Set<string>());
+  const ensureBotAgent = async (bot: OfficeBot): Promise<string | undefined> => {
+    const existing = (linksRef.current[bot.key] || {}).agentId;
+    if (existing) return existing;
+    const match = agents.find((a) => String(a.name || '').trim().toLowerCase() === bot.name.trim().toLowerCase());
+    if (match) { saveLinkFor(bot.key, { agentId: match.id, aiOn: true }); return match.id; }
+    if (autoBindTried.current.has(bot.key)) return undefined;
+    autoBindTried.current.add(bot.key);
+    try {
+      const r = await callAgentsApi({ action: 'save', name: bot.name, description: bot.duty, system_prompt: `You are ${bot.name}, an AI agent working in the Startup Factory Hub office. Your job: ${bot.duty} Act as this specialist — take tasks, do the work, and report results clearly.`, model: 'llama-3.3-70b-versatile', tools: [] });
+      const created = r?.agent;
+      if (created?.id) {
+        setAgents((cur) => (cur.some((a) => a.id === created.id) ? cur : [...cur, created]));
+        saveLinkFor(bot.key, { agentId: created.id, aiOn: true });
+        return created.id;
+      }
+    } catch { autoBindTried.current.delete(bot.key); /* a later open retries */ }
+    return undefined;
+  };
+  useEffect(() => {
+    if (!openBot || !signedIn || !agentsLoaded) return;
+    if (!OFFICE_BOTS.some((b) => b.key === openBot.key)) return; // studio agent characters arrive pre-linked
+    if ((links[openBot.key] || {}).agentId) return;
+    void ensureBotAgent(openBot);
+  }, [openBot?.key, signedIn, agentsLoaded, agents, links]); // eslint-disable-line react-hooks/exhaustive-deps
   const [workingKeys, setWorkingKeys] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => {
     let off = false;
@@ -895,18 +976,18 @@ export default function OfficePage() {
       onPointerMove={(e) => { if (!dragRef.current) return; const evs = (e.nativeEvent as any).getCoalescedEvents?.() as PointerEvent[] | undefined; const last = evs?.length ? evs[evs.length - 1] : e.nativeEvent; const dx = last.clientX - dragRef.current.x, dy = last.clientY - dragRef.current.y; dragRef.current = { x: last.clientX, y: last.clientY }; const sens = e.pointerType === 'touch' ? 0.0042 : 0.005; camRef.current.yaw -= dx * sens; camRef.current.pitch = THREE.MathUtils.clamp(camRef.current.pitch + dy * 0.003, -0.1, 0.9); }}
       onPointerUp={() => { dragRef.current = null; }}>
       <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
-        <color attach="background" args={['#bfd9ec']} />
+        <color attach="background" args={['#cfe2ef']} />
         <ambientLight intensity={0.85} />
         <directionalLight position={[26, 34, 14]} intensity={1.7} color="#fff2df" />
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
           {scene && agentChars.map((o) => (
-            <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || '/models/plaza/RobotExpressive.glb', tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
+            <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
           {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} onPages={setPdfPages} />}
-          {scene && <UnifiedPlayer def={playerDef} model="/models/plaza/RobotExpressive.glb" tint="#ffffff" world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
+          {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
@@ -922,7 +1003,7 @@ export default function OfficePage() {
         <div data-office-ui className="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
           {outdated && scene && (
             <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="rounded-full bg-emerald-500 text-emerald-950 font-semibold px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-lg disabled:opacity-60">
-              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (white floor · tall ceiling · daylight)'}
+              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office (floor 100 · skyscraper view · big theater)'}
             </button>
           )}
           {pubNote && <div className="rounded-lg bg-background/90 border border-border px-3 py-1.5 text-xs max-w-[320px]">{pubNote}</div>}
@@ -1044,7 +1125,7 @@ export default function OfficePage() {
           </div>
           {panelView === 'genius' ? (
             <div className="flex-1 min-h-0">
-              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onSaveLink={saveLink} onOpenConsole={() => setPanelView('console')} />
+              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} />
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
@@ -1073,7 +1154,6 @@ export default function OfficePage() {
           <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (outdated ? 'UPDATED OFFICE READY — ADMIN PUBLISH PENDING' : pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
         </div>
       )}
-      <StudioMobileNav />
     </div>
   );
 }

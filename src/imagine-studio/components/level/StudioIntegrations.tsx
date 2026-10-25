@@ -477,7 +477,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
                   {myAgents.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
                 <select value={agentModel} onChange={(e) => setAgentModel(e.target.value)} className="w-full h-8 rounded-md border border-border bg-background px-2 text-xs">
-                  <option value={AGENT_MODEL_URL}>Character: Agent (rigged robot — sits, types, walks)</option>
+                  <option value={AGENT_MODEL_URL}>Character: Genius Agent (your uploaded character, rigged — sits, types, walks)</option>
                 </select>
                 <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
                   <input type="checkbox" checked={agentSeated} onChange={(e) => setAgentSeated(e.target.checked)} /> Starts seated (at a desk or chair)

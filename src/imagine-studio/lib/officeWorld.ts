@@ -18,18 +18,21 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 2;
+export const OFFICE_SCENE_VERSION = 3;
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
-/** The agent character body. NOTE (founder directive 2026-10-25): the bots
- * must sit, type and walk via the rig controllers — the founder-supplied
- * signature mesh (site-assets/models/agent.glb) is a single merged mesh with
- * NO skeleton and NO clips (verified in the GLB: 1 mesh, 0 skins, 0
- * animations), so no rig can pose it. The bots therefore run on the rigged
- * robot body (Sitting / Walking / Idle clips, fully poseable arms) and the
- * signature mesh remains a one-line swap away the day a rigged version of
- * it exists: point AGENT_MODEL_URL back at it and every character follows. */
-export const AGENT_MODEL_URL = "/models/plaza/RobotExpressive.glb";
+/** The agent character body: the founder's OWN uploaded character
+ * (site-assets/models/agent.glb), RIGGED on 2026-10-25 — a Mixamo-named
+ * skeleton was fitted to the mesh's measured landmarks, the mesh was
+ * skinned to it (rigid robot parts, blended at the joints) and Idle /
+ * Walking / Sitting / Wave clips were baked in, so her bots sit, type and
+ * walk as HER character. Built by /tmp/rig-venv/build_rig.py; the same
+ * auto-skeleton now lives in the Rig Room for future characters. The
+ * player wears the whitened-texture twin (AGENT_PLAYER_MODEL_URL). The
+ * rigged files are hosted in the site-assets bucket next to the original
+ * (the code-push route cannot carry 16 MB binaries). */
+export const AGENT_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/GeniusAgent.glb";
+export const AGENT_PLAYER_MODEL_URL = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/models/GeniusAgentWhite.glb";
 const MODELS = [AGENT_MODEL_URL];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 const ROSTER: [string, string][] = [
@@ -87,8 +90,9 @@ export function buildOfficeScene(): LevelScene {
   const W = 48, D = 32, H = 8, T = 0.18;
   // Floor — flat white slab (founder directive 2026-10-25), no rug.
   o.push(P("Office Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#ffffff", { roughness: 0.95, metalness: 0 }));
-  // Exterior city ground so the skyline sits on something through the glass.
-  o.push(P("City Ground", "box", [0, -0.16, 0], [150, 0.1, 130], "#a9bccb", { roughness: 1 }));
+  // The street, ~100 floors down (founder directive 2026-10-25): the city
+  // ground sits far below the windows, softened by aerial haze.
+  o.push(P("City Ground", "box", [0, -300, 0], [2400, 1, 2400], "#93a8ba", { roughness: 1 }));
   // Perimeter window walls (NYC high-rise glass) with a door gap on the south side.
   const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
   const wallRun = (side: string, len: number, px: number, pz: number, rotY: number, segments: [number, number][]) => {
@@ -111,11 +115,12 @@ export function buildOfficeScene(): LevelScene {
   wallRun("W", D, -W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
   wallRun("E", D, W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
   o.push(P("Entrance Lintel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T], "#d7dee5", { roughness: 0.5, metalness: 0.3 }));
-  // Theater screen, centered on the north wall (live content is rendered by /office).
-  o.push(P("Theater Screen", "box", [0, 2.05, -15.72], [7.9, 3.7, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
-  o.push(P("Theater Pylon Left", "box", [-4.15, 1.7, -15.72], [0.35, 3.4, 0.35], "#0a0f16"));
-  o.push(P("Theater Pylon Right", "box", [4.15, 1.7, -15.72], [0.35, 3.4, 0.35], "#0a0f16"));
-  o.push(P("Theater Glow Strip", "box", [0, 0.12, -15.5], [7.9, 0.06, 0.1], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.2 } as any));
+  // Theater screen — BIG (founder directive 2026-10-25), centered on the
+  // north wall; live content is rendered INTO it by /office.
+  o.push(P("Theater Screen", "box", [0, 3.55, -15.72], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
+  o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -15.72], [0.35, 6.6, 0.35], "#0a0f16"));
+  o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -15.72], [0.35, 6.6, 0.35], "#0a0f16"));
+  o.push(P("Theater Glow Strip", "box", [0, 0.12, -15.5], [15.6, 0.06, 0.1], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.2 } as any));
   // Whiteboard on the south interior + corner plants.
   o.push(P("Whiteboard", "box", [-10, 1.7, D / 2 - 0.35], [6, 2.2, 0.08], "#f7fafc", { roughness: 0.25 }));
   o.push(P("Whiteboard Frame", "box", [-10, 1.7, D / 2 - 0.42], [6.3, 2.5, 0.05], "#b9c6d2", { roughness: 0.6 }));
@@ -138,23 +143,40 @@ export function buildOfficeScene(): LevelScene {
   // 2026-10-25): pale glass-and-steel bodies, unlit reflective window panes.
   let seed = 42;
   const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
-  const tower = (cx: number, cz: number, w: number, h: number, d: number, tone: string, face: "N" | "S" | "E" | "W") => {
-    o.push(P("Skyline Tower", "box", [cx, h / 2 - 0.1, cz], [w, h, d], tone, { roughness: 0.7, metalness: 0.15 }));
-    const rows = Math.max(2, Math.floor(h / 2.4));
+  // FLOOR 100 (founder directive 2026-10-25): every tower stands on the
+  // street ~320 m below; only its TOP matters — peer towers end around our
+  // floor, a farther ring fades into the haze, clouds drift underneath.
+  const tower = (cx: number, cz: number, w: number, top: number, d: number, tone: string, face: "N" | "S" | "E" | "W", windows: boolean) => {
+    const base = -320, h = top - base;
+    o.push(P("Skyline Tower", "box", [cx, base + h / 2, cz], [w, h, d], tone, { roughness: 0.7, metalness: 0.15 }));
+    if (!windows) return;
+    const rows = Math.max(2, Math.floor(Math.min(46, h) / 3.1));
     for (let rI = 0; rI < rows; rI++) {
-      if (rnd() < 0.4) continue;
-      const wy = 1.3 + rI * 2.4;
+      if (rnd() < 0.55) continue;
+      const wy = top - 1.6 - rI * 3.1;
       const off = (rnd() - 0.5) * ((face === "N" || face === "S" ? w : d) - 1.4);
       const pos: [number, number, number] = face === "N" ? [cx + off, wy, cz + d / 2 + 0.04] : face === "S" ? [cx + off, wy, cz - d / 2 - 0.04] : face === "E" ? [cx - w / 2 - 0.04, wy, cz + off] : [cx + w / 2 + 0.04, wy, cz + off];
-      const scl: [number, number, number] = face === "N" || face === "S" ? [0.55, 0.1, 0.06] : [0.06, 0.1, 0.55];
+      const scl: [number, number, number] = face === "N" || face === "S" ? [0.6, 0.12, 0.06] : [0.06, 0.12, 0.6];
       o.push(P("Skyline Window", "box", pos, scl, rnd() < 0.5 ? "#7e97ab" : "#93a9bb", { roughness: 0.35, metalness: 0.2 }));
     }
   };
-  for (let i = 0; i < 8; i++) tower(-30 + i * 8.6, -37, 5 + rnd() * 2.5, 13 + rnd() * 12, 5 + rnd() * 2, "#b7c9da", "N");
-  for (let i = 0; i < 7; i++) tower(-27 + i * 9.2, -27.5, 4.5 + rnd() * 2, 7 + rnd() * 8, 4.5 + rnd() * 2, "#a5bcd2", "N");
-  for (let i = 0; i < 6; i++) tower(-26 + i * 10.4, 30, 5 + rnd() * 2, 8 + rnd() * 9, 5, "#c9d8e4", "S");
-  for (let i = 0; i < 6; i++) tower(34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#a5bcd2", "E");
-  for (let i = 0; i < 6; i++) tower(-34, -22 + i * 9.2, 5, 9 + rnd() * 9, 4.5 + rnd() * 2, "#9db4c9", "W");
+  // Peer towers — their tops end around our floor (some below, a few above).
+  for (let i = 0; i < 8; i++) tower(-32 + i * 9.2, -40, 6 + rnd() * 3, -14 + rnd() * 20, 6 + rnd() * 3, "#b7c9da", "N", true);
+  for (let i = 0; i < 7; i++) tower(-29 + i * 9.8, -29, 5 + rnd() * 2.5, -22 + rnd() * 16, 5 + rnd() * 2, "#a5bcd2", "N", true);
+  for (let i = 0; i < 6; i++) tower(-28 + i * 11, 33, 6 + rnd() * 2.5, -18 + rnd() * 18, 5.5, "#c9d8e4", "S", true);
+  for (let i = 0; i < 6; i++) tower(37, -24 + i * 9.8, 5.5, -20 + rnd() * 19, 5 + rnd() * 2, "#a5bcd2", "E", true);
+  for (let i = 0; i < 6; i++) tower(-37, -24 + i * 9.8, 5.5, -24 + rnd() * 18, 5 + rnd() * 2, "#9db4c9", "W", true);
+  // Distant ring — hazy silhouettes, no window detail.
+  for (let i = 0; i < 9; i++) tower(-120 + i * 30, -120 - rnd() * 40, 14 + rnd() * 10, -48 + rnd() * 30, 14, "#c6d5e2", "N", false);
+  for (let i = 0; i < 7; i++) tower(-110 + i * 34, 120 + rnd() * 40, 14 + rnd() * 10, -52 + rnd() * 28, 14, "#cdd9e4", "S", false);
+  for (let i = 0; i < 6; i++) tower(130 + rnd() * 40, -90 + i * 32, 14, -50 + rnd() * 30, 14 + rnd() * 8, "#bfcfdd", "E", false);
+  for (let i = 0; i < 6; i++) tower(-130 - rnd() * 40, -90 + i * 32, 14, -55 + rnd() * 28, 14 + rnd() * 8, "#c6d5e2", "W", false);
+  // Cloud layer drifting below the windows.
+  for (let i = 0; i < 7; i++) {
+    const cx = -120 + rnd() * 240, cz = -110 + rnd() * 220;
+    if (Math.abs(cx) < 34 && Math.abs(cz) < 26) continue;
+    o.push(P("Cloud Layer", "box", [cx, -30 - rnd() * 22, cz], [55 + rnd() * 85, 1.4, 36 + rnd() * 44], hex("#ffffff", 0.5), { roughness: 1 }));
+  }
   // 20 agent stations: desk, monitor with a glowing dashboard screen, chair, bot.
   OFFICE_DESKS.forEach((d, i) => {
     const k = i + 1, f = d.facing;
@@ -184,10 +206,10 @@ export function buildOfficeScene(): LevelScene {
     ],
     environment: {
       ...EMPTY_SCENE.environment,
-      background: "#bfd9ec",
+      background: "#cfe2ef",
       ambient: 0.8,
       sceneVersion: OFFICE_SCENE_VERSION,
-      gi: { enabled: true, skyColor: "#d6e9f8", groundColor: "#e9e4da", hemisphereIntensity: 0.75, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
+      gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.8, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
     },
   };
 }
