@@ -43,7 +43,7 @@ export function PublishedWorld({ scene }: { scene: any }) {
           return (
             <mesh key={o.id} position={o.position} rotation={o.rotation} scale={o.scale} castShadow receiveShadow>
               <Geo shape={o.shape} />
-              <meshStandardMaterial color={col(o.color)} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} />
+              <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} />
             </mesh>
           );
         }
