@@ -27,18 +27,23 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 7;
+export const OFFICE_SCENE_VERSION = 8;
 
-/** Background geometry RETIRED by the photo skybox (founder directive
- * 2026-10-25: "erase all the background buildings and geometries" — a
- * real photo of NYC wraps the room instead). Built-in office objects
- * carry `office_<n>` ids; a published object with such an id that the
- * code no longer builds is a retired built-in and must never be merged
- * back in, and these names are stripped wherever a published scene is
- * consumed (merge + editor sync). */
+/** Scene objects RETIRED by later founder directives, stripped wherever
+ * a published scene is consumed (live merge + editor sync), so an old
+ * published file can never resurrect them:
+ *  - the photo skybox (2026-10-25) retired the background geometry: the
+ *    City Ground plate, Skyline towers/windows and Cloud Layer boxes;
+ *  - the 10-agent floor limit (2026-10-25, for frame rate) retired the
+ *    BENCH: built-in bot characters (`office_bot_<key>`) whose key is no
+ *    longer on either floor's roster. Studio-added characters carry
+ *    other ids and are never touched. */
+const validBotCharIds = (): Set<string> =>
+  new Set([...OFFICE_BOTS, ...WONDERLANDS_BOTS].map((b) => `office_bot_${b.key}`).concat("office_bot_manager"));
 export const isRetiredBackground = (o: any): boolean =>
-  typeof o?.name === "string" &&
-  (o.name === "City Ground" || o.name.startsWith("Skyline Tower") || o.name.startsWith("Skyline Window") || o.name.startsWith("Cloud Layer"));
+  (typeof o?.name === "string" &&
+    (o.name === "City Ground" || o.name.startsWith("Skyline Tower") || o.name.startsWith("Skyline Window") || o.name.startsWith("Cloud Layer"))) ||
+  (o?.kind === "character" && typeof o?.id === "string" && o.id.startsWith("office_bot_") && !validBotCharIds().has(o.id));
 export const stripRetiredBackground = (scene: any): any =>
   scene && Array.isArray(scene.objects) ? { ...scene, objects: scene.objects.filter((o: any) => !isRetiredBackground(o)) } : scene;
 
@@ -68,27 +73,26 @@ export const AGENT_MODEL_URL = "/models/plaza/GeniusAgent.glb";
 export const AGENT_PLAYER_MODEL_URL = "/models/plaza/GeniusAgentWhite.glb";
 const MODELS = [AGENT_MODEL_URL];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
+/** The floor's specialists — TEN, by founder directive 2026-10-25: at
+ * most 10 agents per floor (plus the Manager, the CEO and the Chairman
+ * — 13 characters top) so the room holds its frame rate. These ten are
+ * the assembly line the default shift plan runs on. The other ten
+ * original roles (Launcher, Ideator, Scout, Fundraiser, Engineer,
+ * Operator, Recruiter, Legal, Finance, Support) are BENCHED, not
+ * deleted: they can staff a new floor when the CEO opens one, and any
+ * of them can be swapped back in here by restoring its ROSTER + TEAM
+ * lines. */
 const ROSTER: [string, string][] = [
   ["Builder", "Builds, writes and ships — pages, plans, code and documents."],
-  ["Launcher", "Launches ideas fast — campaigns, pitches and go-to-market."],
   ["Analyst", "Researches and analyzes — markets, data and competitors."],
-  ["Ideator", "Quick ideas and snappy answers in seconds."],
   ["Architect", "Designs systems and strategy — deep, structured thinking."],
-  ["Scout", "Finds founders, partners and deals"],
-  ["Fundraiser", "Runs investor outreach and follow-ups"],
   ["Researcher", "Deep-dives markets and competitors"],
-  ["Outreach", "Writes and sends campaigns"],
+  ["Planner", "Schedules, tracks goals and deadlines"],
   ["Designer", "Creates visuals, decks and pages"],
-  ["Engineer", "Fixes bugs and hardens the platform"],
   ["Marketer", "Plans content and growth loops"],
   ["Writer", "Drafts posts, emails and documents"],
-  ["Planner", "Schedules, tracks goals and deadlines"],
-  ["Operator", "Keeps funnels and dashboards moving"],
+  ["Outreach", "Writes and sends campaigns"],
   ["Guardian", "Watches quality, safety and access"],
-  ["Recruiter", "Sources people and books meetings"],
-  ["Legal", "Reviews terms, filings and compliance"],
-  ["Finance", "Tracks money, credits and payouts"],
-  ["Support", "Answers users and resolves issues"],
 ];
 /** The Manager — a 21st character who runs the office (founder directive
  * 2026-10-25): he takes the user's goals, plans the shift, assigns the

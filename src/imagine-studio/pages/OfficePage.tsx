@@ -69,6 +69,12 @@ type OfficeTheater = TheaterSource | { kind: 'dashboard'; botKey: string; by: st
  * then walks back and sits down again. A bot whose linked agent produced
  * a run in the last few minutes is PINNED to its desk — it is on a job. */
 const botPos = new Map<string, THREE.Vector3>();
+/* Roam budget (founder directive 2026-10-25): at most 2 bots are on
+ * their feet at any moment — everyone else stays at their desk. This is
+ * what stops the whole floor parading through the same aisles, crossing
+ * each other and the desks, and it keeps the frame rate up. */
+const roamSlots = new Set<string>();
+const ROAM_MAX = 2;
 
 const hashStr = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return Math.abs(h); };
 const AISLE_Z = [-7, 0, 7];
@@ -158,7 +164,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   const legsPoseRef = useRef<any[] | null>(null);
   const legsTriedRef = useRef(0);
   const typePoseRef = useRef<any | undefined>(undefined);
-  useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); }; }, [bot.key]); // eslint-disable-line
+  useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); roamSlots.delete(bot.key); }; }, [bot.key]); // eslint-disable-line
   useFrame((state, dtRaw) => {
     const g = root.current; if (!g) return;
     const dt = Math.min(dtRaw, 0.05);
@@ -231,20 +237,44 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       g.rotation.y += dyaw * Math.min(1, dt * 6);
       s.t -= dt;
       if (s.t <= 0 && roam && !pinnedRef.current) {
-        const wp = OFFICE_WAYPOINTS[(seed + Math.floor(state.clock.elapsedTime / 47)) % OFFICE_WAYPOINTS.length];
-        s.path = officePath(pos, { x: wp[0], z: wp[1] });
-        s.after = 'hang'; s.waved = false;
-        if (s.path.length) setPhase('walk'); else { s.t = 8; }
+        if (!roamSlots.has(bot.key) && roamSlots.size >= ROAM_MAX) {
+          // The room already has its walkers — stay at the desk and
+          // check again in a while instead of joining the parade.
+          s.t = 14 + (seed % 16);
+        } else {
+          // Stroll LOCALLY: the standing spot nearest this bot's own
+          // desk (or a point in its own aisle when every spot is far),
+          // so trips are short and neighborhoods don't collide.
+          let wp = OFFICE_WAYPOINTS[0]; let bd = Infinity;
+          for (const w of OFFICE_WAYPOINTS) { const d = Math.hypot(w[0] - home[0], w[1] - home[2]); if (d < bd) { bd = d; wp = w; } }
+          const target = bd <= 9
+            ? { x: wp[0], z: wp[1] }
+            : { x: home[0] + ((seed % 5) - 2) * 1.2, z: AISLE_Z.reduce((b, a) => (Math.abs(a - home[2]) < Math.abs(b - home[2]) ? a : b), AISLE_Z[0]) };
+          s.path = officePath(pos, target);
+          s.after = 'hang'; s.waved = false;
+          if (s.path.length) { roamSlots.add(bot.key); setPhase('walk'); } else { s.t = 8; }
+        }
       }
     } else if (s.phase === 'walk') {
       typePoseRef.current = undefined; // re-capture the typing base next sit
       playClip(clipOf.walk || clipOf.idle);
       const target = s.path[0];
-      if (!target) { setPhase(s.after === 'hang' ? 'hang' : 'work'); s.t = s.after === 'hang' ? 6 + (seed % 9) : 22 + (seed % 34); }
+      if (!target) { const arrived = s.after; setPhase(arrived === 'hang' ? 'hang' : 'work'); s.t = arrived === 'hang' ? 5 + (seed % 6) : 60 + (seed % 55); if (arrived === 'work') roamSlots.delete(bot.key); }
       else {
         const dx = target[0] - pos.x, dz = target[1] - pos.z;
         const dist = Math.hypot(dx, dz);
-        const step = Math.min(dist, dt * 1.3);
+        // Separation: never walk through another character. Slow down
+        // when one is close; when one is right in the way, the bot
+        // whose key sorts later waits (the other never waits for it,
+        // so two bots can never deadlock face to face).
+        let speed = 1.3;
+        for (const [k, p] of botPos) {
+          if (k === bot.key) continue;
+          const d = Math.hypot(p.x - pos.x, p.z - pos.z);
+          if (d < 1.7) speed = Math.min(speed, 0.55);
+          if (d < 0.8 && roamSlots.has(k) && k < bot.key) { speed = 0; break; }
+        }
+        const step = Math.min(dist, dt * speed);
         if (dist > 0.02) {
           g.position.x += (dx / dist) * step;
           g.position.z += (dz / dist) * step;
@@ -264,7 +294,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       }
       g.rotation.y = rotY + Math.sin(state.clock.elapsedTime * 0.35 + seed) * 0.45;
       s.t -= dt;
-      if (s.t <= 0) { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; if (s.path.length) setPhase('walk'); else { setPhase('work'); s.t = 22 + (seed % 34); } }
+      if (s.t <= 0) { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; if (s.path.length) setPhase('walk'); else { setPhase('work'); roamSlots.delete(bot.key); s.t = 60 + (seed % 55); } }
     }
     // Mutate the stored vector in place — no per-frame allocation.
     const bp = botPos.get(bot.key);
@@ -1387,7 +1417,7 @@ export default function OfficePage() {
       onPointerDown={(e) => { if (uiGuard(e)) return; void maybeAutoMic(); dragRef.current = { x: e.clientX, y: e.clientY }; }}
       onPointerMove={(e) => { if (!dragRef.current) return; const evs = (e.nativeEvent as any).getCoalescedEvents?.() as PointerEvent[] | undefined; const last = evs?.length ? evs[evs.length - 1] : e.nativeEvent; const dx = last.clientX - dragRef.current.x, dy = last.clientY - dragRef.current.y; dragRef.current = { x: last.clientX, y: last.clientY }; const sens = e.pointerType === 'touch' ? 0.0042 : 0.005; camRef.current.yaw -= dx * sens; camRef.current.pitch = THREE.MathUtils.clamp(camRef.current.pitch + dy * 0.003, -0.1, 0.9); }}
       onPointerUp={() => { dragRef.current = null; }}>
-      <Canvas dpr={[1, 1.75]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
+      <Canvas dpr={[1, 1.5]} camera={{ position: [4, 3.4, 7], fov: 55 }}>
         <color attach="background" args={['#cfe2ef']} />
         <ambientLight intensity={1.05} />
         <hemisphereLight args={['#ffffff', '#b6c4cf', 0.55]} />

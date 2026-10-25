@@ -5,7 +5,8 @@
  *
  * The hierarchy: the CHAIRMAN runs the building. A CEO runs each company
  * (all of its floors) through its Managers. A Manager runs one floor's
- * team of specialists (max 20 agents per floor). Talking to the CEO
+ * team of specialists (max 10 agents per floor, plus the Manager, the
+ * CEO and the Chairman — 13 characters top, for frame rate). Talking to the CEO
  * coordinates the company's Managers; talking to the Chairman sets the
  * companies' vision, mission and goals, and he reviews every CEO.
  *
@@ -26,7 +27,10 @@
  * mid-shift, so a company never stops running.
  */
 export const SURVIVAL_THRESHOLD = 94;
-export const MAX_AGENTS_PER_FLOOR = 20;
+/** At most 10 AGENTS per floor (founder directive 2026-10-25, for frame
+ * rate) — the CEO, the Manager and the Chairman stand outside the count,
+ * so a floor tops out at 13 characters. */
+export const MAX_AGENTS_PER_FLOOR = 10;
 
 export type JudgedOutcome = "first-pass" | "revised" | "best-effort" | "unreviewed" | "review-unavailable" | "error";
 

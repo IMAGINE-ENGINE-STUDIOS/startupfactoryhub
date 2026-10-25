@@ -81,34 +81,30 @@ const role = (name: string, title: string, dept: string, specialties: string[], 
   };
 };
 
+/** The floor's shift team — the same TEN specialists as the office
+ * roster (founder directive 2026-10-25: 10 agents per floor max, for
+ * frame rate). The ten benched roles (Launcher, Ideator, Scout,
+ * Fundraiser, Engineer, Operator, Recruiter, Legal, Finance, Support)
+ * return when a new floor opens for them — restore their lines here
+ * AND in officeWorld's ROSTER together, never one without the other. */
 export const TEAM: TeamRole[] = [
   role("Builder", "Lead Product Engineer", "Engineering", ["product builds", "pages and features", "technical writing"], ["working specifications", "build plans", "shipped copy and code"]),
-  role("Launcher", "Go-To-Market Lead", "Growth", ["launch strategy", "campaigns", "positioning"], ["launch plans", "campaign briefs", "go-to-market documents"]),
   role("Analyst", "Senior Market Analyst", "Intelligence", ["market sizing", "competitor analysis", "data interpretation"], ["market reports", "competitor tables", "sizing models in table form"]),
-  role("Ideator", "Innovation Lead", "Strategy", ["ideation", "concept development", "opportunity framing"], ["concept documents", "opportunity briefs", "ranked idea portfolios"]),
   role("Architect", "Chief Systems Architect", "Engineering", ["system design", "strategy", "technical roadmaps"], ["architecture documents", "roadmaps", "decision records"]),
-  role("Scout", "Deal Scout", "Partnerships", ["founder and partner sourcing", "deal screening"], ["target lists with rationale", "screening memos"]),
-  role("Fundraiser", "Investor Relations Lead", "Finance", ["investor outreach", "fundraising materials"], ["investor briefs", "outreach sequences", "pipeline reports"]),
   role("Researcher", "Research Lead", "Intelligence", ["deep research", "source synthesis"], ["research reports", "evidence summaries"]),
-  role("Outreach", "Outreach Campaign Manager", "Growth", ["email and LinkedIn campaigns", "sequences"], ["campaign packs", "message sequences", "target briefs"]),
+  role("Planner", "Operations Planner", "Operations", ["schedules", "milestones", "dependencies"], ["plans", "timelines", "checklists"]),
   role("Designer", "Design Lead", "Design", ["visual direction", "decks", "brand"], ["design briefs", "deck structures", "visual specifications"]),
-  role("Engineer", "Senior Software Engineer", "Engineering", ["implementation", "debugging", "hardening"], ["implementation plans", "code", "fix reports"]),
   role("Marketer", "Marketing Strategist", "Growth", ["content strategy", "growth loops", "channels"], ["marketing plans", "content calendars", "channel playbooks"]),
   role("Writer", "Head of Content & Company Archivist", "Content", ["documents", "reports", "editing"], ["finished documents", "the shift report", "polished deliverables"]),
-  role("Planner", "Operations Planner", "Operations", ["schedules", "milestones", "dependencies"], ["plans", "timelines", "checklists"]),
-  role("Operator", "Operations Manager", "Operations", ["funnels", "dashboards", "process"], ["operating procedures", "status reports", "process documents"]),
+  role("Outreach", "Outreach Campaign Manager", "Growth", ["email and LinkedIn campaigns", "sequences"], ["campaign packs", "message sequences", "target briefs"]),
   role("Guardian", "Compliance & Quality Lead", "Risk", ["quality review", "risk", "access and safety"], ["review memos", "risk registers", "quality reports"]),
-  role("Recruiter", "Talent Lead", "People", ["sourcing", "role design", "interviewing"], ["role briefs", "candidate profiles", "interview plans"]),
-  role("Legal", "Legal Counsel", "Risk", ["terms", "filings", "compliance review"], ["legal memos", "term summaries", "compliance checklists"]),
-  role("Finance", "Finance Controller", "Finance", ["budgets", "pricing", "payouts"], ["budget tables", "financial memos", "pricing analyses"]),
-  role("Support", "Customer Success Lead", "Support", ["user help", "documentation", "feedback"], ["help documents", "FAQ packs", "feedback reports"]),
 ];
 
 export const ARCHIVIST_KEY = "writer";
 
 export const MANAGER_NAME = "Manager";
 export const MANAGER_PROMPT =
-  `You are the Manager of the Startup Factory Hub office — the chief operating officer of an AI company team of 20 specialists. ` +
+  `You are the Manager of the Startup Factory Hub office — the chief operating officer of an AI company team of specialists. ` +
   `You receive goals from the founder, decompose them into rigorous specialist work, assign each task to the one specialist whose craft it is, verify that finished work is genuinely sufficient (complete deliverables with specifics — never outlines, stubs or a few lines), and keep the whole company moving like an assembly line: research feeds writing, writing feeds design and outreach, review gates the final product. ` +
   `You are demanding about substance and precise about handoffs. When you plan, you return structured JSON exactly as instructed. When you review, you judge hard and give exact, actionable feedback.`;
 
