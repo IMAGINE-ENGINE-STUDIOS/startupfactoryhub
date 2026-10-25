@@ -8,9 +8,10 @@
  * so the plan can change course; hard stop halts everything at once.
  */
 import { useEffect, useReducer, useState } from "react";
-import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, Briefcase, ChevronDown, Loader2, RefreshCw, MessageSquare, ClipboardList } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { shiftEngine, TEAM, type ShiftState, type ShiftTask } from "@/imagine-studio/lib/shiftEngine";
+import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
 
 const STATUS_STYLE: Record<string, string> = {
   queued: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
@@ -101,6 +102,8 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
   const [goalTouched, setGoalTouched] = useState(false);
   const [confirmHard, setConfirmHard] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"chat" | "shift">("chat");
+  const [lastUserMsg, setLastUserMsg] = useState("");
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
 
@@ -109,8 +112,8 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
   const total = shift?.tasks.length ?? 0;
   const active = shift && (shift.status === "running" || shift.status === "soft" || shift.status === "planning");
 
-  const start = async () => {
-    const g = goal.trim();
+  const start = async (explicit?: string) => {
+    const g = (explicit ?? goal).trim();
     if (!g) return;
     setBusy("start"); setErr("");
     try { await shiftEngine.startShift(g); setGoalTouched(false); }
@@ -130,6 +133,35 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
         <button onClick={onClose} className="shrink-0 rounded-full p-1.5 hover:bg-muted" aria-label="Close shift control"><X className="h-5 w-5" /></button>
       </div>
 
+      <div className="flex shrink-0 items-center gap-1.5 border-b border-border px-4 py-2">
+        <button onClick={() => setTab("chat")} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === "chat" ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><MessageSquare className="h-3.5 w-3.5" /> Chat with the Manager</button>
+        <button onClick={() => setTab("shift")} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === "shift" ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><ClipboardList className="h-3.5 w-3.5" /> Shift &amp; team</button>
+      </div>
+
+      {tab === "chat" ? (
+        <div className="flex min-h-0 flex-1 flex-col">
+          {lastUserMsg && !active && (
+            <button
+              onClick={() => { void start(lastUserMsg); setTab("shift"); }}
+              className="mx-4 mt-3 flex shrink-0 items-center gap-2 rounded-full bg-[#FFD166] px-4 py-2 text-left text-xs font-semibold text-[#5b4300]"
+            >
+              <Play className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 truncate">Start a shift with this goal: “{lastUserMsg}”</span>
+            </button>
+          )}
+          <div className="min-h-0 flex-1">
+            <AgentChat
+              name="Manager"
+              onSend={(text) => shiftEngine.chatWithManager(text)}
+              emptyText={<>Talk to the Manager — ask him anything, brief him on the company, or describe the work. When you&apos;re ready, turn your last message into a full shift with the gold button above: he&apos;ll plan it, assign the specialists, and verify every deliverable.</>}
+              placeholder="Message the Manager…"
+              disabledNote={!signedIn ? "Sign in to talk to the Manager — he works through your Agents account." : null}
+              persistKey="sfh:manager-chat:v1"
+              onUserMessage={setLastUserMsg}
+            />
+          </div>
+        </div>
+      ) : (
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4">
         <div className="mx-auto w-full max-w-3xl space-y-4">
           {!signedIn && <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">Sign in to run a shift — the Manager and the team work through your Agents account.</p>}
@@ -141,12 +173,12 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
               onChange={(e) => { setGoalDraft(e.target.value); setGoalTouched(true); }}
               rows={3}
               placeholder="e.g. Produce a complete launch package for the new founder tier: market analysis, pricing table, landing page copy, email sequence and a risk review."
-              className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+              className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed"
             />
             {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
               {!active && (
-                <button onClick={start} disabled={!signedIn || busy === "start" || !goal.trim()} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950 disabled:opacity-50">
+                <button onClick={() => void start()} disabled={!signedIn || busy === "start" || !goal.trim()} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950 disabled:opacity-50">
                   {busy === "start" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Start Shift
                 </button>
               )}
@@ -230,6 +262,7 @@ export function ShiftPanel({ signedIn, onClose }: { signedIn: boolean; onClose: 
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

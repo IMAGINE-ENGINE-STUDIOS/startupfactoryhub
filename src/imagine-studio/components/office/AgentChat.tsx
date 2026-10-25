@@ -1,0 +1,113 @@
+// @ts-nocheck -- Imagine Studio v2
+/**
+ * The ONE agent chat UI (founder directive 2026-10-25): every agent
+ * conversation in the office — desk bots, the Manager, executives — uses
+ * this exact thread + composer, in the Genius bubble chat's language
+ * (gradient user bubbles, glass assistant bubbles with markdown) built
+ * from the Agents tab's glass widget tokens. The composer input is
+ * text-base (16px) on purpose: anything smaller makes iOS Safari zoom
+ * the whole page on focus and the 3D view stays zoomed with no way back.
+ */
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Loader2, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+
+export const GLASS_PANEL =
+  "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
+export const GLASS_INPUT =
+  "rounded-2xl border-input bg-background/60 backdrop-blur transition focus-visible:ring-2 focus-visible:ring-emerald-400/60";
+export const GRADIENT_BUTTON =
+  "rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 disabled:shadow-none";
+
+export interface ChatMsg { role: "user" | "assistant"; content: string }
+
+export function AgentChat({
+  name,
+  onSend,
+  emptyText,
+  placeholder,
+  disabledNote,
+  composerExtra,
+  persistKey,
+  onUserMessage,
+}: {
+  name: string;
+  onSend: (text: string) => Promise<string>;
+  emptyText: ReactNode;
+  placeholder: string;
+  disabledNote?: string | null;
+  composerExtra?: ReactNode;
+  persistKey?: string;
+  onUserMessage?: (text: string) => void;
+}) {
+  const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
+    if (!persistKey) return [];
+    try {
+      const p = JSON.parse(localStorage.getItem(persistKey) || "[]");
+      return Array.isArray(p) ? p.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-60) : [];
+    } catch { return []; }
+  });
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+  useEffect(() => {
+    if (!persistKey) return;
+    try { localStorage.setItem(persistKey, JSON.stringify(msgs.slice(-60))); } catch { /* session only */ }
+  }, [msgs, persistKey]);
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy || disabledNote) return;
+    setInput("");
+    setMsgs((m) => [...m, { role: "user", content: text }]);
+    onUserMessage?.(text);
+    setBusy(true);
+    try {
+      const out = await onSend(text);
+      setMsgs((m) => [...m, { role: "assistant", content: out || "Done." }]);
+    } catch (e: any) {
+      setMsgs((m) => [...m, { role: "assistant", content: `That run failed: ${e?.message || "unknown error"}` }]);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="flex h-full w-full min-w-0 flex-col">
+      <div ref={scrollRef} className="min-w-0 flex-1 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y px-4 py-4">
+        <div className="space-y-3">
+          {msgs.length === 0 && <div className="text-sm leading-relaxed text-muted-foreground">{emptyText}</div>}
+          {msgs.map((m, i) => (
+            m.role === "user" ? (
+              <div key={i} className="ml-auto w-fit min-w-0 max-w-[88%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-2.5 text-sm leading-relaxed text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]">{m.content}</div>
+            ) : (
+              <div key={i} className={`${GLASS_PANEL} w-fit min-w-0 max-w-[94%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-bl-md px-4 py-3 text-sm leading-relaxed`}>
+                <div className="[&>p]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:font-mono [&_pre]:overflow-x-auto"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+              </div>
+            )
+          ))}
+          {busy && <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{name} is working…</div>}
+        </div>
+      </div>
+      <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        <div className="flex items-center gap-2">
+          {disabledNote ? (
+            <div className="min-w-0 flex-1 px-1 py-2 text-xs text-muted-foreground">{disabledNote}</div>
+          ) : (
+            <>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void send(); }}
+                placeholder={placeholder}
+                className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-base outline-none placeholder:text-muted-foreground/60`}
+              />
+              <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} shrink-0 px-4 py-2.5 disabled:opacity-50`} aria-label={`Send to ${name}`}><Send className="h-4 w-4" /></button>
+            </>
+          )}
+          {composerExtra}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -208,6 +208,17 @@ export const shiftEngine = {
     return state;
   },
 
+  /** A direct conversation with the Manager (the Shift panel's Chat tab):
+   * same call-agents run the desk bots use, resolved through the office's
+   * auto-bind. Returns his reply text. */
+  async chatWithManager(text: string): Promise<string> {
+    if (!deps) throw new Error("The office is still connecting — try again in a moment.");
+    const managerId = await deps.resolveAgentId("manager");
+    if (!managerId) throw new Error("The Manager could not be brought online (agent setup failed).");
+    const r = await callAgentsApi({ action: "run", agent_id: managerId, message: text });
+    return runOutput(r) || "Done.";
+  },
+
   async startShift(goal: string) {
     if (!deps) throw new Error("The office is still connecting — try again in a moment.");
     const managerId = await deps.resolveAgentId("manager");
@@ -344,33 +355,13 @@ export const shiftEngine = {
 /* Planning + dispatch                                                 */
 /* ------------------------------------------------------------------ */
 
-async function planWithManager(managerId: string, goal: string, done: ShiftTask[]): Promise<ShiftTask[]> {
-  const doneNote = done.length
-    ? `\n\nWork already finished in this shift (do not repeat it; build on it):\n${done.map((t) => `- [${t.agentName}] ${t.title}`).join("\n")}`
-    : "";
-  const r = await callAgentsApi({
-    action: "run",
-    agent_id: managerId,
-    message:
-      `Plan a full company shift for this goal.\n\nGOAL: ${goal}${doneNote}\n\nYOUR TEAM:\n${teamRosterText()}\n\n` +
-      `Rules:\n` +
-      `- Return ONLY a JSON object, no prose: {"tasks":[{"agent":"Builder","title":"short title","detail":"full brief","depends_on":[0,1]}]}\n` +
-      `- 6 to 14 tasks. Each task goes to exactly ONE specialist, by exact first name from the team list.\n` +
-      `- "detail" is a complete brief: what to produce, what it must contain, and the quality bar. Every task must produce a finished deliverable (a document, table, plan, draft or analysis) — never a chat reply.\n` +
-      `- "depends_on" lists the indexes of tasks that must finish first; the finisher's output is handed to the dependent task as input. Build an assembly line: research before writing, writing before design/outreach, review near the end. Tasks with no dependencies start immediately, in parallel.\n` +
-      `- End the line with a Guardian review task over the key deliverables when the goal produces anything public-facing.`,
-  });
-  const text = runOutput(r);
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) throw new Error("The Manager returned no plan.");
-  const parsed = JSON.parse(text.slice(start, end + 1));
-  const raw: any[] = Array.isArray(parsed?.tasks) ? parsed.tasks : [];
-  if (!raw.length) throw new Error("The Manager's plan was empty.");
+interface RawTask { agent: string; title: string; detail: string; deps: number[] }
+
+function finalizeTasks(raw: RawTask[]): ShiftTask[] {
   const ids = raw.map(() => uid());
   const tasks: ShiftTask[] = raw.slice(0, 16).map((t, i) => {
     const r2 = TEAM.find((x) => x.name.toLowerCase() === String(t?.agent || "").toLowerCase()) || TEAM[i % TEAM.length];
-    const depIdx: number[] = Array.isArray(t?.depends_on) ? t.depends_on.filter((d: any) => Number.isInteger(d) && d >= 0 && d < raw.length && d !== i) : [];
+    const depIdx: number[] = Array.isArray(t?.deps) ? t.deps.filter((d: any) => Number.isInteger(d) && d >= 0 && d < raw.length && d !== i) : [];
     return {
       id: ids[i],
       botKey: r2.key,
@@ -394,10 +385,67 @@ async function planWithManager(managerId: string, goal: string, done: ShiftTask[
     }
     const stuck = tasks.filter((t) => !doneSet.has(t.id));
     if (stuck.length && !progressed) { stuck[0].dependsOn = []; doneSet.add(stuck[0].id); progressed = true; }
-    if (!stuck?.length) break;
     if (tasks.every((t) => doneSet.has(t.id))) break;
   }
   return tasks;
+}
+
+/** Parse the Manager's plan. The plan travels as one TASK line per task —
+ * a format that survives prose around it, markdown fences and truncation,
+ * unlike a single JSON blob (founder's first shift died on exactly that:
+ * "The Manager returned no plan", 2026-10-25). */
+function parseTaskLines(text: string): RawTask[] {
+  const out: RawTask[] = [];
+  for (const line of String(text || "").split(/\n/)) {
+    const m = line.match(/^\s*(?:[-*]\s*)?TASK\|([^|]+)\|([^|]+)\|(.+)\|deps:\s*([\d,\s]*)$/i);
+    if (!m) continue;
+    out.push({
+      agent: m[1].trim(),
+      title: m[2].trim(),
+      detail: m[3].trim(),
+      deps: m[4].split(",").map((x) => parseInt(x.trim(), 10)).filter((n) => Number.isInteger(n)),
+    });
+  }
+  return out;
+}
+
+/** The safety net: if the Manager's plan cannot be used at all, the shift
+ * still runs on a standard assembly-line plan built from the goal — a
+ * shift never dies at the planning step. The substitution is logged. */
+function defaultPlan(goal: string): RawTask[] {
+  const g = goal.slice(0, 400);
+  return [
+    { agent: "Analyst", title: "Situation & market analysis", detail: `Analyze the situation behind this goal: ${g} — market, audience, competitors, pricing reality, and the numbers that decide success. Produce a full analysis report with tables where data is tabular.`, deps: [] },
+    { agent: "Researcher", title: "Deep research pack", detail: `Research everything relevant to this goal: ${g} — best practices, comparable successes, channels, tools and evidence. Produce a complete research pack the team can build on.`, deps: [] },
+    { agent: "Planner", title: "Execution plan & milestones", detail: `Turn the analysis and research into an execution plan for this goal: ${g} — phases, milestones, owners, deadlines and the metrics that prove progress.`, deps: [0, 1] },
+    { agent: "Architect", title: "Strategy & structure", detail: `Design the strategy and structure for this goal: ${g} — the offer, the funnel, the positioning and the decisions everything else depends on.`, deps: [0, 1] },
+    { agent: "Builder", title: "Core deliverable build", detail: `Build the core deliverable for this goal: ${g} — the main asset, complete and usable, following the plan and strategy.`, deps: [2, 3] },
+    { agent: "Writer", title: "Full written deliverable", detail: `Write the complete written deliverable for this goal: ${g} — the full document, ready to use, built on the plan and strategy.`, deps: [2, 3] },
+    { agent: "Designer", title: "Presentation & visual package", detail: `Design the presentation and visual package for this goal: ${g} — deck structure, page copy and visual direction for every asset.`, deps: [4, 5] },
+    { agent: "Marketer", title: "Go-to-market & content plan", detail: `Create the go-to-market and content plan for this goal: ${g} — channels, calendar, hooks and the growth loop.`, deps: [4, 5] },
+    { agent: "Outreach", title: "Campaign pack", detail: `Write the full outreach campaign pack for this goal: ${g} — sequences, scripts and follow-ups, ready to send.`, deps: [5, 7] },
+    { agent: "Guardian", title: "Quality & risk review", detail: `Review every deliverable produced for this goal: ${g} — quality, accuracy, compliance and risk. Produce a review memo listing what passes, what must change, and the risks.`, deps: [4, 5, 6, 7, 8] },
+  ];
+}
+
+async function planWithManager(managerId: string, goal: string, done: ShiftTask[]): Promise<ShiftTask[]> {
+  const doneNote = done.length
+    ? `\n\nWork already finished in this shift (do not repeat it; build on it):\n${done.map((t) => `- [${t.agentName}] ${t.title}`).join("\n")}`
+    : "";
+  const format = `Reply with ONLY plan lines, one per task, in exactly this format (no prose, no markdown, no code fences):\nTASK|AgentFirstName|Short title|Full brief for the specialist|deps:0,2\nRules: 6 to 14 tasks; agent = exact first name from the team list; the brief is complete (what to produce, what it must contain, the quality bar) and every task produces a finished deliverable (document, table, plan, draft, analysis), never a chat reply; deps lists the line numbers (starting at 0) of tasks that must finish first, or "deps:" with nothing after it; build an assembly line (research before writing, writing before design/outreach, a Guardian review near the end); never use the | character inside a title or brief and never break a task across lines.`;
+  const prompts = [
+    `Plan a full company shift for this goal.\n\nGOAL: ${goal}${doneNote}\n\nYOUR TEAM:\n${teamRosterText()}\n\n${format}`,
+    `Give me the shift plan now, 8 tasks minimum, ONLY TASK lines in this format: TASK|AgentFirstName|Title|Brief|deps:0,1 — goal: ${goal}`,
+  ];
+  for (const prompt of prompts) {
+    try {
+      const r = await callAgentsApi({ action: "run", agent_id: managerId, message: prompt });
+      const raw = parseTaskLines(runOutput(r));
+      if (raw.length >= 3) return finalizeTasks(raw);
+    } catch { /* try the next form, then the safety net */ }
+  }
+  log("The Manager's plan did not come through in a usable form, so a standard assembly-line plan was set instead — the shift runs either way.");
+  return finalizeTasks(defaultPlan(goal));
 }
 
 async function tick() {

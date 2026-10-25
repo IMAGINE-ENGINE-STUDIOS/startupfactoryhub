@@ -28,6 +28,7 @@ import { inputPulse } from '@/imagine-studio/components/level/locomotion/locomot
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
+import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
 import { shiftEngine, TEAM, MANAGER_PROMPT } from '@/imagine-studio/lib/shiftEngine';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, OFFICE_BOTS, OFFICE_MANAGER, MANAGER_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
@@ -157,6 +158,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   useFrame((state, dtRaw) => {
     const g = root.current; if (!g) return;
     const dt = Math.min(dtRaw, 0.05);
+    const s = st.current;
     // SEAT SNAP (founder directive 2026-10-25): the Sitting clip's final
     // frame puts the belly's underside 0.111 BELOW the group origin, so a
     // group left at floor level buries the body in the floor and the chair
@@ -167,7 +169,6 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       const targetY = (s.phase === 'work' && seated && clipOf.sit) ? seatY + 0.111 : 0;
       g.position.y += (targetY - g.position.y) * Math.min(1, dt * 5);
     }
-    const s = st.current;
     const pos = { x: g.position.x, z: g.position.z };
     // A fresh job pins the bot to its desk, from wherever it is.
     if (pinnedRef.current && s.phase === 'hang') { s.path = officePath(pos, { x: home[0], z: home[2] }); s.after = 'work'; setPhase('walk'); }
@@ -612,31 +613,12 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
 }) {
   const agentId = link.agentId;
   const linkedAgent = agents.find((a) => a.id === agentId);
-  const [msgs, setMsgs] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
-  const [input, setInput] = useState('');
-  const [busy, setBusy] = useState(false);
   // The chat is ISOLATED full-screen (founder direction): the task pipeline
   // and the rest of the Agents tab live behind the Tasks button, never
-  // stacked into the chat.
+  // stacked into the chat. The thread + composer are the shared AgentChat
+  // (the one Genius-bubble-style UI every office agent uses).
   const [view, setView] = useState<'chat' | 'tasks'>('chat');
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { setMsgs([]); setInput(''); setView('chat'); }, [bot.key]);
-  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy, view]);
-  const send = async () => {
-    const text = input.trim();
-    if (!text || busy || !agentId) return;
-    setInput('');
-    setMsgs((m) => [...m, { role: 'user', content: text }]);
-    setBusy(true);
-    try {
-      const r = await callAgentsApi({ action: 'run', agent_id: agentId, message: text });
-      const out = (r?.steps || []).map((s: any) => s.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
-      setMsgs((m) => [...m, { role: 'assistant', content: out }]);
-    } catch (e: any) {
-      setMsgs((m) => [...m, { role: 'assistant', content: `That run failed: ${e?.message || 'unknown error'}` }]);
-    }
-    setBusy(false);
-  };
+  useEffect(() => { setView('chat'); }, [bot.key]);
   if (view === 'tasks') {
     return (
       <div className="flex h-full w-full min-w-0 flex-col bg-background text-foreground">
@@ -674,40 +656,27 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
           <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <span className="h-3 w-3 rounded-full shrink-0" style={{ background: bot.tint }} />
             <span className="min-w-0 truncate font-semibold">{linkedAgent?.name || bot.name}</span>
-            <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${working || busy ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{working || busy ? 'On a job now' : 'Idle'}</span>
+            <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${working ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{working ? 'On a job now' : 'Idle'}</span>
           </div>
           <p className="mt-1 break-words text-sm text-muted-foreground">{bot.duty}</p>
           {!signedIn && <p className="mt-2 text-xs text-muted-foreground">Sign in to chat with {bot.name} and hand it tasks.</p>}
           {signedIn && !agentId && <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />Connecting {bot.name}…</p>}
         </div>
       </div>
-      <div ref={scrollRef} className="min-w-0 flex-1 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y px-4 py-4">
-        <div className="space-y-3">
-          {msgs.length === 0 && <div className="text-sm text-muted-foreground leading-relaxed">Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</div>}
-          {msgs.map((m, i) => (
-            m.role === 'user' ? (
-              <div key={i} className="ml-auto w-fit min-w-0 max-w-[88%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-500 px-4 py-2.5 text-sm leading-relaxed text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]">{m.content}</div>
-            ) : (
-              <div key={i} className={`${GLASS_PANEL} w-fit min-w-0 max-w-[94%] break-words [overflow-wrap:anywhere] rounded-[1.4rem] rounded-bl-md px-4 py-3 text-sm leading-relaxed`}>
-                <div className="[&>p]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:font-mono [&_pre]:overflow-x-auto"><ReactMarkdown>{m.content}</ReactMarkdown></div>
-              </div>
-            )
-          ))}
-          {busy && <div className="flex items-center gap-2 text-xs text-muted-foreground px-1"><Loader2 className="w-4 h-4 animate-spin" />{bot.name} is working…</div>}
-        </div>
-      </div>
-      <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-        <div className="flex items-center gap-2">
-          {signedIn && agentId ? (
-            <>
-              <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void send(); }} placeholder={`Give ${bot.name} a task…`} className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/60`} />
-              <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} shrink-0 px-4 py-2.5 disabled:opacity-50`} aria-label="Send task"><Send className="h-4 w-4" /></button>
-            </>
-          ) : (
-            <div className="min-w-0 flex-1 px-1 py-2 text-xs text-muted-foreground">{signedIn ? `Connecting ${bot.name} to its agent…` : `Sign in to chat with ${bot.name}.`}</div>
-          )}
-          <button onClick={() => setView('tasks')} className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 text-sm font-medium hover:bg-muted" aria-label="Open tasks and pipeline"><ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Tasks</span></button>
-        </div>
+      <div className="min-h-0 min-w-0 flex-1">
+        <AgentChat
+          key={bot.key}
+          name={bot.name}
+          onSend={async (text) => {
+            if (!agentId) throw new Error('Still connecting to the agent — try again in a second.');
+            const r = await callAgentsApi({ action: 'run', agent_id: agentId, message: text });
+            return (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+          }}
+          emptyText={<>Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</>}
+          placeholder={`Give ${bot.name} a task…`}
+          disabledNote={!signedIn ? `Sign in to chat with ${bot.name}.` : !agentId ? `Connecting ${bot.name} to its agent…` : null}
+          composerExtra={<button onClick={() => setView('tasks')} className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 text-sm font-medium hover:bg-muted" aria-label="Open tasks and pipeline"><ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Tasks</span></button>}
+        />
       </div>
     </div>
   );
@@ -1284,7 +1253,7 @@ export default function OfficePage() {
                 ))}
               </div>
               <div className="p-2 border-t border-border flex gap-2">
-                <input value={chatText} onChange={(e) => setChatText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') sendChat(); }} placeholder="Message the room…" className="flex-1 min-w-0 bg-transparent border border-border rounded-lg px-2.5 py-2 text-sm outline-none" />
+                <input value={chatText} onChange={(e) => setChatText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') sendChat(); }} placeholder="Message the room…" className="flex-1 min-w-0 bg-transparent border border-border rounded-lg px-2.5 py-2 text-base outline-none" />
                 <button onClick={sendChat} className="rounded-lg bg-primary text-primary-foreground px-3" aria-label="Send chat message"><Send className="w-4 h-4" /></button>
               </div>
             </div>
