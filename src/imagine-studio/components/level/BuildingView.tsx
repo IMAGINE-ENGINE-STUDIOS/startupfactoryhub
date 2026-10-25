@@ -28,13 +28,21 @@ import { getLocalLevel } from "@/imagine-studio/lib/localLevels";
 const STORY = 8;
 const offsetY = (floor?: number) => ((floor ?? 100) - 100) * STORY;
 
-export function BuildingView({ current, currentScene, onSelect, onClose }: {
+export type BuildingExtra = { id: string; name: string; floor: number; scene: any };
+
+export function BuildingView({ current, currentScene, extras = [], onSelect, onSelectExtra, onClose }: {
   current: NamedWorld;
   currentScene: any;
+  /** Extra levels the user added to this world’s project: each stacks
+   * BELOW the registered floors as another floor — the building grows
+   * downward as levels are added (founder directive 2026-10-25). */
+  extras?: BuildingExtra[];
   onSelect: (w: NamedWorld) => void;
+  onSelectExtra?: (id: string) => void;
   onClose: () => void;
 }) {
   const levels = useMemo(() => buildingLevels(current), [current]);
+  const totalFloors = levels.length + extras.length;
   const [scenes, setScenes] = useState<Record<string, any>>({ [current.key]: currentScene });
   const [hover, setHover] = useState<string | null>(null);
 
@@ -110,8 +118,32 @@ export function BuildingView({ current, currentScene, onSelect, onClose }: {
                 </group>
               );
             })}
+            {extras.map((x) => {
+              const off = offsetY(x.floor);
+              const key = `x:${x.id}`;
+              const hot = hover === key;
+              return (
+                <group key={key} position={[0, off, 0]}>
+                  {x.scene ? <PublishedWorld scene={{ ...x.scene, skybox: undefined }} renderCharacters={false} /> : null}
+                  <mesh
+                    position={[0, 0.18, 0]}
+                    onClick={(e) => { e.stopPropagation(); onSelectExtra?.(x.id); }}
+                    onPointerOver={(e) => { e.stopPropagation(); setHover(key); }}
+                    onPointerOut={() => setHover((h) => (h === key ? null : h))}
+                  >
+                    <boxGeometry args={[46, 0.36, 30]} />
+                    <meshBasicMaterial color="#00E5FF" transparent opacity={hot ? 0.3 : 0.07} depthWrite={false} />
+                  </mesh>
+                  <Html position={[25.5, 3.6, 0]} center style={{ pointerEvents: "none" }}>
+                    <div style={{ whiteSpace: "nowrap", borderRadius: 999, background: "rgba(5,10,20,.82)", color: "#fff", padding: "5px 12px", font: "600 12px system-ui", border: "1px solid rgba(255,255,255,.25)" }}>
+                      LEVEL {x.floor} — {x.name}
+                    </div>
+                  </Html>
+                </group>
+              );
+            })}
           </Suspense>
-          <OrbitControls makeDefault target={[0, levels.length > 1 ? -1 : 3, 0]} maxDistance={140} />
+          <OrbitControls makeDefault target={[0, totalFloors > 1 ? -1 : 3, 0]} maxDistance={140} />
         </Canvas>
         <div className="absolute right-3 top-3 flex w-60 flex-col gap-2">
           {levels.map((w) => (
@@ -125,6 +157,19 @@ export function BuildingView({ current, currentScene, onSelect, onClose }: {
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Level {w.floor}</div>
               <div className="mt-0.5 text-sm font-semibold leading-tight">{w.levelLabel?.split("—")[1]?.trim() || w.name}</div>
               <div className="mt-0.5 text-[11px] text-white/55">{w.key === current.key ? "You are editing this level" : scenes[w.key] ? "Click to open this level in the editor" : "Click to open — it seeds from the published scene"}</div>
+            </button>
+          ))}
+          {extras.map((x) => (
+            <button
+              key={`x-${x.id}`}
+              onClick={() => onSelectExtra?.(x.id)}
+              onMouseEnter={() => setHover(`x:${x.id}`)}
+              onMouseLeave={() => setHover(null)}
+              className="rounded-xl border border-white/15 bg-black/45 px-3.5 py-3 text-left backdrop-blur transition hover:border-cyan-300/60"
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Level {x.floor}</div>
+              <div className="mt-0.5 text-sm font-semibold leading-tight">{x.name}</div>
+              <div className="mt-0.5 text-[11px] text-white/55">Added to this project — click to open in the editor</div>
             </button>
           ))}
         </div>

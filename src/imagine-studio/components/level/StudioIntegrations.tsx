@@ -4,7 +4,8 @@
  * viewport, Genius 3D (bubble tab + Genius AI requests), Dev tab scene
  * sync (scenes/level.json) and publishing.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Library, Sparkles, Rocket, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,22 @@ import { applyStudioOps, sceneContext } from "@/imagine-studio/lib/studioOps";
 import { resolveLevelWorld, setLevelWorld, worldForKey, findWorldLevelId } from "@/imagine-studio/lib/worldBindings";
 import { sceneControllers, normalizeController } from "@/imagine-studio/lib/controllers";
 import { AGENT_MODEL_URL } from "@/imagine-studio/lib/officeWorld";
-import { SKYBOX_CITIES, SKYBOX_ENVIRONMENTS, skyboxCityLabel } from "@/imagine-studio/lib/skyboxes";
+import { SKYBOX_CITIES, SKYBOX_ENVIRONMENTS, skyboxCityLabel, extractSkyboxImage, downscaleSkyboxImage } from "@/imagine-studio/lib/skyboxes";
 import { buildingLevels, type NamedWorld } from "@/imagine-studio/lib/worldSync";
+import { projectOfLevel, levelsOfProject } from "@/imagine-studio/lib/localProjects";
+import { getBoundWorldKey } from "@/imagine-studio/lib/localLevels";
 import { BuildingView } from "@/imagine-studio/components/level/BuildingView";
+
+/**
+ * Overlays opened from the editor header MUST render through this portal.
+ * The header carries backdrop-blur (which makes it the containing block
+ * for fixed-position descendants) and overflow-x-auto (which clips them):
+ * panels rendered inside it are trapped in the ~50px header strip, so the
+ * Social / Controllers / Skybox / Levels buttons look dead even though
+ * they toggle fine (founder report 2026-10-25, mobile AND desktop).
+ * Portaling to <body> makes fixed mean the viewport again.
+ */
+const Portal = ({ children }: { children: React.ReactNode }) => createPortal(children, document.body);
 import { Users, Gamepad2, Image as ImageIcon, Building2 } from "lucide-react";
 
 /** Compact-op vocabulary the studio applies locally; appended to every Genius 3D
@@ -141,6 +155,25 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     const lid = findWorldLevelId(w.key) ?? (await w.syncLevel()).id;
     window.location.href = `/imagine-studio/${lid}`;
   };
+  /* The building GROWS DOWNWARD (founder directive 2026-10-25): every
+   * extra level the user adds to this world’s project stacks below the
+   * registered floors as another floor of the same building — Floor 99
+   * under Floor 100, the next project level under that, and so on.
+   * Registered floors (bindings) and local-draft backups are excluded:
+   * the registry floors render through BuildingView’s own loader, and a
+   * draft is not a floor. */
+  const buildingExtras = useMemo(() => {
+    if (!namedWorld?.building) return [] as { id: string; name: string; floor: number; scene: any }[];
+    const proj = projectOfLevel(levelId);
+    if (!proj) return [];
+    const worlds = buildingLevels(namedWorld);
+    const taken = new Set<string>();
+    for (const w of worlds) { const id = findWorldLevelId(w.key); if (id) taken.add(id); }
+    const lowest = Math.min(...worlds.map((w) => w.floor ?? 100));
+    return levelsOfProject(proj.id)
+      .filter((l) => l.id !== levelId && !taken.has(l.id) && !/— local draft/i.test(l.name) && getBoundWorldKey(l.id) !== "plaza")
+      .map((l, i) => ({ id: l.id, name: l.name, floor: lowest - 1 - i, scene: l.scene }));
+  }, [levelId, namedWorld]);
   const [ctrlForm, setCtrlForm] = useState<any>(null);
   const [ctrlImport, setCtrlImport] = useState("");
   const [myAgents, setMyAgents] = useState<any[] | null>(null);
@@ -171,10 +204,55 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   // Photo skybox: a real-life city photo wrapped around the level. The
   // choice lives on the scene, so each floor of the building can show
   // its own city, and it publishes with the level.
-  const skybox = (scene as any)?.skybox as { city: string; url: string } | undefined;
-  const setSkybox = (c: { id: string; url: string } | null) => {
-    updateScene((s: any) => ({ ...s, skybox: c ? { city: c.id, url: c.url } : undefined }));
-    toast.success(c ? `Skybox: ${skyboxCityLabel(c.id)}` : "Skybox removed", { description: "Saved in this level — publish to make it live for everyone." });
+  const skybox = (scene as any)?.skybox as { city: string; url: string; label?: string } | undefined;
+  const setSkybox = (c: { id: string; url: string; label?: string } | null) => {
+    updateScene((s: any) => ({ ...s, skybox: c ? { city: c.id, url: c.url, ...(c.label ? { label: c.label } : {}) } : undefined }));
+    toast.success(c ? `Skybox: ${c.label || skyboxCityLabel(c.id)}` : "Skybox removed", { description: "Saved in this level — publish to make it live for everyone." });
+  };
+  /* From Sketchfab: live search through the sketchfab-proxy integration
+   * (the same one behind the header Library button). Picking a model
+   * downloads it, extracts its panorama texture, hosts the image on this
+   * level's bucket via the publish asset flow, and sets it as skybox. */
+  type SfModel = { uid: string; name: string; author: string; url: string; thumbnail: string; license: string };
+  const [sfQ, setSfQ] = useState("skybox");
+  const [sfItems, setSfItems] = useState<SfModel[]>([]);
+  const [sfNext, setSfNext] = useState<string | null>(null);
+  const [sfLoading, setSfLoading] = useState(false);
+  const [sfApplying, setSfApplying] = useState<string | null>(null);
+  const sfLoaded = useRef(false);
+  const sfCall = async (body: any) => {
+    const { data, error } = await supabase.functions.invoke("sketchfab-proxy", { body });
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+  const sfSearch = async (cursor?: string) => {
+    setSfLoading(true);
+    try {
+      const d = await sfCall({ action: "search", q: sfQ.trim() || "skybox", cursor });
+      setSfItems((cur) => (cursor ? [...cur, ...(d.results || [])] : (d.results || [])));
+      setSfNext(d.next || null);
+      sfLoaded.current = true;
+    } catch (e: any) { toast.error(e.message || "Sketchfab search failed"); }
+    setSfLoading(false);
+  };
+  useEffect(() => { if (skyOpen && !sfLoaded.current) void sfSearch(); }, [skyOpen]);
+  const applySfSkybox = async (m: SfModel) => {
+    setSfApplying(m.uid);
+    try {
+      const d = await sfCall({ action: "download", uid: m.uid });
+      const r = await fetch(d.url);
+      if (!r.ok) throw new Error("Download failed");
+      const tex = await extractSkyboxImage(await r.blob());
+      if (!tex) { toast.error("No panorama texture inside this model", { description: "Some Sketchfab skyboxes are plain geometry — try another one." }); return; }
+      const jpg = await downscaleSkyboxImage(tex);
+      const a = await callPublish({ action: "asset", ext: "jpg" });
+      const up = await supabase.storage.from("studio-published").uploadToSignedUrl(a.path, a.token, jpg, { contentType: "image/jpeg" });
+      if (up.error) throw new Error(up.error.message);
+      setSkybox({ id: `sf-${m.uid}`, url: a.publicUrl, label: m.name });
+      toast.message(`${m.name} by ${m.author} (${m.license}) via Sketchfab`);
+    } catch (e: any) { toast.error(e.message || "Could not use that skybox"); }
+    finally { setSfApplying(null); }
   };
   // Controllers: one system for every published world. Definitions live on
   // the scene (scene.controllers), the player uses scene.playerControllerId,
@@ -468,6 +546,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         </Button>
       )}
       {levelsOpen && namedWorld?.building && (
+        <Portal>
         <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Building2 className="w-4 h-4" />{namedWorld.building} — levels</div>
@@ -490,13 +569,33 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
               </button>
             ))}
           </div>
+          {buildingExtras.length > 0 && (
+            <>
+              <div className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">More levels in this project</div>
+              <div className="mt-2 space-y-2">
+                {buildingExtras.map((x) => (
+                  <button key={x.id} onClick={() => { window.location.href = `/imagine-studio/${x.id}`; }} className="w-full rounded-lg border border-border px-3 py-2.5 text-left hover:border-primary/60">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold tracking-wide">LEVEL {x.floor}</span>
+                      <span className="text-xs font-semibold">{x.name}</span>
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">A level you added to this project — it stacks below as another floor of the building. Click to open it.</div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <button onClick={() => { setLevelsOpen(false); setBuildingOpen(true); }} className="mt-3 w-full h-9 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90">View the building — all levels stacked</button>
         </div>
+        </Portal>
       )}
       {buildingOpen && namedWorld?.building && (
-        <BuildingView current={namedWorld} currentScene={scene} onSelect={(w) => void openWorldLevel(w)} onClose={() => setBuildingOpen(false)} />
+        <Portal>
+          <BuildingView current={namedWorld} currentScene={scene} extras={buildingExtras} onSelect={(w) => void openWorldLevel(w)} onSelectExtra={(id) => { window.location.href = `/imagine-studio/${id}`; }} onClose={() => setBuildingOpen(false)} />
+        </Portal>
       )}
       {socialOpen && (
+        <Portal>
         <div className="fixed right-3 top-16 z-[80] w-[320px] max-w-[92vw] rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Users className="w-4 h-4" />Social features</div>
@@ -546,8 +645,10 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
           </div>
           <p className="text-[11px] text-muted-foreground mt-2.5 leading-relaxed">Tip: bind this level to a public route (the route selector next to Publish) so people can open it at its own address and join each other there.</p>
         </div>
+        </Portal>
       )}
       {ctrlOpen && (
+        <Portal>
         <div className="fixed right-3 top-16 z-[80] w-[330px] max-w-[92vw] max-h-[84vh] overflow-y-auto rounded-xl border border-border bg-background shadow-2xl p-4 text-left">
           <div className="flex items-center justify-between">
             <div className="font-semibold text-sm flex items-center gap-2"><Gamepad2 className="w-4 h-4" />Controllers</div>
@@ -612,12 +713,14 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
             <button onClick={importCtrl} className="w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted">Import controller</button>
           </div>
         </div>
+        </Portal>
       )}
       {skyOpen && (
         /* Skybox picker as a proper modal (founder fix 2026-10-25): the
          * old floating card rendered over the inspector with the panels'
          * text showing through each other. A solid card on a scrim,
          * centered, with its own scroll — nothing overlaps, ever. */
+        <Portal>
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" onClick={() => setSkyOpen(false)}>
           <div className="w-[620px] max-w-[94vw] max-h-[86vh] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-background shadow-2xl p-5 text-left" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
@@ -650,6 +753,35 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
                 );
               })}
             </div>
+            <div className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">From Sketchfab</div>
+            <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">Live from your Sketchfab library — the same integration as the Library button in the header. Picking one pulls its panorama texture out of the model and hosts it on this level as the skybox.</p>
+            <div className="flex gap-2 mt-2.5">
+              <input value={sfQ} onChange={(e) => setSfQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void sfSearch(); }} placeholder="Search Sketchfab skyboxes…" className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary" />
+              <button onClick={() => void sfSearch()} disabled={sfLoading} className="h-9 px-3.5 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50">{sfLoading ? "Searching…" : "Search"}</button>
+            </div>
+            {sfLoading && !sfItems.length ? (
+              <p className="text-[11px] text-muted-foreground mt-3">Searching Sketchfab…</p>
+            ) : sfItems.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground mt-3">No downloadable skyboxes found — try “skybox 360” or “panorama”.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                {sfItems.map((m) => {
+                  const active = skybox?.city === `sf-${m.uid}`;
+                  return (
+                    <div key={m.uid} className={`rounded-lg overflow-hidden border text-left bg-card ${active ? "border-primary ring-2 ring-primary" : "border-border"}`}>
+                      {m.thumbnail ? <img src={m.thumbnail} alt={m.name} loading="lazy" className="w-full h-20 object-cover" /> : <div className="w-full h-20 bg-muted" />}
+                      <div className="px-2.5 py-2">
+                        <div className="text-xs font-medium truncate" title={m.name}>{m.name}{active ? " · current" : ""}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">{m.author} · {m.license}</div>
+                        <button onClick={() => void applySfSkybox(m)} disabled={!!sfApplying} className="mt-1.5 w-full h-7 rounded-md bg-primary text-primary-foreground text-[11px] font-medium disabled:opacity-50">{sfApplying === m.uid ? "Applying…" : "Use as skybox"}</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {sfNext && <button onClick={() => void sfSearch(sfNext)} disabled={sfLoading} className="mt-3 w-full h-8 rounded-md border border-border text-xs font-medium hover:bg-muted disabled:opacity-50">Load more</button>}
+            {skybox?.label && <p className="text-[11px] text-muted-foreground mt-4">Current skybox: <span className="text-foreground font-medium">{skybox.label}</span></p>}
             {skybox?.url ? (
               <button onClick={() => setSkybox(null)} className="mt-5 w-full h-9 rounded-md border border-border text-xs font-medium hover:bg-muted">Remove skybox (plain background color)</button>
             ) : (
@@ -657,14 +789,17 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
             )}
           </div>
         </div>
+        </Portal>
       )}
       <SketchfabModal open={libOpen} onOpenChange={setLibOpen} onSpawn={async (file, credit) => { await importFile(file); toast.message(credit); }} />
       {dragging && (
+        <Portal>
         <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center ring-2 ring-inset ring-primary bg-primary/5">
           <div className="rounded-xl bg-background/90 px-5 py-3 text-sm font-medium flex items-center gap-2 border border-border/50">
             <Upload className="w-4 h-4 text-primary" />Drop 3D model files to add them to the scene
           </div>
         </div>
+        </Portal>
       )}
     </>
   );

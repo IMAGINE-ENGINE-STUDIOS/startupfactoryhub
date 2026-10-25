@@ -699,7 +699,7 @@ export interface LevelScene {
    * label), `url` the image. Absent = no photo dome, just the
    * environment background color.
    */
-  skybox?: { city: string; url: string };
+  skybox?: { city: string; url: string; label?: string };
   /**
    * Optional Train System configuration. When present, the TrainRuntime
    * mounts during Play mode and drives a locomotive + its cars along the
