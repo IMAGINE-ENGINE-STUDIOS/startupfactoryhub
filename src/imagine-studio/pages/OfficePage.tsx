@@ -30,7 +30,7 @@ import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/Theater
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
 import { FLOORS, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot } from '@/imagine-studio/lib/floors';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
@@ -708,7 +708,7 @@ export default function OfficePage() {
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
   }, []);
-  const codeScene = useMemo(() => buildOfficeScene(), []);
+  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : buildOfficeScene()), [floor]);
   // Scene version gate: when the published scene predates the built-in one
   // (white floor / tall ceiling / daylight update), play the built-in scene
   // merged with the published world's studio additions, until an admin

@@ -24,10 +24,10 @@
  *             unified follow-up engine for every inquiry.
  */
 import {
-  AGENT_MODEL_URL,
   OFFICE_BOTS,
   OFFICE_CHAIRMAN,
   OFFICE_MANAGER,
+  WONDERLANDS_BOTS,
   ceoBot,
   type OfficeBot,
 } from "@/imagine-studio/lib/officeWorld";
@@ -94,10 +94,10 @@ export interface FloorDef {
 
 /* ------------------------- Floor 99: Wonderlands ------------------------- */
 
-const wrole = (name: string, duty: string, title: string, dept: string, specialties: string[], deliverables: string[]): { bot: OfficeBot; role: TeamRole } => {
+const wrole = (name: string, duty: string, title: string, dept: string, specialties: string[], deliverables: string[]): { role: TeamRole } => {
   const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  void duty;
   return {
-    bot: { key, name, duty, model: AGENT_MODEL_URL, tint: "#10b981" },
     role: {
       key,
       name,
@@ -113,8 +113,7 @@ const wrole = (name: string, duty: string, title: string, dept: string, specialt
   };
 };
 
-const W_TINTS = ["#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#84cc16", "#14b8a6", "#eab308"];
-const W_ROLES: { bot: OfficeBot; role: TeamRole }[] = [
+const W_ROLES: { role: TeamRole }[] = [
   wrole("Concierge", "Runs the Genius concierge — designs pools and outdoor spaces with homeowners, contractors and reps.", "Genius Concierge Lead", "Client Experience", ["Genius concierge consults", "homeowner design sessions", "client needs analysis"], ["design consultation reports", "client design briefs", "concierge playbooks"]),
   wrole("Designer", "Designs pools and outdoor living spaces — Genius is the designer for clients with no design experience.", "Outdoor Living Designer", "Design", ["pool and outdoor-living design", "materials and finishes", "design revision"], ["design concepts", "material palettes", "design packages"]),
   wrole("Catalog", "Owns the FLIP flipbook catalog — keeps every product page current and shoppable.", "FLIP Catalog Manager", "Content", ["flipbook catalog at /flip", "product pages", "catalog structure"], ["catalog update packs", "product page copy", "catalog audits"]),
@@ -126,8 +125,6 @@ const W_ROLES: { bot: OfficeBot; role: TeamRole }[] = [
   wrole("Projects", "Coordinates installations — schedules, checklists and handovers.", "Project Coordinator", "Operations", ["project scheduling", "installation checklists", "client updates"], ["project plans", "checklists", "status reports"]),
   wrole("Writer", "Writes and archives the company's documents — and compiles this floor's shift report.", "Content Editor & Company Archivist", "Content", ["documents", "reports", "editing"], ["finished documents", "the shift report", "polished deliverables"]),
 ];
-W_ROLES.forEach((r, i) => { r.bot.tint = W_TINTS[i % W_TINTS.length]; });
-
 const wonderlandsDefaultPlan = (goal: string): RawTask[] => {
   const g = goal.slice(0, 400);
   return [
@@ -169,7 +166,7 @@ const WONDERLANDS_FLOOR: FloorDef = {
   key: "floor99",
   company: "Wonderlands World",
   tagline: "Pools & outdoor living — FLIP catalog, Genius concierge",
-  bots: W_ROLES.map((r) => r.bot),
+  bots: WONDERLANDS_BOTS,
   executives: [ceoBot("Wonderlands World")],
   manager: { ...OFFICE_MANAGER, duty: "Runs the Wonderlands floor — takes your goals, plans the shift, assigns the specialists and verifies their work." },
   managerPrompt: floorManagerPrompt(

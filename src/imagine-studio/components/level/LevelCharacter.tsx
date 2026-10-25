@@ -27,7 +27,22 @@ export default function LevelCharacter({
   const gltf = useGLTF(obj.url);
 
   // Per-instance skeleton clone — required for SkinnedMesh.
-  const cloned = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
+  const cloned = useMemo(() => {
+    const c = SkeletonUtils.clone(gltf.scene) as THREE.Object3D;
+    // EDITOR = PLAY (founder report 2026-10-25: characters "stacked in the
+    // floor" in editor mode). The play views normalize every character —
+    // height to 1.8 m x authored scale, feet grounded — but the editor drew
+    // the raw GLB, whose origin sits at its center (the founder's robot is
+    // 1 unit tall, centered), so it rendered half-buried at half size.
+    // Same rule here, so the editor shows exactly what the world plays.
+    c.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(c);
+    const h = (box.max.y - box.min.y) || 1;
+    const sc = (1.8 / h) * (obj.scale?.[1] ?? 1);
+    c.scale.setScalar(sc);
+    c.position.y = -box.min.y * sc;
+    return c;
+  }, [gltf.scene]); // eslint-disable-line react-hooks/exhaustive-deps
   const groupRef = useRef<THREE.Group>(null);
 
   // Bind GLTF animations to OUR cloned root.

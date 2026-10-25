@@ -49,6 +49,10 @@ Deno.serve(async (req) => {
       const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
       if (!isAdmin) return json({ error: "Only admins can publish the NYC Office" }, 403);
       path = "office-world.json";
+    } else if (target === "office99") {
+      const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (!isAdmin) return json({ error: "Only admins can publish Floor 99" }, 403);
+      path = "floor99-world.json";
     } else if (target === "level") {
       const id = String(body.levelId || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
       if (!id) return json({ error: "Missing level id" }, 400);

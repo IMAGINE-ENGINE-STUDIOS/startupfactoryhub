@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { syncPlazaLevelToPublished } from "@/imagine-studio/lib/plazaLevel";
-import { syncOfficeLevelToPublished } from "@/imagine-studio/lib/officeWorld";
+import { syncOfficeLevelToPublished, syncFloor99LevelToPublished } from "@/imagine-studio/lib/officeWorld";
 import { resolveLevelWorld } from "@/imagine-studio/lib/worldBindings";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Box, Copy, Flag, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react";
@@ -32,6 +32,7 @@ export default function StudioProjectsPage() {
       // Plaza District edit state always mirrors the published version the game plays.
       await syncPlazaLevelToPublished();
       await syncOfficeLevelToPublished();
+      await syncFloor99LevelToPublished();
       refresh();
     });
   }, []);

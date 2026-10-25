@@ -6,11 +6,11 @@
 // publishing verifies the exact file it wrote, and name matching tolerates
 // case / dash / spacing differences instead of demanding an exact string.
 import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, fetchPublishedPlazaScene } from "./plazaLevel";
-import { OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene } from "./officeWorld";
+import { OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, publishedWorldUrl } from "./officeWorld";
 import type { LevelScene } from "./levelTypes";
 
 export interface NamedWorld {
-  key: "plaza" | "office";
+  key: string;
   name: string;
   /** Storage file the publish function writes and the live page reads. */
   path: string;
@@ -23,6 +23,10 @@ export interface NamedWorld {
 export const NAMED_WORLDS: NamedWorld[] = [
   { key: "plaza", name: PLAZA_LEVEL_NAME, path: "plaza-district.json", livePath: "/plaza", publishedUrl: PLAZA_PUBLISHED_URL, fetchPublished: fetchPublishedPlazaScene },
   { key: "office", name: OFFICE_LEVEL_NAME, path: "office-world.json", livePath: "/office", publishedUrl: OFFICE_PUBLISHED_URL, fetchPublished: fetchPublishedOfficeScene },
+  // Floor 99 — a real level of the same building (founder directive
+  // 2026-10-25): its own published file, played at /office?floor=99, and
+  // reachable from the editor like every named world.
+  { key: "office99", name: FLOOR99_LEVEL_NAME, path: "floor99-world.json", livePath: "/office?floor=99", publishedUrl: publishedWorldUrl("floor99-world.json"), fetchPublished: fetchPublishedFloor99Scene },
 ];
 
 const norm = (s: string) => (s || "").toLowerCase().replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();

@@ -103,6 +103,32 @@ export const ceoBot = (company: string): OfficeBot => ({
 });
 export const CEO_HOME: [number, number, number] = [-4.6, 0, -12.6];
 
+/** Floor 99's cast (founder directive 2026-10-25): Wonderlands World —
+ * a real level of the same building, one floor below Floor 100, with its
+ * own team and its own Manager. Keys match the shift-team role keys in
+ * lib/floors (derived from the name the same way). */
+export const FLOOR99_LEVEL_NAME = "Floor 99 — Wonderlands World";
+const WONDERLANDS_ROSTER: [string, string][] = [
+  ["Concierge", "Runs the Genius concierge — designs pools and outdoor spaces with homeowners, contractors and reps."],
+  ["Designer", "Designs pools and outdoor living spaces — Genius is the designer for clients with no design experience."],
+  ["Catalog", "Owns the FLIP flipbook catalog — keeps every product page current and shoppable."],
+  ["Listings", "Runs the marketplace listings — synced, priced right, and followed up."],
+  ["Network", "Builds the contractor and rep network — recruits, onboards and supports partners."],
+  ["Socialite", "Runs the Socialite autopilot — Facebook and Instagram posts three times a day from the portfolio."],
+  ["Follow-Up", "Owns unified follow-up — every inquiry from every channel answered fast and personally."],
+  ["Closer", "Turns designs into signed projects — proposals, quotes and closes."],
+  ["Projects", "Coordinates installations — schedules, checklists and handovers."],
+  ["Writer", "Writes and archives the company's documents — and compiles this floor's shift report."],
+];
+const WONDERLANDS_TINTS = ["#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#84cc16", "#14b8a6", "#eab308"];
+export const WONDERLANDS_BOTS: OfficeBot[] = WONDERLANDS_ROSTER.map(([name, duty], i) => ({
+  key: name.toLowerCase().replace(/[^a-z0-9]+/g, ""),
+  name,
+  duty,
+  model: AGENT_MODEL_URL,
+  tint: WONDERLANDS_TINTS[i % WONDERLANDS_TINTS.length],
+}));
+
 export const OFFICE_BOTS: OfficeBot[] = ROSTER.map(([name, duty], i) => ({
   key: name.toLowerCase(),
   name,
@@ -345,6 +371,58 @@ const stableStringify = (v: any): string => {
  * Same rule as the Plaza: the editable Office level always opens on the CURRENT
  * published scene; a divergent local copy is first preserved as a draft level.
  */
+/** Floor 99's built-in scene: the same room one story BELOW Floor 100 —
+ * the outside world (peer towers, clouds) sits one floor higher relative
+ * to the room — populated with the Wonderlands cast and its Manager. */
+export function buildFloor99Scene(): LevelScene {
+  const base = buildOfficeScene();
+  const objects = (base.objects as any[])
+    .filter((o) => o.kind !== "character")
+    .map((o) => (typeof o.name === "string" && (o.name.startsWith("Skyline") || o.name.startsWith("Cloud Layer"))
+      ? { ...o, position: [o.position[0], o.position[1] + 3.2, o.position[2]] }
+      : o));
+  const characters = WONDERLANDS_BOTS.map((b, i) => {
+    const d = OFFICE_DESKS[i];
+    return {
+      id: `office_bot_${b.key}`, kind: "character", name: `Bot — ${b.name}`, url: b.model, source: "Plaza character rigs",
+      position: [d.x, 0, d.z + d.facing * 0.85], rotation: [0, d.facing === 1 ? Math.PI : 0, 0], scale: [1, 1, 1], visible: true,
+      animationSpeed: 1, paused: false, crossfade: 0.25, playable: false, controlScheme: "both", cameraMode: "third", mobileJoystick: "auto",
+    };
+  });
+  const managerChar = {
+    id: "office_bot_manager", kind: "character", name: "Bot — Manager", url: AGENT_MODEL_URL, source: "Plaza character rigs",
+    position: MANAGER_HOME, rotation: [0, 0, 0], scale: [1, 1, 1], visible: true,
+    animationSpeed: 1, paused: false, crossfade: 0.25, playable: false, controlScheme: "both", cameraMode: "third", mobileJoystick: "auto",
+  };
+  return { ...base, objects: [...objects, ...characters, managerChar] as any } as LevelScene;
+}
+
+/** Fetches Floor 99's OWN published scene (floor99-world.json) — never
+ * Floor 100's file. Null until an admin first publishes the floor. */
+export async function fetchPublishedFloor99Scene(): Promise<LevelScene | null> {
+  const m = await fetchPublishedOfficeMeta(publishedWorldUrl("floor99-world.json"));
+  return m?.scene ?? null;
+}
+
+/** The editable Floor 99 level always opens on its CURRENT published
+ * scene; a divergent local copy is first preserved as a draft level.
+ * Same rule as Floor 100 and the Plaza. */
+export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
+  const publishedScene = await fetchPublishedFloor99Scene();
+  const existing = listLocalLevels().find((l) => l.name === FLOOR99_LEVEL_NAME);
+  if (!publishedScene) return existing ?? _ensure(buildFloor99Scene, FLOOR99_LEVEL_NAME);
+  if (!existing) return _ensure(() => publishedScene, FLOOR99_LEVEL_NAME);
+  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
+    const backup = createLocalLevel(existing.scene);
+    updateLocalLevel(backup.id, {
+      name: `${FLOOR99_LEVEL_NAME} — local draft ${new Date().toISOString().slice(0, 10)}`,
+      description: "Local edits preserved when the Floor 99 level was re-synced to the published version",
+    });
+    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
+  }
+  return getLocalLevel(existing.id) ?? existing;
+}
+
 export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
   const publishedScene = await fetchPublishedOfficeScene();
   const existing = listLocalLevels().find((l) => l.name === OFFICE_LEVEL_NAME);
