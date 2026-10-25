@@ -23,7 +23,7 @@ const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { OFFICE_BOTS, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, buildOfficeScene, fetchPublishedOfficeMeta, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
-import { applyActionPose } from '@/imagine-studio/lib/actionPoses';
+import { applyPose, buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import StudioMobileNav from '@/imagine-studio/components/shared/StudioMobileNav';
 
@@ -73,9 +73,9 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   // started is stopped, because a running clip overwrites bone poses every
   // frame (that is why the other characters "just stood").
   const sitClip = useMemo(() => names.find((x) => /sitting/i.test(x)) ?? null, [names]);
-  const posedRef = useRef(false);
   const sitStartedRef = useRef(false);
-  const sitAttemptsRef = useRef(0);
+  const legsPoseRef = useRef<any[] | null>(null);
+  const legsTriedRef = useRef(0);
   useFrame(() => {
     if (seated && sitClip) {
       const a = actions[sitClip];
@@ -89,13 +89,19 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       return;
     }
     if (seated) {
-      if (posedRef.current) return;
-      if (sitAttemptsRef.current < 120) {
-        sitAttemptsRef.current += 1;
+      // Legs-only seated pose, built once and re-stamped every frame AFTER
+      // the mixer updates: the idle clip keeps arms and upper body alive
+      // (no T-pose freeze) while hips/thighs/shins hold the chair.
+      if (!legsPoseRef.current && legsTriedRef.current < 5) {
+        legsTriedRef.current += 1;
         root.current?.updateMatrixWorld(true);
-        let ok = false;
-        try { ok = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { ok = false; }
-        if (ok) { posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); }
+        try { legsPoseRef.current = buildSeatedLegsPose(model, { forward: new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)), seatHeight: seatY }); } catch { legsPoseRef.current = null; }
+      }
+      if (legsPoseRef.current) {
+        const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
+        const a = idleName ? actions[idleName] : null;
+        if (a && !a.isRunning()) { Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); }); a.reset().fadeIn(0.2).play(); }
+        applyPose(model as any, legsPoseRef.current as any);
       }
       return;
     }

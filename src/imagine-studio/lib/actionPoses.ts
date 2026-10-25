@@ -85,6 +85,8 @@ function calibrateSwing(
   bone: THREE.Bone,
   child: THREE.Object3D,
   dirWorld: THREE.Vector3,
+  probeAngle = 0.35,
+  maxChildY?: number,
 ): { axis: "x" | "y" | "z"; sign: 1 | -1 } | null {
   root.updateMatrixWorld(true);
   const before = child.getWorldPosition(new THREE.Vector3());
@@ -93,11 +95,16 @@ function calibrateSwing(
   for (const axis of ["x", "y", "z"] as const) {
     for (const sign of [1, -1] as const) {
       bone.quaternion.copy(saved);
-      _q.setFromAxisAngle(axis === "x" ? _v1.set(1, 0, 0) : axis === "y" ? _v1.set(0, 1, 0) : _v1.set(0, 0, 1), sign * 0.35);
+      _q.setFromAxisAngle(axis === "x" ? _v1.set(1, 0, 0) : axis === "y" ? _v1.set(0, 1, 0) : _v1.set(0, 0, 1), sign * probeAngle);
       bone.quaternion.multiply(_q);
       root.updateMatrixWorld(true);
-      const after = child.getWorldPosition(_v2);
-      const score = after.sub(before).dot(dirWorld);
+      const after = child.getWorldPosition(new THREE.Vector3());
+      let score = after.clone().sub(before).dot(dirWorld);
+      // Anatomical guard: a joint must never end above its ceiling (this is
+      // what stopped the Soldier's legs from folding up over its head —
+      // a small probe angle scored a twist axis as "forward", and the full
+      // rotation corkscrewed the leg upward).
+      if (maxChildY !== undefined && after.y > maxChildY) score -= 10 * (after.y - maxChildY);
       if (!best || score > best.score) best = { axis, sign, score };
     }
   }
@@ -142,13 +149,19 @@ export function applyActionPose(
     const foot = boneByName(root, map[footKey]);
     if (!thigh || !shin) continue;
     // Thigh: swing the knee forward (sit / jump) or keep it near vertical (kneel).
+    // Calibrate at the FULL target angle with a ceiling at hip height: a
+    // seated knee ends level with the hip, never above it.
     const thighTarget = action === "sit" ? 1.62 : action === "kneel" ? 0.3 : 0.85;
-    const thighCal = calibrateSwing(root, thigh, shin, forward);
+    const hipY = hips ? hips.getWorldPosition(new THREE.Vector3()).y : undefined;
+    const thighCal = calibrateSwing(root, thigh, shin, forward, thighTarget, action === "sit" && hipY !== undefined ? hipY + 0.03 : undefined);
     if (thighCal) { rotateBone(thigh, thighCal.axis, thighCal.sign * thighTarget); posed = true; }
-    // Shin: fold the foot backward (knee flexion).
+    // Shin: fold the foot backward (knee flexion). The foot must end BELOW
+    // the knee — calibrate at the full angle with that ceiling too.
     if (foot) {
       const shinTarget = action === "sit" ? 1.5 : action === "kneel" ? 2.15 : 1.1;
-      const shinCal = calibrateSwing(root, shin, foot, backward);
+      root.updateMatrixWorld(true);
+      const kneeY = shin.getWorldPosition(new THREE.Vector3()).y;
+      const shinCal = calibrateSwing(root, shin, foot, backward, shinTarget, action === "sit" ? kneeY - 0.05 : undefined);
       if (shinCal) { rotateBone(shin, shinCal.axis, shinCal.sign * shinTarget); posed = true; }
     }
     root.updateMatrixWorld(true);
@@ -194,6 +207,25 @@ export function buildActionPose(
   const pose = capturePose(root);
   applyPose(root, bind);
   return pose;
+}
+
+const SEATED_BONE_FILTER = /hip|pelvis|thigh|upleg|leg|shin|calf|knee|foot|ankle|spine/i;
+
+/**
+ * Builds the seated pose for the LEGS + SPINE + HIPS only, as a BonePose
+ * that callers re-apply every frame AFTER the animation mixer runs. The
+ * upper body keeps whatever clip is playing (idle) — arms stay alive
+ * instead of freezing in the bind-pose T. Returns null when the rig has
+ * no mappable legs (such a character cannot sit procedurally).
+ */
+export function buildSeatedLegsPose(
+  root: THREE.Object3D,
+  opts: { forward?: THREE.Vector3; seatHeight?: number; map?: Record<ControllerKey, string | null> } = {},
+): BonePose[] | null {
+  const full = buildActionPose(root, "sit", opts);
+  if (!full) return null;
+  const legs = full.filter((b) => SEATED_BONE_FILTER.test(b.n));
+  return legs.length >= 4 ? legs : null;
 }
 
 /** World-space height of the hips bone (bind pose), or null. */

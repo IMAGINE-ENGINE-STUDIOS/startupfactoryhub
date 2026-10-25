@@ -9,7 +9,7 @@ import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.j
 import * as THREE from 'three';
 import { PLAZA_PUBLISHED_URL } from '@/imagine-studio/lib/plazaLevel';
 import { applyPose } from '@/imagine-studio/lib/rigSaves';
-import { applyActionPose } from '@/imagine-studio/lib/actionPoses';
+import { buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
 
 export function usePublishedPlaza() {
   const [scene, setScene] = useState<any>(null);
@@ -66,7 +66,8 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
   const { actions, names } = useAnimations(animations, root);
   const posedRef = useRef(false);
   const sitStartedRef = useRef(false);
-  const sitAttemptsRef = useRef(0);
+  const legsPoseRef = useRef<any[] | null>(null);
+  const legsTriedRef = useRef(0);
   const sitClipName = useMemo(() => (o.startSeated ? names.find((n) => /sitting/i.test(n)) ?? null : null), [names, o.startSeated]);
   useEffect(() => {
     if (Array.isArray(o.pose) && o.pose.length) { try { applyPose(model as any, o.pose as any); posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); } catch { /* keep clips */ } }
@@ -87,14 +88,18 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
       return;
     }
     if (o.startSeated && !sitClipName) {
-      // Procedural sit, retried from the frame loop; a running idle clip
-      // would overwrite the pose every frame, so clips are stopped on success.
-      if (sitAttemptsRef.current < 120) {
-        sitAttemptsRef.current += 1;
+      // Legs-only seated pose stamped after the mixer each frame; the idle
+      // clip keeps the upper body alive instead of a bind-pose T freeze.
+      if (!legsPoseRef.current && legsTriedRef.current < 5) {
+        legsTriedRef.current += 1;
         root.current?.updateMatrixWorld(true);
-        let ok = false;
-        try { ok = applyActionPose(model, 'sit', { forward: new THREE.Vector3(Math.sin(o.rotation?.[1] || 0), 0, Math.cos(o.rotation?.[1] || 0)), seatHeight: o.seatHeight ?? 0.52 }); } catch { ok = false; }
-        if (ok) { posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); }
+        try { legsPoseRef.current = buildSeatedLegsPose(model, { forward: new THREE.Vector3(Math.sin(o.rotation?.[1] || 0), 0, Math.cos(o.rotation?.[1] || 0)), seatHeight: o.seatHeight ?? 0.52 }); } catch { legsPoseRef.current = null; }
+      }
+      if (legsPoseRef.current) {
+        const idleName = names.find((n) => /idle/i.test(n)) ?? names[0];
+        const a = idleName ? actions[idleName] : null;
+        if (a && !a.isRunning()) { Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); }); a.reset().fadeIn(0.2).play(); }
+        applyPose(model as any, legsPoseRef.current as any);
       }
       return;
     }

@@ -14,7 +14,7 @@ export const OFFICE_BOUNDS = { x: 22.5, z: 14.5 };
 export const OFFICE_WAYPOINTS: [number, number][] = [[0, 12.8], [-19, -12], [19, 12], [12, -13.5], [-12, 13.5]];
 
 export type OfficeBot = { key: string; name: string; duty: string; model: string; tint: string };
-const MODELS = ["Xbot.glb", "Soldier.glb", "RobotExpressive.glb", "CesiumMan.glb", "RiggedFigure.glb"];
+const MODELS = ["Xbot.glb", "Soldier.glb", "RobotExpressive.glb"];
 const TINTS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 const ROSTER: [string, string][] = [
   ["Builder", "Builds, writes and ships — pages, plans, code and documents."],

@@ -23,7 +23,7 @@ const GENIUS_EXTENDED_OPS = `EXTENDED OPS (accepted by this studio — prefer th
 - {"op":"ring","object":OBJ,"count":n,"radius":r,"center":[x,y,z],"faceCenter":true?} copies on a circle.
 - {"op":"scatter","object":OBJ,"count":n,"bounds":[minX,minZ,maxX,maxZ],"seed":n,"minDist":m} scattered copies.
 - {"op":"room","name":str,"center":[x,z],"size":[w,d],"height":h,"windows":"band|full|none","color":"#hex","floorColor":"#hex","openSide":"N|S|E|W"?} floor slab + 4 walls; window walls include a glass band and mullions.
-- {"op":"add","object":{"kind":"character","name":str,"url":"/models/plaza/Xbot.glb","position":[x,0,z],"rotation":[0,ry,0],"playable":false}} a character/NPC (models under /models/plaza/: Xbot.glb, Soldier.glb, RobotExpressive.glb, CesiumMan.glb, RiggedFigure.glb).
+- {"op":"add","object":{"kind":"character","name":str,"url":"/models/plaza/Xbot.glb","position":[x,0,z],"rotation":[0,ry,0],"playable":false}} a character/NPC (models under /models/plaza/: Xbot.glb, Soldier.glb, RobotExpressive.glb — only these three; CesiumMan and RiggedFigure are retired, never add them).
 COMPLEX BUILDS: plan the whole scene first, then build it in parts with these compact ops. If the full request does not fit in one reply, build the next part and end your "reply" text with [MORE]; when everything requested exists, end the reply with [DONE]. Never repeat objects that already exist in the context.`;
 import { NATIVE_FORMATS, extOf, importModelFile } from "@/imagine-studio/lib/model-import";
 import * as THREE from "three";
@@ -462,8 +462,6 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
                   <option value="/models/plaza/Xbot.glb">Character: X Bot</option>
                   <option value="/models/plaza/RobotExpressive.glb">Character: Robot</option>
                   <option value="/models/plaza/Soldier.glb">Character: Soldier</option>
-                  <option value="/models/plaza/CesiumMan.glb">Character: Cesium Man</option>
-                  <option value="/models/plaza/RiggedFigure.glb">Character: Figure</option>
                 </select>
                 <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
                   <input type="checkbox" checked={agentSeated} onChange={(e) => setAgentSeated(e.target.checked)} /> Starts seated (at a desk or chair)
