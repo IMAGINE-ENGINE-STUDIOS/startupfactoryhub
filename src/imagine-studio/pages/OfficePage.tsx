@@ -15,7 +15,7 @@ import { Html, useGLTF, useAnimations } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Sparkles, Square, Video, X } from 'lucide-react';
+import { Bot as BotIcon, Box as BoxIcon, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, FileUp, LayoutDashboard, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, Square, Video, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
@@ -47,62 +47,6 @@ type OfficeTheater = TheaterSource | { kind: 'dashboard'; botKey: string; by: st
 
 /* ---------------- Bots (stationary, at their desks) ---------------- */
 const botPos = new Map<string, THREE.Vector3>();
-
-/* ---------------- Muse skills library → real SFH agents ---------------- */
-function SkillsLibrary({ agents, onAdded }: { agents: any[]; onAdded: () => void }) {
-  const [skills, setSkills] = useState<any[] | null>(null);
-  const [q, setQ] = useState('');
-  const [adding, setAdding] = useState<string | null>(null);
-  const [note, setNote] = useState('');
-  useEffect(() => {
-    let off = false;
-    import('@/imagine-studio/lib/museSkills.generated').then((m) => { if (!off) setSkills(m.MUSE_SKILLS as any[]); }).catch(() => { if (!off) setSkills([]); });
-    return () => { off = true; };
-  }, []);
-  const addedNames = useMemo(() => new Set((agents || []).map((a) => String(a.name || '').toLowerCase())), [agents]);
-  const add = async (s: any) => {
-    setAdding(s.slug); setNote('');
-    try {
-      await callAgentsApi({ action: 'save', name: s.name, description: s.description, model: 'llama-3.3-70b-versatile', system_prompt: String(s.body || '').slice(0, 19500), tools: ['Web search'] });
-      setNote(`"${s.name}" is now one of your agents — link it to a character above, or run it in the console below.`);
-      onAdded();
-    } catch (e: any) { setNote(e?.message || 'Could not add that skill.'); }
-    setAdding(null);
-  };
-  if (skills === null) return <div className="px-4 pt-3 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin" />Loading the Muse skills library…</div>;
-  const needle = q.trim().toLowerCase();
-  const list = skills.filter((s) => !needle || `${s.name} ${s.description} ${s.slug}`.toLowerCase().includes(needle)).slice(0, 60);
-  return (
-    <div className="px-4 pt-3">
-      <div className="rounded-xl border border-border p-3 space-y-2.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5 mr-auto"><Sparkles className="w-3.5 h-3.5" />Muse skills library — {skills.length} skills</span>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search skills…" className="h-8 rounded-md border border-border bg-background px-2.5 text-sm w-44" />
-        </div>
-        <div className="text-[11px] text-muted-foreground">Every skill from your Muse account, importable as a real agent: it lands in your Agents list, runs on the call-agents engine, and can power any character in this office.</div>
-        <div className="grid sm:grid-cols-2 gap-2 max-h-[320px] overflow-y-auto touch-pan-y pr-0.5">
-          {list.map((s) => {
-            const added = addedNames.has(String(s.name).toLowerCase());
-            return (
-              <div key={s.slug} className="rounded-lg border border-border p-2.5 flex flex-col gap-1.5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-medium truncate">{s.name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${s.source === 'Custom' ? 'bg-fuchsia-500/15 text-fuchsia-600' : 'bg-cyan-500/15 text-cyan-600'}`}>{s.source}</span>
-                </div>
-                <div className="text-[11px] text-muted-foreground line-clamp-2 flex-1">{s.description}</div>
-                <button disabled={added || adding === s.slug} onClick={() => void add(s)} className="self-start h-7 px-2.5 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50 flex items-center gap-1.5">
-                  {adding === s.slug ? <Loader2 className="w-3 h-3 animate-spin" /> : null}{added ? 'Added ✓' : 'Add as agent'}
-                </button>
-              </div>
-            );
-          })}
-          {list.length === 0 && <div className="text-xs text-muted-foreground">No skills match that search.</div>}
-        </div>
-        {note && <div className="text-xs text-muted-foreground whitespace-pre-wrap">{note}</div>}
-      </div>
-    </div>
-  );
-}
 
 export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = true }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void; seated?: boolean }) {
   const { scene, animations } = useGLTF(bot.model);
@@ -588,6 +532,7 @@ export default function OfficePage() {
     setLinks(next);
     try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {}
   };
+  const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
   const nearBot = nearKey ? OFFICE_BOTS.find((b) => b.key === nearKey) : null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
   useEffect(() => { if (!scene) return; const t = setTimeout(() => setIntroGone(true), 2100); return () => clearTimeout(t); }, [scene]);
@@ -745,36 +690,16 @@ export default function OfficePage() {
             <span className="w-9 h-9 rounded-full shrink-0 border border-border" style={{ background: openBot.tint }} />
             <div className="mr-auto min-w-0">
               <div className="font-semibold truncate">{openBot.name} — Agents</div>
-              <div className="text-[11px] text-muted-foreground truncate">{openBot.duty} · {link.aiOn && linkedAgent ? `Powered by ${linkedAgent.name}` : 'Link an agent below to power this character'}</div>
+              <div className="text-[11px] text-muted-foreground truncate">{openBot.duty} · the Agents console — identical to your dashboard</div>
             </div>
             {isAdmin && OFFICE_BOTS.some((b) => b.key === openBot.key) && <button onClick={() => { void showDashboardOnTheater(openBot.key); }} className="hidden sm:flex rounded-full border border-border px-3 py-1.5 text-xs items-center gap-1.5 hover:bg-muted"><LayoutDashboard className="w-3.5 h-3.5" />Theater</button>}
-            <button onClick={() => setOpenBot(null)} className="p-1.5 rounded-full hover:bg-muted" aria-label="Close agents"><X className="w-5 h-5" /></button>
-          </div>
-          <div className="px-4 py-3 border-b border-border shrink-0 flex flex-wrap items-center gap-2.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" />Power this character</span>
-            {!signedIn && <span className="text-xs text-muted-foreground">Sign in to link this character to one of your agents.</span>}
-            {signedIn && agents.length === 0 && <span className="text-xs text-muted-foreground">No agents yet — import a Muse skill below, or create one in the console.</span>}
-            {signedIn && agents.length > 0 && (
-              <>
-                <select value={link.agentId || ''} onChange={(e) => saveLink({ agentId: e.target.value || undefined })} className="h-9 rounded-md border border-border bg-background px-2 text-sm min-w-[180px]">
-                  <option value="">Choose an agent…</option>
-                  {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={!!link.aiOn} disabled={!link.agentId} onChange={(e) => saveLink({ aiOn: e.target.checked })} />
-                  Powered by AI
-                </label>
-              </>
-            )}
+            <button onClick={() => { setOpenBot(null); void refreshAgents(); }} className="p-1.5 rounded-full hover:bg-muted" aria-label="Close agents"><X className="w-5 h-5" /></button>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
             {signedIn ? (
-              <>
-                <SkillsLibrary agents={agents} onAdded={refreshAgents} />
-                <Suspense fallback={<div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading the Agents console…</div>}>
-                  <SFHCallAgents key={agentsKey} />
-                </Suspense>
-              </>
+              <Suspense fallback={<div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading the Agents console…</div>}>
+                <SFHCallAgents key={agentsKey} botLink={botLink} />
+              </Suspense>
             ) : (
               <div className="p-6 text-sm text-muted-foreground">This panel is the full Agents console from your Startup Factory Hub dashboard — the same agents, runs, pipelines, sharing and vault. Sign in to use it here, standing next to {openBot.name}.</div>
             )}

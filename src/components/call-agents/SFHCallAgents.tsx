@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen, Bot, Check, Code2, Coins, FileText, Globe, KanbanSquare, Loader2,
@@ -292,7 +292,66 @@ function SegmentedControl({
   );
 }
 
-export default function SFHCallAgents() {
+/* ── Muse skills library: every skill from the owner's Muse account,
+ *    importable as a real agent. Lives inside the one Agents console, so it
+ *    is identical in the dashboards and in the 3D office. ── */
+function SkillsLibrarySection({ agents, onAdded }: { agents: any[]; onAdded: () => void }) {
+  const [skills, setSkills] = useState<any[] | null>(null);
+  const [q, setQ] = useState("");
+  const [adding, setAdding] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  useEffect(() => {
+    let off = false;
+    import("@/imagine-studio/lib/museSkills.generated").then((m) => { if (!off) setSkills((m as any).MUSE_SKILLS as any[]); }).catch(() => { if (!off) setSkills([]); });
+    return () => { off = true; };
+  }, []);
+  const addedNames = useMemo(() => new Set((agents || []).map((a) => String(a.name || "").toLowerCase())), [agents]);
+  const add = async (s: any) => {
+    setAdding(s.slug); setNote("");
+    try {
+      await callAgentsApi({ action: "save", name: s.name, description: s.description, model: "llama-3.3-70b-versatile", system_prompt: String(s.body || "").slice(0, 19500), tools: ["Web search"] });
+      setNote(`"${s.name}" is now one of your agents.`);
+      onAdded();
+    } catch (e: any) { setNote(e?.message || "Could not add that skill."); }
+    setAdding(null);
+  };
+  if (skills === null) return <div className="px-1 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Loading the Muse skills library…</div>;
+  const needle = q.trim().toLowerCase();
+  const list = skills.filter((s) => !needle || `${s.name} ${s.description} ${s.slug}`.toLowerCase().includes(needle)).slice(0, 60);
+  return (
+    <section className="rounded-[2rem] border border-border bg-card/70 px-4 py-5 backdrop-blur-xl sm:px-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white"><Sparkles className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-bold tracking-tight text-foreground">Muse skills library</h3>
+          <p className="text-xs text-muted-foreground">{skills.length} skills from your Muse account — add any of them as a real agent. It joins your team here, in every dashboard, and in the 3D office.</p>
+        </div>
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search skills…" className="h-9 w-44 rounded-full" />
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 max-h-[340px] overflow-y-auto pr-0.5">
+        {list.map((s) => {
+          const added = addedNames.has(String(s.name).toLowerCase());
+          return (
+            <div key={s.slug} className="rounded-2xl border border-border bg-background/60 p-3 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm font-medium text-foreground truncate">{s.name}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${s.source === "Custom" ? "bg-fuchsia-500/15 text-fuchsia-600" : "bg-cyan-500/15 text-cyan-600"}`}>{s.source}</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground line-clamp-2 flex-1">{s.description}</div>
+              <button disabled={added || adding === s.slug} onClick={() => void add(s)} className="self-start h-7 px-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1.5 hover:from-emerald-600 hover:to-teal-600">
+                {adding === s.slug ? <Loader2 className="h-3 w-3 animate-spin" /> : null}{added ? "Added ✓" : "Add as agent"}
+              </button>
+            </div>
+          );
+        })}
+        {list.length === 0 && <div className="text-xs text-muted-foreground">No skills match that search.</div>}
+      </div>
+      {note && <div className="mt-3 text-xs text-muted-foreground">{note}</div>}
+    </section>
+  );
+}
+
+export default function SFHCallAgents({ botLink }: { botLink?: { botName: string; agentId?: string; aiOn?: boolean; onChange: (patch: { agentId?: string; aiOn?: boolean }) => void } } = {}) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [agents, setAgents] = useState<CallAgent[]>([]);
@@ -334,7 +393,9 @@ export default function SFHCallAgents() {
       setAgents(data.agents ?? []);
       setBalance(data.balance ?? null);
       setIsAdmin(!!data.isAdmin);
-      if (!soloId && data.agents?.length) setSoloId(data.agents[0].id);
+      const preferred = botLink?.agentId && (data.agents ?? []).some((a: any) => a.id === botLink.agentId) ? botLink.agentId : undefined;
+      if (preferred) setSoloId(preferred);
+      else if (!soloId && data.agents?.length) setSoloId(data.agents[0].id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load your agents.");
     } finally {
@@ -869,6 +930,27 @@ export default function SFHCallAgents() {
       </div>
 
       <div className="relative min-w-0 space-y-8">
+        {/* ── Office character link (only when embedded in the 3D office) ── */}
+        {botLink && (
+          <section className="rounded-[2rem] border border-border bg-card/70 px-4 py-4 backdrop-blur-xl sm:px-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white"><Bot className="h-5 w-5" /></span>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-foreground">{botLink.botName} — this 3D character</div>
+                <div className="text-[11px] text-muted-foreground">Powered by the agent you choose here. Same agents, same runs, same credits — in the office and in every dashboard.</div>
+              </div>
+              <select value={botLink.agentId || ""} onChange={(e) => botLink.onChange({ agentId: e.target.value || undefined })} className="h-9 rounded-full border border-border bg-background px-3 text-sm text-foreground">
+                <option value="">Choose an agent…</option>
+                {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <input type="checkbox" checked={!!botLink.aiOn} disabled={!botLink.agentId} onChange={(e) => botLink.onChange({ aiOn: e.target.checked })} className="h-4 w-4 accent-emerald-500" />
+                Powered by AI
+              </label>
+            </div>
+          </section>
+        )}
+
         {/* ── 1 · Hero strip ─────────────────────────────── */}
         <section className="rounded-[2rem] bg-gradient-to-br from-emerald-400/60 via-border to-teal-400/60 p-[1.5px] shadow-[0_10px_40px_rgba(6,78,59,0.10)]">
           <div className="relative overflow-hidden rounded-[calc(2rem-1.5px)] bg-card/70 px-4 py-5 backdrop-blur-xl sm:px-8 sm:py-6">
@@ -924,6 +1006,9 @@ export default function SFHCallAgents() {
             {notice}
           </div>
         )}
+
+        {/* ── Muse skills library ─────────────────────── */}
+        <SkillsLibrarySection agents={agents} onAdded={load} />
 
         {/* ── 2 · Character stage — your team ────────────── */}
         <section className="space-y-4">
