@@ -87,84 +87,6 @@ function TowerFill({ taken }: { taken: Set<number> }) {
   return <primitive object={mesh} />;
 }
 
-/**
- * THE PLAZA at the tower's base (founder directive 2026-10-26: the
- * plain black ground disc is out — "create a simple pretty plaza down
- * there instead"). Light stone paving, a podium the tower stands on, a
- * round fountain, planters with green canopies, benches and lamp posts
- * — plain meshes, no assets, so the base of the building reads as a
- * place instead of a hole.
- */
-function TowerPlaza() {
-  const base = offsetY(1) - 0.6;
-  const planters: [number, number][] = [];
-  for (const px of [-52, -30, 30, 52]) for (const pz of [-34, 0, 34]) planters.push([px, pz]);
-  const lamps: [number, number][] = [[-40, -22], [40, -22], [-40, 22], [40, 22], [0, -40], [0, 40]];
-  return (
-    <group position={[0, base, 0]}>
-      {/* stone paving */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[190, 1.2, 130]} />
-        <meshStandardMaterial color="#b7ab9c" roughness={1} />
-      </mesh>
-      {/* podium the tower stands on */}
-      <mesh position={[0, 1.2, 0]}>
-        <boxGeometry args={[64, 1.6, 46]} />
-        <meshStandardMaterial color="#8d97a3" roughness={0.9} />
-      </mesh>
-      {/* fountain: rim + water */}
-      <mesh position={[0, 1.35, 34]}>
-        <cylinderGeometry args={[11, 11, 1.1, 36]} />
-        <meshStandardMaterial color="#d8d2c6" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.95, 34]}>
-        <cylinderGeometry args={[9.8, 9.8, 0.25, 36]} />
-        <meshStandardMaterial color="#5f9ec4" roughness={0.15} metalness={0.1} />
-      </mesh>
-      <mesh position={[0, 2.6, 34]}>
-        <cylinderGeometry args={[0.5, 0.7, 1.6, 10]} />
-        <meshStandardMaterial color="#d8d2c6" roughness={0.8} />
-      </mesh>
-      {/* planters with trees */}
-      {planters.map(([px, pz], i) => (
-        <group key={i} position={[px, 0.6, pz]}>
-          <mesh position={[0, 0.5, 0]}>
-            <boxGeometry args={[4.4, 1, 4.4]} />
-            <meshStandardMaterial color="#6b5d4f" roughness={1} />
-          </mesh>
-          <mesh position={[0, 1.6, 0]}>
-            <cylinderGeometry args={[0.22, 0.3, 1.6, 8]} />
-            <meshStandardMaterial color="#5a4632" roughness={1} />
-          </mesh>
-          <mesh position={[0, 3.6, 0]}>
-            <icosahedronGeometry args={[2.3, 1]} />
-            <meshStandardMaterial color="#4e7d4a" roughness={1} flatShading />
-          </mesh>
-        </group>
-      ))}
-      {/* benches */}
-      {([[-16, 34], [16, 34], [-24, -30], [24, -30]] as [number, number][]).map(([px, pz], i) => (
-        <mesh key={i} position={[px, 1.05, pz]}>
-          <boxGeometry args={[4.6, 0.35, 1.3]} />
-          <meshStandardMaterial color="#7a6248" roughness={0.9} />
-        </mesh>
-      ))}
-      {/* lamp posts */}
-      {lamps.map(([px, pz], i) => (
-        <group key={i} position={[px, 0.6, pz]}>
-          <mesh position={[0, 2.4, 0]}>
-            <cylinderGeometry args={[0.09, 0.12, 4.8, 8]} />
-            <meshStandardMaterial color="#2c3540" roughness={0.6} metalness={0.5} />
-          </mesh>
-          <mesh position={[0, 5, 0]}>
-            <sphereGeometry args={[0.42, 12, 10]} />
-            <meshStandardMaterial color="#ffe9b0" emissive="#ffca55" emissiveIntensity={0.9} roughness={0.4} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
 
 export type BuildingExtra = { id: string; name: string; floor: number; scene: any };
 
@@ -219,8 +141,11 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
    * real floors are created lower down, the span grows and the default
    * shot pulls back on its own to keep every real floor in frame. */
   const realFloors = [...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100];
-  const topF = Math.max(...realFloors);
-  const botF = Math.min(...realFloors);
+  /* The plaza (floor 0) is ground, not a story: it never stretches
+   * the default framing — you fly down to it. */
+  const frameFloors = realFloors.filter((f) => f >= 1);
+  const topF = Math.max(...frameFloors);
+  const botF = Math.min(...frameFloors);
   const spanH = (topF - botF) * STORY + STORY;
   const centerY = (offsetY(topF) + offsetY(botF)) / 2 + STORY / 2;
   const camDist = Math.min(760, Math.max(95, spanH * 3.4 + 55));
@@ -252,7 +177,12 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               <SkyboxDome url={sky.url} />
             </group>
             <TowerFill taken={new Set([...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100])} />
-            <TowerPlaza />
+            {/* The ground is the BUILDING PLAZA level itself (founder
+                directive 2026-10-26): it renders through the levels
+                loop below like every floor — its own scene, editable
+                and publishable — with the tower rising from its
+                podium. The hardcoded plaza mock that stood here is
+                gone. */}
             {levels.map((w) => {
               const s = scenes[w.key];
               const off = offsetY(w.floor);
@@ -274,7 +204,7 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
                   </mesh>
                   <Html position={[25.5, 3.6, 0]} center style={{ pointerEvents: "none" }}>
                     <div style={{ whiteSpace: "nowrap", borderRadius: 999, background: isCurrent ? "rgba(6,40,28,.88)" : "rgba(5,10,20,.82)", color: "#fff", padding: "5px 12px", font: "600 12px system-ui", border: isCurrent ? "1px solid #2EF8A0" : "1px solid rgba(255,255,255,.25)" }}>
-                      LEVEL {w.floor} — {w.levelLabel?.split("—")[1]?.trim() || w.name}{isCurrent ? " · you are editing this level" : ""}
+                      {w.floor === 0 ? (w.levelLabel || w.name) : <>LEVEL {w.floor} — {w.levelLabel?.split("—")[1]?.trim() || w.name}</>}{isCurrent ? " · you are editing this level" : ""}
                     </div>
                   </Html>
                 </group>
@@ -305,7 +235,10 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               );
             })}
           </Suspense>
-          <OrbitControls makeDefault target={[0, centerY, 0]} maxDistance={2400} minDistance={6} />
+          {/* Free flight (founder directive 2026-10-26): orbit, pan
+              and zoom without clamps, so the camera can travel from
+              the top floors all the way down to the Building Plaza. */}
+          <OrbitControls makeDefault target={[0, centerY, 0]} enableDamping dampingFactor={0.08} screenSpacePanning maxDistance={3000} minDistance={2} />
         </Canvas>
         <div className="absolute right-3 top-3 flex w-60 flex-col gap-2">
           {levels.map((w) => (
@@ -316,8 +249,8 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               onMouseLeave={() => setHover(null)}
               className={`rounded-xl border px-3.5 py-3 text-left backdrop-blur transition ${w.key === current.key ? "border-emerald-400/70 bg-emerald-500/15" : "border-white/15 bg-black/45 hover:border-cyan-300/60"}`}
             >
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Level {w.floor}</div>
-              <div className="mt-0.5 text-sm font-semibold leading-tight">{w.levelLabel?.split("—")[1]?.trim() || w.name}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{w.floor === 0 ? "Ground level" : `Level ${w.floor}`}</div>
+              <div className="mt-0.5 text-sm font-semibold leading-tight">{w.floor === 0 ? w.name : (w.levelLabel?.split("—")[1]?.trim() || w.name)}</div>
               <div className="mt-0.5 text-[11px] text-white/55">{w.key === current.key ? "You are editing this level" : scenes[w.key] ? "Click to open this level in the editor" : "Click to open — it seeds from the published scene"}</div>
             </button>
           ))}

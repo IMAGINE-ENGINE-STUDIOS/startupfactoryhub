@@ -6,7 +6,7 @@
 // publishing verifies the exact file it wrote, and name matching tolerates
 // case / dash / spacing differences instead of demanding an exact string.
 import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, fetchPublishedPlazaScene, syncPlazaLevelToPublished } from "./plazaLevel";
-import { OFFICE_LEVEL_NAME, LEGACY_OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, fetchPublishedOfficeMeta, publishedWorldUrl, syncOfficeLevelToPublished, syncFloor99LevelToPublished, syncDynamicFloorLevel } from "./officeWorld";
+import { OFFICE_LEVEL_NAME, LEGACY_OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, fetchPublishedOfficeMeta, publishedWorldUrl, syncOfficeLevelToPublished, syncFloor99LevelToPublished, syncDynamicFloorLevel, BUILDING_PLAZA_LEVEL_NAME, fetchPublishedBuildingPlazaScene, syncBuildingPlazaLevelToPublished } from "./officeWorld";
 import type { LevelScene } from "./levelTypes";
 import type { LocalLevelRecord } from "./localLevels";
 
@@ -41,6 +41,12 @@ export const NAMED_WORLDS: NamedWorld[] = [
   // directive 2026-10-25), one story below Level 100: its own published
   // file, played at /office?floor=99, edited like every level.
   { key: "office99", name: FLOOR99_LEVEL_NAME, path: "floor99-world.json", livePath: "/office?floor=99", publishedUrl: publishedWorldUrl("floor99-world.json"), fetchPublished: fetchPublishedFloor99Scene, syncLevel: syncFloor99LevelToPublished, building: "Startup Office", floor: 99, levelLabel: "Level 99 — Wonderlands World" },
+  // The BUILDING PLAZA — the building's ground level (founder
+  // directive 2026-10-26): a level like /plaza is a world, holding the
+  // plaza scenario and the theater screen, with the tower rising out
+  // of its podium in the stacked building view. Its live home is the
+  // office building itself.
+  { key: "officeplaza", name: BUILDING_PLAZA_LEVEL_NAME, path: "building-plaza.json", livePath: "/office", publishedUrl: publishedWorldUrl("building-plaza.json"), fetchPublished: fetchPublishedBuildingPlazaScene, syncLevel: syncBuildingPlazaLevelToPublished, building: "Startup Office", floor: 0, levelLabel: "Building Plaza — Ground" },
 ];
 
 const norm = (s: string) => (s || "").toLowerCase().replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();

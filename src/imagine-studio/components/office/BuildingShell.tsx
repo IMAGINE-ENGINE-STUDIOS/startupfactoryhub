@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { allFloors, type FloorDef } from "@/imagine-studio/lib/floors";
-import { buildFloor99Scene, buildOfficeScene, publishedWorldUrl } from "@/imagine-studio/lib/officeWorld";
+import { buildBuildingPlazaScene, buildFloor99Scene, buildOfficeScene, publishedWorldUrl } from "@/imagine-studio/lib/officeWorld";
 import type { PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
 
 export const BUILDING_TOP = 100;
@@ -115,6 +115,40 @@ function codeSceneFor(floor: FloorDef): PrimitiveObject[] | null {
   return null;
 }
 
+/** Box-proxy instancing shared by neighbour floors and the plaza:
+ * opaque and glassy primitives as two InstancedMeshes at true
+ * position/rotation/scale. */
+function proxyMeshes(prims: PrimitiveObject[], name: string) {
+  const opaque = prims.filter((p) => (p.color?.[3] ?? 1) >= 0.99);
+  const glassy = prims.filter((p) => (p.color?.[3] ?? 1) < 0.99);
+  const build = (list: PrimitiveObject[], transparent: boolean, meshName: string) => {
+    if (!list.length) return null;
+    const mesh = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      transparent
+        ? new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.3, depthWrite: false })
+        : new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0.05 }),
+      list.length,
+    );
+    mesh.name = meshName;
+    const m = new THREE.Matrix4();
+    list.forEach((p, i) => {
+      const e = new THREE.Euler(p.rotation?.[0] || 0, p.rotation?.[1] || 0, p.rotation?.[2] || 0);
+      m.compose(
+        new THREE.Vector3(p.position?.[0] || 0, p.position?.[1] || 0, p.position?.[2] || 0),
+        new THREE.Quaternion().setFromEuler(e),
+        new THREE.Vector3(Math.abs(p.scale?.[0] || 1), Math.abs(p.scale?.[1] || 1), Math.abs(p.scale?.[2] || 1)),
+      );
+      mesh.setMatrixAt(i, m);
+      const c = p.color || [1, 1, 1, 1];
+      mesh.setColorAt(i, new THREE.Color(c[0], c[1], c[2]));
+    });
+    mesh.frustumCulled = false;
+    return mesh;
+  };
+  return { opaque: build(opaque, false, name), glassy: build(glassy, true, `${name}-glass`) };
+}
+
 /** One neighbour floor, rendered as a faithful box-proxy of its real
  * published layout at its true height in the tower. */
 function NeighborProxy({ floor, currentId }: { floor: FloorDef; currentId: number }) {
@@ -133,45 +167,42 @@ function NeighborProxy({ floor, currentId }: { floor: FloorDef; currentId: numbe
     return () => { live = false; };
   }, [floor]);
 
-  const meshes = useMemo(() => {
-    if (!prims) return null;
-    const opaque = prims.filter((p) => (p.color?.[3] ?? 1) >= 0.99);
-    const glassy = prims.filter((p) => (p.color?.[3] ?? 1) < 0.99);
-    const build = (list: PrimitiveObject[], transparent: boolean, name: string) => {
-      if (!list.length) return null;
-      const mesh = new THREE.InstancedMesh(
-        new THREE.BoxGeometry(1, 1, 1),
-        transparent
-          ? new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.3, depthWrite: false })
-          : new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0.05 }),
-        list.length,
-      );
-      mesh.name = name;
-      const m = new THREE.Matrix4();
-      list.forEach((p, i) => {
-        const e = new THREE.Euler(p.rotation?.[0] || 0, p.rotation?.[1] || 0, p.rotation?.[2] || 0);
-        m.compose(
-          new THREE.Vector3(p.position?.[0] || 0, p.position?.[1] || 0, p.position?.[2] || 0),
-          new THREE.Quaternion().setFromEuler(e),
-          new THREE.Vector3(Math.abs(p.scale?.[0] || 1), Math.abs(p.scale?.[1] || 1), Math.abs(p.scale?.[2] || 1)),
-        );
-        mesh.setMatrixAt(i, m);
-        const c = p.color || [1, 1, 1, 1];
-        mesh.setColorAt(i, new THREE.Color(c[0], c[1], c[2]));
-      });
-      mesh.frustumCulled = false;
-      return mesh;
-    };
-    return {
-      opaque: build(opaque, false, "building-neighbor-proxy"),
-      glassy: build(glassy, true, "building-neighbor-proxy-glass"),
-    };
-  }, [prims]);
+  const meshes = useMemo(() => (prims ? proxyMeshes(prims, "building-neighbor-proxy") : null), [prims]);
 
   if (!meshes) return null;
   const y = (floor.id - currentId) * FLOOR_H;
   return (
     <group position={[0, y, 0]}>
+      {meshes.opaque && <primitive object={meshes.opaque} />}
+      {meshes.glassy && <primitive object={meshes.glassy} />}
+    </group>
+  );
+}
+
+/** The BUILDING PLAZA at the tower's base in the live office: the
+ * plaza level's own scene (published building-plaza.json when it
+ * exists, the code seed otherwise) as a box-proxy at ground level,
+ * so looking down from any floor the building lands on its plaza —
+ * podium, fountain, planters and the theater screen included. */
+function PlazaBase({ currentId }: { currentId: number }) {
+  const [prims, setPrims] = useState<PrimitiveObject[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      let found: PrimitiveObject[] | null = null;
+      try {
+        const r = await fetch(publishedWorldUrl("building-plaza.json"));
+        if (r.ok) found = primitivesOf(await r.json());
+      } catch { /* fall through to the code scene */ }
+      if (!found) { try { found = primitivesOf(buildBuildingPlazaScene()); } catch { /* no plaza */ } }
+      if (live) setPrims(found);
+    })();
+    return () => { live = false; };
+  }, []);
+  const meshes = useMemo(() => (prims ? proxyMeshes(prims, "building-plaza-base") : null), [prims]);
+  if (!meshes) return null;
+  return (
+    <group position={[0, (0 - currentId) * FLOOR_H, 0]}>
       {meshes.opaque && <primitive object={meshes.opaque} />}
       {meshes.glassy && <primitive object={meshes.glassy} />}
     </group>
@@ -190,6 +221,7 @@ export default function BuildingShell({ currentFloorId }: { currentFloorId: numb
       {neighbors.map((f) => (
         <NeighborProxy key={f.key} floor={f} currentId={currentFloorId} />
       ))}
+      <PlazaBase currentId={currentFloorId} />
     </group>
   );
 }

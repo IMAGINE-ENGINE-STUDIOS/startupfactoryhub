@@ -419,6 +419,90 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
   return getLocalLevel(existing.id) ?? existing;
 }
 
+/** The BUILDING PLAZA — the ground level of the Startup Office
+ * building (founder directive 2026-10-26): a level of the building
+ * just like /plaza is a world, holding the plaza scenario (stone
+ * paving, the podium the tower stands on, fountain, planters, benches,
+ * lamps) PLUS the same theater screen the office floors have. No
+ * voting booth, no fake chairs — her words. The podium top sits at
+ * local y=8 so in the stacked building view it meets Floor 1's slab
+ * exactly, and the tower rises out of it. */
+export const BUILDING_PLAZA_LEVEL_NAME = "Building Plaza";
+
+export function buildBuildingPlazaScene(): LevelScene {
+  n = 0;
+  const o: PrimitiveObject[] = [];
+  o.push(P("Plaza Paving", "box", [0, -0.6, 0], [190, 1.2, 130], "#b7ab9c", { roughness: 1 }));
+  o.push(P("Tower Podium", "box", [0, 4, 0], [64, 8, 46], "#8d97a3", { roughness: 0.9 }));
+  // Fountain, south of the podium.
+  o.push(P("Fountain Rim", "cylinder", [0, 0.55, 34], [22, 1.1, 22], "#d8d2c6", { roughness: 0.8 }));
+  o.push(P("Fountain Water", "cylinder", [0, 1.05, 34], [19.6, 0.25, 19.6], "#5f9ec4", { roughness: 0.15, metalness: 0.1 }));
+  o.push(P("Fountain Spout", "cylinder", [0, 1.6, 34], [1.2, 1.6, 1.2], "#d8d2c6", { roughness: 0.8 }));
+  // Planters with trees.
+  for (const px of [-52, -30, 30, 52]) for (const pz of [-34, 0, 34]) {
+    o.push(P("Planter", "box", [px, 0.5, pz], [4.4, 1, 4.4], "#6b5d4f", { roughness: 1 }));
+    o.push(P("Tree Trunk", "cylinder", [px, 1.6, pz], [0.55, 1.6, 0.55], "#5a4632", { roughness: 1 }));
+    o.push(P("Tree Canopy", "sphere", [px, 3.9, pz], [4.6, 4.6, 4.6], "#4e7d4a", { roughness: 1 }));
+  }
+  // Benches.
+  for (const [px, pz] of [[-16, 34], [16, 34], [-24, -30], [24, -30]] as [number, number][]) {
+    o.push(P("Bench", "box", [px, 0.45, pz], [4.6, 0.35, 1.3], "#7a6248", { roughness: 0.9 }));
+  }
+  // Lamp posts.
+  for (const [px, pz] of [[-40, -22], [40, -22], [-40, 22], [40, 22], [0, -40], [0, 40]] as [number, number][]) {
+    o.push(P("Lamp Post", "cylinder", [px, 2.4, pz], [0.22, 4.8, 0.22], "#2c3540", { roughness: 0.6, metalness: 0.5 }));
+    o.push(P("Lamp Globe", "sphere", [px, 5, pz], [0.85, 0.85, 0.85], "#ffe9b0", { roughness: 0.4 }));
+  }
+  // THE THEATER SCREEN — the same one as the office floors (same size,
+  // same build), standing at the plaza's north end facing the tower,
+  // on its two pylons. No voting booth, no fake chairs.
+  o.push(P("Theater Screen", "box", [0, 3.55, -44], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
+  o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -44], [0.35, 6.6, 0.35], "#0a0f16"));
+  o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -44], [0.35, 6.6, 0.35], "#0a0f16"));
+  return {
+    ...EMPTY_SCENE,
+    skybox: { ...DEFAULT_SKYBOX },
+    objects: o as any,
+    lights: [
+      { id: "plaza_sun", name: "Sunlight", kind: "directional", position: [26, 34, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
+      { id: "plaza_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.8 },
+    ],
+    environment: {
+      ...EMPTY_SCENE.environment,
+      background: "#cfe2ef",
+      ambient: 0.8,
+      gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.8, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
+    },
+  };
+}
+
+/** The Building Plaza's OWN published scene (building-plaza.json).
+ * Null until an admin first publishes the level. */
+export async function fetchPublishedBuildingPlazaScene(): Promise<LevelScene | null> {
+  const m = await fetchPublishedOfficeMeta(publishedWorldUrl("building-plaza.json"));
+  return m?.scene ?? null;
+}
+
+/** The editable Building Plaza level always opens on its CURRENT
+ * published scene; a divergent local copy is first preserved as a
+ * draft level. Same rule as Floors 100 and 99. */
+export async function syncBuildingPlazaLevelToPublished(): Promise<LocalLevelRecord> {
+  const publishedScene = stripRetiredBackground(await fetchPublishedBuildingPlazaScene());
+  let existing = resolveWorldSyncLevel("officeplaza", BUILDING_PLAZA_LEVEL_NAME);
+  if (!existing) {
+    existing = _ensure(publishedScene ? () => publishedScene : buildBuildingPlazaScene, BUILDING_PLAZA_LEVEL_NAME);
+    setBoundWorldKey(existing.id, "officeplaza");
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, "officeplaza");
+  if (!publishedScene) return existing;
+  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
+    preserveLocalDraft(existing, BUILDING_PLAZA_LEVEL_NAME, "Local edits preserved when the Building Plaza level was re-synced to the published version");
+    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
+  }
+  return getLocalLevel(existing.id) ?? existing;
+}
+
 /** A department floor's editable level, same published-mirror rule as
  * every named level: it opens on its published scene when one exists,
  * and otherwise seeds from the bare room (Manager only) until the

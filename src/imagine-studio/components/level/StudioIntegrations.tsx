@@ -184,7 +184,10 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
     const worlds = buildingLevels(namedWorld);
     const taken = new Set<string>();
     for (const w of worlds) { const id = findWorldLevelId(w.key); if (id) taken.add(id); }
-    const lowest = Math.min(...worlds.map((w) => w.floor ?? 100));
+    /* Extras stack below the lowest OFFICE floor — the Building Plaza
+     * (floor 0) is the ground and never counts, or extras would land
+     * underneath it. */
+    const lowest = Math.min(...worlds.map((w) => w.floor ?? 100).filter((f) => f >= 1));
     return levelsOfProject(proj.id)
       .filter((l) => l.id !== levelId && !taken.has(l.id) && !/— local draft/i.test(l.name) && getBoundWorldKey(l.id) !== "plaza")
       .map((l, i) => ({ id: l.id, name: l.name, floor: lowest - 1 - i, scene: l.scene }));
