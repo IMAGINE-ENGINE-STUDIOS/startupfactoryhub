@@ -34,6 +34,10 @@ export interface PlayerWorld {
 export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookRef: React.MutableRefObject<{ yaw: number; pitch: number }>, opts?: {
   onMove?: (x: number, z: number, yaw: number, moving: boolean) => void;
   onMovingChange?: (moving: boolean) => void;
+  /** When set, the player is SEATED: pinned to the seat (position +
+   * facing eased), movement input and jumping are suspended, and the
+   * camera keeps orbiting the seated user. */
+  seatRef?: React.MutableRefObject<{ x: number; z: number; ry: number; y: number } | null>;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const stateRef = useRef({ moving: false, sprint: false, speed: 0 });
@@ -84,7 +88,19 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
     const wx = iz * sin - ix * cos, wz = iz * cos + ix * sin;
     const speed = def.walkSpeed * (sprint ? def.sprintMultiplier : 1) * speedMult.current;
     speedMult.current = 1;
-    const hasInput = Math.abs(wx) + Math.abs(wz) > 0.05;
+    // SEATED: ease onto the chair and hold — no walking, no jumping,
+    // the orbit camera keeps working around the seated user.
+    const seat = opts?.seatRef?.current;
+    if (seat) {
+      const kp = Math.min(1, dt * 7);
+      g.position.x += (seat.x - g.position.x) * kp;
+      g.position.z += (seat.z - g.position.z) * kp;
+      g.position.y += (seat.y - g.position.y) * kp;
+      let dy = seat.ry - g.rotation.y; while (dy > Math.PI) dy -= Math.PI * 2; while (dy < -Math.PI) dy += Math.PI * 2;
+      g.rotation.y += dy * kp;
+      vel.current.x = 0; vel.current.z = 0;
+    }
+    const hasInput = !seat && Math.abs(wx) + Math.abs(wz) > 0.05;
     const kv = 1 - Math.exp(-dt * 8);
     vel.current.x += ((hasInput ? wx * speed : 0) - vel.current.x) * kv;
     vel.current.z += ((hasInput ? wz * speed : 0) - vel.current.z) * kv;
@@ -93,7 +109,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
     // Jump: buffered + coyote time, height from the controller definition.
     if (grounded.current) coyote.current = 0.12; else coyote.current = Math.max(0, coyote.current - dt);
     if (k[' '] || mobileAxes.jump) jumpBuf.current = 0.15; else jumpBuf.current = Math.max(0, jumpBuf.current - dt);
-    if (def.canJump && jumpBuf.current > 0 && coyote.current > 0) {
+    if (!seat && def.canJump && jumpBuf.current > 0 && coyote.current > 0) {
       vy.current = Math.sqrt(2 * 22 * Math.max(0.1, def.jumpHeight));
       grounded.current = false; coyote.current = 0; jumpBuf.current = 0;
     }
@@ -160,7 +176,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
   return { groupRef, stateRef };
 }
 
-export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, ring = '#f59e0b', name, world, lookRef, onMove }: {
+export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, ring = '#f59e0b', name, world, lookRef, onMove, seatRef }: {
   def: ControllerDef;
   model?: string;
   tint?: string;
@@ -169,6 +185,7 @@ export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, rin
   world: PlayerWorld;
   lookRef: React.MutableRefObject<{ yaw: number; pitch: number }>;
   onMove?: (x: number, z: number, yaw: number, moving: boolean) => void;
+  seatRef?: React.MutableRefObject<{ x: number; z: number; ry: number; y: number } | null>;
 }) {
   const { scene, animations } = useGLTF(model);
   const modelObj = useMemo(() => {
@@ -197,15 +214,29 @@ export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, rin
     return m;
   }, [scene, tint]);
   const animRoot = useRef<THREE.Group>(null);
+  const sitHeld = useRef(false);
   const { actions, names } = useAnimations(animations, animRoot);
-  const { groupRef, stateRef } = useUnifiedMovement(def, world, lookRef, { onMove });
+  const { groupRef, stateRef } = useUnifiedMovement(def, world, lookRef, { onMove, seatRef });
   useFrame(() => {
     const { moving, sprint } = stateRef.current;
     const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
     const runName = names.find((x) => /run/i.test(x));
     const walkName = names.find((x) => /walk/i.test(x)) ?? idleName;
-    const want = !moving ? idleName : (sprint && runName ? runName : walkName);
+    const sitName = seatRef?.current ? (names.find((x) => /sitting/i.test(x)) ?? null) : null;
+    const want = sitName ?? (!moving ? idleName : (sprint && runName ? runName : walkName));
     const a = want ? actions[want] : undefined;
+    if (a && sitName) {
+      // The Sitting clip is a sit-DOWN transition: play once and clamp
+      // on its final frame — never loop it (same law as the bots).
+      if (!sitHeld.current) {
+        sitHeld.current = true;
+        Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); });
+        a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true;
+        a.reset().fadeIn(0.2).play();
+      }
+      return;
+    }
+    sitHeld.current = false;
     if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
   });
   const spawn = world.spawn ?? [0, 0, 0];

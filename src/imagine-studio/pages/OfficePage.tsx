@@ -17,7 +17,7 @@ import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-t
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
+import { Armchair, Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
@@ -390,7 +390,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
 }
 
 /* ---------------- Social presence (Plaza parity) ---------------- */
-type PeerInfo = { x: number; z: number; ry: number; m: boolean; n: string; c: string };
+type PeerInfo = { x: number; z: number; ry: number; m: boolean; n: string; c: string; s?: boolean };
 const PEER_COLORS = ['#f59e0b', '#38bdf8', '#a78bfa', '#34d399', '#fb7185', '#facc15', '#f472b6', '#4ade80'];
 const colorFor = (id: string) => { let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return PEER_COLORS[Math.abs(h) % PEER_COLORS.length]; };
 const playerYaw = { current: 0 };
@@ -413,15 +413,30 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
   }, [scene, info.c]);
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
+  const peerSitHeld = useRef(false);
   const cur = useRef(new THREE.Vector3(info.x, 0, info.z));
   useFrame((_, dt) => {
     const g = root.current; if (!g) return;
     const k = Math.min(1, dt * 8);
     cur.current.x += (info.x - cur.current.x) * k;
     cur.current.z += (info.z - cur.current.z) * k;
-    g.position.set(cur.current.x, 0, cur.current.z);
+    g.position.set(cur.current.x, info.s ? 0.671 : 0, cur.current.z);
     let diff = info.ry - g.rotation.y; while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
     g.rotation.y += diff * k;
+    if (info.s) {
+      // Seated peer: the sitting clip plays once and holds its last
+      // frame (same law as the bots and the local player).
+      const sit = names.find((x) => /sitting/i.test(x)) ?? null;
+      const a = sit ? actions[sit] : null;
+      if (a && !peerSitHeld.current) {
+        peerSitHeld.current = true;
+        Object.values(actions).forEach((x) => { if (x && x !== a) x.fadeOut(0.2); });
+        a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true;
+        a.reset().fadeIn(0.2).play();
+      }
+      return;
+    }
+    peerSitHeld.current = false;
     const clip = info.m ? (names.find((x) => /walk/i.test(x)) ?? names[0]) : (names.find((x) => /idle/i.test(x)) ?? names[0]);
     const a = clip ? actions[clip] : undefined;
     if (a && !a.isRunning()) { Object.values(actions).forEach((x) => x?.fadeOut(0.2)); a.reset().fadeIn(0.2).play(); }
@@ -942,19 +957,64 @@ export default function OfficePage() {
   };
   const bots = useMemo(() => {
     const chars = (scene?.objects || []).filter((o: any) => o.kind === 'character');
-    const chairs = (scene?.objects || []).filter((o: any) => /^Agent Chair \d+$/.test(o.name || ''));
+    // Chairs are fused INTO the station objects now: the chair spot is
+    // the station position + its local (0, 0, 0.85) rotated by the
+    // station's Y rotation, and the seat top is the fused part's 0.56.
+    const stations = (scene?.objects || []).filter((o: any) => /^Agent Station \d+$/.test(o.name || ''));
+    const chairs = stations.map((st: any) => {
+      const ry = st.rotation?.[1] ?? 0;
+      return { position: [st.position[0] + Math.sin(ry) * 0.85, 0.56, st.position[2] + Math.cos(ry) * 0.85] };
+    });
     return floor.bots.map((bot, i) => {
       const c = chars.find((o: any) => (o.name || '').toLowerCase().includes(bot.name.toLowerCase())) || chars[i];
       const home: [number, number, number] = c ? [c.position[0], 0, c.position[2]] : [OFFICE_DESKS[i].x, 0, OFFICE_DESKS[i].z + OFFICE_DESKS[i].facing * 0.85];
       const rotY = c ? (c.rotation?.[1] ?? 0) : (OFFICE_DESKS[i].facing === 1 ? Math.PI : 0);
-      // Seat height from the nearest chair object (top surface), fallback standard.
+      // Seat height from the nearest fused station's chair (its top is
+      // the constant 0.56 from the station part spec), fallback standard.
       let seatY = 0.52; let bd = 1.6;
-      for (const ch of chairs) { const d = Math.hypot(ch.position[0] - home[0], ch.position[2] - home[2]); if (d < bd) { bd = d; seatY = ch.position[1] + (ch.scale?.[1] ?? 0.07) / 2; } }
+      for (const ch of chairs) { const d = Math.hypot(ch.position[0] - home[0], ch.position[2] - home[2]); if (d < bd) { bd = d; seatY = ch.position[1]; } }
       return { bot: displayBot(floor, bot), home, rotY, seatY };
     });
   }, [scene, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openBot, setOpenBot] = useState<OfficeBot | null>(null);
+  // SIT AT AN EMPTY DESK (founder directive 2026-10-26): the user can
+  // take any station no agent is assigned to. seatRef pins the player
+  // (UnifiedPlayer eases onto the chair and plays the sitting clip);
+  // peers receive s=1 in the position broadcast and render the same.
+  const seatRef = useRef<{ x: number; z: number; ry: number; y: number } | null>(null);
+  const [seatedAt, setSeatedAt] = useState<number | null>(null);
+  const [nearSeat, setNearSeat] = useState<number | null>(null);
+  const seatSpots = useMemo(() => OFFICE_DESKS.map((d, i) => ({ i, x: d.x, z: d.z + d.facing * 0.85, ry: d.facing === 1 ? Math.PI : 0 })), []);
+  const sitAt = (i: number) => { const s = seatSpots[i]; if (!s) return; seatRef.current = { x: s.x, z: s.z, ry: s.ry, y: 0.671 }; setSeatedAt(i); setNearSeat(null); };
+  const standUp = () => { seatRef.current = null; setSeatedAt(null); };
+  useEffect(() => {
+    if (seatedAt != null) return;
+    const iv = setInterval(() => {
+      let best: number | null = null; let bd = 1.7;
+      for (const s of seatSpots) {
+        const takenByBot = bots.some((b) => Math.hypot(b.home[0] - s.x, b.home[2] - s.z) < 0.6);
+        if (takenByBot) continue;
+        let takenByPeer = false;
+        peersRef.current.forEach((p) => { if (Math.hypot(p.x - s.x, p.z - s.z) < 0.6) takenByPeer = true; });
+        if (takenByPeer) continue;
+        const d = Math.hypot(playerPos.x - s.x, playerPos.z - s.z);
+        if (d < bd) { bd = d; best = s.i; }
+      }
+      setNearSeat((cur) => (cur === best ? cur : best));
+    }, 350);
+    return () => clearInterval(iv);
+  }, [seatedAt, bots, seatSpots]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (seatedAt == null) return;
+    const dn = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (['w', 'a', 's', 'd', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) standUp();
+    };
+    window.addEventListener('keydown', dn);
+    return () => window.removeEventListener('keydown', dn);
+  }, [seatedAt]); // eslint-disable-line react-hooks/exhaustive-deps
   const [shiftOpen, setShiftOpen] = useState(false);
   const [panelView, setPanelView] = useState<'genius' | 'console'>('genius');
   useEffect(() => { setPanelView('genius'); }, [openBot?.key]);
@@ -1060,7 +1120,7 @@ export default function OfficePage() {
             const m = JSON.parse(dec.decode(payload));
             if (!m) return;
             if (m.t === 'pos' && p?.identity && socialRef.current.presence) {
-              peersRef.current.set(p.identity, { x: +m.x || 0, z: +m.z || 0, ry: +m.ry || 0, m: !!m.m, n: String(m.n || 'Guest'), c: String(m.c || '#38bdf8') });
+              peersRef.current.set(p.identity, { x: +m.x || 0, z: +m.z || 0, ry: +m.ry || 0, m: !!m.m, n: String(m.n || 'Guest'), c: String(m.c || '#38bdf8'), s: !!m.s });
               setPeers(Object.fromEntries(peersRef.current));
               return;
             }
@@ -1099,7 +1159,7 @@ export default function OfficePage() {
           const moved = Math.hypot(playerPos.x - lx, playerPos.z - lz) > 0.02;
           if (!moved && Math.random() > 0.1) return;
           lx = playerPos.x; lz = playerPos.z;
-          r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'pos', x: +playerPos.x.toFixed(2), z: +playerPos.z.toFixed(2), ry: +playerYaw.current.toFixed(2), m: moved, n: nameRef.current, c: myColorRef.current })), { reliable: false }).catch(() => {});
+          r.localParticipant.publishData(enc.encode(JSON.stringify({ t: 'pos', x: +playerPos.x.toFixed(2), z: +playerPos.z.toFixed(2), ry: +playerYaw.current.toFixed(2), m: moved, n: nameRef.current, c: myColorRef.current, s: seatRef.current ? 1 : 0 })), { reliable: false }).catch(() => {});
         }, 120);
         volTimer = setInterval(() => {
           audioEls.current.forEach((el, key) => {
@@ -1686,7 +1746,7 @@ export default function OfficePage() {
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
           {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} board={boardRows} screenQueue={screenQueue} onPages={setPdfPages} />}
-          {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
+          {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" seatRef={seatRef} world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
@@ -1905,6 +1965,21 @@ export default function OfficePage() {
         </div>
       )}
 
+      {/* Sit / stand at an empty desk (founder directive 2026-10-26). */}
+      {(seatedAt != null || nearSeat != null) && (
+        <div data-office-ui className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-6 z-20">
+          {seatedAt != null ? (
+            <button onClick={standUp} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+              <Armchair className="w-4 h-4 text-emerald-400" /> You're seated — stand up
+            </button>
+          ) : (
+            <button onClick={() => nearSeat != null && sitAt(nearSeat)} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+              <Armchair className="w-4 h-4 text-emerald-400" /> Sit at this desk
+            </button>
+          )}
+        </div>
+      )}
+
       {/* The Team dropdown (founder directive 2026-10-25 — simplified
           chrome): the Manager's Shift Control and the executive suite
           (CEO of this company, Chairman of the building) live behind
@@ -1930,12 +2005,6 @@ export default function OfficePage() {
             </div>
           )}
           <div className="flex items-center gap-2">
-            {/* Direct Manager button (founder report 2026-10-26: the
-                Manager must be one tap away, not only inside the Team
-                menu or by tapping his character). */}
-            <button onClick={() => { closeMenus(); setShiftOpen(true); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
-              <Briefcase className="w-4 h-4 text-[#FFD166]" /> Manager
-            </button>
             <button onClick={() => { setTeamMenu((o) => !o); setBuildingMenu(false); setOfficeMenu(false); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
               <Users className="w-4 h-4" /> Team
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${teamMenu ? 'rotate-180' : ''}`} />

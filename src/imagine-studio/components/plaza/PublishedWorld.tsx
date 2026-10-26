@@ -35,6 +35,27 @@ function Geo({ shape }) {
   }
 }
 
+import { buildAssembly, buildFrameGridGeometry } from '@/imagine-studio/lib/fusedGeometry';
+
+/** A fused single-instance object (founder directives 2026-10-26):
+ * window frames ("framegrid") and multi-part assemblies (desk stations)
+ * render as ONE mesh with per-part materials — never as loose pieces,
+ * and never as a plain box. */
+function FusedMesh({ o }) {
+  const built = useMemo(() => {
+    if (o.shape === 'assembly') return buildAssembly(o);
+    return { geometry: buildFrameGridGeometry(o.scale?.[0] ?? 1), materials: null };
+  }, [o]);
+  const a = Array.isArray(o.color) ? o.color[3] ?? 1 : 1;
+  return (
+    <mesh position={o.position} rotation={o.rotation} scale={o.shape === 'assembly' ? [1, 1, 1] : o.scale} geometry={built.geometry} castShadow receiveShadow>
+      {built.materials
+        ? built.materials.map((m, i) => <primitive key={i} attach={`material-${i}`} object={m} />)
+        : <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} />}
+    </mesh>
+  );
+}
+
 function Model({ o }) {
   const { scene } = useGLTF(o.url);
   const m = useMemo(() => scene.clone(true), [scene]);
@@ -132,6 +153,7 @@ export function PublishedWorld({ scene, renderCharacters = true, onAgentOpen }: 
       {(scene.lights || []).filter((l) => l.kind === 'point').map((l) => <pointLight key={l.id} position={l.position} color={col(l.color)} intensity={l.intensity} distance={30} />)}
       {scene.objects.filter((o) => o.visible !== false && !o.theater && !/theater\s*screen/i.test(o.name || '')).map((o) => {
         if (o.kind === 'primitive') {
+          if (o.shape === 'framegrid' || o.shape === 'assembly') return <FusedMesh key={o.id} o={o} />;
           const a = Array.isArray(o.color) ? o.color[3] ?? 1 : 1;
           return (
             <mesh key={o.id} position={o.position} rotation={o.rotation} scale={o.scale} castShadow receiveShadow>

@@ -59,7 +59,7 @@ wp,patrol,4,0.5,4
 wp,patrol,0,0.5,4
 `;
 
-const PRIMITIVE_SHAPES = ["box", "sphere", "plane", "cylinder", "cone", "torus", "framegrid"] as const;
+const PRIMITIVE_SHAPES = ["box", "sphere", "plane", "cylinder", "cone", "torus", "framegrid", "assembly"] as const;
 export type PrimitiveShape = typeof PRIMITIVE_SHAPES[number];
 
 export interface PrimitiveRow {

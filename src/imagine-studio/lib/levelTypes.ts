@@ -281,10 +281,26 @@ export interface PrimitiveObject extends BaseObject {
   kind: "primitive";
   /** Drop-in theater screen: shows a screen share, image or PDF on the face. */
   theater?: boolean;
-  shape: "box" | "sphere" | "plane" | "cylinder" | "cone" | "torus" | "framegrid";
+  shape: "box" | "sphere" | "plane" | "cylinder" | "cone" | "torus" | "framegrid" | "assembly";
   color: RGBA;
   metalness: number;
   roughness: number;
+  /** Fused single-instance parts (shape "assembly"): authored in the
+   * object's local space, merged into one geometry with per-part
+   * materials by lib/fusedGeometry. */
+  parts?: AssemblyPart[];
+}
+
+export interface AssemblyPart {
+  shape: "box" | "sphere" | "plane" | "cylinder" | "cone" | "torus";
+  position: [number, number, number];
+  scale: [number, number, number];
+  rotation?: [number, number, number];
+  color: RGBA;
+  roughness?: number;
+  metalness?: number;
+  emissive?: RGBA;
+  emissiveIntensity?: number;
 }
 
 export interface PolygonFace {

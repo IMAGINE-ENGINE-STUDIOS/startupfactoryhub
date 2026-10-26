@@ -27,7 +27,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 10;
+export const OFFICE_SCENE_VERSION = 11;
 
 /** Scene objects RETIRED by later founder directives, stripped wherever
  * a published scene is consumed (live merge + editor sync), so an old
@@ -234,24 +234,38 @@ export function buildOfficeScene(): LevelScene {
   o.push(P("Floor Glow S", "box", [0, 0.03, 15.85], [47.5, 0.04, 0.1], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow W", "box", [-23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
   o.push(P("Floor Glow E", "box", [23.85, 0.03, 0], [0.1, 0.04, 31.5], "#02141a", { emissive: hex("#00e5ff"), emissiveIntensity: 0.8 } as any));
-  // 20 agent stations: desk, monitor with a glowing dashboard screen, chair, bot.
+  // 20 agent stations — desk, screen and chair FUSED into ONE object
+  // each (founder directive 2026-10-26): an "assembly" whose parts are
+  // merged into a single geometry with per-part materials. The chair is
+  // built for THIS character (directive 2026-10-25): a wide seat the
+  // belly rests on (top at 0.56 — OfficePage derives seatY from the
+  // station), pedestal + base visible under the body, and the back is
+  // ATTACHED (founder fix 2026-10-26): its front face sits flush with
+  // the seat's rear edge and it runs from y 0.30 to 1.54, one solid
+  // panel with the seat — close enough to read as one chair, far
+  // enough (rear edge 1.375) that the body never swallows it.
+  const part = (shape: string, position: number[], scale: number[], colorHex: string, extra: any = {}) => ({
+    shape, position, scale, rotation: extra.rotation ?? [0, 0, 0], color: hex(colorHex),
+    roughness: extra.roughness, metalness: extra.metalness,
+    ...(extra.emissive ? { emissive: hex(extra.emissive), emissiveIntensity: extra.emissiveIntensity ?? 1 } : {}),
+  });
   OFFICE_DESKS.forEach((d, i) => {
-    const k = i + 1, f = d.facing;
-    o.push(P(`Agent Desk ${k}`, "box", [d.x, 0.74, d.z], [1.7, 0.06, 0.85], "#0e1626", { roughness: 0.6, metalness: 0.2 }));
-    o.push(P(`Agent Desk ${k} Leg L`, "box", [d.x - 0.75, 0.37, d.z], [0.07, 0.74, 0.75], "#070d16"));
-    o.push(P(`Agent Desk ${k} Leg R`, "box", [d.x + 0.75, 0.37, d.z], [0.07, 0.74, 0.75], "#070d16"));
-    o.push(P(`Agent Screen ${k}`, "box", [d.x, 1.18, d.z - f * 0.22], [0.98, 0.58, 0.04], "#04070c", { rotation: [f * -0.1, f === 1 ? Math.PI : 0, 0], roughness: 0.3, metalness: 0.3 }));
-    o.push(P(`Agent Screen ${k} Glow`, "box", [d.x, 1.18, d.z - f * 0.19], [0.9, 0.5, 0.015], "#062a33", { rotation: [f * -0.1, f === 1 ? Math.PI : 0, 0], roughness: 0.4, emissive: hex("#00e5ff"), emissiveIntensity: 1.5 } as any));
-    o.push(P(`Agent Screen ${k} Stand`, "box", [d.x, 0.92, d.z - f * 0.22], [0.08, 0.36, 0.08], "#0a1018"));
-    // A chair built for THIS character (founder directive 2026-10-25): a
-    // wide seat the belly actually rests on (top at 0.56 — OfficePage's
-    // seatY reads it from this object), a pedestal + base that stay
-    // visible under the body, and a tall back placed BEHIND the body's
-    // surface (home + 1.50) so the body can no longer swallow it.
-    o.push(P(`Agent Chair ${k}`, "box", [d.x, 0.52, d.z + f * 0.85], [1.05, 0.08, 1.05], "#111c2c", { roughness: 0.9 }));
-    o.push(P(`Agent Chair ${k} Pedestal`, "box", [d.x, 0.24, d.z + f * 0.85], [0.46, 0.48, 0.46], "#0d1622", { roughness: 0.9 }));
-    o.push(P(`Agent Chair ${k} Base`, "box", [d.x, 0.025, d.z + f * 0.85], [0.84, 0.05, 0.84], "#0d1622", { roughness: 0.9 }));
-    o.push(P(`Agent Chair ${k} Back`, "box", [d.x, 1.03, d.z + f * 1.50], [0.98, 0.98, 0.09], "#0d1622", { roughness: 0.9 }));
+    const k = i + 1;
+    o.push(P(`Agent Station ${k}`, "assembly" as any, [d.x, 0, d.z], [1, 1, 1], "#0e1626", {
+      rotation: [0, d.facing === 1 ? 0 : Math.PI, 0],
+      parts: [
+        part("box", [0, 0.74, 0], [1.7, 0.06, 0.85], "#0e1626", { roughness: 0.6, metalness: 0.2 }),
+        part("box", [-0.75, 0.37, 0], [0.07, 0.74, 0.75], "#070d16"),
+        part("box", [0.75, 0.37, 0], [0.07, 0.74, 0.75], "#070d16"),
+        part("box", [0, 1.18, -0.22], [0.98, 0.58, 0.04], "#04070c", { rotation: [-0.1, 0, 0], roughness: 0.3, metalness: 0.3 }),
+        part("box", [0, 1.18, -0.19], [0.9, 0.5, 0.015], "#062a33", { rotation: [-0.1, 0, 0], roughness: 0.4, emissive: "#00e5ff", emissiveIntensity: 1.5 }),
+        part("box", [0, 0.92, -0.22], [0.08, 0.36, 0.08], "#0a1018"),
+        part("box", [0, 0.52, 0.85], [1.05, 0.08, 1.05], "#111c2c", { roughness: 0.9 }),
+        part("box", [0, 0.24, 0.85], [0.46, 0.48, 0.46], "#0d1622", { roughness: 0.9 }),
+        part("box", [0, 0.025, 0.85], [0.84, 0.05, 0.84], "#0d1622", { roughness: 0.9 }),
+        part("box", [0, 0.92, 1.42], [0.98, 1.24, 0.09], "#0d1622", { roughness: 0.9 }),
+      ],
+    } as any));
   });
   // (The old entrance glazing went here — removed with the bay itself,
   // founder directive 2026-10-26; the south wall above now runs framed
