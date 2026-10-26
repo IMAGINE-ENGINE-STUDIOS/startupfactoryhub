@@ -202,26 +202,70 @@ function neuralChunks(clean: string): string[] {
   return chunks.filter(Boolean);
 }
 
+/* Generation pipeline (founder field report 2026-10-26: "pauses after
+ * every point '.' for several seconds"). The old flow generated each
+ * sentence only after the previous one finished PLAYING, so every
+ * sentence boundary cost a full Kokoro generation in dead silence.
+ * Now generation runs through a FIFO chain decoupled from playback:
+ * prepareSpeech() starts generating upcoming sentences while the
+ * current one plays, and speak() consumes the pre-generated audio.
+ * Generation itself stays serialized (one model instance is not
+ * reentrant) — it just never waits for playback anymore. */
+let genChain: Promise<void> = Promise.resolve();
+const preparedSpeech = new Map<string, Promise<Promise<any>[]>>();
+
+/** Queue generation jobs on the FIFO chain and return their promises.
+ * Jobs START as the chain reaches them (enqueue time, not await
+ * time), so preparing a sentence begins its generation immediately;
+ * awaiting job[i] yields that chunk while later jobs keep running. */
+function enqueueGeneration(tts: any, chunks: string[], voice: string): Promise<any>[] {
+  return chunks.map((c) => {
+    const p = genChain.then(() => tts.generate(c, { voice }).catch(() => null));
+    genChain = p.then(() => undefined, () => undefined);
+    return p;
+  });
+}
+
+/** Start generating this text's audio NOW (playback comes later, via
+ * speak). No-op unless the neural engine is selected. Bounded cache. */
+export function prepareSpeech(text: string, persona: VoicePersona = DEFAULT_PERSONA): void {
+  if (speechEngine(getVoiceModel()) !== "kokoro") return;
+  const clean = stripForSpeech(text);
+  if (!clean) return;
+  const voice = KOKORO_VOICE_FOR_PERSONA[persona.id] || "af_heart";
+  const key = voice + ":" + clean;
+  if (preparedSpeech.has(key)) return;
+  const p = (async () => {
+    const tts = await loadKokoro();
+    return enqueueGeneration(tts, neuralChunks(clean), voice);
+  })();
+  p.catch(() => { preparedSpeech.delete(key); });
+  preparedSpeech.set(key, p);
+  if (preparedSpeech.size > 8) {
+    const oldest = preparedSpeech.keys().next().value;
+    if (oldest && oldest !== key) preparedSpeech.delete(oldest);
+  }
+}
+
 /** Speak with the neural voice; throws on any model problem (caller falls back). */
 async function speakNeural(text: string, persona: VoicePersona, mySeq: number): Promise<void> {
   const clean = stripForSpeech(text);
   if (!clean) return;
-  const tts = await loadKokoro();
   const voice = KOKORO_VOICE_FOR_PERSONA[persona.id] || "af_heart";
-  const chunks = neuralChunks(clean);
-  const gen = (t: string) => tts.generate(t, { voice }).catch(() => null);
-  /* Prefetch one chunk ahead: while chunk N plays, chunk N+1 is already
-   * generating — a long reply sounds continuous instead of pausing for
-   * seconds between sentences (founder field report 2026-10-25: text
-   * arrived fast, then "thinking for several seconds before speaking";
-   * generation was strictly serial and the first chunk ran to 300
-   * characters before a single sound). */
-  let pending: Promise<any> | null = chunks.length ? gen(chunks[0]) : null;
-  for (let i = 0; i < chunks.length; i++) {
+  const key = voice + ":" + clean;
+  let jobs: Promise<any>[] | null = null;
+  const cached = preparedSpeech.get(key);
+  if (cached) {
+    preparedSpeech.delete(key);
+    try { jobs = await cached; } catch { jobs = null; }
+  }
+  if (!jobs) {
+    const tts = await loadKokoro();
+    jobs = enqueueGeneration(tts, neuralChunks(clean), voice);
+  }
+  for (let i = 0; i < jobs.length; i++) {
     if (mySeq !== speakSeq) return; // cancelled / superseded
-    const out: any = await pending;
-    pending = i + 1 < chunks.length ? gen(chunks[i + 1]) : null;
-    if (mySeq !== speakSeq) return;
+    const out: any = await jobs[i];
     const audio: Float32Array = out?.audio;
     const rate: number = out?.sampling_rate || 24000;
     if (audio && audio.length) await playRawAudio(audio, rate);

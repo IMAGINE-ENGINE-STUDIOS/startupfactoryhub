@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { MicRecorder, micErrorMessage } from "@/lib/voice/recorder";
 import { subscribeVoiceStream } from "@/lib/voice/streamBus";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
-import { speak, stopSpeaking, personaFor, preloadSpeech, stripForSpeech, type VoicePersona } from "@/lib/voice/tts";
+import { speak, stopSpeaking, personaFor, preloadSpeech, prepareSpeech, stripForSpeech, type VoicePersona } from "@/lib/voice/tts";
 
 export type TalkState = "off" | "loading" | "listening" | "transcribing" | "waiting" | "speaking";
 
@@ -218,6 +218,13 @@ export function useVoiceConversation(opts: {
     try {
       while (speechQueueRef.current.length) {
         const sentence = speechQueueRef.current.shift()!;
+        /* Pipeline the neural generation: while this sentence plays,
+         * the next two are already generating — no dead air at the
+         * sentence boundary (founder report 2026-10-26: a pause of
+         * seconds after every "."). */
+        for (const next of speechQueueRef.current.slice(0, 2)) {
+          prepareSpeech(next, personaRef.current);
+        }
         await speak(sentence, personaRef.current);
         if (gen !== genRef.current) return;
       }
