@@ -27,7 +27,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 8;
+export const OFFICE_SCENE_VERSION = 9;
 
 /** Scene objects RETIRED by later founder directives, stripped wherever
  * a published scene is consumed (live merge + editor sync), so an old
@@ -188,7 +188,9 @@ export function buildOfficeScene(): LevelScene {
   // 2026-10-25): the background buildings and ground geometry are erased
   // and a real-life photo skybox wraps the room instead (scene.skybox,
   // NYC by default — admins swap the city from edit mode).
-  // Perimeter window walls (NYC high-rise glass) with a door gap on the south side.
+  // Perimeter window walls (NYC high-rise glass) — all four sides run
+  // continuous, no entrance bay (founder directive 2026-10-26: "I don't
+  // want no entrance bay — frame the window as the rest").
   const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
   const wallRun = (side: string, len: number, px: number, pz: number, rotY: number, segments: [number, number][]) => {
     for (const [from, to] of segments) {
@@ -206,15 +208,9 @@ export function buildOfficeScene(): LevelScene {
     }
   };
   wallRun("N", W, 0, -D / 2, 0, [[-W / 2, W / 2]]);
-  wallRun("S", W, 0, D / 2, 0, [[-W / 2, -1.8], [1.8, W / 2]]); // door gap in the middle
+  wallRun("S", W, 0, D / 2, 0, [[-W / 2, W / 2]]);
   wallRun("W", D, -W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
   wallRun("E", D, W / 2, 0, Math.PI / 2, [[-D / 2, D / 2]]);
-  // The entrance lintel was a solid pale slab interrupting the glass —
-  // hidden (founder directive 2026-10-25: no white panels in the windows);
-  // the gap is glazed instead (Entrance Glass panes, appended below) so
-  // the window pattern runs continuously. Kept as an invisible object so
-  // scene object ids stay stable for published-scene merges.
-  o.push(P("Entrance Lintel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T], "#d7dee5", { roughness: 0.5, metalness: 0.3, visible: false }));
   // Theater screen — BIG (founder directive 2026-10-25), centered on the
   // north wall; live content is rendered INTO it by /office.
   o.push(P("Theater Screen", "box", [0, 3.55, -15.72], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
@@ -260,12 +256,9 @@ export function buildOfficeScene(): LevelScene {
     o.push(P(`Agent Chair ${k} Base`, "box", [d.x, 0.025, d.z + f * 0.85], [0.84, 0.05, 0.84], "#0d1622", { roughness: 0.9 }));
     o.push(P(`Agent Chair ${k} Back`, "box", [d.x, 1.03, d.z + f * 1.50], [0.98, 0.98, 0.09], "#0d1622", { roughness: 0.9 }));
   });
-  // Entrance glazing — the south door gap gets the SAME glass as every
-  // other window (founder directive 2026-10-25: continue the window
-  // pattern, no solid panels). Appended last so existing object ids
-  // never shift.
-  o.push(P("Entrance Glass Door", "box", [0, 1.3, D / 2], [3.6, 2.6, T * 0.35], glass, { roughness: 0.08, metalness: 0.1 }));
-  o.push(P("Entrance Glass Panel", "box", [0, (2.6 + H) / 2, D / 2], [3.6, H - 2.6, T * 0.35], glass, { roughness: 0.08, metalness: 0.1 }));
+  // (The old entrance glazing went here — removed with the bay itself,
+  // founder directive 2026-10-26; the south wall above now runs framed
+  // and glazed end to end like the other three sides.)
   const characters = OFFICE_BOTS.map((b, i) => {
     const d = OFFICE_DESKS[i];
     return {
