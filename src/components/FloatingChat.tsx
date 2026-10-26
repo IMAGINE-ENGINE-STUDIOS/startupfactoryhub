@@ -430,7 +430,7 @@ export default function FloatingChat() {
       });
     },
   });
-  useEffect(() => { bubbleCallActiveRef.current = geniusVoice.talkOn && geniusVoice.mine; }, [geniusVoice.talkOn, geniusVoice.mine]);
+  useEffect(() => { bubbleCallActiveRef.current = geniusVoice.talkOn && (geniusVoice as { mine?: boolean }).mine; }, [geniusVoice.talkOn, (geniusVoice as { mine?: boolean }).mine]);
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
     typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
