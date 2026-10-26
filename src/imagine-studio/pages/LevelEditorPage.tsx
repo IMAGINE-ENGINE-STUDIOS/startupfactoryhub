@@ -11,7 +11,7 @@ import {
   Unlock, Mountain, Brush, ArrowUp, ArrowDown, Waves, Minus,
   X, ArrowUpRight, User, Camera, Boxes, Link2, Unlink,
 } from "lucide-react";
-import { Spline as SplineIcon, Paintbrush, Tv, Gamepad2 } from "lucide-react";
+import { Spline as SplineIcon, Paintbrush, Tv, Gamepad2, Scissors } from "lucide-react";
 import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight, Bot, Users } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CharacterAnimationGallery from "@/imagine-studio/components/level/animations/CharacterAnimationGallery";
@@ -32,6 +32,7 @@ import {
   latestSnapshot as latestLevelSnapshot,
 } from "@/imagine-studio/lib/levelBackup";
 import { fuseToInstance } from "@/imagine-studio/lib/fusedGeometry";
+import { cutTargetAround, footprintOf } from "@/imagine-studio/lib/cutGeometry";
 import {
   EMPTY_SCENE, LevelScene, SceneObject, SceneLight, AnimationTrack,
   PrimitiveObject, PolygonObject, ModelObject, newId, Vec3, RGBA,
@@ -1378,6 +1379,40 @@ export default function LevelEditorPage() {
     toast.success(used.length > 1 ? `Fused ${used.length} objects into one instance` : "Made into an instance");
   };
 
+  /** CUT (founder directive 2026-10-26): with 2+ objects selected, the
+   * SMALLEST footprint is the cutter (the pool, the room, the rug) and
+   * every other selected surface is cut around it — strips fused back
+   * into one instance per target, so coplanar overlaps (z-fighting)
+   * are removed for real. */
+  const cutSelection = () => {
+    const objs = scene.objects.filter((o) => selectedIds.has(o.id));
+    if (objs.length < 2) { toast.error("Select the surface AND the object that cuts it (2+)"); return; }
+    const withFp = objs.map((o) => ({ o, fp: footprintOf(o as any) })).filter((x) => x.fp);
+    if (withFp.length < 2) { toast.error("Cutting needs built-in shapes"); return; }
+    const area = (r: any) => (r.maxX - r.minX) * (r.maxZ - r.minZ);
+    withFp.sort((a, b) => area(a.fp) - area(b.fp));
+    const cutter = withFp[0].o;
+    let cutCount = 0;
+    updateScene((s) => {
+      for (const t of withFp.slice(1).map((x) => x.o)) {
+        const target = s.objects.find((x) => x.id === t.id);
+        if (!target) continue;
+        const strips = cutTargetAround(target as any, cutter as any, () => newId("obj"));
+        if (!strips) continue;
+        s.objects = s.objects.filter((x) => x.id !== target.id);
+        if (strips.length) {
+          const fused = fuseToInstance(strips as any[], strips.map((x: any) => x.id), () => newId("obj"));
+          if (fused) { delete (fused as any).__fusedIds; fused.name = target.name; s.objects.push(fused as any); }
+          else s.objects.push(...(strips as any[]));
+        }
+        cutCount++;
+      }
+      return s;
+    });
+    if (cutCount) toast.success(`Cut ${cutCount} surface${cutCount > 1 ? "s" : ""} around "${cutter.name}" — no more overlap`);
+    else toast.error("No overlapping surfaces in the selection to cut");
+  };
+
   /** Find the group (if any) that the focused object belongs to. */
   const currentGroup: SceneGroup | null = useMemo(() => {
     if (!selectedId) return null;
@@ -2495,6 +2530,14 @@ export default function LevelEditorPage() {
                 >
                   <Boxes className="w-3.5 h-3.5" /> Make Instance of {selectedIds.size > 1 ? `${selectedIds.size} objects` : "this object"}
                 </button>
+                {selectedIds.size > 1 && (
+                  <button
+                    className="w-full rounded-lg px-2.5 py-2 text-left text-xs hover:bg-muted flex items-center gap-2"
+                    onClick={() => { setObjMenu(null); cutSelection(); }}
+                  >
+                    <Scissors className="w-3.5 h-3.5" /> Cut Overlap — smallest cuts the rest
+                  </button>
+                )}
                 <div className="px-2.5 py-1 text-[10px] leading-snug text-muted-foreground">Fuses the selection into a single instance object — one click, one object.</div>
               </div>
             </>
@@ -2605,6 +2648,7 @@ export default function LevelEditorPage() {
                   onGroup={groupSelection}
                   onUngroup={ungroupSelection}
                   onMakeInstance={makeInstanceFromSelection}
+                  onCut={cutSelection}
                   onSaveAsDynamic={() => setSaveDynamicOpen(true)}
                   onDelete={() => {
                     removeObject(selectedObj.id);
@@ -3405,7 +3449,7 @@ function ObjectInspector({
   userClips, onOpenCharacterGallery, onSpawnObjects, allObjects = [],
   scenePaths = [], onPatchScenePaths,
   currentGroup, currentGroupSize = 0, selectionSize = 1,
-  onGroup, onUngroup, onSaveAsDynamic, onMakeInstance,
+  onGroup, onUngroup, onSaveAsDynamic, onMakeInstance, onCut,
 }: {
   obj: SceneObject;
   onPatch: (p: Partial<SceneObject>) => void;
@@ -3434,6 +3478,7 @@ function ObjectInspector({
   onUngroup?: () => void;
   onSaveAsDynamic?: () => void;
   onMakeInstance?: () => void;
+  onCut?: () => void;
 }) {
   return (
     <div className="space-y-3">
@@ -3442,7 +3487,7 @@ function ObjectInspector({
         <Input value={obj.name} disabled={disabled} onChange={(e) => onPatch({ name: e.target.value } as any)} className="h-7 text-xs" />
       </div>
 
-      {(onGroup || onUngroup || onSaveAsDynamic || onMakeInstance) && (
+      {(onGroup || onUngroup || onSaveAsDynamic || onMakeInstance || onCut) && (
         <div className="flex flex-wrap items-center gap-1 rounded-md border border-border/40 bg-card/40 px-1.5 py-1">
           {currentGroup ? (
             <span
@@ -3480,6 +3525,15 @@ function ObjectInspector({
               title="Fuse the selected object(s) into ONE instance — their parts merge into a single object that selects, moves and renders as one"
             >
               <Boxes className="w-3 h-3 mr-1" /> Make Instance
+            </Button>
+          )}
+          {onCut && (
+            <Button
+              size="sm" variant="outline" className="h-6 px-2 text-[10px]"
+              disabled={disabled || selectionSize < 2} onClick={onCut}
+              title={selectionSize < 2 ? "Select the surface plus the object that cuts it" : "Cut every other selected surface around the smallest one — removes coplanar overlaps (z-fighting), like a pool cutting the ground"}
+            >
+              <Scissors className="w-3 h-3 mr-1" /> Cut Overlap
             </Button>
           )}
           {onSaveAsDynamic && (

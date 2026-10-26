@@ -509,12 +509,19 @@ export function buildLobbyScene(): LevelScene {
   const bronze = "#8a6a34";
   const TZ = 52; // the fountain's z — the plaza's heart
   /* ---------- the grounds (the plaza half) ---------- */
-  o.push(P("Plaza Lawn", "box", [0, -0.06, 39], [190, 0.12, 152], "#3c6a32", { roughness: 1, metalness: 0 }));
-  o.push(P("Terrace", "box", [0, -0.03, 25], [64, 0.06, 20], "#ddd3ba", { roughness: 0.95, metalness: 0 }));
+  // The lawn is CUT around the lobby's footprint (four pieces, tops
+  // at -0.04): a single sheet under the room shared the slab's plane
+  // and z-fought across the whole hall (founder screenshots
+  // 2026-10-26). Same rule the new Cut tool enforces everywhere.
+  o.push(P("Plaza Lawn S", "box", [0, -0.10, 65.5], [190, 0.12, 99], "#3c6a32", { roughness: 1, metalness: 0 }));
+  o.push(P("Plaza Lawn N", "box", [0, -0.10, -26.5], [190, 0.12, 21], "#3c6a32", { roughness: 1, metalness: 0 }));
+  o.push(P("Plaza Lawn W", "box", [-59.5, -0.10, 0], [71, 0.12, 32], "#3c6a32", { roughness: 1, metalness: 0 }));
+  o.push(P("Plaza Lawn E", "box", [59.5, -0.10, 0], [71, 0.12, 32], "#3c6a32", { roughness: 1, metalness: 0 }));
+  o.push(P("Terrace", "box", [0, -0.03, 25.5], [64, 0.06, 19], "#ddd3ba", { roughness: 0.95, metalness: 0 }));
   o.push(P("Central Walk", "box", [0, -0.02, 66], [14, 0.05, 66], "#e2d9c4", { roughness: 0.95, metalness: 0 }));
-  o.push(P("Theater Apron", "box", [0, -0.02, 100], [34, 0.05, 8], "#d8cfbc", { roughness: 0.95, metalness: 0 }));
+  o.push(P("Theater Apron", "box", [0, -0.005, 100], [34, 0.05, 8], "#d8cfbc", { roughness: 0.95, metalness: 0 }));
   // The grand fountain.
-  o.push(P("Fountain Basin", "cylinder", [0, 0.55, TZ], [26, 1.1, 26], "#ece7db", { roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Basin", "cylinder", [0, 0.51, TZ], [26, 1.1, 26], "#ece7db", { roughness: 0.8, metalness: 0 }));
   o.push(P("Fountain Rim", "torus", [0, 1.15, TZ], [25.2, 1.6, 25.2], "#e0d8c6", { rotation: [Math.PI / 2, 0, 0], roughness: 0.8, metalness: 0 }));
   o.push(P("Fountain Water", "cylinder", [0, 0.95, TZ], [23.6, 0.12, 23.6], "#79a8a4", { roughness: 0.25, metalness: 0.1 }));
   o.push(P("Fountain Pedestal", "cylinder", [0, 2.2, TZ], [5.2, 2.6, 5.2], "#e6e0d0", { roughness: 0.8, metalness: 0 }));
@@ -536,7 +543,7 @@ export function buildLobbyScene(): LevelScene {
     o.push(P("Parterre Hedge W", "box", [cx - 10, 0.4, pz], [0.7, 0.8, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
     o.push(P("Parterre Hedge E", "box", [cx + 10, 0.4, pz], [0.7, 0.8, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
     o.push(P("Parterre Cross NS", "box", [cx, 0.3, pz], [1.1, 0.6, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
-    o.push(P("Parterre Cross EW", "box", [cx, 0.3, pz], [19.3, 0.6, 1.1], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Cross EW", "box", [cx, 0.29, pz], [19.3, 0.58, 1.1], "#2d5a2c", { roughness: 1, metalness: 0 }));
     o.push(P("Flower Bed A", "box", [cx - 5, 0.16, pz - 3], [7.5, 0.3, 4], "#b8492f", { roughness: 1, metalness: 0 }));
     o.push(P("Flower Bed B", "box", [cx + 5, 0.16, pz + 3], [7.5, 0.3, 4], "#e0a33c", { roughness: 1, metalness: 0 }));
     o.push(P("Topiary Pot", "cylinder", [cx, 0.35, pz], [1.3, 0.7, 1.3], "#8a5a38", { roughness: 0.9, metalness: 0 }));
@@ -544,7 +551,7 @@ export function buildLobbyScene(): LevelScene {
   }
   // Tree allées along the axis + the side rows.
   const tree = (x: number, z: number, s = 1) => {
-    o.push(P("Allée Trunk", "cylinder", [x, 1.1 * s, z], [0.5 * s, 2.2 * s, 0.5 * s], "#5a4230", { roughness: 1, metalness: 0 }));
+    o.push(P("Allée Trunk", "cylinder", [x, 1.06 * s, z], [0.5 * s, 2.2 * s, 0.5 * s], "#5a4230", { roughness: 1, metalness: 0 }));
     o.push(P("Allée Crown", "sphere", [x, 3.4 * s, z], [3.4 * s, 3.4 * s, 3.4 * s], "#356b31", { roughness: 1, metalness: 0 }));
     o.push(P("Allée Crown Top", "sphere", [x, 4.6 * s, z], [2.3 * s, 2.3 * s, 2.3 * s], "#3d7a37", { roughness: 1, metalness: 0 }));
   };
@@ -553,7 +560,7 @@ export function buildLobbyScene(): LevelScene {
   // Lamp pairs along the walk.
   for (let i = 0; i < 5; i++) for (const sx of [-1, 1]) {
     const lz = 36 + i * 15;
-    o.push(P("Plaza Lamp Post", "cylinder", [sx * 8.4, 1.6, lz], [0.22, 3.2, 0.22], "#232a31", { metalness: 0.5, roughness: 0.5 }));
+    o.push(P("Plaza Lamp Post", "cylinder", [sx * 8.4, 1.56, lz], [0.22, 3.2, 0.22], "#232a31", { metalness: 0.5, roughness: 0.5 }));
     o.push(P("Plaza Lamp Globe", "sphere", [sx * 8.4, 3.5, lz], [0.72, 0.72, 0.72], "#fff2cf", { emissive: hex("#ffca66"), emissiveIntensity: 0.8 } as any));
   }
   // Benches facing the theater + the THEATER SCREEN (founder: keep it).
@@ -568,12 +575,12 @@ export function buildLobbyScene(): LevelScene {
   o.push(P("Theater Screen Back", "box", [0, 5, 104.4], [25, 9.3, 0.5], "#141a22", { roughness: 0.8, metalness: 0.2 }));
   for (const sx of [-1, 1]) {
     o.push(P("Theater Pylon", "box", [sx * 13.4, 3.4, 104.3], [1.1, 6.8, 1.1], "#232a31", { metalness: 0.4, roughness: 0.5 }));
-    o.push(P("Theater Hedge", "box", [sx * 19, 0.9, 103], [10, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Theater Hedge", "box", [sx * 19, 0.86, 103], [10, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
   }
   // Garden borders.
-  o.push(P("Garden Hedge Back", "box", [0, 0.9, 113], [124, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
+  o.push(P("Garden Hedge Back", "box", [0, 0.86, 113], [120.8, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
   for (const sx of [-1, 1]) {
-    o.push(P("Garden Hedge Side", "box", [sx * 62, 0.9, 71], [1.6, 1.8, 84], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Garden Hedge Side", "box", [sx * 62, 0.86, 71], [1.6, 1.8, 84], "#2d5a2c", { roughness: 1, metalness: 0 }));
     o.push(P("Corner Topiary Pot", "cylinder", [sx * 56, 0.4, 107], [1.6, 0.8, 1.6], "#8a5a38", { roughness: 0.9, metalness: 0 }));
     o.push(P("Corner Topiary", "cone", [sx * 56, 2.6, 107], [2.4, 3.6, 2.4], "#2f6b2f", { roughness: 1, metalness: 0 }));
   }
@@ -643,7 +650,7 @@ export function buildLobbyScene(): LevelScene {
       background: "#cfe2ef",
       ambient: 0.85,
       sceneVersion: OFFICE_SCENE_VERSION,
-      lobbyVersion: 2,
+      lobbyVersion: 3,
       gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.85, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
     },
   } as LevelScene;
@@ -676,9 +683,9 @@ export async function syncLobbyLevelToPublished(): Promise<LocalLevelRecord> {
   }
   if (!publishedScene) {
     // No published scene: an existing local level built before the
-    // Lobby & Plaza merge (lobbyVersion < 2) is reseeded from the
+    // Lobby & Plaza merge (lobbyVersion < 3) is reseeded from the
     // current builder, its old scene preserved as a draft.
-    if ((((existing.scene as any)?.environment?.lobbyVersion) ?? 1) < 2) {
+    if ((((existing.scene as any)?.environment?.lobbyVersion) ?? 1) < 3) {
       preserveLocalDraft(existing, LOBBY_LEVEL_NAME, "Local edits preserved when the Lobby level was upgraded to Lobby & Plaza");
       updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(buildLobbyScene())) });
       return getLocalLevel(existing.id) ?? existing;

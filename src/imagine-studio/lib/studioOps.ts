@@ -5,6 +5,7 @@ import { createLocalLevel, updateLocalLevel } from "@/imagine-studio/lib/localLe
 import { activeProjectLevels, addLevelToProject, getActiveLevel, projectOfLevel } from "@/imagine-studio/lib/localProjects";
 import { normalizeController } from "@/imagine-studio/lib/controllers";
 import { fuseToInstance } from "@/imagine-studio/lib/fusedGeometry";
+import { cutTargetAround } from "@/imagine-studio/lib/cutGeometry";
 
 /** Finds a project level by id or name, creating an empty one when missing. */
 function ensureLevel(ref: string, ops?: any[]): { id: string; name: string } {
@@ -193,6 +194,32 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
           if (op.name) fused.name = String(op.name).slice(0, 80);
           newIds.push(fused.id);
           applied++;
+        }
+      } else if (op.op === "cut") {
+        /* Cut a surface around another object's footprint (founder
+         * directive 2026-10-26 — pools cut the ground, rooms cut the
+         * lawn): {"op":"cut","target":id,"cutter":id}. The target's
+         * strips fuse back into ONE instance, so the ground stays a
+         * single object with a real hole where the cutter sits. */
+        const targetId = real(String(op.target ?? ""));
+        const cutterId = real(String(op.cutter ?? ""));
+        const target = s.objects.find((x) => x.id === targetId);
+        const cutter = s.objects.find((x) => x.id === cutterId);
+        if (target && cutter) {
+          const strips = cutTargetAround(target as any, cutter as any, () => uid("obj"));
+          if (strips) {
+            s.objects = s.objects.filter((x) => x.id !== targetId);
+            if (strips.length) {
+              const fused = fuseToInstance([...strips] as any[], strips.map((x: any) => x.id), () => uid("obj"));
+              if (fused) {
+                delete fused.__fusedIds;
+                fused.name = target.name;
+                s.objects.push(fused);
+                newIds.push(fused.id);
+              } else s.objects.push(...strips);
+            }
+            applied++;
+          }
         }
       } else if (op.op === "environment" && op.patch) {
         const p = op.patch;
