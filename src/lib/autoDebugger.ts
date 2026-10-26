@@ -119,7 +119,7 @@ const SIGNATURES: Signature[] = [
     label: "Local storage saturated",
     test: /(quotaexceeded|exceeded the quota)/i,
     strategy: "remount",
-    explanation: "Local cache was full. Non-essential cached entries are cleared automatically.",
+    explanation: "Local cache was full. Foreign cached entries are cleared automatically — your office data, chats, shifts and tasks are protected and never cleared.",
     safeToRepeat: true,
   },
 ];
@@ -168,10 +168,18 @@ export function clearLog() {
   }
 }
 
-/** Frees space when local storage is saturated, keeping auth + viewport data. */
+/** Frees space when local storage is saturated, keeping auth data AND
+ * every `sfh…` key. MEMORY PROTECTION (founder directive 2026-10-26):
+ * the old keep-list protected only auth/viewport/theme, so this purge
+ * deleted the org doc, every shift state and every agent chat thread
+ * whenever any code anywhere hit a quota error — the office's memory
+ * literally erased itself. `sfh:`/`sfh.` keys are the user's data
+ * (org, shifts, threads, floors, settings) and are NEVER purged;
+ * durable data additionally lives in IndexedDB (lib/durableStore),
+ * which this function cannot touch. Only foreign keys are removed. */
 export function purgeNonEssentialStorage() {
   try {
-    const keep = /^(sb-|sfh\.viewport|sfh\.restore|theme)/;
+    const keep = /^(sb-|sfh[:.]|theme)/i;
     Object.keys(localStorage).forEach((k) => {
       if (!keep.test(k)) localStorage.removeItem(k);
     });

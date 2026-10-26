@@ -189,7 +189,7 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
           <div className="min-h-0 flex-1">
             <AgentChat
               name="Manager"
-              onSend={(text) => engine.chatWithManager(text)}
+              onSend={(text, history) => engine.chatWithManager(text, history)}
               onAction={(d, { audit, report }) => {
                 /* Conversational actions — the Manager acts from the
                  * chat/call: shifts, specialist tasks, documents. */

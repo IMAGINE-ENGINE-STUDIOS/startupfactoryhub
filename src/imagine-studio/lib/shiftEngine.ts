@@ -27,12 +27,16 @@
  *    finished deliverable and compiles the shift report — a real document
  *    (rendered in the panel, downloadable as PDF / Markdown / Word doc).
  *
- * State lives in localStorage (same pattern as the Agents task queue) and
- * the engine runs while the office tab is open; closing the tab pauses
- * the shift, reopening resumes it.
+ * State lives in the DURABLE STORE (lib/durableStore — IndexedDB with
+ * a localStorage mirror; it used to be localStorage-only and shifts
+ * were silently lost to quota errors and storage purges). The engine
+ * runs while the office tab is open; closing the tab pauses the
+ * shift, reopening resumes it.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { OFFICE_BOTS } from "@/imagine-studio/lib/officeWorld";
+import { durableGetSync, durableSet, durableHydrate, durableOnAdopt } from "@/lib/durableStore";
+import { memoryBlock, type MemoryMsg } from "@/lib/agentMemory";
 
 async function callAgentsApi(body: Record<string, unknown>): Promise<any> {
   const { data, error } = await supabase.functions.invoke("call-agents", { body });
@@ -200,32 +204,45 @@ let deps: { resolveAgentId: (botKey: string) => Promise<string | null> } | null 
 const inFlight = new Set<string>();
 let reviewsInFlight = 0;
 
-function load(): ShiftState | null {
-  try {
-    const raw = localStorage.getItem(cfg.storeKey);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (!s || typeof s.goal !== "string" || !Array.isArray(s.tasks)) return null;
-    // A shift found mid-flight after a reload resumes as soft-stopped work:
-    // running/review tasks fall back to queued so nothing is lost.
-    if (s.status === "running" || s.status === "planning") {
-      s.status = "soft";
-      for (const t of s.tasks) if (t.status === "running" || t.status === "review") t.status = "queued";
-      s.log = [...(s.log || []), { t: Date.now(), text: "Shift restored after reload — press Resume to continue." }];
-    }
-    return s as ShiftState;
-  } catch {
-    return null;
+/** A restored shift resumes as soft-stopped work: running/review
+ * tasks fall back to queued so nothing is lost. */
+function restoreMassage(s: ShiftState): ShiftState {
+  if (s.status === "running" || s.status === "planning") {
+    s.status = "soft";
+    for (const t of s.tasks) if (t.status === "running" || t.status === "review") t.status = "queued";
+    s.log = [...(s.log || []), { t: Date.now(), text: "Shift restored after reload — press Resume to continue." }];
   }
+  return s;
+}
+
+function load(): ShiftState | null {
+  // DURABLE STORE (2026-10-26): IndexedDB is the copy of record,
+  // localStorage the mirror — the old direct localStorage read/write
+  // silently lost shifts to quota errors and storage purges.
+  const s = durableGetSync(cfg.storeKey) as ShiftState | undefined;
+  if (!s || typeof s.goal !== "string" || !Array.isArray(s.tasks)) return null;
+  return restoreMassage(s);
 }
 
 function save() {
   if (state) {
     state.updatedAt = Date.now();
-    try { localStorage.setItem(cfg.storeKey, JSON.stringify(state)); } catch { /* session-only */ }
+    durableSet(cfg.storeKey, state);
   }
   listeners.forEach((fn) => fn());
 }
+
+/* If IndexedDB holds a NEWER shift than the bootstrap read (the
+ * localStorage mirror was wiped or too small to mirror), adopt it —
+ * tasks are never lost to a storage cleanup again. */
+void durableHydrate();
+durableOnAdopt(cfg.storeKey, (data) => {
+  const s = data as ShiftState | null;
+  if (!s || typeof s.goal !== "string" || !Array.isArray(s.tasks)) return;
+  if (state && (s.updatedAt ?? 0) <= (state.updatedAt ?? 0)) return;
+  state = restoreMassage(s);
+  listeners.forEach((fn) => fn());
+});
 
 function log(text: string) {
   if (!state) return;
@@ -273,12 +290,15 @@ const engine = {
    * (founder directive 2026-10-26): the Manager can trigger team work
    * from this chat — directives in his reply are executed by the host
    * and never shown raw. */
-  async chatWithManager(text: string): Promise<string> {
+  async chatWithManager(text: string, history?: MemoryMsg[]): Promise<string> {
     if (!deps) throw new Error("The office is still connecting — try again in a moment.");
     const managerId = await deps.resolveAgentId("manager");
     if (!managerId) throw new Error("The Manager could not be brought online (agent setup failed).");
     const protocol = `\n\n[ACTION PROTOCOL — if my message clearly asks you to have work done, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"start_shift","goal":"..."}]] to run a full shift, [[ACT {"type":"run_task","agent":"<specialist name>","task":"..."}]] to assign one specialist, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it — never write it yourself here), [[ACT {"type":"recruit","role":"<role title>","brief":"<what they will own>","name":"<optional name>"}]] when I ask to bring on a new specialist, [[ACT {"type":"rename","agent":"<name>","name":"<new name>"}]] when I ask to rename someone (omit "agent" to rename yourself), [[ACT {"type":"configure","agent":"<name>","mission":"...","vision":"...","instructions":"..."}]] when I set or change someone's mission, vision or standing instructions (omit "agent" for yourself; add "model" only if I name a model). Confirm in words what you set in motion.]`;
-    const r = await callAgentsApi({ action: "run", agent_id: managerId, message: text + protocol });
+    /* MEMORY (2026-10-26): the thread rides along, so the Manager
+     * answers with the conversation in view — previously every
+     * message was sent alone and he remembered nothing. */
+    const r = await callAgentsApi({ action: "run", agent_id: managerId, message: memoryBlock(history, "You") + text + protocol });
     return runOutput(r) || "Done.";
   },
 

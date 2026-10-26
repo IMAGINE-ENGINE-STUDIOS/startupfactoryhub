@@ -21,6 +21,7 @@ import { Armchair, ArrowUpDown, Bot as BotIcon, Box as BoxIcon, Briefcase, Build
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
+import { memoryBlock } from '@/lib/agentMemory';
 import { buildDocument, documentDelivery, DOC_TASK, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
@@ -815,9 +816,10 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole,
         <AgentChat
           key={bot.key}
           name={bot.name}
-          onSend={async (text) => {
+          persistKey={`sfh:bot-chat:${docFloor?.floorKey ?? 'office'}:${bot.key}`}
+          onSend={async (text, history) => {
             if (!agentId) throw new Error('Still connecting to the agent — try again in a second.');
-            const r = await callAgentsApi({ action: 'run', agent_id: agentId, message: text });
+            const r = await callAgentsApi({ action: 'run', agent_id: agentId, message: memoryBlock(history, 'You') + text });
             return (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
           }}
           emptyText={<>Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</>}

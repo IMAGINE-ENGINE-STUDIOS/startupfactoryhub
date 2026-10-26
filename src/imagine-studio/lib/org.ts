@@ -26,6 +26,8 @@
  * clean memory) in the same role. Firings land BETWEEN shifts, never
  * mid-shift, so a company never stops running.
  */
+import { durableGetSync, durableSet, durableHydrate, durableOnAdopt } from "@/lib/durableStore";
+
 export const SURVIVAL_THRESHOLD = 94;
 /** At most 10 AGENTS per floor (founder directive 2026-10-25, for frame
  * rate) — the CEO, the Manager and the Chairman stand outside the count,
@@ -68,11 +70,16 @@ interface OrgDoc {
 const ORG_KEY = "sfh:org:v1";
 const emptyDoc = (): OrgDoc => ({ direction: {}, departments: [], personnel: {}, nameOverrides: {}, perf: {}, execStats: {}, reports: [], evaluations: [], actions: [], pendingFirings: [], chairmanAuthority: true, warned: {} });
 
+/* Persistence routes through the DURABLE STORE (founder directive
+ * 2026-10-26 — the office kept forgetting everything): IndexedDB is
+ * the copy of record, localStorage a mirror. The old direct
+ * localStorage write swallowed quota errors silently and the
+ * auto-debugger's quota purge could delete this doc outright; both
+ * failure modes are gone. If IndexedDB holds a NEWER copy than the
+ * bootstrap read (mirror wiped/stale), it is adopted on hydrate. */
 let doc: OrgDoc = (() => {
-  try {
-    const raw = JSON.parse(localStorage.getItem(ORG_KEY) || "null");
-    if (raw && typeof raw === "object") return { ...emptyDoc(), ...raw };
-  } catch { /* fresh doc */ }
+  const raw = durableGetSync(ORG_KEY);
+  if (raw && typeof raw === "object") return { ...emptyDoc(), ...(raw as Partial<OrgDoc>) };
   return emptyDoc();
 })();
 
@@ -81,9 +88,16 @@ export const orgSubscribe = (fn: () => void) => { listeners.add(fn); return () =
 export const orgGet = (): OrgDoc => doc;
 function mutate(fn: (d: OrgDoc) => void) {
   fn(doc);
-  try { localStorage.setItem(ORG_KEY, JSON.stringify(doc)); } catch { /* session only */ }
+  durableSet(ORG_KEY, doc);
   listeners.forEach((f) => f());
 }
+void durableHydrate();
+durableOnAdopt(ORG_KEY, (data) => {
+  if (data && typeof data === "object") {
+    doc = { ...emptyDoc(), ...(data as Partial<OrgDoc>) };
+    listeners.forEach((f) => f());
+  }
+});
 export const logAction = (by: string, kind: string, text: string) =>
   mutate((d) => { d.actions = [{ at: Date.now(), by, kind, text }, ...d.actions].slice(0, 200); });
 

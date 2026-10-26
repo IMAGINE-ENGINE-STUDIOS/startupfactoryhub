@@ -18,6 +18,7 @@ import { useVoiceCall, warmVoice } from "@/lib/voice/useVoiceCall";
 import { AgentBrain } from "@/lib/voice/adapters";
 import { getAIHeaders } from "@/lib/aiAuth";
 import type { Turn } from "@/lib/voice/engine";
+import { durableGetSync, durableSet, durableHydrate, durableOnAdopt } from "@/lib/durableStore";
 
 export const GLASS_PANEL =
   "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
@@ -51,7 +52,10 @@ export function AgentChat({
   onAction,
 }: {
   name: string;
-  onSend: (text: string) => Promise<string>;
+  /** `history` is the persisted thread BEFORE this message — surfaces
+   * fold it into the outgoing run (lib/agentMemory memoryBlock) so the
+   * agent answers with memory of the conversation. */
+  onSend: (text: string, history: ChatMsg[]) => Promise<string>;
   emptyText: ReactNode;
   placeholder: string;
   disabledNote?: string | null;
@@ -71,10 +75,12 @@ export function AgentChat({
 }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
     if (!persistKey) return [];
-    try {
-      const p = JSON.parse(localStorage.getItem(persistKey) || "[]");
-      return Array.isArray(p) ? p.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-60) : [];
-    } catch { return []; }
+    /* DURABLE STORE (2026-10-26): threads live in IndexedDB with a
+     * localStorage mirror — they survive reloads, quota pressure and
+     * storage purges that used to wipe them. */
+    void durableHydrate();
+    const p = durableGetSync<ChatMsg[]>(persistKey);
+    return Array.isArray(p) ? p.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-60) : [];
   });
   /* Draft armor (founder report 2026-10-25: typed text vanishing in
    * the CEO/Chairman chats): the composer draft is mirrored to
@@ -128,19 +134,34 @@ export function AgentChat({
   useEffect(() => { warmVoice(); }, []);
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+  /* Hydration guard: if the localStorage mirror was wiped but
+   * IndexedDB still holds this thread, the bootstrap read returns []
+   * and persisting that empty state would overwrite the real memory.
+   * So: adopt the IDB copy when it arrives, and never persist an
+   * empty thread before hydration completes. */
+  const hydratedRef = useRef(false);
+  useEffect(() => { void durableHydrate().then(() => { hydratedRef.current = true; }); }, []);
   useEffect(() => {
     if (!persistKey) return;
-    try { localStorage.setItem(persistKey, JSON.stringify(msgs.slice(-60))); } catch { /* session only */ }
+    return durableOnAdopt(persistKey, (data) => {
+      if (Array.isArray(data)) setMsgs((cur) => (cur.length ? cur : (data as ChatMsg[]).slice(-60)));
+    });
+  }, [persistKey]);
+  useEffect(() => {
+    if (!persistKey) return;
+    if (msgs.length === 0 && !hydratedRef.current) return;
+    durableSet(persistKey, msgs.slice(-60));
   }, [msgs, persistKey]);
 
   const sendText = async (raw: string) => {
     const text = raw.trim();
     if (!text || busy || disabledNote) return;
+    const history = msgs;
     setMsgs((m) => [...m, { role: "user", content: text }]);
     onUserMessage?.(text);
     setBusy(true);
     try {
-      let out = await onSend(text);
+      let out = await onSend(text, history);
       /* Typed parity: a run's reply may carry [[ACT]] directives —
        * execute them through the same host path as voice and never
        * show the raw directive in the thread. */
@@ -208,11 +229,9 @@ export function AgentChat({
        * transcript straight into the persisted thread, and it is
        * simply there when the chat reopens. */
       if (persistKey) {
-        try {
-          const cur = JSON.parse(localStorage.getItem(persistKey) || "[]");
-          const base = Array.isArray(cur) ? cur : [];
-          localStorage.setItem(persistKey, JSON.stringify([...base, ...mapped].slice(-60)));
-        } catch { /* persistence is best-effort */ }
+        const cur = durableGetSync<ChatMsg[]>(persistKey);
+        const base = Array.isArray(cur) ? cur : [];
+        durableSet(persistKey, [...base, ...mapped].slice(-60));
       }
     },
   });

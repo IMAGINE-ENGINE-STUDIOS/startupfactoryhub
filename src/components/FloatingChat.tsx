@@ -41,8 +41,12 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
 import ReactMarkdown from 'react-markdown';
 const geniusAILogo = '/startup-factory-hub-logo.png';
-import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
+import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useUpdateChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
+import { durableGetSync, durableSet, durableDelete, durableHydrate, durableOnAdopt } from '@/lib/durableStore';
+
+/** The Genius bubble's live thread in the durable store (2026-10-26). */
+const GENIUS_THREAD_KEY = 'sfh:genius:thread:v1';
 import { getAIHeaders } from "@/lib/aiAuth";
 import { getAppLanguage } from "@/lib/aiLanguage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -273,8 +277,16 @@ export default function FloatingChat() {
   const [totalUnread, setTotalUnread] = useState(0);
   const [docReadyBadge, setDocReadyBadge] = useState(false);
 
-  // AI Assistant state
-  const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
+  // AI Assistant state — restored from the DURABLE STORE on mount
+  // (founder directive 2026-10-26: Genius forgot every conversation
+  // on reload because this was bare useState; the thread now persists
+  // in IndexedDB + localStorage mirror and comes back every time).
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>(() => {
+    const saved = durableGetSync<AIMessage[]>(GENIUS_THREAD_KEY);
+    return Array.isArray(saved)
+      ? saved.filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string').slice(-80)
+      : [];
+  });
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   /* Voice (founder directive 2026-10-25): mic dictation into the Genius
@@ -288,6 +300,19 @@ export default function FloatingChat() {
   useEffect(() => { warmVoice(); }, []);
   const aiMessagesRef = useRef<AIMessage[]>([]);
   useEffect(() => { aiMessagesRef.current = aiMessages; });
+  /* Genius thread persistence: mirror every change into the durable
+   * store; adopt the IndexedDB copy if it is newer than the bootstrap
+   * read; never persist an empty thread before hydration completes
+   * (that would overwrite memory still loading). */
+  const geniusHydratedRef = useRef(false);
+  useEffect(() => { void durableHydrate().then(() => { geniusHydratedRef.current = true; }); }, []);
+  useEffect(() => durableOnAdopt(GENIUS_THREAD_KEY, (data) => {
+    if (Array.isArray(data)) setAiMessages((cur) => (cur.length ? cur : (data as AIMessage[]).slice(-80)));
+  }), []);
+  useEffect(() => {
+    if (aiMessages.length === 0 && !geniusHydratedRef.current) return;
+    durableSet(GENIUS_THREAD_KEY, aiMessages.slice(-80));
+  }, [aiMessages]);
   /* VoiceCall v2 (founder direction 2026-10-26): Talk is a real
    * conversation with one of the founder's own agents — the streaming
    * call-agents "chat" action, run by VoiceCallEngine (worker speech,
@@ -389,7 +414,7 @@ export default function FloatingChat() {
             deliverBubbleAudit(`⚙ ${target.name} is now **${nn}** in your Agents roster.`);
             report(`${target.name} was renamed to ${nn}, as you asked.`);
           } else {
-            const np = withCharter(target.system_prompt || '', { mission: String(d.mission ?? ''), vision: String(d.vision ?? ''), instructions: String(d.instructions ?? '') });
+            const np = withCharter(target.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
             await callAgents({ action: 'save', id: target.id, name: target.name, description: target.description ?? '', model: d.model || target.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: target.tools ?? [] });
             deliverBubbleAudit(`⚙ ${target.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
             report(`${target.name}'s charter was updated as you set it.`);
@@ -422,15 +447,10 @@ export default function FloatingChat() {
       if (!turns.length && !audits.length) return;
       const merged = [...aiMessagesRef.current, ...turns, ...audits] as AIMessage[];
       setAiMessages(merged);
-      const firstUser = turns.find((t) => t.role === 'user');
-      saveChatLog.mutate({
-        title: (firstUser?.content || 'Voice conversation').slice(0, 60),
-        messages: merged,
-        tool_used: 'voice-call',
-      });
+      persistGeniusLogRef.current(merged, 'voice-call');
     },
   });
-  useEffect(() => { bubbleCallActiveRef.current = geniusVoice.talkOn && (geniusVoice as { mine?: boolean }).mine; }, [geniusVoice.talkOn, (geniusVoice as { mine?: boolean }).mine]);
+  useEffect(() => { bubbleCallActiveRef.current = geniusVoice.talkOn && geniusVoice.mine; }, [geniusVoice.talkOn, geniusVoice.mine]);
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
     typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
@@ -468,7 +488,46 @@ export default function FloatingChat() {
   const deleteMemory = useDeleteMemory();
   const { data: chatLogs = [] } = useGeniusChatLogs();
   const saveChatLog = useSaveChatLog();
+  const updateChatLog = useUpdateChatLog();
   const deleteChatLog = useDeleteChatLog();
+
+  /* ONE continuing cloud log (2026-10-26): saves used to INSERT a new
+   * genius_ai_chat_logs row after every reply — the history filled
+   * with fragments and the live conversation was never the same one.
+   * Now the first save creates the row and every later save UPDATES
+   * it, so the cloud copy is the whole conversation. */
+  const currentChatLogIdRef = useRef<string | null>(null);
+  useEffect(() => { currentChatLogIdRef.current = currentChatLogId; }, [currentChatLogId]);
+  const persistGeniusLogRef = useRef<(messages: AIMessage[], tool: string) => void>(() => {});
+  persistGeniusLogRef.current = (messages, tool) => {
+    const clean = messages.filter((m) => m && typeof m.content === 'string').map((m) => ({ role: m.role, content: m.content }));
+    if (!clean.length) return;
+    const id = currentChatLogIdRef.current;
+    if (id) {
+      updateChatLog.mutate({ id, messages: clean });
+    } else {
+      const title = (clean.find((m) => m.role === 'user')?.content || 'Chat').slice(0, 60);
+      saveChatLog.mutate(
+        { title, messages: clean, tool_used: tool },
+        { onSuccess: (data: any) => { if (data?.id) setCurrentChatLogId(data.id); } },
+      );
+    }
+  };
+  /* Cross-device memory: when this device has NO local thread at all,
+   * adopt the most recent cloud conversation as the live thread —
+   * Genius picks up where the user left off, on any device. Local
+   * memory always wins when it exists. */
+  const cloudAdoptedRef = useRef(false);
+  useEffect(() => {
+    if (cloudAdoptedRef.current || !chatLogs.length) return;
+    cloudAdoptedRef.current = true;
+    if (aiMessagesRef.current.length) return;
+    const latest = chatLogs[0];
+    if (latest?.messages?.length) {
+      setAiMessages(latest.messages as AIMessage[]);
+      setCurrentChatLogId(latest.id);
+    }
+  }, [chatLogs]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -1307,10 +1366,10 @@ You can help with:
           fullText = f.finish();
         }
 
-        // Auto-save chat log after each AI response
+        // Auto-save chat log after each AI response — updates the
+        // ONE continuing cloud log instead of inserting a fragment.
         const allMsgsWithResponse = [...allMsgs, { role: 'assistant' as const, content: fullText }];
-        const chatTitle = userMessage.slice(0, 60) || 'Chat';
-        saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
+        persistGeniusLogRef.current(allMsgsWithResponse as AIMessage[], activeTool?.id || 'general');
 
         // Open any generated document in LightPaper as a new editable file
         const isDocTool = activeTool && ALL_TOOLS.find(t => t.id === activeTool.id && t.category === 'document');
@@ -2098,7 +2157,7 @@ You can help with:
                                   <div className="h-px bg-white/10 my-1" />
                                   <button
                                     type="button"
-                                    onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowAttachMenu(false); }}
+                                    onClick={() => { setAiMessages([]); setCurrentChatLogId(null); currentChatLogIdRef.current = null; durableDelete(GENIUS_THREAD_KEY); setActiveTool(null); setShowAttachMenu(false); }}
                                     className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
                                   >
                                     <MessageSquare className="h-4 w-4 text-emerald-400" /> New chat
@@ -2264,7 +2323,7 @@ You can help with:
                                     <div className="flex gap-1.5 pt-2 border-t border-white/10">
                                       <button
                                         type="button"
-                                        onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
+                                        onClick={() => { setAiMessages([]); setCurrentChatLogId(null); currentChatLogIdRef.current = null; durableDelete(GENIUS_THREAD_KEY); setActiveTool(null); setShowToolMenu(false); }}
                                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[11px] font-medium text-primary bg-white/5 hover:bg-primary/10 border border-white/10 transition-colors"
                                       >
                                         <Plus className="h-3.5 w-3.5" />

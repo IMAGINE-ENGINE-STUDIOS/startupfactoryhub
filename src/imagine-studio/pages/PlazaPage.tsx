@@ -14,6 +14,7 @@ import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrac
 import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw, MonitorUp, FileUp, ChevronLeft, ChevronRight, Square } from 'lucide-react';
 import { districtChat } from '@/lib/districtChatBus';
 import { withCharter } from '@/imagine-studio/lib/org';
+import { memoryBlock } from '@/lib/agentMemory';
 import { TheaterScreen, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { Maximize2 } from 'lucide-react';
@@ -736,8 +737,9 @@ export default function PlazaPage() {
             <AgentChat
               key={agentChar.id}
               name={agentChar.name}
-              onSend={async (text) => {
-                const r = await callAgentsApi({ action: 'run', agent_id: agentChar.agentId, message: text });
+              persistKey={`sfh:plaza-chat:${agentChar.id}`}
+              onSend={async (text, history) => {
+                const r = await callAgentsApi({ action: 'run', agent_id: agentChar.agentId, message: memoryBlock(history, 'You') + text });
                 return (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
               }}
               emptyText={<>Chat with {agentChar.name} — give it a task below, or tap the phone button for a hands-free voice conversation in its role voice.</>}
@@ -779,7 +781,7 @@ export default function PlazaPage() {
                         audit(`⚙ Renamed to **${nn}** in the Agents roster — the plaza name tag refreshes when the level reloads.`);
                         report(`The agent was renamed to ${nn}, as you asked.`);
                       } else {
-                        const np = withCharter(me.system_prompt || '', { mission: String(d.mission ?? ''), vision: String(d.vision ?? ''), instructions: String(d.instructions ?? '') });
+                        const np = withCharter(me.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
                         await callAgentsApi({ action: 'save', id: me.id, name: me.name, description: me.description ?? '', model: d.model || me.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: me.tools ?? [] });
                         audit(`⚙ ${agentChar.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
                         report(`${agentChar.name}'s charter was updated as you set it.`);
