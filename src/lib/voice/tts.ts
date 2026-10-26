@@ -113,7 +113,10 @@ export const KOKORO_MODEL = "Kokoro-82M-v1.0-ONNX";
 /** Persona → Kokoro voice (hosted voice files; EN + UK + ES sets). */
 export const KOKORO_VOICE_FOR_PERSONA: Record<string, string> = {
   chairman: "bm_george",
-  ceo: "af_nicole",
+  /* af_nicole was the CEO's voice — one of Kokoro's softest; the
+   * founder's field report 2026-10-26: "the CEO is whispering, not
+   * feasible, change the voice." af_bella is full and projected. */
+  ceo: "af_bella",
   manager: "am_michael",
   bright: "af_bella",
   steady: "am_adam",
@@ -177,8 +180,21 @@ function playRawAudio(audio: Float32Array, sampleRate: number): Promise<void> {
       const AC: typeof AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       audioCtx = audioCtx || new AC();
       if (audioCtx.state === "suspended") void audioCtx.resume();
+      /* Loudness normalize: Kokoro voices render at wildly different
+       * levels (some peak under 0.2 — they "whisper"). Scale quiet
+       * audio up to a 0.89 peak, gain capped at 5x, on the buffer
+       * copy — every voice leaves at a comparable, audible level. */
+      let peak = 0;
+      for (let i = 0; i < audio.length; i += 2) { const v = Math.abs(audio[i]); if (v > peak) peak = v; }
+      const gain = peak > 0.01 && peak < 0.89 ? Math.min(0.89 / peak, 5) : 1;
       const buffer = audioCtx.createBuffer(1, audio.length, sampleRate);
-      buffer.copyToChannel(audio as any, 0);
+      if (gain !== 1) {
+        const scaled = new Float32Array(audio.length);
+        for (let i = 0; i < audio.length; i++) scaled[i] = audio[i] * gain;
+        buffer.copyToChannel(scaled as any, 0);
+      } else {
+        buffer.copyToChannel(audio as any, 0);
+      }
       const src = audioCtx.createBufferSource();
       src.buffer = buffer;
       src.connect(audioCtx.destination);
