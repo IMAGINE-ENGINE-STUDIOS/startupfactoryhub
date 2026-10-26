@@ -60,6 +60,7 @@ export function useVoiceConversation(opts: {
    * which is most of why Talk felt slow (founder: "no way to make
    * this faster more realtime?", 2026-10-25). */
   const spokenCharsRef = useRef<Map<string, number>>(new Map());
+  const spokenTextRef = useRef<Map<string, string>>(new Map());
   const flushedRef = useRef<Set<string>>(new Set());
   const reopenedRef = useRef<Set<string>>(new Set());
   const speechQueueRef = useRef<string[]>([]);
@@ -198,6 +199,7 @@ export function useVoiceConversation(opts: {
    * (the direct stream tap and the host's rendered state) can feed
    * the same reply without ever double-speaking. */
   const feedSpeech = useCallback((id: string, text: string, done: boolean) => {
+    spokenTextRef.current.set(id, text);
     if (!spokenCharsRef.current.has(id)) spokenCharsRef.current.set(id, 0);
     const from = spokenCharsRef.current.get(id)!;
     if (done && text.length <= from) { flushedRef.current.add(id); void pumpSpeech(); return; }
@@ -228,11 +230,21 @@ export function useVoiceConversation(opts: {
   }, []);
 
   /* Source 1 — the host's rendered state (works for every surface,
-   * including non-streaming agent runs). */
+   * including non-streaming agent runs). Guard: if another feed key
+   * already spoke this exact reply in full (the stream tap uses its
+   * own id), adopt that progress instead of speaking it twice. */
   useEffect(() => {
     if (!talkOn) return;
     const la = opts.lastAssistant;
     if (!la) return;
+    for (const [otherId] of Array.from(spokenCharsRef.current.entries())) {
+      if (otherId !== la.id && spokenTextRef.current.get(otherId) === la.text && flushedRef.current.has(otherId)) {
+        spokenCharsRef.current.set(la.id, la.text.length);
+        flushedRef.current.add(la.id);
+        void pumpSpeech();
+        return;
+      }
+    }
     feedSpeech(la.id, la.text, !opts.busy);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [talkOn, opts.lastAssistant?.id, opts.lastAssistant?.text, opts.busy]);

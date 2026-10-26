@@ -1041,9 +1041,13 @@ You can help with:
       setAiMessages(prev => [...prev, { role: 'assistant', content: '' }]);
       /* Voice-first fast lane: publish the stream straight from this
        * reader so Talk speaks sentences as they arrive on the wire,
-       * not after React renders them. The id matches the one
-       * geniusLastAssistant derives for this message (g<index>). */
-      beginVoiceStream(`g${aiMessages.length}`);
+       * not after React renders them. The id must be the one
+       * geniusLastAssistant will derive for this message: the user
+       * message appended above lands at index aiMessages.length, so
+       * this assistant reply lands at +1. (First version used +0 —
+       * an off-by-one that made the two speech feeds track the same
+       * reply under different keys.) */
+      beginVoiceStream(`g${aiMessages.length + 1}`);
 
       while (true) {
         const { done, value } = await reader.read();
