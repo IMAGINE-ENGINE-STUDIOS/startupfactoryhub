@@ -432,33 +432,84 @@ export const BUILDING_PLAZA_LEVEL_NAME = "Building Plaza";
 export function buildBuildingPlazaScene(): LevelScene {
   n = 0;
   const o: PrimitiveObject[] = [];
-  o.push(P("Plaza Paving", "box", [0, -0.6, 0], [190, 1.2, 130], "#b7ab9c", { roughness: 1 }));
-  o.push(P("Tower Podium", "box", [0, 4, 0], [64, 8, 46], "#8d97a3", { roughness: 0.9 }));
-  // Fountain, south of the podium.
-  o.push(P("Fountain Rim", "cylinder", [0, 0.55, 34], [22, 1.1, 22], "#d8d2c6", { roughness: 0.8 }));
-  o.push(P("Fountain Water", "cylinder", [0, 1.05, 34], [19.6, 0.25, 19.6], "#5f9ec4", { roughness: 0.15, metalness: 0.1 }));
-  o.push(P("Fountain Spout", "cylinder", [0, 1.6, 34], [1.2, 1.6, 1.2], "#d8d2c6", { roughness: 0.8 }));
-  // Planters with trees.
-  for (const px of [-52, -30, 30, 52]) for (const pz of [-34, 0, 34]) {
-    o.push(P("Planter", "box", [px, 0.5, pz], [4.4, 1, 4.4], "#6b5d4f", { roughness: 1 }));
-    o.push(P("Tree Trunk", "cylinder", [px, 1.6, pz], [0.55, 1.6, 0.55], "#5a4632", { roughness: 1 }));
-    o.push(P("Tree Canopy", "sphere", [px, 3.9, pz], [4.6, 4.6, 4.6], "#4e7d4a", { roughness: 1 }));
+  // FORMAL GARDEN (founder redesign 2026-10-26, from her reference photo):
+  // symmetric parterres, manicured hedges, tree allées, stone terraces and
+  // a tiered fountain on the main axis. No crude stand-ins — every element
+  // is proportioned, trimmed and mirrored.
+  const LAWN = "#47763a", LAWN_DEEP = "#3c6a32", HEDGE = "#2d5a2c", TOPIARY = "#356b35";
+  const STONE = "#d8cfbc", TRAV = "#c9bb9e", WHITE = "#ece7db", GRAVEL = "#e6dfcd", WATER = "#79a8a4";
+  // Ground: a full lawn carpet; the stone terrace sits on it.
+  o.push(P("Garden Lawn", "box", [0, -0.55, 0], [190, 1.1, 130], LAWN_DEEP, { roughness: 1 }));
+  o.push(P("Stone Terrace", "box", [0, 0.07, 6], [124, 0.14, 92], TRAV, { roughness: 0.95 }));
+  o.push(P("Terrace Inlay", "box", [0, 0.15, 6], [116, 0.04, 84], STONE, { roughness: 0.9 }));
+  // The tower podium, dressed as a stone base with a darker plinth and a
+  // light cornice; hedge planters run along its garden face.
+  o.push(P("Tower Podium", "box", [0, 4, 0], [64, 8, 46], "#b3a68c", { roughness: 0.9 }));
+  o.push(P("Podium Plinth", "box", [0, 0.8, 0], [66, 1.6, 48], "#8f8268", { roughness: 0.95 }));
+  o.push(P("Podium Cornice", "box", [0, 7.6, 0], [66, 0.8, 48], STONE, { roughness: 0.85 }));
+  for (const sx of [-1, 1]) {
+    o.push(P("Podium Planter", "box", [sx * 20, 0.75, 26.5], [30, 1.5, 2.6], "#7d6f57", { roughness: 1 }));
+    o.push(P("Podium Hedge", "box", [sx * 20, 1.9, 26.5], [30, 1, 2.2], HEDGE, { roughness: 1 }));
   }
-  // Benches.
-  for (const [px, pz] of [[-16, 34], [16, 34], [-24, -30], [24, -30]] as [number, number][]) {
-    o.push(P("Bench", "box", [px, 0.45, pz], [4.6, 0.35, 1.3], "#7a6248", { roughness: 0.9 }));
+  // THE FOUNTAIN — tiered, centered on the main axis south of the tower.
+  const FZ = 38;
+  o.push(P("Fountain Basin", "cylinder", [0, 0.5, FZ], [23, 1, 23], WHITE, { roughness: 0.7 }));
+  o.push(P("Fountain Rim", "torus", [0, 1.05, FZ], [22.4, 2.2, 22.4], STONE, { roughness: 0.7, rotation: [Math.PI / 2, 0, 0] } as any));
+  o.push(P("Fountain Water", "cylinder", [0, 0.92, FZ], [20.4, 0.2, 20.4], WATER, { roughness: 0.12, metalness: 0.15 }));
+  o.push(P("Fountain Pedestal", "cylinder", [0, 1.5, FZ], [2.2, 1.6, 2.2], WHITE, { roughness: 0.7 }));
+  o.push(P("Fountain Tier", "cylinder", [0, 2.5, FZ], [9, 0.5, 9], WHITE, { roughness: 0.7 }));
+  o.push(P("Fountain Tier Water", "cylinder", [0, 2.78, FZ], [8.2, 0.14, 8.2], WATER, { roughness: 0.12, metalness: 0.15 }));
+  o.push(P("Fountain Column", "cylinder", [0, 3.3, FZ], [1.1, 1.4, 1.1], WHITE, { roughness: 0.7 }));
+  o.push(P("Fountain Crown", "cylinder", [0, 4.15, FZ], [4.4, 0.4, 4.4], WHITE, { roughness: 0.7 }));
+  o.push(P("Fountain Finial", "sphere", [0, 4.85, FZ], [1.15, 1.15, 1.15], STONE, { roughness: 0.6 }));
+  for (const a of [45, 135, 225, 315]) {
+    const r = 11.2, x = Math.cos(a * Math.PI / 180) * r, z = FZ + Math.sin(a * Math.PI / 180) * r;
+    o.push(P("Fountain Orb", "sphere", [x, 1.35, z], [0.8, 0.8, 0.8], STONE, { roughness: 0.6 }));
   }
-  // Lamp posts.
-  for (const [px, pz] of [[-40, -22], [40, -22], [-40, 22], [40, 22], [0, -40], [0, 40]] as [number, number][]) {
-    o.push(P("Lamp Post", "cylinder", [px, 2.4, pz], [0.22, 4.8, 0.22], "#2c3540", { roughness: 0.6, metalness: 0.5 }));
-    o.push(P("Lamp Globe", "sphere", [px, 5, pz], [0.85, 0.85, 0.85], "#ffe9b0", { roughness: 0.4 }));
+  // PARTERRE QUADRANTS — four mirrored formal beds: hedge frames, gravel
+  // hearts, inner hedge crosses and a topiary at the center of each.
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const cx = sx * 40, cz = 6 + sz * 33;
+    o.push(P("Parterre Lawn", "box", [cx, 0.1, cz], [44, 0.2, 30], LAWN, { roughness: 1 }));
+    o.push(P("Parterre Gravel", "box", [cx, 0.16, cz], [36, 0.1, 22], GRAVEL, { roughness: 1 }));
+    for (const hx of [-21.2, 21.2]) o.push(P("Parterre Hedge", "box", [cx + hx, 0.55, cz], [1.6, 0.9, 30], HEDGE, { roughness: 1 }));
+    for (const hz of [-14, 14]) o.push(P("Parterre Hedge", "box", [cx, 0.55, cz + hz], [44, 0.9, 1.6], HEDGE, { roughness: 1 }));
+    o.push(P("Parterre Cross", "box", [cx, 0.5, cz], [34, 0.7, 1.3], HEDGE, { roughness: 1 }));
+    o.push(P("Parterre Cross", "box", [cx, 0.5, cz], [1.3, 0.7, 20], HEDGE, { roughness: 1 }));
+    o.push(P("Topiary Cone", "cone", [cx, 2.2, cz], [3.4, 3.6, 3.4], TOPIARY, { roughness: 1 }));
+    o.push(P("Topiary Pot", "cylinder", [cx, 0.45, cz], [2, 0.9, 2], "#7d6f57", { roughness: 1 }));
+    for (const ox of [-20.5, 20.5]) for (const oz of [-13.5, 13.5])
+      o.push(P("Topiary Ball", "sphere", [cx + ox * 0.92, 1.15, cz + oz * 0.92], [1.7, 1.7, 1.7], TOPIARY, { roughness: 1 }));
   }
-  // THE THEATER SCREEN — the same one as the office floors (same size,
-  // same build), standing at the plaza's north end facing the tower,
-  // on its two pylons. No voting booth, no fake chairs.
-  o.push(P("Theater Screen", "box", [0, 3.55, -44], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
-  o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -44], [0.35, 6.6, 0.35], "#0a0f16"));
-  o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -44], [0.35, 6.6, 0.35], "#0a0f16"));
+  // TREE ALLÉES — shaped double-crown trees lining the main axis.
+  for (const sx of [-1, 1]) for (const tz of [-46, -30, 22, 54]) {
+    const x = sx * 15.5, z = tz === 22 || tz === 54 ? tz : tz;
+    o.push(P("Allée Trunk", "cylinder", [x, 1.1, z], [0.5, 2.2, 0.5], "#5a4632", { roughness: 1 }));
+    o.push(P("Allée Crown", "sphere", [x, 3.6, z], [4.4, 4.8, 4.4], TOPIARY, { roughness: 1 }));
+    o.push(P("Allée Crown Top", "sphere", [x, 5.3, z], [3, 3, 3], HEDGE, { roughness: 1 }));
+  }
+  // Long manicured hedge walls closing the garden's north and south edges.
+  for (const sz of [-1, 1]) for (const sx of [-1, 1]) {
+    o.push(P("Garden Hedge Wall", "box", [sx * 40, 0.85, 6 + sz * 51], [72, 1.7, 2.6], HEDGE, { roughness: 1 }));
+    o.push(P("Hedge Ball", "sphere", [sx * 76, 1.5, 6 + sz * 51], [2.6, 2.6, 2.6], TOPIARY, { roughness: 1 }));
+  }
+  // LAMPS — black posts, warm globes, in pairs along the axis.
+  for (const sx of [-1, 1]) for (const lz of [-38, -14, 12, 56]) {
+    o.push(P("Lamp Post", "cylinder", [sx * 13, 2.1, lz], [0.2, 4.2, 0.2], "#232a32", { roughness: 0.5, metalness: 0.6 }));
+    o.push(P("Lamp Globe", "sphere", [sx * 13, 4.5, lz], [0.95, 0.95, 0.95], "#ffe9b0", { roughness: 0.35, emissive: "#ffca66", emissiveIntensity: 0.55 } as any));
+  }
+  // STONE BENCHES facing the fountain.
+  for (const sx of [-1, 1]) for (const bz of [24, 52]) {
+    o.push(P("Bench Seat", "box", [sx * 17, 0.62, bz], [5, 0.3, 1.4], WHITE, { roughness: 0.8 }));
+    o.push(P("Bench Leg", "box", [sx * 17 - 1.8, 0.25, bz], [0.5, 0.5, 1.2], STONE, { roughness: 0.85 }));
+    o.push(P("Bench Leg", "box", [sx * 17 + 1.8, 0.25, bz], [0.5, 0.5, 1.2], STONE, { roughness: 0.85 }));
+  }
+  // THE THEATER SCREEN — the same one as the office floors, standing at
+  // the garden's north end facing the tower, hedges flanking it.
+  o.push(P("Theater Screen", "box", [0, 3.55, -46], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
+  o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -46], [0.35, 6.6, 0.35], "#0a0f16"));
+  o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -46], [0.35, 6.6, 0.35], "#0a0f16"));
+  for (const sx of [-1, 1]) o.push(P("Screen Hedge", "box", [sx * 11.5, 1.1, -46], [4.5, 2.2, 1.8], HEDGE, { roughness: 1 }));
   return {
     ...EMPTY_SCENE,
     skybox: { ...DEFAULT_SKYBOX },
