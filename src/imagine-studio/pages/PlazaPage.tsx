@@ -34,6 +34,7 @@ async function callAgentsApi(body: Record<string, unknown>): Promise<any> {
   return data;
 }
 import { syncPlazaLevelToPublished } from '@/imagine-studio/lib/plazaLevel';
+import { buildDocument, documentDelivery, DOC_TASK } from '@/imagine-studio/lib/docBuild';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import { useUnifiedMovement } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor, type ControllerDef } from '@/imagine-studio/lib/controllers';
@@ -740,6 +741,43 @@ export default function PlazaPage() {
               }}
               emptyText={<>Chat with {agentChar.name} — give it a task below, or tap the phone button for a hands-free voice conversation in its role voice.</>}
               voiceAgentId={agentChar.agentId}
+              onAction={(d, { audit, report }) => {
+                /* Conversational actions in the plaza: the character
+                 * runs its own tasks; documents are authored on the
+                 * spot and delivered in the chat. */
+                void (async () => {
+                  const runOut = (r: any) => (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+                  try {
+                    if (d.type === 'run_task') {
+                      const task = String(d.task || '').trim();
+                      audit(`⚙ ${agentChar.name} is on it: ${task}`);
+                      const out = runOut(await callAgentsApi({ action: 'run', agent_id: agentChar.agentId, message: task }));
+                      audit(`⚙ **${agentChar.name} finished:**\n\n${out.slice(0, 1200)}`);
+                      report(`${agentChar.name} completed the task "${task}". Result summary: ${out.slice(0, 300)}`);
+                    } else if (d.type === 'build_document') {
+                      const title = String(d.title || 'Untitled document');
+                      const brief = String(d.brief || title);
+                      audit(`⚙ Building **${title}** in LightPaper — it will arrive here when ready.`);
+                      const doc = await buildDocument({
+                        title,
+                        brief,
+                        authorRun: async () => runOut(await callAgentsApi({ action: 'run', agent_id: agentChar.agentId, message: DOC_TASK(title, brief) })),
+                        floor: null,
+                      });
+                      audit(documentDelivery(doc));
+                      report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                    } else if (d.type === 'navigate') {
+                      const path = String(d.path || '');
+                      if (path.startsWith('/')) { audit(`⚙ Opening ${path}…`); window.location.href = path; }
+                      else audit('⚙ That destination does not look like a page path.');
+                    } else {
+                      audit(`⚙ "${d.type}" runs from the office — the Manager and the executives own that from their chats.`);
+                    }
+                  } catch (e: any) {
+                    audit(`⚙ That action failed: ${e?.message || 'unknown error'}`);
+                  }
+                })();
+              }}
               placeholder={`Give ${agentChar.name} a task…`}
               disabledNote={!signedIn ? `Sign in to chat with ${agentChar.name}.` : !agentChar.agentId ? `${agentChar.name} isn't linked to an agent yet.` : null}
             />

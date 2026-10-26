@@ -15,6 +15,7 @@ import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
 import { buildingRosterRows } from "@/imagine-studio/lib/floors";
+import { buildDocument, documentDelivery, DOC_TASK } from "@/imagine-studio/lib/docBuild";
 
 const STATUS_STYLE: Record<string, string> = {
   queued: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
@@ -186,6 +187,46 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
             <AgentChat
               name="Manager"
               onSend={(text) => engine.chatWithManager(text)}
+              onAction={(d, { audit, report }) => {
+                /* Conversational actions — the Manager acts from the
+                 * chat/call: shifts, specialist tasks, documents. */
+                void (async () => {
+                  try {
+                    if (d.type === "start_shift") {
+                      const goal = String(d.goal || "").trim();
+                      if (!goal) { audit("⚙ The Manager didn't name a goal for the shift."); return; }
+                      await engine.startShift(goal);
+                      audit(`⚙ Shift started: **${goal}** — the Manager is planning and assigning the team.`);
+                      report(`A shift was started for: ${goal}. The team is working.`);
+                    } else if (d.type === "run_task") {
+                      const want = String(d.agent || "").toLowerCase();
+                      const member = team.find((r) => r.key.toLowerCase() === want || r.name.toLowerCase() === want || r.name.toLowerCase().includes(want));
+                      if (!member) { audit(`⚙ No specialist named "${String(d.agent || "")}" on this floor's team.`); return; }
+                      const task = String(d.task || "").trim();
+                      audit(`⚙ ${member.name} is on it: ${task}`);
+                      const out = await engine.runTeamTask(member.key, task);
+                      audit(`⚙ **${member.name} finished:**\n\n${out.slice(0, 1200)}`);
+                      report(`${member.name} completed the task "${task}". Result summary: ${out.slice(0, 300)}`);
+                    } else if (d.type === "build_document") {
+                      const title = String(d.title || "Untitled document");
+                      const brief = String(d.brief || title);
+                      audit(`⚙ The Writer is building **${title}** in LightPaper — it will arrive here when ready.`);
+                      const doc = await buildDocument({
+                        title,
+                        brief,
+                        authorRun: () => engine.runTeamTask("writer", DOC_TASK(title, brief)),
+                        floor: floorKey ? { floorKey, floorId: floorId ?? 0, company } : null,
+                      });
+                      audit(documentDelivery(doc));
+                      report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                    } else {
+                      audit(`⚙ The Manager can't do "${d.type}" from here yet.`);
+                    }
+                  } catch (e: any) {
+                    audit(`⚙ That action failed: ${e?.message || "unknown error"}`);
+                  }
+                })();
+              }}
               emptyText={<>Talk to the Manager — ask him anything, brief him on the company, or describe the work. When you&apos;re ready, turn your last message into a full shift with the gold button above: he&apos;ll plan it, assign the specialists, and verify every deliverable.</>}
               placeholder="Message the Manager…"
               voiceAgentId={managerVoiceId}

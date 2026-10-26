@@ -269,13 +269,26 @@ const engine = {
 
   /** A direct conversation with the Manager (the Shift panel's Chat tab):
    * same call-agents run the desk bots use, resolved through the office's
-   * auto-bind. Returns his reply text. */
+   * auto-bind. Returns his reply text. The ACTION PROTOCOL rides along
+   * (founder directive 2026-10-26): the Manager can trigger team work
+   * from this chat — directives in his reply are executed by the host
+   * and never shown raw. */
   async chatWithManager(text: string): Promise<string> {
     if (!deps) throw new Error("The office is still connecting — try again in a moment.");
     const managerId = await deps.resolveAgentId("manager");
     if (!managerId) throw new Error("The Manager could not be brought online (agent setup failed).");
-    const r = await callAgentsApi({ action: "run", agent_id: managerId, message: text });
+    const protocol = `\n\n[ACTION PROTOCOL — if my message clearly asks you to have work done, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"start_shift","goal":"..."}]] to run a full shift, [[ACT {"type":"run_task","agent":"<specialist name>","task":"..."}]] to assign one specialist, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it — never write it yourself here). Confirm in words what you set in motion.]`;
+    const r = await callAgentsApi({ action: "run", agent_id: managerId, message: text + protocol });
     return runOutput(r) || "Done.";
+  },
+
+  /** Conversational action: run ONE team member on a task, by bot key. */
+  async runTeamTask(botKey: string, task: string): Promise<string> {
+    if (!deps) throw new Error("The office is still connecting — try again in a moment.");
+    const agentId = await deps.resolveAgentId(botKey);
+    if (!agentId) throw new Error("That specialist isn't linked yet.");
+    const r = await callAgentsApi({ action: "run", agent_id: agentId, message: task });
+    return runOutput(r) || "Done — no output text.";
   },
 
   async startShift(goal: string) {

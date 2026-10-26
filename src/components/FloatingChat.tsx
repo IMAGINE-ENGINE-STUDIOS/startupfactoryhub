@@ -19,6 +19,12 @@ import VoiceMicButton from '@/components/voice/VoiceMicButton';
 import { useVoiceCall, warmVoice } from '@/lib/voice/useVoiceCall';
 import { VoiceCallPill } from '@/components/voice/VoiceCallPill';
 import { LiveCaptions } from '@/components/voice/LiveCaptions';
+import { DirectiveFilter, type ActDirective } from '@/lib/voice/adapters';
+import { buildDocument, documentDelivery, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
+
+/** Conversational actions for the Genius bubble (ACTIONS-SPEC):
+ * appended to the Genius system (typed and voice). */
+const BUBBLE_ACTIONS = `\n\nACTIONS: You can make things happen directly from this conversation. When the user clearly asks you to do a job, assign a task to one of their agents, build a report or document, or open a page, emit ONE directive on its own line in this exact format: [[ACT {"type":"run_task","agent":"<agent name>","task":"what to do"}]] — the platform executes it immediately. Types: run_task {agent, task} (one of the user's agents does the job with its skills), build_document {title, brief} (a report or document — the Writer builds it in LightPaper in the background and it is delivered right here in this chat when ready; NEVER write a requested document yourself in the chat — always route it to build_document), navigate {path} (open a page of the app). After the directive, keep talking naturally: confirm what you set in motion in one sentence. NEVER show or explain a directive, and never emit one for something the user did not clearly ask to happen.`;
 import { AgentBrain, GeniusBrain } from '@/lib/voice/adapters';
 import type { Turn } from '@/lib/voice/engine';
 import {
@@ -313,20 +319,88 @@ export default function FloatingChat() {
   }, [user?.id]);
   const voiceBaseHistory = useCallback((): Turn[] =>
     aiMessagesRef.current.map((m) => ({ role: m.role === 'user' ? 'user' as const : 'assistant' as const, content: m.content })), []);
+
+  /* Conversational actions — Genius bubble executor (founder
+   * directive 2026-10-26): directives from the voice brains AND from
+   * typed replies land here. Audits during a call queue and flush
+   * with the transcript; otherwise they post straight to the thread. */
+  const bubbleCallActiveRef = useRef(false);
+  const bubbleAuditQueueRef = useRef<string[]>([]);
+  const bubbleBrainRef = useRef<any>(null);
+  const deliverBubbleAudit = useCallback((text: string) => {
+    if (bubbleCallActiveRef.current) bubbleAuditQueueRef.current.push(text);
+    else setAiMessages((prev) => [...prev, { role: 'assistant', content: text } as AIMessage]);
+  }, []);
+  const bubbleAct = useCallback((d: ActDirective) => {
+    void (async () => {
+      const report = (t: string) => { try { bubbleBrainRef.current?.noteResult?.(t); } catch { /* best effort */ } };
+      const runOut = (r: any) => (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+      const callAgents = async (body: Record<string, unknown>) => {
+        const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/call-agents`, {
+          method: 'POST',
+          headers: await getAIHeaders(),
+          body: JSON.stringify(body),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || (data as any)?.error) throw new Error((data as any)?.error || `Agents service error (${resp.status})`);
+        return data;
+      };
+      try {
+        if (d.type === 'navigate') {
+          const p = String(d.path || '');
+          if (p.startsWith('/')) { deliverBubbleAudit(`⚙ Opening ${p}…`); navigate(p); }
+          else deliverBubbleAudit('⚙ That destination does not look like a page path.');
+        } else if (d.type === 'run_task') {
+          const data = await callAgents({ action: 'list' });
+          const agents = Array.isArray((data as any)?.agents) ? (data as any).agents : [];
+          const want = String(d.agent || '').toLowerCase();
+          const target = agents.find((a: any) => String(a?.name || '').toLowerCase() === want)
+            || agents.find((a: any) => String(a?.name || '').toLowerCase().includes(want));
+          if (!target) { deliverBubbleAudit(`⚙ No agent named "${String(d.agent || '')}" was found in your Agents.`); return; }
+          const task = String(d.task || '').trim();
+          deliverBubbleAudit(`⚙ ${target.name} is on it: ${task}`);
+          const out = runOut(await callAgents({ action: 'run', agent_id: target.id, message: task }));
+          deliverBubbleAudit(`⚙ **${target.name} finished:**\n\n${out.slice(0, 1500)}`);
+          report(`${target.name} completed the task "${task}". Result summary: ${out.slice(0, 300)}`);
+        } else if (d.type === 'build_document') {
+          const title = String(d.title || 'Untitled document');
+          const brief = String(d.brief || title);
+          deliverBubbleAudit(`⚙ The Writer is building **${title}** in LightPaper — it will arrive here when ready.`);
+          const doc = await buildDocument({
+            title,
+            brief,
+            authorRun: () => authorViaLightPaper(title, brief),
+            floor: null,
+          });
+          deliverBubbleAudit(documentDelivery(doc));
+          report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+        } else {
+          deliverBubbleAudit(`⚙ "${d.type}" runs from the office — the Manager and the executive chairs own that from their chats.`);
+        }
+      } catch (e: any) {
+        deliverBubbleAudit(`⚙ That action failed: ${e?.message || 'unknown error'}`);
+      }
+    })();
+  }, [deliverBubbleAudit, navigate]);
+  const bubbleActRef = useRef(bubbleAct);
+  bubbleActRef.current = bubbleAct;
   const voiceBrain = useMemo(() => {
     if (!voiceAgentReady) return null;
-    if (voiceAgentId) return new AgentBrain(getAIHeaders, voiceAgentId, voiceBaseHistory);
-    return new GeniusBrain(getAIHeaders, () => buildVoiceSystemOverride(), getAppLanguage(), voiceBaseHistory);
+    if (voiceAgentId) return new AgentBrain(getAIHeaders, voiceAgentId, voiceBaseHistory, bubbleAct);
+    return new GeniusBrain(getAIHeaders, () => buildVoiceSystemOverride(), getAppLanguage(), voiceBaseHistory, bubbleAct);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceAgentReady, voiceAgentId, voiceBaseHistory]);
+  }, [voiceAgentReady, voiceAgentId, voiceBaseHistory, bubbleAct]);
+  useEffect(() => { bubbleBrainRef.current = voiceBrain; }, [voiceBrain]);
   const geniusVoice = useVoiceCall({
     surfaceId: 'genius-bubble',
     roleText: 'Genius',
     brain: voiceBrain,
     unavailableReason: 'Voice is still getting ready — give it a moment and tap Talk again.',
     onEnd: (turns) => {
-      if (!turns.length) return;
-      const merged = [...aiMessagesRef.current, ...turns] as AIMessage[];
+      const audits = bubbleAuditQueueRef.current.splice(0, bubbleAuditQueueRef.current.length)
+        .map((content): AIMessage => ({ role: 'assistant', content }));
+      if (!turns.length && !audits.length) return;
+      const merged = [...aiMessagesRef.current, ...turns, ...audits] as AIMessage[];
       setAiMessages(merged);
       const firstUser = turns.find((t) => t.role === 'user');
       saveChatLog.mutate({
@@ -336,6 +410,7 @@ export default function FloatingChat() {
       });
     },
   });
+  useEffect(() => { bubbleCallActiveRef.current = geniusVoice.talkOn && geniusVoice.mine; }, [geniusVoice.talkOn, geniusVoice.mine]);
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
     typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
@@ -1054,7 +1129,7 @@ You can help with:
               .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
               .join('\n\n')}`
           : '';
-      const systemOverride = getSystemOverride() + knowledgeBlock;
+      const systemOverride = getSystemOverride() + knowledgeBlock + BUBBLE_ACTIONS;
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
@@ -1203,6 +1278,15 @@ You can help with:
           fullText = cleanText;
         }
 
+        /* Conversational actions (typed parity): execute any [[ACT]]
+         * directives in the reply through the bubble executor and
+         * never show them raw. */
+        if (fullText.includes('[[ACT')) {
+          const f = new DirectiveFilter((d) => bubbleActRef.current(d));
+          f.feed(fullText);
+          fullText = f.finish();
+        }
+
         // Auto-save chat log after each AI response
         const allMsgsWithResponse = [...allMsgs, { role: 'assistant' as const, content: fullText }];
         const chatTitle = userMessage.slice(0, 60) || 'Chat';
@@ -1276,7 +1360,7 @@ You can help with:
             .join('\n\n')}`
         : '';
     const voiceBlock = `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`;
-    return getSystemOverride() + knowledgeBlock + voiceBlock;
+    return getSystemOverride() + knowledgeBlock + BUBBLE_ACTIONS + voiceBlock;
   };
 
   const selectedUser = selectedConversation 

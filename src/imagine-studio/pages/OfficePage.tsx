@@ -21,6 +21,7 @@ import { Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDow
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
+import { buildDocument, documentDelivery, DOC_TASK, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
@@ -646,9 +647,10 @@ const FIELD_LABEL =
 const GRADIENT_BUTTON =
   "rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 disabled:shadow-none";
 
-function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole }: {
+function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole, docFloor }: {
   bot: OfficeBot; link: BotLink; agents: any[]; signedIn: boolean; working: boolean;
   onOpenConsole: () => void;
+  docFloor?: { floorKey: string; floorId: number; company: string } | null;
 }) {
   const agentId = link.agentId;
   const linkedAgent = agents.find((a) => a.id === agentId);
@@ -714,6 +716,52 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
           emptyText={<>Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</>}
           placeholder={`Give ${bot.name} a task…`}
           voiceAgentId={agentId}
+          onAction={(d, { audit, report }) => {
+            /* Conversational actions from a desk chat: delegate to
+             * any of her agents by name, or route documents to the
+             * Writer. Shifts/recruiting live with the Manager and
+             * the executives — said honestly when asked here. */
+            void (async () => {
+              const runOut = (r: any) => (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+              try {
+                if (d.type === 'run_task') {
+                  const want = String(d.agent || '').toLowerCase();
+                  const target = !want || want === bot.name.toLowerCase()
+                    ? (agentId ? { id: agentId, name: bot.name } : null)
+                    : agents.find((a) => String(a.name || '').toLowerCase() === want || String(a.name || '').toLowerCase().includes(want));
+                  if (!target) { audit(`⚙ No agent named "${String(d.agent || '')}" is linked yet.`); return; }
+                  const task = String(d.task || '').trim();
+                  audit(`⚙ ${target.name} is on it: ${task}`);
+                  const out = runOut(await callAgentsApi({ action: 'run', agent_id: target.id, message: task }));
+                  audit(`⚙ **${target.name} finished:**\n\n${out.slice(0, 1200)}`);
+                  report(`${target.name} completed the task "${task}". Result summary: ${out.slice(0, 300)}`);
+                } else if (d.type === 'build_document') {
+                  const title = String(d.title || 'Untitled document');
+                  const brief = String(d.brief || title);
+                  const writer = agents.find((a) => /writer/i.test(String(a.name || '')));
+                  audit(`⚙ The Writer is building **${title}** in LightPaper — it will arrive here when ready.`);
+                  const doc = await buildDocument({
+                    title,
+                    brief,
+                    authorRun: async () => writer
+                      ? runOut(await callAgentsApi({ action: 'run', agent_id: writer.id, message: DOC_TASK(title, brief) }))
+                      : authorViaLightPaper(title, brief),
+                    floor: docFloor ?? null,
+                  });
+                  audit(documentDelivery(doc));
+                  report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                } else if (d.type === 'navigate') {
+                  const path = String(d.path || '');
+                  if (path.startsWith('/')) { audit(`⚙ Opening ${path}…`); window.location.href = path; }
+                  else audit('⚙ That destination does not look like a page path.');
+                } else {
+                  audit(`⚙ "${d.type}" runs from the Manager or the executive chairs — ask them and it happens from their chat.`);
+                }
+              } catch (e: any) {
+                audit(`⚙ That action failed: ${e?.message || 'unknown error'}`);
+              }
+            })();
+          }}
           disabledNote={!signedIn ? `Sign in to chat with ${bot.name}.` : !agentId ? `Connecting ${bot.name} to its agent…` : null}
           composerExtra={<button onClick={() => setView('tasks')} className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 text-sm font-medium hover:bg-muted" aria-label="Open tasks and pipeline"><ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Tasks</span></button>}
         />
@@ -1674,7 +1722,7 @@ export default function OfficePage() {
           </div>
           {panelView === 'genius' ? (
             <div className="flex-1 min-h-0 min-w-0">
-              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} />
+              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} docFloor={{ floorKey: floor.key, floorId: floor.id, company: floor.company }} />
             </div>
           ) : (
             <div className="flex-1 min-w-0 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y">

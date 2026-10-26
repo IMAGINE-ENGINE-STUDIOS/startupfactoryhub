@@ -13,6 +13,7 @@ import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { LiveCaptions } from "@/components/voice/LiveCaptions";
+import { DirectiveFilter, type ActDirective } from "@/lib/voice/adapters";
 import { useVoiceCall, warmVoice } from "@/lib/voice/useVoiceCall";
 import { AgentBrain } from "@/lib/voice/adapters";
 import { getAIHeaders } from "@/lib/aiAuth";
@@ -27,6 +28,15 @@ export const GRADIENT_BUTTON =
 
 export interface ChatMsg { role: "user" | "assistant"; content: string }
 
+/** Conversational actions (ACTIONS-SPEC): the parent executes a
+ * directive; `audit` writes to the thread (held during a call,
+ * flushed with the transcript); `report` feeds the outcome into the
+ * agent's next voice turn. */
+export interface ActionHelpers {
+  audit: (text: string) => void;
+  report: (text: string) => void;
+}
+
 export function AgentChat({
   name,
   onSend,
@@ -38,6 +48,7 @@ export function AgentChat({
   onUserMessage,
   voiceAgentId,
   voiceRoleText,
+  onAction,
 }: {
   name: string;
   onSend: (text: string) => Promise<string>;
@@ -54,6 +65,9 @@ export function AgentChat({
   /** Role keywords for the voice persona ("Chairman", "Manager"…)
    * when `name` is a person's name. Defaults to `name`. */
   voiceRoleText?: string;
+  /** Conversational actions: when the agent emits an [[ACT]]
+   * directive (voice or typed), the parent executes it here. */
+  onAction?: (d: ActDirective, helpers: ActionHelpers) => void;
 }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
     if (!persistKey) return [];
@@ -80,6 +94,35 @@ export function AgentChat({
     } catch { /* session only */ }
   }, [input, draftKey]);
   const [busy, setBusy] = useState(false);
+
+  /* ---- Conversational actions machinery ----
+   * Directives from the voice brain (AgentBrain sink) and from typed
+   * run replies both land in dispatchAction, which hands them to the
+   * parent's executor with audit/report helpers. Audits are written
+   * to the thread immediately when no call is live on this surface;
+   * during a call they queue and flush with the end-of-call
+   * transcript (the no-text-during-a-call rule still holds). */
+  const actionRef = useRef(onAction);
+  actionRef.current = onAction;
+  const auditQueueRef = useRef<ChatMsg[]>([]);
+  const callActiveRef = useRef(false);
+  const voiceBrainRef = useRef<{ id: string; brain: AgentBrain } | null>(null);
+  const dispatchAction = (d: ActDirective) => {
+    const handler = actionRef.current;
+    const audit = (text: string) => {
+      const msg: ChatMsg = { role: "assistant", content: text };
+      if (callActiveRef.current) auditQueueRef.current.push(msg);
+      else setMsgs((m) => [...m, msg]);
+    };
+    const report = (text: string) => {
+      try { voiceBrainRef.current?.brain.noteResult(text); } catch { /* best effort */ }
+    };
+    if (!handler) {
+      audit("⚙ That kind of action isn't wired up in this chat yet.");
+      return;
+    }
+    try { handler(d, { audit, report }); } catch { /* executors report their own errors */ }
+  };
   /* Warm the speech worker + STT model on mount (background), so a
    * Talk tap doesn't pay the cold start. */
   useEffect(() => { warmVoice(); }, []);
@@ -97,7 +140,15 @@ export function AgentChat({
     onUserMessage?.(text);
     setBusy(true);
     try {
-      const out = await onSend(text);
+      let out = await onSend(text);
+      /* Typed parity: a run's reply may carry [[ACT]] directives —
+       * execute them through the same host path as voice and never
+       * show the raw directive in the thread. */
+      if (actionRef.current) {
+        const f = new DirectiveFilter((d) => dispatchAction(d));
+        f.feed(out);
+        out = f.finish();
+      }
       setMsgs((m) => [...m, { role: "assistant", content: out || "Done." }]);
     } catch (e: any) {
       setMsgs((m) => [...m, { role: "assistant", content: `That run failed: ${e?.message || "unknown error"}` }]);
@@ -122,13 +173,16 @@ export function AgentChat({
    * Talk is the phone call. */
   const msgsRef = useRef<ChatMsg[]>(msgs);
   useEffect(() => { msgsRef.current = msgs; }, [msgs]);
-  const voiceBrainRef = useRef<{ id: string; brain: AgentBrain } | null>(null);
   if (voiceAgentId) {
     if (voiceBrainRef.current?.id !== voiceAgentId) {
       voiceBrainRef.current = {
         id: voiceAgentId,
-        brain: new AgentBrain(getAIHeaders, voiceAgentId, () =>
-          msgsRef.current.map((m): Turn => ({ role: m.role, content: m.content }))),
+        brain: new AgentBrain(
+          getAIHeaders,
+          voiceAgentId,
+          () => msgsRef.current.map((m): Turn => ({ role: m.role, content: m.content })),
+          (d) => dispatchAction(d),
+        ),
       };
     }
   } else {
@@ -142,8 +196,12 @@ export function AgentChat({
       ? `${name} is finishing a run — Talk opens when it's done.`
       : `${name} isn't linked to an agent yet, so there's no one to call.`,
     onEnd: (turns) => {
-      if (!turns.length) return;
-      const mapped = turns.map((t): ChatMsg => ({ role: t.role, content: t.content }));
+      const audits = auditQueueRef.current.splice(0, auditQueueRef.current.length);
+      if (!turns.length && !audits.length) return;
+      const mapped = [
+        ...turns.map((t): ChatMsg => ({ role: t.role, content: t.content })),
+        ...audits,
+      ];
       setMsgs((m) => [...m, ...mapped]);
       /* The call outlives this panel (session-owned): if the panel
        * was closed mid-call, setMsgs is a no-op — so ALSO write the
@@ -158,6 +216,7 @@ export function AgentChat({
       }
     },
   });
+  useEffect(() => { callActiveRef.current = voice.talkOn && voice.mine; }, [voice.talkOn, voice.mine]);
 
   return (
     <div className="flex h-full w-full min-w-0 flex-col">

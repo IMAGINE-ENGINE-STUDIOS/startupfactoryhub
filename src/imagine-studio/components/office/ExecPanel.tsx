@@ -22,6 +22,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { X, LayoutDashboard, MessageSquare, Building2, FileText, ScrollText, UserX, Play, Crown, Briefcase, AlertTriangle, Download, Plus, Trash2, Save, Loader2, Landmark } from "lucide-react";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
+import { buildDocument, documentDelivery, DOC_TASK } from "@/imagine-studio/lib/docBuild";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
 import { FLOORS, companyFloors, engineFor, buildingRosterRows, floorTeamScopes, loadCustomBots, customBotToRole, type FloorDef } from "@/imagine-studio/lib/floors";
@@ -607,7 +608,80 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
           <div className="min-h-0 flex-1">
             <AgentChat
               name={myName}
-              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}`)}
+              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}\n\n[ACTION PROTOCOL — if my message clearly asks you to make work happen, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"dispatch","goal":"..."}]] to coordinate the company/building, [[ACT {"type":"run_task","agent":"<person or role name>","task":"..."}]] to assign someone directly, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it in LightPaper — never write it yourself here), [[ACT {"type":"fire","agent":"<name>"}]] only when I explicitly say to remove someone. Confirm in words what you set in motion.]`)}
+              onAction={(d, { audit, report }) => {
+                /* Conversational actions — the CEO/Chairman act from
+                 * the chat/call: dispatch, direct tasks, documents,
+                 * removals. Founder directive 2026-10-26. */
+                void (async () => {
+                  const execFloor = isCeo ? ceoHome : FLOORS[0];
+                  const by = isCeo ? "CEO" : "Chairman";
+                  const findRow = (nameWanted: string) => {
+                    const w = nameWanted.toLowerCase();
+                    const scoped = rows.filter((r) => !isCeo || r.company === company);
+                    return scoped.find((r) => r.label.toLowerCase() === w || r.label.toLowerCase().includes(w) || r.role.toLowerCase() === w);
+                  };
+                  const botKeyOf = (r: (typeof rows)[number]) => r.role === "manager" ? "manager" : r.role === "ceo" ? "ceo" : r.role === "chairman" ? "chairman" : r.scope.split(":").slice(1).join(":");
+                  try {
+                    if (d.type === "dispatch" || d.type === "start_shift") {
+                      const goal = String(d.goal || "").trim();
+                      if (!goal) { audit("⚙ No goal was named for the dispatch."); return; }
+                      const floorsForPlan = isCeo ? companyFloorList : FLOORS;
+                      const floorList = floorsForPlan.map((f) => `Floor ${f.id} (${f.company})`).join(", ");
+                      audit(`⚙ Dispatching: **${goal}**`);
+                      const reply = await tools.chatWith(execFloor, isCeo ? "ceo" : "chairman",
+                        `${briefingFor(execFloor, isCeo ? "ceo" : "chairman")}Coordinate this goal: ${goal}\n\nReply with ONLY assignment lines, one per floor, format: ASSIGN|FloorNumber|The sub-goal brief for that floor's Manager. Floors: ${floorList}.`);
+                      const assigns: { floorId: number; text: string }[] = [];
+                      for (const line of reply.split(/\n/)) { const m = line.match(/ASSIGN\|(\d+)\|(.+)/); if (m) assigns.push({ floorId: parseInt(m[1], 10), text: m[2].trim() }); }
+                      const plan = assigns.length ? assigns : [{ floorId: execFloor.id, text: goal }];
+                      const done: string[] = [];
+                      for (const a of plan) {
+                        const f = FLOORS.find((x) => x.id === a.floorId) || execFloor;
+                        try { await tools.dispatch(f, a.text); done.push(`Floor ${f.id}`); }
+                        catch (e: any) { audit(`⚙ Floor ${f.id} could not start: ${e?.message || "error"}`); }
+                      }
+                      if (done.length) {
+                        audit(`⚙ Shifts running on ${done.join(", ")}.`);
+                        report(`The goal "${goal}" was dispatched; shifts are running on ${done.join(", ")}.`);
+                        logAction(by, "dispatch", `${by} dispatched "${goal.slice(0, 140)}" from the chat to ${done.join(", ")}.`);
+                      }
+                    } else if (d.type === "run_task") {
+                      const row = findRow(String(d.agent || ""));
+                      if (!row) { audit(`⚙ Nobody named "${String(d.agent || "")}" was found${isCeo ? ` at ${company}` : ""}.`); return; }
+                      const f = FLOORS.find((x) => x.key === row.floorKey) || execFloor;
+                      const task = String(d.task || "").trim();
+                      audit(`⚙ ${row.label} is on it: ${task}`);
+                      const out = await tools.chatWith(f, botKeyOf(row), task);
+                      audit(`⚙ **${row.label} finished:**\n\n${out.slice(0, 1200)}`);
+                      report(`${row.label} completed the task "${task}". Result summary: ${out.slice(0, 300)}`);
+                    } else if (d.type === "build_document") {
+                      const title = String(d.title || "Untitled document");
+                      const brief = String(d.brief || title);
+                      audit(`⚙ The Writer is building **${title}** in LightPaper — it will arrive here when ready.`);
+                      const doc = await buildDocument({
+                        title,
+                        brief,
+                        authorRun: () => tools.chatWith(execFloor, "writer", DOC_TASK(title, brief)),
+                        floor: { floorKey: execFloor.key, floorId: execFloor.id, company: execFloor.company },
+                      });
+                      audit(documentDelivery(doc));
+                      report(`The document "${doc.title}" is finished, saved in LightPaper, delivered in the chat, and filed under Reports.`);
+                    } else if (d.type === "fire") {
+                      const row = findRow(String(d.agent || ""));
+                      if (!row) { audit(`⚙ Nobody named "${String(d.agent || "")}" was found.`); return; }
+                      const r = await tools.fire(row.floorKey, botKeyOf(row), by, "Removed at the founder's request from the chat");
+                      audit(r.queued
+                        ? `⚙ ${row.label} will be replaced at the next safe moment (queued by ${by}).`
+                        : `⚙ ${row.label} has been replaced — a new ${row.role} takes over.`);
+                      report(`${row.label} was removed as you asked.`);
+                    } else {
+                      audit(`⚙ The ${by} can't do "${d.type}" from here yet.`);
+                    }
+                  } catch (e: any) {
+                    audit(`⚙ That action failed: ${e?.message || "unknown error"}`);
+                  }
+                })();
+              }}
               emptyText={isCeo
                 ? <>Talk to {myName}, CEO of {company}. Set the company's priorities, question a Manager's plan, or hand over a goal — or use the Coordinate box above and he will assign every floor's Manager a shift of their own.</>
                 : <>Talk to {myName}, Chairman of the building. Set or change any company's vision, mission and goals through him, ask for a ruling on a CEO, or order a review — he sees every rating in the building.</>}
