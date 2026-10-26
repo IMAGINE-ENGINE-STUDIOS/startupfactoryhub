@@ -12,6 +12,7 @@
  * floor with the BUILDING buttons.
  */
 import { Suspense, useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { X } from "lucide-react";
@@ -27,6 +28,56 @@ import { getLocalLevel } from "@/imagine-studio/lib/localLevels";
  * floor's floor. */
 const STORY = 8;
 const offsetY = (floor?: number) => ((floor ?? 100) - 100) * STORY;
+
+/**
+ * THE REST OF THE TOWER, FOR LOOKS (founder directive, repeated,
+ * 2026-10-26): the building runs from Floor 100 down to Floor 1. The
+ * real levels render their actual scenes; every other floor is a
+ * lightweight instanced slab + glass band — two draw calls for the
+ * whole tower — fading into haze with distance, exactly as the live
+ * office shell does. Without this the "building" was two rooms
+ * floating in the sky.
+ */
+function TowerFill({ taken }: { taken: Set<number> }) {
+  const { slabs, glass } = useMemo(() => {
+    const ids: number[] = [];
+    for (let f = 1; f < 100; f++) if (!taken.has(f)) ids.push(f);
+    const box = new THREE.BoxGeometry(1, 1, 1);
+    const haze = new THREE.Color("#33506e");
+    const slabMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0.05 }), ids.length);
+    slabMesh.name = "building-view-tower-slabs";
+    const glassMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.32, depthWrite: false }), ids.length);
+    glassMesh.name = "building-view-tower-glass";
+    const m = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const slabBase = new THREE.Color("#cfd8e1");
+    const glassBase = new THREE.Color("#8fb8d8");
+    ids.forEach((f, i) => {
+      const y = offsetY(f);
+      const fade = Math.min(1, (100 - f) / 34);
+      m.compose(new THREE.Vector3(0, y - 0.22, 0), q, new THREE.Vector3(48.4, 0.45, 32.4));
+      slabMesh.setMatrixAt(i, m);
+      slabMesh.setColorAt(i, slabBase.clone().lerp(haze, fade * 0.8));
+      m.compose(new THREE.Vector3(0, y + STORY / 2, 0), q, new THREE.Vector3(48.24, STORY - 0.55, 32.24));
+      glassMesh.setMatrixAt(i, m);
+      glassMesh.setColorAt(i, glassBase.clone().lerp(haze, fade * 0.8));
+    });
+    slabMesh.frustumCulled = false;
+    glassMesh.frustumCulled = false;
+    return { slabs: slabMesh, glass: glassMesh };
+  }, [taken]);
+  return (
+    <>
+      <primitive object={slabs} />
+      <primitive object={glass} />
+      {/* The ground the tower stands on. */}
+      <mesh position={[0, offsetY(1) - 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[340, 48]} />
+        <meshStandardMaterial color="#0d1826" roughness={1} />
+      </mesh>
+    </>
+  );
+}
 
 export type BuildingExtra = { id: string; name: string; floor: number; scene: any };
 
@@ -85,12 +136,13 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
         <button onClick={onClose} className="shrink-0 rounded-full p-1.5 hover:bg-white/10" aria-label="Close building view"><X className="h-5 w-5" /></button>
       </div>
       <div className="relative min-h-0 flex-1">
-        <Canvas dpr={[1, 1.75]} camera={{ position: [38, 15, 38], fov: 48 }}>
+        <Canvas dpr={[1, 1.75]} camera={{ position: [330, -260, 330], fov: 48, far: 5000 }}>
           <color attach="background" args={["#0b1526"]} />
           <ambientLight intensity={1.0} />
           <hemisphereLight args={["#ffffff", "#5a6a78", 0.5]} />
           <Suspense fallback={null}>
             <SkyboxDome url={sky.url} />
+            <TowerFill taken={new Set([...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100])} />
             {levels.map((w) => {
               const s = scenes[w.key];
               const off = offsetY(w.floor);
@@ -143,7 +195,7 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               );
             })}
           </Suspense>
-          <OrbitControls makeDefault target={[0, totalFloors > 1 ? -1 : 3, 0]} maxDistance={140} />
+          <OrbitControls makeDefault target={[0, offsetY(1) / 2, 0]} maxDistance={1800} minDistance={6} />
         </Canvas>
         <div className="absolute right-3 top-3 flex w-60 flex-col gap-2">
           {levels.map((w) => (
