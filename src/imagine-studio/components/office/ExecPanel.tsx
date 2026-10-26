@@ -36,6 +36,8 @@ import {
 export interface ExecTools {
   fire: (floorKey: string, botKey: string, by: string, reason: string) => Promise<{ queued: boolean }>;
   chatWith: (f: FloorDef, botKey: string, text: string) => Promise<string>;
+  /** Resolve an executive's call-agent id (VoiceCall v2 brain). */
+  resolveAgentId: (f: FloorDef, botKey: string) => Promise<string | null>;
   dispatch: (f: FloorDef, goal: string) => Promise<void>;
   openFloor: (floorId: number) => void;
   /** Open an ENTIRE new floor of the building for a department — the
@@ -179,6 +181,20 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
   const myScope = isCeo ? ceoScope(ceoHome.key) : CHAIRMAN_SCOPE;
   const myName = personaName(myScope, isCeo ? "CEO" : "Chairman");
   const myGen = generationOf(myScope);
+  /* VoiceCall v2: resolve this executive's call-agent id so the chat's
+   * Talk button converses with HIM (streaming chat), not a task run.
+   * Re-resolves when the person is replaced (generation changes). */
+  const [execVoiceId, setExecVoiceId] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setExecVoiceId(null);
+    if (!signedIn) return;
+    const f = isCeo ? ceoHome : FLOORS[0];
+    const key = isCeo ? "ceo" : "chairman";
+    void tools.resolveAgentId(f, key).then((id) => { if (!cancelled) setExecVoiceId(id); }).catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCeo, ceoHome?.key, myGen, signedIn]);
   const myScore = isCeo
     ? companyScore(companyFloorList.map((f) => ({ floorKey: f.key, teamScopes: floorTeamScopes(f) })))
     : (() => { const cs = rows.filter((r) => r.role === "ceo" && r.accuracy !== null); return { accuracy: cs.length ? Math.round((cs.reduce((a, r) => a + (r.accuracy as number), 0) / cs.length) * 10) / 10 : null, judged: rows.reduce((a, r) => a + r.judged, 0), atRisk: false }; })();
@@ -596,6 +612,8 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                 ? <>Talk to {myName}, CEO of {company}. Set the company's priorities, question a Manager's plan, or hand over a goal — or use the Coordinate box above and he will assign every floor's Manager a shift of their own.</>
                 : <>Talk to {myName}, Chairman of the building. Set or change any company's vision, mission and goals through him, ask for a ruling on a CEO, or order a review — he sees every rating in the building.</>}
               placeholder={`Message the ${isCeo ? "CEO" : "Chairman"}…`}
+              voiceAgentId={execVoiceId}
+              voiceRoleText={isCeo ? "CEO" : "Chairman"}
               disabledNote={!signedIn ? `Sign in to talk to the ${isCeo ? "CEO" : "Chairman"} — they work through your Agents account.` : null}
               persistKey={`${isCeo ? `sfh:ceo-chat:${ceoHome.key}` : "sfh:chairman-chat:v1"}:g${myGen}`}
             />

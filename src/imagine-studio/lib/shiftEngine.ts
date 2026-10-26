@@ -260,6 +260,13 @@ const engine = {
     return state;
   },
 
+  /** The Manager's call-agent id, for surfaces that need to talk to
+   * him directly (the VoiceCall v2 conversation brain). */
+  async managerAgentId(): Promise<string | null> {
+    if (!deps) return null;
+    try { return await deps.resolveAgentId("manager"); } catch { return null; }
+  },
+
   /** A direct conversation with the Manager (the Shift panel's Chat tab):
    * same call-agents run the desk bots use, resolved through the office's
    * auto-bind. Returns his reply text. */

@@ -708,6 +708,7 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole 
           }}
           emptyText={<>Chat with {bot.name} — give it a task below and it runs right here. For the task pipeline, tap <span className="font-medium text-foreground">Tasks</span>.</>}
           placeholder={`Give ${bot.name} a task…`}
+          voiceAgentId={agentId}
           disabledNote={!signedIn ? `Sign in to chat with ${bot.name}.` : !agentId ? `Connecting ${bot.name} to its agent…` : null}
           composerExtra={<button onClick={() => setView('tasks')} className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 text-sm font-medium hover:bg-muted" aria-label="Open tasks and pipeline"><ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Tasks</span></button>}
         />
@@ -1412,6 +1413,13 @@ export default function OfficePage() {
       if (!id) throw new Error('Could not bring them online — sign in and try again.');
       const r = await callAgentsApi({ action: 'run', agent_id: id, message: text });
       return runOutput(r) || 'Done.';
+    },
+    resolveAgentId: async (f, botKey) => {
+      const bot = botOnFloor(f, botKey);
+      if (!bot) return null;
+      try {
+        return f.key === floor.key ? await ensureBotAgent(bot) : await ensureAgentForFloor(f, bot);
+      } catch { return null; }
     },
     dispatch: async (f, goal) => { await engineFor(f).startShift(goal); },
     openFloor: (floorId) => { window.location.href = floorId === 100 ? '/office' : `/office?floor=${floorId}`; },

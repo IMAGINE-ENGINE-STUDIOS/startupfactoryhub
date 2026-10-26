@@ -110,6 +110,14 @@ export interface TeamTools {
 export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorId, archivistLabel, managerChatKey, teamTools, signedIn, onClose }: { engine: ShiftEngine; team: TeamRole[]; company: string; floorLabel: string; floorKey?: string; floorId?: number; archivistLabel: string; managerChatKey: string; teamTools: TeamTools; signedIn: boolean; onClose: () => void }) {
   const [, force] = useReducer((x: number) => x + 1, 0);
   useEffect(() => engine.subscribe(force), []);
+  /* VoiceCall v2: the Manager's call-agent id for the chat's Talk. */
+  const [managerVoiceId, setManagerVoiceId] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!signedIn) { setManagerVoiceId(null); return; }
+    void engine.managerAgentId().then((id) => { if (!cancelled) setManagerVoiceId(id); });
+    return () => { cancelled = true; };
+  }, [engine, signedIn]);
   const shift = engine.getState();
   const [goalDraft, setGoalDraft] = useState("");
   const [goalTouched, setGoalTouched] = useState(false);
@@ -180,6 +188,8 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
               onSend={(text) => engine.chatWithManager(text)}
               emptyText={<>Talk to the Manager — ask him anything, brief him on the company, or describe the work. When you&apos;re ready, turn your last message into a full shift with the gold button above: he&apos;ll plan it, assign the specialists, and verify every deliverable.</>}
               placeholder="Message the Manager…"
+              voiceAgentId={managerVoiceId}
+              voiceRoleText="Manager"
               disabledNote={!signedIn ? "Sign in to talk to the Manager — he works through your Agents account." : null}
               persistKey={managerChatKey}
               onUserMessage={setLastUserMsg}

@@ -12,7 +12,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
-import { useVoiceConversation, talkStatusLabel } from "@/lib/voice/useVoiceConversation";
+import { useVoiceCall } from "@/lib/voice/useVoiceCall";
+import { AgentBrain } from "@/lib/voice/adapters";
+import { getAIHeaders } from "@/lib/aiAuth";
+import type { Turn } from "@/lib/voice/engine";
 
 export const GLASS_PANEL =
   "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
@@ -32,6 +35,8 @@ export function AgentChat({
   composerExtra,
   persistKey,
   onUserMessage,
+  voiceAgentId,
+  voiceRoleText,
 }: {
   name: string;
   onSend: (text: string) => Promise<string>;
@@ -41,6 +46,13 @@ export function AgentChat({
   composerExtra?: ReactNode;
   persistKey?: string;
   onUserMessage?: (text: string) => void;
+  /** VoiceCall v2: the call-agent this chat's Talk button converses
+   * with (streaming chat action — a conversation, not a task run).
+   * Null/absent: Talk explains the agent isn't linked yet. */
+  voiceAgentId?: string | null;
+  /** Role keywords for the voice persona ("Chairman", "Manager"…)
+   * when `name` is a person's name. Defaults to `name`. */
+  voiceRoleText?: string;
 }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
     if (!persistKey) return [];
@@ -95,19 +107,39 @@ export function AgentChat({
     await sendText(text);
   };
 
-  /* Voice (founder directive 2026-10-25): the mic dictates into the
-   * composer (on-device Whisper, self-hosted model); Talk mode runs the
-   * realtime loop — speak, hear the reply spoken in this agent's role
-   * voice, listen again. Persona comes from the agent's name/role. */
-  const lastAssistant = (() => {
-    for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role === "assistant") return { id: `m${i}`, text: msgs[i].content };
-    return null;
-  })();
-  const voice = useVoiceConversation({
-    roleText: name,
-    lastAssistant,
-    busy,
-    onUserText: (t) => { void sendText(t); },
+  /* Voice — VoiceCall v2 (founder direction 2026-10-26): Talk is a
+   * CONVERSATION with this agent — the streaming call-agents "chat"
+   * action through VoiceCallEngine (worker speech, pipelined
+   * generation, nothing written to the thread while the call runs;
+   * the transcript lands when it ends). The old v1 loop sent voice
+   * turns through the task-RUN path and read the finished text
+   * afterwards — slow, text-first, "not a conversation" (her words).
+   * The typed composer keeps the run path: that's the work desk;
+   * Talk is the phone call. */
+  const msgsRef = useRef<ChatMsg[]>(msgs);
+  useEffect(() => { msgsRef.current = msgs; }, [msgs]);
+  const voiceBrainRef = useRef<{ id: string; brain: AgentBrain } | null>(null);
+  if (voiceAgentId) {
+    if (voiceBrainRef.current?.id !== voiceAgentId) {
+      voiceBrainRef.current = {
+        id: voiceAgentId,
+        brain: new AgentBrain(getAIHeaders, voiceAgentId, () =>
+          msgsRef.current.map((m): Turn => ({ role: m.role, content: m.content }))),
+      };
+    }
+  } else {
+    voiceBrainRef.current = null;
+  }
+  const voice = useVoiceCall({
+    roleText: voiceRoleText || name,
+    brain: busy ? null : (voiceBrainRef.current?.brain ?? null),
+    unavailableReason: busy
+      ? `${name} is finishing a run — Talk opens when it's done.`
+      : `${name} isn't linked to an agent yet, so there's no one to call.`,
+    onEnd: (turns) => {
+      if (!turns.length) return;
+      setMsgs((m) => [...m, ...turns.map((t): ChatMsg => ({ role: t.role, content: t.content }))]);
+    },
   });
 
   return (
@@ -128,10 +160,10 @@ export function AgentChat({
         </div>
       </div>
       <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-        {voice.talkOn && (
+        {voice.talkOn && voice.statusText && (
           <div className="flex items-center gap-2 pb-2 text-[11px] font-medium text-emerald-500" role="status">
             <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
-            {talkStatusLabel(voice.talkState, voice.loadPct, name)}
+            {voice.statusText}
           </div>
         )}
         <div className="flex items-center gap-2">

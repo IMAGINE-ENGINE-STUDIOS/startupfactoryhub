@@ -739,6 +739,7 @@ export default function PlazaPage() {
                 return (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
               }}
               emptyText={<>Chat with {agentChar.name} — give it a task below, or tap the phone button for a hands-free voice conversation in its role voice.</>}
+              voiceAgentId={agentChar.agentId}
               placeholder={`Give ${agentChar.name} a task…`}
               disabledNote={!signedIn ? `Sign in to chat with ${agentChar.name}.` : !agentChar.agentId ? `${agentChar.name} isn't linked to an agent yet.` : null}
             />
