@@ -117,6 +117,24 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       const diagnosis = this.state.diagnosis;
+      /* NO CONSOLE FLASH (founder report 2026-10-26: a fresh tab shows
+       * the error screen for a few seconds, then the site recovers).
+       * getDerivedStateFromError renders BEFORE componentDidCatch gets
+       * to run the silent repair, so the full "Session held" console
+       * used to paint for EVERY fault — including the transient ones
+       * the repair fixes a moment later. The diagnosis is only set
+       * when a fault actually survives repair; until then, render a
+       * neutral restoring splash, never the console. */
+      if (!diagnosis) {
+        return (
+          <div className="min-h-screen w-full bg-background flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" />
+              <p className="font-mono text-[11px] tracking-[0.25em] uppercase text-muted-foreground">Restoring your session…</p>
+            </div>
+          </div>
+        );
+      }
       const attempts = this.recoveryCount;
 
       return (
