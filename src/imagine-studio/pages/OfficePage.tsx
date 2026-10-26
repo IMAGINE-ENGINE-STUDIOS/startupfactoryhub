@@ -33,6 +33,7 @@ import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
 import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
 import { OfficeAdminTab } from '@/imagine-studio/components/office/OfficeAdmin';
 import { ExecPanel, type ExecTools } from '@/imagine-studio/components/office/ExecPanel';
+import BuildingShell from '@/imagine-studio/components/office/BuildingShell';
 import { FLOORS, allFloors, createDynamicFloor, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot, type FloorDef } from '@/imagine-studio/lib/floors';
 import { runOutput } from '@/imagine-studio/lib/shiftEngine';
 import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, renamePerson, retiredAgentIds, setPersonnelPrompt, withCharter, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
@@ -1651,6 +1652,7 @@ export default function OfficePage() {
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           <BotTapRaycast />
+          <BuildingShell currentFloorId={floor.id} />
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
           {scene && <OfficeBotCharacter bot={managerBot} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
           {scene && floor.executives.map((raw) => { const b = displayBot(floor, raw); return (
