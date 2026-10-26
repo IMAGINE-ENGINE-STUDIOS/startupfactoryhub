@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { saveRestorePoint } from "@/lib/sessionRestore";
+import { isUpdateAvailable, notifyUpdateAvailable, reloadForUpdate, subscribeUpdateAvailable } from "@/lib/updateSignal";
 
 const POLL_INTERVAL_MS = 20_000;
 
@@ -22,24 +22,18 @@ const UpdateAvailableBubble = () => {
   const [updateReady, setUpdateReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const hardRefresh = useCallback(async () => {
-    saveRestorePoint();
-    try {
-      if ("caches" in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((key) => caches.delete(key)));
-      }
-      if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map((registration) => registration.update()));
-      }
-    } catch {
-      // Ignore cleanup errors — the reload below is what matters.
-    }
+  // The ONLY reload path: the user clicks Refresh. reloadForUpdate
+  // snapshots their exact place first (URL, scroll, open panels,
+  // drafts), so they land back precisely where they were.
+  const applyUpdate = useCallback(() => {
+    void reloadForUpdate();
+  }, []);
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("_v", Date.now().toString(36));
-    window.location.replace(url.toString());
+  // Other detectors (dead chunk, runtime recovery) raise the same
+  // offer through the update signal — surface it here too.
+  useEffect(() => {
+    if (isUpdateAvailable()) setUpdateReady(true);
+    return subscribeUpdateAvailable(() => setUpdateReady(true));
   }, []);
 
   useEffect(() => {
@@ -62,10 +56,11 @@ const UpdateAvailableBubble = () => {
         const latestEntry = extractEntryScript(html);
 
         if (!cancelled && currentEntry && latestEntry && latestEntry !== currentEntry) {
+          // NO-RELOAD RULE (founder directive 2026-10-26): show the
+          // offer and WAIT. The reload happens only when the user
+          // clicks Refresh — never on its own.
           setUpdateReady(true);
-          // Auto-refresh: the viewport/restore point is saved first, so the
-          // user lands back on the exact same pixel with the latest build.
-          void hardRefresh();
+          notifyUpdateAvailable();
         }
 
 
@@ -94,7 +89,7 @@ const UpdateAvailableBubble = () => {
           installing.addEventListener("statechange", () => {
             if (installing.state === "installed" && navigator.serviceWorker.controller) {
               setUpdateReady(true);
-              void hardRefresh();
+              notifyUpdateAvailable();
             }
           });
         };
@@ -110,7 +105,7 @@ const UpdateAvailableBubble = () => {
         registrationRef.removeEventListener("updatefound", onUpdateFound);
       }
     };
-  }, [hardRefresh]);
+  }, []);
 
   if (!updateReady || dismissed) return null;
 
@@ -123,10 +118,10 @@ const UpdateAvailableBubble = () => {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-foreground">New version available</p>
           <p className="text-xs text-muted-foreground">
-            You're viewing a cached older version. Refresh to load the latest.
+            Nothing reloads on its own — refresh when you're ready. Your place, open panels and work stay exactly as they are.
           </p>
         </div>
-        <Button size="sm" className="shrink-0 hover-glow" onClick={() => void hardRefresh()}>
+        <Button size="sm" className="shrink-0 hover-glow" onClick={applyUpdate}>
           Refresh
         </Button>
         <button

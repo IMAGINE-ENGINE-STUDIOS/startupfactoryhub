@@ -1749,6 +1749,41 @@ export default function OfficePage() {
     setOpenBot(b);
   };
   const openPerson = (b: OfficeBot) => openPersonRef.current(b);
+  /* PLACE MEMORY (founder directive 2026-10-26): the site never
+   * reloads itself, and when the user clicks Refresh on the update
+   * bubble, the reload must land them EXACTLY where they were — same
+   * floor (carried by the URL), same open panels, same social-chat
+   * draft. The panel state is snapshotted continuously (session
+   * scope, 30-minute freshness) and re-opened on mount. Chat threads,
+   * shifts and agent drafts already persist on their own (durable
+   * store / AgentChat draft armor); this covers the UI itself. */
+  const uiSnapRestoredRef = useRef(false);
+  useEffect(() => {
+    if (uiSnapRestoredRef.current) return;
+    let snap: any = null;
+    try { snap = JSON.parse(sessionStorage.getItem('sfh:office-ui:v1') || 'null'); } catch { /* ignore */ }
+    if (!snap || snap.floorId !== floor.id || Date.now() - (snap.t || 0) > 30 * 60 * 1000) { uiSnapRestoredRef.current = true; return; }
+    if (snap.execOpen) setExecOpen(snap.execOpen);
+    if (snap.shiftOpen) setShiftOpen(true);
+    if (snap.chatOpen) setChatOpen(true);
+    if (typeof snap.chatText === 'string' && snap.chatText) setChatText(snap.chatText);
+    if (snap.openBotKey) {
+      const fromBots = bots.find((b) => b.bot.key === snap.openBotKey)?.bot;
+      const fromAgents = agentsLoaded ? (agents || []).filter((o: any) => `agent_${o.id}` === snap.openBotKey).map((o: any) => ({ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }))[0] : undefined;
+      const hit = fromBots || fromAgents;
+      if (hit) {
+        setOpenBot(hit as OfficeBot);
+        if (snap.panelView) window.setTimeout(() => setPanelView(snap.panelView), 60);
+      } else if (!agentsLoaded) {
+        return; // placed agents still loading — retry when they land
+      }
+    }
+    uiSnapRestoredRef.current = true;
+  }, [bots, agents, agentsLoaded, floor.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!uiSnapRestoredRef.current) return;
+    try { sessionStorage.setItem('sfh:office-ui:v1', JSON.stringify({ floorId: floor.id, openBotKey: openBot?.key ?? null, execOpen, shiftOpen, panelView, chatOpen, chatText, t: Date.now() })); } catch { /* ignore */ }
+  }, [floor.id, openBot, execOpen, shiftOpen, panelView, chatOpen, chatText]); // eslint-disable-line react-hooks/exhaustive-deps
   const execTools: ExecTools = {
     fire: (floorKey, botKey, by, reason) => firePerson(floorKey, botKey, by, reason),
     recruit: (f, x) => createCustomAgentOnFloor(f, x),

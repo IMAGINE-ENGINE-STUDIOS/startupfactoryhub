@@ -136,6 +136,7 @@ class ErrorBoundary extends Component<Props, State> {
         );
       }
       const attempts = this.recoveryCount;
+      const isStaleBuild = diagnosis?.strategy === 'reload';
 
       return (
         <div className="relative min-h-screen w-full overflow-hidden bg-background flex items-center justify-center p-4 sm:p-8">
@@ -223,16 +224,16 @@ class ErrorBoundary extends Component<Props, State> {
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={this.handleRetry}
+                  onClick={isStaleBuild ? this.handleDeepRepair : this.handleRetry}
                   className="flex-1 rounded-xl bg-primary px-5 py-3 font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-transform hover:scale-[1.02] active:scale-100"
                 >
-                  Resume session
+                  {isStaleBuild ? 'Load the new version' : 'Resume session'}
                 </button>
                 <button
-                  onClick={this.handleDeepRepair}
+                  onClick={isStaleBuild ? this.handleRetry : this.handleDeepRepair}
                   className="flex-1 rounded-xl border border-primary/40 px-5 py-3 font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/10"
                 >
-                  Deep repair
+                  {isStaleBuild ? 'Resume session' : 'Deep repair'}
                 </button>
                 <button
                   onClick={this.handleReset}

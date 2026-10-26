@@ -18,6 +18,7 @@ import App from './App.tsx';
 import './index.css';
 import { saveRestorePoint, applyRestorePoint } from './lib/sessionRestore';
 import { installAutoDebugger } from './lib/autoDebugger';
+import { notifyUpdateAvailable } from './lib/updateSignal';
 
 // Intercept async faults (stale chunks, layout noise) before they reach the user.
 installAutoDebugger();
@@ -26,43 +27,14 @@ declare const __APP_BUILD_ID__: string;
 
 const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || __APP_BUILD_ID__;
 const BUILD_VERSION_KEY = 'sfh_build_version';
-const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
-const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
 const DEV_PREVIEW_CACHE_RESET_KEY = 'sfh_dev_preview_cache_reset_once';
 // Narrow on purpose: generic network messages like Safari's "Load failed" are
 // NOT included, since a single flaky API call must never reload the whole app.
 const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script/i;
 
-function reloadIntoFreshBuild() {
-  if (typeof window === 'undefined') return;
-
-  // Remember exactly where the user was so the reload is invisible to them.
-  saveRestorePoint();
-
-  const url = new URL(window.location.href);
-  url.searchParams.set('_build', BUILD_VERSION);
-  window.location.replace(url.toString());
-}
-
-function getLocalStorageItem(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
 function setLocalStorageItem(key: string, value: string) {
   try {
     localStorage.setItem(key, value);
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-function removeLocalStorageItem(key: string) {
-  try {
-    localStorage.removeItem(key);
   } catch {
     // Ignore storage errors
   }
@@ -102,27 +74,17 @@ async function unregisterServiceWorkersAndClearCaches() {
   }
 }
 
-async function invalidateOnNewBuild() {
+function noteBuildVersion() {
   if (typeof window === 'undefined') return;
-  // Dev/preview builds regenerate the build id on every server restart, which
-  // would trigger an endless clear-cache + location.replace loop inside the
-  // preview iframe. Only run the cache-busting reload in production builds.
+  // NO-RELOAD RULE (founder directive 2026-10-26): the site never
+  // reloads itself. This used to clear caches and force a reload
+  // whenever the booted build differed from the stored one — a
+  // surprise reload on the user's first visit after every deploy.
+  // Now it only records the version: the build that booted IS the
+  // current build, and open tabs learn about newer builds from the
+  // UpdateAvailableBubble, which waits for the user's click.
   if (!import.meta.env.PROD) return;
-
-  const storedVersion = getLocalStorageItem(BUILD_VERSION_KEY);
-  if (storedVersion === BUILD_VERSION) return;
-
-
-  // Guard against reload loops within a single session
-  if (getSessionStorageItem(BUILD_RELOAD_GUARD) === BUILD_VERSION) {
-    setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
-    return;
-  }
-
-  await unregisterServiceWorkersAndClearCaches();
   setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
-  setSessionStorageItem(BUILD_RELOAD_GUARD, BUILD_VERSION);
-  reloadIntoFreshBuild();
 }
 
 async function clearDevPreviewCaches() {
@@ -142,52 +104,18 @@ async function clearDevPreviewCaches() {
   }
 }
 
-function hasRecoveredFromAssetFailure() {
-  try {
-    return sessionStorage.getItem(ASSET_RECOVERY_KEY) === 'done';
-  } catch {
-    return false;
-  }
-}
-
-function markAssetRecoveryDone() {
-  try {
-    sessionStorage.setItem(ASSET_RECOVERY_KEY, 'done');
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-function getErrorMessage(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (value instanceof Error) return value.message;
-  if (value && typeof value === 'object' && 'message' in value) {
-    return String((value as { message?: unknown }).message ?? '');
-  }
-
-  return '';
-}
-
-async function recoverFromAssetFailure() {
-  if (hasRecoveredFromAssetFailure()) return;
-  if (window.location.search.includes('_build=')) {
-    console.error('Asset failure persisted after fresh-build reload. Stopping recovery loop.');
-    return;
-  }
-
-  markAssetRecoveryDone();
-  removeLocalStorageItem(BUILD_VERSION_KEY);
-
-  await unregisterServiceWorkersAndClearCaches();
-  reloadIntoFreshBuild();
-}
-
 function installRuntimeRecoveryHandlers() {
   if (typeof window === 'undefined') return;
 
+  // NO-RELOAD RULE (founder directive 2026-10-26): an asset failure
+  // means a newer build replaced this tab's chunks. The old code
+  // purged caches and reloaded the page on its own. Now the failure
+  // is swallowed (no crash surfaces) and the update offer is raised —
+  // the user clicks Refresh when ready and lands back in their exact
+  // place. Nothing ever reloads itself.
   window.addEventListener('vite:preloadError', (event) => {
     event.preventDefault();
-    void recoverFromAssetFailure();
+    notifyUpdateAvailable();
   });
 
   window.addEventListener('unhandledrejection', (event) => {
@@ -198,7 +126,7 @@ function installRuntimeRecoveryHandlers() {
     }
 
     event.preventDefault();
-    void recoverFromAssetFailure();
+    notifyUpdateAvailable();
   });
 
   window.addEventListener('error', (event) => {
@@ -209,7 +137,7 @@ function installRuntimeRecoveryHandlers() {
     }
 
     event.preventDefault();
-    void recoverFromAssetFailure();
+    notifyUpdateAvailable();
   });
 }
 
@@ -227,7 +155,7 @@ function bootstrap() {
   // Put the user back at the exact pixels they were at before a reload/crash.
   applyRestorePoint();
   void clearDevPreviewCaches();
-  void invalidateOnNewBuild();
+  noteBuildVersion();
 }
 
 bootstrap();

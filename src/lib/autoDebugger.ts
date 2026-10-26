@@ -8,9 +8,12 @@
  * Strategies:
  *  - "ignore"  : known-benign noise, never surfaces to the user
  *  - "remount" : recoverable render fault, remount the tree in place
- *  - "reload"  : stale build / chunk mismatch, purge caches and reload once
+ *  - "reload"  : stale build / chunk mismatch — a newer build exists; the
+ *    user is OFFERED the update (the site never reloads itself)
  *  - "escalate": unknown fault, show the recovery console after retries
  */
+
+import { notifyUpdateAvailable, reloadForUpdate } from "./updateSignal";
 
 export type RepairStrategy = "ignore" | "remount" | "reload" | "escalate";
 
@@ -31,7 +34,6 @@ export interface DebugEntry {
 }
 
 const LOG_KEY = "sfh.autodebug.log";
-const RELOAD_KEY = "sfh.autodebug.reloaded";
 const MAX_LOG = 25;
 
 interface Signature {
@@ -70,7 +72,7 @@ const SIGNATURES: Signature[] = [
     test: /(reading 'default'|reading "default"|importing a module script failed)/i,
     strategy: "reload",
     explanation:
-      "A code fragment from an older build was requested after it had been replaced. Caches are purged and the latest build is fetched once.",
+      "A code fragment from an older build was requested after it had been replaced. A new version is ready — it loads only when you tap Refresh, and your place, open panels and work stay exactly as they are.",
     safeToRepeat: false,
   },
   {
@@ -79,7 +81,7 @@ const SIGNATURES: Signature[] = [
     test: /(failed to fetch dynamically imported module|loading chunk|importing a module script failed|dynamically imported module)/i,
     strategy: "reload",
     explanation:
-      "The browser held an outdated build fragment. Caches are purged and the latest build is fetched once.",
+      "The browser held an outdated build fragment. A new version is ready — it loads only when you tap Refresh, and your place, open panels and work stay exactly as they are.",
     safeToRepeat: false,
   },
   {
@@ -188,87 +190,30 @@ export function purgeNonEssentialStorage() {
   }
 }
 
-/** Reload policy for stale-build faults (rewritten 2026-10-26 after
- * the founder's held session): the old rule allowed ONE purge+reload
- * per 10 minutes and silently did nothing after that — so on a
- * deploy-heavy day a tab rode out the first deploy, then every later
- * fault remounted a tree whose dead chunks could never load, burned
- * the error boundary's silent-recovery budget, and parked the user
- * on the recovery console. Now: a plain reload comes FIRST (it
- * re-reads the current entry, whose chunk set is consistent), caches
- * purge from the second fault on, and up to 4 automatic reloads are
- * allowed in any 10-minute window. A build that is genuinely broken
- * still stops after 4 — that is what the console is for. */
-const RELOAD_WINDOW_MS = 10 * 60 * 1000;
-const RELOAD_LOG_KEY = "sfh.autodebug.reloadlog";
-const MAX_AUTO_RELOADS = 4;
-
-function recentReloads(): number[] {
-  try {
-    const now = Date.now();
-    const log = JSON.parse(sessionStorage.getItem(RELOAD_LOG_KEY) || "[]");
-    return Array.isArray(log) ? log.filter((t) => typeof t === "number" && now - t < RELOAD_WINDOW_MS) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function purgeCaches(): Promise<void> {
-  try {
-    if ("caches" in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    }
-    const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
-    await Promise.all(regs.map((r) => r.unregister()));
-  } catch {
-    /* best effort */
-  }
-}
-
-/** Reloads for a stale-build fault when the budget allows it.
- * Returns false when the budget is spent — the caller must then
- * treat the fault as unhandled (the console) instead of pretending
- * a repair is coming. */
+/** Update policy for stale-build faults (founder directive
+ * 2026-10-26, replacing the automatic-reload policy): the site NEVER
+ * reloads itself — an unannounced reload destroys the user's flow
+ * (open panels, a live meeting, a half-typed message). A stale-build
+ * fault means a newer build exists; the repair is to RAISE the
+ * update offer (lib/updateSignal). The UpdateAvailableBubble shows
+ * it, and the reload happens only when the user clicks Refresh,
+ * after their exact place has been snapshotted. Returning true is
+ * honest: the fault is handled — the current view stays up and the
+ * user decides when to move to the new build. (The old policy
+ * reloaded automatically, up to 4 times per 10 minutes, with a
+ * meeting-shield deferral; both are gone — nothing reloads now, so
+ * nothing needs deferring.) */
 export function reloadForStaleBuild(): boolean {
-  /* MEETING SHIELD (founder report 2026-10-26: live video rooms
-   * "restarting alone" mid-meeting): while a LiveKit meeting holds a
-   * token, LiveVideoRoom sets window.__sfhMeetingActive. A deploy
-   * landing mid-meeting must NOT yank the page — defer the reload
-   * and re-check every 45s; it lands once the meeting is over. */
-  if ((window as any).__sfhMeetingActive) {
-    if (!(window as any).__sfhReloadDeferred) {
-      (window as any).__sfhReloadDeferred = window.setTimeout(() => {
-        (window as any).__sfhReloadDeferred = null;
-        reloadForStaleBuild();
-      }, 45000);
-    }
-    return false;
-  }
-  let count = 0;
-  try {
-    const log = recentReloads();
-    count = log.length;
-    if (count >= MAX_AUTO_RELOADS) return false;
-    log.push(Date.now());
-    sessionStorage.setItem(RELOAD_LOG_KEY, JSON.stringify(log));
-    // Keep the legacy key roughly in step for anything reading it.
-    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-  } catch {
-    return false;
-  }
-  if (count >= 1) {
-    // A repeat fault inside the window: purge first, then reload.
-    void purgeCaches().then(() => window.location.reload());
-    window.setTimeout(() => window.location.reload(), 350);
-  } else {
-    window.location.reload();
-  }
+  notifyUpdateAvailable();
   return true;
 }
 
+/** The user-clicked deep repair: snapshot the place, purge stale
+ * caches and reload into the current build. Only ever invoked from
+ * explicit user actions (the recovery console's button, the update
+ * bubble's Refresh) — never automatically. */
 export async function purgeCachesAndReload(): Promise<boolean> {
-  if (!reloadForStaleBuild()) return false;
+  await reloadForUpdate();
   return true;
 }
 
@@ -281,9 +226,8 @@ export function applyRepair(diagnosis: Diagnosis): boolean {
     case "ignore":
       return true;
     case "reload":
-      // Honest result: true only when a reload is actually happening.
-      // Returning true while the old guard silently blocked the reload
-      // is what burned the boundary's budget and held the session.
+      // Handled = the update offer is raised and the current view
+      // stays up. The reload itself waits for the user's click.
       return reloadForStaleBuild();
     case "remount":
       if (diagnosis.id === "storage-quota") purgeNonEssentialStorage();
@@ -330,10 +274,10 @@ export function installAutoDebugger() {
 
   /* Vite fires this when a lazily loaded chunk fails to load — the
    * moment an open tab meets a build that replaced its chunks. Caught
-   * here, the user never sees a fault at all: caches purge and the
-   * current build loads once (guarded, never a loop). Uncaught, the
-   * same failure becomes a 'default'-of-undefined crash in the error
-   * boundary and a held session on the recovery console. */
+   * here, the user never sees a fault and the page NEVER reloads
+   * itself: the update offer is raised and the user clicks Refresh
+   * when ready. Uncaught, the same failure becomes a
+   * 'default'-of-undefined crash in the error boundary. */
   window.addEventListener("vite:preloadError", (event) => {
     event.preventDefault();
     const payload = (event as Event & { payload?: unknown }).payload;
