@@ -203,7 +203,31 @@ const WONDERLANDS_FLOOR: FloorDef = {
   defaultPlan: wonderlandsDefaultPlan,
 };
 
-export const FLOORS: FloorDef[] = [SFH_FLOOR, WONDERLANDS_FLOOR];
+/** Floor 1 — the Lobby (founder directive 2026-10-26): the building's
+ * ground floor. No team, no desks — an empty double-height hall with
+ * the elevator. It still carries a Manager def so every floor-scoped
+ * system resolves, but its scene has no characters at all. */
+const LOBBY_FLOOR: FloorDef = {
+  id: 1,
+  key: "lobby",
+  company: "Building Lobby",
+  tagline: "Ground floor — elevator hall, opened glass doors to the garden",
+  bots: [],
+  executives: [],
+  manager: { ...OFFICE_MANAGER, duty: "Keeps the lobby — the building's entrance hall and elevator." },
+  managerPrompt: floorManagerPrompt("Building Lobby", "This floor is the building's ground-floor lobby: an empty double-height hall with the elevator. There is no team here yet — the founder will design it later."),
+  team: [],
+  archivistKey: "writer",
+  archivistLabel: "Writer (Archivist)",
+  shiftStoreKey: "sfh:office-shift:lobby:v1",
+  publishedFile: "lobby.json",
+  customStoreKey: "sfh:office-custom-bots:lobby",
+  promptOverrideKey: "sfh:office-prompt-overrides:lobby",
+  managerChatKey: "sfh:manager-chat:lobby",
+  defaultPlan: () => [],
+};
+
+export const FLOORS: FloorDef[] = [SFH_FLOOR, WONDERLANDS_FLOOR, LOBBY_FLOOR];
 
 /* ------------------------------------------------------------------ */
 /* Dynamic floors — created by a CEO for a department                  */

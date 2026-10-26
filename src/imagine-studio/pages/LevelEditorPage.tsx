@@ -2414,6 +2414,27 @@ export default function LevelEditorPage() {
               const o = scene.objects.find((x) => x.id === oid);
               if (isObjectLocked(o)) return;
               patchObject(oid, t as any);
+              // MULTI-MOVE (founder report 2026-10-26): with several
+              // objects selected, the gizmo's drag delta applies to
+              // EVERY selected object, not only the gizmo's target —
+              // positions shift together, rotations add, scales
+              // multiply by the drag's factor.
+              const start = (t as any).start as { position: number[]; rotation: number[]; scale: number[] } | undefined;
+              if (start && selectedIds.size > 1 && selectedIds.has(oid)) {
+                const dP = [t.position[0] - start.position[0], t.position[1] - start.position[1], t.position[2] - start.position[2]];
+                const dR = [t.rotation[0] - start.rotation[0], t.rotation[1] - start.rotation[1], t.rotation[2] - start.rotation[2]];
+                const fS = [t.scale[0] / (start.scale[0] || 1), t.scale[1] / (start.scale[1] || 1), t.scale[2] / (start.scale[2] || 1)];
+                for (const otherId of Array.from(selectedIds)) {
+                  if (otherId === oid) continue;
+                  const oo = scene.objects.find((x) => x.id === otherId);
+                  if (!oo || isObjectLocked(oo)) continue;
+                  patchObject(otherId, {
+                    position: [(oo.position?.[0] ?? 0) + dP[0], (oo.position?.[1] ?? 0) + dP[1], (oo.position?.[2] ?? 0) + dP[2]],
+                    rotation: [(oo.rotation?.[0] ?? 0) + dR[0], (oo.rotation?.[1] ?? 0) + dR[1], (oo.rotation?.[2] ?? 0) + dR[2]],
+                    scale: [(oo.scale?.[0] ?? 1) * fS[0], (oo.scale?.[1] ?? 1) * fS[1], (oo.scale?.[2] ?? 1) * fS[2]],
+                  } as any);
+                }
+              }
             }}
             sculpt={{
               active: sculptActive && !!scene.terrain?.enabled &&

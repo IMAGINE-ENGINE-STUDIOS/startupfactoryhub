@@ -6,7 +6,7 @@
 // publishing verifies the exact file it wrote, and name matching tolerates
 // case / dash / spacing differences instead of demanding an exact string.
 import { PLAZA_LEVEL_NAME, PLAZA_PUBLISHED_URL, fetchPublishedPlazaScene, syncPlazaLevelToPublished } from "./plazaLevel";
-import { OFFICE_LEVEL_NAME, LEGACY_OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, fetchPublishedOfficeMeta, publishedWorldUrl, syncOfficeLevelToPublished, syncFloor99LevelToPublished, syncDynamicFloorLevel, BUILDING_PLAZA_LEVEL_NAME, fetchPublishedBuildingPlazaScene, syncBuildingPlazaLevelToPublished } from "./officeWorld";
+import { OFFICE_LEVEL_NAME, LEGACY_OFFICE_LEVEL_NAME, OFFICE_PUBLISHED_URL, fetchPublishedOfficeScene, FLOOR99_LEVEL_NAME, fetchPublishedFloor99Scene, fetchPublishedOfficeMeta, publishedWorldUrl, syncOfficeLevelToPublished, syncFloor99LevelToPublished, syncDynamicFloorLevel, BUILDING_PLAZA_LEVEL_NAME, fetchPublishedBuildingPlazaScene, syncBuildingPlazaLevelToPublished, LOBBY_LEVEL_NAME, fetchPublishedLobbyScene, syncLobbyLevelToPublished } from "./officeWorld";
 import type { LevelScene } from "./levelTypes";
 import type { LocalLevelRecord } from "./localLevels";
 
@@ -28,6 +28,9 @@ export interface NamedWorld {
   building?: string;
   /** Floor number inside the building (100 = the top office floor). */
   floor?: number;
+  /** Stories this level occupies (the double-height Lobby spans 2 —
+   * the building view's tower fill must skip the extra story too). */
+  span?: number;
   /** How the level is listed inside its building. */
   levelLabel?: string;
   /** Former names that still resolve to this world. */
@@ -47,6 +50,9 @@ export const NAMED_WORLDS: NamedWorld[] = [
   // of its podium in the stacked building view. Its live home is the
   // office building itself.
   { key: "officeplaza", name: BUILDING_PLAZA_LEVEL_NAME, path: "building-plaza.json", livePath: "/office", publishedUrl: publishedWorldUrl("building-plaza.json"), fetchPublished: fetchPublishedBuildingPlazaScene, syncLevel: syncBuildingPlazaLevelToPublished, building: "Startup Office", floor: 0, levelLabel: "Building Plaza — Ground" },
+  // Floor 1 — the LOBBY (founder directive 2026-10-26): double-height
+  // ground floor with opened glass doors and the building's elevator.
+  { key: "lobby", name: LOBBY_LEVEL_NAME, path: "lobby.json", livePath: "/office?floor=1", publishedUrl: publishedWorldUrl("lobby.json"), fetchPublished: fetchPublishedLobbyScene, syncLevel: syncLobbyLevelToPublished, building: "Startup Office", floor: 1, levelLabel: "Floor 1 — Lobby", span: 2 },
 ];
 
 const norm = (s: string) => (s || "").toLowerCase().replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();

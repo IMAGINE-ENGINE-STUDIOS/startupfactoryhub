@@ -1907,10 +1907,18 @@ function TransformGizmo({
     position: [number, number, number];
     rotation: [number, number, number];
     scale: [number, number, number];
+    /** The target's transform when the drag began — the page applies
+     * the DELTA to every other selected object (multi-move). */
+    start?: {
+      position: [number, number, number];
+      rotation: [number, number, number];
+      scale: [number, number, number];
+    };
   }) => void;
 }) {
   const [target, setTarget] = useState<THREE.Object3D | null>(null);
   const tcRef = useRef<any>(null);
+  const dragStart = useRef<{ position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number] } | null>(null);
   const { scene: r3fScene } = useThree();
   useEffect(() => {
     // Find the group named obj-<id> after render
@@ -1961,6 +1969,11 @@ function TransformGizmo({
       scaleSnap={snap && snap > 0 ? snap : null}
       onMouseDown={() => {
         if (controlsRef?.current) controlsRef.current.enabled = false;
+        dragStart.current = {
+          position: [target.position.x, target.position.y, target.position.z],
+          rotation: [target.rotation.x, target.rotation.y, target.rotation.z],
+          scale: [target.scale.x, target.scale.y, target.scale.z],
+        };
       }}
       onMouseUp={() => {
         if (controlsRef?.current) controlsRef.current.enabled = true;
@@ -1988,6 +2001,7 @@ function TransformGizmo({
           position: [target.position.x, target.position.y, target.position.z],
           rotation: [target.rotation.x, target.rotation.y, target.rotation.z],
           scale: [target.scale.x, target.scale.y, target.scale.z],
+          start: dragStart.current ?? undefined,
         });
       }}
     />

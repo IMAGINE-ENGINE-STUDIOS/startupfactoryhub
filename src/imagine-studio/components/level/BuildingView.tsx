@@ -176,7 +176,7 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
             <group position={[0, centerY, 0]} scale={2.2}>
               <SkyboxDome url={sky.url} />
             </group>
-            <TowerFill taken={new Set([...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100])} />
+            <TowerFill taken={new Set([...levels.flatMap((w) => { const f = w.floor ?? 100; const span = (w as any).span ?? 1; return Array.from({ length: span }, (_, i) => f + i); }), ...extras.map((x) => x.floor), 100])} />
             {/* The ground is the BUILDING PLAZA level itself (founder
                 directive 2026-10-26): it renders through the levels
                 loop below like every floor — its own scene, editable

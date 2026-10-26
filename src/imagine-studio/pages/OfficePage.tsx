@@ -17,7 +17,7 @@ import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-t
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { Armchair, Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
+import { Armchair, ArrowUpDown, Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
@@ -38,7 +38,7 @@ import { FLOORS, allFloors, createDynamicFloor, floorById, engineFor, setFloorTe
 import { runOutput } from '@/imagine-studio/lib/shiftEngine';
 import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, renamePerson, retiredAgentIds, setPersonnelPrompt, withCharter, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
 import { officeAdmin } from '@/imagine-studio/components/office/OfficeAdmin';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildLobbyScene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
@@ -921,7 +921,7 @@ export default function OfficePage() {
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
   }, []);
-  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : floor.id === 100 ? buildOfficeScene() : buildSceneWithCast(floor.bots)), [floor]);
+  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : floor.id === 100 ? buildOfficeScene() : floor.id === 1 ? buildLobbyScene() : buildSceneWithCast(floor.bots)), [floor]);
   // Each floor is its own LiveKit room, its own moderation and its own
   // access rules (founder directive 2026-10-25). Floor 100 keeps the
   // historic "office" room name so nothing already joined breaks.
@@ -1037,6 +1037,7 @@ export default function OfficePage() {
   const [buildingMenu, setBuildingMenu] = useState(false);
   const [officeMenu, setOfficeMenu] = useState(false);
   const [teamMenu, setTeamMenu] = useState(false);
+  const [elevatorOpen, setElevatorOpen] = useState(false);
   const closeMenus = () => { setBuildingMenu(false); setOfficeMenu(false); setTeamMenu(false); };
 
   /* ---- Social (Plaza parity): presence, spatial voice, text chat ---- */
@@ -1962,6 +1963,29 @@ export default function OfficePage() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* THE ELEVATOR (founder directive 2026-10-26): in the Lobby, the
+          elevator takes users to the building's other floors. */}
+      {floor.id === 1 && (
+        <div data-office-ui className="absolute left-1/2 -translate-x-1/2 bottom-40 sm:bottom-24 z-20 flex flex-col items-center">
+          {elevatorOpen && (
+            <div className="mb-2 w-64 rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
+              <div className="px-2.5 pt-1.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Elevator — choose a floor</div>
+              {allFloors().filter((f) => f.id !== 1).map((f) => (
+                <button key={f.id} onClick={() => { window.location.href = f.id === 100 ? '/office' : `/office?floor=${f.id}`; }} className="w-full rounded-lg px-2.5 py-2 text-left text-xs hover:bg-muted flex items-center justify-between">
+                  <span className="font-semibold">Floor {f.id}</span><span className="text-muted-foreground">{f.company}</span>
+                </button>
+              ))}
+              <button onClick={() => { window.location.href = '/plaza'; }} className="w-full rounded-lg px-2.5 py-2 text-left text-xs hover:bg-muted flex items-center justify-between">
+                <span className="font-semibold">Plaza</span><span className="text-muted-foreground">Outside the building</span>
+              </button>
+            </div>
+          )}
+          <button onClick={() => setElevatorOpen((v) => !v)} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+            <ArrowUpDown className="w-4 h-4 text-cyan-300" /> Elevator
+          </button>
         </div>
       )}
 

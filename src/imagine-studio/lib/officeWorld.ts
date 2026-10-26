@@ -411,7 +411,10 @@ export async function fetchPublishedFloor99Scene(): Promise<LevelScene | null> {
  * scene; a divergent local copy is first preserved as a draft level.
  * Same rule as Floor 100 and the Plaza. */
 export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
-  const publishedScene = stripRetiredBackground(await fetchPublishedFloor99Scene());
+  const rawPublished99 = stripRetiredBackground(await fetchPublishedFloor99Scene());
+  const publishedScene = rawPublished99 && (((rawPublished99 as any)?.environment?.sceneVersion ?? 1) < OFFICE_SCENE_VERSION)
+    ? mergeOfficeScenes(buildFloor99Scene(), rawPublished99)
+    : rawPublished99;
   // Binding-first identity (founder segregation rule 2026-10-25): the
   // level pinned to "office99" is Floor 99 whatever it is named; a level
   // bound to Floor 100 or the Plaza is never eligible here.
@@ -453,15 +456,10 @@ export function buildBuildingPlazaScene(): LevelScene {
   o.push(P("Garden Lawn", "box", [0, -0.55, 0], [190, 1.1, 130], LAWN_DEEP, { roughness: 1 }));
   o.push(P("Stone Terrace", "box", [0, 0.07, 6], [124, 0.14, 92], TRAV, { roughness: 0.95 }));
   o.push(P("Terrace Inlay", "box", [0, 0.15, 6], [116, 0.04, 84], STONE, { roughness: 0.9 }));
-  // The tower podium, dressed as a stone base with a darker plinth and a
-  // light cornice; hedge planters run along its garden face.
-  o.push(P("Tower Podium", "box", [0, 4, 0], [64, 8, 46], "#b3a68c", { roughness: 0.9 }));
-  o.push(P("Podium Plinth", "box", [0, 0.8, 0], [66, 1.6, 48], "#8f8268", { roughness: 0.95 }));
-  o.push(P("Podium Cornice", "box", [0, 7.6, 0], [66, 0.8, 48], STONE, { roughness: 0.85 }));
-  for (const sx of [-1, 1]) {
-    o.push(P("Podium Planter", "box", [sx * 20, 0.75, 26.5], [30, 1.5, 2.6], "#7d6f57", { roughness: 1 }));
-    o.push(P("Podium Hedge", "box", [sx * 20, 1.9, 26.5], [30, 1, 2.2], HEDGE, { roughness: 1 }));
-  }
+  // The tower's base is the LOBBY floor now (founder directive
+  // 2026-10-26): the old podium box is erased — the double-height
+  // lobby level sits here in the stacked building, its opened glass
+  // doors facing this garden.
   // THE FOUNTAIN — tiered, centered on the main axis south of the tower.
   const FZ = 38;
   o.push(P("Fountain Basin", "cylinder", [0, 0.5, FZ], [23, 1, 23], WHITE, { roughness: 0.7 }));
@@ -589,7 +587,10 @@ export async function syncDynamicFloorLevel(levelName: string, file: string): Pr
 }
 
 export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
-  const publishedScene = stripRetiredBackground(await fetchPublishedOfficeScene());
+  const rawPublished = stripRetiredBackground(await fetchPublishedOfficeScene());
+  const publishedScene = rawPublished && (((rawPublished as any)?.environment?.sceneVersion ?? 1) < OFFICE_SCENE_VERSION)
+    ? mergeOfficeScenes(buildOfficeScene(), rawPublished)
+    : rawPublished;
   // Binding-first identity (founder segregation rule 2026-10-25): the
   // level pinned to "office" is Floor 100 whatever it is named; a level
   // bound to the Plaza or Floor 99 is never eligible here.
@@ -611,6 +612,106 @@ export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
   if (!publishedScene) return existing;
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
     preserveLocalDraft(existing, OFFICE_LEVEL_NAME, "Local edits preserved when the Office level was re-synced to the published version");
+    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
+  }
+  return getLocalLevel(existing.id) ?? existing;
+}
+
+/* ------------------------------------------------------------------ */
+/* THE LOBBY — Floor 1 (founder directive 2026-10-26)                   */
+/* ------------------------------------------------------------------ */
+
+export const LOBBY_LEVEL_NAME = "Lobby — Ground Floor";
+
+/** The building's ground floor: a room like Floor 100 but DOUBLE
+ * height (16 m), EMPTY (no desks — the founder designs it later), with
+ * opened glass doors on the garden side so users come in and out, and
+ * an elevator in the middle that takes users to the other floors. */
+export function buildLobbyScene(): LevelScene {
+  n = 0;
+  const o: PrimitiveObject[] = [];
+  const W = 48, D = 32, H = 16, T = 0.18;
+  const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
+  // Floor — pale stone like the plaza terrace; ceiling slab at 16.
+  o.push(P("Lobby Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#d8cfbc", { roughness: 0.9, metalness: 0 }));
+  o.push(P("Lobby Ceiling", "box", [0, H + 0.06, 0], [W, 0.12, D], "#eef2f5", { roughness: 0.95, metalness: 0 }));
+  for (const lx of [-16, 0, 16]) for (const lz of [-7, 7]) {
+    o.push(P("Ceiling Light Bar", "box", [lx, H - 0.06, lz], [5.5, 0.07, 0.45], "#d5dde4", { emissive: hex("#ffffff"), emissiveIntensity: 0.9 } as any));
+  }
+  // Full walls (fused frames + glass) on N, W, E — double height.
+  const wall = (side: string, len: number, px: number, pz: number, rotY: number, from: number, to: number) => {
+    const segLen = to - from, mid = (from + to) / 2;
+    const mx = px + Math.cos(rotY) * mid, mz = pz - Math.sin(rotY) * mid;
+    const sillH = 0.3, headH = 0.9, glassH = H - sillH - headH;
+    o.push(P(`Window Frame ${side}`, "framegrid" as any, [mx, H / 2, mz], [segLen, H, T], "#bfcbd6", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
+    o.push(P(`Window Wall ${side} Glass`, "box", [mx, sillH + glassH / 2, mz], [segLen, glassH, T * 0.35], glass, { rotation: [0, rotY, 0], roughness: 0.08, metalness: 0.1 }));
+  };
+  wall("N", W, 0, -D / 2, 0, -W / 2, W / 2);
+  wall("W", D, -W / 2, 0, Math.PI / 2, -D / 2, D / 2);
+  wall("E", D, W / 2, 0, Math.PI / 2, -D / 2, D / 2);
+  // SOUTH wall: two runs with a 7 m doorway between them, a lintel over
+  // the opening, and the two GLASS DOORS OPEN into the room.
+  wall("S", W, 0, D / 2, 0, -W / 2, -3.5);
+  wall("S", W, 0, D / 2, 0, 3.5, W / 2);
+  o.push(P("Door Lintel", "box", [0, H - 0.45, D / 2], [7.2, 0.9, T], "#bfcbd6", { roughness: 0.45, metalness: 0.35 }));
+  o.push(P("Glass Door Left", "box", [-4.7, 3, 14.1], [3.4, 6, 0.06], glass, { rotation: [0, 1.85, 0], roughness: 0.08, metalness: 0.1 }));
+  o.push(P("Glass Door Right", "box", [4.7, 3, 14.1], [3.4, 6, 0.06], glass, { rotation: [0, -1.85, 0], roughness: 0.08, metalness: 0.1 }));
+  o.push(P("Door Handle Left", "box", [-3.6, 1.6, 13.2], [0.07, 0.9, 0.07], "#8b98a5", { metalness: 0.7, roughness: 0.3 }));
+  o.push(P("Door Handle Right", "box", [3.6, 1.6, 13.2], [0.07, 0.9, 0.07], "#8b98a5", { metalness: 0.7, roughness: 0.3 }));
+  // THE ELEVATOR — a glass shaft in the middle of the room, cabin at
+  // rest with its doors parted, indicator glowing above them.
+  o.push(P("Elevator Shaft Cap", "box", [0, H - 0.25, 0], [5.6, 0.5, 5.6], "#2b3644", { roughness: 0.5, metalness: 0.4 }));
+  for (const cx of [-2.6, 2.6]) for (const cz of [-2.6, 2.6]) {
+    o.push(P("Elevator Shaft Column", "box", [cx, H / 2, cz], [0.35, H, 0.35], "#2b3644", { roughness: 0.5, metalness: 0.4 }));
+  }
+  for (const [px, pz, rotY, len] of [[0, -2.6, 0, 5.2], [-2.6, 0, Math.PI / 2, 5.2], [2.6, 0, Math.PI / 2, 5.2]] as [number, number, number, number][]) {
+    o.push(P("Elevator Shaft Glass", "box", [px, H / 2, pz], [len, H - 1, 0.06], glass, { rotation: [0, rotY, 0], roughness: 0.08, metalness: 0.1 }));
+  }
+  // South shaft face is the cabin front: frame + parted cabin doors.
+  o.push(P("Elevator Front Frame", "box", [0, H / 2, 2.6], [5.2, H - 1, 0.12], "#39434f", { roughness: 0.5, metalness: 0.4 }));
+  o.push(P("Elevator Cabin", "box", [0, 1.5, 0.4], [3.8, 3, 3.6], "#1c2634", { roughness: 0.4, metalness: 0.5 }));
+  o.push(P("Elevator Door Left", "box", [-1.15, 1.5, 2.28], [0.85, 3, 0.08], "#aeb9c4", { metalness: 0.7, roughness: 0.25 }));
+  o.push(P("Elevator Door Right", "box", [1.15, 1.5, 2.28], [0.85, 3, 0.08], "#aeb9c4", { metalness: 0.7, roughness: 0.25 }));
+  o.push(P("Elevator Indicator", "box", [0, 3.35, 2.68], [1.3, 0.28, 0.06], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.4 } as any));
+  return {
+    ...EMPTY_SCENE,
+    skybox: { ...DEFAULT_SKYBOX },
+    objects: o as any,
+    lights: [
+      { id: "lobby_sun", name: "Sunlight", kind: "directional", position: [26, 40, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
+      { id: "lobby_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.85 },
+    ],
+    environment: {
+      ...EMPTY_SCENE.environment,
+      background: "#cfe2ef",
+      ambient: 0.85,
+      sceneVersion: OFFICE_SCENE_VERSION,
+      gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.85, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
+    },
+  } as LevelScene;
+}
+
+/** The Lobby's OWN published scene (lobby.json). Null until an admin
+ * first publishes the level. */
+export async function fetchPublishedLobbyScene(): Promise<LevelScene | null> {
+  const m = await fetchPublishedOfficeMeta(publishedWorldUrl("lobby.json"));
+  return m?.scene ?? null;
+}
+
+/** The editable Lobby level always opens on its CURRENT published
+ * scene; a divergent local copy is first preserved as a draft. */
+export async function syncLobbyLevelToPublished(): Promise<LocalLevelRecord> {
+  const publishedScene = stripRetiredBackground(await fetchPublishedLobbyScene());
+  let existing = resolveWorldSyncLevel("lobby", LOBBY_LEVEL_NAME);
+  if (!existing) {
+    existing = _ensure(publishedScene ? () => publishedScene : buildLobbyScene, LOBBY_LEVEL_NAME);
+    setBoundWorldKey(existing.id, "lobby");
+    return getLocalLevel(existing.id) ?? existing;
+  }
+  setBoundWorldKey(existing.id, "lobby");
+  if (!publishedScene) return existing;
+  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
+    preserveLocalDraft(existing, LOBBY_LEVEL_NAME, "Local edits preserved when the Lobby level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
   }
   return getLocalLevel(existing.id) ?? existing;
