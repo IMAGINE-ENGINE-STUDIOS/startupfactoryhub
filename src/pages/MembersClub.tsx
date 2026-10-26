@@ -4,7 +4,7 @@
 // access is confirmed, then shows the digital member card and club perks.
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { BadgeCheck, Coffee, Loader2, MapPin, ArrowLeft } from "lucide-react";
+import { BadgeCheck, Coffee, Loader2, MapPin, ArrowLeft, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,6 +61,8 @@ export default function MembersClub() {
 
   const name = (user.user_metadata?.full_name as string) || user.email;
   const memberNo = user.id.replace(/-/g, "").slice(0, 8).toUpperCase();
+  // Free coffee requires an active paid Stripe membership ($50/mo or higher). Complimentary grants do not qualify.
+  const canRedeemCoffee = access.isPaid || access.isAdmin;
   const validUntil = access.subscriptionEnd
     ? new Date(access.subscriptionEnd).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
     : access.isAdmin ? "Admin access" : access.isGranted ? "Complimentary" : "Active";
@@ -102,9 +104,16 @@ export default function MembersClub() {
                 </h2>
                 <img src={foxtailLogo.url} alt="Foxtail Coffee Co." className="h-8 w-auto object-contain" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Exclusive Central Florida meeting point. Two coffees included from Foxtail Belle Isle — show this card at the counter.
-              </p>
+              {canRedeemCoffee ? (
+                <p className="text-sm text-muted-foreground">
+                  Exclusive Central Florida meeting point. Two coffees included from Foxtail Belle Isle — show this card at the counter.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground flex items-start gap-2">
+                  <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  Coffee is included only for paying members (Venture Network $50/mo or higher). Your account is not eligible for free coffee.
+                </p>
+              )}
               <p className="text-sm flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 7813 S Orange Ave Suite 132, Orlando, FL 32809
