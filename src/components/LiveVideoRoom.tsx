@@ -184,6 +184,10 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   };
 
   const [token, setToken] = useState('');
+  const [mintNonce, setMintNonce] = useState(0);
+  const leftRef = useRef(false);
+  const hadConnectedRef = useRef(false);
+  const rejoinLogRef = useRef<number[]>([]);
   const [serverUrl, setServerUrl] = useState('');
   const [connError, setConnError] = useState('');
   const [left, setLeft] = useState(false);
@@ -233,8 +237,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   useEffect(() => { if (tab === 'chat') setSeenCount(chatCount); }, [tab, chatCount]);
   const unread = Math.max(0, chatCount - seenCount);
   const [userLimit, setUserLimit] = useState(100);
-  const [timeLimit, setTimeLimit] = useState(120);
-  const [rules, setRules] = useState({ autoEnd: true, approval: false, muteEntry: true, hideCount: false, hostProducts: true, audience: false, autoFollow: false });
+  const [timeLimit, setTimeLimit] = useState(480);
+  /* autoEnd defaults OFF (founder report 2026-10-26: "live video rooms
+   * are restarting alone interrupting the meetings"). It used to
+   * default ON with a 120-minute limit, so EVERY meeting silently
+   * dumped each participant to the Rejoin screen at their own 2-hour
+   * mark. A host can still set a limit deliberately in Room settings. */
+  const [rules, setRules] = useState({ autoEnd: false, approval: false, muteEntry: true, hideCount: false, hostProducts: true, audience: false, autoFollow: false });
   const [showPkgs, setShowPkgs] = useState(false);
   const [paying, setPaying] = useState('');
   const [copied, setCopied] = useState(false);
@@ -282,7 +291,18 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       }
     })();
     return () => { cancelled = true; };
-  }, [name, id, displayName]);
+  }, [name, id, displayName, mintNonce]);
+
+  /* Keep leftRef in step for the disconnect guard, and raise the
+   * meeting shield while a token is live: the app's auto-repair must
+   * never reload the page from under a meeting when a deploy lands
+   * (see reloadForStaleBuild in lib/autoDebugger). */
+  useEffect(() => { leftRef.current = left; }, [left]);
+  useEffect(() => {
+    const w = window as any;
+    if (token) w.__sfhMeetingActive = true; else delete w.__sfhMeetingActive;
+    return () => { delete w.__sfhMeetingActive; };
+  }, [token]);
 
   useEffect(() => { const t = setInterval(() => setSeconds((s) => s + 1), 1000); return () => clearInterval(t); }, []);
   useEffect(() => { if (rules.autoEnd && seconds >= timeLimit * 60) setLeft(true); }, [seconds, timeLimit, rules.autoEnd]);
@@ -565,7 +585,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-10 max-w-sm w-full text-center">
           <p className="text-white font-medium">You left the call</p>
-          <button onClick={() => { setLeft(false); setSeconds(0); }} className="mt-6 px-5 py-2 rounded-full bg-white text-zinc-900 text-sm">Rejoin</button>
+          <button onClick={() => { setLeft(false); setSeconds(0); if (!kicked) { setToken(''); setMintNonce((n) => n + 1); } }} className="mt-6 px-5 py-2 rounded-full bg-white text-zinc-900 text-sm">Rejoin</button>
         </div>
       </div>
     );
@@ -930,6 +950,24 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   if (!token) return body;
   return (
     <LiveKitRoom serverUrl={serverUrl} token={token} connect video={false} audio={false} data-lk-theme="default"
+      onConnected={() => { hadConnectedRef.current = true; }}
+      onDisconnected={() => {
+        /* AUTO-REJOIN (founder report 2026-10-26): a dropped connection
+         * — token expiry at the old 2h TTL, a network blip, a server
+         * restart — used to end the meeting for that participant. If
+         * they were connected and did NOT press Leave, mint a fresh
+         * token and reconnect automatically (max 5 times an hour,
+         * then surface the error instead of looping). */
+        if (leftRef.current || !hadConnectedRef.current) return;
+        hadConnectedRef.current = false;
+        const now = Date.now();
+        rejoinLogRef.current = rejoinLogRef.current.filter((t) => now - t < 3600_000);
+        if (rejoinLogRef.current.length >= 5) { setConnError('Connection lost — please rejoin the meeting.'); return; }
+        rejoinLogRef.current.push(now);
+        setNotice('Connection dropped — rejoining…');
+        setToken('');
+        setMintNonce((n) => n + 1);
+      }}
       onError={(e) => setConnError(e.message)} style={{ height: '100dvh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
       <LocalPublisher cam={cam} mic={mic} />

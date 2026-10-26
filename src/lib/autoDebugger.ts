@@ -231,6 +231,20 @@ async function purgeCaches(): Promise<void> {
  * treat the fault as unhandled (the console) instead of pretending
  * a repair is coming. */
 export function reloadForStaleBuild(): boolean {
+  /* MEETING SHIELD (founder report 2026-10-26: live video rooms
+   * "restarting alone" mid-meeting): while a LiveKit meeting holds a
+   * token, LiveVideoRoom sets window.__sfhMeetingActive. A deploy
+   * landing mid-meeting must NOT yank the page — defer the reload
+   * and re-check every 45s; it lands once the meeting is over. */
+  if ((window as any).__sfhMeetingActive) {
+    if (!(window as any).__sfhReloadDeferred) {
+      (window as any).__sfhReloadDeferred = window.setTimeout(() => {
+        (window as any).__sfhReloadDeferred = null;
+        reloadForStaleBuild();
+      }, 45000);
+    }
+    return false;
+  }
   let count = 0;
   try {
     const log = recentReloads();

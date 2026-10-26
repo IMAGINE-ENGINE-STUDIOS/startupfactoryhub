@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const at = new AccessToken(apiKey, apiSecret, { identity, name, ttl: "2h" });
+    const at = new AccessToken(apiKey, apiSecret, { identity, name, ttl: "6h" });
     at.addGrant({ room, roomJoin: true, canPublish: true, canSubscribe: true, canPublishData: true });
     const token = await at.toJwt();
 
