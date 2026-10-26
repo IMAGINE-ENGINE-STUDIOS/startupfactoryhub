@@ -16,7 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MicRecorder, micErrorMessage } from "@/lib/voice/recorder";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
-import { speak, stopSpeaking, personaFor, preloadSpeech, type VoicePersona } from "@/lib/voice/tts";
+import { speak, stopSpeaking, personaFor, preloadSpeech, stripForSpeech, type VoicePersona } from "@/lib/voice/tts";
 
 export type TalkState = "off" | "loading" | "listening" | "transcribing" | "waiting" | "speaking";
 
@@ -51,13 +51,26 @@ export function useVoiceConversation(opts: {
   const [loadPct, setLoadPct] = useState<number | null>(null);
   const genRef = useRef(0);
   const recRef = useRef<MicRecorder | null>(null);
-  const spokenRef = useRef<Set<string>>(new Set());
+  /* Streaming speech state: how much of each assistant message has
+   * already been handed to the speech queue, which messages are fully
+   * flushed, and which already reopened the mic. Replies are spoken
+   * SENTENCE BY SENTENCE as they stream in — the old design waited for
+   * the entire reply to finish generating before the first sound,
+   * which is most of why Talk felt slow (founder: "no way to make
+   * this faster more realtime?", 2026-10-25). */
+  const spokenCharsRef = useRef<Map<string, number>>(new Map());
+  const flushedRef = useRef<Set<string>>(new Set());
+  const reopenedRef = useRef<Set<string>>(new Set());
+  const speechQueueRef = useRef<string[]>([]);
+  const pumpingRef = useRef(false);
+  const personaRef = useRef<VoicePersona>(opts.persona || personaFor(opts.roleText));
   const optsRef = useRef(opts);
   optsRef.current = opts;
   const busyRef = useRef(opts.busy);
   busyRef.current = opts.busy;
 
   const persona = opts.persona || personaFor(opts.roleText);
+  personaRef.current = persona;
 
   /* The Talk session's microphone stream — acquired inside the tap
    * that starts Talk and held across every turn, so iOS Safari never
@@ -66,6 +79,7 @@ export function useVoiceConversation(opts: {
 
   const shutdown = useCallback(() => {
     genRef.current++;
+    speechQueueRef.current = [];
     recRef.current?.cancel();
     recRef.current = null;
     MicRecorder.release(streamRef.current);
@@ -90,7 +104,7 @@ export function useVoiceConversation(opts: {
       recRef.current = rec;
       await rec.start({
         stream: streamRef.current ?? undefined,
-        autoStopSilenceMs: 2000,
+        autoStopSilenceMs: 1500,
         noSpeechMs: 20_000,
         maxMs: 45_000,
         onAutoStop: (reason) => { stopReasonRef.current = reason; void finishListen(gen); },
@@ -149,23 +163,72 @@ export function useVoiceConversation(opts: {
     }
   }, [listen, shutdown]);
 
-  /* Speak each new assistant reply once, then reopen the mic. */
+  /* The speech pump: speaks the queue sentence by sentence. When it
+   * drains AND the current reply has been fully flushed AND the agent
+   * is done generating, the mic reopens — the conversation loop. */
+  const pumpSpeech = useCallback(async () => {
+    if (pumpingRef.current) return;
+    pumpingRef.current = true;
+    const gen = genRef.current;
+    try {
+      while (speechQueueRef.current.length) {
+        const sentence = speechQueueRef.current.shift()!;
+        await speak(sentence, personaRef.current);
+        if (gen !== genRef.current) return;
+      }
+    } finally {
+      pumpingRef.current = false;
+    }
+    if (gen !== genRef.current) return;
+    const la = optsRef.current.lastAssistant;
+    if (la && flushedRef.current.has(la.id) && !busyRef.current && !reopenedRef.current.has(la.id)) {
+      reopenedRef.current.add(la.id);
+      void listen(gen);
+    } else if (busyRef.current) {
+      setTalkState("waiting");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Feed the speech queue from the streaming reply: every completed
+   * sentence is spoken as soon as it exists, instead of waiting for
+   * the whole reply. The trailing partial sentence flushes when the
+   * stream ends (busy flips false). */
   useEffect(() => {
     if (!talkOn) return;
     const la = opts.lastAssistant;
-    if (!la || opts.busy) return;
-    if (spokenRef.current.has(la.id)) return;
-    spokenRef.current.add(la.id);
-    const gen = genRef.current;
-    setTalkState("speaking");
-    void (async () => {
-      await speak(la.text, persona);
-      if (gen !== genRef.current) return;
-      if (!busyRef.current) void listen(gen);
-      else setTalkState("waiting");
-    })();
+    if (!la) return;
+    if (!spokenCharsRef.current.has(la.id)) spokenCharsRef.current.set(la.id, 0);
+    const from = spokenCharsRef.current.get(la.id)!;
+    /* Stream over and everything already queued (the common case:
+     * the last sentence completed while busy was still true) — mark
+     * flushed and let the pump run its reopen-the-mic check. */
+    if (!opts.busy && la.text.length <= from) { flushedRef.current.add(la.id); void pumpSpeech(); return; }
+    const tail = la.text.slice(from);
+    if (!tail) return;
+    const ready: string[] = [];
+    let consumed = 0;
+    const re = /[^.!?…]+[.!?…]+["')\]]*\s*/g;
+    let m: RegExpExecArray | null;
+    let last = 0;
+    while ((m = re.exec(tail))) { ready.push(m[0]); last = re.lastIndex; }
+    if (ready.length) consumed = last;
+    if (!opts.busy) {
+      const rest = tail.slice(consumed);
+      if (rest.trim()) { ready.push(rest); consumed = tail.length; }
+      flushedRef.current.add(la.id);
+    }
+    if (!ready.length) return;
+    spokenCharsRef.current.set(la.id, from + consumed);
+    for (const s of ready) if (stripForSpeech(s).trim()) speechQueueRef.current.push(s);
+    if (speechQueueRef.current.length) {
+      setTalkState("speaking");
+      void pumpSpeech();
+    } else if (!opts.busy) {
+      void pumpSpeech(); // nothing to say — still runs the reopen check
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [talkOn, opts.lastAssistant?.id, opts.busy]);
+  }, [talkOn, opts.lastAssistant?.id, opts.lastAssistant?.text, opts.busy]);
 
   const toggleTalk = useCallback(() => {
     if (talkOn) {
@@ -174,7 +237,12 @@ export function useVoiceConversation(opts: {
       return;
     }
     // Messages that already exist are history, not new speech.
-    if (optsRef.current.lastAssistant) spokenRef.current.add(optsRef.current.lastAssistant.id);
+    if (optsRef.current.lastAssistant) {
+      const la = optsRef.current.lastAssistant;
+      spokenCharsRef.current.set(la.id, la.text.length);
+      flushedRef.current.add(la.id);
+      reopenedRef.current.add(la.id);
+    }
     genRef.current++;
     const gen = genRef.current;
     setTalkOn(true);

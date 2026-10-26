@@ -106,11 +106,33 @@ export async function blobToPcm16k(blob: Blob): Promise<Float32Array> {
   }
 }
 
+/** Cut leading/trailing dead air (keeps 150ms of padding). A Talk
+ * capture carries the pause before the user starts and the silence
+ * gap that ended the turn — Whisper would spend a large share of its
+ * time transcribing nothing, which is real seconds on-device. */
+export function trimSilence(pcm: Float32Array, sampleRate = 16000): Float32Array {
+  const win = Math.floor(sampleRate * 0.02);
+  if (pcm.length < win * 4) return pcm;
+  let first = -1;
+  let last = -1;
+  for (let i = 0; i + win <= pcm.length; i += win) {
+    let sum = 0;
+    for (let j = 0; j < win; j += 4) { const v = pcm[i + j]; sum += v * v; }
+    if (Math.sqrt(sum / (win / 4)) > 0.015) { if (first < 0) first = i; last = i + win; }
+  }
+  if (first < 0) return pcm;
+  const pad = Math.floor(sampleRate * 0.15);
+  const a = Math.max(0, first - pad);
+  const b = Math.min(pcm.length, last + pad);
+  return b - a >= pcm.length ? pcm : pcm.slice(a, b);
+}
+
 /** Transcribe a recorded audio blob to text. */
 export async function transcribeBlob(blob: Blob, onProgress?: ProgressFn): Promise<string> {
   const asr = await loadWhisper(onProgress);
-  const pcm = await blobToPcm16k(blob);
-  if (!pcm.length) return "";
+  const raw = await blobToPcm16k(blob);
+  if (!raw.length) return "";
+  const pcm = trimSilence(raw);
   const out = await asr(pcm, { chunk_length_s: 30, stride_length_s: 5 });
   const text = Array.isArray(out) ? out.map((o: any) => o?.text || "").join(" ") : out?.text || "";
   return String(text).trim();
