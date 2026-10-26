@@ -232,10 +232,15 @@ export class AgentBrain implements BrainPort {
   constructor(
     private getHeaders: () => Promise<Record<string, string>>,
     private agentId: string,
+    /** Conversation that predates the call (e.g. the visible chat
+     * thread) — read fresh at each reply, placed before the call's
+     * own turns so the agent has the full context. */
+    private baseHistory?: () => Turn[],
   ) {}
 
   async reply(history: Turn[], userText: string, onDelta: (t: string) => void, signal: AbortSignal): Promise<string> {
     const messages = [
+      ...(this.baseHistory ? this.baseHistory() : []).map((t) => ({ role: t.role, content: t.content })),
       ...history.map((t) => ({ role: t.role, content: t.content })),
       { role: "user" as const, content: userText },
     ];
@@ -252,19 +257,25 @@ export class AgentBrain implements BrainPort {
 export class GeniusBrain implements BrainPort {
   constructor(
     private getHeaders: () => Promise<Record<string, string>>,
-    private systemOverride: string,
+    private systemOverride: string | (() => string),
     private language: string = "en",
+    private baseHistory?: () => Turn[],
   ) {}
 
   async reply(history: Turn[], userText: string, onDelta: (t: string) => void, signal: AbortSignal): Promise<string> {
     const messages = [
+      ...(this.baseHistory ? this.baseHistory() : []).map((t) => ({ role: t.role, content: t.content })),
       ...history.map((t) => ({ role: t.role, content: t.content })),
       { role: "user" as const, content: userText },
     ];
     return streamChat(
       `${FN_BASE}/lightpaper-genius`,
       this.getHeaders,
-      { messages, systemOverride: this.systemOverride, language: this.language },
+      {
+        messages,
+        systemOverride: typeof this.systemOverride === "function" ? this.systemOverride() : this.systemOverride,
+        language: this.language,
+      },
       onDelta,
       signal,
     );

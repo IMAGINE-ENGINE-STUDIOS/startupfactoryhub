@@ -3,7 +3,7 @@ import { districtChat, type DistrictChatState } from '@/lib/districtChatBus';
 import Studio3DTab from '@/components/Studio3DTab';
 import { studio3d, type Studio3DState } from '@/lib/studio3dBus';
 import { agentChatBus } from '@/lib/agentChatBus';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
-import { useVoiceConversation, talkStatusLabel } from '@/lib/voice/useVoiceConversation';
-import { beginVoiceStream, publishVoiceStream } from '@/lib/voice/streamBus';
+import { useVoiceCall } from '@/lib/voice/useVoiceCall';
+import { AgentBrain, GeniusBrain } from '@/lib/voice/adapters';
+import type { Turn } from '@/lib/voice/engine';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -273,36 +274,60 @@ export default function FloatingChat() {
    * goes through a ref because sendAiMessage is declared further down. */
   const aiSendRef = useRef<(t: string) => void>(() => {});
   useEffect(() => { aiSendRef.current = (t) => { void sendAiMessage(t); }; });
-  const voiceSendRef = useRef<(t: string) => void>(() => {});
-  useEffect(() => { voiceSendRef.current = (t) => { void sendVoiceMessage(t); }; });
   const aiMessagesRef = useRef<AIMessage[]>([]);
   useEffect(() => { aiMessagesRef.current = aiMessages; });
-  /* Turns of the live voice call — held as context only, NEVER
-   * rendered while the call runs; committed to the chat when the
-   * call ends (founder directive 2026-10-26: no text during the
-   * conversation, transcribe all messages afterwards). */
-  const callContextRef = useRef<{ role: string; content: string }[]>([]);
-  const geniusLastAssistant = (() => {
-    for (let i = aiMessages.length - 1; i >= 0; i--) if (aiMessages[i].role === 'assistant') return { id: `g${i}`, text: aiMessages[i].content };
-    return null;
-  })();
-  const geniusVoice = useVoiceConversation({
+  /* VoiceCall v2 (founder direction 2026-10-26): Talk is a real
+   * conversation with one of the founder's own agents — the streaming
+   * call-agents "chat" action, run by VoiceCallEngine (worker speech,
+   * pipelined generation, NO text during the call; the transcript is
+   * committed when the call ends). The agent resolves once: "Genius"
+   * by name, else her first agent; with no agents at all, Talk falls
+   * back to the legacy Genius brain. The v1 layered plumbing
+   * (useVoiceConversation + streamBus + dual speech feeds) is retired
+   * here — it produced the frozen page, the per-sentence pauses, and
+   * a transcript assembled from the wrong source. */
+  const [voiceAgentId, setVoiceAgentId] = useState<string | null>(null);
+  const [voiceAgentReady, setVoiceAgentReady] = useState(false);
+  useEffect(() => {
+    if (!user) { setVoiceAgentReady(true); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/call-agents`, {
+          method: 'POST',
+          headers: await getAIHeaders(),
+          body: JSON.stringify({ action: 'list' }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        const agents = Array.isArray((data as any)?.agents) ? (data as any).agents : [];
+        const pick = agents.find((a: any) => /^genius$/i.test(String(a?.name || ''))) || agents[0];
+        if (!cancelled) { setVoiceAgentId(pick ? String(pick.id) : null); setVoiceAgentReady(true); }
+      } catch { if (!cancelled) setVoiceAgentReady(true); }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+  const voiceBaseHistory = useCallback((): Turn[] =>
+    aiMessagesRef.current.map((m) => ({ role: m.role === 'user' ? 'user' as const : 'assistant' as const, content: m.content })), []);
+  const voiceBrain = useMemo(() => {
+    if (!voiceAgentReady) return null;
+    if (voiceAgentId) return new AgentBrain(getAIHeaders, voiceAgentId, voiceBaseHistory);
+    return new GeniusBrain(getAIHeaders, () => buildVoiceSystemOverride(), getAppLanguage(), voiceBaseHistory);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voiceAgentReady, voiceAgentId, voiceBaseHistory]);
+  const geniusVoice = useVoiceCall({
     roleText: 'Genius',
-    lastAssistant: geniusLastAssistant,
-    busy: isAiLoading,
-    onUserText: (t) => voiceSendRef.current(t),
-    onTurn: (turn) => { callContextRef.current = [...callContextRef.current, turn]; },
-    onCallEnd: (turns) => {
-      if (!turns.length) { callContextRef.current = []; return; }
+    brain: voiceBrain,
+    unavailableReason: 'Voice is still getting ready — give it a moment and tap Talk again.',
+    onEnd: (turns) => {
+      if (!turns.length) return;
       const merged = [...aiMessagesRef.current, ...turns] as AIMessage[];
       setAiMessages(merged);
-      const firstUser = turns.find(t => t.role === 'user');
+      const firstUser = turns.find((t) => t.role === 'user');
       saveChatLog.mutate({
         title: (firstUser?.content || 'Voice conversation').slice(0, 60),
         messages: merged,
         tool_used: 'voice-call',
       });
-      callContextRef.current = [];
     },
   });
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
@@ -1023,16 +1048,7 @@ You can help with:
               .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
               .join('\n\n')}`
           : '';
-      /* Voice conversation mode (Talk is on): the reply will be READ
-       * ALOUD, so it must read like a person talking — short natural
-       * sentences, no lists of options read out, no menus or markdown.
-       * Founder field report 2026-10-25: answers "seem kind of dumb"
-       * and the format "is not natural for talking — reading me a list
-       * of options instead of conversing with me." */
-      const voiceBlock = geniusVoice.talkOn
-        ? `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`
-        : '';
-      const systemOverride = getSystemOverride() + knowledgeBlock + voiceBlock;
+      const systemOverride = getSystemOverride() + knowledgeBlock;
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
@@ -1061,15 +1077,6 @@ You can help with:
       let fullText = "";
 
       setAiMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-      /* Voice-first fast lane: publish the stream straight from this
-       * reader so Talk speaks sentences as they arrive on the wire,
-       * not after React renders them. The id must be the one
-       * geniusLastAssistant will derive for this message: the user
-       * message appended above lands at index aiMessages.length, so
-       * this assistant reply lands at +1. (First version used +0 —
-       * an off-by-one that made the two speech feeds track the same
-       * reply under different keys.) */
-      beginVoiceStream(`g${aiMessages.length + 1}`);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1090,7 +1097,6 @@ You can help with:
             const c = parsed.choices?.[0]?.delta?.content;
             if (c) {
               fullText += c;
-              publishVoiceStream(fullText, false);
               setAiMessages(prev => {
                 const updated = [...prev];
                 updated[updated.length - 1] = { role: 'assistant', content: fullText };
@@ -1114,7 +1120,6 @@ You can help with:
           const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
           if (c) {
             fullText += c;
-            publishVoiceStream(fullText, false);
             setAiMessages(prev => {
               const updated = [...prev];
               updated[updated.length - 1] = { role: 'assistant', content: fullText };
@@ -1248,94 +1253,24 @@ You can help with:
       });
       setAiMessages(prev => prev.slice(0, -1));
     } finally {
-      /* Close the voice stream: whatever arrived gets spoken to the
-       * end (NAV tags stripped — they're commands, not conversation),
-       * then Talk reopens the mic. */
-      publishVoiceStream(fullText.replace(/<!--NAV:[^>]+-->\n?/, ''), true);
       setIsAiLoading(false);
     }
   };
 
-  /* CALL MODE (founder directive 2026-10-26): while Talk is on, the
-   * conversation is voice-only — nothing is written to the chat, no
-   * bubbles render, no per-delta state churn (that render storm was
-   * also part of why the page froze). The reply streams straight to
-   * the voice bus and is spoken; the turns live in callContextRef as
-   * context, and the hook hands the full transcript back through
-   * onCallEnd when the call ends — only then do the messages appear
-   * in the chat, all at once. */
-  const sendVoiceMessage = async (text: string) => {
-    if (!user) {
-      toast({ title: "Sign In Required", description: "Please sign in to use Genius AI" });
-      return;
-    }
-    setIsAiLoading(true);
-    const streamId = `voice-${Date.now()}`;
-    beginVoiceStream(streamId);
-    let fullText = '';
-    try {
-      const history = [...aiMessagesRef.current, ...callContextRef.current]
-        .map(m => ({ role: m.role, content: m.content }));
-      const messagesPayload = [...history, { role: 'user' as const, content: text }];
-      const knowledgeBlock =
-        knowledgeEnabled && attachedKnowledge.length > 0
-          ? `\n\nATTACHED KNOWLEDGE BASE (use as context, cite when relevant):\n${attachedKnowledge
-              .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
-              .join('\n\n')}`
-          : '';
-      const voiceBlock = `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`;
-      const systemOverride = getSystemOverride() + knowledgeBlock + voiceBlock;
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
-        {
-          method: "POST",
-          headers: await getAIHeaders(),
-          body: JSON.stringify({ messages: messagesPayload, systemOverride, language: getAppLanguage() }),
-        }
-      );
-      if (resp.status === 429) { toast({ title: "Rate Limit", description: "Too many requests. Please wait.", variant: "destructive" }); return; }
-      if (resp.status === 402) { toast({ title: "Credits Exhausted", description: "Please add credits to continue.", variant: "destructive" }); return; }
-      if (!resp.ok || !resp.body) throw new Error("Stream failed");
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "" || !line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
-            if (c) { fullText += c; publishVoiceStream(fullText, false); }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
-      for (const raw of textBuffer.split("\n")) {
-        if (!raw || raw.startsWith(":") || raw.trim() === "" || !raw.startsWith("data: ")) continue;
-        const jsonStr = raw.slice(6).trim();
-        if (jsonStr === "[DONE]") continue;
-        try {
-          const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
-          if (c) { fullText += c; publishVoiceStream(fullText, false); }
-        } catch {}
-      }
-    } catch (error: any) {
-      console.error('Voice call error:', error);
-      toast({ title: "Error", description: error.message || "Failed to get AI response.", variant: "destructive" });
-    } finally {
-      setIsAiLoading(false);
-      publishVoiceStream(fullText.replace(/<!--NAV:[^>]+-->\n?/, ''), true);
-    }
+  /* System prompt for the legacy Genius voice brain (used only when
+   * the user has no call-agent for Talk): the normal Genius system +
+   * attached knowledge + the spoken-conversation rules — the reply
+   * will be READ ALOUD, so it must read like a person talking, never
+   * a list of options (founder field report 2026-10-25). */
+  const buildVoiceSystemOverride = (): string => {
+    const knowledgeBlock =
+      knowledgeEnabled && attachedKnowledge.length > 0
+        ? `\n\nATTACHED KNOWLEDGE BASE (use as context, cite when relevant):\n${attachedKnowledge
+            .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
+            .join('\n\n')}`
+        : '';
+    const voiceBlock = `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`;
+    return getSystemOverride() + knowledgeBlock + voiceBlock;
   };
 
   const selectedUser = selectedConversation 
@@ -1978,7 +1913,7 @@ You can help with:
                       {geniusVoice.talkOn && (
                         <div className="flex items-center gap-2 px-1 pb-2 text-[11px] font-medium text-emerald-500" role="status">
                           <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
-                          {talkStatusLabel(geniusVoice.talkState, geniusVoice.loadPct, "Genius")}
+                          {geniusVoice.statusText}
                         </div>
                       )}
                       <form

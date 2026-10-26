@@ -186,11 +186,11 @@ export class VoiceCallEngine {
         (p) => this.adapters.stt.load(p),
         (p) => this.adapters.tts.load(p),
       ];
-      let done = 0;
-      await Promise.all(loads.map((load) => load(() => {
-        done += 1;
+      const pcts = [0, 0];
+      await Promise.all(loads.map((load, i) => load((pct) => {
+        pcts[i] = Math.max(pcts[i], pct);
         if (gen === this.runId && this._state === "loading") {
-          this.setState("loading", `${Math.min(99, Math.round((done / 40) * 100))}`);
+          this.setState("loading", String(Math.min(99, Math.round((pcts[0] + pcts[1]) / 2))));
         }
       })));
     } catch (e) {
