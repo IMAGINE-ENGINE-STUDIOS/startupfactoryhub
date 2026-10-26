@@ -55,6 +55,7 @@ import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMvpAcceptanceHtml } from "@/lib/mvpAcceptanceEmailHtml";
 import { generateMvpPaymentReminderHtml } from "@/lib/mvpPaymentReminderEmailHtml";
 import { generateMvpNoShowHtml } from "@/lib/mvpNoShowEmailHtml";
+import { buildInnovationCoffeeHtml } from "@/lib/innovationCoffeeEmail";
 import { buildAfWelcomeHtml, buildAfAcceptanceHtml, buildAfFollowUpHtml, buildAfNoShowHtml } from "@/lib/afEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 import { generateNotionPartnershipHtml } from "@/lib/notionEmailHtml";
@@ -1369,6 +1370,14 @@ const TEMPLATES = [
     edgeFunction: "send-af-no-show-email",
     trigger: "interview no-show / manual",
   },
+  {
+    id: "innovation-coffee",
+    label: "Innovation Coffee Table — Invitation",
+    icon: Coffee,
+    description: "Invite to the Innovation Coffee Table at Foxtail Coffee Belle Isle, with the equity banner GIF",
+    edgeFunction: "send-innovation-coffee-email",
+    trigger: "event day / manual",
+  },
 ] as const;
 
 
@@ -1584,6 +1593,11 @@ const defaultVars = {
     interviewDate: "",
   },
 
+  "innovation-coffee": {
+    to: "",
+    name: "",
+    when: "Today",
+  },
 
   "investor-update": {
 
@@ -1603,7 +1617,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["af-welcome", "af-acceptance", "af-follow-up", "af-no-show", "mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "notion-partnership", "moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["innovation-coffee", "af-welcome", "af-acceptance", "af-follow-up", "af-no-show", "mvp-no-show", "mvp-payment-reminder", "mvp-payment-link", "mvp-program", "notion-partnership", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1716,6 +1730,10 @@ export default function EmailTemplates() {
         cohort: v.cohortName,
         deadline: v.deadline,
       });
+    }
+    if (selected === "innovation-coffee") {
+      const v = vars["innovation-coffee"] as any;
+      return buildInnovationCoffeeHtml({ name: v.name, when: v.when });
     }
     if (selected === "af-no-show") {
       const v = vars["af-no-show"] as any;
@@ -1839,6 +1857,9 @@ export default function EmailTemplates() {
           deadline: v.deadline || "September 29, 2026",
           amountCents: Number(v.amountCents) || 500000,
         };
+      } else if (selected === "innovation-coffee") {
+        const v = vars["innovation-coffee"] as any;
+        payload = { email: toEmail, name: v.name || undefined, when: v.when || "Today" };
       } else if (selected.startsWith("af-")) {
         const v = vars[selected] as any;
         payload = {
@@ -2139,6 +2160,18 @@ export default function EmailTemplates() {
                   </div>
 
                   <div className="rounded-lg border border-border bg-card p-4 space-y-4">
+                    {selected === "innovation-coffee" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Recipient Name <span className="text-muted-foreground">(optional)</span></Label>
+                          <Input value={(vars["innovation-coffee"] as any).name} onChange={(e) => updateVar("innovation-coffee", "name", e.target.value)} className="text-sm" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">When</Label>
+                          <Input value={(vars["innovation-coffee"] as any).when} onChange={(e) => updateVar("innovation-coffee", "when", e.target.value)} className="text-sm" placeholder="Today, 9:00 AM" />
+                        </div>
+                      </>
+                    )}
                     {/* ── Notification-based templates (shared fields) ── */}
                     {NOTIFICATION_IDS.includes(selected) && (() => {
                       const v = vars[selected] as { title: string; message: string; type: string };

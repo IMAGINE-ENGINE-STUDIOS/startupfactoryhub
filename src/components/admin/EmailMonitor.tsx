@@ -21,10 +21,16 @@ import { UnverifiedUsersPanel } from '@/components/admin/UnverifiedUsersPanel';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket, Star, Gift, TrendingUp, Megaphone, CalendarClock
+  Search, CheckCheck, Coffee, Rocket, Star, Gift, TrendingUp, Megaphone, CalendarClock
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
+  {
+    id: 'innovation-coffee',
+    label: 'Innovation Coffee Table',
+    icon: <Coffee className="h-4 w-4" />,
+    desc: 'Invitation to the Innovation Coffee Table at Foxtail Coffee Belle Isle',
+  },
   {
     id: 'notification',
     label: 'Notification Email',
@@ -574,6 +580,24 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `MVP No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ MVP No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'innovation-coffee') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-innovation-coffee-email', {
+            body: { email: to, name: programEmailName || undefined, when: programEmailInterviewDate || 'Today' },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('Innovation Coffee invite failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `Innovation Coffee Table → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: 'Innovation Coffee Table invite sent', description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'af-invitation' || activeType === 'af-welcome') {
       let successCount = 0;
       let failCount = 0;

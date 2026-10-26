@@ -293,3 +293,6 @@ verify_jwt = false
 
 [functions.imagine-pack]
 verify_jwt = false
+
+[functions.send-innovation-coffee-email]
+verify_jwt = true
