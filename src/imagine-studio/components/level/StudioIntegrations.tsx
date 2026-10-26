@@ -4,7 +4,7 @@
  * viewport, Genius 3D (bubble tab + Genius AI requests), Dev tab scene
  * sync (scenes/level.json) and publishing.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { createPortal } from "react-dom";
 import { Library, Sparkles, Rocket, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -585,7 +585,9 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
               </div>
             </>
           )}
-          <button onClick={() => { setLevelsOpen(false); setBuildingOpen(true); }} className="mt-3 w-full h-9 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90">View the building — all levels stacked</button>
+          <button onClick={() => { /* Mounting the building view kicks off scene/model loads — as a transition
+              React may fall back while they load instead of throwing #426 ("suspended while responding
+              to synchronous input"), which the app boundary turns into a held session. */ startTransition(() => { setLevelsOpen(false); setBuildingOpen(true); }); }} className="mt-3 w-full h-9 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90">View the building — all levels stacked</button>
         </div>
         </Portal>
       )}

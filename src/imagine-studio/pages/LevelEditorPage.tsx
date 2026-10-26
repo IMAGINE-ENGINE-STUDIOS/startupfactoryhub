@@ -1,5 +1,5 @@
 // @ts-nocheck -- imported Imagine Studio v2
-import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy, startTransition } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft, Save, Plus, Trash2, Box, Circle, Square, Cylinder, Cone,
@@ -2074,7 +2074,7 @@ export default function LevelEditorPage() {
           <Button
             size="sm"
             variant={testOpen ? "destructive" : "default"}
-            onClick={() => setTestOpen((o) => !o)}
+            onClick={() => startTransition(() => setTestOpen((o) => !o))}
             title="Play: test exactly as published — same renderer and scene data as the live page"
             className={isMobile ? "h-7 px-2 text-[11px]" : "h-8"}
           >

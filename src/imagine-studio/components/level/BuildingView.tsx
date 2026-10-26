@@ -11,7 +11,7 @@
  * published/live side is unchanged — there, visitors move floor to
  * floor with the BUILDING buttons.
  */
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState, startTransition } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
@@ -156,8 +156,8 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
                   <mesh
                     position={[0, 0.18, 0]}
                     onClick={(e) => { e.stopPropagation(); onSelect(w); }}
-                    onPointerOver={(e) => { e.stopPropagation(); setHover(w.key); }}
-                    onPointerOut={() => setHover((h) => (h === w.key ? null : h))}
+                    onPointerOver={(e) => { e.stopPropagation(); startTransition(() => setHover(w.key)); }}
+                    onPointerOut={() => startTransition(() => setHover((h) => (h === w.key ? null : h)))}
                   >
                     <boxGeometry args={[46, 0.36, 30]} />
                     <meshBasicMaterial color={isCurrent ? "#2EF8A0" : "#00E5FF"} transparent opacity={hot ? 0.3 : isCurrent ? 0.18 : 0.07} depthWrite={false} />
@@ -180,8 +180,8 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
                   <mesh
                     position={[0, 0.18, 0]}
                     onClick={(e) => { e.stopPropagation(); onSelectExtra?.(x.id); }}
-                    onPointerOver={(e) => { e.stopPropagation(); setHover(key); }}
-                    onPointerOut={() => setHover((h) => (h === key ? null : h))}
+                    onPointerOver={(e) => { e.stopPropagation(); startTransition(() => setHover(key)); }}
+                    onPointerOut={() => startTransition(() => setHover((h) => (h === key ? null : h)))}
                   >
                     <boxGeometry args={[46, 0.36, 30]} />
                     <meshBasicMaterial color="#00E5FF" transparent opacity={hot ? 0.3 : 0.07} depthWrite={false} />
