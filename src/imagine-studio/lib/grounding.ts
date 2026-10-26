@@ -25,9 +25,9 @@ export function makeGroundSampler() {
       const b = new THREE.Box3().setFromObject(model);
       if (isFinite(b.min.y)) minY = Math.min(minY, b.min.y);
     } catch { /* keep sampling */ }
-    if (t >= 1.15) {
+    if (t >= 2.2) {
       done = true;
-      if (minY !== Infinity && minY < -0.002) return Math.min(0.2, -minY);
+      if (minY !== Infinity && minY < -0.002) return Math.min(0.3, -minY);
       return 0;
     }
     return null;

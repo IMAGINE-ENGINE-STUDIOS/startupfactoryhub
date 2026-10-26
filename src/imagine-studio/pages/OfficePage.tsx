@@ -240,16 +240,23 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
       const sitting = s.phase === 'work' && seated && clipOf.sit;
       let targetY = sitting ? seatY + 0.111 : 0;
       if (!sitting) {
-        const key = s.phase;
-        if ((s as any).groundFor !== key) {
-          (s as any).groundT = ((s as any).groundT ?? 0) + dt;
-          if ((s as any).groundT > 0.45) {
-            try {
-              const b = new THREE.Box3().setFromObject(model);
-              if (isFinite(b.min.y)) (s as any).groundLift = Math.max(0, Math.min(0.12, g.position.y - b.min.y));
-            } catch { /* keep the previous lift */ }
-            (s as any).groundFor = key; (s as any).groundT = 0;
-          }
+        // CONTINUOUS deepest-point tracking (founder report 2026-10-26:
+        // floor 99 fixed, floor 100 not). The old sampler measured ONCE
+        // per phase and clamped the lift at 0.12 — the floor-100
+        // executives'/manager's models dip DEEPER than that in their
+        // idle cycle, so their feet stayed buried. Now: while standing,
+        // re-measure every ~0.12s and keep the lift that satisfies the
+        // DEEPEST point ever seen, up to 0.30.
+        (s as any).groundAcc = ((s as any).groundAcc ?? 0) + dt;
+        if ((s as any).groundAcc > 0.12) {
+          (s as any).groundAcc = 0;
+          try {
+            const b = new THREE.Box3().setFromObject(model);
+            if (isFinite(b.min.y)) {
+              const need = g.position.y - b.min.y;
+              (s as any).groundLift = Math.max((s as any).groundLift ?? 0, Math.max(0, Math.min(0.3, need)));
+            }
+          } catch { /* keep the previous lift */ }
         }
         targetY = (s as any).groundLift ?? 0;
       }
@@ -984,6 +991,17 @@ export default function OfficePage() {
   }, [scene, orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openBot, setOpenBot] = useState<OfficeBot | null>(null);
+  /* ONE DOOR PER PERSON (bug fix, founder report 2026-10-26): every
+   * entry point that "opens" a person — the proximity button, the
+   * interact key, the theater watch button, a 3D tap — must route by
+   * ROLE. The generic Genius-chat panel (setOpenBot) is only for desk
+   * specialists; the Manager opens Shift Control and the CEO/Chairman
+   * open the ExecPanel with their Dashboard / Departments / Reports /
+   * Actions tabs. The proximity path used to send the CEO and Chairman
+   * to the chat-only panel, so their tabs looked "missing" until the
+   * Manager UI had been opened some other way. The router lives in a
+   * ref because several consumers sit above the execOpen state. */
+  const openPersonRef = useRef<(b: OfficeBot) => void>(() => {});
   // SIT AT AN EMPTY DESK (founder directive 2026-10-26): the user can
   // take any station no agent is assigned to. seatRef pins the player
   // (UnifiedPlayer eases onto the chair and plays the sitting clip);
@@ -1311,7 +1329,7 @@ export default function OfficePage() {
     const iv = setInterval(() => {
       if (inputPulse.interact) {
         inputPulse.interact = false;
-        if (nearBotRef.current) setOpenBot(nearBotRef.current);
+        if (nearBotRef.current) openPersonRef.current(nearBotRef.current);
       }
     }, 120);
     return () => clearInterval(iv);
@@ -1352,7 +1370,7 @@ export default function OfficePage() {
   };
   const saveLink = (patch: BotLink) => { if (openBot) saveLinkFor(openBot.key, patch); };
   const botLink = useMemo(() => openBot ? { botName: openBot.name, agentId: link.agentId, aiOn: link.aiOn, onChange: (patch: BotLink) => saveLink(patch) } : undefined, [openBot, link.agentId, link.aiOn]); // eslint-disable-line react-hooks/exhaustive-deps
-  const nearBot = nearKey ? allBotsRef.current.find((b) => b.key === nearKey) : null;
+  const nearBot = nearKey ? [...allBotsRef.current, managerBot].find((b) => b.key === nearKey) : null;
   nearBotRef.current = (nearBot as OfficeBot | null) ?? null;
   const agentChars = useMemo(() => ((scene?.objects || []) as any[]).filter((o) => o.kind === 'character' && o.agentId), [scene]);
   /* ---- Who is on a job right now: a bot whose linked agent produced a run
@@ -1683,6 +1701,15 @@ export default function OfficePage() {
     }
   }, [orgTick]); // eslint-disable-line react-hooks/exhaustive-deps
   const [execOpen, setExecOpen] = useState<'ceo' | 'chairman' | null>(null);
+  /* The role router (see openPersonRef above): assigned here, once the
+   * exec state exists — every "open this person" entry point calls it. */
+  openPersonRef.current = (b: OfficeBot) => {
+    if (b.key === 'manager') { setOpenBot(null); setShiftOpen(true); return; }
+    if (b.key === 'ceo') { setOpenBot(null); setExecOpen('ceo'); return; }
+    if (b.key === 'chairman') { setOpenBot(null); setExecOpen('chairman'); return; }
+    setOpenBot(b);
+  };
+  const openPerson = (b: OfficeBot) => openPersonRef.current(b);
   const execTools: ExecTools = {
     fire: (floorKey, botKey, by, reason) => firePerson(floorKey, botKey, by, reason),
     recruit: (f, x) => createCustomAgentOnFloor(f, x),
@@ -1740,13 +1767,13 @@ export default function OfficePage() {
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
           <BotTapRaycast />
           <BuildingShell currentFloorId={floor.id} />
-          {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
+          {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={openPerson} roam pinnedWork={workingKeys.has(bot.key)} />)}
           {scene && <OfficeBotCharacter bot={managerBot} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
           {scene && floor.executives.map((raw) => { const b = displayBot(floor, raw); return (
             <OfficeBotCharacter key={b.key} bot={b} home={b.key === 'chairman' ? CHAIRMAN_HOME : CEO_HOME} rotY={0} seatY={0.52} seated={false} onOpen={(bb) => setExecOpen(bb.key === 'chairman' ? 'chairman' : 'ceo')} />
           ); })}
           {scene && customOfficeBots.map((b, i) => (
-            <OfficeBotCharacter key={b.key} bot={b} home={[-19 + (i % 8) * 2.4, 0, 12.8]} rotY={Math.PI} seatY={0.52} seated={false} onOpen={setOpenBot} />
+            <OfficeBotCharacter key={b.key} bot={b} home={[-19 + (i % 8) * 2.4, 0, 12.8]} rotY={Math.PI} seatY={0.52} seated={false} onOpen={openPerson} />
           ))}
           {scene && agentChars.map((o) => (
             <OfficeBotCharacter key={`agent_${o.id}`} bot={{ key: `agent_${o.id}`, name: o.name || 'Agent', duty: 'AI agent character', model: o.url || AGENT_MODEL_URL, tint: colorFor(String(o.id)) }} home={[o.position?.[0] ?? 0, 0, o.position?.[2] ?? 5]} rotY={o.rotation?.[1] ?? 0} seatY={o.seatHeight ?? 0.52} seated={!!o.startSeated} pinnedWork={workingKeys.has(`agent_${o.id}`)} onOpen={(b) => { setLinks((cur) => { const next = { ...cur, [b.key]: { agentId: o.agentId, aiOn: true } }; try { localStorage.setItem(LINKS_KEY, JSON.stringify(next)); } catch {} return next; }); setOpenBot(b); }} />
@@ -1883,7 +1910,7 @@ export default function OfficePage() {
               <button onClick={() => turnPage(1)} className="rounded-full bg-background/90 border border-border p-2"><ChevronRight className="w-4 h-4" /></button>
             </>
           )}
-          <button onClick={() => { if (theater.kind === 'dashboard' && screenBot) setOpenBot(screenBot); else if (theater.kind !== 'dashboard') openTheaterFullscreen(theater as TheaterSource); }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
+          <button onClick={() => { if (theater.kind === 'dashboard' && screenBot) openPerson(screenBot); else if (theater.kind !== 'dashboard') openTheaterFullscreen(theater as TheaterSource); }} className="rounded-full bg-background/90 border border-border px-3 py-2 text-xs flex items-center gap-1.5">
             <Maximize2 className="w-4 h-4" />Watch full screen
           </button>
         </div>
@@ -1930,7 +1957,7 @@ export default function OfficePage() {
       )}
 
       {nearBot && !openBot && (
-        <button data-office-ui onClick={() => setOpenBot(nearBot)} className="absolute bottom-24 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 rounded-full bg-primary text-primary-foreground px-4 py-2.5 text-sm font-medium shadow-lg flex items-center gap-2">
+        <button data-office-ui onClick={() => openPerson(nearBot)} className="absolute bottom-24 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 rounded-full bg-primary text-primary-foreground px-4 py-2.5 text-sm font-medium shadow-lg flex items-center gap-2">
           <Play className="w-4 h-4" />Open {nearBot.name}&rsquo;s dashboard
         </button>
       )}
