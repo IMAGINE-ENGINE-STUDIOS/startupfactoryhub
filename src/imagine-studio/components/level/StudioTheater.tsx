@@ -13,7 +13,7 @@ import { openTheaterFullscreen, closeTheaterFullscreen } from "../plaza/TheaterF
 
 const W = 1.6, H = 0.9;
 
-export default function StudioTheater({ obj, selected, onSelect }: { obj: any; selected?: boolean; onSelect?: (id: string) => void }) {
+export default function StudioTheater({ obj, selected, onSelect }: { obj: any; selected?: boolean; onSelect?: (id: string, multi?: boolean) => void }) {
   const [src, setSrc] = useState<TheaterSource>(null);
   const [pages, setPages] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -69,7 +69,7 @@ export default function StudioTheater({ obj, selected, onSelect }: { obj: any; s
 
   const btn = "rounded-md bg-background px-2 py-1 text-[11px] border border-border hover:bg-muted";
   return (
-    <group visible={obj.visible} onClick={(e) => { e.stopPropagation(); onSelect?.(obj.id); }}>
+    <group visible={obj.visible} onClick={(e) => { e.stopPropagation(); onSelect?.(obj.id, e.ctrlKey || e.metaKey || e.shiftKey); }}>
       <mesh position={[0, 0, -0.02]} userData={{ __objId: obj.id }}>
         <boxGeometry args={[W + 0.06, H + 0.06, 0.03]} />
         <meshStandardMaterial color={selected ? "#3b82f6" : "#1a1d22"} />

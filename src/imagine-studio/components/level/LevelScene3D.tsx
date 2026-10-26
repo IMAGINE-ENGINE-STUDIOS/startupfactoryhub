@@ -203,7 +203,7 @@ function PrimitiveMesh({
 }: {
   obj: PrimitiveObject;
   selected?: boolean;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, multi?: boolean) => void;
 }) {
   const geom = useMemo(() => {
     switch (obj.shape) {
@@ -255,7 +255,7 @@ function PrimitiveMesh({
       userData={{ __faceKeys: faceKeys, __objId: obj.id }}
       onClick={(e) => {
         e.stopPropagation();
-        onSelect?.(obj.id);
+        onSelect?.(obj.id, e.ctrlKey || e.metaKey || e.shiftKey);
       }}
     />
   );
@@ -268,7 +268,7 @@ function PolygonMesh({
 }: {
   obj: PolygonObject;
   selected?: boolean;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, multi?: boolean) => void;
 }) {
   const paint = useFacePaint();
   const isActivePaint = paint.active && paint.objectId === obj.id;
@@ -423,7 +423,7 @@ function PolygonMesh({
       userData={{ __faceKeys: faceKeys, __objId: obj.id }}
       onClick={(e) => {
         e.stopPropagation();
-        onSelect?.(obj.id);
+        onSelect?.(obj.id, e.ctrlKey || e.metaKey || e.shiftKey);
       }}
     />
   );
@@ -495,7 +495,7 @@ function GLTFModelMesh({ obj, onSelect }: { obj: ModelObject; onSelect?: (id: st
       visible={obj.visible}
       onClick={(e: any) => {
         e.stopPropagation();
-        onSelect?.(obj.id);
+        onSelect?.(obj.id, e.ctrlKey || e.metaKey || e.shiftKey);
       }}
     />
   );
@@ -897,7 +897,7 @@ function RenderObject({
 }: {
   obj: SceneObject;
   selectedId?: string | null;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, multi?: boolean) => void;
   onFocus?: (id: string) => void;
   playing?: boolean;
   controlsRef?: React.MutableRefObject<any>;
@@ -1115,7 +1115,7 @@ function LightGizmo({
 }: {
   light: SceneLight;
   selected?: boolean;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, multi?: boolean) => void;
 }) {
   if (light.kind === "ambient") return null; // ambient has no position
   const color = rgbaToColor(light.color);

@@ -22,7 +22,7 @@ export default function LevelCharacter({
   onSelect,
 }: {
   obj: CharacterObject;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, multi?: boolean) => void;
 }) {
   const gltf = useGLTF(obj.url);
 
@@ -111,7 +111,7 @@ export default function LevelCharacter({
       visible={obj.visible}
       onClick={(e: any) => {
         e.stopPropagation();
-        onSelect?.(obj.id);
+        onSelect?.(obj.id, e.ctrlKey || e.metaKey || e.shiftKey);
       }}
     >
       <group rotation={[0, modelForwardYawOffset(obj.url), 0]}>

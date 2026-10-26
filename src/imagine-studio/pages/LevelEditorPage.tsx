@@ -319,7 +319,7 @@ function ComponentRow({
       title={`${o.name} (${o.kind})`}
     >
       <button
-        onClick={(e) => onSelect(o.id, e.ctrlKey || e.metaKey)}
+        onClick={(e) => onSelect(o.id, e.ctrlKey || e.metaKey || e.shiftKey)}
         className="flex-1 min-w-0 flex items-center gap-1.5 text-left"
       >
         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
@@ -1815,7 +1815,7 @@ export default function LevelEditorPage() {
                             } ${objLocked ? "opacity-80" : ""}`}
                           >
                             <button
-                              onClick={(e) => selectObject(o.id, e.ctrlKey || e.metaKey)}
+                              onClick={(e) => selectObject(o.id, e.ctrlKey || e.metaKey || e.shiftKey)}
                               className="flex-1 min-w-0 flex items-center gap-1.5 text-left"
                             >
                               {o.kind === "primitive" ? <Box className="w-3 h-3" /> :
@@ -1876,7 +1876,7 @@ export default function LevelEditorPage() {
             {scene.lights.map((l) => (
               <button
                 key={l.id}
-                onClick={(e) => { selectLight(l.id, e.ctrlKey || e.metaKey); }}
+                onClick={(e) => { selectLight(l.id, e.ctrlKey || e.metaKey || e.shiftKey); }}
                 className={`w-full text-left px-2 py-1.5 rounded text-xs flex items-center gap-2 ${
                   selectedLightIds.has(l.id) ? "bg-primary/20 text-primary" : "hover:bg-muted/40"
                 }`}
@@ -2369,15 +2369,15 @@ export default function LevelEditorPage() {
             scene={renderedScene}
             selectedId={selectedId}
             facePaint={facePaintState}
-            onSelect={(oid) => {
+            onSelect={(oid, multi) => {
               if (editingPolygonId) {
                 // While spline editing is active, keep the editing polygon
                 // selected and ignore clicks on other objects / empty space.
                 if (oid === editingPolygonId) return;
                 return;
               }
-              if (oid) selectObject(oid);
-              else {
+              if (oid) selectObject(oid, multi);
+              else if (!multi) {
                 setSelectedIds(new Set());
                 setSelectedId(null);
                 setSelectedLightIds(new Set());
