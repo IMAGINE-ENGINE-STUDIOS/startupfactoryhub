@@ -111,7 +111,7 @@ export function isSpeechSupported(): boolean {
 export const KOKORO_MODEL = "Kokoro-82M-v1.0-ONNX";
 
 /** Persona → Kokoro voice (hosted voice files; EN + UK + ES sets). */
-const KOKORO_VOICE_FOR_PERSONA: Record<string, string> = {
+export const KOKORO_VOICE_FOR_PERSONA: Record<string, string> = {
   chairman: "bm_george",
   ceo: "af_nicole",
   manager: "am_michael",
@@ -162,6 +162,13 @@ function stopNeuralPlayback() {
     try { s.stop(); } catch { /* already ended */ }
     activeSources.delete(s);
   }
+}
+
+/** Play raw PCM through the shared output context (used by the
+ * VoiceCall v2 worker adapter: generation happens in the speech
+ * worker, playback stays here on the main thread). */
+export function playPcm(audio: Float32Array, sampleRate: number): Promise<void> {
+  return playRawAudio(audio, sampleRate);
 }
 
 function playRawAudio(audio: Float32Array, sampleRate: number): Promise<void> {
