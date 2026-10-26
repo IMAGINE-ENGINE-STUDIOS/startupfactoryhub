@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Grid, OrbitControls, useGLTF, Environment, Html, TransformControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { RGBELoader } from "three-stdlib";
 import { EXRLoader } from "three-stdlib";
 import type {
@@ -217,11 +218,32 @@ function PrimitiveMesh({
         return new THREE.ConeGeometry(0.5, 1, 32);
       case "torus":
         return new THREE.TorusGeometry(0.5, 0.15, 16, 64);
+      case "framegrid": {
+        // ONE fused window frame (founder directive 2026-10-26): sill,
+        // header and every mullion merged into a single geometry — one
+        // object per wall instead of ~20 separate pieces. Built in unit
+        // space; the mesh scale [length, height, thickness] restores
+        // meters. Proportions mirror the office walls: 0.15 sill, 0.45
+        // header, 8 total height, a mullion every ~3 m.
+        const len = Math.max(1, (obj.scale as any)?.[0] ?? 1);
+        const sillF = 0.15 / 8, headF = 0.45 / 8, glassF = 1 - sillF - headF;
+        const parts: THREE.BufferGeometry[] = [];
+        const sill = new THREE.BoxGeometry(1, sillF, 1); sill.translate(0, -0.5 + sillF / 2, 0); parts.push(sill);
+        const head = new THREE.BoxGeometry(1, headF, 1); head.translate(0, 0.5 - headF / 2, 0); parts.push(head);
+        const nM = Math.max(1, Math.floor(len / 3));
+        const mullW = 0.12 / len;
+        for (let i = 0; i <= nM; i++) {
+          const m = new THREE.BoxGeometry(mullW, glassF, 0.7);
+          m.translate(-0.5 + i / nM, -0.5 + sillF + glassF / 2, 0);
+          parts.push(m);
+        }
+        return mergeGeometries(parts, false) ?? new THREE.BoxGeometry(1, 1, 1);
+      }
       case "box":
       default:
         return new THREE.BoxGeometry(1, 1, 1);
     }
-  }, [obj.shape]);
+  }, [obj.shape, (obj.scale as any)?.[0]]);
 
   const paint = useFacePaint();
   const faceKeys = useMemo(() => primitiveFaceKeys(obj.shape), [obj.shape]);

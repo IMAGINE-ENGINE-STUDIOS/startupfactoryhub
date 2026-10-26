@@ -27,7 +27,7 @@ export const OFFICE_WAYPOINTS: [number, number][] = [[4, -14], [-20, -13], [20, 
 /** Scene data version of the built-in office. When the published scene is
  * OLDER than this, /office plays the built-in scene (preserving studio-added
  * characters) until an admin publishes the update from the office itself. */
-export const OFFICE_SCENE_VERSION = 9;
+export const OFFICE_SCENE_VERSION = 10;
 
 /** Scene objects RETIRED by later founder directives, stripped wherever
  * a published scene is consumed (live merge + editor sync), so an old
@@ -197,14 +197,11 @@ export function buildOfficeScene(): LevelScene {
       const segLen = to - from, mid = (from + to) / 2;
       const mx = px + Math.cos(rotY) * mid, mz = pz - Math.sin(rotY) * mid;
       const sillH = 0.15, headH = 0.45, glassH = H - sillH - headH;
-      o.push(P(`Window Wall ${side} Sill`, "box", [mx, sillH / 2, mz], [segLen, sillH, T], "#c7d2dc", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
+      // FUSED FRAME (founder directive 2026-10-26): sill, header and all
+      // mullions are ONE solid object (shape "framegrid" — the renderer
+      // merges the parts into a single geometry), not ~20 pieces.
+      o.push(P(`Window Frame ${side}`, "framegrid" as any, [mx, H / 2, mz], [segLen, H, T], "#bfcbd6", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
       o.push(P(`Window Wall ${side} Glass`, "box", [mx, sillH + glassH / 2, mz], [segLen, glassH, T * 0.35], glass, { rotation: [0, rotY, 0], roughness: 0.08, metalness: 0.1 }));
-      o.push(P(`Window Wall ${side} Header`, "box", [mx, H - headH / 2, mz], [segLen, headH, T], "#c7d2dc", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
-      const nM = Math.max(1, Math.floor(segLen / 3));
-      for (let i = 0; i <= nM; i++) {
-        const off = from + (segLen / nM) * i;
-        o.push(P(`Window Mullion ${side}`, "box", [px + Math.cos(rotY) * off, sillH + glassH / 2, pz - Math.sin(rotY) * off], [0.12, glassH, T * 0.7], "#aebbc7", { rotation: [0, rotY, 0], roughness: 0.45, metalness: 0.35 }));
-      }
     }
   };
   wallRun("N", W, 0, -D / 2, 0, [[-W / 2, W / 2]]);

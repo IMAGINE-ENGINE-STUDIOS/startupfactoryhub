@@ -29,7 +29,7 @@ const rgba = (v, d) => {
   return d;
 };
 const uid = (p) => `${p}_${Math.random().toString(36).slice(2, 10)}`;
-const SHAPES = ["box", "sphere", "plane", "cylinder", "cone", "torus"];
+const SHAPES = ["box", "sphere", "plane", "cylinder", "cone", "torus", "framegrid"];
 
 /** Compact context for the AI: level, selection, objects, lights, environment. */
 export function sceneContext(scene: LevelScene, levelName: string, selectedId: string | null) {

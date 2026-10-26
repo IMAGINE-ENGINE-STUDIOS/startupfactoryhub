@@ -281,7 +281,7 @@ export interface PrimitiveObject extends BaseObject {
   kind: "primitive";
   /** Drop-in theater screen: shows a screen share, image or PDF on the face. */
   theater?: boolean;
-  shape: "box" | "sphere" | "plane" | "cylinder" | "cone" | "torus";
+  shape: "box" | "sphere" | "plane" | "cylinder" | "cone" | "torus" | "framegrid";
   color: RGBA;
   metalness: number;
   roughness: number;
