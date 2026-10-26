@@ -66,15 +66,17 @@ serve(async (req) => {
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const origin = req.headers.get("origin") || "https://startupfactoryhub.com";
+    // Members Club event offer: 50% off the first month of the basic monthly plan (Stripe coupon COFFEE50).
+    const coffeeOffer = body?.offer === "coffee50" && planKey === "basic" && cycle === "monthly";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      allow_promotion_codes: true,
+      ...(coffeeOffer ? { discounts: [{ coupon: "COFFEE50" }] } : { allow_promotion_codes: true }),
       success_url: `${origin}${returnPath}?checkout=success`,
       cancel_url: `${origin}${planKey === "investor" ? "/investor-plan" : "/membership"}?checkout=cancelled`,
-      metadata: { user_id: user.id, plan: planKey, billing_cycle: cycle },
+      metadata: { user_id: user.id, plan: planKey, billing_cycle: cycle, ...(coffeeOffer ? { offer: "coffee50" } : {}) },
     });
     logStep("Checkout session created", { sessionId: session.id });
 

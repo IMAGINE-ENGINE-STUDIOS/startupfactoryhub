@@ -37,10 +37,10 @@ export async function updateBasicPlanConfig(input: {
 }
 
 /** Opens a Stripe Checkout session for the chosen billing cycle. */
-export async function createBasicPlanCheckout(cycle: BillingCycle): Promise<string> {
+export async function createBasicPlanCheckout(cycle: BillingCycle, offer?: "coffee50"): Promise<string> {
   const { data, error } = await supabase.functions.invoke(
     "create-basic-plan-checkout",
-    { body: { billingCycle: cycle } }
+    { body: { billingCycle: cycle, ...(offer ? { offer } : {}) } }
   );
   if (error) throw new Error(error.message);
   if (!data?.url) throw new Error("Checkout session URL missing");

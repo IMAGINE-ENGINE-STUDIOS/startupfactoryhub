@@ -31,7 +31,7 @@ export function buildInnovationCoffeeHtml(opts: { name?: string; when?: string }
 <tr><td style="padding:0 4px 16px;font-family:${font};font-size:11px;letter-spacing:4px;color:#5b7f8a;text-transform:uppercase;">Startup Factory Hub &middot; Members Club</td></tr>
 <tr><td style="background:#071219;border:1px solid #143a44;border-radius:18px;overflow:hidden;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-<tr><td><a href="https://startupfactoryhub.com/members-club"><img src="${IC_BANNER_URL}" width="600" alt="Startup Factory Hub Members Club — 7813 S Orange Ave, Suite 132, Orlando, FL 32809" style="display:block;width:100%;height:auto;border:0;border-radius:18px 18px 0 0;"></a></td></tr>
+<tr><td><a href="https://startupfactoryhub.com/members-club?offer=50off"><img src="${IC_BANNER_URL}" width="600" alt="Startup Factory Hub Members Club — 7813 S Orange Ave, Suite 132, Orlando, FL 32809" style="display:block;width:100%;height:auto;border:0;border-radius:18px 18px 0 0;"></a></td></tr>
 <tr><td style="height:3px;line-height:3px;font-size:0;background:#2fd6c8;background-image:linear-gradient(90deg,#2fe0b0,#3aa8f0);">&nbsp;</td></tr>
 <tr><td style="padding:40px 40px 8px;">
 <p style="margin:0 0 14px;"><span style="display:inline-block;${label}background:#0c2a30;border:1px solid #1f5a63;border-radius:999px;padding:6px 12px;">&#9679;&nbsp; Happening ${when.toLowerCase() === "today" ? "today" : when}</span></p>
@@ -53,7 +53,7 @@ ${row("When", when)}
 <tr><td align="center" style="padding:32px 40px 40px;">
 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
 <td style="padding:0 6px 8px;"><a href="${IC_MAPS_URL}" style="display:inline-block;background:#2fd6c8;background-image:linear-gradient(90deg,#2fe0b0,#3aa8f0);color:#03121a;text-decoration:none;font-family:${font};font-weight:800;font-size:15px;letter-spacing:0.5px;padding:15px 30px;border-radius:999px;">Get directions &rarr;</a></td>
-<td style="padding:0 6px 8px;"><a href="https://startupfactoryhub.com/members-club" style="display:inline-block;border:1px solid #2a6b74;color:#bfeff0;text-decoration:none;font-family:${font};font-weight:700;font-size:15px;padding:14px 26px;border-radius:999px;">Members Club</a></td>
+<td style="padding:0 6px 8px;"><a href="https://startupfactoryhub.com/members-club?offer=50off" style="display:inline-block;border:1px solid #2a6b74;color:#bfeff0;text-decoration:none;font-family:${font};font-weight:700;font-size:15px;padding:14px 26px;border-radius:999px;">Members Club · 50% off</a></td>
 </tr></table>
 </td></tr>
 </table></td></tr>
