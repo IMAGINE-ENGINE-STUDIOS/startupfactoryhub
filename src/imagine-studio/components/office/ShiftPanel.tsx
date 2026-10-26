@@ -102,6 +102,9 @@ export interface TeamTools {
   bots: { key: string; name: string; duty: string }[];
   create: (x: { name: string; duty: string; prompt: string }) => Promise<void>;
   reset: (botKey: string, prompt: string) => Promise<void>;
+  /** Conversational rename/configure for the team (and the Manager). */
+  rename?: (botKey: string, name: string) => Promise<void>;
+  configure?: (botKey: string, cfg: { mission?: string; vision?: string; instructions?: string; model?: string }) => Promise<void>;
   resetAll: (prompt: string) => Promise<string>;
   /** Fire & replace (the 94% law): erases the agent and generates a new
    * one in its seat. Queues until the shift ends when one is running. */
@@ -219,6 +222,26 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
                       });
                       audit(documentDelivery(doc));
                       report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                    } else if (d.type === "rename" || d.type === "configure") {
+                      const want = String(d.agent || "").trim().toLowerCase();
+                      const role = (!want || want === "yourself" || want === "you")
+                        ? null
+                        : team.find((t) => t.name.toLowerCase() === want || t.title.toLowerCase() === want);
+                      const botKey = role ? role.key : "manager";
+                      const label = role ? role.name : "The Manager";
+                      if (d.type === "rename") {
+                        const nn = String(d.name || "").trim();
+                        if (!nn) { audit("⚙ The rename needs the new name."); return; }
+                        if (!teamTools.rename) { audit("⚙ Renaming is not available here."); return; }
+                        await teamTools.rename(botKey, nn);
+                        audit(`⚙ ${label} is now **${nn}** — renamed on their record and their agent.`);
+                        report(`${label} was renamed to ${nn}, as you asked.`);
+                      } else {
+                        if (!teamTools.configure) { audit("⚙ Configuring is not available here."); return; }
+                        await teamTools.configure(botKey, { mission: d.mission, vision: d.vision, instructions: d.instructions, model: d.model });
+                        audit(`⚙ ${label}'s charter is updated — mission, vision and instructions now govern how they work.`);
+                        report(`${label}'s charter was updated as you set it.`);
+                      }
                     } else if (d.type === "recruit") {
                       const role = String(d.role || "").trim();
                       if (!role) { audit("⚙ The recruit needs a role — name the role and try again."); return; }

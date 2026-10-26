@@ -35,7 +35,8 @@ import { OfficeAdminTab } from '@/imagine-studio/components/office/OfficeAdmin';
 import { ExecPanel, type ExecTools } from '@/imagine-studio/components/office/ExecPanel';
 import { FLOORS, allFloors, createDynamicFloor, floorById, engineFor, setFloorTeamExtras, loadCustomBots, saveCustomBots, customBotToOfficeBot, customBotToRole, loadPromptOverrides, savePromptOverride, CHAIRMAN_PROMPT, ceoPrompt, CUSTOM_TINTS, type CustomBot, type FloorDef } from '@/imagine-studio/lib/floors';
 import { runOutput } from '@/imagine-studio/lib/shiftEngine';
-import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, retiredAgentIds, setPersonnelPrompt, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
+import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, renamePerson, retiredAgentIds, setPersonnelPrompt, withCharter, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
+import { officeAdmin } from '@/imagine-studio/components/office/OfficeAdmin';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
@@ -647,10 +648,15 @@ const FIELD_LABEL =
 const GRADIENT_BUTTON =
   "rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 disabled:shadow-none";
 
-function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole, docFloor }: {
+function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole, docFloor, teamBots, onRename, onConfigure }: {
   bot: OfficeBot; link: BotLink; agents: any[]; signedIn: boolean; working: boolean;
   onOpenConsole: () => void;
   docFloor?: { floorKey: string; floorId: number; company: string } | null;
+  /** Conversational rename/configure, resolved against the floor's
+   * people (this bot, its teammates, the Manager). */
+  teamBots?: OfficeBot[];
+  onRename?: (botKey: string, name: string) => Promise<void>;
+  onConfigure?: (botKey: string, cfg: { mission?: string; vision?: string; instructions?: string; model?: string }) => Promise<void>;
 }) {
   const agentId = link.agentId;
   const linkedAgent = agents.find((a) => a.id === agentId);
@@ -750,6 +756,25 @@ function OfficeAgentPanel({ bot, link, agents, signedIn, working, onOpenConsole,
                   });
                   audit(documentDelivery(doc));
                   report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                } else if (d.type === 'rename' || d.type === 'configure') {
+                  const want = String(d.agent || '').trim().toLowerCase();
+                  const target = (!want || want === 'yourself' || want === bot.name.toLowerCase())
+                    ? bot
+                    : (teamBots || []).find((b) => b.name.toLowerCase() === want);
+                  if (!target) { audit(`⚙ Nobody named "${String(d.agent || '')}" is on this floor.`); return; }
+                  if (d.type === 'rename') {
+                    const nn = String(d.name || '').trim();
+                    if (!nn) { audit('⚙ The rename needs the new name.'); return; }
+                    if (!onRename) { audit('⚙ Renaming is not available in this panel.'); return; }
+                    await onRename(target.key, nn);
+                    audit(`⚙ ${target.name} is now **${nn}** — renamed on their record and their agent.`);
+                    report(`${target.name} was renamed to ${nn}, as you asked.`);
+                  } else {
+                    if (!onConfigure) { audit('⚙ Configuring is not available in this panel.'); return; }
+                    await onConfigure(target.key, { mission: d.mission, vision: d.vision, instructions: d.instructions, model: d.model });
+                    audit(`⚙ ${target.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
+                    report(`${target.name}'s charter was updated as you set it.`);
+                  }
                 } else if (d.type === 'navigate') {
                   const path = String(d.path || '');
                   if (path.startsWith('/')) { audit(`⚙ Opening ${path}…`); window.location.href = path; }
@@ -1375,6 +1400,49 @@ export default function OfficePage() {
     setFloorTeamExtras(f.key, next.map(customBotToRole));
     if (signedIn) await ensureAgentForFloor(f, customBotToOfficeBot(cb));
   };
+  /* Rename + configure from the chats (conversational actions): the
+   * founder renames a person or rewrites their charter — mission,
+   * vision, standing instructions, model — by talking, never by
+   * digging through settings. Any seat, any floor. */
+  const renameBotOnFloor = async (f: FloorDef, botKey: string, newName: string) => {
+    const bot = botOnFloor(f, botKey);
+    if (!bot) throw new Error('That agent is not in the building.');
+    renamePerson(scopeFor(f, botKey), newName);
+    const customs = f.key === floor.key ? customBotsRef.current : loadCustomBots(f);
+    const ci = customs.findIndex((c) => c.key === botKey);
+    if (ci >= 0) {
+      const next = [...customs]; next[ci] = { ...next[ci], name: newName };
+      if (f.key === floor.key) { customBotsRef.current = next; setCustomBots(next); } else saveCustomBots(f, next);
+    }
+    const id = f.key === floor.key ? await ensureBotAgent(bot) : await ensureAgentForFloor(f, bot);
+    if (id) {
+      const list = await callAgentsApi({ action: 'list' }).catch(() => null);
+      const existing = (list?.agents || []).find((a: any) => a.id === id);
+      if (existing && existing.name !== newName) {
+        await callAgentsApi({ action: 'save', id, name: newName, description: existing.description ?? bot.duty, model: existing.model || 'llama-3.3-70b-versatile', system_prompt: existing.system_prompt || '', tools: existing.tools ?? [] });
+      }
+    }
+  };
+  const configureBotOnFloor = async (f: FloorDef, botKey: string, cfg: { mission?: string; vision?: string; instructions?: string; model?: string }) => {
+    const bot = botOnFloor(f, botKey);
+    if (!bot) throw new Error('That agent is not in the building.');
+    const id = f.key === floor.key ? await ensureBotAgent(bot) : await ensureAgentForFloor(f, bot);
+    if (!id) throw new Error(`Could not bring ${bot.name} online to configure — sign in and try again.`);
+    const list = await callAgentsApi({ action: 'list' }).catch(() => null);
+    const existing = (list?.agents || []).find((a: any) => a.id === id);
+    const newPrompt = withCharter(basePromptFor(f, bot), cfg);
+    await callAgentsApi({ action: 'save', id, name: existing?.name || personaName(scopeFor(f, botKey), bot.name), description: bot.duty, model: cfg.model || existing?.model || 'llama-3.3-70b-versatile', system_prompt: newPrompt, tools: existing?.tools ?? [] });
+    savePromptOverride(f, botKey, newPrompt);
+    setPersonnelPrompt(scopeFor(f, botKey), newPrompt);
+    const customs = f.key === floor.key ? customBotsRef.current : loadCustomBots(f);
+    const ci = customs.findIndex((c) => c.key === botKey);
+    if (ci >= 0) {
+      const next = [...customs]; next[ci] = { ...next[ci], prompt: newPrompt };
+      if (f.key === floor.key) { promptOverridesRef.current = { ...promptOverridesRef.current, [botKey]: newPrompt }; customBotsRef.current = next; setCustomBots(next); } else saveCustomBots(f, next);
+    } else if (f.key === floor.key) {
+      promptOverridesRef.current = { ...promptOverridesRef.current, [botKey]: newPrompt };
+    }
+  };
   const resetAgentRole = async (botKey: string, prompt: string) => {
     const bot = botKey === 'manager' ? floor.manager : allBotsRef.current.find((b) => b.key === botKey);
     if (!bot) throw new Error('That agent is not on this floor.');
@@ -1393,6 +1461,8 @@ export default function OfficePage() {
     bots: [...ALL_BOTS, managerBot].map((b) => ({ key: b.key, name: b.name, duty: b.duty })),
     create: createCustomAgent,
     reset: resetAgentRole,
+    rename: (botKey: string, name: string) => renameBotOnFloor(floor, botKey, name),
+    configure: (botKey: string, cfg: { mission?: string; vision?: string; instructions?: string; model?: string }) => configureBotOnFloor(floor, botKey, cfg),
     fire: (botKey: string) => firePerson(floor.key, botKey, 'Admin', 'removed by the admin'),
     resetAll: async (template: string): Promise<string> => {
       const targets = [...allBotsRef.current, floor.manager];
@@ -1477,6 +1547,11 @@ export default function OfficePage() {
   const execTools: ExecTools = {
     fire: (floorKey, botKey, by, reason) => firePerson(floorKey, botKey, by, reason),
     recruit: (f, x) => createCustomAgentOnFloor(f, x),
+    rename: (f, botKey, name) => renameBotOnFloor(f, botKey, name),
+    configure: (f, botKey, cfg) => configureBotOnFloor(f, botKey, cfg),
+    setFloorAccess: async (f, mode, passcode) => {
+      await officeAdmin(f.id === 100 ? 'office' : `office-${f.id}`, 'setAccess', passcode ? { mode, passcode } : { mode });
+    },
     chatWith: async (f, botKey, text) => {
       const bot = botOnFloor(f, botKey);
       if (!bot) throw new Error('That executive is not in the building.');
@@ -1740,7 +1815,7 @@ export default function OfficePage() {
           </div>
           {panelView === 'genius' ? (
             <div className="flex-1 min-h-0 min-w-0">
-              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} docFloor={{ floorKey: floor.key, floorId: floor.id, company: floor.company }} />
+              <OfficeAgentPanel bot={openBot} link={link} agents={agents} signedIn={signedIn} working={workingKeys.has(openBot.key)} onOpenConsole={() => setPanelView('console')} docFloor={{ floorKey: floor.key, floorId: floor.id, company: floor.company }} teamBots={[...allBotsRef.current, floor.manager]} onRename={(k, n) => renameBotOnFloor(floor, k, n)} onConfigure={(k, cfg) => configureBotOnFloor(floor, k, cfg)} />
             </div>
           ) : (
             <div className="flex-1 min-w-0 overflow-y-auto overflow-x-clip overscroll-contain touch-pan-y">

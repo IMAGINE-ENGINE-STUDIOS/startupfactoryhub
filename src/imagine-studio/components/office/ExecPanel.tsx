@@ -25,7 +25,7 @@ import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
 import { buildDocument, documentDelivery, DOC_TASK } from "@/imagine-studio/lib/docBuild";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
-import { FLOORS, companyFloors, engineFor, buildingRosterRows, floorTeamScopes, loadCustomBots, customBotToRole, type FloorDef } from "@/imagine-studio/lib/floors";
+import { FLOORS, allFloors, companyFloors, engineFor, buildingRosterRows, floorTeamScopes, loadCustomBots, customBotToRole, type FloorDef } from "@/imagine-studio/lib/floors";
 import {
   SURVIVAL_THRESHOLD, addDepartment, applyPersonnelToRoles, ceoScope, companyScore, directionText,
   generationOf, getChairmanAuthority, getDepartments, getDirection, getEvaluations, getReports,
@@ -38,6 +38,13 @@ export interface ExecTools {
   fire: (floorKey: string, botKey: string, by: string, reason: string) => Promise<{ queued: boolean }>;
   /** Recruit a new specialist onto a floor (conversational action). */
   recruit: (f: FloorDef, x: { name: string; duty: string; prompt: string }) => Promise<void>;
+  /** Rename any person in the building (conversational action). */
+  rename: (f: FloorDef, botKey: string, name: string) => Promise<void>;
+  /** Rewrite a person's charter — mission, vision, instructions,
+   * model (conversational action). */
+  configure: (f: FloorDef, botKey: string, cfg: { mission?: string; vision?: string; instructions?: string; model?: string }) => Promise<void>;
+  /** Set a floor's entry mode (conversational action). */
+  setFloorAccess: (f: FloorDef, mode: string, passcode?: string) => Promise<void>;
   chatWith: (f: FloorDef, botKey: string, text: string) => Promise<string>;
   /** Resolve an executive's call-agent id (VoiceCall v2 brain). */
   resolveAgentId: (f: FloorDef, botKey: string) => Promise<string | null>;
@@ -610,7 +617,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
           <div className="min-h-0 flex-1">
             <AgentChat
               name={myName}
-              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}\n\n[ACTION PROTOCOL — if my message clearly asks you to make work happen, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"dispatch","goal":"..."}]] to coordinate the company/building, [[ACT {"type":"run_task","agent":"<person or role name>","task":"..."}]] to assign someone directly, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it in LightPaper — never write it yourself here), [[ACT {"type":"recruit","role":"<role title>","brief":"<what they will own>","name":"<optional name>"}]] when I ask to bring on a new specialist, [[ACT {"type":"fire","agent":"<name>"}]] only when I explicitly say to remove someone. Confirm in words what you set in motion.]`)}
+              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}\n\n[ACTION PROTOCOL — if my message clearly asks you to make work happen, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"dispatch","goal":"..."}]] to coordinate the company/building, [[ACT {"type":"run_task","agent":"<person or role name>","task":"..."}]] to assign someone directly, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it in LightPaper — never write it yourself here), [[ACT {"type":"recruit","role":"<role title>","brief":"<what they will own>","name":"<optional name>"}]] when I ask to bring on a new specialist, [[ACT {"type":"rename","agent":"<name>","name":"<new name>"}]] when I ask to rename someone (omit "agent" to rename yourself), [[ACT {"type":"configure","agent":"<name>","mission":"...","vision":"...","instructions":"..."}]] when I set or change someone's mission, vision or standing instructions (omit "agent" for yourself; add "model" only if I name a model), [[ACT {"type":"set_direction","company":"<company>","vision":"...","mission":"...","goals":"..."}]] when I set a company's direction, [[ACT {"type":"create_floor","name":"<department name>"}]] when I ask to open a new department/floor, [[ACT {"type":"set_floor_access","mode":"public|passcode|private","passcode":"..."}]] when I change who can enter this floor, [[ACT {"type":"fire","agent":"<name>"}]] only when I explicitly say to remove someone. Confirm in words what you set in motion.]`)}
               onAction={(d, { audit, report }) => {
                 /* Conversational actions — the CEO/Chairman act from
                  * the chat/call: dispatch, direct tasks, documents,
@@ -676,6 +683,54 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                         ? `⚙ ${row.label} will be replaced at the next safe moment (queued by ${by}).`
                         : `⚙ ${row.label} has been replaced — a new ${row.role} takes over.`);
                       report(`${row.label} was removed as you asked.`);
+                    } else if (d.type === "rename" || d.type === "configure") {
+                      const want = String(d.agent || "").trim();
+                      const selfT = { f: execFloor, botKey: kind as string, label: by };
+                      let t: { f: FloorDef; botKey: string; label: string } | null = null;
+                      if (!want || /^(you|yourself|u)$/i.test(want)) t = selfT;
+                      else {
+                        const row = findRow(want);
+                        if (row) t = { f: allFloors().find((x) => x.key === row.floorKey) || execFloor, botKey: botKeyOf(row), label: row.label };
+                      }
+                      if (!t) { audit(`⚙ Nobody named "${want}" was found.`); return; }
+                      if (d.type === "rename") {
+                        const nn = String(d.name || "").trim();
+                        if (!nn) { audit("⚙ The rename needs the new name."); return; }
+                        await tools.rename(t.f, t.botKey, nn);
+                        audit(`⚙ ${t.label} is now **${nn}** — renamed on their record and their agent.`);
+                        report(`${t.label} was renamed to ${nn}, as you asked.`);
+                        logAction(by, "rename", `${by} renamed ${t.label} to ${nn} from the chat.`);
+                      } else {
+                        await tools.configure(t.f, t.botKey, { mission: d.mission, vision: d.vision, instructions: d.instructions, model: d.model });
+                        audit(`⚙ ${t.label}'s charter is updated — mission, vision and instructions now govern how they work.`);
+                        report(`${t.label}'s charter was updated as you set it.`);
+                        logAction(by, "configure", `${by} updated ${t.label}'s charter from the chat.`);
+                      }
+                    } else if (d.type === "set_direction") {
+                      const company = String(d.company || "").trim() || (isCeo ? execFloor.company : "");
+                      if (!company) { audit("⚙ Name the company whose direction to set."); return; }
+                      const patch: Record<string, string> = {};
+                      if (d.vision) patch.vision = String(d.vision);
+                      if (d.mission) patch.mission = String(d.mission);
+                      if (d.goals) patch.goals = String(d.goals);
+                      if (!Object.keys(patch).length) { audit("⚙ The direction needs a vision, mission or goals."); return; }
+                      setDirection(company, patch, by);
+                      audit(`⚙ Direction set for **${company}** — it now steers every briefing and plan in that company.`);
+                      report(`The direction for ${company} was updated as you set it.`);
+                    } else if (d.type === "create_floor") {
+                      const name = String(d.name || "").trim();
+                      if (!name) { audit("⚙ The new department needs a name."); return; }
+                      const company = String(d.company || "").trim() || execFloor.company;
+                      const dept = addDepartment(company, name, by);
+                      const fid = await tools.createFloorForDepartment(dept.id, name);
+                      audit(`⚙ **${name}** is open as Floor ${fid} for ${company} — it's in the BUILDING switcher, with its own Manager and team seats. Recruit onto it from here.`);
+                      report(`A new department and floor (${name}, Floor ${fid}) was created for ${company}.`);
+                    } else if (d.type === "set_floor_access") {
+                      const mode = String(d.mode || "").toLowerCase();
+                      if (!["public", "passcode", "private"].includes(mode)) { audit("⚙ Access mode must be public, passcode or private."); return; }
+                      await tools.setFloorAccess(execFloor, mode, d.passcode ? String(d.passcode) : undefined);
+                      audit(`⚙ Floor ${execFloor.id} is now **${mode}**${mode === "passcode" ? " — visitors need the passcode to come in" : mode === "private" ? " — only invited people get in" : " — anyone can walk in"}.`);
+                      report(`Floor ${execFloor.id} access was set to ${mode}.`);
                     } else if (d.type === "recruit") {
                       const role = String(d.role || "").trim();
                       if (!role) { audit("⚙ The recruit needs a role — ask for the role and try again."); return; }

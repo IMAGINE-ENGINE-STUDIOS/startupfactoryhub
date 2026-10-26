@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { Room, RoomEvent, Track, RemoteParticipant, RemoteTrack, RemoteAudioTrack } from 'livekit-client';
 import { Mic, MicOff, Loader2, LogOut, MessageSquare, Vote, X, Send, RotateCcw, RotateCw, MonitorUp, FileUp, ChevronLeft, ChevronRight, Square } from 'lucide-react';
 import { districtChat } from '@/lib/districtChatBus';
+import { withCharter } from '@/imagine-studio/lib/org';
 import { TheaterScreen, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { Maximize2 } from 'lucide-react';
@@ -766,6 +767,23 @@ export default function PlazaPage() {
                       });
                       audit(documentDelivery(doc));
                       report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                    } else if (d.type === 'rename' || d.type === 'configure') {
+                      if (!agentChar.agentId) { audit('⚙ This character is not linked to an agent yet.'); return; }
+                      const list = await callAgentsApi({ action: 'list' }).catch(() => null);
+                      const me = (list?.agents || []).find((a: any) => a.id === agentChar.agentId);
+                      if (!me) { audit('⚙ Could not load this agent to update it.'); return; }
+                      if (d.type === 'rename') {
+                        const nn = String(d.name || '').trim();
+                        if (!nn) { audit('⚙ The rename needs the new name.'); return; }
+                        await callAgentsApi({ action: 'save', id: me.id, name: nn, description: me.description ?? '', model: me.model || 'llama-3.3-70b-versatile', system_prompt: me.system_prompt || '', tools: me.tools ?? [] });
+                        audit(`⚙ Renamed to **${nn}** in the Agents roster — the plaza name tag refreshes when the level reloads.`);
+                        report(`The agent was renamed to ${nn}, as you asked.`);
+                      } else {
+                        const np = withCharter(me.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
+                        await callAgentsApi({ action: 'save', id: me.id, name: me.name, description: me.description ?? '', model: d.model || me.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: me.tools ?? [] });
+                        audit(`⚙ ${agentChar.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
+                        report(`${agentChar.name}'s charter was updated as you set it.`);
+                      }
                     } else if (d.type === 'navigate') {
                       const path = String(d.path || '');
                       if (path.startsWith('/')) { audit(`⚙ Opening ${path}…`); window.location.href = path; }

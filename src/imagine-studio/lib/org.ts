@@ -50,6 +50,10 @@ interface OrgDoc {
   direction: Record<string, CompanyDirection>;
   departments: Department[];
   personnel: Record<string, PersonnelRecord>;
+  /** Founder-chosen names per seat, pinned to the generation they were
+   * set in — a replacement (new generation) gets its own generated
+   * name, never the renamed predecessor's. */
+  nameOverrides: Record<string, { name: string; generation: number }>;
   perf: Record<string, PerfEntry[]>;
   execStats: Record<string, { plansOk: number; plansFallback: number; shiftsDone: number; shiftsHard: number; shiftsFailed: number }>;
   reports: ReportRecord[];
@@ -62,7 +66,7 @@ interface OrgDoc {
 }
 
 const ORG_KEY = "sfh:org:v1";
-const emptyDoc = (): OrgDoc => ({ direction: {}, departments: [], personnel: {}, perf: {}, execStats: {}, reports: [], evaluations: [], actions: [], pendingFirings: [], chairmanAuthority: true, warned: {} });
+const emptyDoc = (): OrgDoc => ({ direction: {}, departments: [], personnel: {}, nameOverrides: {}, perf: {}, execStats: {}, reports: [], evaluations: [], actions: [], pendingFirings: [], chairmanAuthority: true, warned: {} });
 
 let doc: OrgDoc = (() => {
   try {
@@ -271,7 +275,28 @@ const pickPersonaName = (scope: string, generation: number, taken: string[]): st
 };
 
 export const getPersonnel = (scope: string): PersonnelRecord | null => doc.personnel[scope] || null;
-export const personaName = (scope: string, fallback: string): string => doc.personnel[scope]?.personaName || fallback;
+export const personaName = (scope: string, fallback: string): string => {
+  const rec = doc.personnel[scope];
+  if (rec) return rec.personaName;
+  const ov = doc.nameOverrides?.[scope];
+  if (ov && ov.generation === 1) return ov.name;
+  return fallback;
+};
+
+/** Rename the person currently holding a seat (founder direction,
+ * usually spoken in a chat). Updates the personnel record when one
+ * exists and pins a generation-scoped override otherwise, so the new
+ * name shows everywhere personaName is read without disturbing the
+ * seat's prompt resolution. */
+export const renamePerson = (scope: string, name: string) => {
+  const clean = name.trim().slice(0, 60);
+  if (!clean) return;
+  mutate((d) => {
+    const gen = d.personnel[scope]?.generation || 1;
+    if (d.personnel[scope]) d.personnel[scope] = { ...d.personnel[scope], personaName: clean };
+    d.nameOverrides = { ...(d.nameOverrides || {}), [scope]: { name: clean, generation: gen } };
+  });
+};
 export const generationOf = (scope: string): number => doc.personnel[scope]?.generation || 1;
 
 /** Swap a team's names/prompts for the CURRENT generation of each seat:
@@ -279,7 +304,7 @@ export const generationOf = (scope: string): number => doc.personnel[scope]?.gen
 export function applyPersonnelToRoles<T extends { key: string; name: string; prompt: string }>(floorKey: string, roles: T[]): T[] {
   return roles.map((r) => {
     const rec = doc.personnel[agentScope(floorKey, r.key)];
-    return rec ? { ...r, name: rec.personaName, prompt: rec.prompt } : r;
+    return rec ? { ...r, name: rec.personaName, prompt: rec.prompt } : { ...r, name: personaName(agentScope(floorKey, r.key), r.name) };
   });
 }
 export const retiredAgentIds = (scope: string): string[] => doc.personnel[scope]?.retiredAgentIds || [];
@@ -291,6 +316,23 @@ export const setPersonnelPrompt = (scope: string, prompt: string) => {
   if (!doc.personnel[scope]) return;
   mutate((d) => { if (d.personnel[scope]) d.personnel[scope] = { ...d.personnel[scope], prompt }; });
 };
+
+/** The founder-set charter block inside an agent's prompt: mission,
+ * vision and standing instructions, set by talking to the agent (or
+ * its Manager/executives) instead of editing settings by hand.
+ * withCharter replaces any previous charter block, so re-setting a
+ * mission never stacks duplicates. */
+export interface AgentCharter { mission?: string; vision?: string; instructions?: string }
+const CHARTER_MARKER = "\n\n## Your charter (set by the founder)";
+export function withCharter(prompt: string, charter: AgentCharter): string {
+  const lines: string[] = [];
+  if (charter.mission?.trim()) lines.push(`Mission: ${charter.mission.trim()}`);
+  if (charter.vision?.trim()) lines.push(`Vision: ${charter.vision.trim()}`);
+  if (charter.instructions?.trim()) lines.push(`Standing instructions: ${charter.instructions.trim()}`);
+  if (!lines.length) return prompt || ""; // no charter fields — leave the prompt (and any existing charter) untouched
+  const base = (prompt || "").split(CHARTER_MARKER)[0].trimEnd();
+  return `${base}${CHARTER_MARKER}\n${lines.join("\n")}\nLet this charter govern how you approach every task.`;
+}
 
 export function replacementPrompt(basePrompt: string, oldName: string, newName: string, roleLabel: string, company: string, generation: number, reason: string): string {
   let p = (basePrompt || "").split("\n\nNEW APPOINTMENT:")[0];

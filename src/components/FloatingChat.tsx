@@ -21,10 +21,11 @@ import { VoiceCallPill } from '@/components/voice/VoiceCallPill';
 import { LiveCaptions } from '@/components/voice/LiveCaptions';
 import { DirectiveFilter, type ActDirective } from '@/lib/voice/adapters';
 import { buildDocument, documentDelivery, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
+import { withCharter } from '@/imagine-studio/lib/org';
 
 /** Conversational actions for the Genius bubble (ACTIONS-SPEC):
  * appended to the Genius system (typed and voice). */
-const BUBBLE_ACTIONS = `\n\nACTIONS: You can make things happen directly from this conversation. When the user clearly asks you to do a job, assign a task to one of their agents, build a report or document, or open a page, emit ONE directive on its own line in this exact format: [[ACT {"type":"run_task","agent":"<agent name>","task":"what to do"}]] — the platform executes it immediately. Types: run_task {agent, task} (one of the user's agents does the job with its skills), build_document {title, brief} (a report or document — the Writer builds it in LightPaper in the background and it is delivered right here in this chat when ready; NEVER write a requested document yourself in the chat — always route it to build_document), navigate {path} (open a page of the app). After the directive, keep talking naturally: confirm what you set in motion in one sentence. NEVER show or explain a directive, and never emit one for something the user did not clearly ask to happen.`;
+const BUBBLE_ACTIONS = `\n\nACTIONS: You can make things happen directly from this conversation. When the user clearly asks you to do a job, assign a task to one of their agents, build a report or document, or open a page, emit ONE directive on its own line in this exact format: [[ACT {"type":"run_task","agent":"<agent name>","task":"what to do"}]] — the platform executes it immediately. Types: run_task {agent, task} (one of the user's agents does the job with its skills), build_document {title, brief} (a report or document — the Writer builds it in LightPaper in the background and it is delivered right here in this chat when ready; NEVER write a requested document yourself in the chat — always route it to build_document), rename {agent, name} (rename one of the user's agents), configure {agent, mission, vision, instructions} (set or change an agent's mission, vision or standing instructions; add "model" only if the user names a model), navigate {path} (open a page of the app). After the directive, keep talking naturally: confirm what you set in motion in one sentence. NEVER show or explain a directive, and never emit one for something the user did not clearly ask to happen.`;
 import { AgentBrain, GeniusBrain } from '@/lib/voice/adapters';
 import type { Turn } from '@/lib/voice/engine';
 import {
@@ -374,6 +375,25 @@ export default function FloatingChat() {
           });
           deliverBubbleAudit(documentDelivery(doc));
           report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+        } else if (d.type === 'rename' || d.type === 'configure') {
+          const data = await callAgents({ action: 'list' });
+          const agents = Array.isArray((data as any)?.agents) ? (data as any).agents : [];
+          const want = String(d.agent || '').toLowerCase();
+          const target = agents.find((a: any) => String(a?.name || '').toLowerCase() === want)
+            || agents.find((a: any) => String(a?.name || '').toLowerCase().includes(want));
+          if (!target) { deliverBubbleAudit(`⚙ No agent named "${String(d.agent || '')}" was found in your Agents.`); return; }
+          if (d.type === 'rename') {
+            const nn = String(d.name || '').trim();
+            if (!nn) { deliverBubbleAudit('⚙ The rename needs the new name.'); return; }
+            await callAgents({ action: 'save', id: target.id, name: nn, description: target.description ?? '', model: target.model || 'llama-3.3-70b-versatile', system_prompt: target.system_prompt || '', tools: target.tools ?? [] });
+            deliverBubbleAudit(`⚙ ${target.name} is now **${nn}** in your Agents roster.`);
+            report(`${target.name} was renamed to ${nn}, as you asked.`);
+          } else {
+            const np = withCharter(target.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
+            await callAgents({ action: 'save', id: target.id, name: target.name, description: target.description ?? '', model: d.model || target.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: target.tools ?? [] });
+            deliverBubbleAudit(`⚙ ${target.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
+            report(`${target.name}'s charter was updated as you set it.`);
+          }
         } else {
           deliverBubbleAudit(`⚙ "${d.type}" runs from the office — the Manager and the executive chairs own that from their chats.`);
         }
