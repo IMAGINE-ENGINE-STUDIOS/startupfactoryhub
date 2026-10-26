@@ -12,6 +12,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
+import { LiveCaptions } from "@/components/voice/LiveCaptions";
 import { useVoiceCall, warmVoice } from "@/lib/voice/useVoiceCall";
 import { AgentBrain } from "@/lib/voice/adapters";
 import { getAIHeaders } from "@/lib/aiAuth";
@@ -176,6 +177,7 @@ export function AgentChat({
         </div>
       </div>
       <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        <LiveCaptions surfaceId={persistKey || `agentchat:${name}`} name={name} />
         {voice.talkOn && voice.statusText && (
           <div className="flex items-center gap-2 pb-2 text-[11px] font-medium text-emerald-500" role="status">
             <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />

@@ -134,12 +134,24 @@ export interface StartCallOptions {
   silenceMs?: number;
 }
 
+/** Live text of the running call: finalized turns so far plus the
+ * assistant's in-flight streaming text. A SEPARATE channel from the
+ * call view — captions subscribe here, and nothing here can touch
+ * the call's timing (the engine fires it without awaiting). */
+export interface LiveText {
+  turns: Turn[];
+  assistantText: string;
+}
+
 class VoiceSession {
   private engine: VoiceCallEngine | null = null;
   private mic: RecorderMic | null = null;
   private roleText = "";
   private view: CallView = IDLE_VIEW;
   private listeners = new Set<(v: CallView) => void>();
+  private live: LiveText = { turns: [], assistantText: "" };
+  private liveListeners = new Set<(t: LiveText) => void>();
+  private liveTimer: ReturnType<typeof setTimeout> | null = null;
 
   get snapshot(): CallView {
     return this.view;
@@ -156,6 +168,32 @@ class VoiceSession {
     for (const fn of Array.from(this.listeners)) {
       try { fn(this.view); } catch { /* a view's problem, not the call's */ }
     }
+  }
+
+  get liveSnapshot(): LiveText {
+    return this.live;
+  }
+
+  subscribeLive(fn: (t: LiveText) => void): () => void {
+    this.liveListeners.add(fn);
+    fn(this.live);
+    return () => { this.liveListeners.delete(fn); };
+  }
+
+  private emitLive() {
+    for (const fn of Array.from(this.liveListeners)) {
+      try { fn(this.live); } catch { /* a view's problem, not the call's */ }
+    }
+  }
+
+  /** Streaming deltas arrive per token; captions re-render at most
+   * every 120ms regardless — bounded cost, invisible to the call. */
+  private emitLiveThrottled() {
+    if (this.liveTimer) return;
+    this.liveTimer = setTimeout(() => {
+      this.liveTimer = null;
+      this.emitLive();
+    }, 120);
   }
 
   /** Start the (single) call. Throws a mic error the caller can show.
@@ -179,11 +217,23 @@ class VoiceSession {
           this.emit({ state: s, loadPct, statusText: callStatusText(s, loadPct, this.roleText) });
           if (s === "ended" || s === "error") this.cleanup();
         },
-        onTurn: () => {},
+        onTurn: (turn) => {
+          this.live = {
+            turns: [...this.live.turns, turn],
+            assistantText: turn.role === "assistant" ? "" : this.live.assistantText,
+          };
+          this.emitLive();
+        },
+        onAssistantDelta: (fullText) => {
+          this.live = { turns: this.live.turns, assistantText: fullText };
+          this.emitLiveThrottled();
+        },
         onEnd: (log) => { opts.deliver(log); },
       },
     );
     this.engine = engine;
+    this.live = { turns: [], assistantText: "" };
+    this.emitLive();
     this.emit({ active: true, surfaceId: opts.surfaceId, roleText: opts.roleText, state: "loading", loadPct: 0, statusText: callStatusText("loading", 0, opts.roleText) });
     void engine.start();
     return true;
@@ -201,6 +251,9 @@ class VoiceSession {
     this.engine = null;
     this.mic?.release();
     this.mic = null;
+    if (this.liveTimer) { clearTimeout(this.liveTimer); this.liveTimer = null; }
+    this.live = { turns: [], assistantText: "" };
+    this.emitLive();
     this.view = IDLE_VIEW;
     for (const fn of Array.from(this.listeners)) {
       try { fn(this.view); } catch { /* ignore */ }

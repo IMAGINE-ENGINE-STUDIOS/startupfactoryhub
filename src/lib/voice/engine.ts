@@ -84,6 +84,13 @@ export interface EngineEvents {
   onState(state: CallState, detail?: string): void;
   onTurn(turn: Turn): void;
   onEnd(log: Turn[]): void;
+  /** OPTIONAL live-text tap: the assistant's reply text as it streams
+   * (cumulative). Pure notification — the engine never awaits it and
+   * ignores its errors, so a captions view can ride along with ZERO
+   * effect on the talking model's performance (founder requirement
+   * 2026-10-26). The record of the conversation remains the turn
+   * log; this is only a view. */
+  onAssistantDelta?: (fullText: string) => void;
 }
 
 export interface EngineOptions {
@@ -303,6 +310,9 @@ export class VoiceCallEngine {
       try {
         fullText = await this.adapters.brain.reply(history, userText, (cumulative) => {
           for (const s of pump.feed(cumulative)) enqueueSpeak(s);
+          if (this.events.onAssistantDelta) {
+            try { this.events.onAssistantDelta(cumulative); } catch { /* a view never breaks the call */ }
+          }
         }, rac.signal);
       } catch (e) {
         brainFailed = e;

@@ -18,6 +18,7 @@ import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, Ba
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
 import { useVoiceCall, warmVoice } from '@/lib/voice/useVoiceCall';
 import { VoiceCallPill } from '@/components/voice/VoiceCallPill';
+import { LiveCaptions } from '@/components/voice/LiveCaptions';
 import { AgentBrain, GeniusBrain } from '@/lib/voice/adapters';
 import type { Turn } from '@/lib/voice/engine';
 import {
@@ -1918,6 +1919,7 @@ You can help with:
                       </p>
                     ) : (
                       <>
+                      <LiveCaptions surfaceId="genius-bubble" name="Genius" />
                       {geniusVoice.talkOn && (
                         <div className="flex items-center gap-2 px-1 pb-2 text-[11px] font-medium text-emerald-500" role="status">
                           <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
