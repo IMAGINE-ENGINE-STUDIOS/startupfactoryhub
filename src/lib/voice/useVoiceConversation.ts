@@ -46,6 +46,15 @@ export function useVoiceConversation(opts: {
   /** True while the agent is generating a reply. */
   busy: boolean;
   onUserText: (text: string) => void;
+  /** Each completed turn of the call (user utterance, then the
+   * agent's full reply), as it happens — hosts keep these as the
+   * call's context while the conversation is live. */
+  onTurn?: (turn: { role: "user" | "assistant"; content: string }) => void;
+  /** The call ended: the full transcript, in order. Hosts that run
+   * call mode (no text shown during the call) commit the messages
+   * to the chat here — "transcribe all messages when the
+   * conversation ends" (founder directive 2026-10-26). */
+  onCallEnd?: (turns: { role: "user" | "assistant"; content: string }[]) => void;
 }) {
   const [talkOn, setTalkOn] = useState(false);
   const [talkState, setTalkState] = useState<TalkState>("off");
@@ -65,6 +74,38 @@ export function useVoiceConversation(opts: {
   const reopenedRef = useRef<Set<string>>(new Set());
   const speechQueueRef = useRef<string[]>([]);
   const pumpingRef = useRef(false);
+  /* Call transcript: turns are buffered, never displayed mid-call.
+   * pendingUser marks a user turn still waiting for its reply, so
+   * the two reply sources (stream tap, rendered state) can never
+   * record the same assistant turn twice. */
+  const turnsRef = useRef<{ role: "user" | "assistant"; content: string }[]>([]);
+  const pendingUserRef = useRef(false);
+  const lastFlushedIdRef = useRef<string | null>(null);
+  /* Interrupt bookkeeping: the stream id currently flowing, and the
+   * one the user cut off — its remaining sentences are never fed. */
+  const activeStreamIdRef = useRef<string | null>(null);
+  const mutedStreamIdRef = useRef<string | null>(null);
+
+  const recordUserTurn = (text: string) => {
+    const turn = { role: "user" as const, content: text };
+    turnsRef.current = [...turnsRef.current, turn];
+    pendingUserRef.current = true;
+    optsRef.current.onTurn?.(turn);
+  };
+  const recordAssistantTurn = (text: string) => {
+    if (!pendingUserRef.current) return;
+    pendingUserRef.current = false;
+    const turn = { role: "assistant" as const, content: text };
+    turnsRef.current = [...turnsRef.current, turn];
+    optsRef.current.onTurn?.(turn);
+  };
+  const flushCallTranscript = () => {
+    if (!turnsRef.current.length) return;
+    const turns = turnsRef.current;
+    turnsRef.current = [];
+    pendingUserRef.current = false;
+    optsRef.current.onCallEnd?.(turns);
+  };
   const personaRef = useRef<VoicePersona>(opts.persona || personaFor(opts.roleText));
   const optsRef = useRef(opts);
   optsRef.current = opts;
@@ -82,6 +123,7 @@ export function useVoiceConversation(opts: {
   const shutdown = useCallback(() => {
     genRef.current++;
     speechQueueRef.current = [];
+    flushCallTranscript();
     recRef.current?.cancel();
     recRef.current = null;
     MicRecorder.release(streamRef.current);
@@ -143,6 +185,7 @@ export function useVoiceConversation(opts: {
       failCountRef.current = 0;
       if (text) {
         setTalkState("waiting");
+        recordUserTurn(text);
         optsRef.current.onUserText(text);
       } else {
         void listen(gen); // heard nothing — keep the conversation open
@@ -182,9 +225,20 @@ export function useVoiceConversation(opts: {
       pumpingRef.current = false;
     }
     if (gen !== genRef.current) return;
+    /* Stream-tap turns (call mode: nothing renders to state, so the
+     * lastAssistant bookkeeping never moves) reopen from the flushed
+     * stream id instead. */
+    const fid = lastFlushedIdRef.current;
+    if (fid && flushedRef.current.has(fid) && !reopenedRef.current.has(fid)) {
+      if (busyRef.current) { setTalkState("waiting"); return; }
+      reopenedRef.current.add(fid);
+      void listen(gen);
+      return;
+    }
     const la = optsRef.current.lastAssistant;
     if (la && flushedRef.current.has(la.id) && !busyRef.current && !reopenedRef.current.has(la.id)) {
       reopenedRef.current.add(la.id);
+      recordAssistantTurn(la.text);
       void listen(gen);
     } else if (busyRef.current) {
       setTalkState("waiting");
@@ -199,10 +253,11 @@ export function useVoiceConversation(opts: {
    * (the direct stream tap and the host's rendered state) can feed
    * the same reply without ever double-speaking. */
   const feedSpeech = useCallback((id: string, text: string, done: boolean) => {
+    if (id === mutedStreamIdRef.current) return; // user cut this one off
     spokenTextRef.current.set(id, text);
     if (!spokenCharsRef.current.has(id)) spokenCharsRef.current.set(id, 0);
     const from = spokenCharsRef.current.get(id)!;
-    if (done && text.length <= from) { flushedRef.current.add(id); void pumpSpeech(); return; }
+    if (done && text.length <= from) { flushedRef.current.add(id); lastFlushedIdRef.current = id; void pumpSpeech(); return; }
     const tail = text.slice(from);
     if (!tail) return;
     const ready: string[] = [];
@@ -216,6 +271,7 @@ export function useVoiceConversation(opts: {
       const rest = tail.slice(consumed);
       if (rest.trim()) { ready.push(rest); consumed = tail.length; }
       flushedRef.current.add(id);
+      lastFlushedIdRef.current = id;
     }
     if (!ready.length) return;
     spokenCharsRef.current.set(id, from + consumed);
@@ -228,6 +284,18 @@ export function useVoiceConversation(opts: {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* When generation ends (busy falls), re-run the pump: in call
+   * mode nothing else retriggers it, and its reopen check was
+   * waiting for exactly this edge. */
+  const prevBusyRef = useRef(opts.busy);
+  useEffect(() => {
+    const was = prevBusyRef.current;
+    prevBusyRef.current = opts.busy;
+    if (!talkOn || !was || opts.busy) return;
+    void pumpSpeech();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talkOn, opts.busy]);
 
   /* Source 1 — the host's rendered state (works for every surface,
    * including non-streaming agent runs). Guard: if another feed key
@@ -255,7 +323,9 @@ export function useVoiceConversation(opts: {
   useEffect(() => {
     if (!talkOn) return;
     return subscribeVoiceStream((ev) => {
+      activeStreamIdRef.current = ev.id;
       if (!ev.done && ev.text === "") { setTalkState("waiting"); return; }
+      if (ev.done) recordAssistantTurn(ev.text);
       feedSpeech(ev.id, ev.text, ev.done);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -268,6 +338,7 @@ export function useVoiceConversation(opts: {
     if (talkOn && talkState === "speaking") {
       stopSpeaking();
       speechQueueRef.current = [];
+      if (activeStreamIdRef.current) mutedStreamIdRef.current = activeStreamIdRef.current;
       const la = optsRef.current.lastAssistant;
       if (la) {
         /* The unspoken remainder of this reply stays unspoken — she

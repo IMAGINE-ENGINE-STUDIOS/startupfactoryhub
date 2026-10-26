@@ -273,6 +273,15 @@ export default function FloatingChat() {
    * goes through a ref because sendAiMessage is declared further down. */
   const aiSendRef = useRef<(t: string) => void>(() => {});
   useEffect(() => { aiSendRef.current = (t) => { void sendAiMessage(t); }; });
+  const voiceSendRef = useRef<(t: string) => void>(() => {});
+  useEffect(() => { voiceSendRef.current = (t) => { void sendVoiceMessage(t); }; });
+  const aiMessagesRef = useRef<AIMessage[]>([]);
+  useEffect(() => { aiMessagesRef.current = aiMessages; });
+  /* Turns of the live voice call — held as context only, NEVER
+   * rendered while the call runs; committed to the chat when the
+   * call ends (founder directive 2026-10-26: no text during the
+   * conversation, transcribe all messages afterwards). */
+  const callContextRef = useRef<{ role: string; content: string }[]>([]);
   const geniusLastAssistant = (() => {
     for (let i = aiMessages.length - 1; i >= 0; i--) if (aiMessages[i].role === 'assistant') return { id: `g${i}`, text: aiMessages[i].content };
     return null;
@@ -281,7 +290,20 @@ export default function FloatingChat() {
     roleText: 'Genius',
     lastAssistant: geniusLastAssistant,
     busy: isAiLoading,
-    onUserText: (t) => aiSendRef.current(t),
+    onUserText: (t) => voiceSendRef.current(t),
+    onTurn: (turn) => { callContextRef.current = [...callContextRef.current, turn]; },
+    onCallEnd: (turns) => {
+      if (!turns.length) { callContextRef.current = []; return; }
+      const merged = [...aiMessagesRef.current, ...turns] as AIMessage[];
+      setAiMessages(merged);
+      const firstUser = turns.find(t => t.role === 'user');
+      saveChatLog.mutate({
+        title: (firstUser?.content || 'Voice conversation').slice(0, 60),
+        messages: merged,
+        tool_used: 'voice-call',
+      });
+      callContextRef.current = [];
+    },
   });
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
     typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
@@ -1231,6 +1253,88 @@ You can help with:
        * then Talk reopens the mic. */
       publishVoiceStream(fullText.replace(/<!--NAV:[^>]+-->\n?/, ''), true);
       setIsAiLoading(false);
+    }
+  };
+
+  /* CALL MODE (founder directive 2026-10-26): while Talk is on, the
+   * conversation is voice-only — nothing is written to the chat, no
+   * bubbles render, no per-delta state churn (that render storm was
+   * also part of why the page froze). The reply streams straight to
+   * the voice bus and is spoken; the turns live in callContextRef as
+   * context, and the hook hands the full transcript back through
+   * onCallEnd when the call ends — only then do the messages appear
+   * in the chat, all at once. */
+  const sendVoiceMessage = async (text: string) => {
+    if (!user) {
+      toast({ title: "Sign In Required", description: "Please sign in to use Genius AI" });
+      return;
+    }
+    setIsAiLoading(true);
+    const streamId = `voice-${Date.now()}`;
+    beginVoiceStream(streamId);
+    let fullText = '';
+    try {
+      const history = [...aiMessagesRef.current, ...callContextRef.current]
+        .map(m => ({ role: m.role, content: m.content }));
+      const messagesPayload = [...history, { role: 'user' as const, content: text }];
+      const knowledgeBlock =
+        knowledgeEnabled && attachedKnowledge.length > 0
+          ? `\n\nATTACHED KNOWLEDGE BASE (use as context, cite when relevant):\n${attachedKnowledge
+              .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
+              .join('\n\n')}`
+          : '';
+      const voiceBlock = `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`;
+      const systemOverride = getSystemOverride() + knowledgeBlock + voiceBlock;
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
+        {
+          method: "POST",
+          headers: await getAIHeaders(),
+          body: JSON.stringify({ messages: messagesPayload, systemOverride, language: getAppLanguage() }),
+        }
+      );
+      if (resp.status === 429) { toast({ title: "Rate Limit", description: "Too many requests. Please wait.", variant: "destructive" }); return; }
+      if (resp.status === 402) { toast({ title: "Credits Exhausted", description: "Please add credits to continue.", variant: "destructive" }); return; }
+      if (!resp.ok || !resp.body) throw new Error("Stream failed");
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "" || !line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
+            if (c) { fullText += c; publishVoiceStream(fullText, false); }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+      for (const raw of textBuffer.split("\n")) {
+        if (!raw || raw.startsWith(":") || raw.trim() === "" || !raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
+          if (c) { fullText += c; publishVoiceStream(fullText, false); }
+        } catch {}
+      }
+    } catch (error: any) {
+      console.error('Voice call error:', error);
+      toast({ title: "Error", description: error.message || "Failed to get AI response.", variant: "destructive" });
+    } finally {
+      setIsAiLoading(false);
+      publishVoiceStream(fullText.replace(/<!--NAV:[^>]+-->\n?/, ''), true);
     }
   };
 
