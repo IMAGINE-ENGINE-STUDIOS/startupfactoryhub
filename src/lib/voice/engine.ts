@@ -182,17 +182,21 @@ export class VoiceCallEngine {
     this.callAbort = new AbortController();
     this.setState("loading");
     try {
-      const loads: Array<(p: (pct: number) => void) => Promise<void>> = [
-        (p) => this.adapters.stt.load(p),
-        (p) => this.adapters.tts.load(p),
-      ];
+      /* Only the EAR gates the call (founder direction 2026-10-26:
+       * keep the conversation off the critical path of everything
+       * else). The voice model loads in the background — the first
+       * reply's speech simply awaits it inside the TTS adapter, and
+       * a TTS failure degrades there, never kills the call. */
       const pcts = [0, 0];
-      await Promise.all(loads.map((load, i) => load((pct) => {
+      const report = (i: number) => (pct: number) => {
         pcts[i] = Math.max(pcts[i], pct);
         if (gen === this.runId && this._state === "loading") {
           this.setState("loading", String(Math.min(99, Math.round((pcts[0] + pcts[1]) / 2))));
         }
-      })));
+      };
+      const ttsLoad = this.adapters.tts.load(report(1)).catch(() => { /* degraded inside the adapter */ });
+      await this.adapters.stt.load(report(0));
+      void ttsLoad;
     } catch (e) {
       if (gen !== this.runId) return;
       this.setState("error", e instanceof Error ? e.message : "Voice models failed to load.");

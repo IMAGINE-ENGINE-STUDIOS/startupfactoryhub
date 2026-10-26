@@ -109,22 +109,44 @@ export class WorkerTts implements TtsPort {
     return KOKORO_VOICE_FOR_PERSONA[this.persona.id] || "af_heart";
   }
 
-  async load(): Promise<void> {
-    if (!this.neural) { this.mode = "thread"; return; }
-    if (this.mode !== "thread" && (await speechClient.available())) {
-      try {
-        await speechClient.call("tts.load", {}, { timeoutMs: 120_000 });
-        this.mode = "worker";
-        return;
-      } catch { this.mode = "thread"; }
+  private readyPromise: Promise<void> | null = null;
+
+  /** Idempotent and NEVER throws: a voice-model failure degrades to
+   * the in-thread path (and ultimately the device voice), it does
+   * not kill the call. speak()/prepare() await readiness here. */
+  load(): Promise<void> {
+    if (!this.readyPromise) this.readyPromise = this.doLoad();
+    return this.readyPromise;
+  }
+
+  private async doLoad(): Promise<void> {
+    try {
+      if (!this.neural) { this.mode = "thread"; return; }
+      if (this.mode !== "thread" && (await speechClient.available())) {
+        try {
+          await speechClient.call("tts.load", {}, { timeoutMs: 120_000 });
+          this.mode = "worker";
+          return;
+        } catch { this.mode = "thread"; }
+      }
+      this.mode = "thread";
+      await loadKokoro();
+    } catch {
+      this.mode = "thread";
     }
-    this.mode = "thread";
-    await loadKokoro();
   }
 
   prepare(text: string): void {
     const clean = stripForSpeech(text);
     if (!clean || !this.neural) return;
+    if (this.mode === "unknown") {
+      // Voice model still loading in the background: hedge in-thread
+      // (tts.ts has its own pipeline cache; speak() uses whichever
+      // path won the load race).
+      void this.load();
+      prepareSpeech(text, this.persona);
+      return;
+    }
     if (this.mode === "worker") {
       if (this.prepared.has(clean)) return;
       const p = speechClient.call(
@@ -146,6 +168,7 @@ export class WorkerTts implements TtsPort {
   async speak(text: string, signal: AbortSignal): Promise<void> {
     const clean = stripForSpeech(text);
     if (!clean) return;
+    await this.load(); // the engine starts listening before this resolves
     if (this.neural && this.mode === "worker") {
       try {
         const p = this.prepared.get(clean)

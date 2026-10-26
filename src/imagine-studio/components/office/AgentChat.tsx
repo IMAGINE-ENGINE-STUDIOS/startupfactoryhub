@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
-import { useVoiceCall } from "@/lib/voice/useVoiceCall";
+import { useVoiceCall, warmVoice } from "@/lib/voice/useVoiceCall";
 import { AgentBrain } from "@/lib/voice/adapters";
 import { getAIHeaders } from "@/lib/aiAuth";
 import type { Turn } from "@/lib/voice/engine";
@@ -131,6 +131,7 @@ export function AgentChat({
     voiceBrainRef.current = null;
   }
   const voice = useVoiceCall({
+    surfaceId: persistKey || `agentchat:${name}`,
     roleText: voiceRoleText || name,
     brain: busy ? null : (voiceBrainRef.current?.brain ?? null),
     unavailableReason: busy
@@ -138,7 +139,19 @@ export function AgentChat({
       : `${name} isn't linked to an agent yet, so there's no one to call.`,
     onEnd: (turns) => {
       if (!turns.length) return;
-      setMsgs((m) => [...m, ...turns.map((t): ChatMsg => ({ role: t.role, content: t.content }))]);
+      const mapped = turns.map((t): ChatMsg => ({ role: t.role, content: t.content }));
+      setMsgs((m) => [...m, ...mapped]);
+      /* The call outlives this panel (session-owned): if the panel
+       * was closed mid-call, setMsgs is a no-op — so ALSO write the
+       * transcript straight into the persisted thread, and it is
+       * simply there when the chat reopens. */
+      if (persistKey) {
+        try {
+          const cur = JSON.parse(localStorage.getItem(persistKey) || "[]");
+          const base = Array.isArray(cur) ? cur : [];
+          localStorage.setItem(persistKey, JSON.stringify([...base, ...mapped].slice(-60)));
+        } catch { /* persistence is best-effort */ }
+      }
     },
   });
 
@@ -182,6 +195,8 @@ export function AgentChat({
               <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} shrink-0 px-4 py-2.5 disabled:opacity-50`} aria-label={`Send to ${name}`}><Send className="h-4 w-4" /></button>
               <button
                 onClick={voice.toggleTalk}
+                onPointerEnter={() => warmVoice()}
+                onFocus={() => warmVoice()}
                 title={voice.talkOn ? `End the voice conversation with ${name}` : `Talk with ${name}: hands-free voice conversation — replies are spoken in ${name}'s role voice`}
                 aria-label={voice.talkOn ? "End voice conversation" : `Start voice conversation with ${name}`}
                 className={`shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full border transition ${voice.talkOn ? "border-emerald-400 bg-emerald-500/15 text-emerald-500 animate-pulse" : "border-border/60 text-muted-foreground hover:text-foreground hover:border-emerald-400/60"}`}

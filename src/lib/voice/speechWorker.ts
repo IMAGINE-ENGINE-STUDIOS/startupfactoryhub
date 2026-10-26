@@ -24,7 +24,13 @@ import { KokoroTTS } from "kokoro-js";
 const WHISPER_HOST =
   "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/voice/";
 const KOKORO_MODEL = "Kokoro-82M-v1.0-ONNX";
-const DEVICE_TIMEOUT_MS = 25_000;
+/* Kept SHORT on purpose: a hung WebGPU attempt must cost seconds,
+ * not half a minute (founder report 2026-10-26: v2 felt SLOWER —
+ * the first design raced WebGPU for 25s per model before falling
+ * back). Once WebGPU fails for a kind, it is not retried this
+ * session (deviceFailed below). */
+const DEVICE_TIMEOUT_MS = 8_000;
+const deviceFailed = { asr: false, tts: false };
 
 env.remoteHost = WHISPER_HOST;
 env.remotePathTemplate = "{model}/";
@@ -72,13 +78,13 @@ function loadAsr(model: string): Promise<any> {
   if (p) return p;
   const progress = makeProgress("asr");
   const create = async () => {
-    if (hasWebGpu) {
+    if (hasWebGpu && !deviceFailed.asr) {
       try {
         return await withTimeout(
           pipeline("automatic-speech-recognition", model, { dtype: "q8", device: "webgpu", progress_callback: progress }),
           DEVICE_TIMEOUT_MS, "WebGPU speech model load",
         );
-      } catch { /* fall through to WASM */ }
+      } catch { deviceFailed.asr = true; /* fall through to WASM */ }
     }
     return pipeline("automatic-speech-recognition", model, { dtype: "q8", progress_callback: progress });
   };
@@ -95,13 +101,13 @@ function loadKokoroWorker(): Promise<any> {
   if (kokoroPromise) return kokoroPromise;
   const progress = makeProgress("tts");
   const create = async () => {
-    if (hasWebGpu) {
+    if (hasWebGpu && !deviceFailed.tts) {
       try {
         return await withTimeout(
           KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "webgpu", progress_callback: progress }),
           DEVICE_TIMEOUT_MS, "WebGPU neural voice load",
         );
-      } catch { /* fall through to WASM */ }
+      } catch { deviceFailed.tts = true; /* fall through to WASM */ }
     }
     return KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "wasm", progress_callback: progress });
   };

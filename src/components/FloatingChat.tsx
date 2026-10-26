@@ -16,7 +16,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
-import { useVoiceCall } from '@/lib/voice/useVoiceCall';
+import { useVoiceCall, warmVoice } from '@/lib/voice/useVoiceCall';
+import { VoiceCallPill } from '@/components/voice/VoiceCallPill';
 import { AgentBrain, GeniusBrain } from '@/lib/voice/adapters';
 import type { Turn } from '@/lib/voice/engine';
 import {
@@ -315,6 +316,7 @@ export default function FloatingChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voiceAgentReady, voiceAgentId, voiceBaseHistory]);
   const geniusVoice = useVoiceCall({
+    surfaceId: 'genius-bubble',
     roleText: 'Genius',
     brain: voiceBrain,
     unavailableReason: 'Voice is still getting ready — give it a moment and tap Talk again.',
@@ -1325,6 +1327,9 @@ You can help with:
 
   return (
     <>
+      {/* The live-call pill: a voice call runs in the session, outside
+       * any panel — this keeps it visible and endable anywhere. */}
+      <VoiceCallPill />
       {/* GENIUS AI Launcher — Single contained orb with the original logo */}
       {!isOpen && (
         <button
@@ -2306,6 +2311,8 @@ You can help with:
                         <button
                           type="button"
                           onClick={geniusVoice.toggleTalk}
+                          onPointerEnter={() => warmVoice()}
+                          onFocus={() => warmVoice()}
                           title={geniusVoice.talkOn ? "End the voice conversation with Genius" : "Talk with Genius: hands-free voice conversation — replies spoken aloud"}
                           aria-label={geniusVoice.talkOn ? "End voice conversation" : "Start voice conversation with Genius"}
                           className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${geniusVoice.talkOn ? "bg-emerald-500/25 text-emerald-500 animate-pulse" : "bg-primary/10 hover:bg-primary/20 text-primary"}`}
