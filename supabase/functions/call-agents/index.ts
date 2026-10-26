@@ -854,6 +854,175 @@ serve(async (req) => {
       });
     }
 
+    // ───────────────── chat (streaming conversation) ─────────────────
+    // VoiceCall v2 brain: a multi-turn conversation with ONE agent,
+    // streamed back as OpenAI-style SSE so callers can speak the reply
+    // sentence-by-sentence as it arrives. Same auth, owner-scoped agent
+    // lookup, router ladder and reserve/settle credit semantics as
+    // "run"; the stream is tapped (never altered) to recover the full
+    // text + usage for settlement and the run log once it completes.
+    if (action === "chat") {
+      if (!aiKeysConfigured()) return json({ error: "AI providers are not configured on this workspace." }, 503);
+      const agentId = String(body.agent_id ?? "");
+      if (!agentId) return json({ error: "An agent_id is required to chat." }, 400);
+      const rawMessages = Array.isArray(body.messages) ? body.messages : [];
+      const history = rawMessages
+        .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+        .slice(-40)
+        .map((m: any) => ({ role: m.role as string, content: (m.content as string).slice(0, 8000) }));
+      if (!history.length || history[history.length - 1].role !== "user") {
+        return json({ error: "messages must end with a user message." }, 400);
+      }
+      const { data: agent, error: agentErr } = await admin
+        .from("call_agents")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("id", agentId)
+        .single();
+      if (agentErr || !agent) return json({ error: "The selected agent was not found." }, 404);
+
+      const voice = body.voice === true;
+      const VOICE_ADDENDUM =
+        "You are in a spoken conversation: the user is talking out loud and your reply will be spoken by a voice, not read on a screen. " +
+        "Answer the way a smart person talks: one to three short, natural sentences. Never use lists, menus, or formatting. " +
+        "If there are choices, weave them into a sentence and ask one simple question. Stay on the user's thread and be specific.";
+      const systemPrompt = [String(agent.system_prompt ?? "").trim(), HOUSE_STYLE, voice ? VOICE_ADDENDUM : ""]
+        .filter(Boolean)
+        .join("\n\n");
+      const chatMessages = [{ role: "system", content: systemPrompt }, ...history];
+
+      // Reserve credits up front (admins pay 0, mirroring "run").
+      const reserve = isAdmin ? 0 : RESERVE;
+      if (reserve > 0) {
+        const { data: nb, error: ce } = await admin.rpc("ai_credits_consume", {
+          _user_id: user.id,
+          _amount: reserve,
+          _reason: "call-agents:chat-reserve",
+        });
+        if (ce) return json({ error: "Could not check your credits. Please try again." }, 500);
+        if (Number(nb) < 0) {
+          return json(
+            { error: "You're out of credits. You get 5 free credits every day, or upgrade to a monthly plan for more.", code: "no_credits" },
+            402,
+          );
+        }
+      }
+      const refundReserve = async () => {
+        if (reserve > 0) {
+          await admin.rpc("ai_credits_grant", {
+            _user_id: user.id,
+            _amount: reserve,
+            _reason: "call-agents:chat-refund",
+            _ref: "call-agents:chat-refund:" + crypto.randomUUID(),
+          });
+        }
+      };
+
+      const requestedMax = Number(body.max_tokens ?? 0);
+      const chatBody = {
+        model: String(agent.model),
+        messages: chatMessages,
+        temperature: clampTemp(agent.temperature),
+        max_tokens: requestedMax > 0
+          ? Math.min(clampTokens(agent.max_tokens), requestedMax)
+          : voice
+          ? 700
+          : clampTokens(agent.max_tokens),
+        stream: true,
+      };
+      const tier: "llama" | "standard" = /llama/i.test(String(agent.model)) ? "llama" : "standard";
+      let routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
+      if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
+      if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+      const resp = routed.resp;
+      const servedModel = routed.model || String(agent.model);
+      if (!resp.ok || !resp.body) {
+        await refundReserve();
+        return json({ error: `The model provider returned an error (${resp.status}).` }, 502);
+      }
+
+      // Tap the SSE stream: forward every byte untouched; accumulate
+      // the reply text and the final usage chunk on the side.
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullText = "";
+      let usage: any = null;
+      const tap = new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, controller) {
+          controller.enqueue(chunk);
+          buffer += decoder.decode(chunk, { stream: true });
+          let idx: number;
+          while ((idx = buffer.indexOf("\n")) !== -1) {
+            const line = buffer.slice(0, idx).trim();
+            buffer = buffer.slice(idx + 1);
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6);
+            if (payload === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(payload);
+              const delta = parsed?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") fullText += delta;
+              if (parsed?.usage) usage = parsed.usage;
+            } catch {
+              /* a line split mid-JSON stays buffered until completed */
+            }
+          }
+        },
+        async flush() {
+          // Settle + log, mirroring "run". Best-effort by design: a
+          // bookkeeping failure must never eat the user's reply.
+          try {
+            const promptTokens = Number(usage?.prompt_tokens ?? 0);
+            const completionTokens = Number(usage?.completion_tokens ?? 0);
+            const price = MODELS[servedModel];
+            const usd = price
+              ? (promptTokens / 1e6) * price.inPrice + (completionTokens / 1e6) * price.outPrice
+              : costUsd(servedModel, promptTokens, completionTokens);
+            let charged = 0;
+            if (!isAdmin) {
+              charged = usage ? Math.max(0.05, round2(usd * MARKUP)) : reserve;
+              const diff = round2(charged - reserve);
+              if (diff < 0) {
+                await admin.rpc("ai_credits_grant", {
+                  _user_id: user.id,
+                  _amount: -diff,
+                  _reason: "call-agents:chat-adjust",
+                  _ref: "call-agents:chat-adjust:" + crypto.randomUUID(),
+                });
+              } else if (diff > 0) {
+                const { data: nb2 } = await admin.rpc("ai_credits_consume", {
+                  _user_id: user.id,
+                  _amount: diff,
+                  _reason: "call-agents:chat-usage",
+                });
+                if (Number(nb2) < 0) charged = reserve;
+              }
+            }
+            await admin.from("call_agent_runs").insert({
+              agent_id: agent.id,
+              user_id: user.id,
+              input: history[history.length - 1].content,
+              output: cleanText(fullText),
+              prompt_tokens: promptTokens,
+              completion_tokens: completionTokens,
+              credits_charged: charged,
+              status: "ok",
+            });
+          } catch (e) {
+            console.error("call-agents chat settle failed", e);
+          }
+        },
+      });
+      return new Response(resp.body.pipeThrough(tap), {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream",
+          "x-served-model": servedModel,
+          "x-agent-name": String(agent.name ?? ""),
+        },
+      });
+    }
+
     // ───────────────── run_fundraiser ─────────────────
     // Special agent (not user-configured): finds matching investors in the
     // platform directory and drafts an application from the founder's own
