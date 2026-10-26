@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
-import { useVoiceConversation } from '@/lib/voice/useVoiceConversation';
+import { useVoiceConversation, talkStatusLabel } from '@/lib/voice/useVoiceConversation';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -1845,6 +1845,13 @@ You can help with:
                         👆 Select an option above to continue
                       </p>
                     ) : (
+                      <>
+                      {geniusVoice.talkOn && (
+                        <div className="flex items-center gap-2 px-1 pb-2 text-[11px] font-medium text-emerald-500" role="status">
+                          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                          {talkStatusLabel(geniusVoice.talkState, geniusVoice.loadPct, "Genius")}
+                        </div>
+                      )}
                       <form
                         id="genius-ai-form"
                         onSubmit={(e) => {
@@ -2252,6 +2259,7 @@ You can help with:
                           <Send className="h-4 w-4" />
                         </Button>
                       </form>
+                      </>
                     )}
                   </div>
                 </TabsContent>

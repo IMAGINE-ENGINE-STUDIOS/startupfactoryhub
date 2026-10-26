@@ -20,6 +20,22 @@ import { speak, stopSpeaking, personaFor, preloadSpeech, type VoicePersona } fro
 
 export type TalkState = "off" | "loading" | "listening" | "transcribing" | "waiting" | "speaking";
 
+/** Human-readable Talk status — EVERY surface must render this while
+ * Talk is on (founder field report 2026-10-25: "I didn't get a message
+ * or anything from the realtime talk feature" — the state machine ran
+ * invisibly behind a pulsing icon, so a 1-2 minute first-time model
+ * download looked exactly like a dead button). */
+export function talkStatusLabel(state: TalkState, pct: number | null, name = "The agent"): string {
+  switch (state) {
+    case "loading": return pct !== null && pct < 100 ? `Loading the voice model — ${pct}% (first time only)` : "Loading the voice model… (first time only)";
+    case "listening": return "Listening — speak now, then pause when you're done";
+    case "transcribing": return "Transcribing what you said…";
+    case "waiting": return `${name} is thinking…`;
+    case "speaking": return `${name} is speaking…`;
+    default: return "Voice conversation on";
+  }
+}
+
 export function useVoiceConversation(opts: {
   /** Agent role/name text — picks the speaking voice persona. */
   roleText?: string | null;
@@ -32,6 +48,7 @@ export function useVoiceConversation(opts: {
 }) {
   const [talkOn, setTalkOn] = useState(false);
   const [talkState, setTalkState] = useState<TalkState>("off");
+  const [loadPct, setLoadPct] = useState<number | null>(null);
   const genRef = useRef(0);
   const recRef = useRef<MicRecorder | null>(null);
   const spokenRef = useRef<Set<string>>(new Set());
@@ -52,16 +69,21 @@ export function useVoiceConversation(opts: {
 
   const listen = useCallback(async (gen: number) => {
     if (gen !== genRef.current) return;
-    setTalkState("listening");
+    /* "listening" only once the mic is REALLY open — before the model
+     * is ready the state stays "loading" with live progress, so the
+     * user never speaks into a mic that isn't capturing yet. */
+    setTalkState("loading");
     try {
-      await loadWhisper();
+      await loadWhisper((p) => { if (gen === genRef.current) setLoadPct(p); });
       if (gen !== genRef.current) return;
+      setLoadPct(null);
       const rec = new MicRecorder();
       recRef.current = rec;
       await rec.start({
         autoStopSilenceMs: 1600,
         onAutoStop: () => { void finishListen(gen); },
       });
+      if (gen === genRef.current) setTalkState("listening");
     } catch (e: any) {
       if (gen !== genRef.current) return;
       setTalkOn(false);
@@ -139,8 +161,9 @@ export function useVoiceConversation(opts: {
     setTalkState("loading");
     void (async () => {
       preloadSpeech(); // Neural model: start the Kokoro download now, not at first reply
-      try { await loadWhisper(); } catch { /* listen() will surface errors */ }
+      try { await loadWhisper((p) => { if (gen === genRef.current) setLoadPct(p); }); } catch { /* listen() will surface errors */ }
       if (gen !== genRef.current) return;
+      setLoadPct(null);
       void listen(gen);
     })();
   }, [talkOn, listen, shutdown]);
@@ -148,5 +171,5 @@ export function useVoiceConversation(opts: {
   /* Full stop on unmount. */
   useEffect(() => () => { genRef.current++; recRef.current?.cancel(); stopSpeaking(); }, []);
 
-  return { talkOn, talkState, toggleTalk };
+  return { talkOn, talkState, loadPct, toggleTalk };
 }

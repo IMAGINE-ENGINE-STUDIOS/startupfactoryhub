@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { studio3d, type Studio3DState } from '@/lib/studio3dBus';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
-import { useVoiceConversation } from '@/lib/voice/useVoiceConversation';
+import { useVoiceConversation, talkStatusLabel } from '@/lib/voice/useVoiceConversation';
 import { Phone, PhoneOff } from 'lucide-react';
 
 const CHIPS = ['Make it night with neon lights', 'Make the selected object twice as large', 'Add 8 street lamps around the center', 'Make the selected object spin when clicked'];
@@ -49,6 +49,12 @@ export default function Studio3DTab({ state }: { state: Studio3DState }) {
         {state.busy && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />Building in the scene</div>}
         <div ref={end} />
       </div>
+      {voice.talkOn && (
+        <div className="flex items-center gap-2 border-t border-border/40 px-3 pt-2 text-[11px] font-medium text-emerald-500" role="status">
+          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
+          {talkStatusLabel(voice.talkState, voice.loadPct, "Genius 3D")}
+        </div>
+      )}
       <div className="p-2 border-t border-border/40 flex gap-2">
         <Input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} placeholder="Describe a change to this level" maxLength={4000} />
         <VoiceMicButton onText={(t) => setText((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-9 w-9" />

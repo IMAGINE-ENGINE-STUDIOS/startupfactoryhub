@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
-import { useVoiceConversation } from "@/lib/voice/useVoiceConversation";
+import { useVoiceConversation, talkStatusLabel } from "@/lib/voice/useVoiceConversation";
 
 export const GLASS_PANEL =
   "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
@@ -128,6 +128,12 @@ export function AgentChat({
         </div>
       </div>
       <div className="shrink-0 border-t border-border bg-background/80 px-4 pt-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        {voice.talkOn && (
+          <div className="flex items-center gap-2 pb-2 text-[11px] font-medium text-emerald-500" role="status">
+            <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" />
+            {talkStatusLabel(voice.talkState, voice.loadPct, name)}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           {disabledNote ? (
             <div className="min-w-0 flex-1 px-1 py-2 text-xs text-muted-foreground">{disabledNote}</div>
