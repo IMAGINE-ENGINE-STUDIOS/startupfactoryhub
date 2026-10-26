@@ -541,7 +541,7 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
         <ImageIcon className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Skybox</span>
       </Button>
       {namedWorld?.building && (
-        <Button size="sm" variant="ghost" className={cls} onClick={() => setLevelsOpen((o) => !o)} title={`Levels of the ${namedWorld.building} building — this world is one building of stacked levels`}>
+        <Button size="sm" variant="ghost" className={cls} onClick={() => setLevelsOpen((o) => !o)} title={`Levels of the ${namedWorld.building} building — this world is one level inside it`}>
           <Building2 className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Levels</span>
         </Button>
       )}
