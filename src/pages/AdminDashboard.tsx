@@ -141,12 +141,12 @@ const AdminDashboard = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="matrix-admin">
         <div className="flex flex-col lg:flex-row gap-5 items-start">
-          <aside className="order-1 lg:order-2 w-full lg:w-64 shrink-0 lg:sticky lg:top-20 rounded-lg border border-cyan-400/15 bg-[#061016] flex flex-col lg:max-h-[calc(100vh-6.5rem)]">
+          <aside className="order-1 lg:order-2 w-full lg:w-64 shrink-0 lg:sticky lg:top-20 rounded-lg border border-cyan-400/15 bg-[#061016] flex flex-col max-h-[52vh] lg:max-h-[calc(100vh-6.5rem)]">
             <div className="px-4 pt-4 pb-1">
               <p className="text-[9px] tracking-[0.25em] text-[#4E7A73]" style={{ fontFamily: '"JetBrains Mono", monospace' }}>SYSTEM NAVIGATION</p>
               <p className="text-sm font-semibold tracking-wide mt-1">HUB <span className="text-[#00E5FF]">//</span> MATRIX</p>
             </div>
-            <TabsList className="flex lg:flex-col flex-row items-stretch gap-[2px] p-3 bg-transparent border-0 rounded-none overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto flex-1 justify-start">
+            <TabsList className="flex flex-col items-stretch gap-[2px] p-3 bg-transparent border-0 rounded-none overflow-y-auto overflow-x-hidden flex-1 min-h-0 justify-start overscroll-contain">
             <TabsTrigger value="command" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <LayoutDashboard className="h-4 w-4" />
               <span className="whitespace-nowrap">Matrix</span>
