@@ -21,10 +21,16 @@ import { UnverifiedUsersPanel } from '@/components/admin/UnverifiedUsersPanel';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket, Star, Gift, TrendingUp, Megaphone, CalendarClock
+  Search, CheckCheck, Coffee, Rocket, Star, Gift, TrendingUp, Megaphone, CalendarClock
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
+  {
+    id: 'innovation-coffee',
+    label: 'Innovation Coffee Table',
+    icon: <Coffee className="h-4 w-4" />,
+    desc: 'Invitation to the Innovation Coffee Table at Foxtail Coffee Belle Isle',
+  },
   {
     id: 'notification',
     label: 'Notification Email',
@@ -574,6 +580,24 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `MVP No-Show → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ MVP No-Show follow-up sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'innovation-coffee') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-innovation-coffee-email', {
+            body: { email: to, name: programEmailName || undefined, when: programEmailInterviewDate || 'Today' },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('Innovation Coffee invite failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `Innovation Coffee Table → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: 'Innovation Coffee Table invite sent', description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'af-invitation' || activeType === 'af-welcome') {
       let successCount = 0;
       let failCount = 0;
@@ -1194,6 +1218,26 @@ const EmailMonitor = () => {
                       <AlertCircle className="h-4 w-4" />
                       Emails are personalized with each recipient's name.
                     </div>
+                  </div>
+                )}
+
+                {activeType === 'innovation-coffee' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Coffee className="h-4 w-4" />
+                      Innovation Coffee Table Details
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Greeting Name</Label>
+                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>When</Label>
+                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="Today, 9:00 AM" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Venue: Foxtail Coffee Co. — Belle Isle, 7813 S Orange Ave, Suite 132, Orlando, FL 32809</p>
                   </div>
                 )}
 
