@@ -135,7 +135,11 @@ ctx.onmessage = async (e: MessageEvent) => {
   try {
     switch (kind) {
       case "asr.load": {
-        await loadAsr(String(payload?.model || "whisper-base.en"));
+        const asr = await loadAsr(String(payload?.model || "whisper-base.en"));
+        /* Warm-up inference (speed research: never pay cold costs
+         * in-turn): one second of silence compiles the graph now, so
+         * the first real transcription isn't the cold one. */
+        try { await asr(new Float32Array(16000), { chunk_length_s: 30, stride_length_s: 5 }); } catch { /* warm only */ }
         respond(true, { loaded: true });
         break;
       }
@@ -148,7 +152,11 @@ ctx.onmessage = async (e: MessageEvent) => {
         break;
       }
       case "tts.load": {
-        await loadKokoroWorker();
+        const tts = await loadKokoroWorker();
+        /* Warm-up synthesis, same doctrine: the first generated
+         * sentence of a call must not be the cold one (a cold first
+         * synthesis is where the simple device voice used to win). */
+        try { await tts.generate("Hi.", { voice: "af_heart" }); } catch { /* warm only */ }
         respond(true, { loaded: true });
         break;
       }

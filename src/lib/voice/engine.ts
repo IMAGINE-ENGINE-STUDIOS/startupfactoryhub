@@ -97,6 +97,10 @@ export interface EngineOptions {
   /** Consecutive adapter failures tolerated before the call errors
    * out (its partial transcript is still delivered). Default 2. */
   maxConsecutiveFailures?: number;
+  /** How long a completeness-gate continuation listen waits for the
+   * user to resume before the fragment is answered as-is. Default
+   * 2600ms. */
+  continuationMs?: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -105,9 +109,29 @@ export interface EngineOptions {
 /* against false boundaries — carried over from the v1 pump, which    */
 /* was field-proven; the log bookkeeping around it is what's new.     */
 /* ------------------------------------------------------------------ */
+/** Completeness gate (speed research 2026-10-26, §4): does this
+ * transcript read UNFINISHED — the user trailing off mid-thought?
+ * Conservative by design: only clear continuers trigger patience,
+ * so a complete utterance is answered at the short endpoint. */
+const CONTINUERS = new Set([
+  "and", "but", "or", "so", "because", "if", "when", "while", "then",
+  "the", "a", "an", "to", "of", "for", "with", "about", "into", "as",
+  "at", "by", "from", "that", "which", "who", "than", "like", "um", "uh",
+]);
+export function looksIncomplete(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (/[,;:—–-]$/.test(t)) return true;
+  if (/\.\.\.$|…$/.test(t)) return true;
+  const words = t.replace(/[.!?…]+["')\]]?\s*$/, "").split(/\s+/).filter(Boolean);
+  const last = (words[words.length - 1] || "").toLowerCase().replace(/[^a-z']/g, "");
+  return CONTINUERS.has(last);
+}
+
 export class SentencePump {
   private fed = "";
   private consumed = 0;
+  private emitted = false;
 
   /** Feed the cumulative stream text; returns newly completed
    * sentences (and advances the internal offset). */
@@ -128,6 +152,23 @@ export class SentencePump {
       lastEnd = end;
     }
     if (lastEnd > 0) this.consumed += lastEnd;
+    if (out.length) { this.emitted = true; return out; }
+    /* First-chunk acceleration (research §3): before ANYTHING has
+     * been spoken this reply, a long first sentence would leave the
+     * user in silence while it generates. Release the first CLAUSE
+     * (comma/semicolon/dash boundary, >= 4 words in) to speech as
+     * soon as it exists; the rest follows as sentences. */
+    if (!this.emitted) {
+      const cm = /[,;:—–]\s+/.exec(tail);
+      if (cm && cm.index >= 16 && tail.slice(0, cm.index).split(/\s+/).length >= 4) {
+        const clause = tail.slice(0, cm.index).trim();
+        if (clause) {
+          this.consumed += cm.index + cm[0].length;
+          this.emitted = true;
+          return [clause];
+        }
+      }
+    }
     return out;
   }
 
@@ -148,6 +189,8 @@ export class VoiceCallEngine {
   private events: EngineEvents;
   private maxFailures: number;
 
+  private continuationMs: number;
+
   private _state: CallState = "idle";
   private turns: Turn[] = [];
   private runId = 0;               // generation counter: stale loops die
@@ -160,6 +203,7 @@ export class VoiceCallEngine {
     this.adapters = adapters;
     this.events = events;
     this.maxFailures = opts.maxConsecutiveFailures ?? 2;
+    this.continuationMs = opts.continuationMs ?? 2600;
   }
 
   get state(): CallState { return this._state; }
@@ -246,6 +290,29 @@ export class VoiceCallEngine {
     return this.failures >= this.maxFailures;
   }
 
+  /** One continuation listen for the completeness gate: capped at
+   * 2.6s — if the user says nothing more, the original fragment is
+   * answered as-is. Returns the continuation transcript, or null. */
+  private async listenContinuation(): Promise<string | null> {
+    const ac = new AbortController();
+    const onCallAbort = () => ac.abort();
+    this.callAbort?.signal.addEventListener("abort", onCallAbort, { once: true });
+    const timer = setTimeout(() => ac.abort(), this.continuationMs);
+    try {
+      this.setState("listening");
+      const cap = await this.adapters.mic.listenOnce(ac.signal);
+      if (cap.reason === "no-speech") return null;
+      this.setState("transcribing");
+      const text = (await this.adapters.stt.transcribe(cap.audio)).trim();
+      return text || null;
+    } catch {
+      return null; // timeout / hang-up: proceed with what we have
+    } finally {
+      clearTimeout(timer);
+      this.callAbort?.signal.removeEventListener("abort", onCallAbort);
+    }
+  }
+
   private async loop(gen: number): Promise<void> {
     const alive = () => gen === this.runId && !this.endFired;
     while (alive()) {
@@ -277,6 +344,20 @@ export class VoiceCallEngine {
       }
       if (!alive()) return;
       if (!userText) continue;
+
+      /* ---- completeness gate ----
+       * A fragment that reads unfinished (trailing conjunction,
+       * comma, filler) usually means the user paused mid-thought —
+       * the fixed endpoint fired too early for them. Reopen the mic
+       * briefly and APPEND the continuation to the same turn rather
+       * than answering a fragment. Complete utterances skip this
+       * entirely and are answered at the short endpoint. */
+      for (let cont = 0; cont < 2 && looksIncomplete(userText); cont++) {
+        const extra = await this.listenContinuation();
+        if (!alive()) return;
+        if (!extra) break;
+        userText = `${userText} ${extra}`;
+      }
       this.pushTurn({ role: "user", content: userText });
 
       /* ---- think + speak (streamed through the sentence pump) ---- */

@@ -200,11 +200,13 @@ class VoiceSession {
    * Returns false when a call is already running. */
   async start(opts: StartCallOptions): Promise<boolean> {
     if (this.engine) return false;
-    /* 650ms of silence ends a turn (was 900): with the heard-speech
-     * gate this rarely cuts a mid-thought pause, and turn-taking
-     * feels noticeably closer to realtime (founder, 2026-10-26:
-     * "not realtime but took 5 seconds — that's better"). */
-    const mic = new RecorderMic(opts.silenceMs ?? 650);
+    /* 480ms of silence PROPOSES an endpoint (was 900, then 650):
+     * the engine's completeness gate judges the transcript — a
+     * complete sentence is answered immediately, an unfinished one
+     * gets continuation windows instead of a cutoff (speed research
+     * 2026-10-26 §4: two-gate endpointing, founder report "sometimes
+     * cuts too fast"). */
+    const mic = new RecorderMic(opts.silenceMs ?? 480);
     await mic.acquire(); // inside the caller's tap gesture
     this.mic = mic;
     this.roleText = opts.roleText;
@@ -272,6 +274,11 @@ let warmed = false;
 export function warmVoice(): void {
   if (warmed) return;
   warmed = true;
+  /* Ask the browser to keep the downloaded speech models on the
+   * device permanently (instant-start lever 1: return visits skip
+   * the ~150MB download; without persistence the browser may evict
+   * them under storage pressure). */
+  try { void navigator.storage?.persist?.().catch(() => {}); } catch { /* best effort */ }
   void (async () => {
     try {
       if (await speechClient.available()) {
