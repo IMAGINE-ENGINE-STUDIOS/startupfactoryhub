@@ -27,11 +27,10 @@ type ProgressFn = (pct: number | null, label: string) => void;
 const pipelines = new Map<string, Promise<any>>();
 let activeProgress: ProgressFn | null = null;
 
-async function createPipeline(model: string, device: string, transformers: any) {
+async function createPipeline(model: string, transformers: any) {
   const { pipeline } = transformers;
   return pipeline("automatic-speech-recognition", model, {
     dtype: "q8",
-    device,
     progress_callback: (e: any) => {
       if (!activeProgress) return;
       if (e?.status === "progress" && typeof e.progress === "number") {
@@ -44,30 +43,40 @@ async function createPipeline(model: string, device: string, transformers: any) 
 }
 
 /** Load (once per model) and return the ASR pipeline for the user's
- * chosen voice model. Prefers WebGPU, falls back to WASM. */
+ * chosen voice model.
+ *
+ * WASM ONLY (founder field report 2026-10-25: "took long time to load
+ * the recording feature, and did nothing afterwards"): the previous
+ * WebGPU-first attempt could stall FOREVER inside ONNX session
+ * creation on real-world Chrome/GPU combos — no error, no rejection,
+ * so the mic never opened and Talk never listened. A try/catch cannot
+ * catch a hang. WASM q8 is the reliable path (Whisper base transcribes
+ * ~4x realtime on modest hardware), so speech runs on WASM, period.
+ * A hard load timeout turns any future stall into a clear, retryable
+ * error instead of silence. */
 export function loadWhisper(onProgress?: ProgressFn): Promise<any> {
   if (onProgress) activeProgress = onProgress;
   const model = whisperModelId(getVoiceModel());
   let p = pipelines.get(model);
   if (!p) {
-    p = (async () => {
+    const create = (async () => {
       const transformers: any = await import("@huggingface/transformers");
       const { env } = transformers;
       env.remoteHost = WHISPER_HOST;
       env.remotePathTemplate = "{model}/";
       env.allowLocalModels = false;
       if (env.useBrowserCache !== undefined) env.useBrowserCache = true;
-      const hasGpu = typeof navigator !== "undefined" && "gpu" in navigator;
-      if (hasGpu) {
-        try {
-          return await createPipeline(model, "webgpu", transformers);
-        } catch {
-          /* WebGPU present but unusable (older Safari) — fall through to WASM. */
-        }
-      }
-      return createPipeline(model, "wasm", transformers);
+      try {
+        const wasm = (env as any)?.backends?.onnx?.wasm;
+        if (wasm) wasm.numThreads = Math.max(1, Math.min(4, (typeof navigator !== "undefined" && navigator.hardwareConcurrency) || 2));
+      } catch { /* thread tuning is best-effort */ }
+      return createPipeline(model, transformers);
     })();
-    // A failed load must not poison the cache — allow a retry next tap.
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("The voice model took too long to load. Check your connection, then tap the mic again.")), 120_000),
+    );
+    p = Promise.race([create, timeout]);
+    // A failed or timed-out load must not poison the cache — retry next tap.
     p.catch(() => { pipelines.delete(model); });
     pipelines.set(model, p);
   }

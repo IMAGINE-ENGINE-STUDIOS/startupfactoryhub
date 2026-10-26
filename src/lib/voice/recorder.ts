@@ -38,6 +38,10 @@ export class MicRecorder {
     try {
       const AC: typeof AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       this.audioCtx = new AC();
+      // Created after async getUserMedia, the context can start
+      // suspended — then the analyser reads pure silence and Talk
+      // mode would auto-stop mid-sentence. Resume it explicitly.
+      if (this.audioCtx.state === "suspended") void this.audioCtx.resume().catch(() => {});
       const src = this.audioCtx.createMediaStreamSource(this.stream);
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 512;

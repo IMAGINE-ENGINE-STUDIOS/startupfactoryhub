@@ -71,6 +71,8 @@ export function useVoiceConversation(opts: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shutdown]);
 
+  const failCountRef = useRef(0);
+
   const finishListen = useCallback(async (gen: number) => {
     const rec = recRef.current;
     if (!rec) return;
@@ -80,16 +82,30 @@ export function useVoiceConversation(opts: {
       const blob = await rec.stop();
       const text = await transcribeBlob(blob);
       if (gen !== genRef.current) return;
+      failCountRef.current = 0;
       if (text) {
         setTalkState("waiting");
         optsRef.current.onUserText(text);
       } else {
         void listen(gen); // heard nothing — keep the conversation open
       }
-    } catch {
-      if (gen === genRef.current) void listen(gen);
+    } catch (e: any) {
+      if (gen !== genRef.current) return;
+      /* Never fail silently (founder field report 2026-10-25: Talk
+       * "did nothing"): surface the error, and after two failures in
+       * a row stop the loop with a clear message instead of spinning. */
+      failCountRef.current++;
+      if (failCountRef.current >= 2) {
+        failCountRef.current = 0;
+        setTalkOn(false);
+        shutdown();
+        toast.error(e?.message || "Voice transcription failed — Talk mode stopped.");
+      } else {
+        toast.error(e?.message || "Transcription failed — listening again…");
+        void listen(gen);
+      }
     }
-  }, [listen]);
+  }, [listen, shutdown]);
 
   /* Speak each new assistant reply once, then reopen the mic. */
   useEffect(() => {

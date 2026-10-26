@@ -123,10 +123,14 @@ const KOKORO_VOICE_FOR_PERSONA: Record<string, string> = {
 
 let kokoroPromise: Promise<any> | null = null;
 
-/** Load (once) the Kokoro TTS instance from the founder's own storage. */
+/** Load (once) the Kokoro TTS instance from the founder's own storage.
+ * WASM only + a hard timeout — same lesson as loadWhisper: a WebGPU
+ * session-creation stall hangs forever with no error to catch, which
+ * would mute talk-back completely. On timeout this rejects and speak()
+ * falls back to the device voice, so a reply is always heard. */
 export function loadKokoro(): Promise<any> {
   if (!kokoroPromise) {
-    kokoroPromise = (async () => {
+    const create = (async () => {
       const transformers: any = await import("@huggingface/transformers");
       const { env } = transformers;
       env.remoteHost = WHISPER_HOST;
@@ -134,14 +138,12 @@ export function loadKokoro(): Promise<any> {
       env.allowLocalModels = false;
       if (env.useBrowserCache !== undefined) env.useBrowserCache = true;
       const { KokoroTTS } = await import("kokoro-js");
-      const hasGpu = typeof navigator !== "undefined" && "gpu" in navigator;
-      if (hasGpu) {
-        try {
-          return await KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "webgpu" });
-        } catch { /* fall through to WASM */ }
-      }
       return KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "wasm" });
     })();
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("The neural voice took too long to load.")), 120_000),
+    );
+    kokoroPromise = Promise.race([create, timeout]);
     kokoroPromise.catch(() => { kokoroPromise = null; });
   }
   return kokoroPromise;
