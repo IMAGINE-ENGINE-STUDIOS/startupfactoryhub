@@ -38,7 +38,12 @@ function readStored(): VoiceModelId {
     const v = localStorage.getItem(KEY);
     if (v === "tiny" || v === "base" || v === "neural") return v;
   } catch { /* private mode — default applies */ }
-  return "base";
+  /* Neural is the default while testing (founder, 2026-10-25: the device
+   * voice "is very computerized" — the realistic neural talk-back is the
+   * experience being evaluated). Devices that already picked a model in
+   * the dropdown keep their choice; Tiny/Base stay one tap away for a
+   * lighter first download. */
+  return "neural";
 }
 
 let current: VoiceModelId = readStored();
