@@ -1221,6 +1221,26 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
+                {activeType === 'innovation-coffee' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Coffee className="h-4 w-4" />
+                      Innovation Coffee Table Details
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Greeting Name</Label>
+                        <Input value={programEmailName} onChange={e => setProgramEmailName(e.target.value)} placeholder="Founder" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>When</Label>
+                        <Input value={programEmailInterviewDate} onChange={e => setProgramEmailInterviewDate(e.target.value)} placeholder="Today, 9:00 AM" className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Venue: Foxtail Coffee Co. — Belle Isle, 7813 S Orange Ave, Suite 132, Orlando, FL 32809</p>
+                  </div>
+                )}
+
                 {/* MVP / AF program email fields */}
                 {['mvp-acceptance', 'mvp-payment-reminder', 'mvp-no-show', 'af-invitation', 'af-welcome', 'af-acceptance', 'af-follow-up', 'af-no-show'].includes(activeType) && (
                   <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-4">
