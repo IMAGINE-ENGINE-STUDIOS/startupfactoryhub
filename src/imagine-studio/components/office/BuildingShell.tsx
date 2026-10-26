@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { allFloors, type FloorDef } from "@/imagine-studio/lib/floors";
-import { buildBuildingPlazaScene, buildFloor99Scene, buildOfficeScene, publishedWorldUrl } from "@/imagine-studio/lib/officeWorld";
+import { buildFloor99Scene, buildLobbyScene, buildOfficeScene, publishedWorldUrl } from "@/imagine-studio/lib/officeWorld";
 import type { PrimitiveObject } from "@/imagine-studio/lib/levelTypes";
 
 export const BUILDING_TOP = 100;
@@ -111,6 +111,7 @@ function codeSceneFor(floor: FloorDef): PrimitiveObject[] | null {
   try {
     if (floor.id === 100) return primitivesOf(buildOfficeScene());
     if (floor.id === 99) return primitivesOf(buildFloor99Scene());
+    if (floor.id === 1) return primitivesOf(buildLobbyScene());
   } catch { /* dynamic floors have no code scene — generic slab stands */ }
   return null;
 }
@@ -179,32 +180,18 @@ function NeighborProxy({ floor, currentId }: { floor: FloorDef; currentId: numbe
   );
 }
 
-/** The BUILDING PLAZA at the tower's base in the live office: the
- * plaza level's own scene (published building-plaza.json when it
- * exists, the code seed otherwise) as a box-proxy at ground level,
- * so looking down from any floor the building lands on its plaza —
- * podium, fountain, planters and the theater screen included. */
+/** The ground at the tower's base in the live office: the Lobby &
+ * Plaza level IS the ground floor now (founder directive 2026-10-26 —
+ * the separate Building Plaza level is gone), so from the floors
+ * above, the base is simply the plaza's lawn — one green disc, no
+ * white box, no podium. */
 function PlazaBase({ currentId }: { currentId: number }) {
-  const [prims, setPrims] = useState<PrimitiveObject[] | null>(null);
-  useEffect(() => {
-    let live = true;
-    (async () => {
-      let found: PrimitiveObject[] | null = null;
-      try {
-        const r = await fetch(publishedWorldUrl("building-plaza.json"));
-        if (r.ok) found = primitivesOf(await r.json());
-      } catch { /* fall through to the code scene */ }
-      if (!found) { try { found = primitivesOf(buildBuildingPlazaScene()); } catch { /* no plaza */ } }
-      if (live) setPrims(found);
-    })();
-    return () => { live = false; };
-  }, []);
-  const meshes = useMemo(() => (prims ? proxyMeshes(prims, "building-plaza-base") : null), [prims]);
-  if (!meshes) return null;
   return (
-    <group position={[0, (0 - currentId) * FLOOR_H, 0]}>
-      {meshes.opaque && <primitive object={meshes.opaque} />}
-      {meshes.glassy && <primitive object={meshes.glassy} />}
+    <group position={[0, (0 - currentId) * FLOOR_H - 0.05, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[150, 40]} />
+        <meshStandardMaterial color="#3c6a32" roughness={1} />
+      </mesh>
     </group>
   );
 }

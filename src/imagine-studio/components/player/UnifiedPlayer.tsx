@@ -25,7 +25,7 @@ import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
 
 export interface PlayerWorld {
   spawn?: [number, number, number];
-  bounds?: { x: number; z: number };                 // clamp |x|,|z| (office)
+  bounds?: { x: number; z: number; cx?: number; cz?: number }; // clamp around an optional center (the Lobby & Plaza grounds are not centered on the room)
   radialBound?: number;                              // clamp distance from origin (plaza)
   colliders?: { x: number; z: number; r: number }[]; // hard-stop circles
   pushOut?: { x: number; z: number; r: number }[];   // keep-out circles, resolved by pushing out
@@ -122,7 +122,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
     if (vMag > 0.02) {
       let nx = g.position.x + vel.current.x * dt;
       let nz = g.position.z + vel.current.z * dt;
-      if (world.bounds) { nx = THREE.MathUtils.clamp(nx, -world.bounds.x, world.bounds.x); nz = THREE.MathUtils.clamp(nz, -world.bounds.z, world.bounds.z); }
+      if (world.bounds) { const bcx = world.bounds.cx ?? 0, bcz = world.bounds.cz ?? 0; nx = THREE.MathUtils.clamp(nx, bcx - world.bounds.x, bcx + world.bounds.x); nz = THREE.MathUtils.clamp(nz, bcz - world.bounds.z, bcz + world.bounds.z); }
       if (world.radialBound) { const r = Math.hypot(nx, nz); if (r > world.radialBound) { nx *= world.radialBound / r; nz *= world.radialBound / r; } }
       let blocked = false;
       if (world.colliders) for (const d of world.colliders) { if (Math.hypot(nx - d.x, nz - d.z) < d.r) { blocked = true; break; } }
@@ -148,7 +148,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
         get speed() { return Math.hypot(vel.current.x, vel.current.z); },
         setSpeed: (m: number) => { speedMult.current = THREE.MathUtils.clamp(Number(m) || 1, 0, 4); },
       });
-      if (world.bounds) { g.position.x = THREE.MathUtils.clamp(g.position.x, -world.bounds.x, world.bounds.x); g.position.z = THREE.MathUtils.clamp(g.position.z, -world.bounds.z, world.bounds.z); }
+      if (world.bounds) { const bcx = world.bounds.cx ?? 0, bcz = world.bounds.cz ?? 0; g.position.x = THREE.MathUtils.clamp(g.position.x, bcx - world.bounds.x, bcx + world.bounds.x); g.position.z = THREE.MathUtils.clamp(g.position.z, bcz - world.bounds.z, bcz + world.bounds.z); }
     }
     if (isMoving !== stateRef.current.moving) opts?.onMovingChange?.(isMoving);
     stateRef.current = { moving: isMoving, sprint, speed: vMag };

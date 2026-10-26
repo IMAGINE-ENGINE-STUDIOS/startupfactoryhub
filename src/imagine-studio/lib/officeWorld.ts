@@ -433,136 +433,6 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
   return getLocalLevel(existing.id) ?? existing;
 }
 
-/** The BUILDING PLAZA — the ground level of the Startup Office
- * building (founder directive 2026-10-26): a level of the building
- * just like /plaza is a world, holding the plaza scenario (stone
- * paving, the podium the tower stands on, fountain, planters, benches,
- * lamps) PLUS the same theater screen the office floors have. No
- * voting booth, no fake chairs — her words. The podium top sits at
- * local y=8 so in the stacked building view it meets Floor 1's slab
- * exactly, and the tower rises out of it. */
-export const BUILDING_PLAZA_LEVEL_NAME = "Building Plaza";
-
-export function buildBuildingPlazaScene(): LevelScene {
-  n = 0;
-  const o: PrimitiveObject[] = [];
-  // FORMAL GARDEN (founder redesign 2026-10-26, from her reference photo):
-  // symmetric parterres, manicured hedges, tree allées, stone terraces and
-  // a tiered fountain on the main axis. No crude stand-ins — every element
-  // is proportioned, trimmed and mirrored.
-  const LAWN = "#47763a", LAWN_DEEP = "#3c6a32", HEDGE = "#2d5a2c", TOPIARY = "#356b35";
-  const STONE = "#d8cfbc", TRAV = "#c9bb9e", WHITE = "#ece7db", GRAVEL = "#e6dfcd", WATER = "#79a8a4";
-  // Ground: a full lawn carpet; the stone terrace sits on it.
-  o.push(P("Garden Lawn", "box", [0, -0.55, 0], [190, 1.1, 130], LAWN_DEEP, { roughness: 1 }));
-  o.push(P("Stone Terrace", "box", [0, 0.07, 6], [124, 0.14, 92], TRAV, { roughness: 0.95 }));
-  o.push(P("Terrace Inlay", "box", [0, 0.15, 6], [116, 0.04, 84], STONE, { roughness: 0.9 }));
-  // The tower's base is the LOBBY floor now (founder directive
-  // 2026-10-26): the old podium box is erased — the double-height
-  // lobby level sits here in the stacked building, its opened glass
-  // doors facing this garden.
-  // THE FOUNTAIN — tiered, centered on the main axis south of the tower.
-  const FZ = 38;
-  o.push(P("Fountain Basin", "cylinder", [0, 0.5, FZ], [23, 1, 23], WHITE, { roughness: 0.7 }));
-  o.push(P("Fountain Rim", "torus", [0, 1.05, FZ], [22.4, 2.2, 22.4], STONE, { roughness: 0.7, rotation: [Math.PI / 2, 0, 0] } as any));
-  o.push(P("Fountain Water", "cylinder", [0, 0.92, FZ], [20.4, 0.2, 20.4], WATER, { roughness: 0.12, metalness: 0.15 }));
-  o.push(P("Fountain Pedestal", "cylinder", [0, 1.5, FZ], [2.2, 1.6, 2.2], WHITE, { roughness: 0.7 }));
-  o.push(P("Fountain Tier", "cylinder", [0, 2.5, FZ], [9, 0.5, 9], WHITE, { roughness: 0.7 }));
-  o.push(P("Fountain Tier Water", "cylinder", [0, 2.78, FZ], [8.2, 0.14, 8.2], WATER, { roughness: 0.12, metalness: 0.15 }));
-  o.push(P("Fountain Column", "cylinder", [0, 3.3, FZ], [1.1, 1.4, 1.1], WHITE, { roughness: 0.7 }));
-  o.push(P("Fountain Crown", "cylinder", [0, 4.15, FZ], [4.4, 0.4, 4.4], WHITE, { roughness: 0.7 }));
-  o.push(P("Fountain Finial", "sphere", [0, 4.85, FZ], [1.15, 1.15, 1.15], STONE, { roughness: 0.6 }));
-  for (const a of [45, 135, 225, 315]) {
-    const r = 11.2, x = Math.cos(a * Math.PI / 180) * r, z = FZ + Math.sin(a * Math.PI / 180) * r;
-    o.push(P("Fountain Orb", "sphere", [x, 1.35, z], [0.8, 0.8, 0.8], STONE, { roughness: 0.6 }));
-  }
-  // PARTERRE QUADRANTS — four mirrored formal beds: hedge frames, gravel
-  // hearts, inner hedge crosses and a topiary at the center of each.
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const cx = sx * 40, cz = 6 + sz * 33;
-    o.push(P("Parterre Lawn", "box", [cx, 0.1, cz], [44, 0.2, 30], LAWN, { roughness: 1 }));
-    o.push(P("Parterre Gravel", "box", [cx, 0.16, cz], [36, 0.1, 22], GRAVEL, { roughness: 1 }));
-    for (const hx of [-21.2, 21.2]) o.push(P("Parterre Hedge", "box", [cx + hx, 0.55, cz], [1.6, 0.9, 30], HEDGE, { roughness: 1 }));
-    for (const hz of [-14, 14]) o.push(P("Parterre Hedge", "box", [cx, 0.55, cz + hz], [44, 0.9, 1.6], HEDGE, { roughness: 1 }));
-    o.push(P("Parterre Cross", "box", [cx, 0.5, cz], [34, 0.7, 1.3], HEDGE, { roughness: 1 }));
-    o.push(P("Parterre Cross", "box", [cx, 0.5, cz], [1.3, 0.7, 20], HEDGE, { roughness: 1 }));
-    o.push(P("Topiary Cone", "cone", [cx, 2.2, cz], [3.4, 3.6, 3.4], TOPIARY, { roughness: 1 }));
-    o.push(P("Topiary Pot", "cylinder", [cx, 0.45, cz], [2, 0.9, 2], "#7d6f57", { roughness: 1 }));
-    for (const ox of [-20.5, 20.5]) for (const oz of [-13.5, 13.5])
-      o.push(P("Topiary Ball", "sphere", [cx + ox * 0.92, 1.15, cz + oz * 0.92], [1.7, 1.7, 1.7], TOPIARY, { roughness: 1 }));
-  }
-  // TREE ALLÉES — shaped double-crown trees lining the main axis.
-  for (const sx of [-1, 1]) for (const tz of [-46, -30, 22, 54]) {
-    const x = sx * 15.5, z = tz === 22 || tz === 54 ? tz : tz;
-    o.push(P("Allée Trunk", "cylinder", [x, 1.1, z], [0.5, 2.2, 0.5], "#5a4632", { roughness: 1 }));
-    o.push(P("Allée Crown", "sphere", [x, 3.6, z], [4.4, 4.8, 4.4], TOPIARY, { roughness: 1 }));
-    o.push(P("Allée Crown Top", "sphere", [x, 5.3, z], [3, 3, 3], HEDGE, { roughness: 1 }));
-  }
-  // Long manicured hedge walls closing the garden's north and south edges.
-  for (const sz of [-1, 1]) for (const sx of [-1, 1]) {
-    o.push(P("Garden Hedge Wall", "box", [sx * 40, 0.85, 6 + sz * 51], [72, 1.7, 2.6], HEDGE, { roughness: 1 }));
-    o.push(P("Hedge Ball", "sphere", [sx * 76, 1.5, 6 + sz * 51], [2.6, 2.6, 2.6], TOPIARY, { roughness: 1 }));
-  }
-  // LAMPS — black posts, warm globes, in pairs along the axis.
-  for (const sx of [-1, 1]) for (const lz of [-38, -14, 12, 56]) {
-    o.push(P("Lamp Post", "cylinder", [sx * 13, 2.1, lz], [0.2, 4.2, 0.2], "#232a32", { roughness: 0.5, metalness: 0.6 }));
-    o.push(P("Lamp Globe", "sphere", [sx * 13, 4.5, lz], [0.95, 0.95, 0.95], "#ffe9b0", { roughness: 0.35, emissive: "#ffca66", emissiveIntensity: 0.55 } as any));
-  }
-  // STONE BENCHES facing the fountain.
-  for (const sx of [-1, 1]) for (const bz of [24, 52]) {
-    o.push(P("Bench Seat", "box", [sx * 17, 0.62, bz], [5, 0.3, 1.4], WHITE, { roughness: 0.8 }));
-    o.push(P("Bench Leg", "box", [sx * 17 - 1.8, 0.25, bz], [0.5, 0.5, 1.2], STONE, { roughness: 0.85 }));
-    o.push(P("Bench Leg", "box", [sx * 17 + 1.8, 0.25, bz], [0.5, 0.5, 1.2], STONE, { roughness: 0.85 }));
-  }
-  // THE THEATER SCREEN — the same one as the office floors, standing at
-  // the garden's north end facing the tower, hedges flanking it.
-  o.push(P("Theater Screen", "box", [0, 3.55, -46], [15.6, 5.9, 0.25], "#05080e", { metalness: 0.4, roughness: 0.35, theater: true } as any));
-  o.push(P("Theater Pylon Left", "box", [-8.05, 3.4, -46], [0.35, 6.6, 0.35], "#0a0f16"));
-  o.push(P("Theater Pylon Right", "box", [8.05, 3.4, -46], [0.35, 6.6, 0.35], "#0a0f16"));
-  for (const sx of [-1, 1]) o.push(P("Screen Hedge", "box", [sx * 11.5, 1.1, -46], [4.5, 2.2, 1.8], HEDGE, { roughness: 1 }));
-  return {
-    ...EMPTY_SCENE,
-    skybox: { ...DEFAULT_SKYBOX },
-    objects: o as any,
-    lights: [
-      { id: "plaza_sun", name: "Sunlight", kind: "directional", position: [26, 34, 14], color: [1, 0.97, 0.9, 1], intensity: 1.8, castShadow: false },
-      { id: "plaza_ambient", name: "Ambient", kind: "ambient", position: [0, 0, 0], color: [1, 1, 1, 1], intensity: 0.8 },
-    ],
-    environment: {
-      ...EMPTY_SCENE.environment,
-      background: "#cfe2ef",
-      ambient: 0.8,
-      gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.8, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
-    },
-  };
-}
-
-/** The Building Plaza's OWN published scene (building-plaza.json).
- * Null until an admin first publishes the level. */
-export async function fetchPublishedBuildingPlazaScene(): Promise<LevelScene | null> {
-  const m = await fetchPublishedOfficeMeta(publishedWorldUrl("building-plaza.json"));
-  return m?.scene ?? null;
-}
-
-/** The editable Building Plaza level always opens on its CURRENT
- * published scene; a divergent local copy is first preserved as a
- * draft level. Same rule as Floors 100 and 99. */
-export async function syncBuildingPlazaLevelToPublished(): Promise<LocalLevelRecord> {
-  const publishedScene = stripRetiredBackground(await fetchPublishedBuildingPlazaScene());
-  let existing = resolveWorldSyncLevel("officeplaza", BUILDING_PLAZA_LEVEL_NAME);
-  if (!existing) {
-    existing = _ensure(publishedScene ? () => publishedScene : buildBuildingPlazaScene, BUILDING_PLAZA_LEVEL_NAME);
-    setBoundWorldKey(existing.id, "officeplaza");
-    return getLocalLevel(existing.id) ?? existing;
-  }
-  setBoundWorldKey(existing.id, "officeplaza");
-  if (!publishedScene) return existing;
-  if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
-    preserveLocalDraft(existing, BUILDING_PLAZA_LEVEL_NAME, "Local edits preserved when the Building Plaza level was re-synced to the published version");
-    updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
-  }
-  return getLocalLevel(existing.id) ?? existing;
-}
-
 /** A department floor's editable level, same published-mirror rule as
  * every named level: it opens on its published scene when one exists,
  * and otherwise seeds from the bare room (Manager only) until the
@@ -621,24 +491,99 @@ export async function syncOfficeLevelToPublished(): Promise<LocalLevelRecord> {
 /* THE LOBBY — Floor 1 (founder directive 2026-10-26)                   */
 /* ------------------------------------------------------------------ */
 
-export const LOBBY_LEVEL_NAME = "Lobby — Ground Floor";
+export const LOBBY_LEVEL_NAME = "Lobby & Plaza — Ground Floor";
 
-/** The building's ground floor: a room like Floor 100 but DOUBLE
- * height (16 m), EMPTY (no desks — the founder designs it later), with
- * opened glass doors on the garden side so users come in and out, and
- * an elevator in the middle that takes users to the other floors. */
+/** LOBBY & PLAZA — the building's ground floor as ONE level (founder
+ * directive 2026-10-26: "lobby and building plaza are supposed to be
+ * one thing — eliminate the building plaza level"). The double-height
+ * lobby hall (16 m) opens through its glass doors straight onto the
+ * plaza: terrace, grand fountain, parterre gardens, tree allées, lamp
+ * rows and the theater screen at the far end — all walkable, no podium,
+ * no white box underneath. The elevator is a round glass shaft with
+ * bronze rings and a warm-lit cabin. NO desks, NO characters. */
 export function buildLobbyScene(): LevelScene {
   n = 0;
   const o: PrimitiveObject[] = [];
   const W = 48, D = 32, H = 16, T = 0.18;
   const glass: [number, number, number, number] = [0.72, 0.86, 0.97, 0.22];
-  // Floor — pale stone like the plaza terrace; ceiling slab at 16.
+  const bronze = "#8a6a34";
+  const TZ = 52; // the fountain's z — the plaza's heart
+  /* ---------- the grounds (the plaza half) ---------- */
+  o.push(P("Plaza Lawn", "box", [0, -0.06, 39], [190, 0.12, 152], "#3c6a32", { roughness: 1, metalness: 0 }));
+  o.push(P("Terrace", "box", [0, -0.03, 25], [64, 0.06, 20], "#ddd3ba", { roughness: 0.95, metalness: 0 }));
+  o.push(P("Central Walk", "box", [0, -0.02, 66], [14, 0.05, 66], "#e2d9c4", { roughness: 0.95, metalness: 0 }));
+  o.push(P("Theater Apron", "box", [0, -0.02, 100], [34, 0.05, 8], "#d8cfbc", { roughness: 0.95, metalness: 0 }));
+  // The grand fountain.
+  o.push(P("Fountain Basin", "cylinder", [0, 0.55, TZ], [26, 1.1, 26], "#ece7db", { roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Rim", "torus", [0, 1.15, TZ], [25.2, 1.6, 25.2], "#e0d8c6", { rotation: [Math.PI / 2, 0, 0], roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Water", "cylinder", [0, 0.95, TZ], [23.6, 0.12, 23.6], "#79a8a4", { roughness: 0.25, metalness: 0.1 }));
+  o.push(P("Fountain Pedestal", "cylinder", [0, 2.2, TZ], [5.2, 2.6, 5.2], "#e6e0d0", { roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Tier", "cylinder", [0, 3.6, TZ], [9.2, 0.5, 9.2], "#ece7db", { roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Tier Water", "cylinder", [0, 3.8, TZ], [8.4, 0.1, 8.4], "#79a8a4", { roughness: 0.25, metalness: 0.1 }));
+  o.push(P("Fountain Column", "cylinder", [0, 4.8, TZ], [1.6, 2.2, 1.6], "#e6e0d0", { roughness: 0.8, metalness: 0 }));
+  o.push(P("Fountain Crown", "sphere", [0, 6.2, TZ], [2.2, 2.2, 2.2], "#ece7db", { roughness: 0.7, metalness: 0 }));
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    o.push(P("Fountain Jet", "cone", [Math.cos(a) * 7, 1.7, TZ + Math.sin(a) * 7], [0.5, 1.2, 0.5], "#a8c8c4", { roughness: 0.3, metalness: 0.1 }));
+    o.push(P("Fountain Orb", "sphere", [Math.cos(a + 0.5) * 11.2, 1.65, TZ + Math.sin(a + 0.5) * 11.2], [1.1, 1.1, 1.1], bronze, { metalness: 0.8, roughness: 0.3 }));
+  }
+  // Parterre gardens — four mirrored quadrants.
+  for (const sx of [-1, 1]) for (const pz of [42, 70]) {
+    const cx = sx * 27;
+    o.push(P("Parterre Gravel", "box", [cx, 0.02, pz], [20, 0.05, 12], "#e6dfcd", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Hedge N", "box", [cx, 0.4, pz - 6], [20.6, 0.8, 0.7], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Hedge S", "box", [cx, 0.4, pz + 6], [20.6, 0.8, 0.7], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Hedge W", "box", [cx - 10, 0.4, pz], [0.7, 0.8, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Hedge E", "box", [cx + 10, 0.4, pz], [0.7, 0.8, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Cross NS", "box", [cx, 0.3, pz], [1.1, 0.6, 11.3], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Parterre Cross EW", "box", [cx, 0.3, pz], [19.3, 0.6, 1.1], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Flower Bed A", "box", [cx - 5, 0.16, pz - 3], [7.5, 0.3, 4], "#b8492f", { roughness: 1, metalness: 0 }));
+    o.push(P("Flower Bed B", "box", [cx + 5, 0.16, pz + 3], [7.5, 0.3, 4], "#e0a33c", { roughness: 1, metalness: 0 }));
+    o.push(P("Topiary Pot", "cylinder", [cx, 0.35, pz], [1.3, 0.7, 1.3], "#8a5a38", { roughness: 0.9, metalness: 0 }));
+    o.push(P("Topiary Cone", "cone", [cx, 1.9, pz], [1.7, 2.6, 1.7], "#2f6b2f", { roughness: 1, metalness: 0 }));
+  }
+  // Tree allées along the axis + the side rows.
+  const tree = (x: number, z: number, s = 1) => {
+    o.push(P("Allée Trunk", "cylinder", [x, 1.1 * s, z], [0.5 * s, 2.2 * s, 0.5 * s], "#5a4230", { roughness: 1, metalness: 0 }));
+    o.push(P("Allée Crown", "sphere", [x, 3.4 * s, z], [3.4 * s, 3.4 * s, 3.4 * s], "#356b31", { roughness: 1, metalness: 0 }));
+    o.push(P("Allée Crown Top", "sphere", [x, 4.6 * s, z], [2.3 * s, 2.3 * s, 2.3 * s], "#3d7a37", { roughness: 1, metalness: 0 }));
+  };
+  for (const sx of [-1, 1]) for (let i = 0; i < 5; i++) tree(sx * 10.5, 38 + i * 13.5);
+  for (const sx of [-1, 1]) for (let i = 0; i < 5; i++) tree(sx * 44, 20 + i * 18, 1.25);
+  // Lamp pairs along the walk.
+  for (let i = 0; i < 5; i++) for (const sx of [-1, 1]) {
+    const lz = 36 + i * 15;
+    o.push(P("Plaza Lamp Post", "cylinder", [sx * 8.4, 1.6, lz], [0.22, 3.2, 0.22], "#232a31", { metalness: 0.5, roughness: 0.5 }));
+    o.push(P("Plaza Lamp Globe", "sphere", [sx * 8.4, 3.5, lz], [0.72, 0.72, 0.72], "#fff2cf", { emissive: hex("#ffca66"), emissiveIntensity: 0.8 } as any));
+  }
+  // Benches facing the theater + the THEATER SCREEN (founder: keep it).
+  for (const bz of [86, 90.5, 95]) for (const bx of [-12, -4, 4, 12]) {
+    o.push(P("Theater Bench", "box", [bx, 0.5, bz], [5.6, 0.18, 0.7], "#cfc6ae", { roughness: 0.9, metalness: 0 }));
+    o.push(P("Theater Bench Leg", "box", [bx - 2.2, 0.22, bz], [0.35, 0.45, 0.6], "#6b5a41", { roughness: 0.9, metalness: 0 }));
+    o.push(P("Theater Bench Leg", "box", [bx + 2.2, 0.22, bz], [0.35, 0.45, 0.6], "#6b5a41", { roughness: 0.9, metalness: 0 }));
+  }
+  const screen = P("Theater Screen", "plane", [0, 5, 104], [24, 8.5, 1], "#0a1220", { roughness: 0.6, metalness: 0 }) as any;
+  screen.theater = true;
+  o.push(screen);
+  o.push(P("Theater Screen Back", "box", [0, 5, 104.4], [25, 9.3, 0.5], "#141a22", { roughness: 0.8, metalness: 0.2 }));
+  for (const sx of [-1, 1]) {
+    o.push(P("Theater Pylon", "box", [sx * 13.4, 3.4, 104.3], [1.1, 6.8, 1.1], "#232a31", { metalness: 0.4, roughness: 0.5 }));
+    o.push(P("Theater Hedge", "box", [sx * 19, 0.9, 103], [10, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
+  }
+  // Garden borders.
+  o.push(P("Garden Hedge Back", "box", [0, 0.9, 113], [124, 1.8, 1.6], "#2d5a2c", { roughness: 1, metalness: 0 }));
+  for (const sx of [-1, 1]) {
+    o.push(P("Garden Hedge Side", "box", [sx * 62, 0.9, 71], [1.6, 1.8, 84], "#2d5a2c", { roughness: 1, metalness: 0 }));
+    o.push(P("Corner Topiary Pot", "cylinder", [sx * 56, 0.4, 107], [1.6, 0.8, 1.6], "#8a5a38", { roughness: 0.9, metalness: 0 }));
+    o.push(P("Corner Topiary", "cone", [sx * 56, 2.6, 107], [2.4, 3.6, 2.4], "#2f6b2f", { roughness: 1, metalness: 0 }));
+  }
+  /* ---------- the lobby hall ---------- */
   o.push(P("Lobby Floor", "box", [0, -0.05, 0], [W, 0.1, D], "#d8cfbc", { roughness: 0.9, metalness: 0 }));
   o.push(P("Lobby Ceiling", "box", [0, H + 0.06, 0], [W, 0.12, D], "#eef2f5", { roughness: 0.95, metalness: 0 }));
+  o.push(P("Lobby Runner", "box", [0, 0.03, 9.5], [6.4, 0.04, 12], "#5a2320", { roughness: 1, metalness: 0 }));
   for (const lx of [-16, 0, 16]) for (const lz of [-7, 7]) {
     o.push(P("Ceiling Light Bar", "box", [lx, H - 0.06, lz], [5.5, 0.07, 0.45], "#d5dde4", { emissive: hex("#ffffff"), emissiveIntensity: 0.9 } as any));
   }
-  // Full walls (fused frames + glass) on N, W, E — double height.
   const wall = (side: string, len: number, px: number, pz: number, rotY: number, from: number, to: number) => {
     const segLen = to - from, mid = (from + to) / 2;
     const mx = px + Math.cos(rotY) * mid, mz = pz - Math.sin(rotY) * mid;
@@ -649,8 +594,8 @@ export function buildLobbyScene(): LevelScene {
   wall("N", W, 0, -D / 2, 0, -W / 2, W / 2);
   wall("W", D, -W / 2, 0, Math.PI / 2, -D / 2, D / 2);
   wall("E", D, W / 2, 0, Math.PI / 2, -D / 2, D / 2);
-  // SOUTH wall: two runs with a 7 m doorway between them, a lintel over
-  // the opening, and the two GLASS DOORS OPEN into the room.
+  // SOUTH wall: two runs with a 7 m doorway; the GLASS DOORS stand OPEN
+  // — walk straight out onto the terrace and the plaza.
   wall("S", W, 0, D / 2, 0, -W / 2, -3.5);
   wall("S", W, 0, D / 2, 0, 3.5, W / 2);
   o.push(P("Door Lintel", "box", [0, H - 0.45, D / 2], [7.2, 0.9, T], "#bfcbd6", { roughness: 0.45, metalness: 0.35 }));
@@ -658,21 +603,33 @@ export function buildLobbyScene(): LevelScene {
   o.push(P("Glass Door Right", "box", [4.7, 3, 14.1], [3.4, 6, 0.06], glass, { rotation: [0, -1.85, 0], roughness: 0.08, metalness: 0.1 }));
   o.push(P("Door Handle Left", "box", [-3.6, 1.6, 13.2], [0.07, 0.9, 0.07], "#8b98a5", { metalness: 0.7, roughness: 0.3 }));
   o.push(P("Door Handle Right", "box", [3.6, 1.6, 13.2], [0.07, 0.9, 0.07], "#8b98a5", { metalness: 0.7, roughness: 0.3 }));
-  // THE ELEVATOR — a glass shaft in the middle of the room, cabin at
-  // rest with its doors parted, indicator glowing above them.
-  o.push(P("Elevator Shaft Cap", "box", [0, H - 0.25, 0], [5.6, 0.5, 5.6], "#2b3644", { roughness: 0.5, metalness: 0.4 }));
-  for (const cx of [-2.6, 2.6]) for (const cz of [-2.6, 2.6]) {
-    o.push(P("Elevator Shaft Column", "box", [cx, H / 2, cz], [0.35, H, 0.35], "#2b3644", { roughness: 0.5, metalness: 0.4 }));
+  /* THE ELEVATOR — redesigned (founder: "the elevator SUCKS, make
+   * something pretty"): a ROUND glass shaft with bronze rings, a
+   * warm-lit glass cabin, a bronze medallion in the floor. */
+  o.push(P("Elevator Medallion", "cylinder", [0, 0.03, 0], [10, 0.06, 10], "#241c12", { roughness: 0.6, metalness: 0.3 }));
+  o.push(P("Elevator Medallion Ring", "torus", [0, 0.09, 0], [8.8, 0.5, 8.8], "#b08d4f", { rotation: [Math.PI / 2, 0, 0], metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Shaft Glass", "cylinder", [0, H / 2, 0], [5.4, H, 5.4], glass, { roughness: 0.08, metalness: 0.1 }));
+  for (const ry of [0.5, 8, 15.5]) {
+    o.push(P("Elevator Bronze Ring", "torus", [0, ry, 0], [5.5, 0.55, 5.5], bronze, { rotation: [Math.PI / 2, 0, 0], metalness: 0.8, roughness: 0.3 }));
   }
-  for (const [px, pz, rotY, len] of [[0, -2.6, 0, 5.2], [-2.6, 0, Math.PI / 2, 5.2], [2.6, 0, Math.PI / 2, 5.2]] as [number, number, number, number][]) {
-    o.push(P("Elevator Shaft Glass", "box", [px, H / 2, pz], [len, H - 1, 0.06], glass, { rotation: [0, rotY, 0], roughness: 0.08, metalness: 0.1 }));
+  for (const [mx, mz] of [[0, 2.68], [0, -2.68], [2.68, 0], [-2.68, 0]] as [number, number][]) {
+    o.push(P("Elevator Mullion", "box", [mx, H / 2, mz], [0.18, H, 0.18], bronze, { metalness: 0.8, roughness: 0.3 }));
   }
-  // South shaft face is the cabin front: frame + parted cabin doors.
-  o.push(P("Elevator Front Frame", "box", [0, H / 2, 2.6], [5.2, H - 1, 0.12], "#39434f", { roughness: 0.5, metalness: 0.4 }));
-  o.push(P("Elevator Cabin", "box", [0, 1.5, 0.4], [3.8, 3, 3.6], "#1c2634", { roughness: 0.4, metalness: 0.5 }));
-  o.push(P("Elevator Door Left", "box", [-1.15, 1.5, 2.28], [0.85, 3, 0.08], "#aeb9c4", { metalness: 0.7, roughness: 0.25 }));
-  o.push(P("Elevator Door Right", "box", [1.15, 1.5, 2.28], [0.85, 3, 0.08], "#aeb9c4", { metalness: 0.7, roughness: 0.25 }));
-  o.push(P("Elevator Indicator", "box", [0, 3.35, 2.68], [1.3, 0.28, 0.06], "#02161c", { emissive: hex("#00e5ff"), emissiveIntensity: 1.4 } as any));
+  o.push(P("Elevator Cabin Glass", "cylinder", [0, 1.62, 0], [4.3, 2.9, 4.3], glass, { roughness: 0.08, metalness: 0.1 }));
+  o.push(P("Elevator Cabin Crown", "cylinder", [0, 3.22, 0], [4.55, 0.35, 4.55], bronze, { metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Cabin Base", "cylinder", [0, 0.18, 0], [4.55, 0.35, 4.55], bronze, { metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Cabin Light", "cylinder", [0, 2.98, 0], [3.4, 0.06, 3.4], "#ffe9c4", { emissive: hex("#ffd9a0"), emissiveIntensity: 1.3 } as any));
+  o.push(P("Elevator Door Left", "box", [-0.62, 1.55, 2.08], [1.05, 2.9, 0.08], bronze, { metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Door Right", "box", [0.62, 1.55, 2.08], [1.05, 2.9, 0.08], bronze, { metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Call Column", "box", [3.7, 1.5, 2.5], [0.5, 3, 0.5], bronze, { metalness: 0.8, roughness: 0.3 }));
+  o.push(P("Elevator Call Panel", "box", [3.7, 2.55, 2.78], [0.34, 0.52, 0.06], "#1c1410", { emissive: hex("#ffb84d"), emissiveIntensity: 1.1 } as any));
+  for (const sx of [-1, 1]) {
+    o.push(P("Elevator Planter", "cylinder", [sx * 4.8, 0.35, 0], [1.5, 0.7, 1.5], "#3a3f45", { roughness: 0.7, metalness: 0.2 }));
+    o.push(P("Elevator Planter Green", "sphere", [sx * 4.8, 1.15, 0], [1.35, 1.1, 1.35], "#2f6b2f", { roughness: 1, metalness: 0 }));
+    o.push(P("Lobby Bench", "box", [sx * 9, 0.5, 5.5], [4.4, 0.16, 0.8], "#8a6a34", { metalness: 0.4, roughness: 0.5 }));
+    o.push(P("Lobby Bench Leg", "box", [sx * 9 - 1.7, 0.22, 5.5], [0.3, 0.45, 0.7], "#3a3f45", { roughness: 0.7, metalness: 0.3 }));
+    o.push(P("Lobby Bench Leg", "box", [sx * 9 + 1.7, 0.22, 5.5], [0.3, 0.45, 0.7], "#3a3f45", { roughness: 0.7, metalness: 0.3 }));
+  }
   return {
     ...EMPTY_SCENE,
     skybox: { ...DEFAULT_SKYBOX },
@@ -686,6 +643,7 @@ export function buildLobbyScene(): LevelScene {
       background: "#cfe2ef",
       ambient: 0.85,
       sceneVersion: OFFICE_SCENE_VERSION,
+      lobbyVersion: 2,
       gi: { enabled: true, skyColor: "#e2eef7", groundColor: "#cfd8de", hemisphereIntensity: 0.85, contactShadows: false, contactOpacity: 0, contactBlur: 2.5 },
     },
   } as LevelScene;
@@ -709,7 +667,24 @@ export async function syncLobbyLevelToPublished(): Promise<LocalLevelRecord> {
     return getLocalLevel(existing.id) ?? existing;
   }
   setBoundWorldKey(existing.id, "lobby");
-  if (!publishedScene) return existing;
+  // Rename migration (founder directive 2026-10-26): the level IS
+  // "Lobby & Plaza" now — a level still carrying the old "Lobby" name
+  // is this level; rename it in place.
+  if (existing.name !== LOBBY_LEVEL_NAME) {
+    updateLocalLevel(existing.id, { name: LOBBY_LEVEL_NAME });
+    existing = getLocalLevel(existing.id) ?? existing;
+  }
+  if (!publishedScene) {
+    // No published scene: an existing local level built before the
+    // Lobby & Plaza merge (lobbyVersion < 2) is reseeded from the
+    // current builder, its old scene preserved as a draft.
+    if ((((existing.scene as any)?.environment?.lobbyVersion) ?? 1) < 2) {
+      preserveLocalDraft(existing, LOBBY_LEVEL_NAME, "Local edits preserved when the Lobby level was upgraded to Lobby & Plaza");
+      updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(buildLobbyScene())) });
+      return getLocalLevel(existing.id) ?? existing;
+    }
+    return existing;
+  }
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
     preserveLocalDraft(existing, LOBBY_LEVEL_NAME, "Local edits preserved when the Lobby level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });

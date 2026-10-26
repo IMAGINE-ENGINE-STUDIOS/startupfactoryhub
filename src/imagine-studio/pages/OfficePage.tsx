@@ -1780,7 +1780,9 @@ export default function OfficePage() {
           ))}
           {scene && socialFlags.presence && Object.entries(peers).map(([id, info]) => <PeerAvatar key={id} info={info} speaking={speakingIds.includes(id)} />)}
           {scene && socialFlags.theater && <OfficeTheaterScreen source={theater} screenBot={screenBot} screenLink={screenLink} screenAgent={screenAgent} screenRuns={screenRuns} board={boardRows} screenQueue={screenQueue} onPages={setPdfPages} />}
-          {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" seatRef={seatRef} world={{ spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
+          {scene && <UnifiedPlayer def={playerDef} model={AGENT_PLAYER_MODEL_URL} tint="#ffffff" seatRef={seatRef} world={floor.id === 1
+            ? { spawn: [4, 0, 6], bounds: { x: 92, z: 73, cx: 0, cz: 39 }, colliders: [{ x: 0, z: 0, r: 3.4 }, { x: 0, z: 52, r: 14 }, { x: 0, z: 104, r: 8 }], camClamp: { minX: -95, maxX: 95, minY: 0.7, maxY: 15, minZ: -32, maxZ: 110 } }
+            : { spawn: [4, 0, 0], bounds: OFFICE_BOUNDS, colliders: OFFICE_DESKS.map((d) => ({ x: d.x, z: d.z, r: 1.0 })), camClamp: { minX: -21, maxX: 21, minY: 0.7, maxY: 7.3, minZ: -13.2, maxZ: 13.2 } }} lookRef={camRef} onMove={(x, z, ry) => { playerPos.set(x, 0, z); playerYaw.current = ry; }} />}
         </Suspense>
         <Proximity onNear={setNearKey} />
       </Canvas>
