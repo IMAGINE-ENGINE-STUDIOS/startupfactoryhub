@@ -41,14 +41,14 @@ export function buildInnovationCoffeeHtml(opts: { name?: string; when?: string }
 <p style="margin:0 0 14px;${body}">${greeting}</p>
 <p style="margin:0 0 14px;${body}">Join founders, mentors and investors from the Startup Factory Hub community for coffee and real conversations about building, funding and scaling ventures.</p>
 <p style="margin:0 0 24px;${body}">Bring a question, an idea or a project &mdash; and leave with new connections.</p>
-<table role="presentation" cellpadding="0" cellspacing="0"><tr>${chip("Founders")}${chip("Mentors")}${chip("Investors")}${chip("Coffee included")}</tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0"><tr>${chip("Founders")}${chip("Mentors")}${chip("Investors")}${chip("Coffee for paying members")}</tr></table>
 </td></tr>
 <tr><td style="padding:20px 40px 0;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a1b22;border:1px solid #17414b;border-radius:14px;"><tr><td style="padding:6px 22px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 ${row("Where", esc(IC_VENUE), IC_ADDRESS_LINES.map(esc).join("<br>"))}
 ${row("When", when)}
-<tr><td valign="top" width="88" style="padding:14px 0;${label}">Members</td><td style="padding:14px 0;font-family:${font};font-size:15px;line-height:1.5;color:#a9bfc9;">Show your member card at the counter &mdash; two coffees are included.</td></tr>
+<tr><td valign="top" width="88" style="padding:14px 0;${label}">Members</td><td style="padding:14px 0;font-family:${font};font-size:15px;line-height:1.5;color:#a9bfc9;">Two coffees are included only for paying members (Venture Network &#36;50/mo or higher). Show your active member card at the counter. Guests are welcome to order from the menu.</td></tr>
 </table></td></tr></table>
 </td></tr>
 <tr><td align="center" style="padding:32px 40px 40px;">
