@@ -45,6 +45,7 @@ import {
   Rocket,
   Flame,
   Megaphone,
+  Coffee,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
