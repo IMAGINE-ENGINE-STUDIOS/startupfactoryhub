@@ -14,7 +14,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { MicRecorder } from "@/lib/voice/recorder";
+import { MicRecorder, micErrorMessage } from "@/lib/voice/recorder";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
 import { speak, stopSpeaking, personaFor, preloadSpeech, type VoicePersona } from "@/lib/voice/tts";
 
@@ -59,10 +59,17 @@ export function useVoiceConversation(opts: {
 
   const persona = opts.persona || personaFor(opts.roleText);
 
+  /* The Talk session's microphone stream — acquired inside the tap
+   * that starts Talk and held across every turn, so iOS Safari never
+   * sees a getUserMedia call that trails a long download. */
+  const streamRef = useRef<MediaStream | null>(null);
+
   const shutdown = useCallback(() => {
     genRef.current++;
     recRef.current?.cancel();
     recRef.current = null;
+    MicRecorder.release(streamRef.current);
+    streamRef.current = null;
     stopSpeaking();
     setTalkState("off");
   }, []);
@@ -73,13 +80,16 @@ export function useVoiceConversation(opts: {
      * is ready the state stays "loading" with live progress, so the
      * user never speaks into a mic that isn't capturing yet. */
     setTalkState("loading");
+    let phase: "load" | "mic" = "load";
     try {
       await loadWhisper((p) => { if (gen === genRef.current) setLoadPct(p); });
       if (gen !== genRef.current) return;
       setLoadPct(null);
+      phase = "mic";
       const rec = new MicRecorder();
       recRef.current = rec;
       await rec.start({
+        stream: streamRef.current ?? undefined,
         autoStopSilenceMs: 1600,
         maxMs: 30_000,
         onAutoStop: () => { void finishListen(gen); },
@@ -89,7 +99,7 @@ export function useVoiceConversation(opts: {
       if (gen !== genRef.current) return;
       setTalkOn(false);
       shutdown();
-      toast.error(/denied|permission/i.test(e?.message || "") ? "Microphone permission was denied — allow the mic to talk." : "Could not open the microphone");
+      toast.error(phase === "mic" ? micErrorMessage(e) : e?.message || "Voice failed to start — try Talk again.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shutdown]);
@@ -161,6 +171,19 @@ export function useVoiceConversation(opts: {
     setTalkOn(true);
     setTalkState("loading");
     void (async () => {
+      /* Open the mic FIRST, while the tap's permission window is fresh
+       * (iOS Safari can refuse after the model download has sat in
+       * between — "could not open the microphone", 2026-10-25). */
+      try {
+        streamRef.current = await MicRecorder.acquire();
+      } catch (e: any) {
+        if (gen !== genRef.current) return;
+        setTalkOn(false);
+        shutdown();
+        toast.error(micErrorMessage(e));
+        return;
+      }
+      if (gen !== genRef.current) { MicRecorder.release(streamRef.current); streamRef.current = null; return; }
       preloadSpeech(); // Neural model: start the Kokoro download now, not at first reply
       try { await loadWhisper((p) => { if (gen === genRef.current) setLoadPct(p); }); } catch { /* listen() will surface errors */ }
       if (gen !== genRef.current) return;
@@ -170,7 +193,7 @@ export function useVoiceConversation(opts: {
   }, [talkOn, listen, shutdown]);
 
   /* Full stop on unmount. */
-  useEffect(() => () => { genRef.current++; recRef.current?.cancel(); stopSpeaking(); }, []);
+  useEffect(() => () => { genRef.current++; recRef.current?.cancel(); MicRecorder.release(streamRef.current); streamRef.current = null; stopSpeaking(); }, []);
 
   return { talkOn, talkState, loadPct, toggleTalk };
 }

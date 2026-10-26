@@ -4,8 +4,34 @@
  * stop) and the realtime Talk loop (auto-stop after a silence gap, so a
  * spoken message "sends itself" the way a phone call works).
  */
+/** Turn a getUserMedia failure into a message that names the actual
+ * cause — permission, missing device, or a busy mic read very
+ * differently to the person holding the phone. */
+export function micErrorMessage(e: any): string {
+  const name = e?.name || "";
+  if (name === "NotAllowedError" || /denied|permission/i.test(e?.message || "")) {
+    return "Microphone permission was denied — allow the mic for this site, then try again.";
+  }
+  if (name === "NotFoundError" || name === "OverconstrainedError") return "No microphone was found on this device.";
+  if (name === "NotReadableError" || name === "AbortError") return "The microphone could not be opened — it may be in use by another app or call.";
+  return e?.message ? `Microphone error: ${e.message}` : `Could not open the microphone${name ? ` (${name})` : ""}.`;
+}
+
 export class MicRecorder {
   private stream: MediaStream | null = null;
+  private ownStream = true;
+
+  /** Open the microphone NOW. Callers on mobile must do this inside
+   * the tap, before any long await: iOS Safari can refuse getUserMedia
+   * once a multi-minute model download has sat between the user's tap
+   * and the request ("could not open the microphone", 2026-10-25). */
+  static async acquire(): Promise<MediaStream> {
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+  }
+
+  static release(stream: MediaStream | null | undefined) {
+    try { stream?.getTracks().forEach((t) => t.stop()); } catch { /* noop */ }
+  }
   private rec: MediaRecorder | null = null;
   private chunks: Blob[] = [];
   private analyser: AnalyserNode | null = null;
@@ -27,9 +53,12 @@ export class MicRecorder {
    * that much continuous near-silence (post-first-sound). onLevel gets
    * an RMS value ~0..1 for meters/pulses.
    */
-  async start(opts: { autoStopSilenceMs?: number; maxMs?: number; onLevel?: (rms: number) => void; onAutoStop?: () => void } = {}): Promise<void> {
+  async start(opts: { autoStopSilenceMs?: number; maxMs?: number; stream?: MediaStream; onLevel?: (rms: number) => void; onAutoStop?: () => void } = {}): Promise<void> {
     if (this.recording) return;
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    /* A pre-acquired stream (see acquire()) is borrowed, never stopped
+     * by teardown — its owner manages its lifetime. */
+    this.ownStream = !opts.stream;
+    this.stream = opts.stream ?? (await MicRecorder.acquire());
     this.chunks = [];
     const mimeType = this.mime();
     this.rec = new MediaRecorder(this.stream, mimeType ? { mimeType } : undefined);
@@ -114,7 +143,7 @@ export class MicRecorder {
   }
 
   private teardown() {
-    this.stream?.getTracks().forEach((t) => t.stop());
+    if (this.ownStream) this.stream?.getTracks().forEach((t) => t.stop());
     this.stream = null;
     this.rec = null;
     this.analyser = null;

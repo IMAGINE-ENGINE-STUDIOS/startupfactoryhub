@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Mic, Square, Loader2, ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
-import { MicRecorder, micSupported } from "@/lib/voice/recorder";
+import { MicRecorder, micSupported, micErrorMessage } from "@/lib/voice/recorder";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
 import { VOICE_MODELS, getVoiceModel, setVoiceModel, onVoiceModelChange, type VoiceModelId } from "@/lib/voice/modelSetting";
 
@@ -25,8 +25,11 @@ export default function VoiceMicButton({
   const [state, setState] = useState<"idle" | "loading" | "recording" | "busy">("idle");
   const [pct, setPct] = useState<number | null>(null);
   const recRef = useRef<MicRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const aliveRef = useRef(true);
-  useEffect(() => () => { aliveRef.current = false; recRef.current?.cancel(); }, []);
+  useEffect(() => () => { aliveRef.current = false; recRef.current?.cancel(); MicRecorder.release(streamRef.current); streamRef.current = null; }, []);
+
+  const releaseStream = () => { MicRecorder.release(streamRef.current); streamRef.current = null; };
 
   /* Voice-model dropdown (founder directive 2026-10-25): the caret on
    * the mic opens the model picker — Tiny / Base / Neural, tiered for
@@ -68,6 +71,7 @@ export default function VoiceMicButton({
       setState("busy");
       try {
         const blob = await recRef.current?.stop();
+        releaseStream(); // the borrowed stream's owner is this button
         const text = blob ? await transcribeBlob(blob) : "";
         if (!aliveRef.current) return;
         if (text) onText(text);
@@ -78,24 +82,31 @@ export default function VoiceMicButton({
       if (aliveRef.current) setState("idle");
       return;
     }
-    // idle → (load model once) → record
+    // idle → open the mic FIRST (while the tap's permission window is
+    // fresh — iOS Safari can refuse getUserMedia after a long model
+    // download sits between the tap and the request) → load → record.
     try {
       setState("loading");
-      await loadWhisper((p) => { if (aliveRef.current) setPct(p); });
-      if (!aliveRef.current) return;
-      setPct(null);
-      recRef.current = new MicRecorder();
-      await recRef.current.start();
-      if (!aliveRef.current) { recRef.current.cancel(); return; }
-      setState("recording");
+      streamRef.current = await MicRecorder.acquire();
     } catch (e: any) {
       if (!aliveRef.current) return;
       setState("idle");
-      toast.error(
-        /denied|permission/i.test(e?.message || "")
-          ? "Microphone permission was denied — allow the mic to talk to Genius."
-          : e?.message || "Could not start the microphone",
-      );
+      toast.error(micErrorMessage(e));
+      return;
+    }
+    try {
+      await loadWhisper((p) => { if (aliveRef.current) setPct(p); });
+      if (!aliveRef.current) { releaseStream(); return; }
+      setPct(null);
+      recRef.current = new MicRecorder();
+      await recRef.current.start({ stream: streamRef.current });
+      if (!aliveRef.current) { recRef.current.cancel(); releaseStream(); return; }
+      setState("recording");
+    } catch (e: any) {
+      releaseStream();
+      if (!aliveRef.current) return;
+      setState("idle");
+      toast.error(e?.message || "Could not start voice input");
     }
   };
 
