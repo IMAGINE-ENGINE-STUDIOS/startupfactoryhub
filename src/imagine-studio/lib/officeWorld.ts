@@ -362,6 +362,11 @@ const stableStringify = (v: any): string => {
   return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(v[k])}`).join(",")}}`;
 };
 
+/** True when two scenes are content-identical (key order aside) — the
+ * /office page uses it to know whether the scene it is playing still
+ * needs baking into the floor's published file. */
+export const scenesEqual = (a: any, b: any): boolean => !!a && !!b && stableStringify(a) === stableStringify(b);
+
 /**
  * Same rule as the Plaza: the editable Office level always opens on the CURRENT
  * published scene; a divergent local copy is first preserved as a draft level.

@@ -22,7 +22,6 @@ import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
 import { memoryBlock } from '@/lib/agentMemory';
-import { durableGetSync, durableHydrate } from '@/lib/durableStore';
 import { buildDocument, documentDelivery, DOC_TASK, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
@@ -40,7 +39,7 @@ import { FLOORS, allFloors, createDynamicFloor, floorById, engineFor, setFloorTe
 import { runOutput } from '@/imagine-studio/lib/shiftEngine';
 import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, generationOf, getPendingFirings, getPersonnel, logAction, managerScope, orgSubscribe, personaName, recordFiring, renamePerson, retiredAgentIds, setPersonnelPrompt, withCharter, addPendingFiring, updateDepartment, CHAIRMAN_SCOPE } from '@/imagine-studio/lib/org';
 import { officeAdmin } from '@/imagine-studio/components/office/OfficeAdmin';
-import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildLobbyScene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
+import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildLobbyScene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, scenesEqual, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
 import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
@@ -938,7 +937,10 @@ export default function OfficePage() {
       .catch(() => { if (!off) setPubMeta({ publishedAt: null, live: false }); });
     return () => { off = true; };
   }, []);
-  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : floor.id === 100 ? buildOfficeScene() : floor.id === 1 ? buildLobbyScene() : buildSceneWithCast(floor.bots)), [floor]);
+  /* Every company floor's built-in scene comes from the SAME creation
+   * path — buildSceneWithCast over the shared room — Floor 100 included
+   * (founder directive 2026-10-26: "build it again just like level 99"). */
+  const codeScene = useMemo(() => (floor.id === 99 ? buildFloor99Scene() : floor.id === 1 ? buildLobbyScene() : buildSceneWithCast(floor.bots)), [floor]);
   // Each floor is its own LiveKit room, its own moderation and its own
   // access rules (founder directive 2026-10-25). Floor 100 keeps the
   // historic "office" room name so nothing already joined breaks.
@@ -956,9 +958,24 @@ export default function OfficePage() {
   // file IS this scene and the gate never triggers again.
   const pubVersion = (published as any)?.environment?.sceneVersion ?? 1;
   const outdated = !!published && pubVersion < OFFICE_SCENE_VERSION;
+  /* REBUILT LIKE FLOOR 99 (founder directive 2026-10-26): the named
+   * company floors (100 + 99) are CREATED the same way as every other
+   * floor — the code-built cast scene is the level, and the published
+   * file only contributes genuine studio additions through the merge.
+   * Floor 100 used to play its editor-published file RAW whenever its
+   * version was current, so this one floor drifted from its built level:
+   * the root of the Floor 100-only faults the founder kept hitting,
+   * feet underground included. The publish button below bakes the
+   * rebuilt scene back into office-world.json, so the file itself
+   * becomes the rebuilt level too. */
+  const rebuiltFloor = floor.id === 100 || floor.id === 99;
   // Never silently show the built-in copy: wait for the live published file,
   // and only fall back (clearly badged) when it truly cannot be loaded.
-  const scene = published && !outdated ? published : (pubMeta ? mergeOfficeScenes(codeScene, published ?? null) : null);
+  const scene = published && !outdated && !rebuiltFloor ? published : (pubMeta ? mergeOfficeScenes(codeScene, published ?? null) : null);
+  // The publish button + splash status key on REAL difference between
+  // what is playing and what the floor's file holds — once the rebuilt
+  // scene is baked in, the two are equal and both go quiet on their own.
+  const publishPending = floor.id === 100 && !!scene && !!published && (outdated || !scenesEqual(scene, published));
   // The world's own player controller (scene.playerControllerId + scene.controllers), default otherwise.
   const playerDef = useMemo(() => playerControllerFor(scene ?? undefined), [scene]);
   const [publishing, setPublishing] = useState(false);
@@ -1333,9 +1350,8 @@ export default function OfficePage() {
   useEffect(() => {
     if (!signedIn) return;
     let off = false;
-    void durableHydrate();
     const tick = async () => {
-      try { const q = durableGetSync<any[]>('sfh:agents-task-queue:v1'); if (!off && Array.isArray(q)) setQueueItems(q); } catch { /* queue unreadable */ }
+      try { const raw = localStorage.getItem('sfh:agents-task-queue:v1'); const q = raw ? JSON.parse(raw) : []; if (!off && Array.isArray(q)) setQueueItems(q); } catch { /* queue unreadable */ }
       const { data } = await supabase.from('call_agent_runs').select('id, agent_id, input, status, created_at').order('created_at', { ascending: false }).limit(80);
       if (!off && data) setAllRuns(data);
     };
@@ -1883,7 +1899,7 @@ export default function OfficePage() {
             {officeMenu && (
               <div className="absolute right-0 top-[calc(100%+6px)] w-72 max-h-[74vh] overflow-y-auto touch-pan-y rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl p-1.5">
                 <div className="px-2.5 pt-1.5 pb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">This floor</div>
-                {floor.id === 100 && outdated && scene && (
+                {publishPending && (
                   <button onClick={() => { void publishUpdatedScene(); }} disabled={publishing} className="w-full rounded-lg bg-emerald-500 px-2.5 py-2 text-left text-xs font-semibold text-emerald-950 flex items-center gap-2 disabled:opacity-60">
                     {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}{publishing ? 'Publishing…' : 'Publish the updated office'}
                   </button>
@@ -2107,7 +2123,7 @@ export default function OfficePage() {
           <div className="mt-2 text-xs sm:text-sm tracking-[0.5em] text-[#2EF8A0]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{brand.kind === 'company' ? 'HEADQUARTERS' : brand.kind === 'person' ? 'VIRTUAL OFFICE' : 'NEW YORK CITY OFFICE'}</div>
           <div className="mt-5 max-w-md text-sm text-white/60">The 3D home of your AI agents. Walk in, meet the team, put them to work — together.</div>
           <div className="mt-8 h-[3px] w-56 overflow-hidden rounded bg-white/10"><div className="h-full w-1/3 rounded bg-[#00E5FF]" style={{ animation: 'sfhscan 1.15s ease-in-out infinite' }} /></div>
-          <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (outdated ? 'UPDATED OFFICE READY — ADMIN PUBLISH PENDING' : pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
+          <div className="mt-4 text-[11px] text-white/40" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{scene ? (publishPending ? 'REBUILT OFFICE READY — ADMIN PUBLISH PENDING' : pubMeta?.live ? 'LIVE WORLD LOADED — WELCOME IN' : 'BUILT-IN COPY LOADED — WELCOME IN') : 'LOADING THE LIVE WORLD…'}</div>
         </div>
       )}
     </div>
