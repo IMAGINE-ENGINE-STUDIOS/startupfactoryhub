@@ -39,54 +39,52 @@ const offsetY = (floor?: number) => ((floor ?? 100) - 100) * STORY;
  * floating in the sky.
  */
 function TowerFill({ taken }: { taken: Set<number> }) {
-  const { slabs, glass, columns } = useMemo(() => {
+  const mesh = useMemo(() => {
     const ids: number[] = [];
     for (let f = 1; f < 100; f++) if (!taken.has(f)) ids.push(f);
-    const box = new THREE.BoxGeometry(1, 1, 1);
+    /* ONE single opaque InstancedMesh for the whole fill (founder
+     * directive 2026-10-26): the earlier transparent glass bands on
+     * ~97 floors shimmered like water (transparency sorting at
+     * glancing angles). Now every not-yet-created floor wears the
+     * same framed window facade as the real floors — slab, corner
+     * columns, mullions, deep glass you canNOT see into — all opaque,
+     * all one draw call. */
+    type Part = { p: [number, number, number]; s: [number, number, number]; glass?: boolean };
+    const parts: Part[] = [];
+    const glassC = new THREE.Color("#3d5f82");
+    const frameC = new THREE.Color("#b9c6d2");
     const haze = new THREE.Color("#33506e");
-    const slabMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0.05 }), ids.length);
-    slabMesh.name = "building-view-tower-slabs";
-    const glassMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.42, depthWrite: false }), ids.length);
-    glassMesh.name = "building-view-tower-glass";
-    /* Corner columns: without verticals the stack read as a zigzag
-     * ribbon of slab edges (founder screenshot 2026-10-26). A post at
-     * each corner of every story gives the tower a frame the eye can
-     * follow from top to ground. */
-    const colMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.7, metalness: 0.15 }), ids.length * 4);
-    colMesh.name = "building-view-tower-columns";
+    const cols: THREE.Color[] = [];
+    ids.forEach((f) => {
+      const y = offsetY(f);
+      const fade = Math.min(1, (100 - f) / 34) * 0.8;
+      const F = frameC.clone().lerp(haze, fade);
+      const G = glassC.clone().lerp(haze, fade);
+      const add = (p: [number, number, number], s: [number, number, number], glass = false) => { parts.push({ p, s, glass }); cols.push(glass ? G : F); };
+      add([0, y - 0.3, 0], [48.4, 0.6, 32.4]); // slab
+      add([0, y + STORY / 2, -16.02], [48.24, STORY - 0.6, 0.3], true); // facades
+      add([0, y + STORY / 2, 16.02], [48.24, STORY - 0.6, 0.3], true);
+      add([-24.02, y + STORY / 2, 0], [0.3, STORY - 0.6, 32.24], true);
+      add([24.02, y + STORY / 2, 0], [0.3, STORY - 0.6, 32.24], true);
+      for (const cx of [-24.1, 24.1]) for (const cz of [-16.1, 16.1]) add([cx, y + STORY / 2, cz], [0.55, STORY, 0.55]); // corners
+      for (const mx of [-18, -12, -6, 0, 6, 12, 18]) { // mullions on the long faces
+        add([mx, y + STORY / 2, -16.06], [0.28, STORY - 0.6, 0.36]);
+        add([mx, y + STORY / 2, 16.06], [0.28, STORY - 0.6, 0.36]);
+      }
+    });
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
-    const slabBase = new THREE.Color("#cfd8e1");
-    const glassBase = new THREE.Color("#6f9ec4");
-    const colBase = new THREE.Color("#93a7ba");
-    const corners: [number, number][] = [[-24.1, -16.1], [24.1, -16.1], [-24.1, 16.1], [24.1, 16.1]];
-    ids.forEach((f, i) => {
-      const y = offsetY(f);
-      const fade = Math.min(1, (100 - f) / 34);
-      m.compose(new THREE.Vector3(0, y - 0.3, 0), q, new THREE.Vector3(48.4, 0.6, 32.4));
-      slabMesh.setMatrixAt(i, m);
-      slabMesh.setColorAt(i, slabBase.clone().lerp(haze, fade * 0.8));
-      m.compose(new THREE.Vector3(0, y + STORY / 2, 0), q, new THREE.Vector3(48.24, STORY - 0.55, 32.24));
-      glassMesh.setMatrixAt(i, m);
-      glassMesh.setColorAt(i, glassBase.clone().lerp(haze, fade * 0.8));
-      corners.forEach(([cx, cz], ci) => {
-        m.compose(new THREE.Vector3(cx, y + STORY / 2, cz), q, new THREE.Vector3(0.55, STORY, 0.55));
-        colMesh.setMatrixAt(i * 4 + ci, m);
-        colMesh.setColorAt(i * 4 + ci, colBase.clone().lerp(haze, fade * 0.8));
-      });
+    const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.25 }), parts.length);
+    inst.name = "building-view-tower";
+    parts.forEach((pt, i) => {
+      m.compose(new THREE.Vector3(...pt.p), q, new THREE.Vector3(...pt.s));
+      inst.setMatrixAt(i, m);
+      inst.setColorAt(i, cols[i]);
     });
-    slabMesh.frustumCulled = false;
-    glassMesh.frustumCulled = false;
-    colMesh.frustumCulled = false;
-    return { slabs: slabMesh, glass: glassMesh, columns: colMesh };
+    inst.frustumCulled = false;
+    return inst;
   }, [taken]);
-  return (
-    <>
-      <primitive object={slabs} />
-      <primitive object={glass} />
-      <primitive object={columns} />
-    </>
-  );
+  return <primitive object={mesh} />;
 }
 
 /**

@@ -39,7 +39,7 @@ function faded(base: THREE.Color, levelsAway: number): THREE.Color {
 }
 
 function TowerSlabs({ currentId, detailed }: { currentId: number; detailed: Set<number> }) {
-  const { slabs, glass } = useMemo(() => {
+  const { slabs, facades } = useMemo(() => {
     const levels: number[] = [];
     for (let id = BUILDING_BOTTOM; id <= BUILDING_TOP; id++) {
       if (id === currentId || detailed.has(id)) continue;
@@ -48,8 +48,26 @@ function TowerSlabs({ currentId, detailed }: { currentId: number; detailed: Set<
     const box = new THREE.BoxGeometry(1, 1, 1);
     const slabMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0.05 }), levels.length);
     slabMesh.name = "building-tower-slabs";
-    const glassMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.34, depthWrite: false }), levels.length);
-    glassMesh.name = "building-tower-glass";
+    /* OPAQUE framed facades instead of transparent glass bands
+     * (founder directive 2026-10-26: the see-through bands on ~97
+     * floors shimmered like water; the fill floors now wear the same
+     * framed windows as the real floors, too deep to see into).
+     * Facades + corner columns ride ONE instanced mesh. */
+    type Part = { p: [number, number, number]; s: [number, number, number]; glass?: boolean; away: number };
+    const parts: Part[] = [];
+    const facadeC = new THREE.Color("#3d5f82");
+    levels.forEach((id) => {
+      const off = (id - currentId) * FLOOR_H;
+      const away = id - currentId;
+      const add = (p: [number, number, number], s: [number, number, number], glass = false) => parts.push({ p, s, glass, away });
+      add([0, off + FLOOR_H / 2, -(PLATE_D / 2 + 0.02)], [PLATE_W + 0.24, FLOOR_H - 0.6, 0.3], true);
+      add([0, off + FLOOR_H / 2, PLATE_D / 2 + 0.02], [PLATE_W + 0.24, FLOOR_H - 0.6, 0.3], true);
+      add([-(PLATE_W / 2 + 0.02), off + FLOOR_H / 2, 0], [0.3, FLOOR_H - 0.6, PLATE_D + 0.24], true);
+      add([PLATE_W / 2 + 0.02, off + FLOOR_H / 2, 0], [0.3, FLOOR_H - 0.6, PLATE_D + 0.24], true);
+      for (const cx of [-(PLATE_W / 2 + 0.1), PLATE_W / 2 + 0.1]) for (const cz of [-(PLATE_D / 2 + 0.1), PLATE_D / 2 + 0.1]) add([cx, off + FLOOR_H / 2, cz], [0.55, FLOOR_H, 0.55]);
+    });
+    const facadeMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.25 }), parts.length);
+    facadeMesh.name = "building-tower-facades";
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
     const one = new THREE.Vector3(1, 1, 1);
@@ -58,22 +76,24 @@ function TowerSlabs({ currentId, detailed }: { currentId: number; detailed: Set<
       m.compose(new THREE.Vector3(0, off - 0.22, 0), q, new THREE.Vector3(PLATE_W + 0.4, 0.45, PLATE_D + 0.4));
       slabMesh.setMatrixAt(i, m);
       slabMesh.setColorAt(i, faded(SLAB_BASE, id - currentId));
-      m.compose(new THREE.Vector3(0, off + FLOOR_H / 2, 0), q, new THREE.Vector3(PLATE_W + 0.24, FLOOR_H - 0.55, PLATE_D + 0.24));
-      glassMesh.setMatrixAt(i, m);
-      glassMesh.setColorAt(i, faded(GLASS_BASE, id - currentId));
+    });
+    parts.forEach((pt, i) => {
+      m.compose(new THREE.Vector3(...pt.p), q, new THREE.Vector3(...pt.s));
+      facadeMesh.setMatrixAt(i, m);
+      facadeMesh.setColorAt(i, faded(pt.glass ? facadeC : SLAB_BASE, pt.away));
     });
     slabMesh.frustumCulled = false;
-    glassMesh.frustumCulled = false;
-    return { slabs: slabMesh, glass: glassMesh };
+    facadeMesh.frustumCulled = false;
+    return { slabs: slabMesh, facades: facadeMesh };
   }, [currentId, detailed]);
   useEffect(() => () => {
     slabs.geometry.dispose(); (slabs.material as THREE.Material).dispose();
-    glass.geometry.dispose(); (glass.material as THREE.Material).dispose();
-  }, [slabs, glass]);
+    facades.geometry.dispose(); (facades.material as THREE.Material).dispose();
+  }, [slabs, facades]);
   return (
     <>
       <primitive object={slabs} />
-      <primitive object={glass} />
+      <primitive object={facades} />
     </>
   );
 }
