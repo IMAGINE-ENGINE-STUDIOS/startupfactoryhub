@@ -27,13 +27,20 @@ export class MicRecorder {
    * that much continuous near-silence (post-first-sound). onLevel gets
    * an RMS value ~0..1 for meters/pulses.
    */
-  async start(opts: { autoStopSilenceMs?: number; onLevel?: (rms: number) => void; onAutoStop?: () => void } = {}): Promise<void> {
+  async start(opts: { autoStopSilenceMs?: number; maxMs?: number; onLevel?: (rms: number) => void; onAutoStop?: () => void } = {}): Promise<void> {
     if (this.recording) return;
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
     this.chunks = [];
     const mimeType = this.mime();
     this.rec = new MediaRecorder(this.stream, mimeType ? { mimeType } : undefined);
     this.rec.ondataavailable = (e) => { if (e.data?.size) this.chunks.push(e.data); };
+    /* The flag MUST be set before the metering loop starts: the loop's
+     * first tick checks it and returns without rescheduling when false.
+     * It used to be set only at the very end of start() — AFTER tick()
+     * had already run once and died — so silence endpointing never ran
+     * at all and Talk mode recorded forever ("stays listening and
+     * that's it", founder report 2026-10-25). */
+    this.recording = true;
     // Level metering + silence endpointing.
     try {
       const AC: typeof AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -66,12 +73,16 @@ export class MicRecorder {
           opts.onAutoStop?.();
           return;
         }
+        // Failsafe: never record without end, whatever the meter says.
+        if (opts.maxMs && now - startedAt > opts.maxMs) {
+          opts.onAutoStop?.();
+          return;
+        }
         this.timer = window.setTimeout(tick, 110);
       };
       tick();
     } catch { /* metering is decorative — recording continues without it */ }
     this.rec.start(250);
-    this.recording = true;
   }
 
   /** Stop and return the recorded audio blob (empty blob if nothing ran). */

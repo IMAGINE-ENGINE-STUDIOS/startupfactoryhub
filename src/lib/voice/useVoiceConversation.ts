@@ -81,6 +81,7 @@ export function useVoiceConversation(opts: {
       recRef.current = rec;
       await rec.start({
         autoStopSilenceMs: 1600,
+        maxMs: 30_000,
         onAutoStop: () => { void finishListen(gen); },
       });
       if (gen === genRef.current) setTalkState("listening");
