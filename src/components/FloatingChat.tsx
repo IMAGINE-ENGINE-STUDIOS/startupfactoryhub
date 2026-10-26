@@ -1000,7 +1000,16 @@ You can help with:
               .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
               .join('\n\n')}`
           : '';
-      const systemOverride = getSystemOverride() + knowledgeBlock;
+      /* Voice conversation mode (Talk is on): the reply will be READ
+       * ALOUD, so it must read like a person talking — short natural
+       * sentences, no lists of options read out, no menus or markdown.
+       * Founder field report 2026-10-25: answers "seem kind of dumb"
+       * and the format "is not natural for talking — reading me a list
+       * of options instead of conversing with me." */
+      const voiceBlock = geniusVoice.talkOn
+        ? `\n\nVOICE CONVERSATION MODE: The user is talking to you out loud and your reply will be spoken by a voice, not read on a screen. Reply the way a smart person talks in a real conversation: one to three short, natural sentences. NEVER use bullet points, numbered lists, option menus, tables, or markdown, and never say things like "select an option" or "here are your options". If there are choices, weave them into a sentence and ask one simple question to keep the conversation going. Follow the user's requests and questions directly, keep answers focused and specific instead of generic, and do not dump information. Plain spoken words only.`
+        : '';
+      const systemOverride = getSystemOverride() + knowledgeBlock + voiceBlock;
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,

@@ -182,15 +182,45 @@ function playRawAudio(audio: Float32Array, sampleRate: number): Promise<void> {
   });
 }
 
+/** Chunk a reply for neural speech: the FIRST chunk is a single
+ * sentence (speech starts as early as possible); the rest merge
+ * sentences up to ~260 chars each. */
+function neuralChunks(clean: string): string[] {
+  const sentences = (clean.match(/[^.!?…]+[.!?…]*\s*/g) || [clean]).map((s) => s.trim()).filter(Boolean);
+  if (!sentences.length) return [];
+  const chunks: string[] = [];
+  let first = sentences[0];
+  while (first.length > 180) { chunks.push(first.slice(0, 180).trim()); first = first.slice(180); }
+  if (first.trim()) chunks.push(first.trim());
+  let cur = "";
+  for (const s of sentences.slice(1)) {
+    if ((cur + " " + s).trim().length > 260 && cur) { chunks.push(cur.trim()); cur = s; }
+    else cur = cur ? cur + " " + s : s;
+    while (cur.length > 260) { chunks.push(cur.slice(0, 260).trim()); cur = cur.slice(260); }
+  }
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks.filter(Boolean);
+}
+
 /** Speak with the neural voice; throws on any model problem (caller falls back). */
 async function speakNeural(text: string, persona: VoicePersona, mySeq: number): Promise<void> {
   const clean = stripForSpeech(text);
   if (!clean) return;
   const tts = await loadKokoro();
   const voice = KOKORO_VOICE_FOR_PERSONA[persona.id] || "af_heart";
-  for (const chunk of chunkText(clean, 300)) {
+  const chunks = neuralChunks(clean);
+  const gen = (t: string) => tts.generate(t, { voice }).catch(() => null);
+  /* Prefetch one chunk ahead: while chunk N plays, chunk N+1 is already
+   * generating — a long reply sounds continuous instead of pausing for
+   * seconds between sentences (founder field report 2026-10-25: text
+   * arrived fast, then "thinking for several seconds before speaking";
+   * generation was strictly serial and the first chunk ran to 300
+   * characters before a single sound). */
+  let pending: Promise<any> | null = chunks.length ? gen(chunks[0]) : null;
+  for (let i = 0; i < chunks.length; i++) {
     if (mySeq !== speakSeq) return; // cancelled / superseded
-    const out: any = await tts.generate(chunk, { voice });
+    const out: any = await pending;
+    pending = i + 1 < chunks.length ? gen(chunks[i + 1]) : null;
     if (mySeq !== speakSeq) return;
     const audio: Float32Array = out?.audio;
     const rate: number = out?.sampling_rate || 24000;
