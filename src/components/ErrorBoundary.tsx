@@ -160,6 +160,14 @@ class ErrorBoundary extends Component<Props, State> {
                   label="fault"
                   value={this.state.error?.message?.slice(0, 220) ?? 'n/a'}
                 />
+                {/* Diagnostic (added 2026-10-26 while hunting a fault
+                    that only reproduces in real browsers): the raw
+                    stack names the exact module and call site, turning
+                    a held screen into a usable bug report. */}
+                <Line
+                  label="stack"
+                  value={(this.state.error?.stack ?? '').split('\n').slice(0, 5).join(' ⏎ ').slice(0, 600) || 'n/a'}
+                />
                 <Line label="viewport" value="restore point saved" />
               </div>
 
