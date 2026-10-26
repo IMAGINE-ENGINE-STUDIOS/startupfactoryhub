@@ -389,7 +389,7 @@ export default function FloatingChat() {
             deliverBubbleAudit(`⚙ ${target.name} is now **${nn}** in your Agents roster.`);
             report(`${target.name} was renamed to ${nn}, as you asked.`);
           } else {
-            const np = withCharter(target.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
+            const np = withCharter(target.system_prompt || '', { mission: String(d.mission ?? ''), vision: String(d.vision ?? ''), instructions: String(d.instructions ?? '') });
             await callAgents({ action: 'save', id: target.id, name: target.name, description: target.description ?? '', model: d.model || target.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: target.tools ?? [] });
             deliverBubbleAudit(`⚙ ${target.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
             report(`${target.name}'s charter was updated as you set it.`);
