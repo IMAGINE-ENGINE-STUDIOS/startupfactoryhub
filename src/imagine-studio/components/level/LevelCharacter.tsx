@@ -1,12 +1,14 @@
 // @ts-nocheck -- imported Imagine Studio v2
 import { useEffect, useMemo, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SkeletonUtils } from "three-stdlib";
 import type { CharacterObject } from "@/imagine-studio/lib/levelTypes";
 import { modelForwardYawOffset } from "@/imagine-studio/lib/modelOrientation";
 import { applyPose } from "@/imagine-studio/lib/rigSaves";
 import { retargetClipProper } from "@/imagine-studio/lib/animationRetarget";
+import { makeGroundSampler } from "@/imagine-studio/lib/grounding";
 
 /**
  * Rigged character renderer.
@@ -44,6 +46,13 @@ export default function LevelCharacter({
     return c;
   }, [gltf.scene]); // eslint-disable-line react-hooks/exhaustive-deps
   const groupRef = useRef<THREE.Group>(null);
+  // Animated grounding: the static measure above uses the bind pose;
+  // the playing clip plants lower — sample it and lift once.
+  const groundSampler = useRef(makeGroundSampler());
+  useFrame((_, dt) => {
+    const lift = groundSampler.current(cloned, Math.min(dt, 0.05));
+    if (lift !== null && lift > 0) cloned.position.y += lift;
+  });
 
   // Bind GLTF animations to OUR cloned root.
   const { actions, names, mixer } = useAnimations(gltf.animations, cloned);

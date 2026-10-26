@@ -36,6 +36,7 @@ function Geo({ shape }) {
 }
 
 import { buildAssembly, buildFrameGridGeometry } from '@/imagine-studio/lib/fusedGeometry';
+import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
 
 /** A fused single-instance object (founder directives 2026-10-26):
  * window frames ("framegrid") and multi-part assemblies (desk stations)
@@ -91,11 +92,16 @@ export function PublishedCharacter({ o, onAgentOpen }: { o: any; onAgentOpen?: (
   const legsPoseRef = useRef<any[] | null>(null);
   const legsTriedRef = useRef(0);
   const sitClipName = useMemo(() => (o.startSeated ? names.find((n) => /sitting/i.test(n)) ?? null : null), [names, o.startSeated]);
+  const pubGroundSampler = useRef(makeGroundSampler());
   useEffect(() => {
     if (Array.isArray(o.pose) && o.pose.length) { try { applyPose(model as any, o.pose as any); posedRef.current = true; Object.values(actions).forEach((x) => x?.stop()); } catch { /* keep clips */ } }
   }, [model, o]);
-  useFrame(() => {
+  useFrame((_, dt) => {
     if (posedRef.current) return;
+    if (!o.startSeated) {
+      const lift = pubGroundSampler.current(model, Math.min(dt, 0.05));
+      if (lift !== null && lift > 0) model.position.y += lift;
+    }
     if (o.startSeated && sitClipName) {
       // A Sitting clip is a sit-DOWN transition: play once, clamp on the
       // last frame — never loop it.

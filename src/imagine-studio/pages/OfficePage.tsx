@@ -40,6 +40,7 @@ import { MAX_AGENTS_PER_FLOOR, agentScope, applyPersonnelToRoles, ceoScope, gene
 import { officeAdmin } from '@/imagine-studio/components/office/OfficeAdmin';
 import { AGENT_MODEL_URL, AGENT_PLAYER_MODEL_URL, MANAGER_HOME, CHAIRMAN_HOME, CEO_HOME, OFFICE_BOUNDS, OFFICE_DESKS, OFFICE_LEVEL_NAME, OFFICE_SCENE_VERSION, OFFICE_WAYPOINTS, buildOfficeScene, buildFloor99Scene, buildLobbyScene, buildSceneWithCast, fetchPublishedOfficeMeta, mergeOfficeScenes, publishedWorldUrl, syncOfficeLevelToPublished, type OfficeBot } from '@/imagine-studio/lib/officeWorld';
 import { UnifiedPlayer } from '@/imagine-studio/components/player/UnifiedPlayer';
+import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
 import { playerControllerFor } from '@/imagine-studio/lib/controllers';
 import MobileTouchControls from '@/imagine-studio/components/level/play/MobileTouchControls';
 import { applyPose, buildSeatedLegsPose } from '@/imagine-studio/lib/actionPoses';
@@ -414,9 +415,14 @@ function PeerAvatar({ info, speaking }: { info: PeerInfo; speaking: boolean }) {
   const root = useRef<THREE.Group>(null);
   const { actions, names } = useAnimations(animations, root);
   const peerSitHeld = useRef(false);
+  const peerGroundSampler = useRef(makeGroundSampler());
   const cur = useRef(new THREE.Vector3(info.x, 0, info.z));
   useFrame((_, dt) => {
     const g = root.current; if (!g) return;
+    if (!info.s) {
+      const lift = peerGroundSampler.current(model, Math.min(dt, 0.05));
+      if (lift !== null && lift > 0) model.position.y += lift;
+    }
     const k = Math.min(1, dt * 8);
     cur.current.x += (info.x - cur.current.x) * k;
     cur.current.z += (info.z - cur.current.z) * k;

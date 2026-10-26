@@ -21,6 +21,7 @@ import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.j
 import * as THREE from 'three';
 import { mobileAxes, mobileLook } from '@/imagine-studio/components/level/locomotion/locomotionState';
 import { runControllerScript, type ControllerDef } from '@/imagine-studio/lib/controllers';
+import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
 
 export interface PlayerWorld {
   spawn?: [number, number, number];
@@ -217,7 +218,15 @@ export function UnifiedPlayer({ def, model = '/models/plaza/Xbot.glb', tint, rin
   const sitHeld = useRef(false);
   const { actions, names } = useAnimations(animations, animRoot);
   const { groupRef, stateRef } = useUnifiedMovement(def, world, lookRef, { onMove, seatRef });
-  useFrame(() => {
+  // Animated grounding (founder report 2026-10-26: the PLAYER's feet
+  // stood under the floor — the static pose measure misses how low
+  // the clips plant). Sample the playing pose, lift once.
+  const groundSampler = useRef(makeGroundSampler());
+  useFrame((_, dt) => {
+    if (!seatRef?.current) {
+      const lift = groundSampler.current(modelObj, Math.min(dt, 0.05));
+      if (lift !== null && lift > 0) modelObj.position.y += lift;
+    }
     const { moving, sprint } = stateRef.current;
     const idleName = names.find((x) => /idle/i.test(x)) ?? names[0];
     const runName = names.find((x) => /run/i.test(x));

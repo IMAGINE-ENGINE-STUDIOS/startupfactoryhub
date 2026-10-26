@@ -1289,6 +1289,9 @@ export interface LevelSceneProps {
   scene: LevelScene;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
+  /** Right-click on an object in the viewport (founder directive
+   * 2026-10-26): the page opens its object menu (Make Instance…). */
+  onContextObject?: (id: string, x: number, y: number) => void;
   showGrid?: boolean;
   playing?: boolean;
   skipBackground?: boolean; // keep host canvas/world visible when embedded in Atlas
@@ -1354,6 +1357,7 @@ export function LevelSceneContents({
   scene: rawScene,
   selectedId,
   onSelect,
+  onContextObject,
   showGrid,
   playing,
   skipBackground,
@@ -1464,7 +1468,15 @@ export function LevelSceneContents({
         />
       )}
       {scene.terrain?.enabled && <RenderTerrain terrain={scene.terrain} />}
-      <group ref={groupRef} onPointerMissed={() => onSelect?.(null)}>
+      <group ref={groupRef} onPointerMissed={() => onSelect?.(null)} onContextMenu={(e: any) => {
+        if (!onContextObject) return;
+        let nx = e.object;
+        while (nx && !(typeof nx.name === "string" && nx.name.startsWith("obj-"))) nx = nx.parent;
+        if (!nx) return;
+        e.stopPropagation();
+        e.nativeEvent?.preventDefault?.();
+        onContextObject(nx.name.slice(4), e.clientX ?? 0, e.clientY ?? 0);
+      }}>
         {scene.objects.map((o) => (
           <ObjectSlot
             key={o.id}

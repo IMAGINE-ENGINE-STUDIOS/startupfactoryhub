@@ -4,6 +4,7 @@ import { EMPTY_SCENE, type LevelScene } from "@/imagine-studio/lib/levelTypes";
 import { createLocalLevel, updateLocalLevel } from "@/imagine-studio/lib/localLevels";
 import { activeProjectLevels, addLevelToProject, getActiveLevel, projectOfLevel } from "@/imagine-studio/lib/localProjects";
 import { normalizeController } from "@/imagine-studio/lib/controllers";
+import { fuseToInstance } from "@/imagine-studio/lib/fusedGeometry";
 
 /** Finds a project level by id or name, creating an empty one when missing. */
 function ensureLevel(ref: string, ops?: any[]): { id: string; name: string } {
@@ -177,6 +178,22 @@ export function applyStudioOps(input: LevelScene, ops: any[], layerId?: string):
         applied++;
       } else if (op.op === "remove") {
         const before = s.objects.length; s.objects = s.objects.filter((x) => x.id !== real(op.id)); if (s.objects.length < before) applied++;
+      } else if (op.op === "instance") {
+        /* Fuse objects into ONE instance (founder directive 2026-10-26):
+         * {"op":"instance","ids":[objectIds]} — or "id" for a single
+         * object. Primitives, frames and existing instances fuse;
+         * characters/models are left untouched. */
+        const want: string[] = Array.isArray(op.ids) ? op.ids.map((x: any) => real(String(x))) : op.id ? [real(String(op.id))] : [];
+        const fused = fuseToInstance(s.objects as any[], want, () => uid("obj"));
+        if (fused) {
+          const used: string[] = fused.__fusedIds ?? [];
+          delete fused.__fusedIds;
+          s.objects = s.objects.filter((x) => !used.includes(x.id));
+          s.objects.push(fused);
+          if (op.name) fused.name = String(op.name).slice(0, 80);
+          newIds.push(fused.id);
+          applied++;
+        }
       } else if (op.op === "environment" && op.patch) {
         const p = op.patch;
         if (typeof p.background === "string") s.environment.background = p.background;

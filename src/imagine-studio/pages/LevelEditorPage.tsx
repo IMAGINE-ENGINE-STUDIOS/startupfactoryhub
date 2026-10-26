@@ -31,6 +31,7 @@ import {
   markCommitted as markLevelSnapshotCommitted,
   latestSnapshot as latestLevelSnapshot,
 } from "@/imagine-studio/lib/levelBackup";
+import { fuseToInstance } from "@/imagine-studio/lib/fusedGeometry";
 import {
   EMPTY_SCENE, LevelScene, SceneObject, SceneLight, AnimationTrack,
   PrimitiveObject, PolygonObject, ModelObject, newId, Vec3, RGBA,
@@ -542,6 +543,7 @@ export default function LevelEditorPage() {
   const [testOpen, setTestOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [objMenu, setObjMenu] = useState<{ x: number; y: number } | null>(null);
   const [playing, setPlaying] = useState(false);
   /* Imagine Engine header Play/Stop and state echo */
   useEffect(() => {
@@ -1352,6 +1354,28 @@ export default function LevelEditorPage() {
       return s;
     });
     toast.success("Ungrouped");
+  };
+
+  /** MAKE INSTANCE (founder directive 2026-10-26): fuse the selected
+   * object(s) into ONE assembly instance — parts merged, materials
+   * kept. One object by itself becomes an instance too. Primitives,
+   * frames and existing instances fuse; characters/models are left. */
+  const makeInstanceFromSelection = () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) { toast.error("Select at least one object to make an instance"); return; }
+    const fused = fuseToInstance(scene.objects as any[], ids, () => newId("obj"));
+    if (!fused) { toast.error("Only built-in shapes can become an instance (characters and models stay as they are)"); return; }
+    const used: string[] = fused.__fusedIds ?? [];
+    delete fused.__fusedIds;
+    updateScene((s) => {
+      s.objects = s.objects.filter((o) => !used.includes(o.id));
+      s.objects.push(fused as any);
+      if (s.groups) s.groups = s.groups.map((g) => ({ ...g, memberIds: g.memberIds.filter((m) => !used.includes(m)) })).filter((g) => g.memberIds.length > 0);
+      return s;
+    });
+    setSelectedIds(new Set([fused.id]));
+    setSelectedId(fused.id);
+    toast.success(used.length > 1 ? `Fused ${used.length} objects into one instance` : "Made into an instance");
   };
 
   /** Find the group (if any) that the focused object belongs to. */
@@ -2369,6 +2393,10 @@ export default function LevelEditorPage() {
             scene={renderedScene}
             selectedId={selectedId}
             facePaint={facePaintState}
+            onContextObject={(id, x, y) => {
+              if (!selectedIds.has(id)) selectObject(id);
+              setObjMenu({ x, y });
+            }}
             onSelect={(oid, multi) => {
               if (editingPolygonId) {
                 // While spline editing is active, keep the editing polygon
@@ -2455,6 +2483,21 @@ export default function LevelEditorPage() {
             }}
             className="w-full h-full"
           />
+          )}
+          {/* Right-click object menu (founder directive 2026-10-26). */}
+          {objMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setObjMenu(null)} onContextMenu={(e) => { e.preventDefault(); setObjMenu(null); }} />
+              <div className="fixed z-50 w-60 rounded-xl border border-border bg-background/95 backdrop-blur shadow-2xl p-1.5" style={{ left: Math.min(objMenu.x, window.innerWidth - 250), top: Math.min(objMenu.y, window.innerHeight - 120) }}>
+                <button
+                  className="w-full rounded-lg px-2.5 py-2 text-left text-xs hover:bg-muted flex items-center gap-2"
+                  onClick={() => { setObjMenu(null); makeInstanceFromSelection(); }}
+                >
+                  <Boxes className="w-3.5 h-3.5" /> Make Instance of {selectedIds.size > 1 ? `${selectedIds.size} objects` : "this object"}
+                </button>
+                <div className="px-2.5 py-1 text-[10px] leading-snug text-muted-foreground">Fuses the selection into a single instance object — one click, one object.</div>
+              </div>
+            </>
           )}
         </main>
 
@@ -2561,6 +2604,7 @@ export default function LevelEditorPage() {
                   selectionSize={selectedIds.size}
                   onGroup={groupSelection}
                   onUngroup={ungroupSelection}
+                  onMakeInstance={makeInstanceFromSelection}
                   onSaveAsDynamic={() => setSaveDynamicOpen(true)}
                   onDelete={() => {
                     removeObject(selectedObj.id);
@@ -3361,7 +3405,7 @@ function ObjectInspector({
   userClips, onOpenCharacterGallery, onSpawnObjects, allObjects = [],
   scenePaths = [], onPatchScenePaths,
   currentGroup, currentGroupSize = 0, selectionSize = 1,
-  onGroup, onUngroup, onSaveAsDynamic,
+  onGroup, onUngroup, onSaveAsDynamic, onMakeInstance,
 }: {
   obj: SceneObject;
   onPatch: (p: Partial<SceneObject>) => void;
@@ -3389,6 +3433,7 @@ function ObjectInspector({
   onGroup?: () => void;
   onUngroup?: () => void;
   onSaveAsDynamic?: () => void;
+  onMakeInstance?: () => void;
 }) {
   return (
     <div className="space-y-3">
@@ -3397,7 +3442,7 @@ function ObjectInspector({
         <Input value={obj.name} disabled={disabled} onChange={(e) => onPatch({ name: e.target.value } as any)} className="h-7 text-xs" />
       </div>
 
-      {(onGroup || onUngroup || onSaveAsDynamic) && (
+      {(onGroup || onUngroup || onSaveAsDynamic || onMakeInstance) && (
         <div className="flex flex-wrap items-center gap-1 rounded-md border border-border/40 bg-card/40 px-1.5 py-1">
           {currentGroup ? (
             <span
@@ -3426,6 +3471,15 @@ function ObjectInspector({
               title={selectionSize < 2 ? "Select 2+ objects to group" : "Group selection (Ctrl+G)"}
             >
               <Link2 className="w-3 h-3 mr-1" /> Group
+            </Button>
+          )}
+          {onMakeInstance && (
+            <Button
+              size="sm" variant="outline" className="h-6 px-2 text-[10px]"
+              disabled={disabled} onClick={onMakeInstance}
+              title="Fuse the selected object(s) into ONE instance — their parts merge into a single object that selects, moves and renders as one"
+            >
+              <Boxes className="w-3 h-3 mr-1" /> Make Instance
             </Button>
           )}
           {onSaveAsDynamic && (
