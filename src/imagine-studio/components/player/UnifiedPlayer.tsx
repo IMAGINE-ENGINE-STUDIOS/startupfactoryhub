@@ -57,6 +57,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
   const coyote = useRef(0);
   const speedMult = useRef(1);
   const wasSeated = useRef(false);
+  const smCamPos = useRef<THREE.Vector3 | null>(null);
   const smCam = useRef<{ yaw: number; pitch: number } | null>(null);
 
   useFrame(({ camera }, dtRaw) => {
@@ -130,20 +131,35 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
       let nz = g.position.z + vel.current.z * dt;
       if (world.bounds) { const bcx = world.bounds.cx ?? 0, bcz = world.bounds.cz ?? 0; nx = THREE.MathUtils.clamp(nx, bcx - world.bounds.x, bcx + world.bounds.x); nz = THREE.MathUtils.clamp(nz, bcz - world.bounds.z, bcz + world.bounds.z); }
       if (world.radialBound) { const r = Math.hypot(nx, nz); if (r > world.radialBound) { nx *= world.radialBound / r; nz *= world.radialBound / r; } }
-      let blocked = false;
       /* A collider only blocks ENTRY. If the player is already inside
        * its radius — the office seat spot sits 0.85 from the desk
        * center, inside the desk's 1.0 collider — movement must stay
        * free, or standing up from a chair traps the player forever:
        * every first step's target is still inside the radius. */
-      if (world.colliders) for (const d of world.colliders) { if (Math.hypot(g.position.x - d.x, g.position.z - d.z) >= d.r && Math.hypot(nx - d.x, nz - d.z) < d.r) { blocked = true; break; } }
-      if (!blocked) {
+      const hitsCollider = (x: number, z: number) => {
+        if (!world.colliders) return false;
+        for (const d of world.colliders) { if (Math.hypot(g.position.x - d.x, g.position.z - d.z) >= d.r && Math.hypot(x - d.x, z - d.z) < d.r) return true; }
+        return false;
+      };
+      /* SLIDE, DON'T BOUNCE (founder report 2026-10-26, mobile): a
+       * hard stop at a desk — velocity zeroed while the stick is still
+       * pushed, rebuilding into the wall every frame — reads as the
+       * camera bouncing off desks and characters. Try the diagonal,
+       * then each axis alone, so the player slides along the obstacle
+       * and the camera stays steady. */
+      let mx = nx, mz = nz;
+      if (hitsCollider(mx, mz)) {
+        if (!hitsCollider(nx, g.position.z)) { mz = g.position.z; }
+        else if (!hitsCollider(g.position.x, nz)) { mx = g.position.x; }
+        else { mx = g.position.x; mz = g.position.z; vel.current.x *= 0.3; vel.current.z *= 0.3; }
+      }
+      if (mx !== g.position.x || mz !== g.position.z) {
         if (world.pushOut) for (const b of world.pushOut) {
-          const ddx = nx - b.x, ddz = nz - b.z, dd = Math.hypot(ddx, ddz);
-          if (dd < b.r && dd > 0.0001) { nx = b.x + (ddx / dd) * b.r; nz = b.z + (ddz / dd) * b.r; }
+          const ddx = mx - b.x, ddz = mz - b.z, dd = Math.hypot(ddx, ddz);
+          if (dd < b.r && dd > 0.0001) { mx = b.x + (ddx / dd) * b.r; mz = b.z + (ddz / dd) * b.r; }
         }
-        g.position.x = nx; g.position.z = nz;
-      } else { vel.current.x *= 0.3; vel.current.z *= 0.3; }
+        g.position.x = mx; g.position.z = mz;
+      }
       if (isMoving && def.mode !== 'first') {
         const targetYaw = Math.atan2(vel.current.x, vel.current.z);
         let cur = g.rotation.y; let diff = targetYaw - cur; while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
@@ -175,12 +191,22 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
       );
     } else {
       const back = def.cameraDistance, height = def.cameraHeight + pitch * 4;
-      camera.position.set(g.position.x - Math.sin(yaw) * back * Math.cos(pitch), height + g.position.y, g.position.z - Math.cos(yaw) * back * Math.cos(pitch));
+      const desired = new THREE.Vector3(g.position.x - Math.sin(yaw) * back * Math.cos(pitch), height + g.position.y, g.position.z - Math.cos(yaw) * back * Math.cos(pitch));
       if (world.camClamp) {
-        camera.position.x = THREE.MathUtils.clamp(camera.position.x, world.camClamp.minX, world.camClamp.maxX);
-        camera.position.y = THREE.MathUtils.clamp(camera.position.y, world.camClamp.minY, world.camClamp.maxY);
-        camera.position.z = THREE.MathUtils.clamp(camera.position.z, world.camClamp.minZ, world.camClamp.maxZ);
+        desired.x = THREE.MathUtils.clamp(desired.x, world.camClamp.minX, world.camClamp.maxX);
+        desired.y = THREE.MathUtils.clamp(desired.y, world.camClamp.minY, world.camClamp.maxY);
+        desired.z = THREE.MathUtils.clamp(desired.z, world.camClamp.minZ, world.camClamp.maxZ);
       }
+      /* CAMERA POSITION SMOOTHING (founder report 2026-10-26, mobile):
+       * the camera used to be set EXACTLY on the computed spot every
+       * frame, so every clamp edge, collider stop and velocity jitter
+       * in the player hit the camera 1:1 — the "bouncing off desks"
+       * glitch while walking. Ease the camera toward the desired spot
+       * (fast, frame-rate independent); lookAt stays locked on the
+       * player, so turns still feel direct. */
+      if (!smCamPos.current) smCamPos.current = desired.clone();
+      smCamPos.current.lerp(desired, 1 - Math.exp(-dt * 14));
+      camera.position.copy(smCamPos.current);
       camera.lookAt(g.position.x, 1.5 + g.position.y, g.position.z);
     }
   });

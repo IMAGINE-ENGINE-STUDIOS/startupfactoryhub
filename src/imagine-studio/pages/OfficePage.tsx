@@ -961,12 +961,22 @@ export default function OfficePage() {
   const [pubNote, setPubNote] = useState('');
   const publishUpdatedScene = async () => {
     if (!scene) return;
+    /* PUBLISH TO THIS FLOOR'S OWN FILE (bug fix, founder report
+     * 2026-10-26): this used to hardcode target 'office', so standing
+     * on Floor 99 and tapping Publish wrote Floor 99's scene over
+     * Floor 100's office-world.json — and floor99-world.json was never
+     * created at all (the live Floor 99 played a built-in copy while
+     * the editor held the real level: the published/editor split she
+     * keeps hitting). studio-publish has a target per floor — use it. */
+    const target = floor.id === 100 ? 'office' : floor.id === 99 ? 'office99' : floor.id === 1 ? null : `floor${floor.id}`;
+    if (!target) { setPubNote('The Lobby publishes from the 3D Studio — this button is for the company floors.'); return; }
+    const name = floor.id === 100 ? OFFICE_LEVEL_NAME : floor.id === 99 ? 'Floor 99 — Wonderlands World' : `Floor ${floor.id} — ${floor.company}`;
     setPublishing(true); setPubNote('');
-    const { data, error } = await supabase.functions.invoke('studio-publish', { body: { target: 'office', name: OFFICE_LEVEL_NAME, scene } });
+    const { data, error } = await supabase.functions.invoke('studio-publish', { body: { target, name, scene } });
     setPublishing(false);
     if (error || (data as any)?.error) { setPubNote((data as any)?.error || error?.message || 'Publish failed — try again from the 3D Studio.'); return; }
     setPublished(scene);
-    setPubNote('Published — everyone now loads this office.');
+    setPubNote(`Published — everyone now loads Floor ${floor.id} from its own file (${floor.publishedFile}).`);
   };
   const bots = useMemo(() => {
     const chars = (scene?.objects || []).filter((o: any) => o.kind === 'character');
@@ -1009,7 +1019,10 @@ export default function OfficePage() {
   const seatRef = useRef<{ x: number; z: number; ry: number; y: number } | null>(null);
   const [seatedAt, setSeatedAt] = useState<number | null>(null);
   const [nearSeat, setNearSeat] = useState<number | null>(null);
-  const seatSpots = useMemo(() => OFFICE_DESKS.map((d, i) => ({ i, x: d.x, z: d.z + d.facing * 0.85, ry: d.facing === 1 ? Math.PI : 0 })), []);
+  // Desks exist only on team floors — the Lobby & Plaza has none, so
+  // no "Sit at this desk" pill may ever appear there (founder
+  // screenshot 2026-10-26 showed it floating in the empty lobby).
+  const seatSpots = useMemo(() => (floor.bots.length === 0 && floor.id === 1 ? [] : OFFICE_DESKS.map((d, i) => ({ i, x: d.x, z: d.z + d.facing * 0.85, ry: d.facing === 1 ? Math.PI : 0 }))), [floor]);
   const sitAt = (i: number) => { const s = seatSpots[i]; if (!s) return; seatRef.current = { x: s.x, z: s.z, ry: s.ry, y: 0.671 }; setSeatedAt(i); setNearSeat(null); };
   const standUp = () => { seatRef.current = null; setSeatedAt(null); };
   useEffect(() => {
