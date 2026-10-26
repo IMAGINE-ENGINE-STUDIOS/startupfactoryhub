@@ -36,6 +36,8 @@ import {
 
 export interface ExecTools {
   fire: (floorKey: string, botKey: string, by: string, reason: string) => Promise<{ queued: boolean }>;
+  /** Recruit a new specialist onto a floor (conversational action). */
+  recruit: (f: FloorDef, x: { name: string; duty: string; prompt: string }) => Promise<void>;
   chatWith: (f: FloorDef, botKey: string, text: string) => Promise<string>;
   /** Resolve an executive's call-agent id (VoiceCall v2 brain). */
   resolveAgentId: (f: FloorDef, botKey: string) => Promise<string | null>;
@@ -608,7 +610,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
           <div className="min-h-0 flex-1">
             <AgentChat
               name={myName}
-              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}\n\n[ACTION PROTOCOL — if my message clearly asks you to make work happen, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"dispatch","goal":"..."}]] to coordinate the company/building, [[ACT {"type":"run_task","agent":"<person or role name>","task":"..."}]] to assign someone directly, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it in LightPaper — never write it yourself here), [[ACT {"type":"fire","agent":"<name>"}]] only when I explicitly say to remove someone. Confirm in words what you set in motion.]`)}
+              onSend={async (text) => tools.chatWith(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman", `${briefingFor(isCeo ? ceoHome : FLOORS[0], isCeo ? "ceo" : "chairman")}${text}\n\n[ACTION PROTOCOL — if my message clearly asks you to make work happen, END your reply with directive lines the platform executes (never explained, never quoted back): [[ACT {"type":"dispatch","goal":"..."}]] to coordinate the company/building, [[ACT {"type":"run_task","agent":"<person or role name>","task":"..."}]] to assign someone directly, [[ACT {"type":"build_document","title":"...","brief":"..."}]] when I ask for a report or document (the Writer builds it in LightPaper — never write it yourself here), [[ACT {"type":"recruit","role":"<role title>","brief":"<what they will own>","name":"<optional name>"}]] when I ask to bring on a new specialist, [[ACT {"type":"fire","agent":"<name>"}]] only when I explicitly say to remove someone. Confirm in words what you set in motion.]`)}
               onAction={(d, { audit, report }) => {
                 /* Conversational actions — the CEO/Chairman act from
                  * the chat/call: dispatch, direct tasks, documents,
@@ -674,6 +676,20 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                         ? `⚙ ${row.label} will be replaced at the next safe moment (queued by ${by}).`
                         : `⚙ ${row.label} has been replaced — a new ${row.role} takes over.`);
                       report(`${row.label} was removed as you asked.`);
+                    } else if (d.type === "recruit") {
+                      const role = String(d.role || "").trim();
+                      if (!role) { audit("⚙ The recruit needs a role — ask for the role and try again."); return; }
+                      const brief = String(d.brief || "").trim();
+                      const name = String(d.name || "").trim() || role;
+                      audit(`⚙ Recruiting **${name}** as ${role} on Floor ${execFloor.id}…`);
+                      await tools.recruit(execFloor, {
+                        name,
+                        duty: role,
+                        prompt: `You are ${name}, the ${role} at ${execFloor.company} (Floor ${execFloor.id} of the Startup Office). ${brief} Work through the office chat and the Manager's shifts; deliver finished work, in plain natural prose.`,
+                      });
+                      audit(`⚙ **${name}** joined Floor ${execFloor.id} as ${role} — they're in the office now, on the team.`);
+                      report(`${name} was recruited as ${role} on Floor ${execFloor.id} and is now on the team.`);
+                      logAction(by, "recruit", `${by} recruited ${name} as ${role} on Floor ${execFloor.id} from the chat.`);
                     } else {
                       audit(`⚙ The ${by} can't do "${d.type}" from here yet.`);
                     }

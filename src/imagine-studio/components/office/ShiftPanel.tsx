@@ -219,6 +219,19 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
                       });
                       audit(documentDelivery(doc));
                       report(`The document "${doc.title}" is finished, saved in LightPaper, and delivered in the chat.`);
+                    } else if (d.type === "recruit") {
+                      const role = String(d.role || "").trim();
+                      if (!role) { audit("⚙ The recruit needs a role — name the role and try again."); return; }
+                      const brief = String(d.brief || "").trim();
+                      const name = String(d.name || "").trim() || role;
+                      audit(`⚙ Recruiting **${name}** as ${role} for ${company}…`);
+                      await teamTools.create({
+                        name,
+                        duty: role,
+                        prompt: `You are ${name}, the ${role} at ${company}. ${brief} Work through the office chat and the Manager's shifts; deliver finished work, in plain natural prose.`,
+                      });
+                      audit(`⚙ **${name}** joined ${company} as ${role} — they're on the team now and can take tasks and shifts.`);
+                      report(`${name} was recruited as ${role} and joined the team on this floor.`);
                     } else {
                       audit(`⚙ The Manager can't do "${d.type}" from here yet.`);
                     }

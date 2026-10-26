@@ -1358,6 +1358,23 @@ export default function OfficePage() {
     setCustomBots(customBotsRef.current);
     if (signedIn) await ensureBotAgent(customBotToOfficeBot(cb));
   };
+  /* Recruiting from the executive chats (conversational actions):
+   * the same creation as the team tools, for ANY floor — the CEO
+   * recruits onto his company's home floor, the Chairman onto
+   * Floor 100. Cap law applies identically. */
+  const createCustomAgentOnFloor = async (f: FloorDef, { name, duty, prompt }: { name: string; duty: string; prompt: string }) => {
+    if (f.key === floor.key) return createCustomAgent({ name, duty, prompt });
+    const customs = loadCustomBots(f);
+    if (f.bots.length + customs.length >= MAX_AGENTS_PER_FLOOR) {
+      throw new Error(`Floor ${f.id} is full — ${MAX_AGENTS_PER_FLOOR} agents max per floor. Replace someone first, or use another floor.`);
+    }
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 18) || 'agent';
+    const cb: CustomBot = { key: `custom-${slug}-${Math.random().toString(36).slice(2, 6)}`, name, duty: duty || 'Custom specialist', prompt, tint: CUSTOM_TINTS[customs.length % CUSTOM_TINTS.length] };
+    const next = [...customs, cb];
+    saveCustomBots(f, next);
+    setFloorTeamExtras(f.key, next.map(customBotToRole));
+    if (signedIn) await ensureAgentForFloor(f, customBotToOfficeBot(cb));
+  };
   const resetAgentRole = async (botKey: string, prompt: string) => {
     const bot = botKey === 'manager' ? floor.manager : allBotsRef.current.find((b) => b.key === botKey);
     if (!bot) throw new Error('That agent is not on this floor.');
@@ -1459,6 +1476,7 @@ export default function OfficePage() {
   const [execOpen, setExecOpen] = useState<'ceo' | 'chairman' | null>(null);
   const execTools: ExecTools = {
     fire: (floorKey, botKey, by, reason) => firePerson(floorKey, botKey, by, reason),
+    recruit: (f, x) => createCustomAgentOnFloor(f, x),
     chatWith: async (f, botKey, text) => {
       const bot = botOnFloor(f, botKey);
       if (!bot) throw new Error('That executive is not in the building.');
