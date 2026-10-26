@@ -253,11 +253,19 @@ function PrimitiveMesh({
     }
   }
 
+  /* FRAMEGRID (fused window frames): buildFrameGridGeometry merges its
+   * parts WITHOUT geometry groups, and three.js draws NOTHING when a
+   * mesh carries a material ARRAY but its geometry has no groups — so
+   * the frames were invisible in the editor while the published world
+   * (single material, PublishedWorld's FusedMesh) drew them. Give the
+   * frame the single base material, exactly like the live renderer. */
+  const meshMaterial = obj.shape === "framegrid" ? (materials as any[])[0] : materials;
+
   return (
     <mesh
       visible={obj.visible}
       geometry={geom}
-      material={materials}
+      material={meshMaterial}
       castShadow
       receiveShadow
       userData={{ __faceKeys: faceKeys, __objId: obj.id }}

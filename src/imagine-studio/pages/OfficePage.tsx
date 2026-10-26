@@ -246,7 +246,8 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
         // executives'/manager's models dip DEEPER than that in their
         // idle cycle, so their feet stayed buried. Now: while standing,
         // re-measure every ~0.12s and keep the lift that satisfies the
-        // DEEPEST point ever seen, up to 0.30.
+        // DEEPEST point ever seen, up to 0.60 (raised from 0.30 — the
+        // walk/run cycles plant deeper than the old cap allowed).
         (s as any).groundAcc = ((s as any).groundAcc ?? 0) + dt;
         if ((s as any).groundAcc > 0.12) {
           (s as any).groundAcc = 0;
@@ -254,7 +255,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
             const b = new THREE.Box3().setFromObject(model);
             if (isFinite(b.min.y)) {
               const need = g.position.y - b.min.y;
-              (s as any).groundLift = Math.max((s as any).groundLift ?? 0, Math.max(0, Math.min(0.3, need)));
+              (s as any).groundLift = Math.max((s as any).groundLift ?? 0, Math.max(0, Math.min(0.6, need)));
             }
           } catch { /* keep the previous lift */ }
         }

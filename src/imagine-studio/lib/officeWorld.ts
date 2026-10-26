@@ -425,7 +425,26 @@ export async function syncFloor99LevelToPublished(): Promise<LocalLevelRecord> {
     return getLocalLevel(existing.id) ?? existing;
   }
   setBoundWorldKey(existing.id, "office99");
-  if (!publishedScene) return existing;
+  if (!publishedScene) {
+    /* Never published yet (floor99-world.json does not exist): the old
+     * rule kept WHATEVER local level was seeded first, forever — an
+     * old scene with different ceiling lights and pre-fusion pieces,
+     * while Floor 100's level tracked its published file. That split
+     * is the editor inconsistency the founder keeps seeing between
+     * the floors. Upgrade a STALE level (older sceneVersion) to the
+     * current built-in scene once, draft preserved; a level already
+     * at the current version is hers and stays untouched. */
+    const lvlVersion = ((existing.scene as any)?.environment?.sceneVersion ?? 1) as number;
+    if (lvlVersion < OFFICE_SCENE_VERSION) {
+      const fresh = buildFloor99Scene();
+      if (stableStringify(existing.scene) !== stableStringify(fresh)) {
+        preserveLocalDraft(existing, FLOOR99_LEVEL_NAME, "Local edits preserved when the Floor 99 level was upgraded to the current built-in scene (it had never been published)");
+        updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(fresh)) });
+        return getLocalLevel(existing.id) ?? existing;
+      }
+    }
+    return existing;
+  }
   if (stableStringify(existing.scene) !== stableStringify(publishedScene)) {
     preserveLocalDraft(existing, FLOOR99_LEVEL_NAME, "Local edits preserved when the Floor 99 level was re-synced to the published version");
     updateLocalLevel(existing.id, { scene: JSON.parse(JSON.stringify(publishedScene)) });
