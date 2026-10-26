@@ -94,7 +94,7 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
     const payload: Record<string, unknown> = { ...clean, model };
     if (prov === "openai" && payload.max_tokens) { payload.max_completion_tokens = payload.max_tokens; delete payload.max_tokens; }
     if (prov === "groq" && Number(payload.max_tokens) > 8000) payload.max_tokens = 8000;
-    if (prov === "groq" && /gpt-oss|qwen/.test(model)) { payload.reasoning_format = "hidden"; if (/gpt-oss/.test(model)) { delete payload.reasoning_format; payload.include_reasoning = false; } }
+    if (prov === "groq" && /gpt-oss|qwen/.test(model)) { payload.reasoning_format = "hidden"; if (/gpt-oss/.test(model)) { delete payload.reasoning_format; payload.include_reasoning = false; /* gpt-oss reasons BEFORE its first visible token; at the default effort that was a minute of dead air in chat (founder report 2026-10-26). Pin effort low on these conversational routes — deep-reasoning work belongs on the heavy tier. */ payload.reasoning_effort = "low"; } }
     if (payload.stream) payload.stream_options = { include_usage: true };
     if (prov === "gemini") delete payload.stream_options;
     try {

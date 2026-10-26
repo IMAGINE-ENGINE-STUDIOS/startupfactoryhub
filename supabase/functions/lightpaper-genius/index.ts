@@ -89,7 +89,13 @@ PROFESSIONAL FORMAT RULES (ABSOLUTE):
 
     const systemPrompt = (systemOverride || defaultSystem) + formatRules + docContext + languageDirective;
 
-    const { resp: response } = await routeChat("free", {
+    /* "fast", not "free": the free chain leads with gpt-oss-120b, a
+     * reasoning model that thinks at length before its first token —
+     * Genius "thinking" for a minute or more (founder report
+     * 2026-10-26). The fast chain leads with gpt-oss-20b, and the
+     * router now pins gpt-oss reasoning effort to low, so the first
+     * token lands in seconds. */
+    const { resp: response } = await routeChat("fast", {
       messages: [{ role: "system", content: systemPrompt }, ...messages],
       stream: true,
       max_tokens: 8000,
