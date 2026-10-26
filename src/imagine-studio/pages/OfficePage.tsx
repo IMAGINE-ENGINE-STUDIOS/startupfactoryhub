@@ -26,7 +26,7 @@ import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
 const TaskPipeline = lazy(() => import('@/components/call-agents/TaskPipeline'));
-import { inputPulse } from '@/imagine-studio/components/level/locomotion/locomotionState';
+import { inputPulse, mobileAxes } from '@/imagine-studio/components/level/locomotion/locomotionState';
 import { useSourceTexture, type TheaterSource } from '@/imagine-studio/components/plaza/TheaterScreen';
 import { openTheaterFullscreen } from '@/imagine-studio/components/plaza/TheaterFullscreen';
 import { ShiftPanel } from '@/imagine-studio/components/office/ShiftPanel';
@@ -1037,7 +1037,12 @@ export default function OfficePage() {
       if (['w', 'a', 's', 'd', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) standUp();
     };
     window.addEventListener('keydown', dn);
-    return () => window.removeEventListener('keydown', dn);
+    /* Phones have no keys: pushing the touch joystick (or tapping
+     * jump) also stands the user up — the natural "walk away" exit. */
+    const iv = setInterval(() => {
+      if (Math.abs(mobileAxes.x || 0) + Math.abs(mobileAxes.z || 0) > 0.35 || mobileAxes.jump) standUp();
+    }, 120);
+    return () => { window.removeEventListener('keydown', dn); clearInterval(iv); };
   }, [seatedAt]); // eslint-disable-line react-hooks/exhaustive-deps
   const [shiftOpen, setShiftOpen] = useState(false);
   const [panelView, setPanelView] = useState<'genius' | 'console'>('genius');

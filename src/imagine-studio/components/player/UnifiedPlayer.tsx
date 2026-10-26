@@ -56,6 +56,7 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
   const jumpBuf = useRef(0);
   const coyote = useRef(0);
   const speedMult = useRef(1);
+  const wasSeated = useRef(false);
   const smCam = useRef<{ yaw: number; pitch: number } | null>(null);
 
   useFrame(({ camera }, dtRaw) => {
@@ -92,6 +93,11 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
     // SEATED: ease onto the chair and hold — no walking, no jumping,
     // the orbit camera keeps working around the seated user.
     const seat = opts?.seatRef?.current;
+    /* Standing up: the seat held the player at seat height with
+     * `grounded` still true, so gravity never resumed and the player
+     * hovered at chair height. On release, fall back to the floor. */
+    if (seat) wasSeated.current = true;
+    else if (wasSeated.current) { wasSeated.current = false; grounded.current = false; }
     if (seat) {
       const kp = Math.min(1, dt * 7);
       g.position.x += (seat.x - g.position.x) * kp;
@@ -125,7 +131,12 @@ export function useUnifiedMovement(def: ControllerDef, world: PlayerWorld, lookR
       if (world.bounds) { const bcx = world.bounds.cx ?? 0, bcz = world.bounds.cz ?? 0; nx = THREE.MathUtils.clamp(nx, bcx - world.bounds.x, bcx + world.bounds.x); nz = THREE.MathUtils.clamp(nz, bcz - world.bounds.z, bcz + world.bounds.z); }
       if (world.radialBound) { const r = Math.hypot(nx, nz); if (r > world.radialBound) { nx *= world.radialBound / r; nz *= world.radialBound / r; } }
       let blocked = false;
-      if (world.colliders) for (const d of world.colliders) { if (Math.hypot(nx - d.x, nz - d.z) < d.r) { blocked = true; break; } }
+      /* A collider only blocks ENTRY. If the player is already inside
+       * its radius — the office seat spot sits 0.85 from the desk
+       * center, inside the desk's 1.0 collider — movement must stay
+       * free, or standing up from a chair traps the player forever:
+       * every first step's target is still inside the radius. */
+      if (world.colliders) for (const d of world.colliders) { if (Math.hypot(g.position.x - d.x, g.position.z - d.z) >= d.r && Math.hypot(nx - d.x, nz - d.z) < d.r) { blocked = true; break; } }
       if (!blocked) {
         if (world.pushOut) for (const b of world.pushOut) {
           const ddx = nx - b.x, ddz = nz - b.z, dd = Math.hypot(ddx, ddz);
