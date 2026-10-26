@@ -180,21 +180,32 @@ export function purgeNonEssentialStorage() {
   }
 }
 
-/** Purges build caches and reloads — guarded so it can never loop:
- * at most one automatic reload per 10 minutes. A fixed once-per-session
- * guard stranded users on deploy-heavy days (several builds landing
- * inside one long-lived session, each replacing chunks the session
- * still requested); the time window keeps the anti-loop guarantee
- * while letting a later, genuinely new stale-chunk fault recover. */
+/** Reload policy for stale-build faults (rewritten 2026-10-26 after
+ * the founder's held session): the old rule allowed ONE purge+reload
+ * per 10 minutes and silently did nothing after that — so on a
+ * deploy-heavy day a tab rode out the first deploy, then every later
+ * fault remounted a tree whose dead chunks could never load, burned
+ * the error boundary's silent-recovery budget, and parked the user
+ * on the recovery console. Now: a plain reload comes FIRST (it
+ * re-reads the current entry, whose chunk set is consistent), caches
+ * purge from the second fault on, and up to 4 automatic reloads are
+ * allowed in any 10-minute window. A build that is genuinely broken
+ * still stops after 4 — that is what the console is for. */
 const RELOAD_WINDOW_MS = 10 * 60 * 1000;
-export async function purgeCachesAndReload(): Promise<boolean> {
+const RELOAD_LOG_KEY = "sfh.autodebug.reloadlog";
+const MAX_AUTO_RELOADS = 4;
+
+function recentReloads(): number[] {
   try {
-    const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0);
-    if (last && Date.now() - last < RELOAD_WINDOW_MS) return false;
-    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+    const now = Date.now();
+    const log = JSON.parse(sessionStorage.getItem(RELOAD_LOG_KEY) || "[]");
+    return Array.isArray(log) ? log.filter((t) => typeof t === "number" && now - t < RELOAD_WINDOW_MS) : [];
   } catch {
-    return false;
+    return [];
   }
+}
+
+async function purgeCaches(): Promise<void> {
   try {
     if ("caches" in window) {
       const keys = await caches.keys();
@@ -205,7 +216,37 @@ export async function purgeCachesAndReload(): Promise<boolean> {
   } catch {
     /* best effort */
   }
-  window.location.reload();
+}
+
+/** Reloads for a stale-build fault when the budget allows it.
+ * Returns false when the budget is spent — the caller must then
+ * treat the fault as unhandled (the console) instead of pretending
+ * a repair is coming. */
+export function reloadForStaleBuild(): boolean {
+  let count = 0;
+  try {
+    const log = recentReloads();
+    count = log.length;
+    if (count >= MAX_AUTO_RELOADS) return false;
+    log.push(Date.now());
+    sessionStorage.setItem(RELOAD_LOG_KEY, JSON.stringify(log));
+    // Keep the legacy key roughly in step for anything reading it.
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+  } catch {
+    return false;
+  }
+  if (count >= 1) {
+    // A repeat fault inside the window: purge first, then reload.
+    void purgeCaches().then(() => window.location.reload());
+    window.setTimeout(() => window.location.reload(), 350);
+  } else {
+    window.location.reload();
+  }
+  return true;
+}
+
+export async function purgeCachesAndReload(): Promise<boolean> {
+  if (!reloadForStaleBuild()) return false;
   return true;
 }
 
@@ -218,8 +259,10 @@ export function applyRepair(diagnosis: Diagnosis): boolean {
     case "ignore":
       return true;
     case "reload":
-      void purgeCachesAndReload();
-      return true;
+      // Honest result: true only when a reload is actually happening.
+      // Returning true while the old guard silently blocked the reload
+      // is what burned the boundary's budget and held the session.
+      return reloadForStaleBuild();
     case "remount":
       if (diagnosis.id === "storage-quota") purgeNonEssentialStorage();
       return true;
@@ -273,6 +316,6 @@ export function installAutoDebugger() {
     event.preventDefault();
     const payload = (event as Event & { payload?: unknown }).payload;
     recordRepair(payload ?? new Error("vite:preloadError"), diagnose(new Error("Failed to fetch dynamically imported module")), true);
-    void purgeCachesAndReload();
+    reloadForStaleBuild();
   });
 }
