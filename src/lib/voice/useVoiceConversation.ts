@@ -90,9 +90,10 @@ export function useVoiceConversation(opts: {
       recRef.current = rec;
       await rec.start({
         stream: streamRef.current ?? undefined,
-        autoStopSilenceMs: 1600,
-        maxMs: 30_000,
-        onAutoStop: () => { void finishListen(gen); },
+        autoStopSilenceMs: 2000,
+        noSpeechMs: 20_000,
+        maxMs: 45_000,
+        onAutoStop: (reason) => { stopReasonRef.current = reason; void finishListen(gen); },
       });
       if (gen === genRef.current) setTalkState("listening");
     } catch (e: any) {
@@ -105,11 +106,19 @@ export function useVoiceConversation(opts: {
   }, [shutdown]);
 
   const failCountRef = useRef(0);
+  const stopReasonRef = useRef<"silence" | "no-speech" | "max">("silence");
 
   const finishListen = useCallback(async (gen: number) => {
     const rec = recRef.current;
     if (!rec) return;
     recRef.current = null;
+    /* Dead air: nobody spoke — don't burn seconds transcribing
+     * silence; just reopen the mic. */
+    if (stopReasonRef.current === "no-speech") {
+      try { await rec.stop(); } catch { /* recorder already down */ }
+      if (gen === genRef.current) void listen(gen);
+      return;
+    }
     setTalkState("transcribing");
     try {
       const blob = await rec.stop();

@@ -53,7 +53,7 @@ export class MicRecorder {
    * that much continuous near-silence (post-first-sound). onLevel gets
    * an RMS value ~0..1 for meters/pulses.
    */
-  async start(opts: { autoStopSilenceMs?: number; maxMs?: number; stream?: MediaStream; onLevel?: (rms: number) => void; onAutoStop?: () => void } = {}): Promise<void> {
+  async start(opts: { autoStopSilenceMs?: number; noSpeechMs?: number; maxMs?: number; stream?: MediaStream; onLevel?: (rms: number) => void; onAutoStop?: (reason: "silence" | "no-speech" | "max") => void } = {}): Promise<void> {
     if (this.recording) return;
     /* A pre-acquired stream (see acquire()) is borrowed, never stopped
      * by teardown — its owner manages its lifetime. */
@@ -85,6 +85,8 @@ export class MicRecorder {
       const data = new Uint8Array(this.analyser.fftSize);
       const startedAt = performance.now();
       let lastSoundAt = startedAt;
+      let heardSpeech = false;
+      let loudTicks = 0;
       const tick = () => {
         if (!this.recording || !this.analyser) return;
         this.analyser.getByteTimeDomainData(data);
@@ -92,19 +94,33 @@ export class MicRecorder {
         for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
         const rms = Math.sqrt(sum / data.length);
         opts.onLevel?.(rms);
-        if (rms > 0.035) lastSoundAt = performance.now();
+        /* Speech = two consecutive loud ticks (debounces clicks and
+         * coughs). BEFORE any speech, silence must NOT end the turn:
+         * the old logic stopped at ~1.6s whether or not the user had
+         * said a word — Talk "transcribed before I even speak", and
+         * the user's real reply landed while the mic was closed for
+         * that empty transcription (founder report 2026-10-25). */
+        if (rms > 0.025) { loudTicks++; if (loudTicks >= 2) heardSpeech = true; lastSoundAt = performance.now(); }
+        else loudTicks = 0;
         const now = performance.now();
         if (
           opts.autoStopSilenceMs &&
-          now - startedAt > 900 &&
+          heardSpeech &&
           now - lastSoundAt > opts.autoStopSilenceMs
         ) {
-          opts.onAutoStop?.();
+          opts.onAutoStop?.("silence");
+          return;
+        }
+        // No speech at all for a long while: recycle quietly (the
+        // caller re-listens; nothing is transcribed from dead air
+        // unless the caller chooses to).
+        if (!heardSpeech && opts.noSpeechMs && now - startedAt > opts.noSpeechMs) {
+          opts.onAutoStop?.("no-speech");
           return;
         }
         // Failsafe: never record without end, whatever the meter says.
         if (opts.maxMs && now - startedAt > opts.maxMs) {
-          opts.onAutoStop?.();
+          opts.onAutoStop?.("max");
           return;
         }
         this.timer = window.setTimeout(tick, 110);
