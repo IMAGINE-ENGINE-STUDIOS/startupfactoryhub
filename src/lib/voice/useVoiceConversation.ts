@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MicRecorder, micErrorMessage } from "@/lib/voice/recorder";
+import { subscribeVoiceStream } from "@/lib/voice/streamBus";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
 import { speak, stopSpeaking, personaFor, preloadSpeech, stripForSpeech, type VoicePersona } from "@/lib/voice/tts";
 
@@ -104,7 +105,7 @@ export function useVoiceConversation(opts: {
       recRef.current = rec;
       await rec.start({
         stream: streamRef.current ?? undefined,
-        autoStopSilenceMs: 1500,
+        autoStopSilenceMs: 1100,
         noSpeechMs: 20_000,
         maxMs: 45_000,
         onAutoStop: (reason) => { stopReasonRef.current = reason; void finishListen(gen); },
@@ -190,21 +191,17 @@ export function useVoiceConversation(opts: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Feed the speech queue from the streaming reply: every completed
-   * sentence is spoken as soon as it exists, instead of waiting for
-   * the whole reply. The trailing partial sentence flushes when the
-   * stream ends (busy flips false). */
-  useEffect(() => {
-    if (!talkOn) return;
-    const la = opts.lastAssistant;
-    if (!la) return;
-    if (!spokenCharsRef.current.has(la.id)) spokenCharsRef.current.set(la.id, 0);
-    const from = spokenCharsRef.current.get(la.id)!;
-    /* Stream over and everything already queued (the common case:
-     * the last sentence completed while busy was still true) — mark
-     * flushed and let the pump run its reopen-the-mic check. */
-    if (!opts.busy && la.text.length <= from) { flushedRef.current.add(la.id); void pumpSpeech(); return; }
-    const tail = la.text.slice(from);
+  /* Feed the speech queue from a cumulative reply text: every
+   * completed sentence is spoken as soon as it exists; the trailing
+   * partial sentence flushes when `done`. Idempotent — the spoken
+   * offset makes re-feeding the same text a no-op, so two sources
+   * (the direct stream tap and the host's rendered state) can feed
+   * the same reply without ever double-speaking. */
+  const feedSpeech = useCallback((id: string, text: string, done: boolean) => {
+    if (!spokenCharsRef.current.has(id)) spokenCharsRef.current.set(id, 0);
+    const from = spokenCharsRef.current.get(id)!;
+    if (done && text.length <= from) { flushedRef.current.add(id); void pumpSpeech(); return; }
+    const tail = text.slice(from);
     if (!tail) return;
     const ready: string[] = [];
     let consumed = 0;
@@ -213,24 +210,63 @@ export function useVoiceConversation(opts: {
     let last = 0;
     while ((m = re.exec(tail))) { ready.push(m[0]); last = re.lastIndex; }
     if (ready.length) consumed = last;
-    if (!opts.busy) {
+    if (done) {
       const rest = tail.slice(consumed);
       if (rest.trim()) { ready.push(rest); consumed = tail.length; }
-      flushedRef.current.add(la.id);
+      flushedRef.current.add(id);
     }
     if (!ready.length) return;
-    spokenCharsRef.current.set(la.id, from + consumed);
+    spokenCharsRef.current.set(id, from + consumed);
     for (const s of ready) if (stripForSpeech(s).trim()) speechQueueRef.current.push(s);
     if (speechQueueRef.current.length) {
       setTalkState("speaking");
       void pumpSpeech();
-    } else if (!opts.busy) {
+    } else if (done) {
       void pumpSpeech(); // nothing to say — still runs the reopen check
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Source 1 — the host's rendered state (works for every surface,
+   * including non-streaming agent runs). */
+  useEffect(() => {
+    if (!talkOn) return;
+    const la = opts.lastAssistant;
+    if (!la) return;
+    feedSpeech(la.id, la.text, !opts.busy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [talkOn, opts.lastAssistant?.id, opts.lastAssistant?.text, opts.busy]);
 
+  /* Source 2 — the direct stream tap (voice-first fast lane): a
+   * streaming host publishes deltas straight from its fetch reader,
+   * so speech starts with the wire, not with the render. */
+  useEffect(() => {
+    if (!talkOn) return;
+    return subscribeVoiceStream((ev) => {
+      if (!ev.done && ev.text === "") { setTalkState("waiting"); return; }
+      feedSpeech(ev.id, ev.text, ev.done);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talkOn]);
+
   const toggleTalk = useCallback(() => {
+    /* Tap while she's speaking = interrupt, the way you'd cut into a
+     * real conversation: speech stops mid-flow and the mic opens for
+     * the user at once. Tap again (while listening) ends Talk. */
+    if (talkOn && talkState === "speaking") {
+      stopSpeaking();
+      speechQueueRef.current = [];
+      const la = optsRef.current.lastAssistant;
+      if (la) {
+        /* The unspoken remainder of this reply stays unspoken — she
+         * cut in because she has something to say. */
+        spokenCharsRef.current.set(la.id, la.text.length);
+        flushedRef.current.add(la.id);
+        reopenedRef.current.add(la.id);
+      }
+      void listen(genRef.current);
+      return;
+    }
     if (talkOn) {
       setTalkOn(false);
       shutdown();
@@ -267,7 +303,7 @@ export function useVoiceConversation(opts: {
       setLoadPct(null);
       void listen(gen);
     })();
-  }, [talkOn, listen, shutdown]);
+  }, [talkOn, talkState, listen, shutdown]);
 
   /* Full stop on unmount. */
   useEffect(() => () => { genRef.current++; recRef.current?.cancel(); MicRecorder.release(streamRef.current); streamRef.current = null; stopSpeaking(); }, []);

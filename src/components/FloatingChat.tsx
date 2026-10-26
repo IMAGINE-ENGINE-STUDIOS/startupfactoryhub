@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
 import { useVoiceConversation, talkStatusLabel } from '@/lib/voice/useVoiceConversation';
+import { beginVoiceStream, publishVoiceStream } from '@/lib/voice/streamBus';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -1038,6 +1039,11 @@ You can help with:
       let fullText = "";
 
       setAiMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+      /* Voice-first fast lane: publish the stream straight from this
+       * reader so Talk speaks sentences as they arrive on the wire,
+       * not after React renders them. The id matches the one
+       * geniusLastAssistant derives for this message (g<index>). */
+      beginVoiceStream(`g${aiMessages.length}`);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1058,6 +1064,7 @@ You can help with:
             const c = parsed.choices?.[0]?.delta?.content;
             if (c) {
               fullText += c;
+              publishVoiceStream(fullText, false);
               setAiMessages(prev => {
                 const updated = [...prev];
                 updated[updated.length - 1] = { role: 'assistant', content: fullText };
@@ -1081,6 +1088,7 @@ You can help with:
           const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
           if (c) {
             fullText += c;
+            publishVoiceStream(fullText, false);
             setAiMessages(prev => {
               const updated = [...prev];
               updated[updated.length - 1] = { role: 'assistant', content: fullText };
@@ -1214,6 +1222,10 @@ You can help with:
       });
       setAiMessages(prev => prev.slice(0, -1));
     } finally {
+      /* Close the voice stream: whatever arrived gets spoken to the
+       * end (NAV tags stripped — they're commands, not conversation),
+       * then Talk reopens the mic. */
+      publishVoiceStream(fullText.replace(/<!--NAV:[^>]+-->\n?/, ''), true);
       setIsAiLoading(false);
     }
   };
