@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMembershipAccess, MembershipGate } from "@/features/basic-plan";
 import { useQueryClient } from "@tanstack/react-query";
 import foxtailLogo from "@/assets/foxtail-coffee-logo.png.asset.json";
+import CoffeeUpgradeOffer from "@/components/members-club/CoffeeUpgradeOffer";
 
 export default function MembersClub() {
   const { user, loading: authLoading } = useAuth();
@@ -73,6 +74,7 @@ export default function MembersClub() {
         <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Dashboard
         </Link>
+        {!canRedeemCoffee && <CoffeeUpgradeOffer />}
         <MembershipGate
           feature="Members Club"
           title="Members Club"
