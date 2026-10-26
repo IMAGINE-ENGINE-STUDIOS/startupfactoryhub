@@ -82,7 +82,7 @@ export function buildFaceMaterials(
   defaultsByKey: Record<string, DefaultProps> | DefaultProps,
   overrides: Record<string, FaceOverride> | undefined,
   selectedFaces: Set<string> | null,
-  opts?: { doubleSide?: boolean },
+  opts?: { doubleSide?: boolean; map?: THREE.Texture | null },
 ): THREE.MeshStandardMaterial[] {
   return faceKeys.map((key) => {
     const def: DefaultProps =
@@ -101,6 +101,7 @@ export function buildFaceMaterials(
       side: opts?.doubleSide ? THREE.DoubleSide : THREE.FrontSide,
     });
     if (ov?.textureUrl) mat.map = loadFaceTexture(ov.textureUrl, ov);
+    else if (opts?.map) mat.map = opts.map;
     if (selectedFaces?.has(key)) {
       mat.emissive = new THREE.Color("#22c55e");
       mat.emissiveIntensity = 0.55;

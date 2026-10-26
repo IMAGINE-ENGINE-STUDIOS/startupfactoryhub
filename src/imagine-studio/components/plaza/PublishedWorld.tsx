@@ -37,6 +37,7 @@ function Geo({ shape }) {
 
 import { buildAssembly, buildFrameGridGeometry } from '@/imagine-studio/lib/fusedGeometry';
 import { makeGroundSampler } from '@/imagine-studio/lib/grounding';
+import { getTextureMap } from '@/imagine-studio/lib/textureApply';
 
 /** A fused single-instance object (founder directives 2026-10-26):
  * window frames ("framegrid") and multi-part assemblies (desk stations)
@@ -52,7 +53,7 @@ function FusedMesh({ o }) {
     <mesh position={o.position} rotation={o.rotation} scale={o.shape === 'assembly' ? [1, 1, 1] : o.scale} geometry={built.geometry} castShadow receiveShadow>
       {built.materials
         ? built.materials.map((m, i) => <primitive key={i} attach={`material-${i}`} object={m} />)
-        : <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} />}
+        : <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} map={o.texture?.url ? getTextureMap(o.texture) : undefined} />}
     </mesh>
   );
 }
@@ -164,7 +165,7 @@ export function PublishedWorld({ scene, renderCharacters = true, onAgentOpen }: 
           return (
             <mesh key={o.id} position={o.position} rotation={o.rotation} scale={o.scale} castShadow receiveShadow>
               <Geo shape={o.shape} />
-              <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} />
+              <meshStandardMaterial color={col(o.color)} emissive={o.emissive ? col(o.emissive) : '#000000'} emissiveIntensity={o.emissiveIntensity ?? 1} metalness={o.metalness ?? 0} roughness={o.roughness ?? 0.8} transparent={a < 1} opacity={a} depthWrite={a >= 1} map={o.texture?.url ? getTextureMap(o.texture) : undefined} />
             </mesh>
           );
         }

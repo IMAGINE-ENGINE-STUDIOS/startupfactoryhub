@@ -150,6 +150,12 @@ export interface BaseObject {
    */
   faceOverrides?: Record<string, FaceOverride>;
   /**
+   * Whole-object texture (Texture Editor, ported from the Wonderlands
+   * Studio 3D texture editor). Applied as the material map on every face
+   * of the object; per-face `faceOverrides` textures still win per face.
+   */
+  texture?: ObjectTexture;
+  /**
    * Optional role inside the Train System (see `LevelScene.trainSystem`).
    * Tags an object as the locomotive, a car, a door, the driver's cabin,
    * the track centreline marker, or a station stop marker. The TrainRuntime
@@ -275,6 +281,30 @@ export interface FaceOverride {
   offset?: [number, number];
   /** UV rotation in radians (default 0). */
   rotation?: number;
+}
+
+/**
+ * Object-level texture, mirroring the Wonderlands scene3d TextureConfig.
+ * Unlike FaceOverride, `rotation` is in DEGREES and `scale` is the
+ * uniform tiling shortcut used when `repeat` is not set explicitly.
+ */
+export interface ObjectTexture {
+  /** Albedo texture (data URL or remote URL). */
+  url: string;
+  /** Display name (library entry or file name). */
+  name: string;
+  /** Uniform UV tiling (default 1). Used when `repeat` is unset. */
+  scale?: number;
+  /** UV rotation in DEGREES (default 0). */
+  rotation?: number;
+  /** UV offset (default [0, 0]). */
+  offset?: [number, number];
+  /** Per-axis UV tiling; overrides `scale` when set. */
+  repeat?: [number, number];
+  roughness?: number;
+  metalness?: number;
+  /** Optional tint (hex) — reserved for Wonderlands parity. */
+  color?: string;
 }
 
 export interface PrimitiveObject extends BaseObject {

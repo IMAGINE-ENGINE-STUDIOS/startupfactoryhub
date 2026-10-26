@@ -11,7 +11,7 @@ import {
   Unlock, Mountain, Brush, ArrowUp, ArrowDown, Waves, Minus,
   X, ArrowUpRight, User, Camera, Boxes, Link2, Unlink,
 } from "lucide-react";
-import { Spline as SplineIcon, Paintbrush, Tv, Gamepad2, Scissors } from "lucide-react";
+import { Spline as SplineIcon, Tv, Gamepad2, Scissors } from "lucide-react";
 import { Sparkles, Library, ChevronLeft, Search, PanelLeft, PanelRight, Bot, Users } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CharacterAnimationGallery from "@/imagine-studio/components/level/animations/CharacterAnimationGallery";
@@ -76,7 +76,7 @@ import {
 } from "@/imagine-studio/lib/model-import";
 import { GLTFLoader } from "three-stdlib";
 import * as THREE from "three";
-import { FacePaintPanel } from "@/imagine-studio/components/level/FacePaintPanel";
+import { TextureEditorPanel } from "@/imagine-studio/components/level/TextureEditorPanel";
 import TerrainGallery from "@/imagine-studio/components/level/terrain/TerrainGallery";
 import {
   CadImportSettingsDialog,
@@ -626,32 +626,6 @@ export default function LevelEditorPage() {
   const [sculptTool, setSculptTool] = useState<"lift" | "dig" | "smooth" | "flatten">("lift");
   const [sculptRadius, setSculptRadius] = useState(2);
   const [sculptStrength, setSculptStrength] = useState(0.3);
-
-  // Face-paint mode: when active, clicks on the selected object's faces add
-  // to `paintedFaces` (Shift = additive). The inspector panel writes the
-  // chosen color/texture into the object's `faceOverrides`.
-  const [facePaintActive, setFacePaintActive] = useState(false);
-  const [paintedFaces, setPaintedFaces] = useState<Set<string>>(new Set());
-  const facePaintState = useMemo(
-    () => ({
-      active: facePaintActive,
-      objectId: facePaintActive ? selectedId : null,
-      selected: paintedFaces,
-      toggle: (key: string, add: boolean) =>
-        setPaintedFaces((prev) => {
-          const next = add ? new Set(prev) : new Set<string>();
-          if (prev.has(key) && add) next.delete(key);
-          else next.add(key);
-          return next;
-        }),
-      clear: () => setPaintedFaces(new Set()),
-    }),
-    [facePaintActive, selectedId, paintedFaces],
-  );
-  // Exiting paint mode (or switching object) clears the selection.
-  useEffect(() => {
-    if (!facePaintActive) setPaintedFaces(new Set());
-  }, [facePaintActive, selectedId]);
 
   // Atlas placement is loaded on-demand (when the user opens "Place on Atlas"),
   // not on every level load — see openPlaceDialog below.
@@ -2002,12 +1976,6 @@ export default function LevelEditorPage() {
                 icon: <SplineIcon className="w-3.5 h-3.5" />,
                 active: editingPolygonId !== null,
               },
-              {
-                key: "texture",
-                label: "Texture painting",
-                icon: <Paintbrush className="w-3.5 h-3.5" />,
-                active: facePaintActive,
-              },
             ]}
           />
           <Button
@@ -2427,7 +2395,6 @@ export default function LevelEditorPage() {
           <LevelScene3D
             scene={renderedScene}
             selectedId={selectedId}
-            facePaint={facePaintState}
             onContextObject={(id, x, y) => {
               if (!selectedIds.has(id)) selectObject(id);
               setObjMenu({ x, y });
@@ -2633,10 +2600,6 @@ export default function LevelEditorPage() {
                   addingPoint={addingPointMode}
                   onToggleAddPoint={() => setAddingPointMode((v) => !v)}
                   projectId={id || "unsaved"}
-                  facePaintActive={facePaintActive}
-                  paintedFaces={paintedFaces}
-                  onToggleFacePaint={() => setFacePaintActive((v) => !v)}
-                  onClearFacePaint={() => setPaintedFaces(new Set())}
                   userClips={userClipEntries}
                   onOpenCharacterGallery={() => setCharacterGalleryOpen(true)}
                   onSpawnObjects={(objs) => addObjects(objs)}
@@ -3445,7 +3408,7 @@ function BehaviorRow({
 const ModelOptimizerLazy = lazy(() => import("@/imagine-studio/components/level/ModelOptimizer"));
 function ObjectInspector({
   obj, onPatch, disabled, snap = 0, editing, onToggleEdit, addingPoint, onToggleAddPoint, onDelete,
-  projectId, facePaintActive, paintedFaces, onToggleFacePaint, onClearFacePaint,
+  projectId,
   userClips, onOpenCharacterGallery, onSpawnObjects, allObjects = [],
   scenePaths = [], onPatchScenePaths,
   currentGroup, currentGroupSize = 0, selectionSize = 1,
@@ -3461,10 +3424,6 @@ function ObjectInspector({
   onToggleAddPoint?: () => void;
   onDelete?: () => void;
   projectId: string;
-  facePaintActive: boolean;
-  paintedFaces: Set<string>;
-  onToggleFacePaint: () => void;
-  onClearFacePaint: () => void;
   userClips: CharacterClipEntry[];
   onOpenCharacterGallery: () => void;
   onSpawnObjects?: (objs: SceneObject[]) => void;
@@ -3679,16 +3638,11 @@ function ObjectInspector({
           allObjects={allObjects}
         />
       )}
-      {(obj.kind === "polygon" || obj.kind === "primitive" || obj.kind === "model") && (
-        <FacePaintPanel
+      {(obj.kind === "polygon" || obj.kind === "primitive") && (
+        <TextureEditorPanel
           obj={obj}
           projectId={projectId}
-          active={facePaintActive}
-          selectedFaces={paintedFaces}
-          onToggleActive={onToggleFacePaint}
-          onClearSelection={onClearFacePaint}
-          onPatchFaceOverrides={(faceOverrides) => onPatch({ faceOverrides } as any)}
-          onPatchModelOverrides={(materialOverrides) => onPatch({ materialOverrides } as any)}
+          onPatch={onPatch}
           disabled={disabled}
         />
       )}

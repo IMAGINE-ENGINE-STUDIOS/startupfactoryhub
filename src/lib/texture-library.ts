@@ -1,5 +1,5 @@
 /**
- * Texture library for the face-paint inspector.
+ * Texture library for the Texture Editor inspector.
  *
  * Built-in textures are tiny procedural patterns rendered to 256² canvases
  * and exported as JPEG data URLs — instant, offline, no asset hosting.

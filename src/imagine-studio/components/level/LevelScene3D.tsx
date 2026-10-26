@@ -26,7 +26,7 @@ import {
   primitiveFaceKeys,
   resolveFaceKeyFromHit,
 } from "@/imagine-studio/lib/face-system";
-import { FacePaintContext, useFacePaint } from "./FacePaintContext";
+import { getTextureMap } from "@/imagine-studio/lib/textureApply";
 import LevelCharacter from "./LevelCharacter";
 import PlayableCharacter, { type PlayCameraPose } from "./locomotion/PlayableCharacter";
 import PushableRuntime from "./locomotion/PushableRuntime";
@@ -230,23 +230,26 @@ function PrimitiveMesh({
     }
   }, [obj.shape, (obj.scale as any)?.[0]]);
 
-  const paint = useFacePaint();
   const faceKeys = useMemo(() => primitiveFaceKeys(obj.shape), [obj.shape]);
-  const isActivePaint = paint.active && paint.objectId === obj.id;
+  // Whole-object texture (Texture Editor) — applied as the map on every
+  // face material; per-face override textures still win per face.
+  const texMap = useMemo(
+    () => (obj.texture?.url ? getTextureMap(obj.texture) : null),
+    [obj.texture],
+  );
   const materials = useMemo(() => {
     if (obj.shape === "assembly") return buildAssembly(obj).materials as any;
     return buildFaceMaterials(
       faceKeys,
       { color: obj.color, metalness: obj.metalness, roughness: obj.roughness },
       obj.faceOverrides,
-      isActivePaint ? paint.selected : null,
-      { doubleSide: obj.shape === "plane" },
+      null,
+      { doubleSide: obj.shape === "plane", map: texMap },
     );
-  }, [faceKeys, obj.color, obj.metalness, obj.roughness, obj.faceOverrides, obj.shape, isActivePaint, paint.selected, obj]);
+  }, [faceKeys, obj.color, obj.metalness, obj.roughness, obj.faceOverrides, obj.shape, texMap]);
 
-  // Object-level selection tint (blue) wins over the face-paint green
-  // overlay when nothing is painted, so users still see what they picked.
-  if (selected && !isActivePaint) {
+  // Object-level selection tint (blue), so users see what they picked.
+  if (selected) {
     for (const m of materials) {
       m.emissive = new THREE.Color("#3b82f6");
       m.emissiveIntensity = 0.4;
@@ -286,9 +289,12 @@ function PolygonMesh({
   selected?: boolean;
   onSelect?: (id: string, multi?: boolean) => void;
 }) {
-  const paint = useFacePaint();
-  const isActivePaint = paint.active && paint.objectId === obj.id;
   const faceKeys = useMemo(() => objectFaceKeys(obj), [obj.points.length, obj.extrude]);
+  // Whole-object texture (Texture Editor) — see PrimitiveMesh.
+  const texMap = useMemo(
+    () => (obj.texture?.url ? getTextureMap(obj.texture) : null),
+    [obj.texture],
+  );
 
   const { geometry, materials } = useMemo(() => {
     const topPts = obj.points.length
@@ -298,7 +304,7 @@ function PolygonMesh({
 
     if (obj.extrude > 0) {
       // Always-on custom prism builder. Splits sides into N independent
-      // material groups so the face-paint system can address each side.
+      // material groups so per-face overrides can address each side.
       const N = topPts.length;
       const offs = obj.bottomOffsets || [];
       const tH = obj.pointHeights || [];
@@ -416,13 +422,13 @@ function PolygonMesh({
       faceKeys,
       defaultsByKey,
       obj.faceOverrides,
-      isActivePaint ? paint.selected : null,
-      { doubleSide: true },
+      null,
+      { doubleSide: true, map: texMap },
     );
     return { geometry: geom, materials: mats };
-  }, [obj.points, obj.bottomOffsets, obj.pointHeights, obj.bottomHeights, obj.extrude, obj.fillColor, obj.sideColor, obj.topColor, obj.faceOverrides, faceKeys, isActivePaint, paint.selected]);
+  }, [obj.points, obj.bottomOffsets, obj.pointHeights, obj.bottomHeights, obj.extrude, obj.fillColor, obj.sideColor, obj.topColor, obj.faceOverrides, faceKeys, texMap]);
 
-  if (selected && !isActivePaint) {
+  if (selected) {
     for (const m of materials) {
       (m as any).emissive = new THREE.Color("#3b82f6");
       (m as any).emissiveIntensity = 0.4;
@@ -465,8 +471,8 @@ function GLTFModelMesh({ obj, onSelect }: { obj: ModelObject; onSelect?: (id: st
       const key = n.name || `mesh_${i++}`;
       n.userData.__meshKey = key;
       n.userData.__objId = obj.id;
-      // Expose a single-entry face-key map so the FacePickerOverlay can
-      // resolve a click on a model mesh to "mesh:<name>".
+      // Expose a single-entry face-key map ("mesh:<name>") so click
+      // picking can resolve a hit on a model mesh to its mesh key.
       n.userData.__faceKeys = [`mesh:${key}`];
       if (!n.userData.__origMat) n.userData.__origMat = n.material;
 
@@ -1341,14 +1347,6 @@ export interface LevelSceneProps {
   onSelectLight?: (id: string) => void;
   addingPolygonPoint?: boolean;
   onAddingPointHandled?: () => void;
-  /** Face-paint mode state (provided by the editor page). */
-  facePaint?: {
-    active: boolean;
-    objectId: string | null;
-    selected: Set<string>;
-    toggle: (key: string, add: boolean) => void;
-    clear: () => void;
-  };
   /** Terrain sculpt mode state (provided by the editor page). */
   sculpt?: TerrainSculptConfig;
   /** Optional bridge used by Atlas Play to drive Cesium's camera from the playable character. */
@@ -1387,7 +1385,6 @@ export function LevelSceneContents({
   onSelectLight,
   addingPolygonPoint,
   onAddingPointHandled,
-  facePaint,
   sculpt,
   onPlayCameraPose,
   immediatePlayCamera,
@@ -1422,18 +1419,11 @@ export function LevelSceneContents({
   const groupRef = useRef<THREE.Group>(null);
   // Pick a sensible focus action for double-click — set focus request from parent
   const handleFocus = (id: string) => onSelect?.(id);
-  const facePaintValue = facePaint ?? {
-    active: false,
-    objectId: null,
-    selected: new Set<string>(),
-    toggle: () => {},
-    clear: () => {},
-  };
   const hdriCfg = scene.environment.hdri && skipBackground
     ? { ...scene.environment.hdri, asBackground: false }
     : scene.environment.hdri;
   return (
-    <FacePaintContext.Provider value={facePaintValue}>
+    <>
       {/* HDRI takes over the background when asBackground is on; otherwise solid color. */}
       {!skipBackground && !(hdriCfg && hdriCfg.asBackground && hdriCfg.activeId) && (
         <color attach="background" args={[scene.environment.background]} />
@@ -1565,13 +1555,6 @@ export function LevelSceneContents({
           />
         );
       })()}
-      {facePaintValue.active && facePaintValue.objectId && (
-        <FacePickerOverlay
-          groupRef={groupRef}
-          objectId={facePaintValue.objectId}
-          toggle={facePaintValue.toggle}
-        />
-      )}
       {sculpt?.active &&
         scene.terrain?.enabled &&
         scene.terrain.source === "primitive" &&
@@ -1579,7 +1562,7 @@ export function LevelSceneContents({
           <TerrainSculptOverlay sculpt={sculpt} controlsRef={controlsRef} />
         )}
       <TeleportPickerOverlay groupRef={groupRef} />
-    </FacePaintContext.Provider>
+    </>
   );
 }
 
@@ -1590,54 +1573,6 @@ export default function LevelScene3D(
   props: LevelSceneProps & { className?: string }
 ) {
   return <LevelScene3DInner {...props} />;
-}
-
-/**
- * Click-handler overlay active during "Paint Faces" mode. Raycasts the
- * scene from pointer events, finds the target object's mesh, and toggles
- * the hit face key in the shared selection set.
- */
-function FacePickerOverlay({
-  groupRef,
-  objectId,
-  toggle,
-}: {
-  groupRef: React.RefObject<THREE.Group>;
-  objectId: string;
-  toggle: (key: string, add: boolean) => void;
-}) {
-  const { camera, gl, scene: r3fScene } = useThree();
-  useEffect(() => {
-    const canvas = gl.domElement;
-    const raycaster = new THREE.Raycaster();
-    const ndc = new THREE.Vector2();
-    const target = groupRef.current?.getObjectByName(`obj-${objectId}`);
-    if (!target) return;
-    const onDown = (ev: PointerEvent) => {
-      if (ev.button !== 0) return;
-      const rect = canvas.getBoundingClientRect();
-      ndc.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
-      ndc.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(ndc, camera);
-      const hits = raycaster.intersectObject(target, true);
-      const hit = hits.find((h) => (h.object as any).userData?.__faceKeys || (h.object as any).isMesh);
-      if (!hit) return;
-      const obj = hit.object as any;
-      let key: string | null = null;
-      if (obj.userData?.__faceKeys) {
-        key = resolveFaceKeyFromHit(hit);
-      } else if (obj.isMesh && obj.name) {
-        key = `mesh:${obj.name}`;
-      }
-      if (!key) return;
-      ev.stopPropagation();
-      ev.preventDefault();
-      toggle(key, ev.shiftKey);
-    };
-    canvas.addEventListener("pointerdown", onDown, true);
-    return () => canvas.removeEventListener("pointerdown", onDown, true);
-  }, [camera, gl, groupRef, objectId, toggle]);
-  return null;
 }
 
 function LevelScene3DInner(
