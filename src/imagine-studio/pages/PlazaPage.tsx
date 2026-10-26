@@ -781,7 +781,7 @@ export default function PlazaPage() {
                         audit(`⚙ Renamed to **${nn}** in the Agents roster — the plaza name tag refreshes when the level reloads.`);
                         report(`The agent was renamed to ${nn}, as you asked.`);
                       } else {
-                        const np = withCharter(me.system_prompt || '', { mission: d.mission, vision: d.vision, instructions: d.instructions });
+                        const np = withCharter(me.system_prompt || '', { mission: String(d.mission ?? ""), vision: String(d.vision ?? ""), instructions: String(d.instructions ?? "") });
                         await callAgentsApi({ action: 'save', id: me.id, name: me.name, description: me.description ?? '', model: d.model || me.model || 'llama-3.3-70b-versatile', system_prompt: np, tools: me.tools ?? [] });
                         audit(`⚙ ${agentChar.name}'s charter is updated — mission, vision and instructions now govern how they work.`);
                         report(`${agentChar.name}'s charter was updated as you set it.`);
