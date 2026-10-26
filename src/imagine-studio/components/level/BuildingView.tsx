@@ -161,7 +161,13 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
         <button onClick={onClose} className="shrink-0 rounded-full p-1.5 hover:bg-white/10" aria-label="Close building view"><X className="h-5 w-5" /></button>
       </div>
       <div className="relative min-h-0 flex-1">
-        <Canvas dpr={[1, 1.75]} camera={{ position: camPos, fov: 48, far: 7000 }}>
+        {/* Logarithmic depth (founder report 2026-10-26: the plaza
+            glitched from the sky): this camera spans centimeters to
+            ~800 m, and a normal depth buffer cannot tell surfaces a
+            few cm apart at that range — the plaza's lawn/terrace/walk
+            and the fountain's tiers z-fought into stripes. Log depth
+            keeps precision at every scale at once. */}
+        <Canvas dpr={[1, 1.75]} gl={{ logarithmicDepthBuffer: true }} camera={{ position: camPos, fov: 48, near: 0.5, far: 7000 }}>
           <color attach="background" args={["#0b1526"]} />
           <fog attach="fog" args={["#0b1526", 700, 3200]} />
           <ambientLight intensity={1.0} />
