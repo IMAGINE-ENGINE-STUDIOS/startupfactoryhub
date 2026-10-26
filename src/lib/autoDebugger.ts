@@ -47,11 +47,31 @@ const SIGNATURES: Signature[] = [
   {
     id: "suspense-sync-input",
     label: "Route suspended during input",
-    test: /component suspended while responding to synchronous input/i,
+    /* The decoded text AND the minified production form must both
+     * match: production throws "Minified React error #426; visit
+     * …invariant=426", which never contains the decoded sentence —
+     * before this, every #426 fell through to "Unclassified fault"
+     * and parked the user on the recovery console (founder report
+     * 2026-10-26, repair histories full of held #426s). */
+    test: /(component suspended while responding to synchronous input|minified react error #426|invariant=426)/i,
     strategy: "remount",
     explanation:
       "A lazily loaded screen resolved outside a transition. The view is remounted in place while the chunk finishes loading.",
     safeToRepeat: true,
+  },
+  {
+    id: "chunk-default",
+    label: "Stale build chunk (module shape)",
+    /* A dead lazy chunk often surfaces as reading '.default' of
+     * undefined: the SPA fallback serves the app shell for a chunk
+     * the newest build replaced, so the import resolves to a module
+     * with no default export. Remounting can never fix it — only
+     * fetching the current build can. Must precede null-access. */
+    test: /(reading 'default'|reading "default"|importing a module script failed)/i,
+    strategy: "reload",
+    explanation:
+      "A code fragment from an older build was requested after it had been replaced. Caches are purged and the latest build is fetched once.",
+    safeToRepeat: false,
   },
   {
     id: "chunk-load",
@@ -160,11 +180,18 @@ export function purgeNonEssentialStorage() {
   }
 }
 
-/** Purges build caches and reloads once — guarded so it can never loop. */
+/** Purges build caches and reloads — guarded so it can never loop:
+ * at most one automatic reload per 10 minutes. A fixed once-per-session
+ * guard stranded users on deploy-heavy days (several builds landing
+ * inside one long-lived session, each replacing chunks the session
+ * still requested); the time window keeps the anti-loop guarantee
+ * while letting a later, genuinely new stale-chunk fault recover. */
+const RELOAD_WINDOW_MS = 10 * 60 * 1000;
 export async function purgeCachesAndReload(): Promise<boolean> {
   try {
-    if (sessionStorage.getItem(RELOAD_KEY)) return false;
-    sessionStorage.setItem(RELOAD_KEY, "1");
+    const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0);
+    if (last && Date.now() - last < RELOAD_WINDOW_MS) return false;
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
   } catch {
     return false;
   }
@@ -234,5 +261,18 @@ export function installAutoDebugger() {
       event.preventDefault();
       handle(event.reason);
     }
+  });
+
+  /* Vite fires this when a lazily loaded chunk fails to load — the
+   * moment an open tab meets a build that replaced its chunks. Caught
+   * here, the user never sees a fault at all: caches purge and the
+   * current build loads once (guarded, never a loop). Uncaught, the
+   * same failure becomes a 'default'-of-undefined crash in the error
+   * boundary and a held session on the recovery console. */
+  window.addEventListener("vite:preloadError", (event) => {
+    event.preventDefault();
+    const payload = (event as Event & { payload?: unknown }).payload;
+    recordRepair(payload ?? new Error("vite:preloadError"), diagnose(new Error("Failed to fetch dynamically imported module")), true);
+    void purgeCachesAndReload();
   });
 }
