@@ -85,12 +85,86 @@ function TowerFill({ taken }: { taken: Set<number> }) {
       <primitive object={slabs} />
       <primitive object={glass} />
       <primitive object={columns} />
-      {/* The ground the tower stands on. */}
-      <mesh position={[0, offsetY(1) - 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[1300, 48]} />
-        <meshStandardMaterial color="#131e2a" roughness={1} />
-      </mesh>
     </>
+  );
+}
+
+/**
+ * THE PLAZA at the tower's base (founder directive 2026-10-26: the
+ * plain black ground disc is out — "create a simple pretty plaza down
+ * there instead"). Light stone paving, a podium the tower stands on, a
+ * round fountain, planters with green canopies, benches and lamp posts
+ * — plain meshes, no assets, so the base of the building reads as a
+ * place instead of a hole.
+ */
+function TowerPlaza() {
+  const base = offsetY(1) - 0.6;
+  const planters: [number, number][] = [];
+  for (const px of [-52, -30, 30, 52]) for (const pz of [-34, 0, 34]) planters.push([px, pz]);
+  const lamps: [number, number][] = [[-40, -22], [40, -22], [-40, 22], [40, 22], [0, -40], [0, 40]];
+  return (
+    <group position={[0, base, 0]}>
+      {/* stone paving */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[190, 1.2, 130]} />
+        <meshStandardMaterial color="#b7ab9c" roughness={1} />
+      </mesh>
+      {/* podium the tower stands on */}
+      <mesh position={[0, 1.2, 0]}>
+        <boxGeometry args={[64, 1.6, 46]} />
+        <meshStandardMaterial color="#8d97a3" roughness={0.9} />
+      </mesh>
+      {/* fountain: rim + water */}
+      <mesh position={[0, 1.35, 34]}>
+        <cylinderGeometry args={[11, 11, 1.1, 36]} />
+        <meshStandardMaterial color="#d8d2c6" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.95, 34]}>
+        <cylinderGeometry args={[9.8, 9.8, 0.25, 36]} />
+        <meshStandardMaterial color="#5f9ec4" roughness={0.15} metalness={0.1} />
+      </mesh>
+      <mesh position={[0, 2.6, 34]}>
+        <cylinderGeometry args={[0.5, 0.7, 1.6, 10]} />
+        <meshStandardMaterial color="#d8d2c6" roughness={0.8} />
+      </mesh>
+      {/* planters with trees */}
+      {planters.map(([px, pz], i) => (
+        <group key={i} position={[px, 0.6, pz]}>
+          <mesh position={[0, 0.5, 0]}>
+            <boxGeometry args={[4.4, 1, 4.4]} />
+            <meshStandardMaterial color="#6b5d4f" roughness={1} />
+          </mesh>
+          <mesh position={[0, 1.6, 0]}>
+            <cylinderGeometry args={[0.22, 0.3, 1.6, 8]} />
+            <meshStandardMaterial color="#5a4632" roughness={1} />
+          </mesh>
+          <mesh position={[0, 3.6, 0]}>
+            <icosahedronGeometry args={[2.3, 1]} />
+            <meshStandardMaterial color="#4e7d4a" roughness={1} flatShading />
+          </mesh>
+        </group>
+      ))}
+      {/* benches */}
+      {([[-16, 34], [16, 34], [-24, -30], [24, -30]] as [number, number][]).map(([px, pz], i) => (
+        <mesh key={i} position={[px, 1.05, pz]}>
+          <boxGeometry args={[4.6, 0.35, 1.3]} />
+          <meshStandardMaterial color="#7a6248" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* lamp posts */}
+      {lamps.map(([px, pz], i) => (
+        <group key={i} position={[px, 0.6, pz]}>
+          <mesh position={[0, 2.4, 0]}>
+            <cylinderGeometry args={[0.09, 0.12, 4.8, 8]} />
+            <meshStandardMaterial color="#2c3540" roughness={0.6} metalness={0.5} />
+          </mesh>
+          <mesh position={[0, 5, 0]}>
+            <sphereGeometry args={[0.42, 12, 10]} />
+            <meshStandardMaterial color="#ffe9b0" emissive="#ffca55" emissiveIntensity={0.9} roughness={0.4} />
+          </mesh>
+        </group>
+      ))}
+    </group>
   );
 }
 
@@ -141,6 +215,19 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
 
   const sky = currentScene?.skybox?.url ? currentScene.skybox : DEFAULT_SKYBOX;
 
+  /* DEFAULT FRAMING (founder directive 2026-10-26): the camera opens
+   * CLOSE on the floors that actually exist — today the top three —
+   * not on the whole 100-story fill from hundreds of units away. As
+   * real floors are created lower down, the span grows and the default
+   * shot pulls back on its own to keep every real floor in frame. */
+  const realFloors = [...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100];
+  const topF = Math.max(...realFloors);
+  const botF = Math.min(...realFloors);
+  const spanH = (topF - botF) * STORY + STORY;
+  const centerY = (offsetY(topF) + offsetY(botF)) / 2 + STORY / 2;
+  const camDist = Math.min(760, Math.max(95, spanH * 3.4 + 55));
+  const camPos: [number, number, number] = [camDist * 0.72, centerY + spanH * 0.42 + 10, camDist * 0.72];
+
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-[#0b1526] text-white">
       <div className="flex shrink-0 items-center gap-3 px-4 py-3">
@@ -151,22 +238,23 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
         <button onClick={onClose} className="shrink-0 rounded-full p-1.5 hover:bg-white/10" aria-label="Close building view"><X className="h-5 w-5" /></button>
       </div>
       <div className="relative min-h-0 flex-1">
-        <Canvas dpr={[1, 1.75]} camera={{ position: [430, -170, 430], fov: 48, far: 7000 }}>
+        <Canvas dpr={[1, 1.75]} camera={{ position: camPos, fov: 48, far: 7000 }}>
           <color attach="background" args={["#0b1526"]} />
           <fog attach="fog" args={["#0b1526", 700, 3200]} />
           <ambientLight intensity={1.0} />
           <hemisphereLight args={["#ffffff", "#5a6a78", 0.5]} />
           <Suspense fallback={null}>
-            {/* The skybox must CONTAIN the building (founder report
-                2026-10-26: "the skybox isn't big enough"): the stock
-                dome is 420 units around the top floor, but the tower
-                runs 792 down — it hung out of the photo's bottom into
-                the void. In this view the dome is scaled x6.5 and
-                centered on the tower's midpoint. */}
-            <group position={[0, offsetY(1) / 2, 0]} scale={6.5}>
+            {/* Skybox scale tried both ways (founder reports
+                2026-10-26): the stock 420 dome left the tower hanging
+                out of it, but x6.5 blew the photo up into a fishbowl.
+                Settle at x2.2, centered on the floors that exist —
+                big enough to hold the working view, photo still
+                reading at a natural scale. */}
+            <group position={[0, centerY, 0]} scale={2.2}>
               <SkyboxDome url={sky.url} />
             </group>
             <TowerFill taken={new Set([...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100])} />
+            <TowerPlaza />
             {levels.map((w) => {
               const s = scenes[w.key];
               const off = offsetY(w.floor);
@@ -219,7 +307,7 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               );
             })}
           </Suspense>
-          <OrbitControls makeDefault target={[0, offsetY(1) / 2, 0]} maxDistance={2400} minDistance={6} />
+          <OrbitControls makeDefault target={[0, centerY, 0]} maxDistance={2400} minDistance={6} />
         </Canvas>
         <div className="absolute right-3 top-3 flex w-60 flex-col gap-2">
           {levels.map((w) => (
