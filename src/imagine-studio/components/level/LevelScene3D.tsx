@@ -1016,7 +1016,7 @@ function ObjectSlot({
       <RenderObject
         obj={obj}
         selectedId={selectedId}
-        onSelect={onSelect ? (id) => onSelect(id) : undefined}
+        onSelect={onSelect ? (id, multi) => onSelect(id, multi) : undefined}
         playing={playing}
         controlsRef={controlsRef}
         onTrajectoryPointsChange={onTrajectoryPointsChange}
@@ -1042,7 +1042,7 @@ function ObjectSlot({
       <RenderObject
         obj={obj}
         selectedId={selectedId}
-        onSelect={onSelect ? (id) => onSelect(id) : undefined}
+        onSelect={onSelect ? (id, multi) => onSelect(id, multi) : undefined}
         playing={playing}
         controlsRef={controlsRef}
         onTrajectoryPointsChange={onTrajectoryPointsChange}

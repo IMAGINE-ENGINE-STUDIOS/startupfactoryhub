@@ -230,8 +230,28 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
     // vanishes inside it. When seated, lift the group so the belly rests
     // exactly ON the chair's seat top (the seatY prop) — the little legs
     // dangle in front of the chair, as stub legs should.
+    // GROUND SNAP (founder report 2026-10-26): the model's static-pose
+    // grounding leaves the ANIMATED feet a few cm under the floor — the
+    // idle/walk clips plant lower than the bind pose the memo measured.
+    // While standing, sample the skinned bounding box once per phase and
+    // lift the group so the lowest vertex rests exactly on y=0.
     {
-      const targetY = (s.phase === 'work' && seated && clipOf.sit) ? seatY + 0.111 : 0;
+      const sitting = s.phase === 'work' && seated && clipOf.sit;
+      let targetY = sitting ? seatY + 0.111 : 0;
+      if (!sitting) {
+        const key = s.phase;
+        if ((s as any).groundFor !== key) {
+          (s as any).groundT = ((s as any).groundT ?? 0) + dt;
+          if ((s as any).groundT > 0.45) {
+            try {
+              const b = new THREE.Box3().setFromObject(model);
+              if (isFinite(b.min.y)) (s as any).groundLift = Math.max(0, Math.min(0.12, g.position.y - b.min.y));
+            } catch { /* keep the previous lift */ }
+            (s as any).groundFor = key; (s as any).groundT = 0;
+          }
+        }
+        targetY = (s as any).groundLift ?? 0;
+      }
       g.position.y += (targetY - g.position.y) * Math.min(1, dt * 5);
     }
     const pos = { x: g.position.x, z: g.position.z };
