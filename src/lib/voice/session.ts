@@ -162,7 +162,11 @@ class VoiceSession {
    * Returns false when a call is already running. */
   async start(opts: StartCallOptions): Promise<boolean> {
     if (this.engine) return false;
-    const mic = new RecorderMic(opts.silenceMs ?? 900);
+    /* 650ms of silence ends a turn (was 900): with the heard-speech
+     * gate this rarely cuts a mid-thought pause, and turn-taking
+     * feels noticeably closer to realtime (founder, 2026-10-26:
+     * "not realtime but took 5 seconds — that's better"). */
+    const mic = new RecorderMic(opts.silenceMs ?? 650);
     await mic.acquire(); // inside the caller's tap gesture
     this.mic = mic;
     this.roleText = opts.roleText;

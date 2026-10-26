@@ -20,6 +20,7 @@ import { Room, RoomEvent, Track } from 'livekit-client';
 import { Bot as BotIcon, Box as BoxIcon, Briefcase, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Clapperboard, Crown, FileUp, LayoutDashboard, ListTodo, Loader2, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, Play, Send, SlidersHorizontal, Sparkles, Square, Users, Video, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
+import { warmVoice } from '@/lib/voice/useVoiceCall';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
 const SFHCallAgents = lazy(() => import('@/components/call-agents/SFHCallAgents'));
@@ -409,6 +410,10 @@ export function loadOfficeBrand(): Promise<OfficeBrand> {
 export function useOfficeBrand(): OfficeBrand {
   const [brand, setBrand] = useState<OfficeBrand>(cachedBrand ?? SFH_BRAND);
   useEffect(() => { let live = true; loadOfficeBrand().then((b) => { if (live) setBrand(b); }); return () => { live = false; }; }, []);
+  /* Warm the voice engine (worker + speech model) as soon as the
+   * office opens — by the time she opens a chat and taps Talk, the
+   * cold start is already paid. */
+  useEffect(() => { warmVoice(); }, []);
   return brand;
 }
 
