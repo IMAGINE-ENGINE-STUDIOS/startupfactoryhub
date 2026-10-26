@@ -251,7 +251,83 @@ async function streamChat(
   return fullText.replace(/<!--NAV:[^>]+-->\n?/, "");
 }
 
+/* ---------------- Conversational actions ----------------
+ * DirectiveFilter strips [[ACT {...}]] directives from a cumulative
+ * reply stream: they may span deltas, partial openers are held,
+ * malformed JSON is dropped silently — a directive NEVER reaches the
+ * captions, the voice, or the transcript record. Parsed directives
+ * go to the host's executor (fire-and-forget; the conversation never
+ * blocks on a job). See ~/workspace/voice-v2/ACTIONS-SPEC.md. */
+
+export interface ActDirective {
+  type: string;
+  [key: string]: unknown;
+}
+
+const ACT_OPEN = "[[ACT";
+
+export class DirectiveFilter {
+  private consumed = 0;
+  private buf = "";
+  private clean = "";
+
+  constructor(private onAct: (d: ActDirective) => void) {}
+
+  feed(cumulative: string): string {
+    if (cumulative.length < this.consumed) {
+      this.consumed = 0;
+      this.buf = "";
+      this.clean = "";
+    }
+    this.buf += cumulative.slice(this.consumed);
+    this.consumed = cumulative.length;
+    this.drain();
+    return this.clean;
+  }
+
+  private drain(): void {
+    for (;;) {
+      const i = this.buf.indexOf(ACT_OPEN);
+      if (i === -1) {
+        let hold = 0;
+        for (let k = Math.min(ACT_OPEN.length - 1, this.buf.length); k > 0; k--) {
+          if (this.buf.endsWith(ACT_OPEN.slice(0, k))) { hold = k; break; }
+        }
+        this.clean += this.buf.slice(0, this.buf.length - hold);
+        this.buf = this.buf.slice(this.buf.length - hold);
+        return;
+      }
+      this.clean += this.buf.slice(0, i);
+      const rest = this.buf.slice(i);
+      const close = rest.indexOf("]]");
+      if (close === -1) {
+        if (rest.length > 800) {
+          this.clean += rest;
+          this.buf = "";
+        } else {
+          this.buf = rest;
+        }
+        return;
+      }
+      const jsonText = rest.slice(ACT_OPEN.length, close).trim();
+      try {
+        const d = JSON.parse(jsonText);
+        if (d && typeof d.type === "string") this.onAct(d as ActDirective);
+      } catch { /* malformed directive: dropped, never spoken */ }
+      this.buf = rest.slice(close + 2);
+    }
+  }
+
+  finish(): string {
+    this.clean += this.buf;
+    this.buf = "";
+    return this.clean;
+  }
+}
+
 export class AgentBrain implements BrainPort {
+  private notes: string[] = [];
+
   constructor(
     private getHeaders: () => Promise<Record<string, string>>,
     private agentId: string,
@@ -259,7 +335,16 @@ export class AgentBrain implements BrainPort {
      * thread) — read fresh at each reply, placed before the call's
      * own turns so the agent has the full context. */
     private baseHistory?: () => Turn[],
+    /** Host executor for [[ACT]] directives. When provided, the
+     * chat request enables the server-side ACTIONS protocol. */
+    private onAction?: (d: ActDirective) => void,
   ) {}
+
+  /** Queue an action result for the agent's next turn (server-side
+   * system context — never part of the transcript record). */
+  noteResult(text: string): void {
+    if (text.trim()) this.notes.push(text.trim());
+  }
 
   async reply(history: Turn[], userText: string, onDelta: (t: string) => void, signal: AbortSignal): Promise<string> {
     const messages = [
@@ -267,23 +352,44 @@ export class AgentBrain implements BrainPort {
       ...history.map((t) => ({ role: t.role, content: t.content })),
       { role: "user" as const, content: userText },
     ];
-    return streamChat(
+    const notes = this.notes.splice(0, this.notes.length);
+    const body: Record<string, unknown> = {
+      action: "chat",
+      agent_id: this.agentId,
+      messages,
+      voice: true,
+    };
+    if (this.onAction) body.actions = true;
+    if (notes.length) body.context_notes = notes;
+    if (!this.onAction) {
+      return streamChat(`${FN_BASE}/call-agents`, this.getHeaders, body, onDelta, signal);
+    }
+    const filter = new DirectiveFilter(this.onAction);
+    await streamChat(
       `${FN_BASE}/call-agents`,
       this.getHeaders,
-      { action: "chat", agent_id: this.agentId, messages, voice: true },
-      onDelta,
+      body,
+      (t) => onDelta(filter.feed(t)),
       signal,
     );
+    return filter.finish();
   }
 }
 
 export class GeniusBrain implements BrainPort {
+  private notes: string[] = [];
+
   constructor(
     private getHeaders: () => Promise<Record<string, string>>,
     private systemOverride: string | (() => string),
     private language: string = "en",
     private baseHistory?: () => Turn[],
+    private onAction?: (d: ActDirective) => void,
   ) {}
+
+  noteResult(text: string): void {
+    if (text.trim()) this.notes.push(text.trim());
+  }
 
   async reply(history: Turn[], userText: string, onDelta: (t: string) => void, signal: AbortSignal): Promise<string> {
     const messages = [
@@ -291,16 +397,28 @@ export class GeniusBrain implements BrainPort {
       ...history.map((t) => ({ role: t.role, content: t.content })),
       { role: "user" as const, content: userText },
     ];
-    return streamChat(
+    const notes = this.notes.splice(0, this.notes.length);
+    const base = typeof this.systemOverride === "function" ? this.systemOverride() : this.systemOverride;
+    const systemOverride = notes.length
+      ? `${base}\n\nRECENT ACTION RESULTS (mention the outcome naturally if relevant):\n- ${notes.join("\n- ")}`
+      : base;
+    if (!this.onAction) {
+      return streamChat(
+        `${FN_BASE}/lightpaper-genius`,
+        this.getHeaders,
+        { messages, systemOverride, language: this.language },
+        onDelta,
+        signal,
+      );
+    }
+    const filter = new DirectiveFilter(this.onAction);
+    await streamChat(
       `${FN_BASE}/lightpaper-genius`,
       this.getHeaders,
-      {
-        messages,
-        systemOverride: typeof this.systemOverride === "function" ? this.systemOverride() : this.systemOverride,
-        language: this.language,
-      },
-      onDelta,
+      { messages, systemOverride, language: this.language },
+      (t) => onDelta(filter.feed(t)),
       signal,
     );
+    return filter.finish();
   }
 }

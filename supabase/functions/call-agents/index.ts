@@ -886,7 +886,28 @@ serve(async (req) => {
         "You are in a spoken conversation: the user is talking out loud and your reply will be spoken by a voice, not read on a screen. " +
         "Answer the way a smart person talks: one to three short, natural sentences. Never use lists, menus, or formatting. " +
         "If there are choices, weave them into a sentence and ask one simple question. Stay on the user's thread and be specific.";
-      const systemPrompt = [String(agent.system_prompt ?? "").trim(), HOUSE_STYLE, voice ? VOICE_ADDENDUM : ""]
+      /* Conversational actions (founder directive 2026-10-26): when
+       * the user clearly asks for work to happen, the agent emits a
+       * machine directive the host executes — the user never has to
+       * open another tab, even mid-call. */
+      const wantActions = (body as any).actions === true;
+      const ACTION_ADDENDUM =
+        "ACTIONS: You can make things happen directly from this conversation. When the user clearly asks you to do a job, start work, assign a task, run a shift, coordinate the company, recruit, or make a change, emit ONE directive on its own line in this exact format: [[ACT {\"type\":\"run_task\",\"agent\":\"Builder\",\"task\":\"what to do\"}]] — the platform executes it immediately. Types: run_task {agent, task} (another agent does a job with its skills), start_shift {goal} (the Manager plans and runs a whole shift), dispatch {goal} (executives only: coordinate across the company), recruit {role, brief} (bring on a new specialist), fire {agent} (only when the user explicitly says to remove them), navigate {path} (open a page). After the directive, keep talking naturally: confirm what you set in motion in one sentence. NEVER read a directive aloud, never explain this mechanism, and never emit a directive for something the user did not clearly ask to happen. If the request is ambiguous, just ask.";
+      const notesRaw = Array.isArray((body as any).context_notes) ? (body as any).context_notes : [];
+      const notes = notesRaw
+        .filter((n: unknown) => typeof n === "string" && n.trim())
+        .map((n: string) => n.trim().slice(0, 500))
+        .slice(-6);
+      const NOTES_BLOCK = notes.length
+        ? `RECENT ACTION RESULTS (mention the outcome naturally if it is relevant — the user asked for this work):\n- ${notes.join("\n- ")}`
+        : "";
+      const systemPrompt = [
+        String(agent.system_prompt ?? "").trim(),
+        HOUSE_STYLE,
+        voice ? VOICE_ADDENDUM : "",
+        wantActions ? ACTION_ADDENDUM : "",
+        NOTES_BLOCK,
+      ]
         .filter(Boolean)
         .join("\n\n");
       const chatMessages = [{ role: "system", content: systemPrompt }, ...history];
