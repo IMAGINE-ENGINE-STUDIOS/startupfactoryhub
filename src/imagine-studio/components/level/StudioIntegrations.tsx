@@ -148,6 +148,21 @@ export default function StudioIntegrations({ levelId, name, scene, updateScene, 
   const [skyOpen, setSkyOpen] = useState(false);
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [buildingOpen, setBuildingOpen] = useState(false);
+  /* Opening a building world in the studio lands on the BUILDING, not
+   * buried behind the Levels button (founder report 2026-10-26: "the
+   * building is only visible if user clicks on that button"). Once per
+   * session per world: she sees the tower, clicks her level, edits —
+   * closing it doesn't reopen it that session. */
+  useEffect(() => {
+    if (!namedWorld?.building) return;
+    const k = `sfh:studio-building-autoshow:${namedWorld.key}`;
+    try {
+      if (sessionStorage.getItem(k)) return;
+      sessionStorage.setItem(k, "1");
+    } catch { return; }
+    startTransition(() => setBuildingOpen(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [namedWorld?.key]);
   /** Open another level of this world in the editor: only that level
    * loads (its own scene and agents) — the current one is left behind. */
   const openWorldLevel = async (w: NamedWorld) => {

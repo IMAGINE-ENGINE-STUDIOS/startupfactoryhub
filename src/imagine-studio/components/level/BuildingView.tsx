@@ -39,41 +39,56 @@ const offsetY = (floor?: number) => ((floor ?? 100) - 100) * STORY;
  * floating in the sky.
  */
 function TowerFill({ taken }: { taken: Set<number> }) {
-  const { slabs, glass } = useMemo(() => {
+  const { slabs, glass, columns } = useMemo(() => {
     const ids: number[] = [];
     for (let f = 1; f < 100; f++) if (!taken.has(f)) ids.push(f);
     const box = new THREE.BoxGeometry(1, 1, 1);
     const haze = new THREE.Color("#33506e");
     const slabMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0.05 }), ids.length);
     slabMesh.name = "building-view-tower-slabs";
-    const glassMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.32, depthWrite: false }), ids.length);
+    const glassMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.42, depthWrite: false }), ids.length);
     glassMesh.name = "building-view-tower-glass";
+    /* Corner columns: without verticals the stack read as a zigzag
+     * ribbon of slab edges (founder screenshot 2026-10-26). A post at
+     * each corner of every story gives the tower a frame the eye can
+     * follow from top to ground. */
+    const colMesh = new THREE.InstancedMesh(box, new THREE.MeshStandardMaterial({ roughness: 0.7, metalness: 0.15 }), ids.length * 4);
+    colMesh.name = "building-view-tower-columns";
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
     const slabBase = new THREE.Color("#cfd8e1");
-    const glassBase = new THREE.Color("#8fb8d8");
+    const glassBase = new THREE.Color("#6f9ec4");
+    const colBase = new THREE.Color("#93a7ba");
+    const corners: [number, number][] = [[-24.1, -16.1], [24.1, -16.1], [-24.1, 16.1], [24.1, 16.1]];
     ids.forEach((f, i) => {
       const y = offsetY(f);
       const fade = Math.min(1, (100 - f) / 34);
-      m.compose(new THREE.Vector3(0, y - 0.22, 0), q, new THREE.Vector3(48.4, 0.45, 32.4));
+      m.compose(new THREE.Vector3(0, y - 0.3, 0), q, new THREE.Vector3(48.4, 0.6, 32.4));
       slabMesh.setMatrixAt(i, m);
       slabMesh.setColorAt(i, slabBase.clone().lerp(haze, fade * 0.8));
       m.compose(new THREE.Vector3(0, y + STORY / 2, 0), q, new THREE.Vector3(48.24, STORY - 0.55, 32.24));
       glassMesh.setMatrixAt(i, m);
       glassMesh.setColorAt(i, glassBase.clone().lerp(haze, fade * 0.8));
+      corners.forEach(([cx, cz], ci) => {
+        m.compose(new THREE.Vector3(cx, y + STORY / 2, cz), q, new THREE.Vector3(0.55, STORY, 0.55));
+        colMesh.setMatrixAt(i * 4 + ci, m);
+        colMesh.setColorAt(i * 4 + ci, colBase.clone().lerp(haze, fade * 0.8));
+      });
     });
     slabMesh.frustumCulled = false;
     glassMesh.frustumCulled = false;
-    return { slabs: slabMesh, glass: glassMesh };
+    colMesh.frustumCulled = false;
+    return { slabs: slabMesh, glass: glassMesh, columns: colMesh };
   }, [taken]);
   return (
     <>
       <primitive object={slabs} />
       <primitive object={glass} />
+      <primitive object={columns} />
       {/* The ground the tower stands on. */}
       <mesh position={[0, offsetY(1) - 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[340, 48]} />
-        <meshStandardMaterial color="#0d1826" roughness={1} />
+        <circleGeometry args={[1300, 48]} />
+        <meshStandardMaterial color="#131e2a" roughness={1} />
       </mesh>
     </>
   );
@@ -136,12 +151,21 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
         <button onClick={onClose} className="shrink-0 rounded-full p-1.5 hover:bg-white/10" aria-label="Close building view"><X className="h-5 w-5" /></button>
       </div>
       <div className="relative min-h-0 flex-1">
-        <Canvas dpr={[1, 1.75]} camera={{ position: [330, -260, 330], fov: 48, far: 5000 }}>
+        <Canvas dpr={[1, 1.75]} camera={{ position: [430, -170, 430], fov: 48, far: 7000 }}>
           <color attach="background" args={["#0b1526"]} />
+          <fog attach="fog" args={["#0b1526", 700, 3200]} />
           <ambientLight intensity={1.0} />
           <hemisphereLight args={["#ffffff", "#5a6a78", 0.5]} />
           <Suspense fallback={null}>
-            <SkyboxDome url={sky.url} />
+            {/* The skybox must CONTAIN the building (founder report
+                2026-10-26: "the skybox isn't big enough"): the stock
+                dome is 420 units around the top floor, but the tower
+                runs 792 down — it hung out of the photo's bottom into
+                the void. In this view the dome is scaled x6.5 and
+                centered on the tower's midpoint. */}
+            <group position={[0, offsetY(1) / 2, 0]} scale={6.5}>
+              <SkyboxDome url={sky.url} />
+            </group>
             <TowerFill taken={new Set([...levels.map((w) => w.floor ?? 100), ...extras.map((x) => x.floor), 100])} />
             {levels.map((w) => {
               const s = scenes[w.key];
@@ -195,7 +219,7 @@ export function BuildingView({ current, currentScene, extras = [], onSelect, onS
               );
             })}
           </Suspense>
-          <OrbitControls makeDefault target={[0, offsetY(1) / 2, 0]} maxDistance={1800} minDistance={6} />
+          <OrbitControls makeDefault target={[0, offsetY(1) / 2, 0]} maxDistance={2400} minDistance={6} />
         </Canvas>
         <div className="absolute right-3 top-3 flex w-60 flex-col gap-2">
           {levels.map((w) => (
