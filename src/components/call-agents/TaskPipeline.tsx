@@ -4,6 +4,7 @@ import {
   Play, Plus, RefreshCw, Trash2, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { durableGetSync, durableSet, durableHydrate, durableOnAdopt } from "@/lib/durableStore";
 import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,17 +66,18 @@ interface DoneRun {
 const QUEUE_KEY = "sfh:agents-task-queue:v1";
 
 function loadStoredQueue(): TaskQueueItem[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (i): i is TaskQueueItem =>
-        !!i && typeof i.id === "string" && typeof i.agentId === "string" &&
-        typeof i.message === "string"
-    );
-  } catch {
-    return [];
-  }
+  /* DURABLE STORE (2026-10-26): the queue used to live in raw
+   * localStorage with a "session only" shrug on quota errors. It now
+   * reads through the durable store (IndexedDB copy of record,
+   * localStorage mirror, legacy values adopted automatically), so a
+   * reload — or a storage cleanup — can no longer eat queued tasks. */
+  const parsed = durableGetSync<TaskQueueItem[]>(QUEUE_KEY);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(
+    (i): i is TaskQueueItem =>
+      !!i && typeof i.id === "string" && typeof i.agentId === "string" &&
+      typeof i.message === "string"
+  );
 }
 
 const newId = () =>
@@ -180,13 +182,18 @@ export default function TaskPipeline({
     void refreshDone();
   }, [refreshDone]);
 
-  /* ── Queue persistence ─────────────────────────────────────────────── */
+  /* ── Queue persistence (durable store) ─────────────────────────────── */
+  const queueHydratedRef = useRef(false);
+  useEffect(() => { void durableHydrate().then(() => { queueHydratedRef.current = true; }); }, []);
+  useEffect(() => durableOnAdopt(QUEUE_KEY, (data) => {
+    if (Array.isArray(data)) setQueue((cur) => (cur.length ? cur : (data as TaskQueueItem[])));
+  }), []);
   useEffect(() => {
-    try {
-      localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-    } catch {
-      /* storage full/blocked — the queue still works for this session */
-    }
+    /* Never persist an empty queue before hydration completes — the
+     * bootstrap read may have missed an IndexedDB-only queue, and
+     * writing [] over it would delete real queued tasks. */
+    if (queue.length === 0 && !queueHydratedRef.current) return;
+    durableSet(QUEUE_KEY, queue);
   }, [queue]);
 
   // Preselect the first agent in the add form once the team loads.

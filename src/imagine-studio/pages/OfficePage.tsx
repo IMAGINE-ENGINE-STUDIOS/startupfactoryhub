@@ -22,6 +22,7 @@ import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { warmVoice } from '@/lib/voice/useVoiceCall';
 import { memoryBlock } from '@/lib/agentMemory';
+import { durableGetSync, durableHydrate } from '@/lib/durableStore';
 import { buildDocument, documentDelivery, DOC_TASK, authorViaLightPaper } from '@/imagine-studio/lib/docBuild';
 import { PublishedWorld } from '@/imagine-studio/components/plaza/PublishedWorld';
 
@@ -1332,8 +1333,9 @@ export default function OfficePage() {
   useEffect(() => {
     if (!signedIn) return;
     let off = false;
+    void durableHydrate();
     const tick = async () => {
-      try { const raw = localStorage.getItem('sfh:agents-task-queue:v1'); const q = raw ? JSON.parse(raw) : []; if (!off && Array.isArray(q)) setQueueItems(q); } catch { /* queue unreadable */ }
+      try { const q = durableGetSync<any[]>('sfh:agents-task-queue:v1'); if (!off && Array.isArray(q)) setQueueItems(q); } catch { /* queue unreadable */ }
       const { data } = await supabase.from('call_agent_runs').select('id, agent_id, input, status, created_at').order('created_at', { ascending: false }).limit(80);
       if (!off && data) setAllRuns(data);
     };
