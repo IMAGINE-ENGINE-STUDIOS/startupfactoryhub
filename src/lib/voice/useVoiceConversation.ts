@@ -8,14 +8,15 @@
  *   3. SPEAKING: the reply is read aloud in the agent's role voice.
  *   4. Back to LISTENING — until you turn Talk off.
  * Barge-in is the Talk button itself: tapping it off stops speech and
- * mic immediately. Nothing here phones home: STT is on-device Whisper,
- * TTS is the device's built-in voices.
+ * mic immediately. Nothing here phones home: STT is on-device Whisper;
+ * talk-back is the device voice, or Kokoro neural speech on the Neural
+ * voice model — both self-hosted, both in the browser.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MicRecorder } from "@/lib/voice/recorder";
 import { loadWhisper, transcribeBlob } from "@/lib/voice/whisper";
-import { speak, stopSpeaking, personaFor, type VoicePersona } from "@/lib/voice/tts";
+import { speak, stopSpeaking, personaFor, preloadSpeech, type VoicePersona } from "@/lib/voice/tts";
 
 export type TalkState = "off" | "loading" | "listening" | "transcribing" | "waiting" | "speaking";
 
@@ -121,6 +122,7 @@ export function useVoiceConversation(opts: {
     setTalkOn(true);
     setTalkState("loading");
     void (async () => {
+      preloadSpeech(); // Neural model: start the Kokoro download now, not at first reply
       try { await loadWhisper(); } catch { /* listen() will surface errors */ }
       if (gen !== genRef.current) return;
       void listen(gen);

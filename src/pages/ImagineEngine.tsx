@@ -11,14 +11,14 @@ export default function ImagineEngine() {
      * surface uses. ai.js only records the mic and passes blobs across. */
     let cancelled = false;
     (async () => {
-      const [{ transcribeBlob }, { speak, stopSpeaking }] = await Promise.all([
+      const [{ transcribeBlob }, { speak, stopSpeaking, personaFor }] = await Promise.all([
         import("@/lib/voice/whisper"),
         import("@/lib/voice/tts"),
       ]);
       if (cancelled) return;
       (window as any).__sfhVoice = {
         transcribe: (blob: Blob) => transcribeBlob(blob),
-        speak: (text: string, roleText?: string) => speak(text, { roleText: roleText || "Genius" }),
+        speak: (text: string, roleText?: string) => speak(text, personaFor(roleText || "Genius")),
         stopSpeaking: () => stopSpeaking(),
       };
     })();

@@ -49,7 +49,23 @@ export function AgentChat({
       return Array.isArray(p) ? p.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-60) : [];
     } catch { return []; }
   });
-  const [input, setInput] = useState("");
+  /* Draft armor (founder report 2026-10-25: typed text vanishing in
+   * the CEO/Chairman chats): the composer draft is mirrored to
+   * sessionStorage and restored on mount, so even if this component is
+   * ever remounted by a parent re-render storm, what the user typed is
+   * NEVER lost. Cleared when the message is sent. */
+  const draftKey = persistKey ? `${persistKey}:draft` : null;
+  const [input, setInput] = useState(() => {
+    if (!draftKey) return "";
+    try { return sessionStorage.getItem(draftKey) || ""; } catch { return ""; }
+  });
+  useEffect(() => {
+    if (!draftKey) return;
+    try {
+      if (input) sessionStorage.setItem(draftKey, input);
+      else sessionStorage.removeItem(draftKey);
+    } catch { /* session only */ }
+  }, [input, draftKey]);
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);

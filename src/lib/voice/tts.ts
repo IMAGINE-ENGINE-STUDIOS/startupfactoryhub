@@ -4,12 +4,17 @@
  * their replies out loud, with a voice matched to the agent's ROLE, so a
  * realtime conversation feels like talking to different people.
  *
- * Engine of this first ship: the voices BUILT INTO the visitor's device
- * (SpeechSynthesis) — zero download, zero hosting, zero services, works
- * on every phone and computer today. The self-hosted neural voice
- * (Kokoro) plugs in behind this same speak() interface later; nothing
- * at the call sites changes.
+ * Two engines behind this one speak() interface, chosen by the user's
+ * voice model (see modelSetting.ts):
+ *  - "device": the voices built into the visitor's device
+ *    (SpeechSynthesis) — zero download. Used by the Tiny and Base models.
+ *  - "kokoro": Kokoro-82M, a real neural voice model hosted in the
+ *    founder's own Supabase Storage and run in the browser — the Neural
+ *    model's talk-back. Any failure falls back to the device voice, so
+ *    a reply is never lost to a model problem.
  */
+import { getVoiceModel, speechEngine } from "./modelSetting";
+import { WHISPER_HOST } from "./whisper";
 
 export type VoicePersona = {
   id: string;
@@ -92,20 +97,108 @@ function chunkText(text: string, max = 190): string[] {
 export function stopSpeaking() {
   speakSeq++;
   try { window.speechSynthesis?.cancel(); } catch { /* noop */ }
+  stopNeuralPlayback();
 }
 
 export function isSpeechSupported(): boolean {
-  return typeof window !== "undefined" && "speechSynthesis" in window;
+  if (typeof window === "undefined") return false;
+  if (speechEngine(getVoiceModel()) === "kokoro") return true; // neural path needs only AudioContext
+  return "speechSynthesis" in window;
 }
 
-/**
- * Speak text with the persona's voice. Resolves when speech ENDS (the
- * realtime loop chains listening off this). Cancelling via stopSpeaking
- * also resolves it.
- */
-export function speak(text: string, persona: VoicePersona = DEFAULT_PERSONA): Promise<void> {
+/* ---------------- Kokoro neural speech (the Neural model) ----------- */
+
+export const KOKORO_MODEL = "Kokoro-82M-v1.0-ONNX";
+
+/** Persona → Kokoro voice (hosted voice files; EN + UK + ES sets). */
+const KOKORO_VOICE_FOR_PERSONA: Record<string, string> = {
+  chairman: "bm_george",
+  ceo: "af_nicole",
+  manager: "am_michael",
+  bright: "af_bella",
+  steady: "am_adam",
+  warm: "af_alloy",
+  genius: "af_heart",
+};
+
+let kokoroPromise: Promise<any> | null = null;
+
+/** Load (once) the Kokoro TTS instance from the founder's own storage. */
+export function loadKokoro(): Promise<any> {
+  if (!kokoroPromise) {
+    kokoroPromise = (async () => {
+      const transformers: any = await import("@huggingface/transformers");
+      const { env } = transformers;
+      env.remoteHost = WHISPER_HOST;
+      env.remotePathTemplate = "{model}/";
+      env.allowLocalModels = false;
+      if (env.useBrowserCache !== undefined) env.useBrowserCache = true;
+      const { KokoroTTS } = await import("kokoro-js");
+      const hasGpu = typeof navigator !== "undefined" && "gpu" in navigator;
+      if (hasGpu) {
+        try {
+          return await KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "webgpu" });
+        } catch { /* fall through to WASM */ }
+      }
+      return KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: "q8", device: "wasm" });
+    })();
+    kokoroPromise.catch(() => { kokoroPromise = null; });
+  }
+  return kokoroPromise;
+}
+
+/** Warm the speech engine for the current model choice (Talk start). */
+export function preloadSpeech(): void {
+  if (speechEngine(getVoiceModel()) === "kokoro") void loadKokoro().catch(() => {});
+}
+
+let audioCtx: AudioContext | null = null;
+const activeSources = new Set<AudioBufferSourceNode>();
+
+function stopNeuralPlayback() {
+  for (const s of Array.from(activeSources)) {
+    try { s.stop(); } catch { /* already ended */ }
+    activeSources.delete(s);
+  }
+}
+
+function playRawAudio(audio: Float32Array, sampleRate: number): Promise<void> {
   return new Promise((resolve) => {
-    if (!isSpeechSupported()) { resolve(); return; }
+    try {
+      const AC: typeof AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtx = audioCtx || new AC();
+      if (audioCtx.state === "suspended") void audioCtx.resume();
+      const buffer = audioCtx.createBuffer(1, audio.length, sampleRate);
+      buffer.copyToChannel(audio as any, 0);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(audioCtx.destination);
+      activeSources.add(src);
+      src.onended = () => { activeSources.delete(src); resolve(); };
+      src.start();
+    } catch { resolve(); }
+  });
+}
+
+/** Speak with the neural voice; throws on any model problem (caller falls back). */
+async function speakNeural(text: string, persona: VoicePersona, mySeq: number): Promise<void> {
+  const clean = stripForSpeech(text);
+  if (!clean) return;
+  const tts = await loadKokoro();
+  const voice = KOKORO_VOICE_FOR_PERSONA[persona.id] || "af_heart";
+  for (const chunk of chunkText(clean, 300)) {
+    if (mySeq !== speakSeq) return; // cancelled / superseded
+    const out: any = await tts.generate(chunk, { voice });
+    if (mySeq !== speakSeq) return;
+    const audio: Float32Array = out?.audio;
+    const rate: number = out?.sampling_rate || 24000;
+    if (audio && audio.length) await playRawAudio(audio, rate);
+  }
+}
+
+function speakDevice(text: string, persona: VoicePersona): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) { resolve(); return; }
     const clean = stripForSpeech(text);
     if (!clean) { resolve(); return; }
     const mySeq = ++speakSeq;
@@ -127,4 +220,26 @@ export function speak(text: string, persona: VoicePersona = DEFAULT_PERSONA): Pr
     };
     next();
   });
+}
+
+/**
+ * Speak text with the persona's voice, on the engine the user's voice
+ * model selects: Neural → Kokoro (with device fallback on any problem);
+ * Tiny / Base → the device voice. Resolves when speech ENDS (the
+ * realtime loop chains listening off this). stopSpeaking() cancels and
+ * also resolves it.
+ */
+export async function speak(text: string, persona: VoicePersona = DEFAULT_PERSONA): Promise<void> {
+  if (speechEngine(getVoiceModel()) === "kokoro") {
+    const mySeq = ++speakSeq;
+    try {
+      await speakNeural(text, persona, mySeq);
+      return;
+    } catch {
+      if (mySeq !== speakSeq) return; // cancelled while loading — stay silent
+      /* Neural failed (model still downloading, device too old…) — the
+       * reply still gets spoken, on the device voice. */
+    }
+  }
+  return speakDevice(text, persona);
 }

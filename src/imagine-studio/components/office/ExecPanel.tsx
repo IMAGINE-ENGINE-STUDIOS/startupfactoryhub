@@ -61,6 +61,87 @@ function download(name: string, content: string) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
+/* HOISTED (bug fix, founder report 2026-10-25): FireButton, PersonRow
+ * and DirectionEditor used to be defined INSIDE ExecPanel's body. Every
+ * re-render — and this panel re-renders on every shift-engine and org
+ * notification — created brand-new component types, so React unmounted
+ * and remounted their subtrees: text boxes lost focus mid-typing and
+ * drafts appeared to erase. Defined ONCE here at module level, they
+ * re-render like any normal component and inputs keep focus and state.
+ * Never define components inside ExecPanel (or any panel) again. */
+function FireButton({ floorKey, botKey, label, by = "Admin", reason = "removed by the admin", isAdmin, confirmKey, setConfirmKey, onFire }: {
+  floorKey: string; botKey: string; label: string; by?: string; reason?: string;
+  isAdmin: boolean; confirmKey: string; setConfirmKey: (k: string) => void;
+  onFire: (floorKey: string, botKey: string, label: string, by: string, reason: string) => void;
+}) {
+  if (!isAdmin && by !== "Chairman") return null;
+  const k = `${floorKey}:${botKey}`;
+  return confirmKey === k ? (
+    <button onClick={() => onFire(floorKey, botKey, label, by, reason)} className="shrink-0 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-semibold text-white">Confirm — fire &amp; erase</button>
+  ) : (
+    <button onClick={() => setConfirmKey(k)} className="shrink-0 rounded-full border border-red-500/50 px-2.5 py-1 text-[10px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10">Fire</button>
+  );
+}
+
+function PersonRow({ r, floorFallback, isAdmin, confirmKey, setConfirmKey, onFire }: {
+  r: EvalRow; floorFallback: FloorDef;
+  isAdmin: boolean; confirmKey: string; setConfirmKey: (k: string) => void;
+  onFire: (floorKey: string, botKey: string, label: string, by: string, reason: string) => void;
+}) {
+  const gen = generationOf(r.scope);
+  const f = FLOORS.find((x) => x.key === r.floorKey) || floorFallback;
+  const botKey = r.role === "manager" ? "manager" : r.role === "ceo" ? "ceo" : r.role === "chairman" ? "chairman" : r.scope.split(":").slice(1).join(":");
+  return (
+    <div className="flex items-center gap-2.5 py-1.5">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-xs font-medium">{r.label}</span>
+          {gen > 1 && <span className="shrink-0 rounded-full bg-muted px-1.5 py-px text-[9px] font-semibold text-muted-foreground">GEN {gen}</span>}
+          {r.accuracy !== null && r.judged >= 4 && (r.accuracy as number) < SURVIVAL_THRESHOLD && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-px text-[9px] font-semibold text-red-600 dark:text-red-400">AT RISK</span>}
+        </div>
+        <div className="truncate text-[10px] text-muted-foreground">{r.role === "agent" ? "Specialist" : r.role === "manager" ? "Manager" : r.role === "ceo" ? "CEO" : "Chairman"} · {r.company} · Floor {f.id}</div>
+      </div>
+      <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-muted sm:block">
+        <div className={`h-full rounded-full ${r.accuracy !== null && r.accuracy >= SURVIVAL_THRESHOLD ? "bg-emerald-500" : "bg-red-500"}`} style={{ width: `${r.accuracy ?? 0}%` }} />
+      </div>
+      <ScoreChip v={r.accuracy} judged={r.judged} />
+      <FireButton floorKey={r.floorKey} botKey={botKey} label={r.label} isAdmin={isAdmin} confirmKey={confirmKey} setConfirmKey={setConfirmKey} onFire={onFire} />
+    </div>
+  );
+}
+
+function DirectionEditor({ c, isAdmin, value, dirty, onChange, onSave }: {
+  c: string; isAdmin: boolean;
+  value: { vision: string; mission: string; goals: string };
+  dirty: boolean;
+  onChange: (k: "vision" | "mission" | "goals", v: string) => void;
+  onSave: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border p-3.5">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold">{c} — direction</span>
+        <span className="text-[10px] text-muted-foreground">Vision, mission and goals steer every CEO plan and Manager shift</span>
+        {isAdmin && dirty && <button onClick={onSave} className="ml-auto flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground"><Save className="h-3.5 w-3.5" /> Save direction</button>}
+      </div>
+      {(["vision", "mission", "goals"] as const).map((k) => (
+        <label key={k} className="mt-2.5 block">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</span>
+          <textarea
+            value={value[k]}
+            disabled={!isAdmin}
+            onChange={(e) => onChange(k, e.target.value)}
+            rows={2}
+            placeholder={k === "vision" ? "What this company exists to become…" : k === "mission" ? "What it does, for whom, and how it wins…" : "The current objectives, in priority order…"}
+            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed disabled:opacity-60"
+          />
+        </label>
+      ))}
+      {!isAdmin && <p className="mt-2 text-[11px] text-muted-foreground">Only the admin edits direction directly — or set it by talking to the Chairman.</p>}
+    </div>
+  );
+}
+
 export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
   kind: "ceo" | "chairman";
   floor: FloorDef;
@@ -127,39 +208,6 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
     setConfirmKey("");
   };
 
-  const FireButton = ({ floorKey, botKey, label, by = "Admin", reason = "removed by the admin" }: { floorKey: string; botKey: string; label: string; by?: string; reason?: string }) => {
-    if (!isAdmin && by !== "Chairman") return null;
-    const k = `${floorKey}:${botKey}`;
-    return confirmKey === k ? (
-      <button onClick={() => void fire(floorKey, botKey, label, by, reason)} className="shrink-0 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-semibold text-white">Confirm — fire &amp; erase</button>
-    ) : (
-      <button onClick={() => setConfirmKey(k)} className="shrink-0 rounded-full border border-red-500/50 px-2.5 py-1 text-[10px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10">Fire</button>
-    );
-  };
-
-  const PersonRow = ({ r }: { r: EvalRow }) => {
-    const gen = generationOf(r.scope);
-    const f = FLOORS.find((x) => x.key === r.floorKey) || floor;
-    const botKey = r.role === "manager" ? "manager" : r.role === "ceo" ? "ceo" : r.role === "chairman" ? "chairman" : r.scope.split(":").slice(1).join(":");
-    return (
-      <div className="flex items-center gap-2.5 py-1.5">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate text-xs font-medium">{r.label}</span>
-            {gen > 1 && <span className="shrink-0 rounded-full bg-muted px-1.5 py-px text-[9px] font-semibold text-muted-foreground">GEN {gen}</span>}
-            {r.accuracy !== null && r.judged >= 4 && (r.accuracy as number) < SURVIVAL_THRESHOLD && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-px text-[9px] font-semibold text-red-600 dark:text-red-400">AT RISK</span>}
-          </div>
-          <div className="truncate text-[10px] text-muted-foreground">{r.role === "agent" ? "Specialist" : r.role === "manager" ? "Manager" : r.role === "ceo" ? "CEO" : "Chairman"} · {r.company} · Floor {f.id}</div>
-        </div>
-        <div className="hidden h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-muted sm:block">
-          <div className={`h-full rounded-full ${r.accuracy !== null && r.accuracy >= SURVIVAL_THRESHOLD ? "bg-emerald-500" : "bg-red-500"}`} style={{ width: `${r.accuracy ?? 0}%` }} />
-        </div>
-        <ScoreChip v={r.accuracy} judged={r.judged} />
-        <FireButton floorKey={r.floorKey} botKey={botKey} label={r.label} />
-      </div>
-    );
-  };
-
   const briefingFor = (f: FloorDef, botKey: string): string => {
     if (botKey === "chairman") {
       const lines = rows.map((r) => `- ${r.label} (${r.role}, ${r.company}, Floor ${(FLOORS.find((x) => x.key === r.floorKey) || f).id}): ${r.accuracy === null ? "no scored work yet" : `${r.accuracy}% accuracy over ${r.judged} judged tasks`}`).join("\n");
@@ -224,34 +272,22 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
     setDirDraft((cur) => { const next = { ...cur }; delete next[c]; return next; });
   };
 
-  const DirectionEditor = ({ c }: { c: string }) => {
-    const cur = getDirection(c);
-    const draft = dirDraft[c] || cur;
-    const dirty = !!dirDraft[c];
-    return (
-      <div className="rounded-xl border border-border p-3.5">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold">{c} — direction</span>
-          <span className="text-[10px] text-muted-foreground">Vision, mission and goals steer every CEO plan and Manager shift</span>
-          {isAdmin && dirty && <button onClick={() => saveDir(c)} className="ml-auto flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground"><Save className="h-3.5 w-3.5" /> Save direction</button>}
-        </div>
-        {(["vision", "mission", "goals"] as const).map((k) => (
-          <label key={k} className="mt-2.5 block">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{k}</span>
-            <textarea
-              value={draft[k]}
-              disabled={!isAdmin}
-              onChange={(e) => setDirDraft((prev) => ({ ...prev, [c]: { ...(prev[c] || cur), [k]: e.target.value } }))}
-              rows={2}
-              placeholder={k === "vision" ? "What this company exists to become…" : k === "mission" ? "What it does, for whom, and how it wins…" : "The current objectives, in priority order…"}
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed disabled:opacity-60"
-            />
-          </label>
-        ))}
-        {!isAdmin && <p className="mt-2 text-[11px] text-muted-foreground">Only the admin edits direction directly — or set it by talking to the Chairman.</p>}
-      </div>
-    );
+  /* Shared props for the hoisted module-level components above. */
+  const fireBtnProps = {
+    isAdmin,
+    confirmKey,
+    setConfirmKey,
+    onFire: (fk: string, bk: string, l: string, b: string, r: string) => { void fire(fk, bk, l, b, r); },
   };
+  const dirProps = (c: string) => ({
+    c,
+    isAdmin,
+    value: dirDraft[c] || getDirection(c),
+    dirty: !!dirDraft[c],
+    onChange: (k: "vision" | "mission" | "goals", v: string) =>
+      setDirDraft((prev) => ({ ...prev, [c]: { ...(prev[c] || getDirection(c)), [k]: v } })),
+    onSave: () => saveDir(c),
+  });
 
   const tabBtn = (id: typeof tab, label: string, Icon: any) => (
     <button onClick={() => setTab(id)} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === id ? "bg-emerald-500 text-white" : "border border-border hover:bg-muted"}`}><Icon className="h-3.5 w-3.5" /> {label}</button>
@@ -292,7 +328,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
 
           {tab === "dash" && isCeo && (
             <>
-              <DirectionEditor c={company} />
+              <DirectionEditor {...dirProps(company)} />
               <div className="rounded-xl border border-border p-3.5">
                 <div className="text-sm font-semibold">Floors &amp; Managers</div>
                 <div className="mt-2 space-y-3">
@@ -307,7 +343,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                           <span className="text-[11px] text-muted-foreground">Manager: {personaName(managerScope(f.key), "Manager")}</span>
                           <ScoreChip v={ms.accuracy} judged={ms.judged} />
                           <span className="ml-auto flex items-center gap-1.5">
-                            <FireButton floorKey={f.key} botKey="manager" label={`the Manager of Floor ${f.id}`} />
+                            <FireButton {...fireBtnProps} floorKey={f.key} botKey="manager" label={`the Manager of Floor ${f.id}`} />
                             <button onClick={() => tools.openFloor(f.id)} className="rounded-full border border-border px-2.5 py-1 text-[10px] font-medium hover:bg-muted">Open floor</button>
                           </span>
                         </div>
@@ -324,7 +360,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                 <div className="text-sm font-semibold">Everyone at {company}</div>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Scores are computed from the Managers' review records — first-pass approvals, send-backs, failures. Nobody can edit or inflate their own number.</p>
                 <div className="mt-1.5 divide-y divide-border/50">
-                  {scopedRows.map((r) => <PersonRow key={r.scope} r={r} />)}
+                  {scopedRows.map((r) => <PersonRow key={r.scope} r={r} floorFallback={floor} {...fireBtnProps} />)}
                 </div>
               </div>
             </>
@@ -349,7 +385,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                     {condemnedCeos.map((r) => (
                       <div key={r.scope} className="flex flex-wrap items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2.5">
                         <span className="flex-1 text-xs">The CEO of {r.company} ({r.label}) is at {r.accuracy}% — under the line at two consecutive reports.</span>
-                        {!authority && <FireButton floorKey={r.floorKey} botKey="ceo" label={`the CEO of ${r.company}`} by="Chairman" reason={`accuracy ${r.accuracy}% — under the ${SURVIVAL_THRESHOLD}% line at two consecutive reports`} />}
+                        {!authority && <FireButton {...fireBtnProps} floorKey={r.floorKey} botKey="ceo" label={`the CEO of ${r.company}`} by="Chairman" reason={`accuracy ${r.accuracy}% — under the ${SURVIVAL_THRESHOLD}% line at two consecutive reports`} />}
                         {authority && <span className="text-[10px] font-medium text-muted-foreground">Replacement already queued by the Chairman — it lands between shifts.</span>}
                       </div>
                     ))}
@@ -369,7 +405,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                       <ScoreChip v={cs.accuracy} judged={cs.judged} />
                       {atRisk > 0 && <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-600 dark:text-red-400">{atRisk} at risk</span>}
                       <span className="ml-auto flex items-center gap-1.5">
-                        <FireButton floorKey={home.key} botKey="ceo" label={`the CEO of ${c}`} />
+                        <FireButton {...fireBtnProps} floorKey={home.key} botKey="ceo" label={`the CEO of ${c}`} />
                         <button onClick={() => tools.openFloor(home.id)} className="rounded-full border border-border px-2.5 py-1 text-[10px] font-medium hover:bg-muted">Open company floor</button>
                       </span>
                     </div>
@@ -377,20 +413,20 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                   </div>
                 );
               })}
-              <DirectionEditor c={companies[0]} />
-              {companies.slice(1).map((c) => <DirectionEditor key={c} c={c} />)}
+              <DirectionEditor {...dirProps(companies[0])} />
+              {companies.slice(1).map((c) => <DirectionEditor key={c} {...dirProps(c)} />)}
               <div className="rounded-xl border border-border p-3.5">
                 <div className="text-sm font-semibold">Everyone in the building</div>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">The full ratings table — the same numbers the Chairman rules on.</p>
                 <div className="mt-1.5 divide-y divide-border/50">
-                  {rows.map((r) => <PersonRow key={r.scope} r={r} />)}
+                  {rows.map((r) => <PersonRow key={r.scope} r={r} floorFallback={floor} {...fireBtnProps} />)}
                 </div>
                 {isAdmin && (
                   <div className="mt-3 border-t border-border pt-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium">The Chairman himself</span>
                       <span className="text-[11px] text-muted-foreground">Nobody is above the law — the admin can replace the Chairman too. His successor starts clean, briefed by the building's records.</span>
-                      <span className="ml-auto"><FireButton floorKey="floor100" botKey="chairman" label="the Chairman" /></span>
+                      <span className="ml-auto"><FireButton {...fireBtnProps} floorKey="floor100" botKey="chairman" label="the Chairman" /></span>
                     </div>
                   </div>
                 )}

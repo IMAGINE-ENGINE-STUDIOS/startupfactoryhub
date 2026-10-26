@@ -1,29 +1,35 @@
 // @ts-nocheck -- voice core: self-hosted Whisper speech-to-text.
 /**
  * Speech-to-text that is 100% ours (founder directive 2026-10-25):
- * OpenAI's Whisper (base.en, int8) runs INSIDE the visitor's browser via
+ * OpenAI's Whisper (int8) runs INSIDE the visitor's browser via
  * Transformers.js + ONNX Runtime Web. The model files are hosted in the
  * founder's own Supabase Storage (public bucket "site-assets", prefix
- * voice/whisper-tiny.en/) — no Groq, no speech API, no free tier, and the
- * audio never leaves the device. First use downloads ~80 MB (progress is
- * reported), afterwards the browser cache serves it.
+ * voice/<model>/) — no Groq, no speech API, no free tier, and the audio
+ * never leaves the device. Which Whisper the visitor gets (tiny.en or
+ * base.en) follows their voice-model choice — see modelSetting.ts.
+ * First use downloads the model (progress is reported), afterwards the
+ * browser cache serves it.
  *
  * The library itself is lazy-loaded (dynamic import) so nothing here
  * costs the main bundle until someone actually taps a mic button.
  */
+import { getVoiceModel, whisperModelId } from "./modelSetting";
 
 export const WHISPER_HOST =
   "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/voice/";
-export const WHISPER_MODEL = "whisper-tiny.en";
+export const WHISPER_MODEL = "whisper-base.en";
 
 type ProgressFn = (pct: number | null, label: string) => void;
 
-let pipelinePromise: Promise<any> | null = null;
+/* One pipeline per Whisper model — the user's dropdown choice (Tiny /
+ * Base / Neural) decides which one loads; switching loads the other
+ * model once and keeps both cached. */
+const pipelines = new Map<string, Promise<any>>();
 let activeProgress: ProgressFn | null = null;
 
-async function createPipeline(device: string, transformers: any) {
+async function createPipeline(model: string, device: string, transformers: any) {
   const { pipeline } = transformers;
-  return pipeline("automatic-speech-recognition", WHISPER_MODEL, {
+  return pipeline("automatic-speech-recognition", model, {
     dtype: "q8",
     device,
     progress_callback: (e: any) => {
@@ -37,11 +43,14 @@ async function createPipeline(device: string, transformers: any) {
   });
 }
 
-/** Load (once) and return the ASR pipeline. Prefers WebGPU, falls back to WASM. */
+/** Load (once per model) and return the ASR pipeline for the user's
+ * chosen voice model. Prefers WebGPU, falls back to WASM. */
 export function loadWhisper(onProgress?: ProgressFn): Promise<any> {
   if (onProgress) activeProgress = onProgress;
-  if (!pipelinePromise) {
-    pipelinePromise = (async () => {
+  const model = whisperModelId(getVoiceModel());
+  let p = pipelines.get(model);
+  if (!p) {
+    p = (async () => {
       const transformers: any = await import("@huggingface/transformers");
       const { env } = transformers;
       env.remoteHost = WHISPER_HOST;
@@ -51,17 +60,18 @@ export function loadWhisper(onProgress?: ProgressFn): Promise<any> {
       const hasGpu = typeof navigator !== "undefined" && "gpu" in navigator;
       if (hasGpu) {
         try {
-          return await createPipeline("webgpu", transformers);
+          return await createPipeline(model, "webgpu", transformers);
         } catch {
           /* WebGPU present but unusable (older Safari) — fall through to WASM. */
         }
       }
-      return createPipeline("wasm", transformers);
+      return createPipeline(model, "wasm", transformers);
     })();
-    // A failed load must not poison the singleton — allow a retry next tap.
-    pipelinePromise.catch(() => { pipelinePromise = null; });
+    // A failed load must not poison the cache — allow a retry next tap.
+    p.catch(() => { pipelines.delete(model); });
+    pipelines.set(model, p);
   }
-  return pipelinePromise;
+  return p;
 }
 
 /** Decode any recorded blob to mono 16 kHz Float32 PCM (what Whisper eats). */
