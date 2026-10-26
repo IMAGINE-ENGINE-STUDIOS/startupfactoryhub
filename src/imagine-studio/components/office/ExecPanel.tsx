@@ -22,6 +22,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { X, LayoutDashboard, MessageSquare, Building2, FileText, ScrollText, UserX, Play, Crown, Briefcase, AlertTriangle, Download, Plus, Trash2, Save, Loader2, Landmark } from "lucide-react";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
 import { FLOORS, companyFloors, engineFor, buildingRosterRows, floorTeamScopes, loadCustomBots, customBotToRole, type FloorDef } from "@/imagine-studio/lib/floors";
 import {
@@ -537,6 +538,7 @@ export function ExecPanel({ kind, floor, tools, signedIn, isAdmin, onClose }: {
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Coordinate a company goal — the CEO assigns each floor's Manager</label>
                 <div className="mt-1.5 flex gap-2">
                   <textarea value={goalDraft} onChange={(e) => setGoalDraft(e.target.value)} rows={2} placeholder="e.g. Launch the new tier: research, pricing, page copy, campaign — everything, across the company." className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed" />
+                  <VoiceMicButton onText={(t) => setGoalDraft((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10 self-end" />
                   <button onClick={() => void coordinate()} disabled={!signedIn || coordBusy || !goalDraft.trim()} className="flex shrink-0 items-center gap-1.5 self-end rounded-full bg-sky-500 px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-50">{coordBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Coordinate</button>
                 </div>
                 {coordResult.length > 0 && (

@@ -19,6 +19,20 @@ import { Maximize2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import { PublishedWorld, usePublishedPlaza } from '@/imagine-studio/components/plaza/PublishedWorld';
+import { AgentChat } from '@/imagine-studio/components/office/AgentChat';
+import VoiceMicButton from '@/components/voice/VoiceMicButton';
+
+/** Same call-agents bridge the office uses: run a linked SFH agent. */
+async function callAgentsApi(body: Record<string, unknown>): Promise<any> {
+  const { data, error } = await supabase.functions.invoke('call-agents', { body });
+  if (error) {
+    let message = error.message;
+    try { const parsed = await (error as any).context?.json?.(); if (parsed?.error) message = parsed.error; } catch {}
+    throw new Error(message);
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
 import { syncPlazaLevelToPublished } from '@/imagine-studio/lib/plazaLevel';
 import { findWorldLevelId } from '@/imagine-studio/lib/worldBindings';
 import { useUnifiedMovement } from '@/imagine-studio/components/player/UnifiedPlayer';
@@ -354,6 +368,7 @@ function ChatPanel({ msgs, onSend, onClose }: { msgs: ChatMsg[]; onSend: (t: str
       <div className="flex gap-2 p-3 border-t border-border">
         <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
           placeholder="Write a message" className="flex-1 min-w-0 rounded-lg border bg-background px-3 py-2 text-sm" />
+        <VoiceMicButton onText={(t) => setText((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t).slice(0, 500))} className="h-9 w-9 shrink-0 self-center" />
         <button onClick={send} aria-label="Send" className="rounded-lg bg-primary text-primary-foreground px-3"><Send className="w-4 h-4" /></button>
       </div>
     </div>
@@ -371,6 +386,12 @@ export default function PlazaPage() {
   const [mic, setMic] = useState(false);
   const [count, setCount] = useState(1);
   const [panel, setPanel] = useState<'chat' | 'vote' | null>(null);
+  /* Plaza agents (founder directive 2026-10-25): clicking an AI agent
+   * character opens its chat — the shared AgentChat, voice included.
+   * Until now PublishedWorld's onAgentOpen was never wired here. */
+  const [agentChar, setAgentChar] = useState<any | null>(null);
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => setSignedIn(!!user)).catch(() => {}); }, []);
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [unread, setUnread] = useState(0);
   const panelRef = useRef(panel); panelRef.current = panel;
@@ -660,7 +681,7 @@ export default function PlazaPage() {
         <hemisphereLight args={['#dfefff', '#6b8f4e', 0.4]} />
         <directionalLight position={[30, 40, 20]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} />
-        {published ? <PublishedWorld scene={published} /> : <PlazaWorld />}
+        {published ? <PublishedWorld scene={published} onAgentOpen={(o) => setAgentChar(o)} /> : <PlazaWorld />}
         <TheaterScreen source={theater} onPages={setPdfPages} />
         <Game me={{ color, name, char }} peers={peers} def={plazaDef} onMove={onMove} />
       </Canvas>
@@ -698,6 +719,30 @@ export default function PlazaPage() {
             </div>
           )}
           <input ref={fileInput} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { onDocFile(e.target.files?.[0]); e.target.value = ''; }} />
+        </div>
+      )}
+      {agentChar && (
+        <div className="absolute right-3 top-14 bottom-24 w-[min(380px,calc(100vw-24px))] rounded-2xl bg-background/95 border border-border flex flex-col overflow-hidden z-20">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+            <div className="min-w-0">
+              <div className="font-medium text-sm truncate">{agentChar.name}</div>
+              <div className="text-[11px] text-muted-foreground">AI agent — chat, or tap the phone button for a voice conversation</div>
+            </div>
+            <button onClick={() => setAgentChar(null)} aria-label="Close agent chat" className="shrink-0 ml-2"><X className="w-4 h-4" /></button>
+          </div>
+          <div className="flex-1 min-h-0">
+            <AgentChat
+              key={agentChar.id}
+              name={agentChar.name}
+              onSend={async (text) => {
+                const r = await callAgentsApi({ action: 'run', agent_id: agentChar.agentId, message: text });
+                return (r?.steps || []).map((x: any) => x.output).filter(Boolean).join('\n\n') || r?.output || 'Done.';
+              }}
+              emptyText={<>Chat with {agentChar.name} — give it a task below, or tap the phone button for a hands-free voice conversation in its role voice.</>}
+              placeholder={`Give ${agentChar.name} a task…`}
+              disabledNote={!signedIn ? `Sign in to chat with ${agentChar.name}.` : !agentChar.agentId ? `${agentChar.name} isn't linked to an agent yet.` : null}
+            />
+          </div>
         </div>
       )}
       {panel === 'vote' && <LevelElectionsPanel isAdmin={isAdmin} refreshKey={electionTick} onClose={() => setPanel(null)} onChanged={() => sendMod('election')} />}

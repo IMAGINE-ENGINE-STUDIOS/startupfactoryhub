@@ -12,6 +12,7 @@ import { X, Play, PauseCircle, OctagonX, FileText, Download, Trash2, RotateCcw, 
 import { jsPDF } from "jspdf";
 import type { ShiftEngine, ShiftState, ShiftTask, TeamRole } from "@/imagine-studio/lib/shiftEngine";
 import { AgentChat } from "@/imagine-studio/components/office/AgentChat";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { AccuracyChart, downloadHtml, reportToHtml } from "@/imagine-studio/components/office/ReportCharts";
 import { buildingRosterRows } from "@/imagine-studio/lib/floors";
 
@@ -200,7 +201,8 @@ export function ShiftPanel({ engine, team, company, floorLabel, floorKey, floorI
               className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-base leading-relaxed"
             />
             {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <VoiceMicButton onText={(t) => { setGoalDraft(goal.trim() ? `${goal.trim()} ${t}` : t); setGoalTouched(true); }} className="h-9 w-9" />
               {!active && (
                 <button onClick={() => void start()} disabled={!signedIn || busy === "start" || !goal.trim()} className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950 disabled:opacity-50">
                   {busy === "start" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Start Shift

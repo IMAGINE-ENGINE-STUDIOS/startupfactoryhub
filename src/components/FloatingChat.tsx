@@ -14,7 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
+import VoiceMicButton from '@/components/voice/VoiceMicButton';
+import { useVoiceConversation } from '@/lib/voice/useVoiceConversation';
 import {
   BoltIcon, ResearchIcon, SummaryIcon, PitchIcon, PlanIcon, BookIcon, QuillIcon,
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
@@ -264,6 +266,22 @@ export default function FloatingChat() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  /* Voice (founder directive 2026-10-25): mic dictation into the Genius
+   * composer + Talk mode — replies spoken aloud in Genius's voice, then
+   * it listens again. STT is the self-hosted on-device Whisper; the send
+   * goes through a ref because sendAiMessage is declared further down. */
+  const aiSendRef = useRef<(t: string) => void>(() => {});
+  useEffect(() => { aiSendRef.current = (t) => { void sendAiMessage(t); }; });
+  const geniusLastAssistant = (() => {
+    for (let i = aiMessages.length - 1; i >= 0; i--) if (aiMessages[i].role === 'assistant') return { id: `g${i}`, text: aiMessages[i].content };
+    return null;
+  })();
+  const geniusVoice = useVoiceConversation({
+    roleText: 'Genius',
+    lastAssistant: geniusLastAssistant,
+    busy: isAiLoading,
+    onUserText: (t) => aiSendRef.current(t),
+  });
   const [activeTool, setActiveTool] = useState<ToolItem | null>(() =>
     typeof window !== 'undefined' && window.location.pathname.startsWith('/imagine-engine') ? IMAGINE_TOOL : null);
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
@@ -1563,6 +1581,7 @@ You can help with:
                         onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                         className="flex-1 rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                       />
+                      <VoiceMicButton onText={(t) => setNewMessage((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary border-0" />
                       <Button 
                         onClick={sendMessage} 
                         disabled={!newMessage.trim()} 
@@ -2212,6 +2231,16 @@ You can help with:
                           disabled={isAiLoading}
                           className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                         />
+                        <VoiceMicButton onText={(t) => setAiInput((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary border-0" />
+                        <button
+                          type="button"
+                          onClick={geniusVoice.toggleTalk}
+                          title={geniusVoice.talkOn ? "End the voice conversation with Genius" : "Talk with Genius: hands-free voice conversation — replies spoken aloud"}
+                          aria-label={geniusVoice.talkOn ? "End voice conversation" : "Start voice conversation with Genius"}
+                          className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${geniusVoice.talkOn ? "bg-emerald-500/25 text-emerald-500 animate-pulse" : "bg-primary/10 hover:bg-primary/20 text-primary"}`}
+                        >
+                          {geniusVoice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+                        </button>
                         <Button 
                           type="submit" 
                           size="icon" 

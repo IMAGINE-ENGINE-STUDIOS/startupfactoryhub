@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import VoiceMicButton from '@/components/voice/VoiceMicButton';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -951,7 +952,10 @@ export default function UnifiedCommunityFeed({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl" />
+            <div className="relative">
+              <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl pr-12" />
+              <VoiceMicButton onText={(t) => setNewPost((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="absolute right-2 bottom-2 h-9 w-9 bg-background/70" />
+            </div>
 
             
             {/* Media Preview */}

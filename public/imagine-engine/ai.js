@@ -495,14 +495,18 @@
     '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Genius AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
     '<div class="iea-att" id="iea-att"></div>' +
-    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>ideas, analysis, plans</small></button><button data-m="build">Build <small>makes the changes</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
+    '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>ideas, analysis, plans</small></button><button data-m="build">Build <small>makes the changes</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button><button id="iea-mic" title="Dictate with your voice — transcribed on your device by our self-hosted Whisper">&#127908;</button><button id="iea-talk" title="Talk with Genius — hands-free voice conversation, replies spoken aloud">&#128222;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
     '<input type="file" id="iea-ff" multiple hidden><input type="file" id="iea-fm" accept="image/*,video/*" multiple hidden>';
   css.textContent +=
     ".iea-pl{position:relative}.iea-pl>button{width:34px;height:34px;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:18px;cursor:pointer}" +
     ".iea-menu{display:none;position:absolute;bottom:40px;left:0;width:210px;background:#0a0a0c;border:1px solid #3f3f46;border-radius:10px;padding:4px;z-index:5;box-shadow:0 10px 30px #000a}.iea-menu.on{display:block}" +
     ".iea-menu button{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:#e4e4e7;text-align:left;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:12px;height:auto}.iea-menu button:hover,.iea-menu button.sel{background:#27272a}" +
     ".iea-menu small{color:#71717a;font-size:10px}.iea-mh{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#71717a;padding:6px 8px 2px}.iea-ms{font-size:10px;color:#52525b;padding:4px 8px}" +
-    ".iea-att{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px}.iea-att span{background:#18181b;border:1px solid #3f3f46;border-radius:8px;padding:2px 8px;font-size:10px;cursor:pointer}";
+    ".iea-att{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px}.iea-att span{background:#18181b;border:1px solid #3f3f46;border-radius:8px;padding:2px 8px;font-size:10px;cursor:pointer}" +
+    "#iea-mic,#iea-talk{width:34px;height:38px;flex:none;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:15px;cursor:pointer;margin-left:4px}" +
+    "#iea-mic.rec{background:#7f1d1d;border-color:#ef4444;animation:ieaPulse 1.1s infinite}" +
+    "#iea-talk.on{background:#065f46;border-color:#10b981;animation:ieaPulse 1.1s infinite}" +
+    "@keyframes ieaPulse{0%,100%{opacity:1}50%{opacity:.55}}";
   var model = localStorage.getItem("iea-model") || "build", atts = [];
   var list = root.querySelector("#iea-l"), input = root.querySelector("#iea-in"), go = root.querySelector("#iea-go");
 
@@ -679,6 +683,102 @@
       .then(function (v) { if (v === "retry") { render(); return; } busy = false; liveProgress = ""; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
+
+  /* Voice (founder directive 2026-10-25): dictation + realtime Talk with
+   * Genius, on the SAME self-hosted voice core as every other Genius
+   * surface. The host page exposes window.__sfhVoice (on-device Whisper
+   * transcription + role-voiced speech); ai.js only records the mic and
+   * passes audio blobs / text across the frame boundary. No Groq, no
+   * cloud speech service — the audio never leaves the visitor's device
+   * for transcription. */
+  var micBtn = root.querySelector("#iea-mic"), talkBtn = root.querySelector("#iea-talk");
+  var vRec = null, vChunks = [], talkOn = false, talkTimer = 0, talkHeard = 0, vSpeaking = false, vListening = false;
+  function vBridge() { try { var w = window; while (w) { if (w.__sfhVoice) return w.__sfhVoice; if (w.parent === w) return null; w = w.parent; } } catch (e) {} return null; }
+  function vNote(t) { var s = root.querySelector("#iea-tab"); if (!s) return; s.textContent = t; setTimeout(function () { try { render(); } catch (e) {} }, 2800); }
+  function vStrip(t) { return String(t || "").replace(/```[\s\S]*?```/g, " code block ").replace(/`([^`]*)`/g, "$1").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/https?:\/\/\S+/g, "").replace(/[#>*_~|]{2,}/g, " ").replace(/\s+/g, " ").trim().slice(0, 1200); }
+  function vStopTracks(stream) { try { stream && stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+  function vRecord(onBlob) {
+    if (!navigator.mediaDevices || !window.MediaRecorder) { vNote("Voice input isn't supported in this browser."); vTalkOff(); return; }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (stream) {
+      vChunks = [];
+      var mime = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg", "audio/mp4"].filter(function (m) { try { return MediaRecorder.isTypeSupported(m); } catch (e) { return false; } })[0];
+      var rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      vRec = rec; vListening = true;
+      var startedAt = Date.now(), heard = false, silenceSince = 0, ac = null, an = null;
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); an = ac.createAnalyser(); an.fftSize = 512; ac.createMediaStreamSource(stream).connect(an); } catch (e) {}
+      var levelTimer = setInterval(function () {
+        if (!an) return;
+        var buf = new Uint8Array(an.fftSize); an.getByteTimeDomainData(buf);
+        var sum = 0; for (var i = 0; i < buf.length; i++) { var d = (buf[i] - 128) / 128; sum += d * d; }
+        var rms = Math.sqrt(sum / buf.length);
+        if (rms > 0.04) { heard = true; silenceSince = 0; }
+        else if (heard && Date.now() - startedAt > 900) { if (!silenceSince) silenceSince = Date.now(); if (Date.now() - silenceSince > 1600) { try { rec.stop(); } catch (e) {} } }
+      }, 120);
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) vChunks.push(e.data); };
+      rec.onstop = function () {
+        clearInterval(levelTimer); try { ac && ac.close(); } catch (e) {}
+        vStopTracks(stream); if (vRec === rec) vRec = null; vListening = false;
+        if (micBtn) micBtn.classList.remove("rec");
+        var blob = new Blob(vChunks, { type: (vChunks[0] && vChunks[0].type) || "audio/webm" });
+        if (blob.size) onBlob(blob);
+      };
+      rec.start(250);
+      if (micBtn && !talkOn) micBtn.classList.add("rec");
+    }).catch(function () { vNote("Microphone access was denied."); vTalkOff(); });
+  }
+  function vTranscribe(blob, done) {
+    var b = vBridge();
+    if (!b) { vNote("Voice loads from the full Startup Factory Hub page."); done(""); return; }
+    if (micBtn) micBtn.innerHTML = "&#8230;";
+    b.transcribe(blob).then(function (text) { if (micBtn) micBtn.innerHTML = "&#127908;"; done((text || "").trim()); })
+      .catch(function () { if (micBtn) micBtn.innerHTML = "&#127908;"; vNote("I couldn't transcribe that — try again."); done(""); });
+  }
+  if (micBtn) micBtn.onclick = function () {
+    if (vRec) { try { vRec.stop(); } catch (e) {} return; }
+    if (talkOn) { vTalkOff(); return; }
+    vRecord(function (blob) { vTranscribe(blob, function (text) { if (text) { input.value = (input.value.trim() ? input.value.trim() + " " : "") + text; input.focus(); } }); });
+  };
+  function vTalkOff() {
+    if (!talkOn) return;
+    talkOn = false; clearInterval(talkTimer);
+    if (vRec) { try { vRec.stop(); } catch (e) {} }
+    var b = vBridge(); if (b) b.stopSpeaking();
+    if (talkBtn) { talkBtn.classList.remove("on"); talkBtn.innerHTML = "&#128222;"; }
+  }
+  function vTalkListen() {
+    if (!talkOn || vListening || vSpeaking || busy) return;
+    vRecord(function (blob) {
+      if (!talkOn) return;
+      vTranscribe(blob, function (text) { if (talkOn && text) send(text); });
+    });
+  }
+  function vTalkTick() {
+    if (!talkOn) return;
+    if (vSpeaking || vListening) return;
+    if (busy) return;
+    /* A finished reply waits in messages[]: speak it, then listen again. */
+    for (var i = messages.length - 1; i >= talkHeard; i--) {
+      if (messages[i].role === "assistant") {
+        talkHeard = messages.length;
+        var b = vBridge(); if (!b) { vTalkOff(); return; }
+        var spoken = vStrip(messages[i].content);
+        if (!spoken) { vTalkListen(); return; }
+        vSpeaking = true;
+        b.speak(spoken, "Genius").then(function () { vSpeaking = false; vTalkListen(); }).catch(function () { vSpeaking = false; vTalkListen(); });
+        return;
+      }
+    }
+    talkHeard = messages.length;
+    vTalkListen();
+  }
+  if (talkBtn) talkBtn.onclick = function () {
+    if (talkOn) { vTalkOff(); return; }
+    if (!vBridge()) { vNote("Voice loads from the full Startup Factory Hub page."); return; }
+    talkOn = true; talkHeard = messages.length;
+    talkBtn.classList.add("on"); talkBtn.innerHTML = "&#128308;";
+    talkTimer = setInterval(vTalkTick, 600);
+    vTalkListen();
+  };
   var menu = root.querySelector("#iea-menu");
   function markModel() { menu.querySelectorAll("[data-m]").forEach(function (b) { b.classList.toggle("sel", b.getAttribute("data-m") === model); }); }
   markModel();

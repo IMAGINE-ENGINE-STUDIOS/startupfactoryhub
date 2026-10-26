@@ -9,8 +9,10 @@
  * the whole page on focus and the 3D view stays zoomed with no way back.
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Phone, PhoneOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
+import { useVoiceConversation } from "@/lib/voice/useVoiceConversation";
 
 export const GLASS_PANEL =
   "rounded-[2rem] border border-border bg-card/70 shadow-[0_10px_40px_rgba(6,78,59,0.08)] backdrop-blur-xl";
@@ -56,10 +58,9 @@ export function AgentChat({
     try { localStorage.setItem(persistKey, JSON.stringify(msgs.slice(-60))); } catch { /* session only */ }
   }, [msgs, persistKey]);
 
-  const send = async () => {
-    const text = input.trim();
+  const sendText = async (raw: string) => {
+    const text = raw.trim();
     if (!text || busy || disabledNote) return;
-    setInput("");
     setMsgs((m) => [...m, { role: "user", content: text }]);
     onUserMessage?.(text);
     setBusy(true);
@@ -71,6 +72,27 @@ export function AgentChat({
     }
     setBusy(false);
   };
+  const send = async () => {
+    const text = input.trim();
+    if (!text) return;
+    setInput("");
+    await sendText(text);
+  };
+
+  /* Voice (founder directive 2026-10-25): the mic dictates into the
+   * composer (on-device Whisper, self-hosted model); Talk mode runs the
+   * realtime loop — speak, hear the reply spoken in this agent's role
+   * voice, listen again. Persona comes from the agent's name/role. */
+  const lastAssistant = (() => {
+    for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role === "assistant") return { id: `m${i}`, text: msgs[i].content };
+    return null;
+  })();
+  const voice = useVoiceConversation({
+    roleText: name,
+    lastAssistant,
+    busy,
+    onUserText: (t) => { void sendText(t); },
+  });
 
   return (
     <div className="flex h-full w-full min-w-0 flex-col">
@@ -102,7 +124,16 @@ export function AgentChat({
                 placeholder={placeholder}
                 className={`${GLASS_INPUT} min-w-0 flex-1 border px-4 py-2.5 text-base outline-none placeholder:text-muted-foreground/60`}
               />
+              <VoiceMicButton onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10" />
               <button onClick={() => void send()} disabled={busy || !input.trim()} className={`${GRADIENT_BUTTON} shrink-0 px-4 py-2.5 disabled:opacity-50`} aria-label={`Send to ${name}`}><Send className="h-4 w-4" /></button>
+              <button
+                onClick={voice.toggleTalk}
+                title={voice.talkOn ? `End the voice conversation with ${name}` : `Talk with ${name}: hands-free voice conversation — replies are spoken in ${name}'s role voice`}
+                aria-label={voice.talkOn ? "End voice conversation" : `Start voice conversation with ${name}`}
+                className={`shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full border transition ${voice.talkOn ? "border-emerald-400 bg-emerald-500/15 text-emerald-500 animate-pulse" : "border-border/60 text-muted-foreground hover:text-foreground hover:border-emerald-400/60"}`}
+              >
+                {voice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+              </button>
             </>
           )}
           {composerExtra}

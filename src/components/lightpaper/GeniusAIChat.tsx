@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { Phone, PhoneOff } from "lucide-react";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
+import { useVoiceConversation } from "@/lib/voice/useVoiceConversation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,6 +52,19 @@ export default function GeniusAIChat({ isOpen, onClose, onInsertText }: GeniusAI
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  /* Voice: mic dictation + Talk mode (replies spoken in Genius's voice). */
+  const lpLastAssistant = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) if (messages[i].role === "assistant") return { id: `lp${i}`, text: messages[i].content };
+    return null;
+  })();
+  const lpVoice = useVoiceConversation({
+    roleText: "Genius",
+    lastAssistant: lpLastAssistant,
+    busy: isLoading,
+    onUserText: (t) => { void sendMessageRef.current(t); },
+  });
+  const sendMessageRef = useRef<(t: string) => void>(() => {});
+  useEffect(() => { sendMessageRef.current = (t) => { void sendMessage(t); }; });
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -313,6 +329,16 @@ export default function GeniusAIChat({ isOpen, onClose, onInsertText }: GeniusAI
             disabled={isLoading}
             className="text-sm"
           />
+          <VoiceMicButton onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-9 w-9 flex-shrink-0" />
+          <button
+            type="button"
+            onClick={lpVoice.toggleTalk}
+            title={lpVoice.talkOn ? "End the voice conversation with Genius" : "Talk with Genius: hands-free voice conversation"}
+            aria-label={lpVoice.talkOn ? "End voice conversation" : "Start voice conversation with Genius"}
+            className={`shrink-0 h-9 w-9 rounded-full border inline-flex items-center justify-center transition flex-shrink-0 ${lpVoice.talkOn ? "border-emerald-400 bg-emerald-500/15 text-emerald-500 animate-pulse" : "border-border/60 text-muted-foreground hover:text-foreground"}`}
+          >
+            {lpVoice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+          </button>
           <Button
             type="submit"
             size="icon"

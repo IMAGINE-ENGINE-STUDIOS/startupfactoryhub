@@ -3,6 +3,9 @@ import { Send, Box, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { studio3d, type Studio3DState } from '@/lib/studio3dBus';
+import VoiceMicButton from '@/components/voice/VoiceMicButton';
+import { useVoiceConversation } from '@/lib/voice/useVoiceConversation';
+import { Phone, PhoneOff } from 'lucide-react';
 
 const CHIPS = ['Make it night with neon lights', 'Make the selected object twice as large', 'Add 8 street lamps around the center', 'Make the selected object spin when clicked'];
 
@@ -11,6 +14,18 @@ export default function Studio3DTab({ state }: { state: Studio3DState }) {
   const [text, setText] = useState('');
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth' }); }, [state?.msgs.length, state?.busy]);
+  /* Voice: mic dictation + Talk mode (Genius 3D speaks its replies). */
+  const lastAssistant = (() => {
+    const msgs = state?.msgs || [];
+    for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role !== 'user') return { id: `s${i}`, text: msgs[i].text };
+    return null;
+  })();
+  const voice = useVoiceConversation({
+    roleText: 'Genius 3D Architect',
+    lastAssistant,
+    busy: !!state?.busy,
+    onUserText: (t) => { if (!state?.busy) studio3d.send(t.slice(0, 4000)); },
+  });
   if (!state) return <div className="flex-1 flex items-center justify-center p-6 text-sm text-muted-foreground text-center">Open a level in the 3D Studio to build with Genius 3D.</div>;
   const send = (t = text) => { const v = t.trim(); if (!v || state.busy) return; studio3d.send(v.slice(0, 4000)); setText(''); };
   return (
@@ -36,6 +51,8 @@ export default function Studio3DTab({ state }: { state: Studio3DState }) {
       </div>
       <div className="p-2 border-t border-border/40 flex gap-2">
         <Input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} placeholder="Describe a change to this level" maxLength={4000} />
+        <VoiceMicButton onText={(t) => setText((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-9 w-9" />
+        <button type="button" onClick={voice.toggleTalk} title={voice.talkOn ? "End the voice conversation" : "Talk with Genius 3D: hands-free voice conversation"} aria-label={voice.talkOn ? "End voice conversation" : "Start voice conversation"} className={`shrink-0 h-9 w-9 rounded-full border inline-flex items-center justify-center transition ${voice.talkOn ? "border-emerald-400 bg-emerald-500/15 text-emerald-500 animate-pulse" : "border-border/60 text-muted-foreground hover:text-foreground"}`}>{voice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}</button>
         <Button size="icon" onClick={() => send()} disabled={state.busy} aria-label="Send"><Send className="h-4 w-4" /></Button>
       </div>
     </div>

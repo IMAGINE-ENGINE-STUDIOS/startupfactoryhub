@@ -3,6 +3,7 @@ import { Send, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { districtChat, type DistrictChatState } from '@/lib/districtChatBus';
+import VoiceMicButton from '@/components/voice/VoiceMicButton';
 
 /** District chat rendered inside the Genius bubble. */
 export default function DistrictChatTab({ state }: { state: DistrictChatState }) {
@@ -29,6 +30,7 @@ export default function DistrictChatTab({ state }: { state: DistrictChatState })
       </div>
       <div className="p-2 border-t border-border/40 flex gap-2">
         <Input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} placeholder="Message the district" maxLength={500} />
+        <VoiceMicButton onText={(t) => setText((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t).slice(0, 500))} className="h-9 w-9" />
         <Button size="icon" onClick={send} aria-label="Send"><Send className="h-4 w-4" /></Button>
       </div>
     </div>

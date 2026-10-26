@@ -4,6 +4,7 @@ import {
   Play, Plus, RefreshCw, Trash2, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -375,14 +376,17 @@ export default function TaskPipeline({
                 <Label htmlFor="tp-task" className={FIELD_LABEL}>
                   Task
                 </Label>
-                <Textarea
-                  id="tp-task"
-                  value={formMessage}
-                  onChange={(e) => setFormMessage(e.target.value)}
-                  placeholder="Describe the task for this agent…"
-                  rows={2}
-                  className={`${GLASS_INPUT} min-h-[40px] resize-none`}
-                />
+                <div className="flex items-start gap-2">
+                  <Textarea
+                    id="tp-task"
+                    value={formMessage}
+                    onChange={(e) => setFormMessage(e.target.value)}
+                    placeholder="Describe the task for this agent…"
+                    rows={2}
+                    className={`${GLASS_INPUT} min-h-[40px] resize-none flex-1`}
+                  />
+                  <VoiceMicButton onText={(t) => setFormMessage((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10 mt-0.5" />
+                </div>
               </div>
               {formError && <p className="text-xs font-medium text-destructive">{formError}</p>}
               <Button

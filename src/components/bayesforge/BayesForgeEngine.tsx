@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -342,6 +343,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                             accent.ring
                           )}
                         />
+                        <VoiceMicButton onText={(t) => setDraft((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-9 w-9 shrink-0" />
                         {!currentStep.required && (
                           <Button
                             type="button"
