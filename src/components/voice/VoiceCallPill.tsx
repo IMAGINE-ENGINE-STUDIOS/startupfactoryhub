@@ -7,12 +7,31 @@
  * while they walk the office or work elsewhere.
  */
 import { useEffect, useState } from "react";
-import { PhoneOff, Pause } from "lucide-react";
+import { PhoneOff, Pause, AlertTriangle, X } from "lucide-react";
 import { voiceSession, type CallView } from "@/lib/voice/session";
 
 export function VoiceCallPill() {
   const [view, setView] = useState<CallView>(voiceSession.snapshot);
   useEffect(() => voiceSession.subscribe(setView), []);
+  /* A call that died keeps its reason on screen until dismissed —
+   * never a silent vanish (founder report 2026-10-26). */
+  if (!view.active && view.state === "error" && view.errorText) {
+    return (
+      <div className="fixed bottom-24 left-4 z-[90] flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-2xl border border-red-400/50 bg-background/95 py-2 pl-3.5 pr-2 shadow-[0_10px_30px_rgba(127,29,29,0.3)] backdrop-blur-xl" role="alert">
+        <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+        <span className="min-w-0 text-xs font-medium text-foreground">
+          {view.roleText ? <>Call with {view.roleText} ended: </> : "The call ended: "}{view.errorText}
+        </span>
+        <button
+          onClick={() => voiceSession.clearError()}
+          className="flex shrink-0 items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[11px] font-medium hover:bg-muted"
+          aria-label="Dismiss"
+        >
+          <X className="h-3 w-3" /> Dismiss
+        </button>
+      </div>
+    );
+  }
   if (!view.active) return null;
   const canInterrupt = view.state === "speaking" || view.state === "thinking";
   return (

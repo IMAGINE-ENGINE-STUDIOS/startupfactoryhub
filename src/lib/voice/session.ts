@@ -111,6 +111,11 @@ export interface CallView {
   state: CallState;
   loadPct: number | null;
   statusText: string;
+  /** Why the last call died (founder report 2026-10-26: a call that
+   * failed at startup vanished without a word). Set when the session
+   * lands in the error state; the pill keeps it on screen until the
+   * user dismisses it or starts a new call. */
+  errorText: string | null;
 }
 
 export function callStatusText(state: CallState, loadPct: number | null, roleText: string): string {
@@ -124,7 +129,7 @@ export function callStatusText(state: CallState, loadPct: number | null, roleTex
   }
 }
 
-const IDLE_VIEW: CallView = { active: false, surfaceId: null, roleText: "", state: "idle", loadPct: null, statusText: "" };
+const IDLE_VIEW: CallView = { active: false, surfaceId: null, roleText: "", state: "idle", loadPct: null, statusText: "", errorText: null };
 
 export interface StartCallOptions {
   surfaceId: string;
@@ -147,6 +152,7 @@ class VoiceSession {
   private engine: VoiceCallEngine | null = null;
   private mic: RecorderMic | null = null;
   private roleText = "";
+  private lastError: string | null = null;
   private view: CallView = IDLE_VIEW;
   private listeners = new Set<(v: CallView) => void>();
   private live: LiveText = { turns: [], assistantText: "" };
@@ -216,6 +222,7 @@ class VoiceSession {
         onState: (s, detail) => {
           const n = s === "loading" && detail ? Number(detail) : NaN;
           const loadPct = Number.isFinite(n) ? n : null;
+          if (s === "error") this.lastError = detail && Number.isNaN(Number(detail)) ? detail : "The call ran into a problem.";
           this.emit({ state: s, loadPct, statusText: callStatusText(s, loadPct, this.roleText) });
           if (s === "ended" || s === "error") this.cleanup();
         },
@@ -236,7 +243,7 @@ class VoiceSession {
     this.engine = engine;
     this.live = { turns: [], assistantText: "" };
     this.emitLive();
-    this.emit({ active: true, surfaceId: opts.surfaceId, roleText: opts.roleText, state: "loading", loadPct: 0, statusText: callStatusText("loading", 0, opts.roleText) });
+    this.emit({ active: true, surfaceId: opts.surfaceId, roleText: opts.roleText, state: "loading", loadPct: 0, statusText: callStatusText("loading", 0, opts.roleText), errorText: null });
     void engine.start();
     return true;
   }
@@ -249,6 +256,16 @@ class VoiceSession {
     this.engine?.stop();
   }
 
+  /** Dismiss the kept error notice (the pill's button). */
+  clearError(): void {
+    if (!this.view.active && this.view.state === "error") {
+      this.view = IDLE_VIEW;
+      for (const fn of Array.from(this.listeners)) {
+        try { fn(this.view); } catch { /* ignore */ }
+      }
+    }
+  }
+
   private cleanup(): void {
     this.engine = null;
     this.mic?.release();
@@ -256,7 +273,13 @@ class VoiceSession {
     if (this.liveTimer) { clearTimeout(this.liveTimer); this.liveTimer = null; }
     this.live = { turns: [], assistantText: "" };
     this.emitLive();
-    this.view = IDLE_VIEW;
+    /* A call that ERRORED keeps its reason on screen (in the pill)
+     * instead of vanishing silently; a clean end returns to idle. */
+    const err = this.lastError;
+    this.lastError = null;
+    this.view = err
+      ? { ...IDLE_VIEW, state: "error", statusText: err, errorText: err, roleText: this.roleText }
+      : IDLE_VIEW;
     for (const fn of Array.from(this.listeners)) {
       try { fn(this.view); } catch { /* ignore */ }
     }

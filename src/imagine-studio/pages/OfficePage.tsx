@@ -12,7 +12,7 @@
  * synced to everyone in the room over LiveKit (same pattern as the Plaza).
  */
 import { Suspense, lazy, memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Html, useGLTF, useAnimations, Environment, Lightformer } from '@react-three/drei';
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
@@ -108,6 +108,49 @@ const _tq = new THREE.Quaternion();
 const _AXIS_X = new THREE.Vector3(1, 0, 0);
 const _AXIS_Y = new THREE.Vector3(0, 1, 0);
 
+/* Character tap targets (founder report 2026-10-26: mesh onClick was
+ * unreliable — the camera drag races it on desktop and eats it on
+ * mobile, so panels seemed not to open at all). Characters register
+ * their group here; a single canvas-level tap detector (BotTapRaycast)
+ * decides tap vs drag by movement + duration and raycasts ONLY on a
+ * true tap — the same press that rotates the camera can never also
+ * open a panel, and a clean tap always lands, mouse or finger. */
+export const botTapTargets = new Map<string, { obj: THREE.Object3D; bot: OfficeBot; onOpen: (b: OfficeBot) => void }>();
+
+export function BotTapRaycast() {
+  const camera = useThree((s) => s.camera);
+  const gl = useThree((s) => s.gl);
+  const down = useRef<{ x: number; y: number; t: number } | null>(null);
+  useEffect(() => {
+    const el = gl.domElement;
+    const pd = (e: PointerEvent) => { down.current = { x: e.clientX, y: e.clientY, t: performance.now() }; };
+    const pu = (e: PointerEvent) => {
+      const d = down.current; down.current = null;
+      if (!d) return;
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10 || performance.now() - d.t > 500) return;
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      const rc = new THREE.Raycaster();
+      rc.setFromCamera(ndc, camera);
+      const objs = Array.from(botTapTargets.values()).map((x) => x.obj);
+      if (!objs.length) return;
+      const hits = rc.intersectObjects(objs, true);
+      if (!hits.length) return;
+      let o: THREE.Object3D | null = hits[0].object;
+      while (o) {
+        const key = (o as any).userData?.botTapKey as string | undefined;
+        if (key) { const t = botTapTargets.get(key); if (t) t.onOpen(t.bot); return; }
+        o = o.parent;
+      }
+    };
+    el.addEventListener('pointerdown', pd);
+    el.addEventListener('pointerup', pu);
+    return () => { el.removeEventListener('pointerdown', pd); el.removeEventListener('pointerup', pu); };
+  }, [camera, gl]);
+  return null;
+}
+
 export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = true, roam = false, pinnedWork = false }: { bot: OfficeBot; home: [number, number, number]; rotY: number; seatY: number; onOpen: (b: OfficeBot) => void; seated?: boolean; roam?: boolean; pinnedWork?: boolean }) {
   const { scene, animations } = useGLTF(bot.model);
   const model = useMemo(() => {
@@ -168,6 +211,14 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   const legsTriedRef = useRef(0);
   const typePoseRef = useRef<any | undefined>(undefined);
   useEffect(() => { botPos.set(bot.key, new THREE.Vector3(home[0], 0, home[2])); return () => { botPos.delete(bot.key); roamSlots.delete(bot.key); }; }, [bot.key]); // eslint-disable-line
+  /* Register as a tap target for BotTapRaycast (replaces the old mesh
+   * onClick, which the camera drag raced and mobile taps lost). */
+  useEffect(() => {
+    const g = root.current; if (!g) return;
+    (g as any).userData.botTapKey = bot.key;
+    botTapTargets.set(bot.key, { obj: g, bot, onOpen });
+    return () => { if (botTapTargets.get(bot.key)?.obj === g) botTapTargets.delete(bot.key); };
+  }, [bot, onOpen]);
   useFrame((state, dtRaw) => {
     const g = root.current; if (!g) return;
     const dt = Math.min(dtRaw, 0.05);
@@ -306,7 +357,7 @@ export function OfficeBotCharacter({ bot, home, rotY, seatY, onOpen, seated = tr
   });
   const dot = status === 'Working' ? '#34d399' : status === 'Walking' ? '#38bdf8' : '#fbbf24';
   return (
-    <group ref={root} position={home} rotation={[0, rotY, 0]} onClick={(e) => { e.stopPropagation(); onOpen(bot); }}>
+    <group ref={root} position={home} rotation={[0, rotY, 0]}>
       <primitive object={model} />
       <Html position={[0, 1.52, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
         <div style={{ pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 5, font: '600 11px system-ui', lineHeight: 1.25, color: '#fff', background: 'rgba(5,10,20,.62)', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
@@ -1599,6 +1650,7 @@ export default function OfficePage() {
         </Environment>
         <Suspense fallback={null}>
           {scene && <PublishedWorld scene={scene} renderCharacters={false} />}
+          <BotTapRaycast />
           {scene && bots.map(({ bot, home, rotY, seatY }) => <OfficeBotCharacter key={bot.key} bot={bot} home={home} rotY={rotY} seatY={seatY} onOpen={setOpenBot} roam pinnedWork={workingKeys.has(bot.key)} />)}
           {scene && <OfficeBotCharacter bot={managerBot} home={MANAGER_HOME} rotY={0} seatY={0.52} seated={false} onOpen={() => setShiftOpen(true)} />}
           {scene && floor.executives.map((raw) => { const b = displayBot(floor, raw); return (
@@ -1855,10 +1907,18 @@ export default function OfficePage() {
               </button>
             </div>
           )}
-          <button onClick={() => { setTeamMenu((o) => !o); setBuildingMenu(false); setOfficeMenu(false); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
-            <Users className="w-4 h-4" /> Team
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${teamMenu ? 'rotate-180' : ''}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Direct Manager button (founder report 2026-10-26: the
+                Manager must be one tap away, not only inside the Team
+                menu or by tapping his character). */}
+            <button onClick={() => { closeMenus(); setShiftOpen(true); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+              <Briefcase className="w-4 h-4 text-[#FFD166]" /> Manager
+            </button>
+            <button onClick={() => { setTeamMenu((o) => !o); setBuildingMenu(false); setOfficeMenu(false); }} className="flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur hover:bg-muted">
+              <Users className="w-4 h-4" /> Team
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${teamMenu ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
       {shiftOpen && <ShiftPanel engine={engine} team={applyPersonnelToRoles(floor.key, [...floor.team, ...customBots.map(customBotToRole)])} company={floor.company} floorLabel={`Floor ${floor.id}`} floorKey={floor.key} floorId={floor.id} archivistLabel={floor.archivistLabel} managerChatKey={floor.managerChatKey} teamTools={teamTools} signedIn={signedIn} onClose={() => setShiftOpen(false)} />}
