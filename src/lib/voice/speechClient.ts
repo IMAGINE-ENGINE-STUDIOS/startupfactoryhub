@@ -105,11 +105,17 @@ class SpeechClient {
       const timer = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`Speech worker ${kind} timed out`));
-        // A timed-out worker may be wedged (the WebGPU hang class of
-        // bug) — kill it so later calls take the fallback instead of
-        // queueing behind a corpse. Boot cost is paid once per page.
-        this.kill("The speech worker stopped answering.");
-        this.availableCache = Promise.resolve(false);
+        // A timeout means SLOW, not necessarily wedged (a cold model
+        // load on one thread starves everything behind it). Killing
+        // the worker here once turned a slow start into a main-thread
+        // fallback collapse — so verify the wedge with a ping first:
+        // alive-but-slow workers are left alone to finish.
+        if (kind !== "ping") {
+          void this.call("ping", {}, { timeoutMs: 5_000 }).catch(() => {
+            this.kill("The speech worker stopped answering.");
+            this.availableCache = Promise.resolve(false);
+          });
+        }
       }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer, progressCb: opts.onProgress || null });
       try {

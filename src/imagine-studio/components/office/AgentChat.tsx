@@ -79,6 +79,9 @@ export function AgentChat({
     } catch { /* session only */ }
   }, [input, draftKey]);
   const [busy, setBusy] = useState(false);
+  /* Warm the speech worker + STT model on mount (background), so a
+   * Talk tap doesn't pay the cold start. */
+  useEffect(() => { warmVoice(); }, []);
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
   useEffect(() => {

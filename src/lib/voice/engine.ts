@@ -194,8 +194,14 @@ export class VoiceCallEngine {
           this.setState("loading", String(Math.min(99, Math.round((pcts[0] + pcts[1]) / 2))));
         }
       };
-      const ttsLoad = this.adapters.tts.load(report(1)).catch(() => { /* degraded inside the adapter */ });
       await this.adapters.stt.load(report(0));
+      /* The voice model starts loading only AFTER the ear is ready:
+       * fired together, the two model loads starve each other on the
+       * speech worker's single thread and the cold start balloons
+       * (founder report 2026-10-26: ~5 minutes to first talk, then
+       * fast). Fired here, Kokoro compiles while the user is already
+       * speaking their first turn. */
+      const ttsLoad = this.adapters.tts.load(report(1)).catch(() => { /* degraded inside the adapter */ });
       void ttsLoad;
     } catch (e) {
       if (gen !== this.runId) return;

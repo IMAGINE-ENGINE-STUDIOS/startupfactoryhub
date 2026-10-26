@@ -24,11 +24,16 @@ import { KokoroTTS } from "kokoro-js";
 const WHISPER_HOST =
   "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/site-assets/voice/";
 const KOKORO_MODEL = "Kokoro-82M-v1.0-ONNX";
-/* Kept SHORT on purpose: a hung WebGPU attempt must cost seconds,
- * not half a minute (founder report 2026-10-26: v2 felt SLOWER —
- * the first design raced WebGPU for 25s per model before falling
- * back). Once WebGPU fails for a kind, it is not retried this
- * session (deviceFailed below). */
+/* WASM ONLY — the v1 field doctrine, reinstated (founder reports
+ * 2026-10-25 + 2026-10-26). WebGPU session creation on real
+ * Chrome/GPU combos can hang or crawl, and racing it "with a
+ * timeout" still taxed every cold start: the zombie attempt kept
+ * competing with the WASM fallback on this single worker thread,
+ * and the two models' loads starved each other — a ~5-minute cold
+ * start, after which the conversation itself ran fast. The
+ * worker's win was never WebGPU; it is thread isolation. WASM
+ * inference here is the exact configuration v1 proved on the
+ * founder's machines. */
 const DEVICE_TIMEOUT_MS = 8_000;
 const deviceFailed = { asr: false, tts: false };
 
@@ -68,7 +73,7 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   ]);
 }
 
-const hasWebGpu = typeof (self.navigator as any)?.gpu !== "undefined";
+const hasWebGpu = false; // see the WASM-only doctrine above
 
 /* ---------------- Whisper ---------------- */
 const asrPipelines = new Map<string, Promise<any>>();

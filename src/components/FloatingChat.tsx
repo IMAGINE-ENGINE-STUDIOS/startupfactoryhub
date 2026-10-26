@@ -275,6 +275,9 @@ export default function FloatingChat() {
    * goes through a ref because sendAiMessage is declared further down. */
   const aiSendRef = useRef<(t: string) => void>(() => {});
   useEffect(() => { aiSendRef.current = (t) => { void sendAiMessage(t); }; });
+  /* Warm the speech worker + STT model on mount (background): the
+   * cold start is paid while she reads the page, not after the tap. */
+  useEffect(() => { warmVoice(); }, []);
   const aiMessagesRef = useRef<AIMessage[]>([]);
   useEffect(() => { aiMessagesRef.current = aiMessages; });
   /* VoiceCall v2 (founder direction 2026-10-26): Talk is a real
