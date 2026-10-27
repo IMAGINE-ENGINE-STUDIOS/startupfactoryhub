@@ -373,9 +373,10 @@ export default function SignDocument() {
       _signer_email: email.trim(),
       _signature_data: signature,
       _note: null,
-      ...(typeof signedFieldIndex === "number" && signedFieldIndex >= 0
-        ? { _field_index: signedFieldIndex }
-        : {}),
+      // Always send _field_index (null when unset) so the database picks one
+      // unambiguous function version instead of failing with PGRST203.
+      _field_index:
+        typeof signedFieldIndex === "number" && signedFieldIndex >= 0 ? signedFieldIndex : null,
     } as any);
     setSubmitting(false);
 
