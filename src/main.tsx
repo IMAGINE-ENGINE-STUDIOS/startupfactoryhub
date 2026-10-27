@@ -18,6 +18,13 @@ import App from './App.tsx';
 import './index.css';
 import { saveRestorePoint, applyRestorePoint } from './lib/sessionRestore';
 import { installAutoDebugger } from './lib/autoDebugger';
+
+/** Extract a readable message from any thrown value. */
+const getErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  try { return JSON.stringify(err) ?? ''; } catch { return String(err); }
+};
 import { notifyUpdateAvailable } from './lib/updateSignal';
 
 // Intercept async faults (stale chunks, layout noise) before they reach the user.
