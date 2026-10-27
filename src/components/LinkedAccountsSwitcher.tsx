@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { ArrowLeftRight, Link2, Unlink, Loader2, Check } from 'lucide-react';
+import { useUserRole, AppRole } from '@/hooks/useUserRole';
 import { LinkedAccount, linkAccount, listLinkedAccounts, switchToAccount, unlinkCurrentAccount, hasSavedSession } from '@/lib/linkedAccounts';
 
 export default function LinkedAccountsSwitcher({ compact = false }: { compact?: boolean } = {}) {
@@ -18,6 +19,9 @@ export default function LinkedAccountsSwitcher({ compact = false }: { compact?: 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const { role, roles, switchRole } = useUserRole();
+  const roleLabel = (r: AppRole) => r === 'admin' ? 'Admin dashboard' : r === 'startup' ? 'Startup Factory Hub (startup)' : `${r.charAt(0).toUpperCase()}${r.slice(1)} dashboard`;
+  const doRole = (r: AppRole) => { switchRole(r); setOpen(false); navigate('/dashboard'); window.location.reload(); };
 
   const load = () => listLinkedAccounts().then(setAccounts).catch(() => setAccounts([]));
   useEffect(() => { if (user && open) load(); }, [user, open]);
@@ -65,6 +69,18 @@ export default function LinkedAccountsSwitcher({ compact = false }: { compact?: 
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 bg-background backdrop-blur-none p-3 space-y-3">
+        {roles.length > 1 && (
+          <div className="space-y-1 border-b border-border/40 pb-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Open this account as</p>
+            {roles.map(r => (
+              <button key={r} disabled={r === role} onClick={() => doRole(r)}
+                className="w-full flex items-center justify-between rounded-md px-2 py-2 text-left text-sm hover:bg-muted disabled:hover:bg-transparent">
+                <span className="font-medium">{roleLabel(r)}</span>
+                {r === role && <Check className="h-4 w-4 text-primary" />}
+              </button>
+            ))}
+          </div>
+        )}
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Your linked accounts</p>
         {accounts.length === 0 && <p className="text-sm text-muted-foreground">No linked accounts yet.</p>}
         <div className="space-y-1">
