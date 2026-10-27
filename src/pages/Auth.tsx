@@ -69,12 +69,14 @@ export default function Auth() {
         }
         if (user) {
           const isDemoUser = Object.values(DEMO_ACCOUNTS).some(a => a.email.toLowerCase() === user.email?.toLowerCase());
-          if (!isDemoUser) {
-            // Never sign a real account out just to preview a demo (the session is shared across tabs and frames).
-            toast({ title: 'You are already signed in', description: 'Sign out first or use a private window to try the demo accounts.' });
+          const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
+          if (!isDemoUser && inFrame) {
+            // Embedded brochure previews must never sign the real account out of its other tabs.
+            toast({ title: 'You are already signed in', description: 'Open the demo in its own tab to switch to the demo account.' });
             navigate(redirectPath);
             return;
           }
+          // Opening a demo link directly switches to that demo account so it shows its own dashboard.
           await signOut();
         }
         const { error } = await signIn(demoAccount.email, demoAccount.password);
