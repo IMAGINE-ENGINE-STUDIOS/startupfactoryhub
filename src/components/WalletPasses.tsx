@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail, Satellite, Rocket } from 'lucide-react';
+import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail, Satellite, Rocket, Coffee } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useMembershipAccess } from '@/features/basic-plan';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -38,6 +40,9 @@ interface Pass {
 export default function WalletPasses({ className, 'data-tour': dataTour }: { className?: string; 'data-tour'?: string }) {
   const { isSubscribed, tier } = useMembershipStatus();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  // Coffee requires an active paid Stripe membership ($50/mo or higher); complimentary grants never qualify.
+  const access = useMembershipAccess();
   const [frontierApproved, setFrontierApproved] = useState(false);
   const [frontierRequested, setFrontierRequested] = useState(false);
   const [frontierCredentials, setFrontierCredentials] = useState<{ username: string; password: string } | null>(null);
@@ -184,6 +189,21 @@ export default function WalletPasses({ className, 'data-tour': dataTour }: { cla
       details: 'Access coworking spaces worldwide.',
       gradient: 'from-primary to-accent',
       image: sfhPassImg,
+    });
+  }
+
+  // Innovation Coffee Table Pass — paying members only, two coffees included at Foxtail Belle Isle
+  if (access.isPaid || access.isAdmin) {
+    passes.push({
+      id: 'innovation-coffee',
+      title: 'Innovation Coffee Table',
+      subtitle: 'Foxtail Coffee Co. — Belle Isle',
+      icon: <Coffee className="h-5 w-5" />,
+      tier: 'Paying Member',
+      active: true,
+      details: 'Two coffees included. Open the pass and show your member card at the counter. 7813 S Orange Ave, Suite 132, Orlando, FL.',
+      gradient: 'from-primary to-accent',
+      onClick: () => navigate('/members-club'),
     });
   }
 
