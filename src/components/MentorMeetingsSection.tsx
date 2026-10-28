@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Calendar as CalendarIcon, Clock, TrendingUp, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MentorshipRequests from '@/components/MentorshipRequests';
-import RequestServiceDialog, { type RequestServiceMode } from '@/components/RequestServiceDialog';
 import MenteeSessions from '@/components/MenteeSessions';
 import BookingsList from '@/components/BookingsList';
 import MentorSessionHistory from '@/components/MentorSessionHistory';
@@ -20,7 +19,6 @@ interface Props {
 
 export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCount = 0, activeMentees }: Props) {
   const [view, setView] = useState<View>('upcoming');
-  const [requestMode, setRequestMode] = useState<RequestServiceMode | null>(null);
 
   const chips: Array<{ key: View; label: string; icon: any; tone: string }> = [
     { key: 'requests', label: 'Requests', icon: Bell, tone: 'text-amber-500' },
