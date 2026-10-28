@@ -113,6 +113,8 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
     }
   };
 
+  if (requestsOnly && (loading || requestedSessions.length === 0)) return null;
+
   if (loading) {
     return (
       <Card>
@@ -306,7 +308,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
       )}
 
       {/* Empty State */}
-      {requestedSessions.length === 0 && scheduledSessions.length === 0 && (
+      {!requestsOnly && requestedSessions.length === 0 && scheduledSessions.length === 0 && (
         <Card className="tech-card border-0">
           <CardContent className="py-12 text-center">
             <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
