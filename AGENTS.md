@@ -1,4 +1,5 @@
 # Project architecture rules
+- Partner white-label brochure artwork stays in its dedicated page with scoped global-CSS tokens and CSS/SVG network animation; why: keeps the silver design isolated and lightweight without changing other brochure pages.
 - APEX proposal licensing values live in src/pages/apex/licensing.ts with adjacent rule tests; why: displayed terms stay aligned with tested pricing without changing payment flows.
 - Equity marketing artwork lives in src/components/marketing/EquityProgramBanner.tsx and equityBannerRenderer.ts, reusing the existing rover GLB and a shared Canvas/Three renderer for preview, GIF and JPG; why: animated exports and stills stay visually identical without remote rendering.
 
