@@ -2172,20 +2172,7 @@ export default function CorporateBrochure() {
                         animate={{ top: ['0%', '100%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} />
                     </div>
                     <div className="relative z-10 flex flex-col h-full">
-                    <div className="flex items-start justify-between gap-4">
-                      <PageTitle kicker="10 · Special in this membership" title={<>Corporate package.</>} accent={NEON.emerald} />
-                      <motion.div className="relative shrink-0 rounded-2xl px-5 py-3 text-right overflow-hidden"
-                        style={{ background: 'linear-gradient(135deg, #04140f, #062a22)', border: `1px solid ${NEON.emerald}aa`, boxShadow: `0 0 40px ${NEON.emerald}55` }}
-                        animate={{ boxShadow: [`0 0 24px ${NEON.emerald}44`, `0 0 48px ${NEON.emerald}88`, `0 0 24px ${NEON.emerald}44`] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-                        <div className="font-futuristic font-black leading-none text-[52px]" style={{ color: NEON.emerald, textShadow: `0 0 18px ${NEON.emerald}` }}>
-                          $1,500<span className="text-[20px] font-bold" style={{ color: '#d1fae5' }}>/month</span>
-                        </div>
-                        <div className="mt-2 text-[15px] font-bold" style={{ color: '#ecfdf5' }}>
-                          or $16,200/year <span className="ml-1 rounded-full px-2 py-0.5 text-[12px]" style={{ background: NEON.emerald, color: '#04140f' }}>SAVE 10%</span>
-                        </div>
-                      </motion.div>
-                    </div>
+                    <PageTitle kicker="10 · Special in this membership" title={<>Corporate package.</>} accent={NEON.emerald} />
                     <p className="mt-2 text-[20px] leading-snug text-slate-700 font-semibold max-w-[680px]">
                       Everything in the platform, plus seven services delivered directly by the Startup Factory Hub team.
                     </p>
