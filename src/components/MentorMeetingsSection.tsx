@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Calendar as CalendarIcon, Clock, GraduationCap, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Bell, Calendar as CalendarIcon, Clock, TrendingUp, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MentorshipRequests from '@/components/MentorshipRequests';
 import RequestServiceDialog, { type RequestServiceMode } from '@/components/RequestServiceDialog';
