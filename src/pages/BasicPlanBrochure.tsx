@@ -490,6 +490,29 @@ const CheckoutPanel = ({
 
 
 
+/* Membership tiers shown on cover and join page — Imagine Engine Studios Corp */
+function TierStrip({ monthly, compact = false }: { monthly: string; compact?: boolean }) {
+  const tiers = [
+    { name: 'Venture Network', price: monthly, extra: 'Full network access', color: '#67e8f9' },
+    { name: 'Venture Resident', price: '$550', extra: '+ Dedicated desk', color: NEON.lime },
+    { name: 'Global Venture Partner', price: '$950', extra: '+ Private office', color: NEON.magenta },
+  ];
+  return (
+    <div className={`grid grid-cols-3 ${compact ? 'gap-2' : 'gap-3'}`}>
+      {tiers.map((t) => (
+        <div key={t.name} className={`rounded-2xl ${compact ? 'px-3 py-2.5' : 'px-4 py-5'}`} style={{
+          background: 'rgba(255,255,255,0.08)', border: `1px solid ${t.color}66`, backdropFilter: 'blur(16px)',
+          boxShadow: `0 0 24px ${t.color}22`,
+        }}>
+          <div className={`font-mono uppercase leading-tight ${compact ? 'text-[10px] tracking-[0.14em]' : 'text-[12px] tracking-[0.2em]'}`} style={{ color: t.color }}>{t.name}</div>
+          <div className={`font-black text-white leading-none mt-1.5 ${compact ? 'text-[26px]' : 'text-[44px]'}`}>{t.price}<span className="text-white/55 text-[13px] font-semibold">/mo</span></div>
+          <div className={`text-white/80 mt-1.5 ${compact ? 'text-[11px]' : 'text-[14px]'}`}>{t.extra}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure({ embedded = false }: { embedded?: boolean }) {
   const { plan } = useBasicPlan();
@@ -573,14 +596,8 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 unlocked with a single membership.
               </p>
 
-              <div className="mt-10">
-                <div className="inline-block rounded-2xl px-10 py-7" style={{
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(16px)',
-                }}>
-                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Venture Network</div>
-                  <div className="text-[72px] leading-none font-black text-white mt-1">{monthly}</div>
-                  <div className="text-white/60 text-base mt-2">per month · cancel anytime</div>
-                </div>
+              <div className="mt-8 max-w-3xl">
+                <TierStrip monthly={monthly} />
               </div>
             </div>
           </section>
@@ -1546,7 +1563,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               </h1>
 
 
-              <div className="mt-5 flex-1 min-h-0">
+              <div className="mt-4">
+                <TierStrip monthly={monthly} compact />
+              </div>
+
+              <div className="mt-4 flex-1 min-h-0">
                 <CheckoutPanel monthly={monthly} isMember={isMember} />
               </div>
 
