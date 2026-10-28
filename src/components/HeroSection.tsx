@@ -55,7 +55,7 @@ const HeroSection = () => {
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{
           animationDelay: '0.2s'
         }}>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">We build, accelerate, scale, and invest in global startups.</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">We build, accelerate, scale, and invest in startups globally.</p>
           </div>
 
           {/* CTA Buttons */}
