@@ -58,26 +58,6 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
       <div>
         {view === 'requests' && (
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setRequestMode('mentor')}
-                className="gap-1.5 h-9 flex-1 rounded-xl"
-              >
-                <GraduationCap className="h-4 w-4 text-primary" />
-                Request mentorship
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setRequestMode('advisor')}
-                className="gap-1.5 h-9 flex-1 rounded-xl"
-              >
-                <Briefcase className="h-4 w-4 text-primary" />
-                Request advisory service
-              </Button>
-            </div>
             <MentorshipRequests />
             <BookingsList variant="requests" />
             <MenteeSessions onJoinMeeting={onJoinMeeting} requestsOnly />
