@@ -579,7 +579,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 Startup Factory Hub · Venture Network
               </div>
               <h1 className="font-black tracking-tight text-white" style={{
-                fontSize: 'clamp(54px, 9vw, 96px)', lineHeight: 0.94,
+                fontSize: 'clamp(48px, 7vw, 74px)', lineHeight: 0.94,
                 textShadow: `0 0 60px ${NEON.cyan}55`,
               }}>
                 ONE<br />NETWORK.<br />
@@ -590,7 +590,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)`, boxShadow: `0 0 20px ${NEON.cyan}` }}
                 initial={{ width: 0 }} animate={{ width: 360 }} transition={{ duration: 1.2, ease: 'easeOut' }}
               />
-              <p className="mt-8 text-[23px] text-white/85 max-w-2xl leading-relaxed">
+              <p className="mt-6 text-[19px] text-white/85 max-w-2xl leading-relaxed">
                 Join our venture builder community: feed, resource map, acceleration programs, events,
                 investor access, IP & technology access, internships, volunteering and certified courses —
                 unlocked with a single membership.
