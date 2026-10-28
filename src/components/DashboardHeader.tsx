@@ -1,7 +1,7 @@
-import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain, MessageSquare } from "lucide-react";
+import { Home, User, HelpCircle, Brain, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
@@ -12,15 +12,11 @@ import LinkedAccountsSwitcher from "@/components/LinkedAccountsSwitcher";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  // Keep tab navigation on the current dashboard route so each role's
-  // profile / calendar tab opens correctly (mentor, investor, advisor, etc.)
-  const basePath = location.pathname.startsWith("/") && location.pathname !== "/"
-    ? location.pathname
-    : "/dashboard";
-  const goToTab = (tab: string) => navigate(`${basePath}?tab=${tab}`);
+  // The Calendar top icon was removed 2026-10-28 (founder direction):
+  // the calendar now lives as its own tab in every dashboard's tab bar,
+  // right after Tools.
 
   // Mobile: lay icons out in two rows so all of them stay visible without
   // overlapping the profile / tabs underneath the fixed header.
@@ -34,15 +30,6 @@ export function DashboardHeader() {
         <div className="flex items-center gap-1.5">
           <LinkedAccountsSwitcher compact />
           <GlobalClock />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => goToTab("calendar")}
-            className={iconBtnClass}
-            title="Calendar"
-          >
-            <CalendarIcon className="h-4 w-4" />
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -99,16 +86,6 @@ export function DashboardHeader() {
     <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-40 flex items-center gap-1.5 sm:gap-2">
       <LinkedAccountsSwitcher />
       <GlobalClock />
-
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => goToTab("calendar")}
-        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
-        title="Calendar"
-      >
-        <CalendarIcon className="h-4 w-4" />
-      </Button>
 
       <Button
         variant="ghost"

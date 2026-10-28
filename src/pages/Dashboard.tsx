@@ -382,6 +382,7 @@ const Dashboard = () => {
               { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
               { value: 'resources',    icon: Globe,          label: t('nav.resources') },
               { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
+              { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot,            label: 'Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network',      icon: Network,        label: 'Net' },

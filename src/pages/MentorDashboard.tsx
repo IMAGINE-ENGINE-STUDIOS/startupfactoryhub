@@ -126,6 +126,7 @@ const MentorDashboard = () => {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
