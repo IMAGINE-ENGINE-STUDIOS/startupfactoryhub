@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, C
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
-import { Target as CpTarget, Handshake as CpHandshake, Users as CpUsers, LifeBuoy as CpSupport } from 'lucide-react';
+import { Users as CpUsers } from 'lucide-react';
+import { FlaskConical as SpTest, Search as SpDiscovery, BarChart3 as SpCompetition, BadgeCheck as SpValidation, ShoppingBag as SpCommercialization, Rocket as SpGtm } from 'lucide-react';
 const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=accelerator';
 
 import {
@@ -1108,10 +1109,13 @@ export const PartnersARPage = () => (
 
 /* Corporate $1,500 package — Imagine Engine Studios Corp */
 const CORPORATE_SPECIALS = [
-  { i: CpTarget, a: '#10b981', t: 'Find clients', b: 'We source and qualify buyers for your products and services across the SFH network, events and global hubs.' },
-  { i: CpHandshake, a: '#06b6d4', t: 'Corporate partner introductions', b: 'Warm introductions to our corporate partners for pilots, procurement and strategic collaboration.' },
-  { i: CpUsers, a: '#a855f7', t: 'Human capital', b: 'Access to vetted talent, mentors and advisors to staff projects and grow your team fast.' },
-  { i: CpSupport, a: '#f59e0b', t: 'Hands-on support from our team', b: 'Our team works with you directly: planning, execution and follow-up on every opportunity.' },
+  { i: SpTest, a: '#10b981', t: 'Test customer', b: 'We test your offer with real customers inside the SFH network before you commit budget to it.' },
+  { i: SpDiscovery, a: '#06b6d4', t: 'Customer discovery', b: 'Structured discovery interviews and feedback loops that surface who actually buys and why.' },
+  { i: CpUsers, a: '#a855f7', t: 'Mentors and advisors', b: 'Direct access to SFH mentors, advisors and industry experts for every decision that matters.' },
+  { i: SpCompetition, a: '#f59e0b', t: 'Market competition', b: 'A clear read on your competitors, your market position and where you can win.' },
+  { i: SpValidation, a: '#ec4899', t: 'Validation and attraction', b: 'We validate demand and position your company to attract clients, talent and investors.' },
+  { i: SpCommercialization, a: '#22d3ee', t: 'Commercialization', b: 'Pricing, channels and sales support to turn your product into recurring revenue.' },
+  { i: SpGtm, a: '#818cf8', t: 'Strategy and go to market', b: 'A hands-on go-to-market plan, built and executed together with our team.' },
 ];
 
 export default function CorporateBrochure() {
@@ -2159,17 +2163,19 @@ export default function CorporateBrochure() {
                   <PageFrame accent={NEON.emerald} code="10" label="CORPORATE MEMBERSHIP" pageNum={10}>
                     <PageTitle kicker="10 · Special in this membership" title={<>Corporate package. <span style={{ color: NEON.emerald }}>$1,500.</span></>} accent={NEON.emerald} />
                     <p className="mt-2 text-[17px] leading-snug text-slate-700 max-w-[620px]">
-                      Everything in the platform, plus four services delivered directly by the Startup Factory Hub team.
+                      Everything in the platform, plus seven services delivered directly by the Startup Factory Hub team.
                     </p>
-                    <div className="mt-5 grid grid-cols-2 gap-4 flex-1 min-h-0">
+                    <div className="mt-4 grid grid-cols-2 gap-3 flex-1 min-h-0">
                       {CORPORATE_SPECIALS.map((c, idx) => (
-                        <motion.div key={c.t} whileHover={{ y: -4 }} className="relative rounded-2xl p-5 flex flex-col overflow-hidden"
+                        <motion.div key={c.t} whileHover={{ y: -4 }} className={`relative rounded-2xl p-4 flex flex-col overflow-hidden ${idx === CORPORATE_SPECIALS.length - 1 ? 'col-span-2' : ''}`}
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${c.a}55`, boxShadow: `0 0 30px ${c.a}20` }}>
-                          <div className="absolute -right-3 -top-4 font-futuristic font-black text-[90px] leading-none select-none" style={{ color: `${c.a}14` }}>0{idx + 1}</div>
-                          <NeonBadge icon={c.i} color={c.a} />
-                          <div className="mt-4 text-[22px] font-black text-slate-900 leading-tight">{c.t}</div>
-                          <div className="mt-1 h-[2px] w-16" style={{ background: c.a }} />
-                          <p className="mt-3 text-[16px] leading-snug text-slate-700">{c.b}</p>
+                          <div className="absolute -right-2 -top-3 font-futuristic font-black text-[64px] leading-none select-none" style={{ color: `${c.a}14` }}>0{idx + 1}</div>
+                          <div className="flex items-center gap-3">
+                            <NeonBadge icon={c.i} color={c.a} />
+                            <div className="text-[19px] font-black text-slate-900 leading-tight">{c.t}</div>
+                          </div>
+                          <div className="mt-2 h-[2px] w-14" style={{ background: c.a }} />
+                          <p className="mt-2 text-[14px] leading-snug text-slate-700">{c.b}</p>
                         </motion.div>
                       ))}
                     </div>
