@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import TRLTracker from '@/components/TRLTracker';
+import JourneyCustomerStats from '@/components/JourneyCustomerStats';
 import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
 import JourneyCompletionDialog from '@/components/JourneyCompletionDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -139,6 +140,38 @@ const roadmapSteps: RoadmapStep[] = [
       { id: 'gf-4', text: 'Schedule investor meetings', completed: false },
       { id: 'gf-5', text: 'Complete due diligence process', completed: false },
     ]
+  },
+  {
+    id: '7',
+    title: 'Get Customers',
+    description: 'Put your offer in front of the platform\'s built-in ecosystem and turn interest into conversations',
+    stage: 'launch',
+    completed: false,
+    locked: true,
+    resources: ['Products & Services Listings', 'Network Directory', 'Member Inbox'],
+    icon: Users,
+    defaultChecklist: [
+      { id: 'gc-1', text: 'List what you sell on your public page (Products & Services tab)', completed: false },
+      { id: 'gc-2', text: 'Make your startup profile easy to find in the network', completed: false },
+      { id: 'gc-3', text: 'Start conversations with potential customers', completed: false },
+      { id: 'gc-4', text: 'Reply to every inquiry in your inbox', completed: false },
+    ]
+  },
+  {
+    id: '8',
+    title: 'Sell & Grow Revenue',
+    description: 'Close your first sales through your public page and turn real traction into growth',
+    stage: 'growth',
+    completed: false,
+    locked: true,
+    resources: ['Public Page Checkout', 'Sales Records', 'Investor Matching'],
+    icon: TrendingUp,
+    defaultChecklist: [
+      { id: 'sg-1', text: 'Make your first sale through your public page checkout', completed: false },
+      { id: 'sg-2', text: 'Follow up with every buyer and ask for a referral', completed: false },
+      { id: 'sg-3', text: 'Review your traction every week: views, conversations, sales', completed: false },
+      { id: 'sg-4', text: 'Use your traction when you talk to investors', completed: false },
+    ]
   }
 ];
 
@@ -199,7 +232,7 @@ export default function StartupRoadmap() {
   useEffect(() => {
     const standardSteps = steps.filter(step => {
       const stepNum = parseInt(step.id);
-      return !isNaN(stepNum) && stepNum >= 1 && stepNum <= 6;
+      return !isNaN(stepNum) && stepNum >= 1 && stepNum <= 8;
     });
     
     const allCompleted = standardSteps.length > 0 && standardSteps.every(step => step.completed);
@@ -793,7 +826,7 @@ export default function StartupRoadmap() {
     
     const standardSteps = steps.filter(s => {
       const num = parseInt(s.id);
-      return !isNaN(num) && num >= 1 && num <= 6;
+      return !isNaN(num) && num >= 1 && num <= 8;
     });
     
     const completedSteps = standardSteps.filter(s => s.completed).length;
@@ -803,7 +836,7 @@ export default function StartupRoadmap() {
     if (completedSteps !== totalSteps) {
       toast({
         title: "Journey not complete",
-        description: "Complete all 6 steps to share your journey!",
+        description: "Complete all 8 steps to share your journey!",
         variant: "destructive"
       });
       return;
@@ -890,10 +923,10 @@ export default function StartupRoadmap() {
   };
 
 
-  // Standard 6-step journey (ids 1-6); custom + accelerator handled separately
+  // Standard 8-step journey (ids 1-8); custom + accelerator handled separately
   const standardSteps = steps.filter((s) => {
     const n = parseInt(s.id);
-    return !isNaN(n) && n >= 1 && n <= 6;
+    return !isNaN(n) && n >= 1 && n <= 8;
   });
   const customSteps = steps.filter((s) => s.id.startsWith('custom-'));
 
@@ -1065,6 +1098,14 @@ export default function StartupRoadmap() {
             <TRLTracker
               currentLevel={activeStep.trlLevel || 0}
               onLevelUpdate={(level) => updateTRLLevel(activeStep.id, level)}
+              disabled={activeStep.locked}
+            />
+          )}
+
+          {/* Live customer proof for the Get Customers / Sell & Grow Revenue steps */}
+          {(activeStep.id === '7' || activeStep.id === '8') && (
+            <JourneyCustomerStats
+              stepId={activeStep.id as '7' | '8'}
               disabled={activeStep.locked}
             />
           )}

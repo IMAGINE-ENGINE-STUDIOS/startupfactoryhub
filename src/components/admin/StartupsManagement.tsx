@@ -92,7 +92,9 @@ const JOURNEY_STEPS = [
   'MVP Development',
   'User Validation',
   'Launch Preparation',
-  'Growth & Scaling'
+  'Growth & Scaling',
+  'Get Customers',
+  'Sell & Grow Revenue'
 ];
 
 const StartupsManagement = () => {
@@ -194,13 +196,13 @@ const StartupsManagement = () => {
         
         // Find first incomplete step for current_step - database uses "1", "2", etc.
         let current_step = 1;
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 8; i++) {
           const stepRecord = progressRecords.find(p => p.step_id === String(i));
           if (!stepRecord || !stepRecord.completed) {
             current_step = i;
             break;
           }
-          if (i === 6 && stepRecord?.completed) current_step = 7; // All completed
+          if (i === 8 && stepRecord?.completed) current_step = 9; // All completed
         }
 
         return {
@@ -210,9 +212,9 @@ const StartupsManagement = () => {
           owner_avatar: profile?.avatar_url || null,
           journey_progress: {
             completed_steps: completedSteps,
-            total_steps: 6,
-            current_step: Math.min(current_step, 6),
-            percentage: Math.round((completedSteps / 6) * 100)
+            total_steps: 8,
+            current_step: Math.min(current_step, 8),
+            percentage: Math.round((completedSteps / 8) * 100)
           }
         };
       });
@@ -833,7 +835,7 @@ const StartupsManagement = () => {
                     </div>
                     <Progress value={selectedCompany.journey_progress?.percentage || 0} className="h-2" />
                     <p className="text-xs text-muted-foreground">
-                      {selectedCompany.journey_progress?.completed_steps || 0} of 6 steps completed
+                      {selectedCompany.journey_progress?.completed_steps || 0} of 8 steps completed
                     </p>
                   </div>
 

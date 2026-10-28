@@ -55,7 +55,6 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
 import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
-import GetCustomersCard from '@/components/GetCustomersCard';
 
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
@@ -375,9 +374,6 @@ const Dashboard = () => {
             className="h-14 w-14 sm:h-16 sm:w-16"
           />
         </div>
-
-        {/* Get Customers journey (Phase 1, Step 3) */}
-        <GetCustomersCard />
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
