@@ -1390,7 +1390,7 @@ export default function CorporateBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SYSTEM · ONLINE</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>SERVICE · PER BATCH</span>
+                        <span style={{ color: NEON.cyan }}>CORPORATE PACKAGE</span>
                         <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
                       </div>
                     </div>
