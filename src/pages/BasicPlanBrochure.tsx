@@ -490,6 +490,29 @@ const CheckoutPanel = ({
 
 
 
+/* Membership tiers shown on cover and join page — Imagine Engine Studios Corp */
+function TierStrip({ monthly, compact = false }: { monthly: string; compact?: boolean }) {
+  const tiers = [
+    { name: 'Venture Network', price: monthly, extra: 'Full network access', color: '#67e8f9' },
+    { name: 'Venture Resident', price: '$550', extra: '+ Dedicated desk', color: NEON.lime },
+    { name: 'Global Venture Partner', price: '$950', extra: '+ Private office', color: NEON.magenta },
+  ];
+  return (
+    <div className={`grid grid-cols-3 ${compact ? 'gap-2' : 'gap-3'}`}>
+      {tiers.map((t) => (
+        <div key={t.name} className={`rounded-2xl ${compact ? 'px-3 py-2.5' : 'px-4 py-5'}`} style={{
+          background: 'rgba(255,255,255,0.08)', border: `1px solid ${t.color}66`, backdropFilter: 'blur(16px)',
+          boxShadow: `0 0 24px ${t.color}22`,
+        }}>
+          <div className={`font-mono uppercase leading-tight ${compact ? 'text-[10px] tracking-[0.14em]' : 'text-[12px] tracking-[0.2em]'}`} style={{ color: t.color }}>{t.name}</div>
+          <div className={`font-black text-white leading-none mt-1.5 ${compact ? 'text-[26px]' : 'text-[44px]'}`}>{t.price}<span className="text-white/55 text-[13px] font-semibold">/mo</span></div>
+          <div className={`text-white/80 mt-1.5 ${compact ? 'text-[11px]' : 'text-[14px]'}`}>{t.extra}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure({ embedded = false }: { embedded?: boolean }) {
   const { plan } = useBasicPlan();
@@ -556,7 +579,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 Startup Factory Hub · Venture Network
               </div>
               <h1 className="font-black tracking-tight text-white" style={{
-                fontSize: 'clamp(54px, 9vw, 96px)', lineHeight: 0.94,
+                fontSize: 'clamp(48px, 7vw, 74px)', lineHeight: 0.94,
                 textShadow: `0 0 60px ${NEON.cyan}55`,
               }}>
                 ONE<br />NETWORK.<br />
@@ -567,20 +590,14 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)`, boxShadow: `0 0 20px ${NEON.cyan}` }}
                 initial={{ width: 0 }} animate={{ width: 360 }} transition={{ duration: 1.2, ease: 'easeOut' }}
               />
-              <p className="mt-8 text-[23px] text-white/85 max-w-2xl leading-relaxed">
+              <p className="mt-6 text-[19px] text-white/85 max-w-2xl leading-relaxed">
                 Join our venture builder community: feed, resource map, acceleration programs, events,
                 investor access, IP & technology access, internships, volunteering and certified courses —
                 unlocked with a single membership.
               </p>
 
-              <div className="mt-10">
-                <div className="inline-block rounded-2xl px-10 py-7" style={{
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(16px)',
-                }}>
-                  <div className="font-mono text-[13px] tracking-[0.3em] uppercase text-white/60">Venture Network</div>
-                  <div className="text-[72px] leading-none font-black text-white mt-1">{monthly}</div>
-                  <div className="text-white/60 text-base mt-2">per month · cancel anytime</div>
-                </div>
+              <div className="mt-8 max-w-3xl">
+                <TierStrip monthly={monthly} />
               </div>
             </div>
           </section>
@@ -1546,7 +1563,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               </h1>
 
 
-              <div className="mt-5 flex-1 min-h-0">
+              <div className="mt-4">
+                <TierStrip monthly={monthly} compact />
+              </div>
+
+              <div className="mt-4 flex-1 min-h-0">
                 <CheckoutPanel monthly={monthly} isMember={isMember} />
               </div>
 
