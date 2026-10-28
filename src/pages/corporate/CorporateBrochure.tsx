@@ -1955,8 +1955,8 @@ export default function CorporateBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
-                    <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="SFH CAPABILITIES" pageNum={5}>
+                    <PageTitle kicker="05 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
 
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -2037,8 +2037,8 @@ export default function CorporateBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={6}>
+                    <PageTitle kicker="06 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -2117,8 +2117,8 @@ export default function CorporateBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="08" label="CAPABILITY MATRIX" pageNum={8}>
-                    <PageTitle kicker="08 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="07" label="CAPABILITY MATRIX" pageNum={7}>
+                    <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
                   </PageFrame>
@@ -2130,9 +2130,9 @@ export default function CorporateBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.emerald} code="09" label="ORGANIZATIONAL GROWTH" pageNum={9}>
+                  <PageFrame accent={NEON.emerald} code="08" label="ORGANIZATIONAL GROWTH" pageNum={8}>
                     <PageTitle
-                      kicker="09 · Benefits to Your Organization"
+                      kicker="08 · Benefits to Your Organization"
                       title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
                       accent={NEON.emerald}
                     />
