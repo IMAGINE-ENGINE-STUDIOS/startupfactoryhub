@@ -2161,23 +2161,43 @@ export default function CorporateBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.emerald} code="10" label="CORPORATE MEMBERSHIP" pageNum={10}>
+                    {/* Next-gen dynamic layer — Imagine Engine Studios Corp */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]">
+                      <motion.div className="absolute -top-24 -left-24 w-[360px] h-[360px] rounded-full blur-3xl" style={{ background: `${NEON.emerald}33` }}
+                        animate={{ x: [0, 60, 0], y: [0, 40, 0] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }} />
+                      <motion.div className="absolute -bottom-24 -right-24 w-[380px] h-[380px] rounded-full blur-3xl" style={{ background: `${NEON.cyan}2e` }}
+                        animate={{ x: [0, -50, 0], y: [0, -30, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
+                      <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: `linear-gradient(${NEON.emerald} 1px, transparent 1px), linear-gradient(90deg, ${NEON.emerald} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
+                      <motion.div className="absolute left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald}, transparent)` }}
+                        animate={{ top: ['0%', '100%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} />
+                    </div>
+                    <div className="relative z-10 flex flex-col h-full">
                     <PageTitle kicker="10 · Special in this membership" title={<>Corporate package. <span style={{ color: NEON.emerald }}>$1,500.</span></>} accent={NEON.emerald} />
-                    <p className="mt-2 text-[17px] leading-snug text-slate-700 max-w-[620px]">
+                    <p className="mt-2 text-[20px] leading-snug text-slate-700 font-semibold max-w-[680px]">
                       Everything in the platform, plus seven services delivered directly by the Startup Factory Hub team.
                     </p>
                     <div className="mt-4 grid grid-cols-2 gap-3 flex-1 min-h-0">
                       {CORPORATE_SPECIALS.map((c, idx) => (
-                        <motion.div key={c.t} whileHover={{ y: -4 }} className={`relative rounded-2xl p-4 flex flex-col overflow-hidden ${idx === CORPORATE_SPECIALS.length - 1 ? 'col-span-2' : ''}`}
-                          style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${c.a}55`, boxShadow: `0 0 30px ${c.a}20` }}>
-                          <div className="absolute -right-2 -top-3 font-futuristic font-black text-[64px] leading-none select-none" style={{ color: `${c.a}14` }}>0{idx + 1}</div>
-                          <div className="flex items-center gap-3">
+                        <motion.div key={c.t}
+                          initial={{ opacity: 0, y: 18, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }}
+                          transition={{ delay: idx * 0.08, duration: 0.5, ease: 'easeOut' }}
+                          whileHover={{ y: -5, scale: 1.015 }}
+                          className={`group relative rounded-2xl p-4 flex flex-col overflow-hidden backdrop-blur-md ${idx === CORPORATE_SPECIALS.length - 1 ? 'col-span-2' : ''}`}
+                          style={{ background: `linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.78))`, border: `1px solid ${c.a}66`, boxShadow: `0 10px 34px -12px ${c.a}66, inset 0 0 0 1px rgba(255,255,255,0.6)` }}>
+                          <div className="absolute left-0 top-0 bottom-0 w-[4px]" style={{ background: `linear-gradient(180deg, ${c.a}, transparent)` }} />
+                          <motion.div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(115deg, transparent 30%, ${c.a}22 50%, transparent 70%)` }}
+                            animate={{ x: ['-120%', '120%'] }} transition={{ duration: 4.5, repeat: Infinity, delay: idx * 0.6, ease: 'easeInOut' }} />
+                          <div className="absolute -right-1 -top-3 font-futuristic font-black text-[72px] leading-none select-none" style={{ color: `${c.a}1f` }}>0{idx + 1}</div>
+                          <div className="relative flex items-center gap-3">
                             <NeonBadge icon={c.i} color={c.a} />
-                            <div className="text-[19px] font-black text-slate-900 leading-tight">{c.t}</div>
+                            <div className="text-[23px] font-black text-slate-900 leading-tight tracking-tight">{c.t}</div>
                           </div>
-                          <div className="mt-2 h-[2px] w-14" style={{ background: c.a }} />
-                          <p className="mt-2 text-[14px] leading-snug text-slate-700">{c.b}</p>
+                          <motion.div className="relative mt-2 h-[3px] rounded-full" style={{ background: `linear-gradient(90deg, ${c.a}, transparent)` }}
+                            initial={{ width: 0 }} whileInView={{ width: 80 }} viewport={{ once: true }} transition={{ delay: 0.3 + idx * 0.08, duration: 0.6 }} />
+                          <p className="relative mt-2 text-[17px] leading-snug text-slate-700 font-medium">{c.b}</p>
                         </motion.div>
                       ))}
+                    </div>
                     </div>
                   </PageFrame>
                 </A4Wrapper>
