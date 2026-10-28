@@ -140,7 +140,9 @@ export default function PublicUserPage() {
   const tabs = useMemo(() => {
     const t: { value: string; label: string; icon: any }[] = [{ value: 'about', label: 'About', icon: FileText }];
     sections.filter(s => s.visible || isOwner).forEach(s => t.push({ value: `s-${s.id}`, label: s.title, icon: FileText }));
-    if (listings.length || isOwner) t.push({ value: 'shop', label: 'Products & services', icon: ShoppingBag });
+    // Products & Services is a standard section on every public page (Get Customers
+    // journey steps 1+4): always show the tab, even when the owner has no listings yet.
+    t.push({ value: 'shop', label: 'Products & Services', icon: ShoppingBag });
     if (media.length || isOwner) t.push({ value: 'media', label: 'Media', icon: ImageIcon });
     t.push({ value: 'posts', label: 'Posts', icon: Newspaper });
     if (events.length) t.push({ value: 'events', label: 'Events', icon: CalendarDays });
@@ -296,7 +298,22 @@ export default function PublicUserPage() {
                 </div>
               </div>
             ))}
-            {listings.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No products or services yet.</p>}
+            {listings.length === 0 && (
+              isOwner ? (
+                <div className="tech-card border-0 flex flex-col items-center gap-3 p-8 text-center">
+                  <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <h3 className="font-semibold">List what you sell</h3>
+                    <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">Add your first product or service so visitors can buy or book it right from your page. Payments run through secure checkout, and sales are recorded on your page.</p>
+                  </div>
+                  <Button onClick={() => setListingEdit({ kind: 'product', title: '', description: '', price: '', images: [], video_url: '', active: true })}>
+                    <Plus className="mr-1 h-4 w-4" />Add product or service
+                  </Button>
+                </div>
+              ) : (
+                <p className="py-10 text-center text-sm text-muted-foreground">No products or services listed yet.</p>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="media" className="mt-4">

@@ -622,9 +622,17 @@ export default function FloatingChat() {
   useEffect(() => {
     const handleOpenChat = async (event: Event) => {
       const customEvent = event as CustomEvent;
-      const { userId } = customEvent.detail;
+      const { userId } = (customEvent.detail ?? {}) as { userId?: string };
       setIsOpen(true);
+      setIsMinimized(false);
       setActiveTab('messages');
+      if (!userId) {
+        // Inbox deep link (e.g. the /messages route): open on the
+        // conversation list without selecting a thread.
+        setSelectedConversation(null);
+        fetchConversations();
+        return;
+      }
       setSelectedConversation(userId);
       fetchMessages(userId);
       

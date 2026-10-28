@@ -29,6 +29,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import GetCustomersCard from '@/components/GetCustomersCard';
 
 import MemberStartupsTab from '@/components/member/MemberStartupsTab';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,6 +88,9 @@ const MemberDashboard = () => {
             className="h-14 w-14 sm:h-16 sm:w-16"
           />
         </div>
+
+        {/* Get Customers journey (Phase 1, Step 3) */}
+        <GetCustomersCard />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <DashboardTabsNav

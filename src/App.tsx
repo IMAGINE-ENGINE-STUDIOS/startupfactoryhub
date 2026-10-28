@@ -71,6 +71,7 @@ const LiveVideo = lazy(() => import("./pages/LiveVideo"));
 const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
 const MembersClub = lazy(() => import("./pages/MembersClub"));
+const Messages = lazy(() => import("./pages/Messages"));
 const InvestorPlanBrochure = lazy(() => import("./pages/InvestorPlanBrochure"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
@@ -265,6 +266,9 @@ const App = () => (
                      <Route path="/basic-plan" element={<BasicPlanBrochure />} />
                      <Route path="/membership" element={<BasicPlanBrochure />} />
                      <Route path="/members-club" element={<MembersClub />} />
+                     <Route path="/messages" element={<Messages />} />
+                     <Route path="/inbox" element={<Navigate to="/messages" replace />} />
+                     <Route path="/chat" element={<Navigate to="/messages" replace />} />
                      <Route path="/investor-plan" element={<InvestorPlanBrochure />} />
                      <Route path="/investor-priority" element={<InvestorPlanBrochure />} />
                     <Route path="/parasocios" element={<SociosBrochure />} />
