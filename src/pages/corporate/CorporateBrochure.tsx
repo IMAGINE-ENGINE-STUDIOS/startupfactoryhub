@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
 import { Target as CpTarget, Handshake as CpHandshake, Users as CpUsers, LifeBuoy as CpSupport } from 'lucide-react';
+import { FlaskConical as SpTest, Search as SpDiscovery, BarChart3 as SpCompetition, BadgeCheck as SpValidation, ShoppingBag as SpCommercialization, Rocket as SpGtm } from 'lucide-react';
 const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=accelerator';
 
 import {
@@ -1108,10 +1109,13 @@ export const PartnersARPage = () => (
 
 /* Corporate $1,500 package — Imagine Engine Studios Corp */
 const CORPORATE_SPECIALS = [
-  { i: CpTarget, a: '#10b981', t: 'Find clients', b: 'We source and qualify buyers for your products and services across the SFH network, events and global hubs.' },
-  { i: CpHandshake, a: '#06b6d4', t: 'Corporate partner introductions', b: 'Warm introductions to our corporate partners for pilots, procurement and strategic collaboration.' },
-  { i: CpUsers, a: '#a855f7', t: 'Human capital', b: 'Access to vetted talent, mentors and advisors to staff projects and grow your team fast.' },
-  { i: CpSupport, a: '#f59e0b', t: 'Hands-on support from our team', b: 'Our team works with you directly: planning, execution and follow-up on every opportunity.' },
+  { i: SpTest, a: '#10b981', t: 'Test customer', b: 'We test your offer with real customers inside the SFH network before you commit budget to it.' },
+  { i: SpDiscovery, a: '#06b6d4', t: 'Customer discovery', b: 'Structured discovery interviews and feedback loops that surface who actually buys and why.' },
+  { i: CpUsers, a: '#a855f7', t: 'Mentors and advisors', b: 'Direct access to SFH mentors, advisors and industry experts for every decision that matters.' },
+  { i: SpCompetition, a: '#f59e0b', t: 'Market competition', b: 'A clear read on your competitors, your market position and where you can win.' },
+  { i: SpValidation, a: '#ec4899', t: 'Validation and attraction', b: 'We validate demand and position your company to attract clients, talent and investors.' },
+  { i: SpCommercialization, a: '#22d3ee', t: 'Commercialization', b: 'Pricing, channels and sales support to turn your product into recurring revenue.' },
+  { i: SpGtm, a: '#818cf8', t: 'Strategy and go to market', b: 'A hands-on go-to-market plan, built and executed together with our team.' },
 ];
 
 export default function CorporateBrochure() {
