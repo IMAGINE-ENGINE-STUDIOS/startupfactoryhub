@@ -64,6 +64,7 @@ export default function RouteSeo() {
     const name = path.split('/').filter(Boolean).pop()?.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     const title = hit ? (path === '/' ? hit[0] : `${hit[0]} | ${BRAND}`) : `${name ?? 'Home'} | ${BRAND}`;
     const description = hit ? hit[1] : `${name ?? 'Home'} on ${BRAND}, the AI startup accelerator and venture builder.`;
+    const socialDescription = (hit && hit[2]) || description;
     const url = `${SITE}${path === '/' ? '/' : path}`;
     document.title = title;
     let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
