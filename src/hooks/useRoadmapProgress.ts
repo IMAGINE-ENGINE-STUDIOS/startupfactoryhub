@@ -13,7 +13,7 @@ export const useRoadmapProgress = (refreshTrigger?: number) => {
   const { user } = useAuth();
   const [progress, setProgress] = useState<RoadmapProgressData>({
     completedSteps: 0,
-    totalSteps: 8,
+    totalSteps: 7,
     percentage: 0,
     loading: true,
   });
@@ -57,16 +57,16 @@ export const useRoadmapProgress = (refreshTrigger?: number) => {
       console.error('Error fetching roadmap progress:', error);
       setProgress({
         completedSteps: 0,
-        totalSteps: 8,
+        totalSteps: 7,
         percentage: 0,
         loading: false,
       });
       return;
     }
 
-    // Default steps are IDs 1-8, custom steps start with 'custom-'
+    // Default steps are IDs 1-7, custom steps start with 'custom-'
     const customSteps = data?.filter(step => step.step_id.startsWith('custom-')) || [];
-    const totalSteps = 8 + customSteps.length;
+    const totalSteps = 7 + customSteps.length;
     
     const completedSteps = data?.filter(step => step.completed).length || 0;
     const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;

@@ -32,7 +32,7 @@ export const JOURNEY_STEPS: { value: JourneyStep; label: string }[] = [
   { value: 'mvp', label: 'MVP Development' },
   { value: 'validation', label: 'User Validation' },
   { value: 'launch', label: 'Product Launch' },
-  { value: 'growth', label: 'Growth & Funding' },
+  { value: 'growth', label: 'Funding' },
   { value: 'all', label: 'All Stages' },
 ];
 

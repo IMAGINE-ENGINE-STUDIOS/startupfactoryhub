@@ -125,9 +125,28 @@ const roadmapSteps: RoadmapStep[] = [
     ]
   },
   {
+    id: '7',
+    title: 'Get Customers, Sell & Grow',
+    description: 'Turn the platform\'s built-in network into customers and revenue: list what you sell, start conversations, close your first sales and grow from real traction',
+    stage: 'launch',
+    completed: false,
+    locked: true,
+    resources: ['Products & Services Listings', 'Network Directory', 'Member Inbox', 'Public Page Checkout', 'Sales Records'],
+    icon: Users,
+    defaultChecklist: [
+      { id: 'gc-1', text: 'List what you sell on your public page (Products & Services tab)', completed: false },
+      { id: 'gc-2', text: 'Make your startup profile easy to find in the network', completed: false },
+      { id: 'gc-3', text: 'Start conversations with potential customers', completed: false },
+      { id: 'gc-4', text: 'Reply to every inquiry in your inbox', completed: false },
+      { id: 'sg-1', text: 'Make your first sale through your public page checkout', completed: false },
+      { id: 'sg-2', text: 'Follow up with every buyer and ask for a referral', completed: false },
+      { id: 'sg-3', text: 'Review your traction every week: views, conversations, sales', completed: false },
+    ]
+  },
+  {
     id: '6',
-    title: 'Growth & Funding',
-    description: 'Scale your startup and secure funding for accelerated growth',
+    title: 'Funding',
+    description: 'Secure the funding you need: prepare your deck and financial model, meet investors and close your round',
     stage: 'growth',
     completed: false,
     locked: true,
@@ -139,38 +158,7 @@ const roadmapSteps: RoadmapStep[] = [
       { id: 'gf-3', text: 'Identify target investors (VCs/Angels)', completed: false },
       { id: 'gf-4', text: 'Schedule investor meetings', completed: false },
       { id: 'gf-5', text: 'Complete due diligence process', completed: false },
-    ]
-  },
-  {
-    id: '7',
-    title: 'Get Customers',
-    description: 'Put your offer in front of the platform\'s built-in ecosystem and turn interest into conversations',
-    stage: 'launch',
-    completed: false,
-    locked: true,
-    resources: ['Products & Services Listings', 'Network Directory', 'Member Inbox'],
-    icon: Users,
-    defaultChecklist: [
-      { id: 'gc-1', text: 'List what you sell on your public page (Products & Services tab)', completed: false },
-      { id: 'gc-2', text: 'Make your startup profile easy to find in the network', completed: false },
-      { id: 'gc-3', text: 'Start conversations with potential customers', completed: false },
-      { id: 'gc-4', text: 'Reply to every inquiry in your inbox', completed: false },
-    ]
-  },
-  {
-    id: '8',
-    title: 'Sell & Grow Revenue',
-    description: 'Close your first sales through your public page and turn real traction into growth',
-    stage: 'growth',
-    completed: false,
-    locked: true,
-    resources: ['Public Page Checkout', 'Sales Records', 'Investor Matching'],
-    icon: TrendingUp,
-    defaultChecklist: [
-      { id: 'sg-1', text: 'Make your first sale through your public page checkout', completed: false },
-      { id: 'sg-2', text: 'Follow up with every buyer and ask for a referral', completed: false },
-      { id: 'sg-3', text: 'Review your traction every week: views, conversations, sales', completed: false },
-      { id: 'sg-4', text: 'Use your traction when you talk to investors', completed: false },
+      { id: 'gf-6', text: 'Use your traction (profile views, conversations, sales) in investor conversations', completed: false },
     ]
   }
 ];
@@ -232,7 +220,7 @@ export default function StartupRoadmap() {
   useEffect(() => {
     const standardSteps = steps.filter(step => {
       const stepNum = parseInt(step.id);
-      return !isNaN(stepNum) && stepNum >= 1 && stepNum <= 8;
+      return !isNaN(stepNum) && stepNum >= 1 && stepNum <= 7;
     });
     
     const allCompleted = standardSteps.length > 0 && standardSteps.every(step => step.completed);
@@ -826,7 +814,7 @@ export default function StartupRoadmap() {
     
     const standardSteps = steps.filter(s => {
       const num = parseInt(s.id);
-      return !isNaN(num) && num >= 1 && num <= 8;
+      return !isNaN(num) && num >= 1 && num <= 7;
     });
     
     const completedSteps = standardSteps.filter(s => s.completed).length;
@@ -836,7 +824,7 @@ export default function StartupRoadmap() {
     if (completedSteps !== totalSteps) {
       toast({
         title: "Journey not complete",
-        description: "Complete all 8 steps to share your journey!",
+        description: "Complete all 7 steps to share your journey!",
         variant: "destructive"
       });
       return;
@@ -857,7 +845,7 @@ export default function StartupRoadmap() {
       .from('feed_posts')
       .insert({
         user_id: user.id,
-        content: "🎉 I just completed my entire startup journey on Startup Factory Hub! From idea validation to growth & funding. Excited for what's next! #StartupJourney #Milestone",
+        content: "🎉 I just completed my entire startup journey on Startup Factory Hub! From idea validation to funding. Excited for what's next! #StartupJourney #Milestone",
         post_type: 'journey_completion',
         internship_data: journeyData,
       });
@@ -923,10 +911,11 @@ export default function StartupRoadmap() {
   };
 
 
-  // Standard 8-step journey (ids 1-8); custom + accelerator handled separately
+  // Standard 7-step journey (ids 1-7; display order puts id '7' before
+  // id '6' — Funding is last); custom + accelerator handled separately
   const standardSteps = steps.filter((s) => {
     const n = parseInt(s.id);
-    return !isNaN(n) && n >= 1 && n <= 8;
+    return !isNaN(n) && n >= 1 && n <= 7;
   });
   const customSteps = steps.filter((s) => s.id.startsWith('custom-'));
 
@@ -1102,10 +1091,9 @@ export default function StartupRoadmap() {
             />
           )}
 
-          {/* Live customer proof for the Get Customers / Sell & Grow Revenue steps */}
-          {(activeStep.id === '7' || activeStep.id === '8') && (
+          {/* Live customer proof for the merged Get Customers, Sell & Grow step */}
+          {activeStep.id === '7' && (
             <JourneyCustomerStats
-              stepId={activeStep.id as '7' | '8'}
               disabled={activeStep.locked}
             />
           )}

@@ -91,10 +91,9 @@ const JOURNEY_STEPS = [
   'Market Research',
   'MVP Development',
   'User Validation',
-  'Launch Preparation',
-  'Growth & Scaling',
-  'Get Customers',
-  'Sell & Grow Revenue'
+  'Product Launch',
+  'Get Customers, Sell & Grow',
+  'Funding'
 ];
 
 const StartupsManagement = () => {
@@ -194,15 +193,19 @@ const StartupsManagement = () => {
         const progressRecords = progressMap.get(company.user_id) || [];
         const completedSteps = progressRecords.filter(p => p.completed).length;
         
-        // Find first incomplete step for current_step - database uses "1", "2", etc.
+        // Find first incomplete step for current_step. Positions follow the
+        // Journey tab's DISPLAY order, whose step ids are 1,2,3,4,5,7,6 —
+        // the merged customers step (id "7") is position 6 and Funding
+        // (id "6") is the last step, position 7.
+        const DISPLAY_ORDER_STEP_IDS = ['1', '2', '3', '4', '5', '7', '6'];
         let current_step = 1;
-        for (let i = 1; i <= 8; i++) {
-          const stepRecord = progressRecords.find(p => p.step_id === String(i));
+        for (let i = 0; i < DISPLAY_ORDER_STEP_IDS.length; i++) {
+          const stepRecord = progressRecords.find(p => p.step_id === DISPLAY_ORDER_STEP_IDS[i]);
           if (!stepRecord || !stepRecord.completed) {
-            current_step = i;
+            current_step = i + 1;
             break;
           }
-          if (i === 8 && stepRecord?.completed) current_step = 9; // All completed
+          if (i === DISPLAY_ORDER_STEP_IDS.length - 1 && stepRecord?.completed) current_step = 8; // All completed
         }
 
         return {
@@ -212,9 +215,9 @@ const StartupsManagement = () => {
           owner_avatar: profile?.avatar_url || null,
           journey_progress: {
             completed_steps: completedSteps,
-            total_steps: 8,
-            current_step: Math.min(current_step, 8),
-            percentage: Math.round((completedSteps / 8) * 100)
+            total_steps: 7,
+            current_step: Math.min(current_step, 7),
+            percentage: Math.round((completedSteps / 7) * 100)
           }
         };
       });
@@ -835,7 +838,7 @@ const StartupsManagement = () => {
                     </div>
                     <Progress value={selectedCompany.journey_progress?.percentage || 0} className="h-2" />
                     <p className="text-xs text-muted-foreground">
-                      {selectedCompany.journey_progress?.completed_steps || 0} of 8 steps completed
+                      {selectedCompany.journey_progress?.completed_steps || 0} of 7 steps completed
                     </p>
                   </div>
 

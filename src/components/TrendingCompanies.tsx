@@ -64,7 +64,7 @@ export default function TrendingCompanies() {
 
   const fetchSuccessStories = async () => {
     try {
-      // Fetch companies with completed roadmaps (all 8 steps)
+      // Fetch companies with completed roadmaps (all 7 steps)
       const { data: roadmapProgress, error: roadmapError } = await supabase
         .from('roadmap_progress')
         .select('user_id, completed')
@@ -78,9 +78,9 @@ export default function TrendingCompanies() {
         userCompletionCount[item.user_id] = (userCompletionCount[item.user_id] || 0) + 1;
       });
 
-      // Get users who completed all 8 steps
+      // Get users who completed all 7 steps
       const fullyCompletedUserIds = Object.entries(userCompletionCount)
-        .filter(([_, count]) => count >= 8)
+        .filter(([_, count]) => count >= 7)
         .map(([userId]) => userId);
 
       // Fetch their companies
