@@ -10,7 +10,7 @@ const SITE = 'https://startupfactoryhub.com';
 const BRAND = 'Startup Factory Hub';
 // Optional third element overrides og:description/twitter:description (defaults to the meta description).
 const ROUTES: Record<string, [string, string, string?]> = {
-  '/': ['Startup Factory Hub', 'We build, accelerate, scale, and invest in startups globally.'],
+  '/': ['Startup Factory Hub', 'We build, accelerate, scale, and invest in startups globally.', 'Startup Factory Hub is an AI-powered global venture builder creating the infrastructure to build and scale the next generation of startups.'],
   '/about': ['About Us', 'Meet the Startup Factory Hub team and learn how we are building AI-powered infrastructure for the global startup ecosystem.'],
   '/auth': ['Sign In or Join', 'Sign in or create your Startup Factory Hub account to start your founder journey.'],
   '/dashboard': ['Dashboard', 'Your Startup Factory Hub dashboard: journey, network, resources and Genius AI.'],
