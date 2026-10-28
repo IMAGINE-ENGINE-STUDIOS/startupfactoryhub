@@ -322,6 +322,76 @@ export async function executeAction(action: ProposedAction, ctx: ExecCtx): Promi
         return { ok: true, summary: `Opened ${a.tab}.` };
       }
 
+      // ───────────── Grants (the brain's grant matcher) ─────────────
+      // Scoring lives in Postgres (match_startup_to_grants), so
+      // Genius, the recommendation popup and the Journey all agree.
+      case "suggest_my_grants": {
+        if (!ctx.userId) return { ok: false, summary: "Not signed in" };
+        const a = action.args;
+        // Same matcher the AI recommendation feature (brain logo) uses:
+        // match_startup_to_grants() over grants stored as globe resources.
+        const { data: company } = await supabase
+          .from("companies")
+          .select("id, name")
+          .eq("user_id", ctx.userId)
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (!company) {
+          return {
+            ok: true,
+            summary:
+              "No company profile yet — create one and grants unlock automatically as you complete it and progress on your journey.",
+          };
+        }
+        await supabase.rpc("expire_past_grants" as any);
+        await supabase.rpc("recompute_grant_matches" as any, { p_company_id: company.id });
+        const { data: matches, error } = await supabase.rpc("match_startup_to_grants" as any, {
+          p_company_id: company.id,
+          p_limit: a.limit ?? 5,
+        });
+        if (error) throw error;
+        const list = (matches ?? []) as any[];
+        if (list.length === 0) {
+          return {
+            ok: true,
+            summary:
+              "No grants match your startup yet. As you complete your company profile and journey steps, new grants unlock automatically and I will surface them here and in your AI recommendations.",
+          };
+        }
+        const unlockedCount = list.filter((m: any) => m.unlocked).length;
+        const lines = list.map((m: any, i: number) => {
+          const reason = Array.isArray(m.reasons) && m.reasons[0] ? ` ${m.reasons[0]}` : "";
+          const money = m.amount_text ? ` — ${m.amount_text}` : "";
+          const when = m.is_rolling ? " · rolling" : m.deadline ? ` · deadline ${new Date(m.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "";
+          return `${i + 1}. [${m.unlocked ? "Unlocked" : "Locked"}] ${m.title}${money}${when}.${reason}`;
+        });
+        return {
+          ok: true,
+          summary: `${unlockedCount} grant${unlockedCount === 1 ? "" : "s"} unlocked for ${company.name}, ${list.length} total matches:\n${lines.join("\n")}`,
+        };
+      }
+
+      case "open_grant_on_map": {
+        const a = action.args;
+        ctx.navigate("/dashboard?tab=resources");
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("genius-resource-navigate", {
+              detail: { search: a.title || "", resourceId: a.resource_id || "", resourceType: "government_grant" },
+            })
+          );
+          if (typeof a.lat === "number" && typeof a.lng === "number") {
+            window.dispatchEvent(
+              new CustomEvent("genius-map-navigate", {
+                detail: { lat: a.lat, lng: a.lng, zoom: 10 },
+              })
+            );
+          }
+        }, 700);
+        return { ok: true, summary: `Showing ${a.title || "the grant"} on the globe.` };
+      }
+
 
       default:
         return { ok: false, summary: `Unknown action: ${action.name}` };

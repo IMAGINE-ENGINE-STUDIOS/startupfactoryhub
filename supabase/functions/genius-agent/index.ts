@@ -379,6 +379,39 @@ const TOOLS = [
     },
   },
   {
+    type: "function",
+    function: {
+      name: "suggest_my_grants",
+      description:
+        "Suggest grants for the signed-in founder's startup using the platform's grant matcher. Grants are scored against the startup's company profile (industry, journey stage, location, eligibility tags) and UNLOCK automatically as the startup progresses. Use whenever the user asks about grants, funding they can apply for, non-dilutive funding, SBIR, or what grants they qualify / unlocked for. Always call this instead of listing grants from memory.",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: { type: "number", description: "How many matches to show. Default 5" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "open_grant_on_map",
+      description:
+        "Show one specific grant on the Global Resource Map / globe. Use after suggest_my_grants when the user wants to see a grant, or when they name a grant program.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          resource_id: { type: "string" },
+          lat: { type: "number" },
+          lng: { type: "number" },
+        },
+        required: ["title"],
+      },
+    },
+  },
+  {
 
     type: "function",
     function: {
@@ -492,6 +525,10 @@ function describeAction(name: string, args: any): { title: string; details: stri
         details: [`To: ${args.to_name}`, args.from_name ? `From: ${args.from_name}` : "From: my location"],
         risk: "low",
       };
+    case "suggest_my_grants":
+      return { title: "Find my grant matches", details: ["Scored against your startup profile and journey stage"], risk: "low" };
+    case "open_grant_on_map":
+      return { title: "Show grant on the globe", details: [`Grant: ${args.title}`], risk: "low" };
     case "open_dashboard_tab":
       return { title: "Open dashboard tab", details: [`Tab: ${args.tab}`], risk: "low" };
 
@@ -512,6 +549,7 @@ CAPABILITIES:
 - Search: web search and platform search
 - Navigation: open dashboard tabs, fly the 4D map to any place worldwide
 - Resource Map: open the Global Resource Map with a search/filter (open_resource_map) and draw directions to any place or resource (get_resource_directions)
+- Grants: suggest grants matched and unlocked for the user's own startup (suggest_my_grants) and show any grant on the globe (open_grant_on_map). Grants unlock automatically as the startup completes its profile and journey steps — when a user asks about grants, funding, SBIR or non-dilutive money, ALWAYS call suggest_my_grants instead of naming programs from memory, and offer to open the best match on the map.
 
 RULES:
 1. When the user asks to do something actionable, CALL THE APPROPRIATE TOOL — do not just describe what you would do.

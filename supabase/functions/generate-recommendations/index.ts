@@ -184,6 +184,10 @@ serve(async (req) => {
       .single();
 
     let systemPrompt: string;
+    // Grant matches from the platform matcher (grants are resources on the
+    // globe). Filled in the startup branch, prepended to the AI list below —
+    // same RecommendationPopup, same 'resource' type, no new interface.
+    let grantRecommendations: any[] = [];
 
     if (userRole === 'mentor' || userRole === 'advisor') {
       // Fetch mentor/advisor-specific data in parallel
@@ -214,6 +218,39 @@ serve(async (req) => {
       ]);
 
       const company = companyRes.data;
+
+      // ── Grants: the AI recommendation feature's grant function ──
+      // Grants live on the globe as government_grant resources. This call
+      // expires past-deadline grants, recomputes this startup's matches
+      // (auto-unlock state lives in grant_matches) and returns the ranked
+      // list. Unlocked grants become recommendations verbatim — the AI
+      // never invents grant names, amounts or deadlines.
+      if (company?.id) {
+        try {
+          await supabaseClient.rpc('expire_past_grants');
+          await supabaseClient.rpc('recompute_grant_matches', { p_company_id: company.id });
+          const { data: grantMatches } = await supabaseClient.rpc('match_startup_to_grants', {
+            p_company_id: company.id, p_limit: 5,
+          });
+          grantRecommendations = (grantMatches || []).map((g: any) => ({
+            type: 'resource',
+            title: g.unlocked ? `Grant unlocked: ${g.title}` : `Grant: ${g.title}`,
+            description:
+              `${g.amount_text || 'Grant funding'}` +
+              (g.is_rolling ? ' · Rolling applications' : g.deadline ? ` · Deadline ${new Date(g.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : '') +
+              ` · Match ${g.score}% for ${company.name}. ` +
+              (g.unlocked
+                ? `Why you unlocked it: ${(g.reasons || []).join(' ')}`
+                : `To unlock: ${(g.missing || [])[0] || 'keep progressing on your journey'}`) +
+              (g.website_url ? ` Apply: ${g.website_url}` : ''),
+            action: 'View on the globe',
+            reference_id: g.resource_id,
+          }));
+        } catch (grantErr) {
+          console.error('Grant matching in recommendations failed (continuing without):', grantErr);
+        }
+      }
+
       const connectedIds = new Set(
         connectionsRes.data?.flatMap(c => [c.requester_id, c.addressee_id].filter(id => id !== user.id)) || []
       );
@@ -307,7 +344,10 @@ serve(async (req) => {
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error('No tool call in AI response');
 
-    const recommendations = JSON.parse(toolCall.function.arguments).recommendations;
+    const aiRecommendations = JSON.parse(toolCall.function.arguments).recommendations;
+
+    // Unlocked grants first — they are time-sensitive and fully verified.
+    const recommendations = [...grantRecommendations, ...aiRecommendations];
 
     return new Response(
       JSON.stringify({ recommendations }),
