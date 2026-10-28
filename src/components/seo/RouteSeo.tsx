@@ -8,8 +8,8 @@ import { useLocation } from 'react-router-dom';
 
 const SITE = 'https://startupfactoryhub.com';
 const BRAND = 'Startup Factory Hub';
-
-const ROUTES: Record<string, [string, string]> = {
+// Optional third element overrides og:description/twitter:description (defaults to the meta description).
+const ROUTES: Record<string, [string, string, string?]> = {
   '/': ['Startup Factory Hub', 'We build, accelerate, scale, and invest in startups globally.'],
   '/about': ['About Us', 'Meet the Startup Factory Hub team and learn how we are building AI-powered infrastructure for the global startup ecosystem.'],
   '/auth': ['Sign In or Join', 'Sign in or create your Startup Factory Hub account to start your founder journey.'],
