@@ -27,29 +27,41 @@ import sfhLogo from '@/assets/sfh-logo-combined.png';
 // --- Static matrix-symbol background layer (CSS-based, lightweight, brand teal) ---
 const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEF0123456789@#$%&*";
 const MatrixSymbolLayer = ({ density = 0.08, columns = 32 }: { density?: number; columns?: number }) => {
-  const cols = Array.from({ length: columns }, (_, i) => i);
+  /* Columns are generated ONCE per mount (founder mobile-glitch fix
+   * 2026-10-28): this used to call Math.random() during render, so every
+   * re-render (e.g. each A4Wrapper ResizeObserver scale update while the
+   * stacked mobile brochure loads) visibly reshuffled every column —
+   * a flicker/shimmer across all pages. */
+  const cols = useMemo(
+    () =>
+      Array.from({ length: columns }, (_, c) => {
+        const charsInCol = 22 + Math.floor(Math.random() * 10);
+        return {
+          key: c,
+          left: (c / columns) * 100,
+          delay: (Math.random() * 4).toFixed(2),
+          text: Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join(''),
+        };
+      }),
+    [columns]
+  );
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ opacity: density }}>
-      {cols.map((c) => {
-        const charsInCol = 22 + Math.floor(Math.random() * 10);
-        const left = (c / columns) * 100;
-        const delay = (Math.random() * 4).toFixed(2);
-        return (
-          <div
-            key={c}
-            className="absolute top-0 text-teal-400 font-mono text-[11px] leading-[14px] whitespace-pre"
-            style={{
-              left: `${left}%`,
-              writingMode: 'vertical-rl',
-              textOrientation: 'upright',
-              animation: `matrix-fall 18s linear ${delay}s infinite`,
-              textShadow: '0 0 6px rgba(20,184,166,0.6)',
-            }}
-          >
-            {Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join('')}
-          </div>
-        );
-      })}
+      {cols.map((col) => (
+        <div
+          key={col.key}
+          className="absolute top-0 text-teal-400 font-mono text-[11px] leading-[14px] whitespace-pre"
+          style={{
+            left: `${col.left}%`,
+            writingMode: 'vertical-rl',
+            textOrientation: 'upright',
+            animation: `matrix-fall 18s linear ${col.delay}s infinite`,
+            textShadow: '0 0 6px rgba(20,184,166,0.6)',
+          }}
+        >
+          {col.text}
+        </div>
+      ))}
     </div>
   );
 };
@@ -1715,7 +1727,7 @@ export default function Brochure() {
           );
           if (!flipbookSupported) {
             return (
-              <div className="w-full max-w-[700px] mx-auto flex flex-col gap-6">
+              <div className="brochure-calm w-full max-w-[700px] mx-auto flex flex-col gap-6">
                 {pages}
               </div>
             );

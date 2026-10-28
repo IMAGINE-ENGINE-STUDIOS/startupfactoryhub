@@ -2513,7 +2513,7 @@ export default function WTCBrochure() {
 
           if (!flipbookSupported) {
             return (
-              <div className="w-full max-w-[700px] mx-auto flex flex-col gap-6">
+              <div className="brochure-calm w-full max-w-[700px] mx-auto flex flex-col gap-6">
                 {pages}
               </div>
             );
