@@ -66,7 +66,7 @@ const AboutHero = () => {
               </span>
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Startup Factory Hub is building the <span className="font-medium text-primary">AI-powered infrastructure layer</span> for the global startup ecosystem.
+              Startup Factory Hub is an <span className="font-medium text-primary">AI-powered global venture builder</span> creating the infrastructure to build and scale the next generation of startups.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-2 lg:justify-start">
               {["Deep Tech", "AI, Biotech, Quantum", "Growth methodology", "Built for success"].map((tag) => (
