@@ -711,7 +711,6 @@ const Dashboard = () => {
                 }
                 mentorship={
                   <div className="space-y-4">
-                    <BookingsList variant="scheduled" category="mentorship" title="Booked Mentoring Sessions" />
                     <MentorshipSection
                       onJoin={setActiveVideoUrl}
                       onOpenTranscript={openMentorshipTranscript}

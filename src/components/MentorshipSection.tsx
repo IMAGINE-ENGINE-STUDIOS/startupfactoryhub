@@ -5,6 +5,7 @@ import { Sparkles, Users, Calendar as CalendarIcon, History } from 'lucide-react
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
+import BookingsList from '@/components/BookingsList';
 import { cn } from '@/lib/utils';
 
 type View = 'offers' | 'active' | 'upcoming' | 'past';
@@ -82,7 +83,8 @@ export default function MentorshipSection({
       <div className={view === 'active' ? '' : 'hidden'}>
         <StartupActiveMentors onJoin={onJoin} onCountChange={(n) => update('active', n)} />
       </div>
-      <div className={view === 'upcoming' ? '' : 'hidden'}>
+      <div className={view === 'upcoming' ? 'space-y-4' : 'hidden'}>
+        <BookingsList variant="scheduled" category="mentorship" title="Booked Mentoring Sessions" />
         <StartupMentoringSessions
           type="upcoming"
           onJoin={onJoin}
