@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, C
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
-import { Target as CpTarget, Handshake as CpHandshake, Users as CpUsers, LifeBuoy as CpSupport } from 'lucide-react';
+import { Users as CpUsers } from 'lucide-react';
 import { FlaskConical as SpTest, Search as SpDiscovery, BarChart3 as SpCompetition, BadgeCheck as SpValidation, ShoppingBag as SpCommercialization, Rocket as SpGtm } from 'lucide-react';
 const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=accelerator';
 
