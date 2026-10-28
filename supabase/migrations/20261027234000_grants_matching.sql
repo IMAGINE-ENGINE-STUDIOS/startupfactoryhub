@@ -52,6 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_resources_grants
 -- ---------- 2. Eligibility facts a startup may need to state ----------
 -- Nullable on purpose: NULL = unknown, never treated as "no".
 ALTER TABLE public.companies
+  ADD COLUMN IF NOT EXISTS tags              TEXT[] NOT NULL DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS is_women_owned    BOOLEAN,
   ADD COLUMN IF NOT EXISTS is_minority_owned BOOLEAN,
   ADD COLUMN IF NOT EXISTS country           TEXT,
@@ -92,7 +93,7 @@ CREATE OR REPLACE FUNCTION public.company_journey_step(p_stage TEXT)
 RETURNS TEXT LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE lower(coalesce(p_stage,''))
     WHEN 'idea' THEN 'idea' WHEN 'pre-seed' THEN 'research' WHEN 'preseed' THEN 'research'
-    WHEN 'mvp' THEN 'mvp' WHEN 'seed' THEN 'validation' WHEN 'launch' THEN 'launch'
+    WHEN 'mvp' THEN 'mvp' WHEN 'prototype' THEN 'mvp' WHEN 'seed' THEN 'validation' WHEN 'launch' THEN 'launch'
     WHEN 'series a' THEN 'growth' WHEN 'series b' THEN 'growth' WHEN 'growth' THEN 'growth'
     ELSE 'idea' END;
 $$;
@@ -101,26 +102,26 @@ CREATE OR REPLACE FUNCTION public.grant_blockers(p_company public.companies, p_r
 RETURNS TEXT[] LANGUAGE plpgsql STABLE AS $$
 DECLARE b TEXT[] := '{}';
 BEGIN
-  IF p_resource.grant_status = 'closed' THEN b := b || 'This grant is closed.'; END IF;
+  IF p_resource.grant_status = 'closed' THEN b := array_append(b, 'This grant is closed.'::text); END IF;
   IF p_resource.grant_deadline IS NOT NULL AND p_resource.grant_deadline < now()
      AND NOT p_resource.grant_is_rolling
-     THEN b := b || 'The deadline has passed.'; END IF;
+     THEN b := array_append(b, 'The deadline has passed.'::text); END IF;
   IF p_resource.grant_women_owned_required AND p_company.is_women_owned IS DISTINCT FROM true
-     THEN b := b || 'Requires a women-owned business (51%+). Add this to your company profile if it applies.'; END IF;
+     THEN b := array_append(b, 'Requires a women-owned business (51%+). Add this to your company profile if it applies.'::text); END IF;
   IF p_resource.grant_us_based_required AND p_company.country IS NOT NULL
      AND lower(p_company.country) NOT IN ('united states','usa','us','estados unidos')
-     THEN b := b || 'US-based companies only.'; END IF;
+     THEN b := array_append(b, 'US-based companies only.'::text); END IF;
   IF p_resource.grant_state_focus IS NOT NULL AND p_company.state IS NOT NULL
      AND upper(p_company.state) <> upper(p_resource.grant_state_focus)
-     THEN b := b || 'Only for companies in the grant''s focus state.'; END IF;
+     THEN b := array_append(b, 'Only for companies in the grant''s focus state.'::text); END IF;
   IF coalesce(array_length(p_resource.grant_applicant_types,1),0) > 0
      AND NOT ('startup' = ANY(p_resource.grant_applicant_types))
      AND NOT ('any' = ANY(p_resource.grant_applicant_types))
-     THEN b := b || 'Not open to startups directly (see who can apply).'; END IF;
+     THEN b := array_append(b, 'Not open to startups directly (see who can apply).'::text); END IF;
   IF coalesce(array_length(p_resource.grant_required_steps,1),0) > 0
-     AND NOT (public.company_journey_step(p_company.stage) = ANY(p_resource.grant_required_steps))
+     AND NOT (public.company_journey_step(p_company.stage::text) = ANY(p_resource.grant_required_steps))
      AND NOT ('all' = ANY(p_resource.grant_required_steps))
-     THEN b := b || ('Unlocks at the ' || array_to_string(p_resource.grant_required_steps, ' / ') || ' stage of your journey.'); END IF;
+     THEN b := array_append(b, ('Unlocks at the ' || array_to_string(p_resource.grant_required_steps, ' / ') || ' stage of your journey.')::text); END IF;
   RETURN b;
 END $$;
 
@@ -128,39 +129,39 @@ END $$;
 -- eligibility tags 15, deadline/amount fit 10.
 CREATE OR REPLACE FUNCTION public.score_grant_for_company(p_company public.companies, p_resource public.resources)
 RETURNS TABLE(score INTEGER, reasons JSONB) LANGUAGE plpgsql STABLE AS $$
-DECLARE s INTEGER := 0; r JSONB := '[]'::jsonb; step TEXT := public.company_journey_step(p_company.stage);
+DECLARE s INTEGER := 0; r JSONB := '[]'::jsonb; step TEXT := public.company_journey_step(p_company.stage::text);
 BEGIN
   IF p_resource.journey_steps IS NULL OR 'all' = ANY(p_resource.journey_steps) OR step = ANY(p_resource.journey_steps) THEN
-    s := s + 30; r := r || to_jsonb('Matches your current journey stage (' || step || ').');
+    s := s + 30; r := r || to_jsonb(('Matches your current journey stage (' || step || ').')::text);
   ELSIF coalesce(array_length(p_resource.journey_steps,1),0) > 0 THEN
-    s := s + 10; r := r || to_jsonb('Relevant to a nearby journey stage.');
+    s := s + 10; r := r || to_jsonb('Relevant to a nearby journey stage.'::text);
   END IF;
   IF coalesce(array_length(p_resource.grant_industries,1),0) = 0 THEN
-    s := s + 20; r := r || to_jsonb('Open to all industries.');
+    s := s + 20; r := r || to_jsonb('Open to all industries.'::text);
   ELSIF p_company.industry IS NOT NULL AND EXISTS (
       SELECT 1 FROM unnest(p_resource.grant_industries) i WHERE lower(p_company.industry) LIKE '%' || lower(i) || '%') THEN
-    s := s + 25; r := r || to_jsonb('Matches your industry: ' || p_company.industry || '.');
+    s := s + 25; r := r || to_jsonb(('Matches your industry: ' || p_company.industry || '.')::text);
   END IF;
   IF p_resource.grant_state_focus IS NOT NULL AND p_company.state IS NOT NULL
      AND upper(p_company.state) = upper(p_resource.grant_state_focus) THEN
-    s := s + 20; r := r || to_jsonb('Made for companies in your state.');
+    s := s + 20; r := r || to_jsonb('Made for companies in your state.'::text);
   ELSIF p_resource.location_type = 'online' OR p_resource.grant_country_focus IS NULL THEN
-    s := s + 16; r := r || to_jsonb('Available online / anywhere.');
+    s := s + 16; r := r || to_jsonb('Available online / anywhere.'::text);
   ELSIF p_company.country IS NOT NULL AND p_resource.grant_country_focus IS NOT NULL
         AND lower(p_company.country) = lower(p_resource.grant_country_focus) THEN
-    s := s + 14; r := r || to_jsonb('Open in your country.');
+    s := s + 14; r := r || to_jsonb('Open in your country.'::text);
   END IF;
   IF coalesce(array_length(p_resource.grant_eligibility_tags,1),0) > 0 AND p_company.tags IS NOT NULL THEN
     s := s + LEAST(15, 5 * (SELECT count(*) FROM unnest(p_resource.grant_eligibility_tags) t
                             WHERE lower(t) = ANY (SELECT lower(x) FROM unnest(p_company.tags) x)));
   END IF;
   IF p_resource.grant_women_owned_required AND p_company.is_women_owned THEN
-    s := s + 10; r := r || to_jsonb('You qualify as a women-owned business.');
+    s := s + 10; r := r || to_jsonb('You qualify as a women-owned business.'::text);
   END IF;
   IF p_resource.grant_is_rolling OR p_resource.grant_deadline IS NULL THEN
-    s := s + 7; r := r || to_jsonb('Rolling applications, no deadline pressure.');
+    s := s + 7; r := r || to_jsonb('Rolling applications, no deadline pressure.'::text);
   ELSIF p_resource.grant_deadline > now() AND p_resource.grant_deadline < now() + interval '45 days' THEN
-    s := s + 10; r := r || to_jsonb('Deadline is close: ' || to_char(p_resource.grant_deadline,'Mon DD, YYYY') || '.');
+    s := s + 10; r := r || to_jsonb(('Deadline is close: ' || to_char(p_resource.grant_deadline,'Mon DD, YYYY') || '.')::text);
   ELSIF p_resource.grant_deadline > now() THEN
     s := s + 6;
   END IF;
