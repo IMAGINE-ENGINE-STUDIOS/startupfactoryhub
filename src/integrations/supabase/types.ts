@@ -1810,18 +1810,24 @@ export type Database = {
           ai_analysis: Json | null
           ai_summary_id: string | null
           announcement_posted_at: string | null
+          city: string | null
+          country: string | null
           created_at: string
           description: string | null
           founded_year: number | null
           funding_amount: number | null
           id: string
           industry: string | null
+          is_minority_owned: boolean | null
+          is_women_owned: boolean | null
           location: string | null
           logo_url: string | null
           looking_for: string[] | null
           name: string
           pitch_deck_url: string | null
           stage: Database["public"]["Enums"]["company_stage"] | null
+          state: string | null
+          tags: string[]
           team_size: number | null
           updated_at: string
           user_id: string
@@ -1831,18 +1837,24 @@ export type Database = {
           ai_analysis?: Json | null
           ai_summary_id?: string | null
           announcement_posted_at?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
           funding_amount?: number | null
           id?: string
           industry?: string | null
+          is_minority_owned?: boolean | null
+          is_women_owned?: boolean | null
           location?: string | null
           logo_url?: string | null
           looking_for?: string[] | null
           name: string
           pitch_deck_url?: string | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
+          state?: string | null
+          tags?: string[]
           team_size?: number | null
           updated_at?: string
           user_id: string
@@ -1852,18 +1864,24 @@ export type Database = {
           ai_analysis?: Json | null
           ai_summary_id?: string | null
           announcement_posted_at?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
           funding_amount?: number | null
           id?: string
           industry?: string | null
+          is_minority_owned?: boolean | null
+          is_women_owned?: boolean | null
           location?: string | null
           logo_url?: string | null
           looking_for?: string[] | null
           name?: string
           pitch_deck_url?: string | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
+          state?: string | null
+          tags?: string[]
           team_size?: number | null
           updated_at?: string
           user_id?: string
@@ -3591,6 +3609,66 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      grant_matches: {
+        Row: {
+          company_id: string
+          computed_at: string
+          eligible: boolean
+          id: string
+          missing: Json
+          notified_at: string | null
+          reasons: Json
+          resource_id: string
+          score: number
+          status: string
+          unlocked: boolean
+          unlocked_at: string | null
+        }
+        Insert: {
+          company_id: string
+          computed_at?: string
+          eligible?: boolean
+          id?: string
+          missing?: Json
+          notified_at?: string | null
+          reasons?: Json
+          resource_id: string
+          score?: number
+          status?: string
+          unlocked?: boolean
+          unlocked_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          computed_at?: string
+          eligible?: boolean
+          id?: string
+          missing?: Json
+          notified_at?: string | null
+          reasons?: Json
+          resource_id?: string
+          score?: number
+          status?: string
+          unlocked?: boolean
+          unlocked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grant_matches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grant_matches_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       home_layout: {
         Row: {
@@ -7730,6 +7808,24 @@ export type Database = {
           country: string | null
           created_at: string
           description: string | null
+          grant_amount_max_usd: number | null
+          grant_amount_text: string | null
+          grant_applicant_types: string[]
+          grant_country_focus: string | null
+          grant_deadline: string | null
+          grant_eligibility_tags: string[]
+          grant_external_id: string | null
+          grant_industries: string[]
+          grant_is_rolling: boolean
+          grant_last_verified_at: string | null
+          grant_required_steps: string[]
+          grant_sfh_applicant: string | null
+          grant_sfh_status: string | null
+          grant_source_url: string | null
+          grant_state_focus: string | null
+          grant_status: string | null
+          grant_us_based_required: boolean
+          grant_women_owned_required: boolean
           id: string
           is_emergency: boolean
           is_featured: boolean | null
@@ -7760,6 +7856,24 @@ export type Database = {
           country?: string | null
           created_at?: string
           description?: string | null
+          grant_amount_max_usd?: number | null
+          grant_amount_text?: string | null
+          grant_applicant_types?: string[]
+          grant_country_focus?: string | null
+          grant_deadline?: string | null
+          grant_eligibility_tags?: string[]
+          grant_external_id?: string | null
+          grant_industries?: string[]
+          grant_is_rolling?: boolean
+          grant_last_verified_at?: string | null
+          grant_required_steps?: string[]
+          grant_sfh_applicant?: string | null
+          grant_sfh_status?: string | null
+          grant_source_url?: string | null
+          grant_state_focus?: string | null
+          grant_status?: string | null
+          grant_us_based_required?: boolean
+          grant_women_owned_required?: boolean
           id?: string
           is_emergency?: boolean
           is_featured?: boolean | null
@@ -7790,6 +7904,24 @@ export type Database = {
           country?: string | null
           created_at?: string
           description?: string | null
+          grant_amount_max_usd?: number | null
+          grant_amount_text?: string | null
+          grant_applicant_types?: string[]
+          grant_country_focus?: string | null
+          grant_deadline?: string | null
+          grant_eligibility_tags?: string[]
+          grant_external_id?: string | null
+          grant_industries?: string[]
+          grant_is_rolling?: boolean
+          grant_last_verified_at?: string | null
+          grant_required_steps?: string[]
+          grant_sfh_applicant?: string | null
+          grant_sfh_status?: string | null
+          grant_source_url?: string | null
+          grant_state_focus?: string | null
+          grant_status?: string | null
+          grant_us_based_required?: boolean
+          grant_women_owned_required?: boolean
           id?: string
           is_emergency?: boolean
           is_featured?: boolean | null
@@ -9853,6 +9985,19 @@ export type Database = {
       }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
+      company_journey_step:
+        | {
+            Args: { p_stage: Database["public"]["Enums"]["company_stage"] }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.company_journey_step(p_stage => text), public.company_journey_step(p_stage => company_stage). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { p_stage: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.company_journey_step(p_stage => text), public.company_journey_step(p_stage => company_stage). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
       confirm_emergency_resource: {
         Args: { _resource_id: string }
         Returns: number
@@ -9866,6 +10011,7 @@ export type Database = {
         Returns: Json
       }
       create_account_link_code: { Args: never; Returns: string }
+      expire_past_grants: { Args: never; Returns: number }
       get_account_groups: {
         Args: { user_ids: string[] }
         Returns: {
@@ -9993,6 +10139,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      grant_blockers: {
+        Args: {
+          p_company: Database["public"]["Tables"]["companies"]["Row"]
+          p_resource: Database["public"]["Tables"]["resources"]["Row"]
+        }
+        Returns: string[]
+      }
       has_earth_intelligence_bonus: {
         Args: { _user_id: string }
         Returns: boolean
@@ -10030,8 +10183,35 @@ export type Database = {
         Returns: boolean
       }
       is_net_group_public: { Args: { _group: string }; Returns: boolean }
+      match_startup_to_grants: {
+        Args: { p_company_id: string; p_limit?: number }
+        Returns: {
+          amount_max_usd: number
+          amount_text: string
+          city: string
+          country: string
+          deadline: string
+          eligible: boolean
+          grant_status: string
+          is_rolling: boolean
+          latitude: number
+          longitude: number
+          missing: Json
+          reasons: Json
+          resource_id: string
+          score: number
+          title: string
+          unlocked: boolean
+          website_url: string
+        }[]
+      }
       profile_contact_email: { Args: { _owner: string }; Returns: string }
       profile_contact_resume: { Args: { _owner: string }; Returns: string }
+      recompute_all_grant_matches: { Args: never; Returns: number }
+      recompute_grant_matches: {
+        Args: { p_company_id: string }
+        Returns: number
+      }
       redeem_account_link_code: { Args: { _code: string }; Returns: boolean }
       save_sign_document_by_token: {
         Args: {
@@ -10042,6 +10222,16 @@ export type Database = {
           _token: string
         }
         Returns: string
+      }
+      score_grant_for_company: {
+        Args: {
+          p_company: Database["public"]["Tables"]["companies"]["Row"]
+          p_resource: Database["public"]["Tables"]["resources"]["Row"]
+        }
+        Returns: {
+          reasons: Json
+          score: number
+        }[]
       }
       search_lightpaper_projects: {
         Args: { search_query: string; user_id_param: string }
