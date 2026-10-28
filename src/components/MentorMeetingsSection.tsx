@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import MentorshipRequests from '@/components/MentorshipRequests';
 import RequestServiceDialog, { type RequestServiceMode } from '@/components/RequestServiceDialog';
 import MenteeSessions from '@/components/MenteeSessions';
+import BookingsList from '@/components/BookingsList';
 import MentorSessionHistory from '@/components/MentorSessionHistory';
 import MentorOffersBoard from '@/components/MentorOffersBoard';
 
@@ -80,6 +81,8 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
               </Button>
             </div>
             <MentorshipRequests />
+            <BookingsList variant="requests" />
+            <MenteeSessions onJoinMeeting={onJoinMeeting} requestsOnly />
           </div>
         )}
         {view === 'upcoming' && <MenteeSessions onJoinMeeting={onJoinMeeting} />}

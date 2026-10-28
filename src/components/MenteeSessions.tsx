@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Clock, 
   Video, 
@@ -19,18 +20,21 @@ import { cn } from '@/lib/utils';
 
 interface MenteeSessionsProps {
   onJoinMeeting?: (meetingLink: string, sessionData?: any) => void;
+  /** Only show incoming session requests (used by Meetings → Requests). */
+  requestsOnly?: boolean;
 }
 
-export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = {}) {
+export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: MenteeSessionsProps = {}) {
   const { sessions, loading, updateSession } = useMentoringSessions();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const requestedSessions = sessions.filter(
-    s => s.status === 'pending' || s.status === 'requested'
+    s => (s.status === 'pending' || s.status === 'requested') && (!requestsOnly || s.mentor_id === user?.id)
   );
 
-  const scheduledSessions = sessions.filter(
+  const scheduledSessions = requestsOnly ? [] : sessions.filter(
     s => s.status === 'scheduled' && new Date(s.scheduled_at) > new Date()
   );
 
