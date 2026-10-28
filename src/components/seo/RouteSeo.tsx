@@ -72,10 +72,10 @@ export default function RouteSeo() {
     link.href = url;
     setMeta('name', 'description', description);
     setMeta('property', 'og:title', title);
-    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:description', socialDescription);
     setMeta('property', 'og:url', url);
     setMeta('name', 'twitter:title', title);
-    setMeta('name', 'twitter:description', description);
+    setMeta('name', 'twitter:description', socialDescription);
   }, [pathname]);
   return null;
 }
