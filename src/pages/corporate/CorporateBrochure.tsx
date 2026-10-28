@@ -1109,13 +1109,13 @@ export const PartnersARPage = () => (
 
 /* Corporate $1,500 package — Imagine Engine Studios Corp */
 const CORPORATE_SPECIALS = [
-  { i: SpTest, a: '#10b981', t: 'Test customer', b: 'We test your offer with real customers inside the SFH network before you commit budget to it.' },
-  { i: SpDiscovery, a: '#06b6d4', t: 'Customer discovery', b: 'Structured discovery interviews and feedback loops that surface who actually buys and why.' },
-  { i: CpUsers, a: '#a855f7', t: '1:1 meetings with the SFH team', b: 'Book one-on-one meetings with the Startup Factory Hub team whenever your company needs them.' },
-  { i: SpCompetition, a: '#f59e0b', t: 'Market competition', b: 'A clear read on your competitors, your market position and where you can win.' },
-  { i: SpValidation, a: '#ec4899', t: 'Validation and attraction', b: 'We validate demand and position your company to attract clients, talent and investors.' },
-  { i: SpCommercialization, a: '#22d3ee', t: 'Commercialization', b: 'Pricing, channels and sales support to turn your product into recurring revenue.' },
-  { i: SpGtm, a: '#818cf8', t: 'Strategy and go to market', b: 'A hands-on go-to-market plan, built and executed together with our team.' },
+  { i: SpTest, a: '#10b981', t: 'Test customer', b: 'De-risk launches: prove your offer with real buyers in our network before you scale spend.' },
+  { i: SpDiscovery, a: '#06b6d4', t: 'Customer discovery', b: 'Find who buys and why, so every dollar targets the customers that drive revenue.' },
+  { i: CpUsers, a: '#a855f7', t: '1:1 meetings with the SFH team', b: 'On-demand access to our team to unblock decisions and keep execution moving fast.' },
+  { i: SpCompetition, a: '#f59e0b', t: 'Market competition', b: 'Know where you win: sharper positioning that grows market share and defends margin.' },
+  { i: SpValidation, a: '#ec4899', t: 'Validation and attraction', b: 'Proven demand that attracts clients, partners, talent and investors to your company.' },
+  { i: SpCommercialization, a: '#22d3ee', t: 'Commercialization', b: 'Turn products into recurring revenue with the right pricing, channels and sales motion.' },
+  { i: SpGtm, a: '#818cf8', t: 'Strategy and go to market', b: 'A results-driven go-to-market plan, executed with our team, for faster growth and measurable ROI.' },
 ];
 
 export default function CorporateBrochure() {
