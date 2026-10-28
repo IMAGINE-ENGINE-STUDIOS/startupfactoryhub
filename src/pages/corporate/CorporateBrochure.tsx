@@ -2226,10 +2226,23 @@ export default function CorporateBrochure() {
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="CALL TO ACTION" title={<>JOIN THE<br />CORPORATE PACKAGE</>} accent={NEON.cyan} />
+                      <div className="flex items-start justify-between gap-4">
+                        <PageTitle kicker="CALL TO ACTION" title={<>JOIN THE<br />CORPORATE PACKAGE</>} accent={NEON.cyan} />
+                        <motion.div className="relative shrink-0 rounded-2xl px-5 py-3 text-right overflow-hidden"
+                          style={{ background: 'linear-gradient(135deg, #04140f, #062a22)', border: `1px solid ${NEON.emerald}aa` }}
+                          animate={{ boxShadow: [`0 0 24px ${NEON.emerald}44`, `0 0 48px ${NEON.emerald}88`, `0 0 24px ${NEON.emerald}44`] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                          <div className="font-futuristic font-black leading-none text-[48px]" style={{ color: NEON.emerald, textShadow: `0 0 18px ${NEON.emerald}` }}>
+                            $1,500<span className="text-[18px] font-bold" style={{ color: '#d1fae5' }}>/month</span>
+                          </div>
+                          <div className="mt-2 text-[15px] font-bold" style={{ color: '#ecfdf5' }}>
+                            or $16,200/year <span className="ml-1 rounded-full px-2 py-0.5 text-[12px]" style={{ background: NEON.emerald, color: '#04140f' }}>SAVE 10%</span>
+                          </div>
+                        </motion.div>
+                      </div>
 
-                      <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Join the Startup Factory Hub corporate package for <strong>$1,500</strong>: client sourcing, corporate partner introductions, human capital and hands-on support, on top of the full platform, events and global network.
+                      <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[480px]">
+                        Join the Startup Factory Hub corporate package for <strong>$1,500/month</strong>, or <strong>$16,200/year</strong> (10% off when you pay the whole year): test customers, customer discovery, 1:1 meetings with the SFH team, market competition, validation, commercialization and go-to-market strategy.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
