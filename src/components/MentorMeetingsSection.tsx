@@ -74,14 +74,6 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
         )}
         {view === 'offer' && <MentorOffersBoard />}
       </div>
-
-      {requestMode && (
-        <RequestServiceDialog
-          mode={requestMode}
-          open={!!requestMode}
-          onOpenChange={(o) => { if (!o) setRequestMode(null); }}
-        />
-      )}
     </div>
   );
 }
