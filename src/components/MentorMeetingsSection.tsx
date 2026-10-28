@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Calendar as CalendarIcon, Clock, GraduationCap, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Bell, Calendar as CalendarIcon, Clock, TrendingUp, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MentorshipRequests from '@/components/MentorshipRequests';
-import RequestServiceDialog, { type RequestServiceMode } from '@/components/RequestServiceDialog';
 import MenteeSessions from '@/components/MenteeSessions';
 import BookingsList from '@/components/BookingsList';
 import MentorSessionHistory from '@/components/MentorSessionHistory';
@@ -20,7 +19,6 @@ interface Props {
 
 export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCount = 0, activeMentees }: Props) {
   const [view, setView] = useState<View>('upcoming');
-  const [requestMode, setRequestMode] = useState<RequestServiceMode | null>(null);
 
   const chips: Array<{ key: View; label: string; icon: any; tone: string }> = [
     { key: 'requests', label: 'Requests', icon: Bell, tone: 'text-amber-500' },
@@ -60,26 +58,6 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
       <div>
         {view === 'requests' && (
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setRequestMode('mentor')}
-                className="gap-1.5 h-9 flex-1 rounded-xl"
-              >
-                <GraduationCap className="h-4 w-4 text-primary" />
-                Request mentorship
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setRequestMode('advisor')}
-                className="gap-1.5 h-9 flex-1 rounded-xl"
-              >
-                <Briefcase className="h-4 w-4 text-primary" />
-                Request advisory service
-              </Button>
-            </div>
             <MentorshipRequests />
             <BookingsList variant="requests" />
             <MenteeSessions onJoinMeeting={onJoinMeeting} requestsOnly />
@@ -96,14 +74,6 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
         )}
         {view === 'offer' && <MentorOffersBoard />}
       </div>
-
-      {requestMode && (
-        <RequestServiceDialog
-          mode={requestMode}
-          open={!!requestMode}
-          onOpenChange={(o) => { if (!o) setRequestMode(null); }}
-        />
-      )}
     </div>
   );
 }
