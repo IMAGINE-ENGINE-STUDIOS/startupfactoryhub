@@ -30,6 +30,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBasicPlan, formatCents } from '@/features/basic-plan/hooks/useBasicPlan';
 import { useMembershipAccess } from '@/features/basic-plan/hooks/useMembershipAccess';
 import { createBasicPlanCheckout } from '@/features/basic-plan/api/basicPlanApi';
+import { MEMBERSHIP_TIERS } from '@/lib/membership-tiers';
+import { supabase } from '@/integrations/supabase/client';
 import type { BillingCycle } from '@/features/basic-plan/types';
 
 import imgCampus from '@/assets/membership/campus-atrium.jpg';
@@ -386,18 +388,52 @@ const JoinButton = ({
 
 /* ============================ INLINE CHECKOUT ============================ */
 /**
- * Final page checkout: billing-cycle selector + live order summary + Stripe
- * redirect. Mirrors the dark editorial styling of the closing spread.
+ * Final page checkout: tier selector + billing cycle + live order summary +
+ * Stripe redirect. Mirrors the dark editorial styling of the closing spread.
+ * Every paid tier shown on this brochure is purchasable here —
+ * Imagine Engine Studios Corp.
  */
 
+type CheckoutTierKey = 'network' | 'resident' | 'partner';
+type CheckoutCycle = 'monthly' | 'yearly';
+
 const CheckoutPanel = ({
-  monthly, isMember,
+  monthly, isMember, tier, cycle, onTier, onCycle,
 }: {
   monthly: string; isMember: boolean;
+  tier: CheckoutTierKey; cycle: CheckoutCycle;
+  onTier: (t: CheckoutTierKey) => void; onCycle: (c: CheckoutCycle) => void;
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
+
+  const tiers: {
+    key: CheckoutTierKey; name: string; color: string; extra: string;
+    monthly: string; yearly: string; priceId: string | null; yearlyPriceId: string | null;
+  }[] = [
+    {
+      key: 'network', name: 'Venture Network', color: '#67e8f9', extra: 'Full network access',
+      monthly, yearly: formatCents(48000), priceId: null, yearlyPriceId: null,
+    },
+    {
+      key: 'resident', name: 'Venture Resident', color: NEON.lime, extra: '+ Dedicated desk',
+      monthly: formatCents(MEMBERSHIP_TIERS.self_paced_office.price * 100),
+      yearly: formatCents(MEMBERSHIP_TIERS.self_paced_office.yearly_price * 100),
+      priceId: MEMBERSHIP_TIERS.self_paced_office.price_id,
+      yearlyPriceId: MEMBERSHIP_TIERS.self_paced_office.yearly_price_id,
+    },
+    {
+      key: 'partner', name: 'Global Venture Partner', color: NEON.magenta, extra: '+ Private office',
+      monthly: formatCents(MEMBERSHIP_TIERS.global_access.price * 100),
+      yearly: formatCents(MEMBERSHIP_TIERS.global_access.yearly_price * 100),
+      priceId: MEMBERSHIP_TIERS.global_access.price_id,
+      yearlyPriceId: MEMBERSHIP_TIERS.global_access.yearly_price_id,
+    },
+  ];
+  const active = tiers.find((t) => t.key === tier) ?? tiers[0];
+  const price = cycle === 'monthly' ? active.monthly : active.yearly;
+  const cycleLabel = cycle === 'monthly' ? 'Monthly' : 'Annual';
 
   const pay = async () => {
     if (!user) {
@@ -407,7 +443,22 @@ const CheckoutPanel = ({
     }
     setBusy(true);
     try {
-      const url = await createBasicPlanCheckout('monthly');
+      let url: string | null = null;
+      if (active.key === 'network') {
+        url = await createBasicPlanCheckout(cycle);
+      } else {
+        const priceId = cycle === 'monthly' ? active.priceId : active.yearlyPriceId;
+        if (!priceId) throw new Error('Checkout is not available for this tier yet.');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Not authenticated');
+        const { data, error } = await supabase.functions.invoke('create-membership-checkout', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { priceId },
+        });
+        if (error) throw error;
+        url = data?.url ?? null;
+      }
+      if (!url) throw new Error('Checkout unavailable. Please try again.');
       window.open(url, '_blank');
     } catch (e) {
       toast({
@@ -421,7 +472,7 @@ const CheckoutPanel = ({
   };
 
   return (
-    <div className="rounded-3xl p-8 w-full h-full flex flex-col" style={{
+    <div className="rounded-3xl p-6 w-full h-full flex flex-col" style={{
       background: 'linear-gradient(150deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
       backdropFilter: 'blur(24px) saturate(140%)',
       WebkitBackdropFilter: 'blur(24px) saturate(140%)',
@@ -435,38 +486,65 @@ const CheckoutPanel = ({
         </span>
       </div>
 
-      <div className="mt-6 rounded-2xl px-6 py-7" style={{
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {tiers.map((t) => (
+          <button key={t.key} onClick={() => onTier(t.key)} className="rounded-xl px-2.5 py-2.5 text-left transition hover:scale-[1.02]" style={{
+            background: t.key === tier ? `${t.color}2b` : 'rgba(255,255,255,0.06)',
+            border: `1px solid ${t.key === tier ? t.color : 'rgba(255,255,255,0.16)'}`,
+            boxShadow: t.key === tier ? `0 0 22px ${t.color}55` : 'none',
+          }}>
+            <div className="font-mono text-[9px] uppercase tracking-[0.14em] leading-tight" style={{ color: t.color }}>{t.name}</div>
+            <div className="font-black text-white text-[17px] leading-none mt-1">
+              {t.monthly}<span className="text-white/50 text-[10px] font-semibold">/mo</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        {(['monthly', 'yearly'] as CheckoutCycle[]).map((c) => (
+          <button key={c} onClick={() => onCycle(c)} className="rounded-xl px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition" style={{
+            background: c === cycle ? 'rgba(103,232,249,0.2)' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${c === cycle ? 'rgba(103,232,249,0.6)' : 'rgba(255,255,255,0.14)'}`,
+            color: c === cycle ? '#a5f3fc' : 'rgba(255,255,255,0.55)',
+          }}>
+            {c === 'monthly' ? 'Monthly' : 'Annual · save'}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 rounded-2xl px-5 py-4" style={{
         background: 'linear-gradient(140deg, rgba(103,232,249,0.22), rgba(255,255,255,0.06))',
         border: '1px solid rgba(103,232,249,0.55)',
       }}>
-        <div className="font-mono text-[12px] uppercase tracking-[0.3em] text-white/70">Venture Network · monthly</div>
-        <div className="flex items-end gap-3 mt-2">
-          <span className="text-[72px] leading-none font-black text-white">{monthly}</span>
-          <span className="text-white/60 mb-3 text-lg">/ month</span>
+        <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/70">{active.name} · {cycleLabel}</div>
+        <div className="flex items-end gap-3 mt-1">
+          <span className="text-[54px] leading-none font-black text-white">{price}</span>
+          <span className="text-white/60 mb-2 text-base">/ {cycle === 'monthly' ? 'month' : 'year'}</span>
         </div>
-        <div className="text-[14px] text-white/65 mt-2">Billed every month · cancel anytime</div>
+        <div className="text-[13px] text-white/65 mt-1">{active.extra} · cancel anytime</div>
       </div>
 
-      <div className="mt-6 space-y-3 text-[15px] text-white/75">
+      <div className="mt-3 space-y-2 text-[14px] text-white/75">
         <div className="flex items-center justify-between">
-          <span>Startup Factory Hub · Venture Network</span>
-          <span className="font-bold text-white">{monthly}</span>
+          <span>Startup Factory Hub · {active.name}</span>
+          <span className="font-bold text-white">{price}</span>
         </div>
         <div className="flex items-center justify-between">
           <span>Billing cycle</span>
-          <span className="text-white/90">Monthly</span>
+          <span className="text-white/90">{cycleLabel}</span>
         </div>
-        <div className="h-px w-full my-2" style={{ background: 'rgba(255,255,255,0.18)' }} />
-        <div className="flex items-center justify-between text-[16px]">
+        <div className="h-px w-full my-1" style={{ background: 'rgba(255,255,255,0.18)' }} />
+        <div className="flex items-center justify-between text-[15px]">
           <span className="font-mono uppercase tracking-[0.22em] text-white/60">Due today</span>
-          <span className="text-3xl font-black text-white">{monthly}</span>
+          <span className="text-2xl font-black text-white">{price}</span>
         </div>
       </div>
 
       <button
         onClick={pay}
         disabled={busy || isMember}
-        className="mt-auto w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-5 transition hover:scale-[1.02] disabled:opacity-60"
+        className="mt-auto w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 transition hover:scale-[1.02] disabled:opacity-60"
         style={{
           background: 'linear-gradient(135deg, #0ea5b7, #0369a1)',
           border: '1px solid rgba(255,255,255,0.35)',
@@ -475,11 +553,11 @@ const CheckoutPanel = ({
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <CreditCard className="h-5 w-5 text-white" />}
         <span className="font-bold tracking-[0.16em] uppercase text-white text-lg">
-          {isMember ? 'Membership active' : `Pay ${monthly} · activate`}
+          {isMember ? 'Membership active' : `Pay ${price} · activate`}
         </span>
       </button>
 
-      <div className="mt-3 flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.2em] text-white/45">
+      <div className="mt-2.5 flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.2em] text-white/45">
         <span>Cancel anytime</span>
         <a href="mailto:info@startupfactoryhub.com" className="hover:text-white/80">info@startupfactoryhub.com</a>
       </div>
@@ -487,28 +565,47 @@ const CheckoutPanel = ({
   );
 };
 
-
-
-
-/* Membership tiers shown on cover and join page — Imagine Engine Studios Corp */
-function TierStrip({ monthly, compact = false }: { monthly: string; compact?: boolean }) {
+/* Membership tiers shown on cover and join page — Imagine Engine Studios Corp.
+ * On the join page the strip doubles as the checkout tier selector. */
+function TierStrip({ monthly, compact = false, selected, onSelect }: {
+  monthly: string; compact?: boolean; selected?: string; onSelect?: (key: CheckoutTierKey) => void;
+}) {
   const tiers = [
-    { name: 'Venture Network', price: monthly, extra: 'Full network access', color: '#67e8f9' },
-    { name: 'Venture Resident', price: '$550', extra: '+ Dedicated desk', color: NEON.lime },
-    { name: 'Global Venture Partner', price: '$950', extra: '+ Private office', color: NEON.magenta },
+    { key: 'network' as CheckoutTierKey, name: 'Venture Network', price: monthly, extra: 'Full network access', color: '#67e8f9' },
+    { key: 'resident' as CheckoutTierKey, name: 'Venture Resident', price: formatCents(MEMBERSHIP_TIERS.self_paced_office.price * 100), extra: '+ Dedicated desk', color: NEON.lime },
+    { key: 'partner' as CheckoutTierKey, name: 'Global Venture Partner', price: formatCents(MEMBERSHIP_TIERS.global_access.price * 100), extra: '+ Private office', color: NEON.magenta },
   ];
   return (
     <div className={`grid grid-cols-3 ${compact ? 'gap-2' : 'gap-3'}`}>
-      {tiers.map((t) => (
-        <div key={t.name} className={`rounded-2xl ${compact ? 'px-3 py-2.5' : 'px-4 py-5'}`} style={{
-          background: 'rgba(255,255,255,0.08)', border: `1px solid ${t.color}66`, backdropFilter: 'blur(16px)',
-          boxShadow: `0 0 24px ${t.color}22`,
-        }}>
-          <div className={`font-mono uppercase leading-tight ${compact ? 'text-[10px] tracking-[0.14em]' : 'text-[12px] tracking-[0.2em]'}`} style={{ color: t.color }}>{t.name}</div>
-          <div className={`font-black text-white leading-none mt-1.5 ${compact ? 'text-[26px]' : 'text-[44px]'}`}>{t.price}<span className="text-white/55 text-[13px] font-semibold">/mo</span></div>
-          <div className={`text-white/80 mt-1.5 ${compact ? 'text-[11px]' : 'text-[14px]'}`}>{t.extra}</div>
-        </div>
-      ))}
+      {tiers.map((t) => {
+        const inner = (
+          <>
+            <div className={`font-mono uppercase leading-tight ${compact ? 'text-[10px] tracking-[0.14em]' : 'text-[12px] tracking-[0.2em]'}`} style={{ color: t.color }}>{t.name}</div>
+            <div className={`font-black text-white leading-none mt-1.5 ${compact ? 'text-[26px]' : 'text-[44px]'}`}>{t.price}<span className="text-white/55 text-[13px] font-semibold">/mo</span></div>
+            <div className={`text-white/80 mt-1.5 ${compact ? 'text-[11px]' : 'text-[14px]'}`}>{t.extra}</div>
+          </>
+        );
+        const style = {
+          background: 'rgba(255,255,255,0.08)',
+          border: `1px solid ${selected === t.key ? t.color : `${t.color}66`}`,
+          backdropFilter: 'blur(16px)',
+          boxShadow: selected === t.key ? `0 0 28px ${t.color}55` : `0 0 24px ${t.color}22`,
+        } as const;
+        return onSelect ? (
+          <button
+            key={t.name}
+            onClick={() => onSelect(t.key)}
+            className={`rounded-2xl text-left transition hover:scale-[1.02] ${compact ? 'px-3 py-2.5' : 'px-4 py-5'}`}
+            style={style}
+          >
+            {inner}
+          </button>
+        ) : (
+          <div key={t.name} className={`rounded-2xl ${compact ? 'px-3 py-2.5' : 'px-4 py-5'}`} style={style}>
+            {inner}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -520,6 +617,8 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [checkoutTier, setCheckoutTier] = useState<CheckoutTierKey>('network');
+  const [checkoutCycle, setCheckoutCycle] = useState<CheckoutCycle>('monthly');
   const { supported: flipSupported, spread, width, height } = useFlipEnv();
 
   // After returning from Stripe Checkout, re-verify the subscription so the
@@ -1564,11 +1663,11 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
 
 
               <div className="mt-4">
-                <TierStrip monthly={monthly} compact />
+                <TierStrip monthly={monthly} compact selected={checkoutTier} onSelect={setCheckoutTier} />
               </div>
 
               <div className="mt-4 flex-1 min-h-0">
-                <CheckoutPanel monthly={monthly} isMember={isMember} />
+                <CheckoutPanel monthly={monthly} isMember={isMember} tier={checkoutTier} cycle={checkoutCycle} onTier={setCheckoutTier} onCycle={setCheckoutCycle} />
               </div>
 
               <div className="mt-6 flex items-center gap-5">
