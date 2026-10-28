@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+import FundabilityBadge from '@/components/FundabilityBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ArrowLeft, MapPin, Globe, Linkedin, MessageCircle, UserPlus, UserCheck, Plus, Loader2, Pencil, Trash2,
@@ -188,6 +189,9 @@ export default function PublicUserPage() {
               <span><b className="text-foreground">{followersCount}</b> followers</span>
               <span><b className="text-foreground">{followingCount}</b> following</span>
             </div>
+            <div className="mt-2">
+              <FundabilityBadge userId={userId} followers={followersCount} posts={posts.length} variant="badge" />
+            </div>
           </div>
           {!isOwner && user && (
             <div className="flex flex-wrap gap-2 sm:pb-2">
@@ -222,6 +226,9 @@ export default function PublicUserPage() {
           </div>
 
           <TabsContent value="about" className="mt-4">
+            <div className="mb-4">
+              <FundabilityBadge userId={userId} followers={followersCount} posts={posts.length} variant="card" />
+            </div>
             <div className="tech-card border-0 p-5">
               <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{profile.bio || 'No bio yet.'}</p>
               {profile.industry && <p className="mt-3 text-xs"><span className="text-muted-foreground">Industry: </span>{profile.industry}</p>}

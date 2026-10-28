@@ -31,6 +31,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { useStartupAnalytics, type AnalyticsRange } from '@/hooks/useStartupAnalytics';
+import FundabilityScorePanel from '@/components/FundabilityScorePanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -325,7 +326,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         })}
       </div>
 
-      {/* ── Tabs: Growth / Audience ─────────────────────────────── */}
+      {/* ── Tabs: Growth / Audience / Score ──────────────────────── */}
       <Tabs defaultValue="growth" className="space-y-4">
         <TabsList className="tech-card border-0 rounded-full p-1 h-auto bg-transparent">
           <TabsTrigger value="growth" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -333,6 +334,9 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
           </TabsTrigger>
           <TabsTrigger value="audience" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             Audience
+          </TabsTrigger>
+          <TabsTrigger value="score" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            Score
           </TabsTrigger>
         </TabsList>
 
@@ -503,6 +507,18 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               )}
             </div>
           </div>
+        </TabsContent>
+
+        {/* ── Score tab: Fundability Score (#1, 2026-10-28) ─────────── */}
+        <TabsContent value="score" className="space-y-4 mt-0">
+          <FundabilityScorePanel
+            signal={{
+              followers: a.followers,
+              connections: a.connections,
+              posts: a.posts,
+              engagement: a.engagement,
+            }}
+          />
         </TabsContent>
       </Tabs>
     </div>
