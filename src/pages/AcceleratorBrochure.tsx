@@ -58,6 +58,7 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
+import WhiteLabelPartnerPage from './partners/WhiteLabelPartnerPage';
 import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
@@ -2291,6 +2292,13 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <PartnersNasdaqPage />
+              </BookPage>
+
+              {/* WHITE-LABEL · PARTNER EDITION (silver) */}
+              <BookPage>
+                <A4Wrapper>
+                  <WhiteLabelPartnerPage pageNum={13} />
+                </A4Wrapper>
               </BookPage>
 
               {/* ====================================================
