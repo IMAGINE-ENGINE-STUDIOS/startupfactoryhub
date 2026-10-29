@@ -1,0 +1,180 @@
+-- SFH: NOT PORTED — Wonderlands migration 20261004221704_e6b6b093-5b75-4255-a40d-15ac97af9a99.sql
+-- SFH: preserved verbatim below, ENTIRELY COMMENTED OUT.
+-- SFH: This WW file creates the Wonderlands companies tenancy
+-- SFH: model (companies, company_members, company_role enum),
+-- SFH: seeds a "Wonderlands" platform company with WW contact
+-- SFH: data (incl. a hardcoded WW profile UUID), rewrites
+-- SFH: public.handle_new_user() around WW's user_role enum, and
+-- SFH: tags 19 WW tables with company_id. SFH has no companies
+-- SFH: model (spec §13 Q8): SOCIALITE tenancy in SFH is
+-- SFH: owner_id-only, so none of it may run here — uncommenting
+-- SFH: would also clobber SFH's own handle_new_user trigger fn.
+-- SFH: The ONLY socialite statements in the file are the
+-- SFH: socialite_contacts / socialite_scheduled entries inside
+-- SFH: the DO block's table array (company_id column + company
+-- SFH: RLS policy). They are skipped deliberately: the staged
+-- SFH: edge functions never reference company_id (verified by
+-- SFH: grep across all 10 functions + 8 shared modules), so SFH
+-- SFH: socialite_contacts / socialite_scheduled simply have no
+-- SFH: company_id column. If SFH adopts a companies model
+-- SFH: later, re-apply just those two tables' statements.
+
+--
+-- CREATE TYPE public.company_role AS ENUM ('owner','admin','sales','estimator','crew');
+--
+-- CREATE TABLE public.companies (
+--   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   name text NOT NULL,
+--   slug text UNIQUE,
+--   trades text[] NOT NULL DEFAULT '{}',
+--   phone text, email text, city text, state text, license_number text, team_size text,
+--   logo_url text,
+--   status text NOT NULL DEFAULT 'trial',
+--   is_platform_owner boolean NOT NULL DEFAULT false,
+--   created_by uuid,
+--   created_at timestamptz NOT NULL DEFAULT now(),
+--   updated_at timestamptz NOT NULL DEFAULT now()
+-- );
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON public.companies TO authenticated;
+-- GRANT ALL ON public.companies TO service_role;
+-- ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;
+--
+-- CREATE TABLE public.company_members (
+--   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   company_id uuid NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
+--   user_id uuid NOT NULL,
+--   role public.company_role NOT NULL DEFAULT 'crew',
+--   is_active boolean NOT NULL DEFAULT true,
+--   created_at timestamptz NOT NULL DEFAULT now(),
+--   updated_at timestamptz NOT NULL DEFAULT now(),
+--   UNIQUE (company_id, user_id)
+-- );
+-- CREATE INDEX company_members_user_idx ON public.company_members(user_id);
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON public.company_members TO authenticated;
+-- GRANT ALL ON public.company_members TO service_role;
+-- ALTER TABLE public.company_members ENABLE ROW LEVEL SECURITY;
+--
+-- CREATE TRIGGER companies_touch BEFORE UPDATE ON public.companies FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+-- CREATE TRIGGER company_members_touch BEFORE UPDATE ON public.company_members FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+--
+-- -- Helpers (security definer → no RLS recursion)
+-- CREATE OR REPLACE FUNCTION public.is_company_member(_cid uuid)
+-- RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT EXISTS (SELECT 1 FROM public.company_members WHERE company_id = _cid AND user_id = auth.uid() AND is_active);
+-- $$;
+-- CREATE OR REPLACE FUNCTION public.has_company_role(_cid uuid, _roles public.company_role[])
+-- RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT EXISTS (SELECT 1 FROM public.company_members WHERE company_id = _cid AND user_id = auth.uid() AND is_active AND role = ANY(_roles));
+-- $$;
+-- CREATE OR REPLACE FUNCTION public.platform_company_id()
+-- RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT id FROM public.companies WHERE is_platform_owner ORDER BY created_at LIMIT 1;
+-- $$;
+-- -- Company of the signed-in user; public visitors (Wonderlands website) fall back to the platform company.
+-- CREATE OR REPLACE FUNCTION public.current_company_id()
+-- RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT COALESCE(
+--     (SELECT company_id FROM public.company_members WHERE user_id = auth.uid() AND is_active ORDER BY created_at LIMIT 1),
+--     public.platform_company_id());
+-- $$;
+-- REVOKE EXECUTE ON FUNCTION public.is_company_member(uuid), public.has_company_role(uuid, public.company_role[]), public.platform_company_id(), public.current_company_id() FROM anon;
+--
+-- CREATE POLICY "Members view their company" ON public.companies FOR SELECT TO authenticated USING (is_main_admin() OR is_company_member(id));
+-- CREATE POLICY "Owners/admins update their company" ON public.companies FOR UPDATE TO authenticated USING (is_main_admin() OR has_company_role(id, ARRAY['owner','admin']::public.company_role[])) WITH CHECK (is_main_admin() OR has_company_role(id, ARRAY['owner','admin']::public.company_role[]));
+-- CREATE POLICY "Platform admins manage companies" ON public.companies FOR ALL TO authenticated USING (is_main_admin()) WITH CHECK (is_main_admin());
+--
+-- CREATE POLICY "Members view co-members" ON public.company_members FOR SELECT TO authenticated USING (is_main_admin() OR user_id = auth.uid() OR is_company_member(company_id));
+-- CREATE POLICY "Owners/admins manage members" ON public.company_members FOR ALL TO authenticated USING (is_main_admin() OR has_company_role(company_id, ARRAY['owner','admin']::public.company_role[])) WITH CHECK (is_main_admin() OR has_company_role(company_id, ARRAY['owner','admin']::public.company_role[]));
+--
+-- -- Platform company + owners
+-- INSERT INTO public.companies (name, slug, trades, status, is_platform_owner, email, phone)
+-- VALUES ('Wonderlands','wonderlands', ARRAY['pools','spas','landscaping','outdoor_kitchens','enclosures','fencing','solar','pavers','design_studio'], 'active', true, 'wonderlandsworlds@gmail.com', '+1 (239) 257-0637');
+-- INSERT INTO public.company_members (company_id, user_id, role)
+-- SELECT public.platform_company_id(), id, 'owner' FROM public.profiles WHERE role = 'main_admin'
+-- ON CONFLICT DO NOTHING;
+-- INSERT INTO public.company_members (company_id, user_id, role)
+-- SELECT public.platform_company_id(), id, 'sales' FROM public.profiles WHERE role = 'sales_rep'
+-- ON CONFLICT DO NOTHING;
+--
+-- -- Tag business tables, backfill to Wonderlands, add isolation policy
+-- DO $$
+-- DECLARE t text; pid uuid := public.platform_company_id();
+-- BEGIN
+--   FOREACH t IN ARRAY ARRAY['clients','client_activities','communication_logs','user_quotations','invoices','orders','product_orders',
+--     'construction_projects','project_phases','phase_items','contractor_project_tasks','project_cost_items','contractors',
+--     'procurement_listings','procurement_proposals','flip_books','socialite_contacts','socialite_scheduled','notifications']
+--   LOOP
+--     EXECUTE format('ALTER TABLE public.%I ADD COLUMN IF NOT EXISTS company_id uuid REFERENCES public.companies(id)', t);
+--     EXECUTE format('UPDATE public.%I SET company_id = %L WHERE company_id IS NULL', t, pid);
+--     EXECUTE format('ALTER TABLE public.%I ALTER COLUMN company_id SET DEFAULT public.current_company_id()', t);
+--     EXECUTE format('ALTER TABLE public.%I ALTER COLUMN company_id SET NOT NULL', t);
+--     EXECUTE format('CREATE INDEX IF NOT EXISTS %I ON public.%I(company_id)', t || '_company_idx', t);
+--     EXECUTE format('CREATE POLICY "Company members manage own company records" ON public.%I FOR ALL TO authenticated USING (public.is_company_member(company_id)) WITH CHECK (public.is_company_member(company_id))', t);
+--   END LOOP;
+-- END $$;
+--
+-- -- Public invoice links only for the Wonderlands website, never other companies
+-- DROP POLICY IF EXISTS "Invoices viewable by admins owners or public by id" ON public.invoices;
+-- CREATE POLICY "Invoices viewable by admins owners or public by id" ON public.invoices FOR SELECT
+-- USING (is_main_admin() OR auth.uid() = user_id OR auth.uid() = created_by OR (user_id IS NULL AND company_id = public.platform_company_id()));
+--
+-- -- Sign-up: business accounts get their own company; homeowners as before
+-- CREATE OR REPLACE FUNCTION public.handle_new_user()
+--  RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+-- AS $function$
+-- DECLARE
+--   _raw text := lower(coalesce(NEW.raw_user_meta_data ->> 'role', 'consumer'));
+--   _type text := lower(coalesce(NEW.raw_user_meta_data ->> 'account_type', ''));
+--   _role public.user_role;
+--   _cid uuid;
+--   _trades text[];
+-- BEGIN
+--   IF _type = 'business' THEN _raw := 'supplier'; END IF;
+--   _role := CASE
+--     WHEN _raw = 'sales_rep' THEN 'sales_rep'::public.user_role
+--     WHEN _raw IN ('supplier','installer','contractor','business') THEN 'supplier'::public.user_role
+--     ELSE 'consumer'::public.user_role END;
+--
+--   INSERT INTO public.profiles (id, email, first_name, last_name, role, company_name)
+--   VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data ->> 'first_name', NEW.raw_user_meta_data ->> 'last_name', _role, NEW.raw_user_meta_data ->> 'company_name')
+--   ON CONFLICT (id) DO NOTHING;
+--
+--   IF _role = 'supplier' THEN
+--     BEGIN
+--       SELECT coalesce(array_agg(x), '{}') INTO _trades
+--       FROM jsonb_array_elements_text(coalesce(NEW.raw_user_meta_data -> 'trades', '[]'::jsonb)) x;
+--       INSERT INTO public.companies (name, trades, phone, email, city, state, license_number, team_size, created_by)
+--       VALUES (coalesce(nullif(NEW.raw_user_meta_data ->> 'company_name',''), split_part(NEW.email,'@',1) || ' Company'),
+--               _trades, NEW.raw_user_meta_data ->> 'phone', lower(NEW.email),
+--               NEW.raw_user_meta_data ->> 'city', NEW.raw_user_meta_data ->> 'state',
+--               NEW.raw_user_meta_data ->> 'license_number', NEW.raw_user_meta_data ->> 'team_size', NEW.id)
+--       RETURNING id INTO _cid;
+--       INSERT INTO public.company_members (company_id, user_id, role) VALUES (_cid, NEW.id, 'owner');
+--     EXCEPTION WHEN OTHERS THEN
+--       RAISE NOTICE 'company creation failed for %: %', NEW.email, SQLERRM;
+--     END;
+--   ELSIF _role = 'sales_rep' THEN
+--     INSERT INTO public.company_members (company_id, user_id, role)
+--     VALUES (public.platform_company_id(), NEW.id, 'sales') ON CONFLICT DO NOTHING;
+--   END IF;
+--
+--   IF _role = 'consumer' AND NEW.email IS NOT NULL THEN
+--     BEGIN
+--       IF NOT EXISTS (SELECT 1 FROM public.clients WHERE lower(email) = lower(NEW.email)) THEN
+--         INSERT INTO public.clients (first_name, last_name, email, phone, status, source, assigned_sales_rep_id, company_id)
+--         VALUES (
+--           coalesce(nullif(NEW.raw_user_meta_data ->> 'first_name',''), split_part(NEW.email,'@',1)),
+--           coalesce(NEW.raw_user_meta_data ->> 'last_name',''),
+--           lower(NEW.email), NEW.raw_user_meta_data ->> 'phone', 'new', 'website_registration',
+--           (SELECT id FROM public.profiles WHERE id = '5e64621c-83c4-48c8-a3b0-dd317d7e7336'),
+--           public.platform_company_id());
+--       END IF;
+--     EXCEPTION WHEN OTHERS THEN
+--       RAISE NOTICE 'client sync failed for %: %', NEW.email, SQLERRM;
+--     END;
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $function$;
+-- REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM public, anon, authenticated;
+--

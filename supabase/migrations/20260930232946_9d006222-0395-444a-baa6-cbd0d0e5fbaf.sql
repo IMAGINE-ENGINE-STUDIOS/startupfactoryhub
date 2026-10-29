@@ -1,0 +1,1 @@
+CREATE POLICY "No direct client access to AI config" ON public.socialite_ai_config FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);

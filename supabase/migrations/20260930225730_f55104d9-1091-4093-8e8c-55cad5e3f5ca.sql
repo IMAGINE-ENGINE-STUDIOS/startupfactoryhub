@@ -1,0 +1,2 @@
+CREATE POLICY "Users manage their own scheduled posts" ON public.socialite_scheduled FOR ALL TO authenticated
+  USING (created_by = auth.uid() AND kind = 'post') WITH CHECK (created_by = auth.uid() AND kind = 'post');

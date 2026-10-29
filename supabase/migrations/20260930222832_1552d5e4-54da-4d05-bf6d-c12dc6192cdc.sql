@@ -1,0 +1,1 @@
+CREATE POLICY "No direct client access to social keys" ON public.socialite_credentials FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);

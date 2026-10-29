@@ -1,0 +1,238 @@
+-- SFH: ADAPTED COPY of Wonderlands migration 20261002013316_d17a5d46-8f6b-4a54-8c72-f68fe02d4723.sql.
+-- SFH: The WW original is a platform-wide RLS restatement covering
+-- SFH: Wonderlands-only tables (career_applications, clients,
+-- SFH: construction_projects, contractors, flip_site_placements,
+-- SFH: galleries, invoices, job postings, notifications, orders,
+-- SFH: procurement, referrals, WW storage buckets, ...) and WW-only
+-- SFH: helper functions (is_contractor_self, is_active_sales_rep,
+-- SFH: is_notification_recipient, get_project_by_token,
+-- SFH: get_shared_gallery). None of that is SOCIALITE and none of
+-- SFH: those tables exist in SFH, so everything except the
+-- SFH: "-- SOCIALITE config" block is preserved verbatim below but
+-- SFH: COMMENTED OUT. Only the socialite_plans /
+-- SFH: socialite_billing_config / socialite_shield_rules policy
+-- SFH: statements are active.
+
+--
+-- -- Helpers
+-- CREATE OR REPLACE FUNCTION public.is_contractor_self(_cid uuid)
+-- RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT EXISTS (SELECT 1 FROM public.contractors WHERE id = _cid AND user_id = auth.uid());
+-- $$;
+-- CREATE OR REPLACE FUNCTION public.is_active_sales_rep()
+-- RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'sales_rep' AND is_active = true);
+-- $$;
+-- CREATE OR REPLACE FUNCTION public.is_notification_recipient(_type text, _rid text)
+-- RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+--   SELECT CASE
+--     WHEN is_main_admin() THEN true
+--     WHEN _rid ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+--       (_rid::uuid = auth.uid()) OR (_type = 'contractor' AND EXISTS (SELECT 1 FROM public.contractors WHERE id = _rid::uuid AND user_id = auth.uid()))
+--     ELSE false END;
+-- $$;
+--
+-- -- Token-gated read lookups for shared links
+-- CREATE OR REPLACE FUNCTION public.get_project_by_token(_token text, _internal boolean DEFAULT false)
+-- RETURNS json LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
+-- DECLARE p public.construction_projects%ROWTYPE; result json;
+-- BEGIN
+--   IF _token IS NULL OR length(_token) < 8 THEN RETURN NULL; END IF;
+--   IF _internal THEN
+--     SELECT * INTO p FROM public.construction_projects WHERE internal_share_token = _token;
+--   ELSE
+--     SELECT * INTO p FROM public.construction_projects WHERE share_token = _token;
+--   END IF;
+--   IF p.id IS NULL THEN RETURN NULL; END IF;
+--   SELECT json_build_object(
+--     'project', CASE WHEN _internal THEN to_json(p) ELSE (to_jsonb(p) - 'internal_share_token' - 'contract_price')::json END,
+--     'phases', COALESCE((SELECT json_agg(ph ORDER BY ph.phase_order) FROM public.project_phases ph WHERE ph.project_id = p.id), '[]'::json),
+--     'items', COALESCE((SELECT json_agg(i ORDER BY i.item_order) FROM public.phase_items i JOIN public.project_phases ph ON ph.id = i.phase_id WHERE ph.project_id = p.id), '[]'::json),
+--     'documents', COALESCE((SELECT json_agg(d ORDER BY d.created_at DESC) FROM public.item_documents d JOIN public.phase_items i ON i.id = d.item_id JOIN public.project_phases ph ON ph.id = i.phase_id WHERE ph.project_id = p.id), '[]'::json),
+--     'cost_items', CASE WHEN _internal THEN COALESCE((SELECT json_agg(c ORDER BY c.created_at) FROM public.project_cost_items c WHERE c.project_id = p.id), '[]'::json) ELSE '[]'::json END,
+--     'tasks', COALESCE((SELECT json_agg(to_jsonb(t) || jsonb_build_object('contractors', json_build_object('company_name', co.company_name, 'contact_name', co.contact_name)) ORDER BY t.start_date)
+--                        FROM public.contractor_project_tasks t LEFT JOIN public.contractors co ON co.id = t.contractor_id WHERE t.project_id = p.id), '[]'::json)
+--   ) INTO result;
+--   RETURN result;
+-- END; $$;
+-- GRANT EXECUTE ON FUNCTION public.get_project_by_token(text, boolean) TO anon, authenticated;
+--
+-- CREATE OR REPLACE FUNCTION public.get_shared_gallery(_token text, _folder_id uuid DEFAULT NULL)
+-- RETURNS json LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
+-- DECLARE root public.gallery_folders%ROWTYPE; target uuid; ok boolean;
+-- BEGIN
+--   IF _token IS NULL OR length(_token) < 8 THEN RETURN NULL; END IF;
+--   SELECT * INTO root FROM public.gallery_folders WHERE share_token = _token AND is_active = true;
+--   IF root.id IS NULL THEN RETURN NULL; END IF;
+--   target := COALESCE(_folder_id, root.id);
+--   WITH RECURSIVE tree AS (
+--     SELECT id FROM public.gallery_folders WHERE id = root.id
+--     UNION ALL SELECT f.id FROM public.gallery_folders f JOIN tree ON f.parent_folder_id = tree.id WHERE f.is_active = true
+--   ) SELECT EXISTS (SELECT 1 FROM tree WHERE id = target) INTO ok;
+--   IF NOT ok THEN RETURN NULL; END IF;
+--   RETURN json_build_object(
+--     'root', json_build_object('id', root.id, 'name', root.name),
+--     'folders', COALESCE((SELECT json_agg(json_build_object('id', f.id, 'name', f.name, 'parent_folder_id', f.parent_folder_id) ORDER BY f.name) FROM public.gallery_folders f WHERE f.parent_folder_id = target AND f.is_active = true), '[]'::json),
+--     'files', COALESCE((SELECT json_agg(json_build_object('id', g.id, 'file_name', g.file_name, 'file_url', g.file_url, 'file_type', g.file_type, 'file_size', g.file_size, 'created_at', g.created_at) ORDER BY g.created_at DESC) FROM public.gallery_files g WHERE g.folder_id = target AND g.deleted_at IS NULL), '[]'::json)
+--   );
+-- END; $$;
+-- GRANT EXECUTE ON FUNCTION public.get_shared_gallery(text, uuid) TO anon, authenticated;
+--
+-- -- career_applications
+-- DROP POLICY IF EXISTS "Anyone can submit career applications" ON public.career_applications;
+-- CREATE POLICY "Anyone can submit valid career applications" ON public.career_applications FOR INSERT TO anon, authenticated
+-- WITH CHECK (char_length(btrim(applicant_name)) BETWEEN 1 AND 200 AND applicant_email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' AND (status IS NULL OR status = 'pending'));
+--
+-- -- communication_logs (admin ALL policy already exists)
+-- DROP POLICY IF EXISTS "System can update communication logs" ON public.communication_logs;
+-- DROP POLICY IF EXISTS "System can insert communication logs" ON public.communication_logs;
+-- CREATE POLICY "Sales reps log for their clients" ON public.communication_logs FOR INSERT TO authenticated
+-- WITH CHECK (EXISTS (SELECT 1 FROM public.clients c WHERE c.id = client_id AND c.assigned_sales_rep_id = auth.uid()));
+--
+-- -- construction projects / phases / items / documents / cost items
+-- DROP POLICY IF EXISTS "Anyone can view project by share token" ON public.construction_projects;
+-- DROP POLICY IF EXISTS "Anyone can view phases" ON public.project_phases;
+-- DROP POLICY IF EXISTS "Anyone can view items" ON public.phase_items;
+-- DROP POLICY IF EXISTS "Anyone can view documents" ON public.item_documents;
+-- DROP POLICY IF EXISTS "Anyone can insert documents" ON public.item_documents;
+-- DROP POLICY IF EXISTS "Anyone can update documents" ON public.item_documents;
+-- DROP POLICY IF EXISTS "Anyone can view cost items by project" ON public.project_cost_items;
+-- DROP POLICY IF EXISTS "Anyone can insert cost items" ON public.project_cost_items;
+-- DROP POLICY IF EXISTS "Anyone can update cost items" ON public.project_cost_items;
+-- DROP POLICY IF EXISTS "Anyone can delete cost items" ON public.project_cost_items;
+--
+-- -- contractor_project_tasks
+-- DROP POLICY IF EXISTS "Contractors can view own assigned tasks" ON public.contractor_project_tasks;
+-- DROP POLICY IF EXISTS "Admins can manage contractor project tasks" ON public.contractor_project_tasks;
+-- DROP POLICY IF EXISTS "Contractors can update own tasks" ON public.contractor_project_tasks;
+-- CREATE POLICY "Admins manage contractor project tasks" ON public.contractor_project_tasks FOR ALL USING (is_main_admin()) WITH CHECK (is_main_admin());
+-- CREATE POLICY "Contractors view own tasks" ON public.contractor_project_tasks FOR SELECT USING (is_contractor_self(contractor_id));
+-- CREATE POLICY "Contractors update own tasks" ON public.contractor_project_tasks FOR UPDATE USING (is_contractor_self(contractor_id)) WITH CHECK (is_contractor_self(contractor_id));
+--
+-- -- customer_cache (admin policies already exist)
+-- DROP POLICY IF EXISTS "Anyone can update via quote submission" ON public.customer_cache;
+-- DROP POLICY IF EXISTS "Anyone can upsert via quote submission" ON public.customer_cache;
+-- CREATE POLICY "Quote submissions add new customers" ON public.customer_cache FOR INSERT TO anon, authenticated
+-- WITH CHECK (char_length(btrim(name)) BETWEEN 1 AND 200 AND email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' AND COALESCE(total_quotes, 1) = 1 AND notes IS NULL);
+--
+-- -- flip_site_placements
+-- DROP POLICY IF EXISTS "Anyone reads placements" ON public.flip_site_placements;
+-- CREATE POLICY "Anyone reads active placements" ON public.flip_site_placements FOR SELECT USING (active = true OR is_main_admin());
+--
+-- -- gallery
+-- DROP POLICY IF EXISTS "Anyone can view files in shared folders" ON public.gallery_files;
+-- DROP POLICY IF EXISTS "Anyone can view folder by share token" ON public.gallery_folders;
+--
+-- -- genius_appointments
+-- DROP POLICY IF EXISTS "Anyone can request an appointment" ON public.genius_appointments;
+-- CREATE POLICY "Anyone can request a valid appointment" ON public.genius_appointments FOR INSERT TO anon, authenticated
+-- WITH CHECK (char_length(btrim(name)) BETWEEN 1 AND 200 AND email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$');
+--
+-- -- invoices
+-- DROP POLICY IF EXISTS "Invoices insertable by anyone" ON public.invoices;
+-- DROP POLICY IF EXISTS "Anyone can update invoices" ON public.invoices;
+-- CREATE POLICY "Anyone can create unpaid draft invoices" ON public.invoices FOR INSERT
+-- WITH CHECK (is_main_admin() OR (
+--   COALESCE(status, 'draft') = 'draft' AND COALESCE(payment_status, 'unpaid') = 'unpaid' AND COALESCE(paid_amount, 0) = 0
+--   AND (created_by IS NULL OR created_by = auth.uid()) AND (user_id IS NULL OR user_id = auth.uid())));
+-- CREATE POLICY "Admins or creators update invoices" ON public.invoices FOR UPDATE
+-- USING (is_main_admin() OR (auth.uid() IS NOT NULL AND created_by = auth.uid()))
+-- WITH CHECK (is_main_admin() OR (auth.uid() IS NOT NULL AND created_by = auth.uid()));
+--
+-- -- job postings / attachments / views
+-- DROP POLICY IF EXISTS "Anyone can view open job postings" ON public.job_postings;
+-- CREATE POLICY "Anyone can view open job postings" ON public.job_postings FOR SELECT
+-- USING (status IN ('open', 'active') OR business_id = auth.uid() OR is_main_admin());
+-- DROP POLICY IF EXISTS "Anyone can view job attachments" ON public.job_attachments;
+-- CREATE POLICY "View attachments of visible jobs" ON public.job_attachments FOR SELECT
+-- USING (is_main_admin() OR EXISTS (SELECT 1 FROM public.job_postings j WHERE j.id = job_id AND (j.status IN ('open', 'active') OR j.business_id = auth.uid())));
+-- DROP POLICY IF EXISTS "Anyone can view job views" ON public.job_views;
+-- DROP POLICY IF EXISTS "Anyone can record job views" ON public.job_views;
+-- CREATE POLICY "Viewers and job owners see views" ON public.job_views FOR SELECT
+-- USING (viewer_id = auth.uid() OR is_main_admin() OR EXISTS (SELECT 1 FROM public.job_postings j WHERE j.id = job_id AND j.business_id = auth.uid()));
+-- CREATE POLICY "Record own job views" ON public.job_views FOR INSERT WITH CHECK (viewer_id IS NULL OR viewer_id = auth.uid());
+--
+-- -- notifications
+-- DROP POLICY IF EXISTS "Allow all operations on notifications" ON public.notifications;
+-- CREATE POLICY "Recipients read notifications" ON public.notifications FOR SELECT USING (is_notification_recipient(recipient_type, recipient_id));
+-- CREATE POLICY "Recipients update notifications" ON public.notifications FOR UPDATE USING (is_notification_recipient(recipient_type, recipient_id)) WITH CHECK (is_notification_recipient(recipient_type, recipient_id));
+-- CREATE POLICY "Recipients delete notifications" ON public.notifications FOR DELETE USING (is_notification_recipient(recipient_type, recipient_id));
+-- CREATE POLICY "Signed-in users send notifications" ON public.notifications FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL AND COALESCE(is_read, false) = false);
+--
+-- -- orders / analytics / pipelines
+-- DROP POLICY IF EXISTS "System can insert orders" ON public.orders;
+-- CREATE POLICY "Consumers create own orders" ON public.orders FOR INSERT TO authenticated WITH CHECK (consumer_id = auth.uid() OR is_main_admin());
+-- DROP POLICY IF EXISTS "System can insert page analytics" ON public.page_analytics;
+-- CREATE POLICY "Admins insert page analytics" ON public.page_analytics FOR INSERT WITH CHECK (is_main_admin());
+-- DROP POLICY IF EXISTS "Anyone can insert performance metrics" ON public.performance_metrics;
+-- CREATE POLICY "Anyone records own performance metrics" ON public.performance_metrics FOR INSERT TO anon, authenticated
+-- WITH CHECK ((user_id IS NULL OR user_id = auth.uid()) AND char_length(COALESCE(page_url, '')) <= 2048);
+-- DROP POLICY IF EXISTS "System can log search analytics" ON public.search_analytics;
+-- CREATE POLICY "Anyone logs own searches" ON public.search_analytics FOR INSERT WITH CHECK (user_id IS NULL OR user_id = auth.uid());
+-- DROP POLICY IF EXISTS "System can insert pipeline data" ON public.user_pipelines;
+-- CREATE POLICY "Anyone records own pipeline data" ON public.user_pipelines FOR INSERT
+-- WITH CHECK ((user_id IS NULL OR user_id = auth.uid()) AND COALESCE(is_converted, false) = false);
+--
+-- -- procurement
+-- DROP POLICY IF EXISTS "Authenticated users can insert procurement documents" ON public.procurement_documents;
+-- DROP POLICY IF EXISTS "Anyone can read procurement documents" ON public.procurement_documents;
+-- DROP POLICY IF EXISTS "Authenticated users can delete procurement documents" ON public.procurement_documents;
+-- CREATE POLICY "Admins manage procurement documents" ON public.procurement_documents FOR ALL USING (is_main_admin()) WITH CHECK (is_main_admin());
+-- CREATE POLICY "Contractors read procurement documents" ON public.procurement_documents FOR SELECT
+-- USING (EXISTS (SELECT 1 FROM public.contractors c WHERE c.user_id = auth.uid()));
+--
+-- DROP POLICY IF EXISTS "Admins can manage procurement listings" ON public.procurement_listings;
+-- CREATE POLICY "Admins manage procurement listings" ON public.procurement_listings FOR ALL USING (is_main_admin()) WITH CHECK (is_main_admin());
+-- CREATE POLICY "Assigned contractors view listings" ON public.procurement_listings FOR SELECT USING (is_contractor_self(assigned_contractor_id));
+--
+-- DROP POLICY IF EXISTS "Contractors can update own proposals" ON public.procurement_proposals;
+-- DROP POLICY IF EXISTS "Contractors can delete own proposals" ON public.procurement_proposals;
+-- DROP POLICY IF EXISTS "Contractors can view own proposals" ON public.procurement_proposals;
+-- DROP POLICY IF EXISTS "Contractors can insert own proposals" ON public.procurement_proposals;
+-- CREATE POLICY "Admins manage procurement proposals" ON public.procurement_proposals FOR ALL USING (is_main_admin()) WITH CHECK (is_main_admin());
+-- CREATE POLICY "Contractors view own proposals" ON public.procurement_proposals FOR SELECT USING (is_contractor_self(contractor_id));
+-- CREATE POLICY "Contractors insert own proposals" ON public.procurement_proposals FOR INSERT WITH CHECK (is_contractor_self(contractor_id) AND COALESCE(status, 'pending') = 'pending');
+-- CREATE POLICY "Contractors update own proposals" ON public.procurement_proposals FOR UPDATE USING (is_contractor_self(contractor_id)) WITH CHECK (is_contractor_self(contractor_id) AND COALESCE(status, 'pending') = 'pending');
+-- CREATE POLICY "Contractors delete own proposals" ON public.procurement_proposals FOR DELETE USING (is_contractor_self(contractor_id));
+--
+-- -- referrals
+-- DROP POLICY IF EXISTS "Anyone can submit referrals" ON public.referrals;
+-- CREATE POLICY "Anyone can submit valid referrals" ON public.referrals FOR INSERT
+-- WITH CHECK (char_length(btrim(COALESCE(lead_name, ''))) BETWEEN 1 AND 200
+--   AND (referrer_user_id IS NULL OR referrer_user_id = auth.uid())
+--   AND COALESCE(is_sales_team_verified, false) = false
+--   AND (status IS NULL OR status = 'pending'));
+--
+-- SOCIALITE config
+DROP POLICY IF EXISTS "Anyone reads billing config" ON public.socialite_billing_config;
+DROP POLICY IF EXISTS "Anyone reads plans" ON public.socialite_plans;
+CREATE POLICY "Anyone reads active plans" ON public.socialite_plans FOR SELECT USING (active = true OR is_main_admin());
+DROP POLICY IF EXISTS "shield rules read" ON public.socialite_shield_rules;
+CREATE POLICY "Admins read shield rules" ON public.socialite_shield_rules FOR SELECT TO authenticated USING (is_main_admin());
+--
+-- -- Storage
+-- DROP POLICY IF EXISTS "Admins can delete project documents" ON storage.objects;
+-- DROP POLICY IF EXISTS "Admins can upload project documents" ON storage.objects;
+-- DROP POLICY IF EXISTS "Anyone can read project documents" ON storage.objects;
+-- DROP POLICY IF EXISTS "Anyone can upload project documents" ON storage.objects;
+-- DROP POLICY IF EXISTS "Anyone can view project documents" ON storage.objects;
+-- CREATE POLICY "Admins manage project documents" ON storage.objects FOR ALL
+-- USING (bucket_id = 'project-documents' AND is_main_admin()) WITH CHECK (bucket_id = 'project-documents' AND is_main_admin());
+--
+-- DROP POLICY IF EXISTS "Anyone can upload resumes" ON storage.objects;
+-- DROP POLICY IF EXISTS "Anyone can view resumes" ON storage.objects;
+-- CREATE POLICY "Applicants upload resumes" ON storage.objects FOR INSERT TO anon, authenticated
+-- WITH CHECK (bucket_id = 'career-resumes' AND lower(storage.extension(name)) IN ('pdf', 'doc', 'docx') AND (owner IS NULL OR owner = auth.uid()));
+-- CREATE POLICY "Admins view resumes" ON storage.objects FOR SELECT USING (bucket_id = 'career-resumes' AND is_main_admin());
+--
+-- DROP POLICY IF EXISTS "Anyone can view gallery files" ON storage.objects;
+-- CREATE POLICY "Staff view gallery files" ON storage.objects FOR SELECT USING (bucket_id = 'gallery-files' AND (is_main_admin() OR is_active_sales_rep()));
+--
+-- DROP POLICY IF EXISTS "Proposal and job owners can view attachments" ON storage.objects;
+-- DROP POLICY IF EXISTS "Proposal owners can delete their attachments" ON storage.objects;
+-- DROP POLICY IF EXISTS "Proposal owners can upload attachments" ON storage.objects;
+-- CREATE POLICY "Uploaders view proposal attachments" ON storage.objects FOR SELECT USING (bucket_id = 'proposal-attachments' AND (owner = auth.uid() OR is_main_admin()));
+-- CREATE POLICY "Uploaders delete proposal attachments" ON storage.objects FOR DELETE USING (bucket_id = 'proposal-attachments' AND (owner = auth.uid() OR is_main_admin()));
+-- CREATE POLICY "Signed-in users upload proposal attachments" ON storage.objects FOR INSERT TO authenticated
+-- WITH CHECK (bucket_id = 'proposal-attachments' AND owner = auth.uid());
+--
