@@ -119,7 +119,7 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
             {/* Vertical rail */}
             <div className="absolute left-[28px] sm:left-[32px] top-0 bottom-6 sm:bottom-8 w-px bg-gradient-to-b from-border via-border/60 to-transparent" />
 
-            <div className="space-y-4 sm:space-y-5 min-w-0">
+            <div className="space-y-4 sm:space-y-5 min-w-0 max-h-[600px] overflow-y-auto pr-2 pb-1">
               {showInception && (
                 <div className="relative pl-[52px] sm:pl-[56px] min-w-0">
                   <NvidiaInceptionCard />

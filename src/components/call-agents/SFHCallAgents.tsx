@@ -293,7 +293,7 @@ function SegmentedControl({
   );
 }
 
-/* ── Muse skills library: every skill from the owner's Muse account,
+/* ── Genius skills library: every skill from the owner's account,
  *    importable as a real agent. Lives inside the one Agents console, so it
  *    is identical in the dashboards and in the 3D office. ── */
 function SkillsLibrarySection({ agents, onAdded }: { agents: any[]; onAdded: () => void }) {
@@ -316,7 +316,7 @@ function SkillsLibrarySection({ agents, onAdded }: { agents: any[]; onAdded: () 
     } catch (e: any) { setNote(e?.message || "Could not add that skill."); }
     setAdding(null);
   };
-  if (skills === null) return <div className="px-1 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Loading the Muse skills library…</div>;
+  if (skills === null) return <div className="px-1 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Loading the Genius skills library…</div>;
   const needle = q.trim().toLowerCase();
   const list = skills.filter((s) => !needle || `${s.name} ${s.description} ${s.slug}`.toLowerCase().includes(needle)).slice(0, 60);
   return (
@@ -324,8 +324,8 @@ function SkillsLibrarySection({ agents, onAdded }: { agents: any[]; onAdded: () 
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white"><Sparkles className="h-5 w-5" /></span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold tracking-tight text-foreground">Muse skills library</h3>
-          <p className="text-xs text-muted-foreground">{skills.length} skills from your Muse account — add any of them as a real agent. It joins your team here, in every dashboard, and in the 3D office.</p>
+          <h3 className="text-lg font-bold tracking-tight text-foreground">Genius skills library</h3>
+          <p className="text-xs text-muted-foreground">{skills.length} Genius skills — add any of them as a real agent. It joins your team here, in every dashboard, and in the 3D office.</p>
         </div>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search skills…" className="h-9 w-44 rounded-full" />
       </div>
@@ -1022,7 +1022,7 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
           </div>
         )}
 
-        {/* ── Muse skills library ─────────────────────── */}
+        {/* ── Genius skills library ─────────────────────── */}
         <SkillsLibrarySection agents={agents} onAdded={load} />
 
         {/* ── 2 · Character stage — your team ────────────── */}
