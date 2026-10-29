@@ -222,7 +222,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [link, setLink] = useState('');
   const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
-  const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'money' | 'rules'>('shop');
+  const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'money' | 'rules'>('chat');
   const mobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -750,8 +750,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   );
 
   const pills = [
-    { k: 'shop', label: `SHOP • ${catalog.length}` },
     { k: 'chat', label: `CHAT • ${chatCount}` },
+    { k: 'shop', label: `SHOP • ${catalog.length}` },
     { k: 'text', label: 'TEXT' },
     ...(isHost ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
   ] as const;

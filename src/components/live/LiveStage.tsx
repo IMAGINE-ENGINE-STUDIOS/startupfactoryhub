@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { VideoTrack, useTracks, useSpeakingParticipants, isTrackReference } from '@livekit/components-react';
 import type { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { Track } from 'livekit-client';
@@ -36,16 +36,42 @@ export default function LiveStage(p: Props) {
     return [...seen.values()].sort((a, b) => Number(b.participant.isLocal) - Number(a.participant.isLocal) || Number(b.participant.identity === p.hostId) - Number(a.participant.identity === p.hostId));
   }, [cams, p.hostId]);
 
-  // Speaker suggestion: someone other than the pinned person talks for 1.5s.
-  const topSpeaker = speaking.find((s) => s.identity !== p.pinned)?.identity || null;
+  // Stable speaker: LiveKit's speaking order flickers as people interject, so
+  // the stage never follows it raw. A participant becomes the stable speaker
+  // only after holding the floor continuously for 1.2s, and the stable speaker
+  // can change at most once every 2.5s. When nobody is speaking, the last
+  // stable speaker stays — the big view never blanks or flaps.
+  const rawTop = speaking[0]?.identity || null;
+  const [stableSpeaker, setStableSpeaker] = useState<string | null>(null);
+  const candidateRef = useRef<{ id: string; since: number } | null>(null);
+  const lastSwitchRef = useRef(0);
+  useEffect(() => {
+    if (!rawTop || rawTop === stableSpeaker) { candidateRef.current = null; return; }
+    const now = Date.now();
+    if (candidateRef.current?.id !== rawTop) candidateRef.current = { id: rawTop, since: now };
+    const wait = Math.max(1200 - (now - candidateRef.current.since), 2500 - (now - lastSwitchRef.current), 0);
+    const t = setTimeout(() => { setStableSpeaker(rawTop); lastSwitchRef.current = Date.now(); candidateRef.current = null; }, wait);
+    return () => clearTimeout(t);
+  }, [rawTop, stableSpeaker]);
+
+  // A pin set by a person's own click is a decision, not a suggestion:
+  // auto-follow and the speaking pill must never override it. The hold clears
+  // when the pin itself is cleared.
+  const manualHoldRef = useRef(false);
+  const handlePin = (identity: string | null) => { manualHoldRef.current = identity !== null; p.onPin(identity); };
+  useEffect(() => { if (p.pinned === null) manualHoldRef.current = false; }, [p.pinned]);
+
+  // Speaker follow: act only on the stable speaker, never over a manual pin.
+  const topSpeaker = stableSpeaker && stableSpeaker !== p.pinned ? stableSpeaker : null;
   const [suggest, setSuggest] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<string | null>(null);
   useEffect(() => {
-    if (!topSpeaker || tiles.length < 2) { setSuggest(null); return; }
+    if (!topSpeaker || tiles.length < 2 || manualHoldRef.current) { setSuggest(null); return; }
     const t = setTimeout(() => {
+      if (manualHoldRef.current) return; // a manual pin landed meanwhile — it wins
       if (p.autoFollow && p.isHost) p.onPin(topSpeaker);
       else if (topSpeaker !== dismissed) setSuggest(topSpeaker);
-    }, 1500);
+    }, 600);
     return () => clearTimeout(t);
   }, [topSpeaker, tiles.length, p.autoFollow, p.isHost, dismissed]); // eslint-disable-line
 
@@ -54,10 +80,13 @@ export default function LiveStage(p: Props) {
   const heroNode = p.hero
     ? p.hero
     : share ? <VideoTrack trackRef={share as any} className="w-full h-full object-contain bg-black" />
-    : pinnedTile ? <Tile t={pinnedTile} {...p} speaking={speakingIds.has(pinnedTile.participant.identity)} big />
+    : pinnedTile ? <Tile t={pinnedTile} {...p} onPin={handlePin} speaking={speakingIds.has(pinnedTile.participant.identity)} big />
     : null;
 
   const suggestName = suggest ? (tiles.find((t) => t.participant.identity === suggest)?.participant.name || 'Someone') : '';
+
+  // Mobile big view follows the stable speaker, not the raw speaking order.
+  const mobileHeroTile = (stableSpeaker && tiles.find((t) => t.participant.identity === stableSpeaker && !t.participant.isLocal)) || tiles.find((t) => !t.participant.isLocal) || tiles[0];
 
   return (
     <div className="relative w-full h-full min-h-0">
@@ -65,25 +94,25 @@ export default function LiveStage(p: Props) {
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-white/95 shadow-2xl text-sm text-zinc-900">
           <Mic className="w-3.5 h-3.5 text-emerald-600" />
           <span className="max-w-[180px] truncate">{suggestName} is speaking</span>
-          <button onClick={() => { p.onPin(suggest); setSuggest(null); }} className="flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-900 text-white text-xs"><Pin className="w-3 h-3" />{p.isHost ? 'Pin for everyone' : 'Pin'}</button>
+          <button onClick={() => { handlePin(suggest); setSuggest(null); }} className="flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-900 text-white text-xs"><Pin className="w-3 h-3" />{p.isHost ? 'Pin for everyone' : 'Pin'}</button>
           <button aria-label="Dismiss" onClick={() => { setDismissed(suggest); setSuggest(null); }} className="w-6 h-6 rounded-full hover:bg-zinc-100 flex items-center justify-center"><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
 
       {p.mobile && tiles.length > 1 && !heroNode && tiles.length === 2 ? (
         <div className="grid h-full gap-1.5 grid-rows-2">
-          {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
+          {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />)}
         </div>
       ) : p.mobile && (heroNode || tiles.length > 2) ? (
         // Phones: one big view on top, everyone else in a sideways swipe row.
         <div className="flex flex-col h-full gap-1.5">
           <div className="relative flex-1 min-h-0 rounded-2xl overflow-hidden bg-zinc-900">
-            {heroNode || <Tile t={(speaking[0] && tiles.find((t) => t.participant.identity === speaking[0].identity && !t.participant.isLocal)) || tiles.find((t) => !t.participant.isLocal) || tiles[0]} {...p} speaking big />}
+            {heroNode || <Tile t={mobileHeroTile} {...p} onPin={handlePin} speaking big />}
           </div>
           <div className="h-28 shrink-0 flex gap-1.5 overflow-x-auto snap-x">
-            {tiles.filter((t) => heroNode ? true : t !== ((speaking[0] && tiles.find((x) => x.participant.identity === speaking[0].identity && !x.participant.isLocal)) || tiles.find((x) => !x.participant.isLocal) || tiles[0])).map((t) => (
+            {tiles.filter((t) => heroNode ? true : t !== mobileHeroTile).map((t) => (
               <div key={t.participant.identity} className="w-24 h-full shrink-0 snap-start">
-                <Tile t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />
+                <Tile t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />
               </div>
             ))}
           </div>
@@ -94,7 +123,7 @@ export default function LiveStage(p: Props) {
           <div className="w-56 shrink-0 h-full overflow-y-auto flex flex-col gap-2 pr-1">
             {tiles.filter((t) => p.hero || share || t.participant.identity !== p.pinned).map((t) => (
               <div key={t.participant.identity} className="aspect-video shrink-0">
-                <Tile t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />
+                <Tile t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />
               </div>
             ))}
           </div>
@@ -103,19 +132,19 @@ export default function LiveStage(p: Props) {
         // More than 4 people: tiles stop shrinking; the first 4 fill the stage, the rest scroll in a slider.
         <div className="flex h-full gap-3">
           <div className="grid flex-1 min-w-0 h-full gap-3 grid-cols-2 grid-rows-2">
-            {tiles.slice(0, 4).map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
+            {tiles.slice(0, 4).map((t) => <Tile key={t.participant.identity} t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />)}
           </div>
           <div className="w-56 shrink-0 h-full overflow-y-auto flex flex-col gap-2 pr-1">
             {tiles.slice(4).map((t) => (
               <div key={t.participant.identity} className="aspect-video shrink-0">
-                <Tile t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />
+                <Tile t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />
               </div>
             ))}
           </div>
         </div>
       ) : (
         <div className="grid h-full gap-3" style={{ gridTemplateColumns: `repeat(${colsFor(tiles.length)}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.ceil(Math.max(1, tiles.length) / colsFor(tiles.length))}, minmax(0, 1fr))` }}>
-          {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} speaking={speakingIds.has(t.participant.identity)} />)}
+          {tiles.map((t) => <Tile key={t.participant.identity} t={t} {...p} onPin={handlePin} speaking={speakingIds.has(t.participant.identity)} />)}
         </div>
       )}
     </div>
@@ -169,5 +198,5 @@ function Tile({ t, speaking, big, isHost, hostId, pinned, onPin, audience, allow
 }
 
 function TileBtn({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
-  return <button aria-label={label} title={label} onClick={(e) => { e.stopPropagation(); onClick(); }} className="w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80">{children}</button>;
+  return <button aria-label={label} title={label} onClick={(e) => { e.stopPropagation(); onClick(); }} onDoubleClick={(e) => e.stopPropagation()} className="w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80">{children}</button>;
 }
