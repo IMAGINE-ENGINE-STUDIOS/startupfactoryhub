@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { durableGetSync, durableSet } from '@/lib/durableStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine, ExternalLink } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
@@ -259,6 +259,19 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [catalog, setCatalog] = useState<Product[]>(() => { try { return JSON.parse(localStorage.getItem(catalogKey) || '[]'); } catch { return []; } });
   const [drop, setDrop] = useState<Product | null>(null);
   const [stageOffer, setStageOffer] = useState(true);
+  // Brochures open as an overlay ON the live video screen — never a new window.
+  const [brochureView, setBrochureView] = useState<{ url: string; name: string } | null>(null);
+  const [flipCopied, setFlipCopied] = useState(false);
+  const openBrochure = (url?: string, name?: string) => { if (!url) return; setFlipCopied(false); setBrochureView({ url, name: name || 'Brochure' }); };
+  const copyFlipLink = async () => { if (!brochureView) return; try { await navigator.clipboard.writeText(absUrl(brochureView.url)); setFlipCopied(true); } catch { /* clipboard unavailable */ } };
+  // Mini stickers along the bottom of the stage once a product is pushed:
+  // the live drop first, then every catalog product that carries a brochure.
+  const brochureStickers = useMemo(() => {
+    const list: Product[] = [];
+    if (drop?.brochure) list.push(drop);
+    for (const p of catalog) if (p.brochure && !list.some((x) => x.id === p.id)) list.push(p);
+    return list;
+  }, [drop, catalog]);
   const [adding, setAdding] = useState(false);
   const [pkgPick, setPkgPick] = useState(SFH_PACKAGES[0].id);
   const [pkgOpen, setPkgOpen] = useState(false);
@@ -750,7 +763,33 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <span className="block font-mono text-xs text-zinc-500">{priceLabel(drop)}</span>
           </span>
           <button disabled={paying === drop.id} onClick={() => buy(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{drop.pkg ? (paying === drop.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
+          {drop.brochure && <button onClick={() => openBrochure(drop.brochure, drop.name)} className="px-3.5 py-2 rounded-full border border-emerald-600/40 bg-emerald-50 text-emerald-700 text-sm flex items-center gap-1.5 shrink-0"><BookOpen className="w-3.5 h-3.5" />Brochure</button>}
           <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
+        </div>
+      )}
+      {drop && !brochureView && brochureStickers.length > 0 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-end gap-2 max-w-[94%] overflow-x-auto px-1 py-0.5">
+          {brochureStickers.map((p) => (
+            <button key={p.id} onClick={() => openBrochure(p.brochure, p.name)} title={`${p.name} — view the brochure`} className="group flex flex-col items-center gap-1 shrink-0">
+              <span className="relative block w-11 h-11 rounded-full ring-2 ring-white/80 shadow-xl overflow-hidden transition-transform group-hover:scale-110">
+                <Thumb p={p} className="w-full h-full" />
+                <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white flex items-center justify-center py-px"><BookOpen className="w-2.5 h-2.5" /></span>
+              </span>
+              <span className="max-w-[64px] truncate text-[9px] font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">{p.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {brochureView && (
+        <div className="absolute inset-0 z-40 flex flex-col bg-zinc-950/95 backdrop-blur-sm">
+          <div className="flex items-center gap-2 px-3 py-2 shrink-0">
+            <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="flex-1 min-w-0 truncate text-sm font-medium text-white">{brochureView.name} — brochure</span>
+            <a href={absUrl(brochureView.url)} target="_blank" rel="noreferrer" title="Open in new tab" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs shrink-0"><ExternalLink className="w-3.5 h-3.5" />New tab</a>
+            <button onClick={copyFlipLink} title="Copy the flipbook link" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs shrink-0">{flipCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Link2 className="w-3.5 h-3.5" />}{flipCopied ? 'Link copied' : 'Flip link'}</button>
+            <button aria-label="Close brochure" onClick={() => setBrochureView(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0"><X className="w-4 h-4" /></button>
+          </div>
+          <iframe title={`${brochureView.name} brochure`} src={brochureView.url} className="flex-1 w-full min-h-0 bg-white" />
         </div>
       )}
       <div className={`h-full ${mobile ? 'p-1.5' : 'p-3'}`}>
@@ -863,7 +902,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="font-medium truncate">{drop.name}</p>
               <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
               <button disabled={paying === drop.id} onClick={() => buy(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm disabled:opacity-60"><ShoppingBag className="w-4 h-4" />{drop.pkg ? (paying === drop.id ? 'Opening checkout…' : 'Subscribe now') : 'Add to Cart'}</button>
-              {drop.brochure && <a href={drop.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
+              {drop.brochure && <button onClick={() => openBrochure(drop.brochure, drop.name)} className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</button>}
             </div>
           </div>
         </div>
@@ -927,7 +966,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="text-[14px] text-zinc-900">{k.name}</p>
               <p className="font-mono text-[11px] text-zinc-500">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
               <ul className="mt-1 text-[11px] text-zinc-500">{k.perks.map((x) => <li key={x}>{x}</li>)}</ul>
-              {k.brochure && <a href={k.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs font-medium"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
+              {k.brochure && <button onClick={() => openBrochure(k.brochure, k.name)} className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs font-medium"><BookOpen className="w-3.5 h-3.5" />View the brochure</button>}
               <div className="mt-2 flex gap-2">
                 <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-2 rounded-full border border-zinc-200 text-xs text-zinc-800 disabled:opacity-50">{inCat ? 'In catalog' : 'Add to catalog'}</button>
                 <button onClick={() => addPackage(k, true)} className="flex-1 py-2 rounded-full bg-zinc-900 text-white text-xs">Drop live now</button>
@@ -978,7 +1017,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
                 <button disabled={paying === p.id} onClick={() => buy(p)} className="mt-2 w-full py-2 rounded-full bg-zinc-900 text-white text-xs font-medium disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
                 {(p.brochure || canSell) && (
                   <div className="mt-1.5 flex gap-1.5">
-                    {p.brochure && <a href={p.brochure} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-[11px] font-medium"><BookOpen className="w-3 h-3" />Brochure</a>}
+                    {p.brochure && <button onClick={() => openBrochure(p.brochure, p.name)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-[11px] font-medium"><BookOpen className="w-3 h-3" />Brochure</button>}
                     {canSell && <button onClick={() => pushToAll(p)} className="flex-1 py-1.5 rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-800">Push to All</button>}
                   </div>
                 )}
