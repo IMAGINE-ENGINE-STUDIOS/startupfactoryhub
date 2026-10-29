@@ -258,6 +258,15 @@ export default function FloatingChat() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showPlans, setShowPlans] = useState(false);
+  const [showJournal, setShowJournal] = useState(false);
+  const JOURNAL_KEY = 'sfh:genius:journal:v1';
+  type JournalEntry = { ts: number; kind: 'note' | 'transcript'; content: string };
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => durableGetSync<JournalEntry[]>(JOURNAL_KEY) || []);
+  useEffect(() => {
+    const stop = durableOnAdopt(JOURNAL_KEY, (data) => { if (Array.isArray(data)) setJournalEntries(data as JournalEntry[]); });
+    void durableHydrate().then(() => { const d = durableGetSync<JournalEntry[]>(JOURNAL_KEY); if (Array.isArray(d) && d.length) setJournalEntries(d); });
+    return stop;
+  }, []);
   const { usage: geniusUsage } = useGeniusPlan();
 
   const [activeTab, setActiveTab] = useState<'messages' | 'ai' | 'district' | 'studio3d'>('ai');
@@ -318,6 +327,14 @@ export default function FloatingChat() {
       const content = (e as CustomEvent).detail?.content;
       if (typeof content !== 'string' || !content) return;
       setAiMessages((cur) => (cur.some((m) => m.content === content) ? cur : [...cur, { role: 'assistant', content } as AIMessage]));
+      if (content.startsWith('📓') || content.startsWith('📋')) {
+        setJournalEntries((cur) => {
+          if (cur.some((e) => e.content === content)) return cur;
+          const next = [{ ts: Date.now(), kind: (content.startsWith('📓') ? 'note' : 'transcript') as 'note' | 'transcript', content }, ...cur].slice(0, 50);
+          durableSet(JOURNAL_KEY, next);
+          return next;
+        });
+      }
     };
     window.addEventListener('sfh:genius:append', onAppend);
     return () => window.removeEventListener('sfh:genius:append', onAppend);
@@ -1652,6 +1669,20 @@ You can help with:
                   {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
                 </Button>
               )}
+              {activeTab === 'ai' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-amber-300 hover:text-amber-200 relative"
+                  title="Journal — notes & transcripts from your live sessions"
+                  onClick={() => setShowJournal(s => !s)}
+                >
+                  <PenSquare className="h-3.5 w-3.5" />
+                  {journalEntries.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-0.5 rounded-full bg-amber-400 text-[9px] font-bold text-zinc-900 flex items-center justify-center">{journalEntries.length}</span>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -2540,6 +2571,39 @@ You can help with:
             </Button>
           </div>
           <GeniusAIPlans />
+        </div>
+      )}
+
+      {showJournal && (
+        <div className="fixed inset-x-2 bottom-2 sm:inset-x-auto sm:right-4 sm:bottom-4 z-[60] w-auto sm:w-[min(30rem,calc(100vw-2rem))] max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-border shadow-2xl p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 text-amber-900"><PenSquare className="h-4 w-4" /></span> Journal
+            </h3>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowJournal(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">Notes and transcripts from your live sessions. Ask Genius about any of them, right in the chat.</p>
+          {journalEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground rounded-lg border border-dashed border-border p-4">Nothing here yet. When you save a note from a live session's Journal tab, or finish a transcribed call, it will appear here.</p>
+          ) : (
+            <div className="space-y-3">
+              {journalEntries.map((e, i) => (
+                <div key={`${e.ts}-${i}`} className="rounded-xl border border-border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${e.kind === 'note' ? 'bg-amber-400/20 text-amber-500' : 'bg-violet-500/15 text-violet-400'}`}>{e.kind === 'note' ? <PenSquare className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}</span>
+                    <p className="flex-1 min-w-0 text-xs font-medium truncate">{e.content.split('\n')[0].replace(/^[📓📋]\s*/, '')}</p>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{new Date(e.ts).toLocaleDateString()}</span>
+                  </div>
+                  <details className="mt-2">
+                    <summary className="text-[11px] text-primary cursor-pointer">Read</summary>
+                    <div className="mt-1 max-h-56 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">{e.content}</div>
+                  </details>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

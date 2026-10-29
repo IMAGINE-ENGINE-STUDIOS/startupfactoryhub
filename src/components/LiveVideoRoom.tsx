@@ -433,6 +433,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       if (!cur.some((m) => m?.content === content)) durableSet(KEY, [...cur, { role: 'assistant', content }].slice(-80));
     } catch { /* the bubble also adopts via the event below */ }
     window.dispatchEvent(new CustomEvent('sfh:genius:append', { detail: { content } }));
+    if (content.startsWith('📓') || content.startsWith('📋')) {
+      try {
+        const JKEY = 'sfh:genius:journal:v1';
+        const entries = durableGetSync<{ ts: number; kind: string; content: string }[]>(JKEY) || [];
+        if (!entries.some((e) => e?.content === content)) durableSet(JKEY, [{ ts: Date.now(), kind: content.startsWith('📓') ? 'note' : 'transcript', content }, ...entries].slice(0, 50));
+      } catch { /* journal store is best-effort */ }
+    }
   };
   const saveNoteToGenius = () => {
     const text = journal.trim(); if (!text) return;
@@ -864,10 +871,14 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
         <div className="rounded-3xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No live drop yet. {canSell ? 'Use "Push to All" on a product.' : 'The host will push products here.'}</div>
       )}
 
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">CATALOG</p>
-        {canSell && !adding && <span className="flex gap-3">
-          <button onClick={() => setShowPkgs((v) => !v)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-medium shadow-sm hover:bg-emerald-500 transition"><Crown className="w-3.5 h-3.5" />{showPkgs ? 'Hide packages' : 'Startup Factory packages'}</button>
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]"><ShopIcon className="h-4 w-4" /></span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-zinc-900 leading-tight">Catalog</p>
+          <p className="font-mono text-[10px] text-zinc-500">{catalog.length} product{catalog.length === 1 ? '' : 's'} in this room</p>
+        </div>
+        {canSell && !adding && <span className="flex gap-1.5">
+          <button onClick={() => setShowPkgs((v) => !v)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-medium shadow-sm hover:from-emerald-600 hover:to-teal-600 transition"><Crown className="w-3.5 h-3.5" />{showPkgs ? 'Hide packages' : 'SFH packages'}</button>
           <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-300 text-xs text-zinc-800 hover:bg-zinc-50 transition"><Plus className="w-3.5 h-3.5" />Add product</button>
         </span>}
       </div>
@@ -952,42 +963,52 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       )}
 
       {catalog.length === 0 && !adding && <p className="rounded-2xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No products yet.{canSell ? ' Add one with a photo and price.' : ''}</p>}
-      {catalog.map((p) => (
-        <div key={p.id} className="flex gap-4 border border-zinc-200 rounded-2xl p-4">
-          <Thumb p={p} className="w-20 h-20 rounded-xl shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-2">
-              <p className="flex-1 text-[15px] text-zinc-900 truncate">{p.name}</p>
-              {canSell && <button aria-label="Delete product" onClick={() => deleteProduct(p.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
+      {catalog.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          {catalog.map((p) => (
+            <div key={p.id} className="relative flex flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white">
+              <Thumb p={p} className="w-full h-24" />
+              {p.tag && <span className="absolute left-2 top-2 font-mono text-[9px] px-2 py-0.5 rounded-full bg-black/60 text-white">{p.tag}</span>}
+              {canSell && <button aria-label="Delete product" onClick={() => deleteProduct(p.id)} className="absolute right-2 top-2 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500"><Trash2 className="w-3 h-3" /></button>}
+              <div className="flex flex-1 flex-col p-3">
+                <p className="text-[13px] font-medium text-zinc-900 leading-snug line-clamp-2">{p.name}</p>
+                <p className="font-mono text-xs text-zinc-500 mt-0.5">{priceLabel(p)}</p>
+                {p.perks && <p className="mt-1 text-[11px] leading-snug text-zinc-500 line-clamp-2">{p.perks.join(' • ')}</p>}
+                <div className="flex-1" />
+                <button disabled={paying === p.id} onClick={() => buy(p)} className="mt-2 w-full py-2 rounded-full bg-zinc-900 text-white text-xs font-medium disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
+                {(p.brochure || canSell) && (
+                  <div className="mt-1.5 flex gap-1.5">
+                    {p.brochure && <a href={p.brochure} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-[11px] font-medium"><BookOpen className="w-3 h-3" />Brochure</a>}
+                    {canSell && <button onClick={() => pushToAll(p)} className="flex-1 py-1.5 rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-800">Push to All</button>}
+                  </div>
+                )}
+              </div>
             </div>
-            <p className="font-mono text-xs text-zinc-500 mt-1">{priceLabel(p)}{p.tag && ` • ${p.tag}`}</p>
-            {p.perks && <ul className="mt-1 text-[11px] text-zinc-500 space-y-0.5">{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>}
-            <div className="mt-2 flex gap-2">
-              <button disabled={paying === p.id} onClick={() => buy(p)} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add'}</button>
-              {p.brochure && <a href={p.brochure} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />Brochure</a>}
-              {canSell && <button onClick={() => pushToAll(p)} className="px-4 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">Push to All</button>}
-            </div>
-          </div>
+          ))}
         </div>
-      ))}
+      )}
 
-      <div className="border-t border-zinc-100 pt-4">
-        <div className="flex items-center justify-between">
-          <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">UNIVERSAL CART • {cartCount}</p>
-          <button onClick={checkout} className="font-mono text-xs text-zinc-900 underline">View</button>
+      <div className="rounded-[1.75rem] bg-zinc-900 text-white p-4">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white"><ShoppingBag className="h-4 w-4" /></span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold leading-tight">Universal Cart</p>
+            <p className="font-mono text-[10px] text-zinc-400">{cartCount} item{cartCount === 1 ? '' : 's'}</p>
+          </div>
+          <button onClick={checkout} className="font-mono text-xs text-emerald-400 underline underline-offset-2">View</button>
         </div>
         {cartItems.length === 0
-          ? <p className="mt-3 rounded-2xl border border-dashed border-zinc-300 p-4 font-mono text-xs text-zinc-500">No items yet. Add from live push.</p>
+          ? <p className="mt-3 rounded-2xl border border-dashed border-white/15 p-4 font-mono text-xs text-zinc-400">No items yet. Add from the catalog or a live push.</p>
           : (
             <div className="mt-3 space-y-1">
               {cartItems.map((i) => (
-                <div key={i.id} className="flex items-center gap-2 text-sm text-zinc-800 py-1.5">
+                <div key={i.id} className="flex items-center gap-2 text-sm text-zinc-100 py-1.5">
                   <span className="flex-1 truncate">{i.name} x{i.qty}</span>
                   <span className="font-mono">${(i.price * i.qty).toFixed(2)}</span>
-                  <button aria-label="Remove" onClick={() => removeFromCart(i.id)} className="text-zinc-400 hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+                  <button aria-label="Remove" onClick={() => removeFromCart(i.id)} className="text-zinc-500 hover:text-red-400"><X className="w-3.5 h-3.5" /></button>
                 </div>
               ))}
-              <button onClick={checkout} className="w-full mt-2 py-2.5 rounded-full bg-zinc-900 text-white text-sm">Checkout • ${cartTotal.toFixed(2)}</button>
+              <button onClick={checkout} className="w-full mt-2 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium">Checkout • ${cartTotal.toFixed(2)}</button>
             </div>
           )}
       </div>
