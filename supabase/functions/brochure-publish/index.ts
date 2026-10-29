@@ -19,6 +19,19 @@ Deno.serve(async (req) => {
     if (!isAdmin) return json({ error: "Only admins can edit brochures" }, 403);
 
     const body = await req.json().catch(() => ({}));
+
+    // Every published brochure in the studio bucket (admin picker feed for
+    // the live rooms). Runs before the slug check: listing needs no slug.
+    if (body.action === "list") {
+      const { data, error } = await admin.storage.from(BUCKET)
+        .list("brochures", { limit: 500, sortBy: { column: "created_at", order: "desc" } });
+      if (error) return json({ error: error.message }, 500);
+      const brochures = (data || [])
+        .filter((f) => f.name.endsWith(".json"))
+        .map((f) => ({ slug: f.name.replace(/\.json$/, ""), updatedAt: f.updated_at || f.created_at || null }));
+      return json({ ok: true, brochures });
+    }
+
     const slug = String(body.slug || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 60);
     if (!slug) return json({ error: "Missing brochure" }, 400);
 

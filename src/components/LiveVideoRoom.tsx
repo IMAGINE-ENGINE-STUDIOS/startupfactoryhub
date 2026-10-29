@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { durableGetSync, durableSet } from '@/lib/durableStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine, ExternalLink } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine, ExternalLink, Loader2 } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
@@ -545,6 +545,45 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; if (share) broadcast({ t: 'present', p }); };
   // Re-send what I'm presenting so people who join later see it too.
   useEffect(() => { if (presentMine.current && presenting) broadcast({ t: 'present', p: presenting }); }, [peerCount, token]); // eslint-disable-line
+  // Admin brochure feed for the Present panel: every brochure published from
+  // the Brochure Studio, listed live from the studio-published bucket through
+  // the admin list action — a brochure created in the studio appears here on
+  // its own, no wiring per brochure.
+  const [brochureList, setBrochureList] = useState<{ slug: string; title: string; path: string }[]>([]);
+  const [brochureLoading, setBrochureLoading] = useState(false);
+  const loadBrochures = useCallback(async () => {
+    setBrochureLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('brochure-publish', { body: { action: 'list' } });
+      if (error) throw error;
+      const rows = (data?.brochures || []) as { slug: string }[];
+      const list = await Promise.all(rows.map(async ({ slug }) => {
+        const path = slug.startsWith('b-') ? `/b/${slug.slice(2)}` : `/${slug}`;
+        let title = '';
+        try {
+          const r = await fetch(supabase.storage.from('studio-published').getPublicUrl(`brochures/${slug}.json`).data.publicUrl);
+          if (r.ok) { const doc = await r.json(); if (doc && typeof doc.title === 'string') title = doc.title.trim(); }
+        } catch { /* fall back to the slug */ }
+        if (!title) title = (slug.startsWith('b-') ? slug.slice(2) : slug).replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        return { slug, title, path };
+      }));
+      setBrochureList(list);
+    } catch {
+      // List feed unavailable (function not redeployed yet): fall back to the
+      // platform brochures wired into the live shop packages.
+      const seen = new Set<string>();
+      const fall: { slug: string; title: string; path: string }[] = [];
+      for (const k of SFH_PACKAGES) { if (k.brochure && !seen.has(k.brochure)) { seen.add(k.brochure); fall.push({ slug: k.brochure.slice(1), title: k.name, path: k.brochure }); } }
+      setBrochureList(fall);
+    }
+    setBrochureLoading(false);
+  }, []);
+  useEffect(() => {
+    if (!presentOpen || !(isAdmin || isHost)) return;
+    loadBrochures();
+    const t = setInterval(loadBrochures, 20000);
+    return () => clearInterval(t);
+  }, [presentOpen, isAdmin, isHost, loadBrochures]);
   const onFiles = async (list: FileList | null) => {
     const f = list?.[0];
     if (!f) return;
@@ -841,6 +880,23 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <button onClick={openLink} className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs">Open</button>
             </div>
             <button onClick={() => fileInput.current?.click()} className="w-full flex items-center justify-center gap-2 py-2 rounded-full border border-white/10 text-zinc-200 text-sm"><Upload className="w-4 h-4" />Upload a file (or drop it on the call)</button>
+            {(isAdmin || isHost) && (
+              <div className="space-y-1.5">
+                <p className="flex items-center gap-1.5 px-1 font-mono text-[10px] tracking-wider text-zinc-400"><BookOpen className="w-3.5 h-3.5 text-emerald-400" />BROCHURES — SHARE TO THE SCREEN{brochureLoading && <Loader2 className="w-3 h-3 animate-spin" />}</p>
+                {brochureList.length === 0 && !brochureLoading && <p className="px-1 text-xs text-zinc-500">No published brochures yet — create one in the Brochure Studio and it shows up here automatically.</p>}
+                {brochureList.length > 0 && (
+                  <div className="max-h-44 overflow-y-auto space-y-1">
+                    {brochureList.map((b) => (
+                      <button key={b.slug} onClick={() => { present({ name: b.title, url: b.path, kind: 'link' }); setPresentOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-left hover:bg-white/5">
+                        <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="flex-1 min-w-0"><span className="block truncate text-sm text-zinc-100">{b.title}</span><span className="block font-mono text-[10px] text-zinc-500">{b.path}</span></span>
+                        <span className="px-2.5 py-1 rounded-full bg-white text-zinc-900 text-[11px] shrink-0">Share</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
         <div className={`flex items-center gap-1.5 px-2 py-1.5 bg-zinc-900 border border-white/10 ${mobile ? 'w-full rounded-2xl justify-between' : 'rounded-full'}`}>
