@@ -81,7 +81,7 @@ const TRANSLATE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/live-tr
 /** Free translation on the platform's own AI — no credits, no outside service. */
 export async function translateTexts(texts: string[], target: string): Promise<string[] | null> {
   try {
-    const r = await fetch(TRANSLATE_URL, { method: 'POST', headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ texts, target }) });
+    const r = await fetch(TRANSLATE_URL, { method: 'POST', headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ texts, target }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !Array.isArray(d.translations)) return null;
     return d.translations.map((t: unknown) => String(t ?? ''));

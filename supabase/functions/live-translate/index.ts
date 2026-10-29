@@ -83,7 +83,8 @@ Deno.serve(async (req) => {
       if (lines.length === texts.length) arr = lines;
     }
     if (!Array.isArray(arr)) return json({ error: "Bad translation shape" }, 502);
-    return json({ translations: arr.map((t) => String(t ?? "")) });
+    // Models sometimes keep the "1." line numbers inside the strings — strip them.
+    return json({ translations: arr.map((t) => String(t ?? "").replace(/^\s*\d+[.)]\s*/, "").trim()) });
   } catch (e) {
     return json({ error: String((e as Error)?.message || e) }, 500);
   }
