@@ -14,12 +14,25 @@ function read(scope: string): string | null {
   } catch { return null; }
 }
 
-export function useRememberedTab(scope: string, urlTab: string | null, fallback: string) {
-  const [tab, setTabState] = useState<string>(() => urlTab || read(scope) || fallback);
+export function useRememberedTab(scope: string, urlTab: string | null, fallback: string, validTabs?: string[]) {
+  // Validate every incoming tab value against the dashboard's real tab
+  // list when one is provided. A foreign value — a ?tab= param carried
+  // over from another page (profile pages use their own tab names), or
+  // a tab id from an older build — used to be trusted and persisted
+  // verbatim; the dashboard then matched NO tab and rendered an empty
+  // content area ("no tab open until selected", founder 2026-10-29).
+  const isValid = useCallback((t: string | null | undefined): t is string =>
+    !!t && (!validTabs || validTabs.includes(t)), [validTabs]);
+  const [tab, setTabState] = useState<string>(() => {
+    if (isValid(urlTab)) return urlTab;
+    const remembered = read(scope);
+    return isValid(remembered) ? remembered : fallback;
+  });
   const setTab = useCallback((t: string) => {
+    if (!isValid(t)) return;
     setTabState(t);
     try { localStorage.setItem(PREFIX + scope, JSON.stringify({ t, at: Date.now() })); } catch { /* ignore */ }
-  }, [scope]);
+  }, [scope, isValid]);
   useEffect(() => { if (urlTab) setTab(urlTab); }, [urlTab, setTab]);
   return [tab, setTab] as const;
 }

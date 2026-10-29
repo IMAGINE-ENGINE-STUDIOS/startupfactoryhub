@@ -751,3 +751,13 @@ html:not(.dark) .matrix-admin input, html:not(.dark) .matrix-admin textarea, htm
 .brochure-calm *::after {
   animation: none !important;
 }
+
+/* Social feed windowing (2026-10-29): off-screen post cards skip layout
+   and paint, and the browser may release their decoded banner/image
+   memory. Without this, paging through the feed mounted dozens of
+   full-size (~1-2 MB) event banners at once and mobile browsers killed
+   the page mid-scroll. */
+.feed-window > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}

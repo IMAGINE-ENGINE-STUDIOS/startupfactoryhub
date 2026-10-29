@@ -245,9 +245,14 @@ export const EventPostCard = ({
         {/* Banner Image or Gradient Header */}
         {eventData.banner_url ? (
           <div className="h-32 sm:h-40 relative overflow-hidden">
-            <img 
-              src={eventData.banner_url} 
+            <img
+              src={eventData.banner_url.includes('/storage/v1/object/public/') && !eventData.banner_url.includes('?')
+                ? eventData.banner_url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=900&quality=75&resize=cover'
+                : eventData.banner_url}
               alt={eventData.title}
+              loading="lazy"
+              decoding="async"
+              onError={(e) => { const img = e.currentTarget; if (img.src !== eventData.banner_url) img.src = eventData.banner_url!; }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />

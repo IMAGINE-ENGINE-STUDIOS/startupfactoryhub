@@ -145,6 +145,7 @@ export default function UnifiedCommunityFeed({
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  const offsetRef = useRef(0);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const handleUserClick = (userId: string) => {
     setSelectedUserId(userId);
@@ -166,30 +167,35 @@ export default function UnifiedCommunityFeed({
       });
     }
 
-    // Set up real-time subscription
+    // Set up real-time subscription. A full refetch RESETS the feed to
+    // page 1 — if the reader has paged down (offset beyond the first
+    // page), that yanks the list out from under them mid-scroll (a
+    // visible glitch/jump). While paged, skip the reset; new posts
+    // surface on the next remount or manual refresh instead.
+    const refreshIfAtTop = () => { if (offsetRef.current <= limit) fetchPosts(); };
     const channel = supabase.channel('feed-posts').on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
       table: 'feed_posts'
-    }, () => fetchPosts()).on('postgres_changes', {
+    }, () => refreshIfAtTop()).on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
       table: 'post_likes'
     }, () => {
-      fetchPosts();
+      refreshIfAtTop();
       if (user) fetchUserLikes();
     }).on('postgres_changes', {
       event: 'DELETE',
       schema: 'public',
       table: 'post_likes'
     }, () => {
-      fetchPosts();
+      refreshIfAtTop();
       if (user) fetchUserLikes();
     }).on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
       table: 'post_comments'
-    }, () => fetchPosts()).on('postgres_changes', {
+    }, () => refreshIfAtTop()).on('postgres_changes', {
       event: 'DELETE',
       schema: 'public',
       table: 'feed_posts'
@@ -341,9 +347,11 @@ export default function UnifiedCommunityFeed({
         return [...prev, ...uniqueNew];
       });
       setOffset(currentOffset + limit);
+      offsetRef.current = currentOffset + limit;
     } else {
       setPosts(formattedPosts);
       setOffset(limit);
+      offsetRef.current = limit;
       setHasMore(true);
     }
     setLoadingMore(false);
@@ -1045,8 +1053,10 @@ export default function UnifiedCommunityFeed({
         </div>}
 
 
-      {/* Posts Grid */}
-      <div className="space-y-4">
+      {/* Posts Grid — .feed-window lets the browser skip rendering and
+          release image memory for off-screen cards (see index.css);
+          without it a long feed of full-size banners crashes mobile. */}
+      <div className="space-y-4 feed-window">
         {posts.map((post, index) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
@@ -1212,7 +1222,7 @@ export default function UnifiedCommunityFeed({
                             ))}
                             {imageUrls.map((url, idx) => (
                               <div key={`i-${idx}`} className="relative cursor-pointer group" onClick={() => openLightbox(imageUrls, idx)}>
-                                <img src={url} alt={`Media ${idx + 1}`} className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover transition-transform group-hover:brightness-90" />
+                                <img src={url} alt={`Media ${idx + 1}`} loading="lazy" decoding="async" className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover transition-transform group-hover:brightness-90" />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                   <div className="bg-black/50 rounded-full p-2">
                                     <ZoomIn className="h-5 w-5 text-white" />

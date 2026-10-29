@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle, Brain, MessageSquare } from "lucide-react";
+import { Home, User, HelpCircle, Brain, RadioTower } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,8 @@ export function DashboardHeader() {
   // The Calendar top icon was removed 2026-10-28 (founder direction):
   // the calendar now lives as its own tab in every dashboard's tab bar,
   // right after Tools.
+  // The Messages top icon was removed 2026-10-29 (founder direction):
+  // it was never an approved header item — do not re-add it here.
 
   // Mobile: lay icons out in two rows so all of them stay visible without
   // overlapping the profile / tabs underneath the fixed header.
@@ -30,15 +32,6 @@ export function DashboardHeader() {
         <div className="flex items-center gap-1.5">
           <LinkedAccountsSwitcher compact />
           <GlobalClock />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/messages")}
-            className={iconBtnClass}
-            title="Messages"
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Button>
           <NotificationCenter
             data-tour="notifications-button"
             className={iconBtnClass}
@@ -47,6 +40,15 @@ export function DashboardHeader() {
             data-tour="wallet-button"
             className={iconBtnClass}
           />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/socialite")}
+            className={iconBtnClass}
+            title="Socialite — broadcast & social"
+          >
+            <RadioTower className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Row 2 — secondary / navigation actions */}
@@ -87,16 +89,6 @@ export function DashboardHeader() {
       <LinkedAccountsSwitcher />
       <GlobalClock />
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate("/messages")}
-        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
-        title="Messages"
-      >
-        <MessageSquare className="h-4 w-4" />
-      </Button>
-
       <ThemeToggle />
 
       <Button
@@ -131,6 +123,16 @@ export function DashboardHeader() {
         title={t("nav.home")}
       >
         <Home className="h-4 w-4" />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate("/socialite")}
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
+        title="Socialite — broadcast & social"
+      >
+        <RadioTower className="h-4 w-4" />
       </Button>
     </div>
   );
