@@ -153,15 +153,22 @@ export class SentencePump {
     }
     if (lastEnd > 0) this.consumed += lastEnd;
     if (out.length) { this.emitted = true; return out; }
-    /* First-chunk acceleration (research §3): before ANYTHING has
-     * been spoken this reply, a long first sentence would leave the
-     * user in silence while it generates. Release the first CLAUSE
-     * (comma/semicolon/dash boundary, >= 4 words in) to speech as
-     * soon as it exists; the rest follows as sentences. */
-    if (!this.emitted) {
-      const cm = /[,;:—–]\s+/.exec(tail);
-      if (cm && cm.index >= 16 && tail.slice(0, cm.index).split(/\s+/).length >= 4) {
-        const clause = tail.slice(0, cm.index).trim();
+    /* Clause-by-clause release (research §3, generalized to the whole
+     * reply 2026-10-29): a long sentence would otherwise leave the
+     * listener in silence while it generates AND while its speech is
+     * synthesized. Whenever the unreleased tail has grown long
+     * (>= 10 words) with no sentence end in it yet, release its first
+     * CLAUSE (comma/semicolon/dash boundary, >= 16 chars and >= 4
+     * words in) to speech as soon as it exists; the rest follows the
+     * same way, then as sentences. Speech generation therefore stays
+     * ahead of playback for the entire reply instead of stalling at
+     * every long sentence. Bookkeeping is unchanged: pieces stay in
+     * order and no text is dropped or duplicated. */
+    const rest = tail.slice(lastEnd);
+    if (rest.split(/\s+/).filter(Boolean).length >= 10) {
+      const cm = /[,;:—–]\s+/.exec(rest);
+      if (cm && cm.index >= 16 && rest.slice(0, cm.index).split(/\s+/).length >= 4) {
+        const clause = rest.slice(0, cm.index).trim();
         if (clause) {
           this.consumed += cm.index + cm[0].length;
           this.emitted = true;
