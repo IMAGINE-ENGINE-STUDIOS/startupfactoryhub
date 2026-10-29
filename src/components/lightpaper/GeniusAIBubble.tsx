@@ -1150,19 +1150,18 @@ IMPORTANT:
             const hasOptions = lastAssistant ? !!parseOptions(lastAssistant.content) : false;
             const showTextInput = !hasOptions || phase === "stopped" || phase === "input";
 
-            // If options are present and phase is conversation, only show a hint
-            if (hasOptions && phase === "conversation") {
-              return (
-                <div className="px-4 pb-3 pt-1 flex-shrink-0">
-                  <p className={`text-xs ${fg} opacity-40 text-center`}>
-                    👆 Select an option above to continue
-                  </p>
-                </div>
-              );
-            }
+            // Options are an addition to the composer, never a replacement:
+            // the textarea below always renders; when the last message
+            // carries options we show a hint above it instead of hiding it.
+            const showOptionsHint = hasOptions && phase === "conversation";
 
             return (
               <div className="px-4 pb-3 pt-1 flex-shrink-0">
+                {showOptionsHint && (
+                  <p className={`text-xs ${fg} opacity-40 text-center pb-2`}>
+                    👆 Select an option above, or just type
+                  </p>
+                )}
                 {/* One-click document builders */}
                 {conversation.length === 0 && phase === "input" && (
                   <div className="flex flex-wrap gap-1.5 mb-2">

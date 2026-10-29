@@ -1491,7 +1491,6 @@ You can help with:
   const lastAssistantMsg = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1] : null;
 
   const lastMsgOptions = lastAssistantMsg?.role === 'assistant' ? parseOptions(lastAssistantMsg.content) : null;
-  const hideInput = lastMsgOptions && !isAiLoading;
 
   // Group tools by category
   const groupedTools = ALL_TOOLS.reduce((acc, tool) => {
@@ -2084,11 +2083,12 @@ You can help with:
                     )}
 
                     {/* Show select hint when options available */}
-                    {hideInput ? (
+                    {lastMsgOptions && !isAiLoading && (
                       <p className="text-center text-xs text-muted-foreground py-2">
-                        👆 Select an option above to continue
+                        👆 Select an option above, or just type
                       </p>
-                    ) : (
+                    )}
+                    {(
                       <>
                       <LiveCaptions surfaceId="genius-bubble" name="Genius" />
                       {geniusVoice.talkOn && (
