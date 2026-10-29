@@ -280,6 +280,14 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [moreOpen, setMoreOpen] = useState(false);
   const [sideHidden, setSideHidden] = useState(false);
   const openSheet = (k: 'shop' | 'chat' | 'text') => { setTab(k); setSheetOpen(true); };
+  // Broadcast to the host's linked social accounts (live-broadcast edge fn).
+  const [bcOpen, setBcOpen] = useState(false);
+  const [bcAccounts, setBcAccounts] = useState<{ platform: string; linked: boolean; liveSupported: boolean }[] | null>(null);
+  const [bcSel, setBcSel] = useState<string[]>([]);
+  const [bcTitle, setBcTitle] = useState('');
+  const [bcBusy, setBcBusy] = useState(false);
+  const [bcResults, setBcResults] = useState<{ platform: string; ok: boolean; liveUrl?: string | null; error?: string }[] | null>(null);
+  const [bcLive, setBcLive] = useState(false);
   const [txOn, setTxOn] = useState(true);
   const [txLines, setTxLines] = useState<TxLine[]>([]);
   const [txPartial, setTxPartial] = useState('');
@@ -697,6 +705,49 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     try { await navigator.clipboard.writeText(u.toString()); setNotice('Camera link copied — open it on your phone or second camera'); }
     catch { setNotice(u.toString()); }
   };
+  // ---------- Broadcast to linked social accounts (live-broadcast fn) ----------
+  const openBroadcast = async () => {
+    setBcOpen(true);
+    try {
+      const [acc, st] = await Promise.all([
+        supabase.functions.invoke('live-broadcast', { body: { action: 'accounts' } }),
+        supabase.functions.invoke('live-broadcast', { body: { action: 'status', room: name } }),
+      ]);
+      if (acc.error) throw new Error(acc.data?.error || acc.error.message || 'Could not load your accounts');
+      setBcAccounts(acc.data?.accounts ?? []);
+      const liveRows = (st.data?.broadcasts ?? []).filter((b: any) => b.status === 'live');
+      if (liveRows.length) {
+        setBcLive(true);
+        setBcResults(liveRows.map((b: any) => ({ platform: b.platform, ok: true, liveUrl: b.live_url })));
+        setBcSel((s) => s.length ? s : liveRows.map((b: any) => b.platform));
+      }
+    } catch (e: any) { setNotice(e.message || 'Could not load broadcast accounts'); }
+  };
+  const startBroadcast = async () => {
+    if (!bcSel.length || bcBusy) return;
+    setBcBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('live-broadcast', { body: { action: 'start', room: name, title: bcTitle.trim() || 'Live on Startup Factory Hub', platforms: bcSel } });
+      if (error) throw new Error(data?.error || error.message || 'Broadcast failed to start');
+      setBcResults(data?.results ?? []);
+      if (data?.ok) { setBcLive(true); setNotice('You are live on the selected accounts'); }
+      else setNotice(data?.error || 'Broadcast could not start on the selected accounts');
+    } catch (e: any) { setNotice(e.message || 'Broadcast failed to start'); }
+    setBcBusy(false);
+  };
+  const stopBroadcast = async () => {
+    if (bcBusy) return;
+    setBcBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('live-broadcast', { body: { action: 'stop', room: name } });
+      if (error) throw new Error(data?.error || error.message || 'Could not stop the broadcast');
+      setBcLive(false);
+      setBcResults(null);
+      setNotice('Broadcast stopped');
+    } catch (e: any) { setNotice(e.message || 'Could not stop the broadcast'); }
+    setBcBusy(false);
+  };
+  const toggleBcPlatform = (p: string) => setBcSel((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p]);
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
   const checkout = () => { if (cartItems.length) pay('cart', { items: cartItems }); };
 
@@ -1110,6 +1161,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           <span className="font-mono text-xs px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-500 truncate max-w-[150px]">ROOM {name}</span>
           <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 font-mono text-xs text-white shadow-sm hover:bg-zinc-700 transition">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
           <button onClick={copyCamLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-700 hover:bg-zinc-50 transition"><SwitchCamera className="w-3.5 h-3.5" />Add camera</button>
+          {isHost && !camMode && <button onClick={openBroadcast} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 font-mono text-xs text-white shadow-sm hover:opacity-90 transition"><Radio className="w-3.5 h-3.5" />Broadcast{bcLive ? ' • LIVE' : ''}</button>}
           <span className={`ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full ${isHost ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>{isHost ? 'HOST' : 'GUEST'}</span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1200,6 +1252,68 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       {stage}
       {!camMode && mobile && sheetOpen && <div className="fixed inset-0 z-[55] bg-black/50" onClick={() => setSheetOpen(false)} />}
       {!camMode && sidebar}
+      {bcOpen && (
+        <div className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4" onClick={() => setBcOpen(false)}>
+          <div className="w-full max-w-md bg-zinc-900 text-white rounded-3xl border border-white/10 shadow-2xl p-5 space-y-4 max-h-[88dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3">
+              <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0"><Radio className="w-5 h-5 text-white" /></span>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-base leading-tight">Broadcast live</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">Stream this room to your linked accounts</p>
+              </div>
+              <button aria-label="Close broadcast panel" onClick={() => setBcOpen(false)} className="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition shrink-0"><X className="w-4 h-4" /></button>
+            </div>
+            {bcAccounts === null ? (
+              <p className="text-sm text-zinc-400">Loading your accounts…</p>
+            ) : (
+              <div className="space-y-2">
+                {bcAccounts.map((a) => (
+                  <div key={a.platform} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3.5 py-2.5">
+                    <span className="font-mono text-xs capitalize">{a.platform}</span>
+                    {!a.linked ? (
+                      <span className="ml-auto text-[11px] text-zinc-500 text-right">Not linked — add it in the Marketing tab</span>
+                    ) : !a.liveSupported ? (
+                      <span className="ml-auto text-[11px] text-zinc-500 text-right">Live via API not available for this platform yet</span>
+                    ) : (
+                      <label className="ml-auto flex items-center gap-2 text-[11px] text-zinc-300 cursor-pointer">
+                        {bcLive && bcResults?.some((r) => r.platform === a.platform && r.ok) && <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">ON AIR</span>}
+                        <input type="checkbox" checked={bcSel.includes(a.platform)} onChange={() => toggleBcPlatform(a.platform)} disabled={bcLive || bcBusy} className="w-4 h-4 accent-emerald-500" />
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <input value={bcTitle} onChange={(e) => setBcTitle(e.target.value)} maxLength={120} placeholder="Stream title"
+              className="w-full rounded-xl border border-white/10 bg-zinc-800 px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-emerald-400/60" />
+            {bcResults && (
+              <div className="space-y-1.5">
+                {bcResults.map((r) => (
+                  <div key={r.platform} className="flex items-center gap-2 text-xs">
+                    <span className="font-mono capitalize">{r.platform}</span>
+                    {r.ok ? (
+                      <>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">LIVE</span>
+                        {r.liveUrl && <a href={r.liveUrl} target="_blank" rel="noreferrer" className="text-teal-300 underline truncate">Watch</a>}
+                      </>
+                    ) : (
+                      <span className="text-red-300">{r.error || 'Failed to start'}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              {!bcLive ? (
+                <button onClick={startBroadcast} disabled={bcBusy || !bcSel.length} className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 font-mono text-xs text-white shadow hover:opacity-90 transition disabled:opacity-40">{bcBusy ? 'Working…' : 'Go live'}</button>
+              ) : (
+                <button onClick={stopBroadcast} disabled={bcBusy} className="flex-1 py-2.5 rounded-full border border-red-400/60 text-red-300 font-mono text-xs hover:bg-red-500/10 transition disabled:opacity-40">{bcBusy ? 'Working…' : 'Stop broadcast'}</button>
+              )}
+              <button onClick={() => setBcOpen(false)} className="px-4 py-2.5 rounded-full border border-white/15 font-mono text-xs text-zinc-300 hover:bg-white/5 transition">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
