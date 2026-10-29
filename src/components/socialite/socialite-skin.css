@@ -1,15 +1,14 @@
-/* Extracted from Wonderlands src/index.css (HEAD 2df15b7) — the .socialite-skin
-   scoped block SOCIALITE's UI depends on. Merge into SFH's src/index.css on
-   integration; not imported by any staged component directly. */
-/* SOCIALITE skin — re-themes the embedded admin email panels (cyan "command center"
-   look) to SOCIALITE's monochrome zinc style. Scoped to .socialite-skin only. */
-.socialite-skin [class*="text-cyan-"] { color: #f4f4f5 !important; }
-.socialite-skin [class*="text-cyan-400/"] { color: #71717a !important; }
-.socialite-skin [class*="border-cyan-"], .socialite-skin [class*="border-slate-"] { border-color: #27272a !important; }
-.socialite-skin [class*="bg-gray-900"], .socialite-skin [class*="bg-slate-900"], .socialite-skin .bg-card { background-color: #161617 !important; }
+/* SOCIALITE skin — SFH Agents theme (founder direction 2026-10-29):
+   re-themes the embedded admin-style panels to the Startup Factory Hub
+   Agents UI language — glassy dark panels, emerald-to-teal gradient
+   primaries, pill controls. Scoped to .socialite-skin only. */
+.socialite-skin [class*="text-cyan-"] { color: #6ee7b7 !important; }
+.socialite-skin [class*="text-cyan-400/"] { color: #5eead4 !important; }
+.socialite-skin [class*="border-cyan-"], .socialite-skin [class*="border-slate-"] { border-color: rgba(255,255,255,0.1) !important; }
+.socialite-skin [class*="bg-gray-900"], .socialite-skin [class*="bg-slate-900"], .socialite-skin .bg-card { background-color: rgba(24,24,27,0.72) !important; backdrop-filter: blur(12px); }
 .socialite-skin [class*="bg-gray-800"] { background-color: #18181b !important; }
-.socialite-skin [class*="bg-cyan-600"] { background-color: #fff !important; color: #000 !important; }
-.socialite-skin [class*="bg-cyan-600"]:hover { background-color: #e4e4e7 !important; }
+.socialite-skin [class*="bg-cyan-600"] { background-image: linear-gradient(135deg, #10b981, #14b8a6) !important; background-color: transparent !important; color: #fff !important; box-shadow: 0 6px 16px rgba(16,185,129,0.35); }
+.socialite-skin [class*="bg-cyan-600"]:hover { filter: brightness(1.08); }
 .socialite-skin .rounded-lg, .socialite-skin .rounded-xl { border-radius: 18px; }
-.socialite-skin input, .socialite-skin textarea, .socialite-skin [role="combobox"] { background-color: #18181b !important; border-color: #27272a !important; border-radius: 12px; }
+.socialite-skin input, .socialite-skin textarea, .socialite-skin [role="combobox"] { background-color: #18181b !important; border-color: rgba(255,255,255,0.1) !important; border-radius: 12px; }
 .socialite-skin button[class*="rounded-md"] { border-radius: 9999px; }

@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { Bot, DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
+import { Bot, Megaphone, DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +35,7 @@ import LiveRooms from '@/components/LiveRooms';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
+import SocialitePage from '@/pages/Socialite';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import { format, parseISO } from 'date-fns';
 
@@ -641,6 +642,7 @@ export default function InvestorDashboard() {
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
+              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -929,6 +931,10 @@ export default function InvestorDashboard() {
 
           <TabsContent value="call-agents" className="space-y-4">
             <SFHCallAgents />
+          </TabsContent>
+
+          <TabsContent value="marketing" className="space-y-4">
+            <SocialitePage embedded />
           </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">

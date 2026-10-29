@@ -17,24 +17,20 @@ import { getSavedTz } from "@/lib/socialite/sendTime";
 const BUCKET = "socialite-autopost";
 
 export const DEFAULT_TEMPLATES = [
-  "From dirt to dive-in ready. {project} — designed and built by Startup Factory Hub. DM us for a free design consult.",
-  "Same yard. Completely different life. {project}, a Startup Factory Hub backyard. Your staycation starts at home — free consult, link in bio.",
-  "Your backyard, but better. {project} by Startup Factory Hub. Comment 'POOL' and we'll send ideas for yours.",
-  "Florida lives outside. Build for it. {project} — another Startup Factory Hub build in Central Florida. Save this for your backyard mood board.",
-  "Plot twist: it's your backyard. {project}, designed and built by Startup Factory Hub. Tag who you'd invite first.",
-  "Pool Build Diary: the details nobody sees once the water's in — the steel, the plumbing, the finish work. {project} by Startup Factory Hub. Follow along for the next stage.",
-  "3 things nobody tells you before building a pool in Florida: permits and HOA approval take time, a screen enclosure changes your whole budget picture, and hurricane season shapes the schedule. We handle all of it. {project} — Startup Factory Hub. DM us for a free design consult.",
-  "Why they chose us, in one frame: honest numbers, a design that fits the home, and a crew that treats the yard like their own. {project} — Startup Factory Hub.",
-  "What a real Florida pool project includes: design, permitting, dig, steel, plumbing, shell, finish, and the first swim. {project} by Startup Factory Hub — this is what the journey looks like. Free consult at startupfactoryhub.com",
-  "Orlando summers were made for this. {project} — built for sunshine, designed for you, by Startup Factory Hub. Comment 'POOL' and we'll send ideas.",
-  "Golden hour at {project}. Built for cannonballs, cocktails, and quiet mornings alike — Startup Factory Hub. Your turn: free design consult, link in bio.",
-  "Where summer never ends. {project}, a Startup Factory Hub backyard in Central Florida. Dig it. Dream it. Dive in. Start at startupfactoryhub.com",
+  "Building what comes next. {project} — a startup growing inside Startup Factory Hub. Follow the journey.",
+  "Founders don't wait for permission. {project} is building with Startup Factory Hub.",
+  "From idea to company: {project}, venture-built at Startup Factory Hub. This is what the factory floor looks like.",
+  "Every week, founders ship. {project} — one of the startups building at Startup Factory Hub.",
+  "The pitch is just the start. {project} is doing the work — venture building at Startup Factory Hub.",
+  "Orlando is building. {project}, a Startup Factory Hub startup. Watch this space.",
+  "Behind the scenes at the factory: {project} — building, testing, shipping. Startup Factory Hub.",
+  "Meet {project}: solving a real problem, backed by the Startup Factory Hub venture builder.",
 ];
 
 export const DEFAULT_TAGSETS = [
-  "#CentralFloridaPools #OrlandoPoolBuilder #FloridaBackyard #PoolBuild #BackyardGoals #LakelandFL #WinterHavenFL #StartupFactoryHub",
-  "#CentralFloridaPools #OrlandoPoolBuilder #FloridaBackyard #BackyardGoals #LuxuryPools #PoolDesign #StartupFactoryHub #Staycation",
-  "#PoolBuild #FloridaBackyard #OrlandoPoolBuilder #CentralFloridaPools #OutdoorLiving #DreamBackyard #StartupFactoryHub #PoolGoals",
+  "#StartupFactoryHub #VentureBuilder #OrlandoStartups #Founders #PreSeed #BuildInPublic",
+  "#StartupFactoryHub #Startups #Innovation #VentureBuilding #OrlandoTech #Founders",
+  "#BuildInPublic #StartupFactoryHub #PreSeed #SaaS #AIStartups #VentureBuilder",
 ];
 
 type Cfg = {

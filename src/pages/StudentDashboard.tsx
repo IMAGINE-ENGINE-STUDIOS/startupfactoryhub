@@ -23,6 +23,7 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
+import SocialitePage from '@/pages/Socialite';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -37,7 +38,7 @@ import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
-import { Bot, Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video, Rocket, ExternalLink, FileText} from 'lucide-react';
+import { Bot, Megaphone, Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video, Rocket, ExternalLink, FileText} from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -120,6 +121,7 @@ export default function StudentDashboard() {
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
+              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -412,6 +414,10 @@ export default function StudentDashboard() {
 
           <TabsContent value="call-agents" className="space-y-4">
             <SFHCallAgents />
+          </TabsContent>
+
+          <TabsContent value="marketing" className="space-y-4">
+            <SocialitePage embedded />
           </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">

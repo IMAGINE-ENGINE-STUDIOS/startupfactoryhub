@@ -1,8 +1,6 @@
 /**
  * State is cached in localStorage (pf_* keys). Real Meta posting needs META secrets + edge function.
  */
-import socialiteIcon from "@/assets/socialite/socialite-icon.webp.asset.json";
-import socialiteWordmark from "@/assets/socialite/socialite-wordmark.webp.asset.json";
 import "@/components/socialite/socialite-skin.css";
 import SocialiteInsights from "@/components/socialite/SocialiteInsights";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +17,7 @@ import SocialiteScheduled from "@/components/socialite/SocialiteScheduled";
 import SendTimePicker from "@/components/socialite/SendTimePicker";
 import { scheduleSend, getSavedTz, fmtIn, zonedToDate, SEND_TIMEZONES, TZ_KEY } from "@/lib/socialite/sendTime";
 import TimezoneSelect from "@/components/socialite/TimezoneSelect";
-import { Receipt as ReceiptIcon, MessageCircle as MsgIcon, BookOpen } from "lucide-react";
+import { Receipt as ReceiptIcon, MessageCircle as MsgIcon, BookOpen, Megaphone } from "lucide-react";
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   AtSign,
@@ -204,7 +202,7 @@ function formatSize(n: number) {
   return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }
 
-export default function Socialite() {
+export default function Socialite({ embedded = false }: { embedded?: boolean }) {
   // core nav - ADDED automation + admin
   const [view, setView] = useState<"composer" | "automation" | "queue" | "calendar" | "dashboard" | "analytics" | "accounts" | "settings" | "datacontrol" | "messaging" | "sendtimes" | "billing" | "genius" | "api" | "shield">("dashboard");
   // Real connection status from the encrypted key vault (SOCIALITE → Accounts)
@@ -225,12 +223,12 @@ export default function Socialite() {
   // SFH: AuthContext has no profile — load the role from profiles.
   // SFH's admin predicate is profiles.role = 'admin' (WW used 'main_admin').
   const { user: authUser } = useAuth();
-  const [authProfile, setAuthProfile] = useState<{ role?: string } | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   useEffect(() => {
-    if (!authUser) { setAuthProfile(null); return; }
-    supabase.from('profiles').select('role').eq('id', authUser.id).maybeSingle().then(({ data }) => setAuthProfile(data as { role?: string } | null));
+    if (!authUser) { setIsOwner(false); return; }
+    // SFH roles live in user_roles (profiles has no role column).
+    supabase.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle().then(({ data }) => setIsOwner(!!data));
   }, [authUser]);
-  const isOwner = authProfile?.role === "admin";
   const STAFF_ONLY = new Set(["sendtimes"]);
   const canSee = (id: string) => isOwner || !STAFF_ONLY.has(id);
   const [scheduleAt, setScheduleAt] = useState(() => {
@@ -973,13 +971,21 @@ Use 2 hashtags max when promo present`;
     const topTopic = topicsArr[0]?.topic;
     const topTone = tones[0]?.tone;
 
-    const bestSlotLabel = slots[0]?.label || "8pm";
-    const secondSlotLabel = slots[1]?.label || "9am";
-    const bestSlotCtr = slots[0]?.avgCtr?.toFixed(1) || "4.2";
-    const secondCtr = slots[1]?.avgCtr?.toFixed(1) || "2.1";
-    const promoStr = topPromo ? `use ${topPromo} on ${autoPlatforms.includes("instagram" as PlatformId) ? "Instagram" : autoPlatforms[0] || "Instagram"}` : "use promo on Instagram";
-    const engagementLift = 0;
-    const recommendation = `Bot learned: Move 60% of posts to ${bestSlotLabel} + ${secondSlotLabel} (${bestSlotCtr}% CTR vs ${secondCtr}%) + ${promoStr} = +${engagementLift}% engagement. Top topic: ${topTopic || "product launch"} • Tone: ${topTone || "Minimal"} • ${topSlots.join(", ")} perform 2x better.`;
+    // Recommendation states ONLY what was computed from the user's real
+    // posts — no fallback numbers, no invented lift, no "Nx better" claims.
+    const bestSlotLabel = slots[0]?.label;
+    const secondSlotLabel = slots[1]?.label;
+    const bestSlotCtr = slots[0]?.avgCtr?.toFixed(1);
+    const secondCtr = slots[1]?.avgCtr?.toFixed(1);
+    const promoStr = topPromo ? `use ${topPromo} on ${autoPlatforms.includes("instagram" as PlatformId) ? "Instagram" : autoPlatforms[0] || "Instagram"}` : null;
+    const recParts: string[] = [];
+    if (bestSlotLabel && secondSlotLabel && bestSlotCtr && secondCtr) recParts.push(`Move 60% of posts to ${bestSlotLabel} + ${secondSlotLabel} (engagement score ${bestSlotCtr} vs ${secondCtr})`);
+    else if (bestSlotLabel) recParts.push(`Your best posting time so far is ${bestSlotLabel}`);
+    if (promoStr) recParts.push(promoStr);
+    if (topTopic) recParts.push(`Top topic: ${topTopic}`);
+    if (topTone) recParts.push(`Tone: ${topTone}`);
+    if (topSlots.length) recParts.push(`${topSlots.join(", ")} are your top slots`);
+    const recommendation = recParts.length ? `Bot learned: ${recParts.join(" • ")}` : "Bot learned: not enough posted data yet — keep posting and this gets smarter.";
 
     const brain: PerformanceBrainData = {
       slots,
@@ -1571,7 +1577,7 @@ Use 2 hashtags max when promo present`;
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0a0b] text-zinc-100 selection:bg-white/20 font-[Inter,system-ui,sans-serif] flex">
+    <div className={embedded ? "w-full bg-[#0a0a0b] text-zinc-100 selection:bg-emerald-500/30 font-[Inter,system-ui,sans-serif] flex rounded-2xl overflow-hidden border border-white/10" : "min-h-screen w-full bg-[#0a0a0b] text-zinc-100 selection:bg-emerald-500/30 font-[Inter,system-ui,sans-serif] flex"}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         * { font-family: 'Inter', system-ui, sans-serif; }
@@ -1591,21 +1597,20 @@ Use 2 hashtags max when promo present`;
         </div>
       )}
 
-      <aside className="hidden lg:flex w-[280px] shrink-0 flex-col border-r border-zinc-800/80 bg-[#0f0f10] sticky top-0 h-screen overflow-y-auto overscroll-contain">
+      <aside className={`hidden lg:flex w-[280px] shrink-0 flex-col border-r border-zinc-800/80 bg-[#0f0f10] sticky top-0 overflow-y-auto overscroll-contain ${embedded ? "max-h-[85vh]" : "h-screen"}`}>
         <div className="px-4 pt-6 pb-5 flex items-center justify-center gap-3">
           {whiteLabelConfig.enabled && whiteLabelConfig.logoUrl ? (
             <img src={whiteLabelConfig.logoUrl} alt={whiteLabelConfig.platformName} className="w-9 h-9 rounded-xl object-cover bg-white border border-zinc-800" />
           ) : (
-            /* Brand icon is fixed at exactly 1 inch wide (CSS inches); inverted to white on the dark sidebar */
-            <img src={socialiteIcon.url} alt="Socialite" className="w-[1in] max-w-none shrink-0 h-auto invert" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]"><Megaphone className="h-5 w-5" /></span>
           )}
           <div className="min-w-0 flex-1">
             {whiteLabelConfig.enabled ? (
               <div className="font-semibold text-[15px] leading-none tracking-tight">{whiteLabelConfig.platformName}</div>
             ) : (
-              <img src={socialiteWordmark.url} alt="Socialite" className="block w-full aspect-[7/1] object-cover object-center" />
+              <div className="font-semibold text-[17px] leading-none tracking-tight">Marketing</div>
             )}
-            <div className="text-[11px] text-zinc-500 mono mt-1 text-center">{whiteLabelConfig.enabled && whiteLabelConfig.hideBranding ? 'v2.4 • White-label' : 'v2.4'}</div>
+            <div className="text-[11px] text-zinc-500 mono mt-1">{whiteLabelConfig.enabled && whiteLabelConfig.hideBranding ? 'White-label' : 'Startup Factory Hub'}</div>
           </div>
         </div>
 
@@ -1629,7 +1634,7 @@ Use 2 hashtags max when promo present`;
               key={it.id}
               onClick={() => setView(it.id as any)}
               className={`w-full flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[13.5px] font-medium transition-all text-left relative ${
-                view === it.id ? "bg-white text-black shadow-[0_1px_2px_rgba(0,0,0,0.1)]" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                view === it.id ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
               }`}
             >
               <it.icon className="w-[18px] h-[18px]" />
@@ -1637,7 +1642,7 @@ Use 2 hashtags max when promo present`;
               {it.id==="automation" && automationEnabled && <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />}
               {it.id==="admin" && isAdmin && <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />}
               {it.badge ? (
-                <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full mono ${view === it.id ? "bg-black text-white" : "bg-zinc-800 text-zinc-300"}`}>
+                <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full mono ${view === it.id ? "bg-white/25 text-white" : "bg-zinc-800 text-zinc-300"}`}>
                   {it.badge}
                 </span>
               ) : null}
