@@ -8,6 +8,15 @@ export const MEMBERSHIP_TIERS = {
     yearly_product_id: null,
     yearly_price_id: null,
   },
+  members_club: {
+    name: "Members Club",
+    price: 50,
+    product_id: null,
+    price_id: "price_1UBP5CK5N1RcUVuYE6ZLPaqv",
+    yearly_price: 480,
+    yearly_product_id: null,
+    yearly_price_id: "price_1UBP6kK5N1RcUVuYyxfwBHLw",
+  },
   community: {
     name: "Community",
     price: 350,
@@ -43,6 +52,15 @@ export const MEMBERSHIP_TIERS = {
     yearly_price: 16200,
     yearly_product_id: "prod_U5clTYgMxNAnYI",
     yearly_price_id: "price_1T7RVuK5N1RcUVuY3vVk6mWC",
+  },
+  institutional: {
+    name: "Institutional",
+    price: 5000,
+    product_id: null,
+    price_id: null,
+    yearly_price: 0,
+    yearly_product_id: null,
+    yearly_price_id: null,
   },
   // Separate advisor membership — 25% referral commission, Investment
   // Committee introductions and event speaking opportunities.
