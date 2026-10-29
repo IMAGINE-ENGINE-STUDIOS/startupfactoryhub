@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Code, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, Box, Phone, PhoneOff, type LucideIcon } from 'lucide-react';
 import VoiceMicButton from '@/components/voice/VoiceMicButton';
 import { useVoiceCall, warmVoice } from '@/lib/voice/useVoiceCall';
 import { VoiceCallPill } from '@/components/voice/VoiceCallPill';
@@ -33,8 +33,6 @@ import {
   ScriptIcon, LegalIcon, BlogIcon, ReportIcon, LetterIcon, FreeWriteIcon,
   AnalyticsIcon, IntelIcon, ScanIcon, SentimentIcon, DocScanIcon,
   BroadcastIcon, MeetingIcon, ContactsIcon, JobsIcon, ResourcesIcon,
-  CodeIcon, DebugIcon, ExplainCodeIcon, ReviewIcon, ConvertIcon, SqlIcon,
-  TranslateIcon, NotesIcon,
   type GeniusIcon,
 } from '@/components/icons/GeniusToolIcons';
 
@@ -98,7 +96,7 @@ interface ToolItem {
   id: string;
   name: string;
   icon: GeniusIcon;
-  category: 'quick' | 'document' | 'code' | 'ai-tools' | 'actions';
+  category: 'quick' | 'document' | 'ai-tools' | 'actions';
   systemHint: string;
 }
 
@@ -131,19 +129,6 @@ const ALL_TOOLS: ToolItem[] = [
   { id: 'free', name: 'Free Writing', icon: FreeWriteIcon, category: 'document',
     systemHint: 'Write freely based on the user request. Adapt tone, style, and format to match needs.' },
 
-  { id: 'code-write', name: 'Write Code', icon: CodeIcon, category: 'code',
-    systemHint: 'Write complete, working code for whatever the user describes — any language, framework or platform. Ask which language/framework only if it is not stated or implied.' },
-  { id: 'code-debug', name: 'Debug & Fix', icon: DebugIcon, category: 'code',
-    systemHint: 'Debug the code the user pastes: find the root cause of the error or wrong behavior, explain it briefly, and return the corrected code.' },
-  { id: 'code-explain', name: 'Explain Code', icon: ExplainCodeIcon, category: 'code',
-    systemHint: 'Explain the code the user pastes in plain language: what it does, how it flows, and what each important part is for.' },
-  { id: 'code-review', name: 'Code Review', icon: ReviewIcon, category: 'code',
-    systemHint: 'Review the code the user pastes like a senior engineer: correctness bugs first, then security, performance, and readability — prioritized, with concrete fixes.' },
-  { id: 'code-convert', name: 'Convert Code', icon: ConvertIcon, category: 'code',
-    systemHint: 'Convert code from one language or framework to another, preserving behavior and using idiomatic patterns of the target.' },
-  { id: 'sql-builder', name: 'SQL Builder', icon: SqlIcon, category: 'code',
-    systemHint: 'Turn plain-language requests into correct SQL. Ask for the table/column names only if they are needed and not given; note the dialect (Postgres, MySQL, etc.) when it matters.' },
-
   { id: 'analytics', name: 'My Analytics', icon: AnalyticsIcon, category: 'ai-tools',
     systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
   { id: 'intelligence', name: 'Market Intelligence', icon: IntelIcon, category: 'ai-tools',
@@ -154,10 +139,6 @@ const ALL_TOOLS: ToolItem[] = [
     systemHint: 'SENTIMENT: Analyze sentiment, emotion, urgency, and tone of the text the user provides.' },
   { id: 'analyze-document', name: 'Document Analysis', icon: DocScanIcon, category: 'ai-tools',
     systemHint: 'DOCUMENT: Extract text, tables, and key information from a document image the user uploads.' },
-  { id: 'translate', name: 'Translate', icon: TranslateIcon, category: 'ai-tools',
-    systemHint: 'TRANSLATE: Translate the text the user provides into the language they name, preserving formatting, tone and meaning.' },
-  { id: 'meeting-notes', name: 'Meeting Notes', icon: NotesIcon, category: 'ai-tools',
-    systemHint: 'MEETING NOTES: Turn raw meeting notes or a transcript into a clean summary with decisions and action items.' },
 
   { id: 'create-post', name: 'Create Post', icon: BroadcastIcon, category: 'actions',
     systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
@@ -193,14 +174,6 @@ const MISSION_GREETINGS: Record<string, string> = {
   summarize: "**Smart Summary.** Paste any text and I'll condense it to the essentials.",
   sentiment: "**Sentiment Analysis.** Paste the message or review and I'll read tone, emotion and urgency.",
   'analyze-document': "**Document Analysis.** Upload or paste a document image and I'll extract the text, tables and key data.",
-  'code-write': "**Write Code mode.** Tell me what to build and the language or framework — I'll write complete, working code.",
-  'code-debug': "**Debug & Fix mode.** Paste your code and the error you're getting — I'll find the cause and fix it.",
-  'code-explain': "**Explain Code mode.** Paste any code and I'll walk you through what it does in plain language.",
-  'code-review': "**Code Review mode.** Paste your code and I'll review it like a senior engineer — bugs, security, performance, readability.",
-  'code-convert': "**Convert Code mode.** Paste code and name the target language or framework — I'll convert it, behavior preserved.",
-  'sql-builder': "**SQL Builder mode.** Describe the data you want in plain words and I'll write the SQL for it.",
-  translate: "**Translate mode.** Paste the text and name the target language — I'll translate it, keeping tone and formatting.",
-  'meeting-notes': "**Meeting Notes mode.** Paste your notes or a transcript and I'll return a clean summary with decisions and action items.",
   'create-post': "**Create Post.** Tell me what you want to announce and I'll draft the post — I can publish it for you too.",
   'create-meeting': "**Book Meeting.** Tell me who, when and the topic, and I'll set up the meeting link.",
   contacts: "**My Contacts.** Tell me who you're looking for and I'll search your network.",
@@ -215,7 +188,6 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
 
   'quick': { label: 'Quick', icon: Zap },
   'document': { label: 'Documents', icon: FileText },
-  'code': { label: 'Code', icon: Code },
   'ai-tools': { label: 'AI Tools', icon: Brain },
   'actions': { label: 'Actions', icon: Globe },
 };
@@ -227,7 +199,6 @@ const IMAGINE_TOOL: ToolItem = { id: 'imagine', name: 'Imagine Engine builder', 
 const TOOL_GROUPS = [
   { key: 'quick', label: 'INSTANT', gradient: 'from-amber-500 to-orange-500', ring: 'ring-amber-400/40' },
   { key: 'document', label: 'CREATE', gradient: 'from-violet-500 to-fuchsia-500', ring: 'ring-violet-400/40' },
-  { key: 'code', label: 'CODE', gradient: 'from-rose-500 to-red-500', ring: 'ring-rose-400/40' },
   { key: 'ai-tools', label: 'ANALYZE', gradient: 'from-cyan-500 to-blue-500', ring: 'ring-cyan-400/40' },
   { key: 'actions', label: 'EXECUTE', gradient: 'from-emerald-500 to-teal-500', ring: 'ring-emerald-400/40' },
 ] as const;
@@ -599,6 +570,17 @@ export default function FloatingChat() {
 
   // "+" attachment / knowledge menu
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [voiceMenuOpen, setVoiceMenuOpen] = useState(false);
+  const aiInputRef = useRef<HTMLTextAreaElement>(null);
+  // Composer auto-grow: as the user types, the box smoothly enlarges up to
+  // two rows, then scrolls internally.
+  useEffect(() => {
+    const el = aiInputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 64)}px`;
+    el.style.overflowY = el.scrollHeight > 64 ? 'auto' : 'hidden';
+  }, [aiInput]);
   const [showAttachHistory, setShowAttachHistory] = useState(false);
   const [isAttaching, setIsAttaching] = useState(false);
   const [knowledgeEnabled, setKnowledgeEnabled] = useState(true);
@@ -859,22 +841,6 @@ export default function FloatingChat() {
 6. Be direct and decisive. No hedging, no "it depends" unless truly necessary.`;
     }
 
-    // Code tools
-    const codeTool = ALL_TOOLS.find(t => t.id === toolId && t.category === 'code');
-    if (codeTool) {
-      return `You are **Genius AI**, an expert software engineer.
-
-RULES:
-1. Ask at MOST 2 SHORT multiple choice questions, and ONLY if the request is truly ambiguous (e.g. language or framework unknown). Use format: "A) Option B) Option C) Option". NEVER ask free-text questions.
-2. Otherwise produce the code IMMEDIATELY — complete, runnable, production quality. No placeholders, no TODO stubs, no "rest of the code" omissions.
-3. Put code in fenced Markdown code blocks with the language named. Keep explanations brief and outside the code blocks; comments inside the code only where they genuinely help.
-4. Follow modern best practices for the language/framework: types where supported, real error handling, and security basics (validate input, parameterize queries, never hardcode secrets).
-5. If the user pasted code, work on THEIR code and return the full corrected version — not a rewrite from scratch, unless they ask for one.
-6. STRICT COMPLIANCE: follow user instructions EXACTLY (language, framework, versions, length).
-
-CONTEXT: ${codeTool.systemHint}`;
-    }
-
     // Document presets
     const docTool = ALL_TOOLS.find(t => t.id === toolId && t.category === 'document');
     if (docTool) {
@@ -960,35 +926,6 @@ RULES:
 1. If no document has been attached yet, instruct the user to tap the 📎 paperclip below to upload one. Nothing else.
 2. Never invent content that isn't in the extracted text.
 3. Use Markdown tables for any tabular data.`;
-    }
-
-    if (toolId === 'translate') {
-      return `You are **Genius AI** in TRANSLATE mode.
-Translate the user's text into the language they name.
-
-RULES:
-1. If no target language is named, ask ONCE with multiple choice: "A) Spanish B) English C) French D) Portuguese" — then wait.
-2. Output the translation ONLY — no preface, no commentary, no original text repeated, unless the user asks for both side by side.
-3. Preserve Markdown formatting, line breaks, links and placeholders exactly. Keep names, numbers and terminology accurate; match the original tone (formal/informal).
-4. For long texts, translate the whole text — never truncate or summarize.`;
-    }
-
-    if (toolId === 'meeting-notes') {
-      return `You are **Genius AI** in MEETING NOTES mode.
-Turn the user's raw notes or transcript into clean, structured meeting notes.
-
-OUTPUT FORMAT (always Markdown):
-**Summary:** 2–4 sentences on what the meeting covered.
-**Decisions:**
-- each decision made, one bullet each
-**Action Items:**
-- [ ] task — owner (only if named) — due (only if stated)
-**Open Questions:** (only if any) bullets
-
-RULES:
-1. If the user has not pasted notes or a transcript yet, ask once: "Paste your notes or the transcript and I'll structure them." — nothing else.
-2. Never invent decisions, owners or deadlines that are not in the source.
-3. Keep names and numbers exactly as given.`;
     }
 
     // Actions
@@ -2221,7 +2158,7 @@ You can help with:
                           e.preventDefault();
                           sendAiMessage();
                         }}
-                        className="flex items-center gap-1.5"
+                        className="flex items-end gap-1.5"
                       >
                         {/* "+" Attach / knowledge menu */}
                         <div className="relative shrink-0" ref={attachMenuRef}>
@@ -2576,9 +2513,12 @@ You can help with:
                           </>
                         )}
 
-                        <Input
+                        <textarea
+                          ref={aiInputRef}
                           value={aiInput}
                           onChange={(e) => setAiInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); } }}
+                          rows={1}
                           placeholder={
                             activeTool?.id === 'quick'
                               ? 'Ask a quick question...'
@@ -2599,20 +2539,43 @@ You can help with:
                               : 'Ask Genius AI anything...'
                           }
                           disabled={isAiLoading}
-                          className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
+                          className="flex-1 min-w-0 resize-none text-sm leading-5 rounded-3xl border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-[height] duration-300 ease-in-out bg-background/50 backdrop-blur-sm px-4 py-2.5 outline-none"
                         />
-                        <VoiceMicButton onText={(t) => setAiInput((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary border-0" />
-                        <button
-                          type="button"
-                          onClick={geniusVoice.toggleTalk}
-                          onPointerEnter={() => warmVoice()}
-                          onFocus={() => warmVoice()}
-                          title={geniusVoice.talkOn ? "End the voice conversation with Genius" : "Talk with Genius: hands-free voice conversation — replies spoken aloud"}
-                          aria-label={geniusVoice.talkOn ? "End voice conversation" : "Start voice conversation with Genius"}
-                          className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${geniusVoice.talkOn ? "bg-emerald-500/25 text-emerald-500 animate-pulse" : "bg-primary/10 hover:bg-primary/20 text-primary"}`}
-                        >
-                          {geniusVoice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-                        </button>
+                        <div className="relative shrink-0">
+                          {voiceMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setVoiceMenuOpen(false)} />}
+                          {voiceMenuOpen && (
+                            <div className="absolute bottom-full right-0 mb-2 w-48 rounded-2xl border border-border bg-background shadow-2xl p-1.5 z-50">
+                              <button
+                                type="button"
+                                onClick={() => { setVoiceMenuOpen(false); geniusVoice.toggleTalk(); }}
+                                onPointerEnter={() => warmVoice()}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-muted text-sm text-left"
+                              >
+                                {geniusVoice.talkOn ? <PhoneOff className="h-4 w-4 text-emerald-500" /> : <Phone className="h-4 w-4" />}
+                                {geniusVoice.talkOn ? 'End call' : 'Call'}
+                                {geniusVoice.talkOn && <span className="ml-auto text-[10px] font-semibold text-emerald-500">LIVE</span>}
+                              </button>
+                              <div
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-muted text-sm cursor-pointer"
+                                onClick={(e) => { if (!(e.target as HTMLElement).closest('button')) (e.currentTarget.querySelector('button') as HTMLButtonElement | null)?.click(); }}
+                              >
+                                <VoiceMicButton onText={(t) => setAiInput((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="h-6 w-6 bg-transparent hover:bg-transparent text-foreground border-0 shadow-none" iconClassName="h-4 w-4" />
+                                <span>Dictation</span>
+                              </div>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setVoiceMenuOpen((o) => !o)}
+                            onPointerEnter={() => warmVoice()}
+                            onFocus={() => warmVoice()}
+                            title="Voice: call or dictation"
+                            aria-label="Voice options: call or dictation"
+                            className={`relative z-40 shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${geniusVoice.talkOn ? "bg-emerald-500/25 text-emerald-500 animate-pulse" : "bg-primary/10 hover:bg-primary/20 text-primary"}`}
+                          >
+                            {geniusVoice.talkOn ? <PhoneOff className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
+                          </button>
+                        </div>
                         <Button 
                           type="submit" 
                           size="icon" 
