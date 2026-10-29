@@ -3,10 +3,11 @@
  * Pages, content and backgrounds come from the published Studio document.
  * Credits: Imagine Engine Studios Corp.
  */
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { useParams } from 'react-router-dom';
 import { fetchPublished, slugFromPath } from '@/components/brochure-studio/BrochureStudio';
+import { useBrochureLiveBridge } from '@/lib/brochureLive';
 import type { BrochureDoc, PageRef } from '@/components/brochure-studio/types';
 
 const Page = forwardRef<HTMLDivElement, { n: number; src?: string }>(({ n, src }, ref) => (
@@ -38,11 +39,13 @@ export default function StudioBrochure() {
     calc(); window.addEventListener('resize', calc); return () => window.removeEventListener('resize', calc);
   }, []);
   const spread = typeof window !== 'undefined' && window.innerWidth >= 1100;
+  const bookRef = useRef<any>(null);
+  const { reportPage } = useBrochureLiveBridge(bookRef);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center py-6" style={{ background: 'linear-gradient(180deg,#060a14,#0b1220)' }}>
       {/* @ts-expect-error react-pageflip typing requires every prop */}
-      <HTMLFlipBook key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
+      <HTMLFlipBook ref={bookRef} onFlip={(e: any) => reportPage(e.data)} key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
         {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
       </HTMLFlipBook>
     </div>

@@ -225,7 +225,22 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const recRef = useRef<MediaRecorder | null>(null);
   const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
-  const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
+  const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link'; brochure?: boolean } | null>(null);
+  // Brochure presentation sync. The presenter's page is the shared page:
+  // their flips broadcast to the room and followers in sync flip with them.
+  // A follower who flips away browses privately — it never touches anyone
+  // else's screen — and the presenter's next move pops a small pill that
+  // offers to restore following.
+  const heroFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const presenterPageRef = useRef(0);
+  const followingRef = useRef(true);
+  const [presenterPage, setPresenterPage] = useState(0);
+  const [myBrochurePage, setMyBrochurePage] = useState(0);
+  const [following, setFollowing] = useState(true);
+  const [pillDismissedFor, setPillDismissedFor] = useState(-1);
+  const setFollow = (v: boolean) => { followingRef.current = v; setFollowing(v); };
+  const resetBrochureSync = () => { presenterPageRef.current = 0; setPresenterPage(0); setMyBrochurePage(0); setFollow(true); setPillDismissedFor(-1); };
+  const gotoBrochurePage = (page: number) => { try { heroFrameRef.current?.contentWindow?.postMessage({ t: 'sfh-brochure-goto', page }, window.location.origin); } catch { /* frame gone */ } };
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'journal' | 'money' | 'rules'>('chat');
   const mobile = useIsMobile();
@@ -355,7 +370,15 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
     if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
-    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); }
+    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); resetBrochureSync(); }
+    if (m.t === 'bpage' && typeof m.page === 'number') {
+      const wasFollowing = followingRef.current;
+      presenterPageRef.current = m.page;
+      setPresenterPage(m.page);
+      // Followers still in sync move with the presenter; anyone browsing on
+      // their own keeps their page — the pill offers them the way back.
+      if (wasFollowing && !presentMine.current) { setMyBrochurePage(m.page); gotoBrochurePage(m.page); }
+    }
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
     if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); setBanned(Array.isArray(m.banned) ? m.banned : []); }
     if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
@@ -542,9 +565,9 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     } catch { /* cancelled */ }
   };
   const presentMine = useRef(false);
-  const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; if (share) broadcast({ t: 'present', p }); };
+  const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; resetBrochureSync(); if (share) broadcast({ t: 'present', p }); };
   // Re-send what I'm presenting so people who join later see it too.
-  useEffect(() => { if (presentMine.current && presenting) broadcast({ t: 'present', p: presenting }); }, [peerCount, token]); // eslint-disable-line
+  useEffect(() => { if (presentMine.current && presenting) { broadcast({ t: 'present', p: presenting }); if (presenting.brochure) broadcast({ t: 'bpage', page: presenterPageRef.current }); } }, [peerCount, token]); // eslint-disable-line
   // Admin brochure feed for the Present panel: every brochure published from
   // the Brochure Studio, listed live from the studio-published bucket through
   // the admin list action — a brochure created in the studio appears here on
@@ -584,6 +607,25 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     const t = setInterval(loadBrochures, 20000);
     return () => clearInterval(t);
   }, [presentOpen, isAdmin, isHost, loadBrochures]);
+  // Page reports from the presented brochure's iframe. The presenter's own
+  // flips broadcast to the room; a follower's flips only move their own
+  // follow state (in sync = their page matches the presenter's page).
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (!heroFrameRef.current || e.source !== heroFrameRef.current.contentWindow) return;
+      const d = e.data as { t?: string; page?: number } | null;
+      if (!d || d.t !== 'sfh-brochure-page' || typeof d.page !== 'number') return;
+      setMyBrochurePage(d.page);
+      if (presentMine.current) {
+        if (presenterPageRef.current !== d.page) { presenterPageRef.current = d.page; setPresenterPage(d.page); broadcast({ t: 'bpage', page: d.page }); }
+      } else {
+        setFollow(d.page === presenterPageRef.current);
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, []); // eslint-disable-line
   const onFiles = async (list: FileList | null) => {
     const f = list?.[0];
     if (!f) return;
@@ -831,6 +873,14 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           <iframe title={`${brochureView.name} brochure`} src={brochureView.url} className="flex-1 w-full min-h-0 bg-white" />
         </div>
       )}
+      {presenting?.brochure && !presentMine.current && !following && pillDismissedFor !== presenterPage && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-zinc-900/95 border border-white/15 shadow-2xl text-white max-w-[94%]">
+          <BookOpen className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="text-xs truncate">You're browsing on your own — the presenter is on page {presenterPage + 1}</span>
+          <button onClick={() => { setFollow(true); setMyBrochurePage(presenterPage); gotoBrochurePage(presenterPage); }} className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs shrink-0">Follow presenter</button>
+          <button onClick={() => setPillDismissedFor(presenterPage)} className="px-2 py-1 text-xs text-zinc-300 shrink-0">Stay</button>
+        </div>
+      )}
       <div className={`h-full ${mobile ? 'p-1.5' : 'p-3'}`}>
         {(() => {
           const hero = (sharing || presenting) ? (
@@ -840,7 +890,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
                   ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
                   : presenting.kind === 'video' ? <video src={presenting.url} controls autoPlay className="w-full h-full object-contain" />
                   : presenting.kind === 'pdf' ? <object data={presenting.url} type="application/pdf" className="w-full h-full bg-white"><a href={presenting.url} target="_blank" rel="noreferrer" className="block p-6 text-white underline">Open {presenting.name}</a></object>
-                  : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
+                  : <iframe ref={heroFrameRef} onLoad={() => { try { heroFrameRef.current?.contentWindow?.postMessage({ t: 'sfh-brochure-hello' }, window.location.origin); } catch { /* ignore */ } }} title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
               <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else present(null); }} className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
             </div>
           ) : null;
@@ -887,7 +937,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
                 {brochureList.length > 0 && (
                   <div className="max-h-44 overflow-y-auto space-y-1">
                     {brochureList.map((b) => (
-                      <button key={b.slug} onClick={() => { present({ name: b.title, url: b.path, kind: 'link' }); setPresentOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-left hover:bg-white/5">
+                      <button key={b.slug} onClick={() => { present({ name: b.title, url: b.path, kind: 'link', brochure: true }); setPresentOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-left hover:bg-white/5">
                         <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
                         <span className="flex-1 min-w-0"><span className="block truncate text-sm text-zinc-100">{b.title}</span><span className="block font-mono text-[10px] text-zinc-500">{b.path}</span></span>
                         <span className="px-2.5 py-1 rounded-full bg-white text-zinc-900 text-[11px] shrink-0">Share</span>

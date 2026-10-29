@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import { motion } from 'framer-motion';
 import HTMLFlipBook from 'react-pageflip';
+import { useBrochureLiveBridge } from '@/lib/brochureLive';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
@@ -705,6 +706,7 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
   const { config, yearlySavingsPercent } = useInvestorPlan();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
+  const { reportPage } = useBrochureLiveBridge(bookRef);
   const [currentPage, setCurrentPage] = useState(0);
   const { supported: flipSupported, spread, width, height } = useFlipEnv();
 
@@ -1182,7 +1184,7 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
                 disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
-                onFlip={(e: any) => setCurrentPage(e.data)}
+                onFlip={(e: any) => { setCurrentPage(e.data); reportPage(e.data); }}
               >
                 {Children.toArray((pages as any).props.children)}
               </HTMLFlipBook>

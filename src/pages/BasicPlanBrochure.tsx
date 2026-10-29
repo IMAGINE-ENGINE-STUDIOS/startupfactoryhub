@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 import { motion } from 'framer-motion';
 import HTMLFlipBook from 'react-pageflip';
+import { useBrochureLiveBridge } from '@/lib/brochureLive';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
@@ -616,6 +617,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
   const { isMember, tier, refetch } = useMembershipAccess();
   const { toast } = useToast();
   const bookRef = useRef<any>(null);
+  const { reportPage } = useBrochureLiveBridge(bookRef);
   const [currentPage, setCurrentPage] = useState(0);
   const [checkoutTier, setCheckoutTier] = useState<CheckoutTierKey>('network');
   const [checkoutCycle, setCheckoutCycle] = useState<CheckoutCycle>('monthly');
@@ -1755,7 +1757,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                 disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
-                onFlip={(e: any) => setCurrentPage(e.data)}
+                onFlip={(e: any) => { setCurrentPage(e.data); reportPage(e.data); }}
               >
                 {Children.toArray((pages as any).props.children)}
               </HTMLFlipBook>

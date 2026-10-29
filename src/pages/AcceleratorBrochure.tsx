@@ -19,6 +19,7 @@ import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
+import { useBrochureLiveBridge } from '@/lib/brochureLive';
 
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
@@ -1107,6 +1108,7 @@ export const PartnersARPage = () => (
 export default function AcceleratorBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
+  const { reportPage } = useBrochureLiveBridge(bookRef);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(14);
@@ -2493,7 +2495,7 @@ export default function AcceleratorBrochure() {
                 disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
-                onFlip={(e: any) => setCurrentPage(e.data)}
+                onFlip={(e: any) => { setCurrentPage(e.data); reportPage(e.data); }}
                 onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
               >
                 {Children.toArray((pages as any).props.children)}
