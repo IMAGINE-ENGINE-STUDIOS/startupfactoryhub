@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isUpdateAvailable, notifyUpdateAvailable, reloadForUpdate, subscribeUpdateAvailable } from "@/lib/updateSignal";
+import { clearUpdateAvailable, isUpdateAvailable, notifyUpdateAvailable, reloadForUpdate, subscribeUpdateAvailable } from "@/lib/updateSignal";
 
 const POLL_INTERVAL_MS = 20_000;
 
@@ -61,6 +61,15 @@ const UpdateAvailableBubble = () => {
           // clicks Refresh — never on its own.
           setUpdateReady(true);
           notifyUpdateAvailable();
+        }
+
+        if (!cancelled && currentEntry && latestEntry && latestEntry === currentEntry) {
+          // The running build IS the latest served build — any
+          // raised offer is stale (e.g. the flag survived the
+          // refresh that applied the update). Clear it, or the
+          // banner can never be satisfied.
+          clearUpdateAvailable();
+          setUpdateReady(false);
         }
 
 

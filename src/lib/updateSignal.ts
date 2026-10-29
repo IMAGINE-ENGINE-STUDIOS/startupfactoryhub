@@ -37,6 +37,23 @@ export function notifyUpdateAvailable() {
   }
 }
 
+/**
+ * Clear the update offer. Called when the user applies the update
+ * (reloadForUpdate) and when the version poll confirms the running
+ * build IS the latest served build. Without this the flag was
+ * write-only: once raised it survived every refresh in
+ * sessionStorage and the banner came straight back after each
+ * reload — the "never satisfied" loop (founder report 2026-10-29).
+ */
+export function clearUpdateAvailable() {
+  available = false;
+  try {
+    sessionStorage.removeItem(FLAG_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function subscribeUpdateAvailable(cb: () => void): () => void {
   const handler = () => cb();
   window.addEventListener(EVENT_NAME, handler);
@@ -50,6 +67,9 @@ export function subscribeUpdateAvailable(cb: () => void): () => void {
  * and the office UI snapshot put everything back on the other side.
  */
 export async function reloadForUpdate(): Promise<void> {
+  // The user is applying the update — the offer must not survive
+  // the reload, or the banner reappears on the fresh build.
+  clearUpdateAvailable();
   saveRestorePoint();
   try {
     if ("caches" in window) {
