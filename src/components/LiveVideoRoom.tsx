@@ -270,6 +270,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [floats, setFloats] = useState<{ key: number; icon: any; c: string; x: number }[]>([]);
   const [peerCount, setPeerCount] = useState(1);
   const recRef = useRef<MediaRecorder | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
   const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
@@ -636,34 +637,15 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     else if (/\.(pptx?|docx?|xlsx?)$/.test(lower)) present({ name: f.name, url: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`, kind: 'link' });
     else present({ name: f.name, url, kind: 'link' });
   };
-  const toggleRec = async () => {
-    if (recRef.current) { if (recRef.current.state !== 'inactive') recRef.current.stop(); return; }
-    if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) { setNotice('Recording is not supported in this browser. Use Chrome or Edge on a computer.'); return; }
-    let screen: MediaStream;
-    try {
-      screen = await (navigator.mediaDevices as any).getDisplayMedia({ video: { frameRate: 30 }, audio: true, preferCurrentTab: true, selfBrowserSurface: 'include', systemAudio: 'include' });
-    } catch { setNotice('Recording cancelled'); return; }
-    let mic: MediaStream | null = null;
-    try { mic = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { /* no mic */ }
-    // Mix tab/system audio and the host microphone into one track so everything is heard.
-    let ac: AudioContext | null = null;
-    const audioTracks: MediaStreamTrack[] = [];
-    try {
-      ac = new AudioContext();
-      const dest = ac.createMediaStreamDestination();
-      let any = false;
-      [screen, mic].forEach((s) => { if (s && s.getAudioTracks().length) { ac!.createMediaStreamSource(new MediaStream(s.getAudioTracks())).connect(dest); any = true; } });
-      if (any) audioTracks.push(...dest.stream.getAudioTracks());
-    } catch { audioTracks.push(...screen.getAudioTracks(), ...(mic?.getAudioTracks() || []).slice(0, 1)); }
-    const stream = new MediaStream([...screen.getVideoTracks(), ...audioTracks]);
+  const beginRecording = (stream: MediaStream, cleanup: () => void) => {
     const mime = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'].find((m) => MediaRecorder.isTypeSupported(m)) || '';
     let mr: MediaRecorder;
     try { mr = mime ? new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 }) : new MediaRecorder(stream); }
-    catch { screen.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); setNotice('Could not start recording'); return; }
+    catch { cleanup(); setNotice('Could not start recording'); return null; }
     const chunks: Blob[] = [];
     mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
     mr.onstop = () => {
-      screen.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); ac?.close().catch(() => {});
+      cleanup();
       const type = mr.mimeType || mime || 'video/webm';
       const ext = type.includes('mp4') ? 'mp4' : 'webm';
       if (chunks.length) {
@@ -675,8 +657,124 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       }
       recRef.current = null; setRec(false);
     };
-    screen.getVideoTracks()[0]?.addEventListener('ended', () => { if (mr.state !== 'inactive') mr.stop(); });
     mr.start(1000); recRef.current = mr; setRec(true); setRecSecs(0);
+    return mr;
+  };
+  const toggleRec = async () => {
+    if (recRef.current) { if (recRef.current.state !== 'inactive') recRef.current.stop(); return; }
+    if (typeof MediaRecorder === 'undefined') { setNotice('Recording is not supported in this browser.'); return; }
+
+    // Desktop: capture the tab itself (video + system audio), plus the mic.
+    if (navigator.mediaDevices?.getDisplayMedia) {
+      let screen: MediaStream;
+      try {
+        screen = await (navigator.mediaDevices as any).getDisplayMedia({ video: { frameRate: 30 }, audio: true, preferCurrentTab: true, selfBrowserSurface: 'include', systemAudio: 'include' });
+      } catch { setNotice('Recording cancelled'); return; }
+      let mic: MediaStream | null = null;
+      try { mic = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { /* no mic */ }
+      // Mix tab/system audio and the host microphone into one track so everything is heard.
+      let ac: AudioContext | null = null;
+      const audioTracks: MediaStreamTrack[] = [];
+      try {
+        ac = new AudioContext();
+        const dest = ac.createMediaStreamDestination();
+        let any = false;
+        [screen, mic].forEach((s) => { if (s && s.getAudioTracks().length) { ac!.createMediaStreamSource(new MediaStream(s.getAudioTracks())).connect(dest); any = true; } });
+        if (any) audioTracks.push(...dest.stream.getAudioTracks());
+      } catch { audioTracks.push(...screen.getAudioTracks(), ...(mic?.getAudioTracks() || []).slice(0, 1)); }
+      const stream = new MediaStream([...screen.getVideoTracks(), ...audioTracks]);
+      const mr = beginRecording(stream, () => { screen.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); ac?.close().catch(() => {}); });
+      if (mr) screen.getVideoTracks()[0]?.addEventListener('ended', () => { if (mr.state !== 'inactive') mr.stop(); });
+      return;
+    }
+
+    // Mobile browsers have no screen capture: composite the room view itself
+    // (every video tile and the stage hero, in the layout on screen) onto a
+    // canvas and record that, with the mic and everyone's audio mixed in.
+    const stage = stageRef.current;
+    if (!stage || !('captureStream' in HTMLCanvasElement.prototype)) { setNotice('Recording is not supported in this browser.'); return; }
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280; canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { setNotice('Recording is not supported in this browser.'); return; }
+    let mic: MediaStream | null = null;
+    try { mic = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { /* no mic */ }
+    let ac: AudioContext | null = null;
+    const audioTracks: MediaStreamTrack[] = [];
+    try {
+      ac = new AudioContext();
+      try { await ac.resume(); } catch { /* already running */ }
+      const dest = ac.createMediaStreamDestination();
+      const sources = new Set<MediaStream>();
+      if (mic && mic.getAudioTracks().length) sources.add(new MediaStream(mic.getAudioTracks()));
+      document.querySelectorAll('audio').forEach((el) => {
+        const s = (el as HTMLAudioElement).srcObject as MediaStream | null;
+        if (s && s.getAudioTracks().length) sources.add(new MediaStream(s.getAudioTracks()));
+      });
+      let any = false;
+      sources.forEach((s) => { try { ac!.createMediaStreamSource(s).connect(dest); any = true; } catch { /* one bad source */ } });
+      if (any) audioTracks.push(...dest.stream.getAudioTracks());
+    } catch { if (mic) audioTracks.push(...mic.getAudioTracks().slice(0, 1)); }
+    const vstream = (canvas as any).captureStream(30) as MediaStream;
+    const stream = new MediaStream([...vstream.getVideoTracks(), ...audioTracks]);
+
+    // Cross-origin presentation images are reloaded CORS-clean so they can
+    // be drawn without blanking the recording.
+    const corsImgs = new Map<string, HTMLImageElement>();
+    const getCorsImg = (src: string) => {
+      let im = corsImgs.get(src);
+      if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.src = src; corsImgs.set(src, im); }
+      return im.complete && im.naturalWidth > 0 ? im : null;
+    };
+    const drawFit = (src: CanvasImageSource, sw: number, sh: number, x: number, y: number, w: number, h: number, contain: boolean) => {
+      try {
+        if (!sw || !sh) { ctx.drawImage(src as any, x, y, w, h); return; }
+        const s = contain ? Math.min(w / sw, h / sh) : Math.max(w / sw, h / sh);
+        const dw = sw * s, dh = sh * s;
+        if (contain) { ctx.fillStyle = '#09090b'; ctx.fillRect(x, y, w, h); ctx.drawImage(src as any, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh); }
+        else ctx.drawImage(src as any, (sw - w / s) / 2, (sh - h / s) / 2, w / s, h / s, x, y, w, h);
+      } catch { /* skip this element */ }
+    };
+    let raf = 0;
+    const paint = () => {
+      const sr = stage.getBoundingClientRect();
+      ctx.fillStyle = '#09090b'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (sr.width > 0 && sr.height > 0) {
+        const scale = Math.min(canvas.width / sr.width, canvas.height / sr.height);
+        const ox = (canvas.width - sr.width * scale) / 2, oy = (canvas.height - sr.height * scale) / 2;
+        const rectOf = (el: Element) => { const r = el.getBoundingClientRect(); return { x: ox + (r.left - sr.left) * scale, y: oy + (r.top - sr.top) * scale, w: r.width * scale, h: r.height * scale }; };
+        // Presented documents (iframes) cannot be drawn — hold their place with a labelled card.
+        stage.querySelectorAll('iframe, object').forEach((el) => {
+          const { x, y, w, h } = rectOf(el);
+          if (w < 4 || h < 4) return;
+          ctx.fillStyle = '#18181b'; ctx.fillRect(x, y, w, h);
+          ctx.fillStyle = '#e4e4e7'; ctx.font = '600 28px system-ui, sans-serif'; ctx.textAlign = 'center';
+          try { ctx.fillText(presenting?.name || 'Presentation', x + w / 2, y + h / 2, Math.max(60, w - 48)); } catch { /* long names */ }
+        });
+        stage.querySelectorAll('video, img').forEach((el) => {
+          const { x, y, w, h } = rectOf(el);
+          if (w < 4 || h < 4) return;
+          if (el instanceof HTMLVideoElement) {
+            drawFit(el, el.videoWidth, el.videoHeight, x, y, w, h, el.className.includes('object-contain'));
+            const label = el.parentElement?.querySelector('span.font-mono')?.textContent?.trim();
+            if (label && el.videoWidth > 0) {
+              const bh = Math.max(18, h * 0.12);
+              ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x, y + h - bh, w, bh);
+              ctx.fillStyle = '#ffffff'; ctx.font = `${Math.max(11, Math.round(bh * 0.55))}px ui-monospace, monospace`; ctx.textAlign = 'left';
+              try { ctx.fillText(label, x + 8, y + h - bh * 0.32, Math.max(40, w - 12)); } catch { /* skip */ }
+            }
+          } else if (el instanceof HTMLImageElement) {
+            const src = el.currentSrc || el.src;
+            const clean = !src || src.startsWith('blob:') || src.startsWith('data:') || src.startsWith(window.location.origin);
+            if (clean) drawFit(el, el.naturalWidth, el.naturalHeight, x, y, w, h, el.className.includes('object-contain'));
+            else { const ci = getCorsImg(src); if (ci) drawFit(ci, ci.naturalWidth, ci.naturalHeight, x, y, w, h, el.className.includes('object-contain')); }
+          }
+        });
+      }
+      raf = requestAnimationFrame(paint);
+    };
+    paint();
+    beginRecording(stream, () => { cancelAnimationFrame(raf); vstream.getTracks().forEach((t) => t.stop()); mic?.getTracks().forEach((t) => t.stop()); ac?.close().catch(() => {}); });
   };
   const openLink = () => {
     if (!link.trim()) return;
@@ -888,7 +986,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
         </div>
       )}
-      <div className={`h-full ${mobile ? 'p-1.5' : 'p-3'}`}>
+      <div ref={stageRef} className={`h-full ${mobile ? 'p-1.5' : 'p-3'}`}>
         {(() => {
           const hero = (sharing || presenting) ? (
             <div className="relative w-full h-full">
