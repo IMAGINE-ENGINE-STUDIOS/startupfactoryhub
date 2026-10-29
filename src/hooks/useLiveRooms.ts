@@ -118,18 +118,9 @@ export const useLiveRooms = () => {
     try {
       const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(); // 12 hours
 
-      // Create Whereby room
-      const { data: wherebyData, error: wherebyError } = await supabase.functions.invoke('create-whereby-room', {
-        body: {
-          roomName: name,
-          startDate: new Date().toISOString(),
-          endDate: expiresAt,
-        },
-      });
-
-      if (wherebyError) throw wherebyError;
-
-      const meetingLink = wherebyData.roomUrl;
+      // Startup Factory Hub live video room (no external meeting provider)
+      const nameSlug = name.substring(0, 20).replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '') || 'live';
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=room-${nameSlug}-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
 
       // Create room in database
       const { data: room, error: roomError } = await supabase

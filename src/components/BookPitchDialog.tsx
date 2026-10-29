@@ -154,16 +154,8 @@ export default function BookPitchDialog({
       const scheduledDate = new Date(date);
       scheduledDate.setHours(hours, minutes, 0, 0);
 
-      // Create Whereby room
-      const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-        body: { 
-          roomName: `pitch-${Date.now().toString(36).slice(-8)}`,
-          startDate: scheduledDate.toISOString()
-        }
-      });
-
-      if (roomError) throw roomError;
-      const meetingLink = roomData.roomUrl;
+      // Startup Factory Hub live video room (no external meeting provider)
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=pitch-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
 
       // Create pitch meeting
       const { error: pitchError } = await supabase

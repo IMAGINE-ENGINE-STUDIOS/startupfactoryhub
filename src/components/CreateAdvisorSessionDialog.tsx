@@ -298,16 +298,8 @@ export default function CreateAdvisorSessionDialog({
     try {
       setLoading(true);
 
-      // Create Whereby room
-      const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-        body: { 
-          roomName: `adv-sess-${Math.random().toString(36).substring(2, 10)}`,
-          startDate: scheduledAt.toISOString()
-        }
-      });
-
-      if (roomError) throw roomError;
-      const meetingLink = roomData.roomUrl;
+      // Startup Factory Hub live video room (no external meeting provider)
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=adv-sess-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
 
       // Create the session with advisor as mentor and host
       const { error } = await supabase

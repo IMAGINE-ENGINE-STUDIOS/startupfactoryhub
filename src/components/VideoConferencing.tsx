@@ -45,11 +45,13 @@ const toLiveVideoPath = (url?: string): string | null => {
   }
   return null;
 };
-const isValidWherebyUrl = (url?: string): boolean => !!toLiveVideoPath(url);
+const isValidMeetingUrl = (url?: string): boolean => !!toLiveVideoPath(url);
 
 export default function VideoConferencing({
   roomUrl,
   persistentRoomUrl,
+  userId,
+  hostId,
   userName = 'User',
   meetingTitle,
   onLeave,
@@ -69,7 +71,7 @@ export default function VideoConferencing({
     setIsLoading(true);
 
     // Check if we already have a valid persistent room URL
-    const existing = isValidWherebyUrl(persistentRoomUrl) ? persistentRoomUrl : isValidWherebyUrl(roomUrl) ? roomUrl : undefined;
+    const existing = isValidMeetingUrl(persistentRoomUrl) ? persistentRoomUrl : isValidMeetingUrl(roomUrl) ? roomUrl : undefined;
     if (existing) {
       setActiveRoomUrl(existing);
       openInNewTab(existing);
@@ -77,33 +79,20 @@ export default function VideoConferencing({
       return;
     }
 
-    // Create a new persistent room (10-year expiration handled by edge function)
+    // Startup Factory Hub live video room (no external meeting provider).
+    // The room slug is derived from the event/meeting; the event organizer
+    // (hostId) hosts, falling back to the current user.
     try {
-      const response = await fetch(
-        'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/create-whereby-room',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI'
-          },
-          body: JSON.stringify({
-            roomName: eventId ? `event-${eventId}` : meetingTitle ? `meet-${meetingTitle.substring(0, 15).replace(/\s+/g, '-')}` : `room-${Date.now()}`
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to create meeting room');
-      }
-
-      const data = await response.json();
-      setActiveRoomUrl(data.roomUrl);
-      openInNewTab(data.roomUrl);
+      const titleSlug = meetingTitle ? meetingTitle.substring(0, 15).replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '') : '';
+      const slug = eventId ? `event-${eventId}` : titleSlug ? `meet-${titleSlug}` : `room-${Date.now().toString(36)}`;
+      const host = hostId || userId;
+      const liveLink = `https://startupfactoryhub.com/live-video?room=${slug}${host ? `&host=${host}` : ''}`;
+      setActiveRoomUrl(liveLink);
+      openInNewTab(liveLink);
 
       // Notify parent to save the new room URL to database
-      if (onRoomCreated && data.roomUrl) {
-        onRoomCreated(data.roomUrl);
+      if (onRoomCreated) {
+        onRoomCreated(liveLink);
       }
     } catch (error) {
       console.error('Error creating room:', error);

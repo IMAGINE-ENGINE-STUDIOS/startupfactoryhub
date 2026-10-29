@@ -513,7 +513,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
                   <p className="font-semibold text-primary">Host Tip:</p>
                   <p className="text-muted-foreground">
-                    You can start the meeting anytime. Attendees will join the same Whereby room automatically.
+                    You can start the meeting anytime. Attendees will join the same Startup Factory Hub live video room automatically.
                   </p>
                 </div>
               )}

@@ -64,19 +64,8 @@ export default function InvestorBookPitchDialog({
       const scheduledDate = new Date(date);
       scheduledDate.setHours(hours, minutes, 0, 0);
 
-      // Create Whereby meeting room
-      const { data: wherebyData, error: wherebyError } = await supabase.functions.invoke(
-        'create-whereby-room',
-        {
-          body: {
-            roomName: `${companyName} - Investor Pitch`,
-            startDate: scheduledDate.toISOString(),
-            endDate: new Date(scheduledDate.getTime() + duration * 60000).toISOString(),
-          }
-        }
-      );
-
-      if (wherebyError) throw wherebyError;
+      // Startup Factory Hub live video room (no external meeting provider)
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=pitch-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
 
       // Insert pitch meeting with pending status
       const { error: meetingError } = await supabase
@@ -88,7 +77,7 @@ export default function InvestorBookPitchDialog({
           host_id: user.id,
           scheduled_date: scheduledDate.toISOString(),
           duration_minutes: duration,
-          meeting_link: wherebyData.roomUrl,
+          meeting_link: meetingLink,
           status: 'pending',
           meeting_notes: `Pitch meeting request from investor`
         });

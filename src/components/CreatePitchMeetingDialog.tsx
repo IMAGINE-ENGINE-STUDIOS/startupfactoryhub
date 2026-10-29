@@ -227,15 +227,8 @@ export default function CreatePitchMeetingDialog({
 
     setBooking(true);
     try {
-      // Create Whereby room
-      const wherebyResponse = await supabase.functions.invoke('create-whereby-room', {
-        body: { 
-          startDate: selectedDate.toISOString(),
-          endDate: new Date(selectedDate.getTime() + 30 * 60000).toISOString()
-        }
-      });
-
-      const meetingLink = wherebyResponse.data?.roomUrl || '';
+      // Startup Factory Hub live video room (no external meeting provider)
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=pitch-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
 
       // Combine date and time
       const [hours, minutes] = selectedTimeSlot.split(':');

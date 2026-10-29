@@ -222,30 +222,15 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialD
 
       let meetingLocation = formData.location;
 
-      // If online event, create Whereby room
+      // If online event, generate a Startup Factory Hub live video link
+      // (local generation — no external meeting provider, cannot fail)
       if (isOnlineEvent) {
-        const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-          body: {
-            roomName: `evt-${formData.title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now().toString(36).slice(-8)}`,
-            startDate: startDateTime.toISOString(),
-            endDate: endDateTime.toISOString()
-          }
+        const titleSlug = formData.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '') || 'event';
+        meetingLocation = `https://startupfactoryhub.com/live-video?room=evt-${titleSlug}-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
+        toast({
+          title: 'Video room created!',
+          description: 'Meeting link has been generated.',
         });
-
-        if (roomError) {
-          console.error('Failed to create Whereby room:', roomError);
-          toast({ 
-            title: 'Warning: Video room creation failed', 
-            description: 'Event will be created without a video link.',
-            variant: 'destructive' 
-          });
-        } else if (roomData?.roomUrl) {
-          meetingLocation = roomData.roomUrl;
-          toast({ 
-            title: 'Video room created!', 
-            description: 'Meeting link has been generated.',
-          });
-        }
       }
 
       const ticketPriceCents = formData.ticket_price ? Math.round(parseFloat(formData.ticket_price) * 100) : 0;

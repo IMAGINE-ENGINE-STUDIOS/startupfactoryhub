@@ -367,16 +367,8 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     try {
       setLoading(true);
 
-      // Create Whereby room
-      const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-        body: { 
-          roomName: `sess-${Math.random().toString(36).substring(2, 10)}`,
-          startDate: scheduledTime.toISOString()
-        }
-      });
-
-      if (roomError) throw roomError;
-      const meetingLink = roomData.roomUrl;
+      // Startup Factory Hub live video room (no external meeting provider)
+      const meetingLink = `https://startupfactoryhub.com/live-video?room=sess-${crypto.randomUUID().slice(0, 8)}&host=${formData.mentor_id || user.id}`;
 
       const { error } = await supabase
         .from('mentoring_sessions')

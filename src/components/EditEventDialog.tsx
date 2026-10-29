@@ -131,61 +131,28 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
       // Check if new end date is in the future
       const newEndDateIsFuture = endDateTime > now;
 
-      // Handle online event scenarios
+      // Handle online event scenarios (Startup Factory Hub live video links)
+      const titleSlug = formData.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '') || 'event';
+      const newLiveLink = `https://startupfactoryhub.com/live-video?room=evt-${titleSlug}-${crypto.randomUUID().slice(0, 8)}&host=${user.id}`;
       if (nowOnline && !wasOnline) {
         // Changed from physical to online - create new room
-        const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-          body: {
-            roomName: `evt-${formData.title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now().toString(36).slice(-8)}`,
-            startDate: startDateTime.toISOString(),
-            endDate: endDateTime.toISOString()
-          }
+        meetingLocation = newLiveLink;
+        toast({
+          title: 'Video room created!',
+          description: 'Meeting link has been generated.',
         });
-
-        if (roomError) {
-          console.error('Failed to create Whereby room:', roomError);
-          toast({ 
-            title: 'Warning: Video room creation failed',
-            description: 'Event will be updated without a new video link.',
-            variant: 'destructive'
-          });
-        } else if (roomData?.roomUrl) {
-          meetingLocation = roomData.roomUrl;
-          toast({ 
-            title: 'Video room created!', 
-            description: 'Meeting link has been generated.',
-          });
-        }
       } else if (!nowOnline && wasOnline) {
-        // Changed from online to physical - clear Whereby link
+        // Changed from online to physical - clear live video link
         meetingLocation = formData.location;
       } else if (nowOnline && wasOnline && roomMightBeExpired && newEndDateIsFuture) {
         // Room expired but end date extended to future - regenerate room
-        const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
-          body: {
-            roomName: `evt-${formData.title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now().toString(36).slice(-8)}`,
-            startDate: startDateTime.toISOString(),
-            endDate: endDateTime.toISOString()
-          }
+        meetingLocation = newLiveLink;
+        toast({
+          title: 'Video room regenerated!',
+          description: 'A new meeting link has been created since the previous one expired.',
         });
-
-        if (roomError) {
-          console.error('Failed to regenerate Whereby room:', roomError);
-          toast({ 
-            title: 'Warning: Video room regeneration failed',
-            description: 'The existing meeting link may be expired.',
-            variant: 'destructive'
-          });
-          meetingLocation = event.location;
-        } else if (roomData?.roomUrl) {
-          meetingLocation = roomData.roomUrl;
-          toast({ 
-            title: 'Video room regenerated!', 
-            description: 'A new meeting link has been created since the previous one expired.',
-          });
-        }
       } else if (nowOnline && wasOnline) {
-        // Stays online with valid room - keep existing Whereby link
+        // Stays online with valid room - keep existing live video link
         meetingLocation = event.location;
       }
 
@@ -294,31 +261,10 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
                 onCheckedChange={async (checked) => {
                   setIsOnlineEvent(checked as boolean);
                   if (checked && user) {
-                    setUploading(true);
-                    try {
-                      const { data, error } = await supabase.functions.invoke('create-whereby-room', {
-                        body: { 
-                          roomName: `evt-${Math.random().toString(36).substring(2, 10)}`,
-                          startDate: formData.start_date && formData.start_time 
-                            ? new Date(`${formData.start_date}T${formData.start_time}`).toISOString() 
-                            : undefined,
-                          endDate: formData.end_date && formData.end_time
-                            ? new Date(`${formData.end_date}T${formData.end_time}`).toISOString()
-                            : undefined
-                        }
-                      });
-                      
-                      if (error) throw error;
-                      
-                      setFormData(prev => ({ ...prev, location: data.roomUrl }));
-                      toast({ title: 'Video conference room created!' });
-                    } catch (error) {
-                      console.error('Failed to create Whereby room:', error);
-                      toast({ title: 'Failed to create meeting room', variant: 'destructive' });
-                      setIsOnlineEvent(false);
-                    } finally {
-                      setUploading(false);
-                    }
+                    // Startup Factory Hub live video link (local generation)
+                    const checkboxSlug = formData.title ? formData.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '') : '';
+                    setFormData(prev => ({ ...prev, location: `https://startupfactoryhub.com/live-video?room=evt-${checkboxSlug || 'event'}-${crypto.randomUUID().slice(0, 8)}&host=${user.id}` }));
+                    toast({ title: 'Video conference room created!' });
                   } else {
                     setFormData(prev => ({ ...prev, location: '' }));
                   }
@@ -336,7 +282,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
               id="location"
               value={formData.location}
               onChange={e => !isOnlineEvent && setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder={isOnlineEvent ? 'Whereby meeting link will be generated' : 'Event location or virtual link'}
+              placeholder={isOnlineEvent ? 'Startup Factory Hub live video link will be generated' : 'Event location or virtual link'}
               readOnly={isOnlineEvent}
               className={isOnlineEvent ? 'bg-muted' : ''}
             />
