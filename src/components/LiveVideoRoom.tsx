@@ -10,7 +10,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
@@ -21,7 +21,7 @@ import GuestCheckIn, { readCheckin, type Checkin } from './live/GuestCheckIn';
 
 interface LiveVideoRoomProps { roomName?: string; room?: string; identity?: string; onLeave?: () => void }
 
-type Product = { id: string; name: string; price: number; tag: string; image: string; pkg?: string; interval?: 'month' | 'year'; perks?: string[] };
+type Product = { id: string; name: string; price: number; tag: string; image: string; pkg?: string; interval?: 'month' | 'year'; perks?: string[]; brochure?: string };
 type CartItem = { id: string; name: string; price: number; qty: number; image?: string };
 const absUrl = (u: string) => { try { return u && !u.startsWith('data:') ? new URL(u, window.location.origin).href : u; } catch { return u; } };
 const priceLabel = (p: Product) => `$${p.price.toLocaleString()}${p.interval ? (p.interval === 'year' ? '/yr' : '/mo') : ''}`;
@@ -256,6 +256,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [stageOffer, setStageOffer] = useState(true);
   const [adding, setAdding] = useState(false);
   const [pkgPick, setPkgPick] = useState(SFH_PACKAGES[0].id);
+  const [pkgOpen, setPkgOpen] = useState(false);
   const [draft, setDraft] = useState({ name: '', price: '', tag: '', image: '' });
   const [stats, setStats] = useState({ adds: 0, value: 0 });
   useEffect(() => { try { localStorage.setItem(catalogKey, JSON.stringify(catalog)); } catch { /* storage full */ } }, [catalog, catalogKey]);
@@ -369,7 +370,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     setAdding(false);
   };
   const deleteProduct = (pid: string) => { setCatalog((c) => c.filter((x) => x.id !== pid)); if (drop?.id === pid) setDrop(null); broadcast({ t: 'remove', id: pid }); };
-  const pkgProduct = (k: typeof SFH_PACKAGES[number]): Product => ({ id: `pkg-${k.id}`, pkg: k.id, name: k.name, price: k.price, interval: k.interval, tag: k.tag, perks: k.perks, image: absUrl(k.image) });
+  const pkgProduct = (k: typeof SFH_PACKAGES[number]): Product => ({ id: `pkg-${k.id}`, pkg: k.id, name: k.name, price: k.price, interval: k.interval, tag: k.tag, perks: k.perks, brochure: k.brochure, image: absUrl(k.image) });
   const addPackage = (k: typeof SFH_PACKAGES[number], push = false) => {
     const p = pkgProduct(k);
     setCatalog((c) => c.some((x) => x.id === p.id) ? c : [...c, p]);
@@ -770,6 +771,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="font-medium truncate">{drop.name}</p>
               <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
               <button disabled={paying === drop.id} onClick={() => buy(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm disabled:opacity-60"><ShoppingBag className="w-4 h-4" />{drop.pkg ? (paying === drop.id ? 'Opening checkout…' : 'Subscribe now') : 'Add to Cart'}</button>
+              {drop.brochure && <a href={drop.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
             </div>
           </div>
         </div>
@@ -780,8 +782,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       <div className="flex items-center justify-between">
         <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">CATALOG</p>
         {canSell && !adding && <span className="flex gap-3">
-          <button onClick={() => setShowPkgs((v) => !v)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Crown className="w-3 h-3" />{showPkgs ? 'Hide packages' : 'Startup Factory packages'}</button>
-          <button onClick={() => setAdding(true)} className="flex items-center gap-1 font-mono text-xs text-zinc-900 underline"><Plus className="w-3 h-3" />Add product</button>
+          <button onClick={() => setShowPkgs((v) => !v)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-medium shadow-sm hover:bg-emerald-500 transition"><Crown className="w-3.5 h-3.5" />{showPkgs ? 'Hide packages' : 'Startup Factory packages'}</button>
+          <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-300 text-xs text-zinc-800 hover:bg-zinc-50 transition"><Plus className="w-3.5 h-3.5" />Add product</button>
         </span>}
       </div>
 
@@ -789,10 +791,38 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
         const k = SFH_PACKAGES.find((x) => x.id === pkgPick) || SFH_PACKAGES[0];
         const inCat = catalog.some((x) => x.id === `pkg-${k.id}`);
         return (
-          <div className="rounded-2xl border border-zinc-200 overflow-hidden">
-            <select value={k.id} onChange={(e) => setPkgPick(e.target.value)} className="w-full text-sm px-3 py-2 border-b border-zinc-200 bg-white text-zinc-900">
-              {SFH_PACKAGES.map((x) => <option key={x.id} value={x.id}>{catalog.some((c) => c.id === `pkg-${x.id}`) ? '(added) ' : ''}{x.name} — ${x.price.toLocaleString()}/{x.interval === 'year' ? 'yr' : 'mo'}</option>)}
-            </select>
+          <div className="rounded-3xl border-2 border-zinc-900 overflow-hidden shadow-lg">
+            <div className="flex items-center gap-2 px-4 py-3 bg-zinc-900 text-white">
+              <span className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0"><Crown className="w-4 h-4 text-white" /></span>
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-[10px] tracking-[0.18em] text-emerald-400">STARTUP FACTORY HUB</p>
+                <p className="text-sm font-semibold leading-tight">Memberships & Packages</p>
+              </div>
+              <span className="flex items-center gap-1 font-mono text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />SELL LIVE</span>
+            </div>
+            <div className="relative">
+              <button onClick={() => setPkgOpen((v) => !v)} className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-zinc-50 text-left">
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[15px] font-medium text-zinc-900 truncate">{k.name}</span>
+                  <span className="block font-mono text-[11px] text-zinc-500">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'} • {k.tag}</span>
+                </span>
+                <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${pkgOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {pkgOpen && (
+                <div className="border-t border-zinc-100 max-h-64 overflow-y-auto">
+                  {SFH_PACKAGES.map((x) => (
+                    <button key={x.id} onClick={() => { setPkgPick(x.id); setPkgOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 ${x.id === k.id ? 'bg-emerald-50' : ''}`}>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm text-zinc-900 truncate">{x.name}</span>
+                        <span className="block font-mono text-[10px] text-zinc-500">{x.tag}</span>
+                      </span>
+                      {catalog.some((c) => c.id === `pkg-${x.id}`) && <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-zinc-900 text-white">ADDED</span>}
+                      <span className="font-mono text-xs text-zinc-900">${x.price.toLocaleString()}/{x.interval === 'year' ? 'yr' : 'mo'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="relative h-32">
               <img src={k.image} alt={k.name} className="w-full h-full object-cover" />
               <span className="absolute left-2 top-2 font-mono text-[9px] px-2 py-0.5 rounded-full bg-black/60 text-white">{k.tag}</span>
@@ -801,9 +831,10 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="text-[14px] text-zinc-900">{k.name}</p>
               <p className="font-mono text-[11px] text-zinc-500">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
               <ul className="mt-1 text-[11px] text-zinc-500">{k.perks.map((x) => <li key={x}>{x}</li>)}</ul>
+              {k.brochure && <a href={k.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs font-medium"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
               <div className="mt-2 flex gap-2">
-                <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-1.5 rounded-full border border-zinc-200 text-xs text-zinc-800 disabled:opacity-50">{inCat ? 'In catalog' : 'Add to catalog'}</button>
-                <button onClick={() => addPackage(k, true)} className="flex-1 py-1.5 rounded-full bg-zinc-900 text-white text-xs">Drop live now</button>
+                <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-2 rounded-full border border-zinc-200 text-xs text-zinc-800 disabled:opacity-50">{inCat ? 'In catalog' : 'Add to catalog'}</button>
+                <button onClick={() => addPackage(k, true)} className="flex-1 py-2 rounded-full bg-zinc-900 text-white text-xs">Drop live now</button>
               </div>
             </div>
           </div>
@@ -848,6 +879,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             {p.perks && <ul className="mt-1 text-[11px] text-zinc-500 space-y-0.5">{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>}
             <div className="mt-2 flex gap-2">
               <button disabled={paying === p.id} onClick={() => buy(p)} className="px-4 py-1.5 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add'}</button>
+              {p.brochure && <a href={p.brochure} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />Brochure</a>}
               {canSell && <button onClick={() => pushToAll(p)} className="px-4 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">Push to All</button>}
             </div>
           </div>
@@ -883,21 +915,21 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       <div className={`border-b border-zinc-100 ${mobile ? 'px-4 pt-2 pb-3' : 'px-5 pt-5 pb-4'}`}>
         <div className="flex items-center gap-2 pr-8 lg:pr-0">
           <span className="font-mono text-xs px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-500 truncate max-w-[150px]">ROOM {name}</span>
-          <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-800">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
-          <span className="ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700">{isHost ? 'HOST' : 'GUEST'}</span>
+          <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 font-mono text-xs text-white shadow-sm hover:bg-zinc-700 transition">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
+          <span className={`ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full ${isHost ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>{isHost ? 'HOST' : 'GUEST'}</span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 p-1 rounded-full bg-zinc-100 font-mono text-[11px] max-w-full overflow-x-auto">
+          <div className="flex gap-1 p-1 rounded-2xl bg-zinc-100 font-mono text-[11px] max-w-full overflow-x-auto">
             {pills.map((t) => (
-              <button key={t.k} onClick={() => setTab(t.k as any)} className={`relative whitespace-nowrap px-3 py-1.5 rounded-full ${tab === t.k ? 'bg-zinc-900 text-white' : 'text-zinc-500'}`}>
-                {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.label}
+              <button key={t.k} onClick={() => setTab(t.k as any)} className={`relative flex-1 flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl transition ${tab === t.k ? 'bg-zinc-900 text-white shadow' : 'text-zinc-500 hover:text-zinc-900'}`}>
+                {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.k === 'chat' ? <><MessageSquare className="w-3.5 h-3.5" />{t.label}</> : t.k === 'shop' ? <><ShopIcon className="w-3.5 h-3.5" />{t.label}</> : <><FileText className="w-3.5 h-3.5" />{t.label}</>}
                 {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
               </button>
             ))}
           </div>
           <div className="ml-auto flex gap-1.5">
             {REACTIONS.map((r) => (
-              <button key={r.k} aria-label={`React ${r.k}`} onClick={() => react(r)} className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center"><r.i className={`w-4 h-4 ${r.c}`} /></button>
+              <button key={r.k} aria-label={`React ${r.k}`} onClick={() => react(r)} className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center hover:scale-110 hover:border-zinc-300 transition"><r.i className={`w-4 h-4 ${r.c}`} /></button>
             ))}
           </div>
         </div>
