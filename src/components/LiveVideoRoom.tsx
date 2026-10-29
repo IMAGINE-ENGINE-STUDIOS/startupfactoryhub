@@ -423,19 +423,37 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [savedNotes, setSavedNotes] = useState<{ ts: number; text: string }[]>(() => { try { return JSON.parse(localStorage.getItem(`${journalKey}-saved`) || '[]'); } catch { return []; } });
   useEffect(() => { try { localStorage.setItem(`${journalKey}-draft`, journal); } catch { /* private mode */ } }, [journal, journalKey]);
   useEffect(() => { try { localStorage.setItem(`${journalKey}-saved`, JSON.stringify(savedNotes.slice(0, 50))); } catch { /* private mode */ } }, [savedNotes, journalKey]);
-  const saveNoteToGenius = () => {
-    const text = journal.trim(); if (!text) return;
-    const content = `📓 Journal note — live session "${name}" • ${new Date().toLocaleString()}\n\n${text}`;
+  // Append a message to the user's Genius bubble thread: written to the
+  // durable thread store (cold start) and dispatched as an event the mounted
+  // bubble adopts immediately. Deduped by exact content on both sides.
+  const appendToGenius = (content: string) => {
     try {
       const KEY = 'sfh:genius:thread:v1';
       const cur = durableGetSync<{ role: string; content: string }[]>(KEY) || [];
       if (!cur.some((m) => m?.content === content)) durableSet(KEY, [...cur, { role: 'assistant', content }].slice(-80));
     } catch { /* the bubble also adopts via the event below */ }
     window.dispatchEvent(new CustomEvent('sfh:genius:append', { detail: { content } }));
+  };
+  const saveNoteToGenius = () => {
+    const text = journal.trim(); if (!text) return;
+    appendToGenius(`📓 Journal note — live session "${name}" • ${new Date().toLocaleString()}\n\n${text}`);
     setSavedNotes((n) => [{ ts: Date.now(), text }, ...n]);
     setJournal('');
     setNotice('Note saved to your Genius bubble');
   };
+  // After the meeting: the full transcript lands in the user's Genius bubble,
+  // so they can ask Genius anything about the call ("what did we decide?",
+  // "what did Ana say about pricing?") and it answers from the transcript.
+  const geniusTxRef = useRef(false);
+  useEffect(() => {
+    if (!left) { geniusTxRef.current = false; return; }
+    if (geniusTxRef.current || txLines.length === 0) return;
+    geniusTxRef.current = true;
+    const clock = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const body = txLines.slice(-400).map((l) => `[${clock(l.ts)}] ${l.speaker}: ${l.text}`).join('\n');
+    const note = txLines.length > 400 ? `\n\n(Showing the last 400 of ${txLines.length} lines — the full record is in your session download/email.)` : '';
+    appendToGenius(`📋 Transcript — live session "${name}" • ${new Date().toLocaleString()} • ${txLines.length} lines\nAsk me anything about this meeting.\n\n${body}${note}`);
+  }, [left]); // eslint-disable-line
   useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
 
   // Removed people can knock; the host admits or denies them (works while they're out of the call).
