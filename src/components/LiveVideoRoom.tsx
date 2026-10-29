@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { durableGetSync, durableSet } from '@/lib/durableStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine, ExternalLink, Loader2 } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine, SwitchCamera } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
@@ -102,6 +102,27 @@ function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
   return null;
 }
 
+// Companion camera: registers a flip function (front/back or next USB cam)
+// that the control bar calls. Lives inside the LiveKit room context.
+function CamFlipBridge({ register }: { register: (fn: () => void) => void }) {
+  const { localParticipant } = useLocalParticipant();
+  useEffect(() => {
+    register(async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter((d) => d.kind === 'videoinput');
+        if (cams.length < 2) return;
+        const pub = localParticipant.getTrackPublication(Track.Source.Camera);
+        const cur = (pub?.track as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack?.getSettings?.().deviceId;
+        const idx = cams.findIndex((d) => d.deviceId === cur);
+        const next = cams[(idx + 1) % cams.length];
+        await localParticipant.switchActiveDevice('videoinput', next.deviceId);
+      } catch { /* single-camera devices ignore flips */ }
+    });
+  }, [localParticipant, register]);
+  return null;
+}
+
 function PeerCount({ onCount }: { onCount: (n: number) => void }) {
   const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone], { onlySubscribed: false });
   const n = new Set(tracks.map((t) => t.participant.identity)).size;
@@ -142,12 +163,18 @@ function Thumb({ p, className }: { p: Product; className: string }) {
 
 function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: LiveVideoRoomProps & { guest?: Checkin | null; chosenName?: string | null }) {
   const name = roomName || room || 'live-commerce-room';
+  // Companion camera mode (?cam=1): this device joins as a second camera for
+  // the same person — its own participant ("<id>-cam", "Name · Cam"),
+  // video-only, never host, no sidebar/shop/journal.
+  const camMode = useMemo(() => { try { return new URL(window.location.href).searchParams.get('cam') === '1'; } catch { return false; } }, []);
   const { user } = useAuth();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const guestId = useMemo(() => `guest-${Math.floor(Math.random() * 100000)}`, []);
-  const id = identity || user?.id || guestId;
-  const displayName = chosenName || profile?.full_name || user?.email?.split('@')[0]
+  const rawId = identity || user?.id || guestId;
+  const id = camMode ? `${rawId}-cam` : rawId;
+  const displayNameBase = chosenName || profile?.full_name || user?.email?.split('@')[0]
     || (guest ? `${guest.name} (${guest.role === 'investor' ? 'Investor' : 'Startup'})` : 'Guest');
+  const displayName = camMode ? `${displayNameBase} · Cam` : displayNameBase;
 
   // Platform admins can always take over as host (e.g. when an old link names someone else).
   const [isAdmin, setIsAdmin] = useState(false);
@@ -165,7 +192,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     // The CEO account always hosts the main conference room, whatever the link says.
     if (name === 'main' && user?.id && user.email?.toLowerCase() === 'ceo@imagineengine.space' && h !== user.id) h = null;
     // The public conference room ("main") is only ever hosted by a platform admin; other rooms by whoever opens them first.
-    if (!h && user?.id && (name !== 'main' || isAdmin)) {
+    if (!camMode && !h && user?.id && (name !== 'main' || isAdmin)) {
       h = user.id;
       url.searchParams.set('host', h);
       if (!url.searchParams.get('room')) url.searchParams.set('room', name);
@@ -187,6 +214,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [token, setToken] = useState('');
   const [mintNonce, setMintNonce] = useState(0);
   const leftRef = useRef(false);
+  const flipRef = useRef<() => void>(() => {});
   const hadConnectedRef = useRef(false);
   const rejoinLogRef = useRef<number[]>([]);
   const [serverUrl, setServerUrl] = useState('');
@@ -199,8 +227,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
 
   const [seconds, setSeconds] = useState(0);
   // Hosts start live; guests start muted with camera off.
-  const [mic, setMic] = useState(isHost);
-  const [cam, setCam] = useState(isHost);
+  const [mic, setMic] = useState(isHost && !camMode);
+  const [cam, setCam] = useState(isHost || camMode);
   const [bg, setBg] = useState<BgChoice>(readBgChoice);
   const [bgOpen, setBgOpen] = useState(false);
   const [hand, setHand] = useState(false);
@@ -225,22 +253,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const recRef = useRef<MediaRecorder | null>(null);
   const [presentOpen, setPresentOpen] = useState(false);
   const [link, setLink] = useState('');
-  const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link'; brochure?: boolean } | null>(null);
-  // Brochure presentation sync. The presenter's page is the shared page:
-  // their flips broadcast to the room and followers in sync flip with them.
-  // A follower who flips away browses privately — it never touches anyone
-  // else's screen — and the presenter's next move pops a small pill that
-  // offers to restore following.
-  const heroFrameRef = useRef<HTMLIFrameElement | null>(null);
-  const presenterPageRef = useRef(0);
-  const followingRef = useRef(true);
-  const [presenterPage, setPresenterPage] = useState(0);
-  const [myBrochurePage, setMyBrochurePage] = useState(0);
-  const [following, setFollowing] = useState(true);
-  const [pillDismissedFor, setPillDismissedFor] = useState(-1);
-  const setFollow = (v: boolean) => { followingRef.current = v; setFollowing(v); };
-  const resetBrochureSync = () => { presenterPageRef.current = 0; setPresenterPage(0); setMyBrochurePage(0); setFollow(true); setPillDismissedFor(-1); };
-  const gotoBrochurePage = (page: number) => { try { heroFrameRef.current?.contentWindow?.postMessage({ t: 'sfh-brochure-goto', page }, window.location.origin); } catch { /* frame gone */ } };
+  const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'journal' | 'money' | 'rules'>('chat');
   const mobile = useIsMobile();
@@ -274,25 +287,26 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [catalog, setCatalog] = useState<Product[]>(() => { try { return JSON.parse(localStorage.getItem(catalogKey) || '[]'); } catch { return []; } });
   const [drop, setDrop] = useState<Product | null>(null);
   const [stageOffer, setStageOffer] = useState(true);
-  // Brochures open as an overlay ON the live video screen — never a new window.
-  const [brochureView, setBrochureView] = useState<{ url: string; name: string } | null>(null);
-  const [flipCopied, setFlipCopied] = useState(false);
-  const openBrochure = (url?: string, name?: string) => { if (!url) return; setFlipCopied(false); setBrochureView({ url, name: name || 'Brochure' }); };
-  const copyFlipLink = async () => { if (!brochureView) return; try { await navigator.clipboard.writeText(absUrl(brochureView.url)); setFlipCopied(true); } catch { /* clipboard unavailable */ } };
-  // Mini stickers along the bottom of the stage once a product is pushed:
-  // the live drop first, then every catalog product that carries a brochure.
-  const brochureStickers = useMemo(() => {
-    const list: Product[] = [];
-    if (drop?.brochure) list.push(drop);
-    for (const p of catalog) if (p.brochure && !list.some((x) => x.id === p.id)) list.push(p);
-    return list;
-  }, [drop, catalog]);
   const [adding, setAdding] = useState(false);
   const [pkgPick, setPkgPick] = useState(SFH_PACKAGES[0].id);
   const [pkgOpen, setPkgOpen] = useState(false);
   const [draft, setDraft] = useState({ name: '', price: '', tag: '', image: '' });
   const [stats, setStats] = useState({ adds: 0, value: 0 });
   useEffect(() => { try { localStorage.setItem(catalogKey, JSON.stringify(catalog)); } catch { /* storage full */ } }, [catalog, catalogKey]);
+  // Host products saved to the profile: a signed-in user's own products load
+  // into every room they open, on any device (user_live_products). If the
+  // table is unavailable the room keeps working from local state alone.
+  useEffect(() => {
+    if (!user?.id || camMode) return;
+    let live = true;
+    supabase.from('user_live_products').select('id, name, price, tag, image').eq('user_id', user.id).order('created_at', { ascending: true })
+      .then(({ data, error }) => {
+        if (!live || error || !data) return;
+        const mine = (data as unknown as { id: string; name: string; price: number; tag: string | null; image: string | null }[]).map((r) => ({ id: r.id, name: r.name, price: Number(r.price), tag: r.tag || '', image: r.image || '' }));
+        if (mine.length) setCatalog((c) => [...mine.filter((mp) => !c.some((x) => x.id === mp.id)), ...c]);
+      });
+    return () => { live = false; };
+  }, [user?.id]); // eslint-disable-line
 
   const sendRef = useRef<(m: any) => void>(() => {});
   const setSend = useCallback((fn: (m: any) => void) => { sendRef.current = fn; }, []);
@@ -370,15 +384,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     if (m.t === 'push' && m.p) { setDrop(m.p); setStageOffer(true); setCatalog((c) => c.some((x) => x.id === m.p.id) ? c : [...c, m.p]); }
     if (m.t === 'product' && m.p) setCatalog((c) => c.some((x) => x.id === m.p.id) ? c.map((x) => x.id === m.p.id ? m.p : x) : [...c, m.p]);
     if (m.t === 'remove') setCatalog((c) => c.filter((x) => x.id !== m.id));
-    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); resetBrochureSync(); }
-    if (m.t === 'bpage' && typeof m.page === 'number') {
-      const wasFollowing = followingRef.current;
-      presenterPageRef.current = m.page;
-      setPresenterPage(m.page);
-      // Followers still in sync move with the presenter; anyone browsing on
-      // their own keeps their page — the pill offers them the way back.
-      if (wasFollowing && !presentMine.current) { setMyBrochurePage(m.page); gotoBrochurePage(m.page); }
-    }
+    if (m.t === 'present') { presentMine.current = false; setPresenting(m.p || null); }
     if (m.t === 'react') { const r = REACTIONS.find((x) => x.k === m.k); if (r) showReaction(r); }
     if (m.t === 'room') { setSpotlight(m.spot ?? null); setRoomAudience(!!m.audience); setAllowed(Array.isArray(m.allowed) ? m.allowed : []); setBanned(Array.isArray(m.banned) ? m.banned : []); }
     if (m.t === 'hand' && m.up) setNotice(`${m.name || 'Someone'} raised their hand`);
@@ -401,16 +407,30 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const react = (r: typeof REACTIONS[number]) => { showReaction(r); broadcast({ t: 'react', k: r.k }); };
   const canSell = isHost || !rules.hostProducts;
   const pushToAll = (p: Product) => { setDrop(p); setStageOffer(true); broadcast({ t: 'push', p }); };
-  const saveProduct = () => {
+  const saveProduct = async () => {
     const price = parseFloat(draft.price);
     if (!draft.name.trim() || !(price >= 0)) return;
-    const p: Product = { id: `lp-${Date.now()}`, name: draft.name.trim(), price, tag: draft.tag.trim().toUpperCase(), image: draft.image };
+    const base = { name: draft.name.trim(), price, tag: draft.tag.trim().toUpperCase(), image: draft.image };
+    let p: Product = { id: `lp-${Date.now()}`, ...base };
+    if (user?.id) {
+      try {
+        const { data } = await supabase.from('user_live_products').insert({ user_id: user.id, ...base }).select('id').single();
+        if (data?.id) p = { ...p, id: data.id as unknown as string };
+      } catch { /* table unavailable — keep the local id */ }
+    }
     setCatalog((c) => [...c, p]);
     broadcast({ t: 'product', p });
     setDraft({ name: '', price: '', tag: '', image: '' });
     setAdding(false);
   };
-  const deleteProduct = (pid: string) => { setCatalog((c) => c.filter((x) => x.id !== pid)); if (drop?.id === pid) setDrop(null); broadcast({ t: 'remove', id: pid }); };
+  const deleteProduct = (pid: string) => {
+    setCatalog((c) => c.filter((x) => x.id !== pid));
+    if (drop?.id === pid) setDrop(null);
+    broadcast({ t: 'remove', id: pid });
+    if (user?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(pid)) {
+      supabase.from('user_live_products').delete().eq('id', pid).eq('user_id', user.id).then(() => {}, () => {});
+    }
+  };
   const pkgProduct = (k: typeof SFH_PACKAGES[number]): Product => ({ id: `pkg-${k.id}`, pkg: k.id, name: k.name, price: k.price, interval: k.interval, tag: k.tag, perks: k.perks, brochure: k.brochure, image: absUrl(k.image) });
   const addPackage = (k: typeof SFH_PACKAGES[number], push = false) => {
     const p = pkgProduct(k);
@@ -421,7 +441,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
 
   // Stage control: who is on stage, who is pinned, audience mode.
   const audience = isHost ? rules.audience : roomAudience;
-  const canSpeak = isHost || !audience || allowed.includes(id);
+  const canSpeak = isHost || camMode || !audience || allowed.includes(id);
   const pinned = isHost ? spotlight : (localPin !== undefined ? localPin : spotlight);
   const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed, banned });
   roomRef.current = { spot: spotlight, audience: rules.audience, allowed, banned };
@@ -490,7 +510,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const geniusTxRef = useRef(false);
   useEffect(() => {
     if (!left) { geniusTxRef.current = false; return; }
-    if (geniusTxRef.current || txLines.length === 0) return;
+    if (camMode || geniusTxRef.current || txLines.length === 0) return;
     geniusTxRef.current = true;
     const clock = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const body = txLines.slice(-400).map((l) => `[${clock(l.ts)}] ${l.speaker}: ${l.text}`).join('\n');
@@ -565,67 +585,9 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     } catch { /* cancelled */ }
   };
   const presentMine = useRef(false);
-  const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; resetBrochureSync(); if (share) broadcast({ t: 'present', p }); };
+  const present = (p: typeof presenting, share = true) => { setPresenting(p); presentMine.current = !!p; if (share) broadcast({ t: 'present', p }); };
   // Re-send what I'm presenting so people who join later see it too.
-  useEffect(() => { if (presentMine.current && presenting) { broadcast({ t: 'present', p: presenting }); if (presenting.brochure) broadcast({ t: 'bpage', page: presenterPageRef.current }); } }, [peerCount, token]); // eslint-disable-line
-  // Admin brochure feed for the Present panel: every brochure published from
-  // the Brochure Studio, listed live from the studio-published bucket through
-  // the admin list action — a brochure created in the studio appears here on
-  // its own, no wiring per brochure.
-  const [brochureList, setBrochureList] = useState<{ slug: string; title: string; path: string }[]>([]);
-  const [brochureLoading, setBrochureLoading] = useState(false);
-  const loadBrochures = useCallback(async () => {
-    setBrochureLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('brochure-publish', { body: { action: 'list' } });
-      if (error) throw error;
-      const rows = (data?.brochures || []) as { slug: string }[];
-      const list = await Promise.all(rows.map(async ({ slug }) => {
-        const path = slug.startsWith('b-') ? `/b/${slug.slice(2)}` : `/${slug}`;
-        let title = '';
-        try {
-          const r = await fetch(supabase.storage.from('studio-published').getPublicUrl(`brochures/${slug}.json`).data.publicUrl);
-          if (r.ok) { const doc = await r.json(); if (doc && typeof doc.title === 'string') title = doc.title.trim(); }
-        } catch { /* fall back to the slug */ }
-        if (!title) title = (slug.startsWith('b-') ? slug.slice(2) : slug).replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-        return { slug, title, path };
-      }));
-      setBrochureList(list);
-    } catch {
-      // List feed unavailable (function not redeployed yet): fall back to the
-      // platform brochures wired into the live shop packages.
-      const seen = new Set<string>();
-      const fall: { slug: string; title: string; path: string }[] = [];
-      for (const k of SFH_PACKAGES) { if (k.brochure && !seen.has(k.brochure)) { seen.add(k.brochure); fall.push({ slug: k.brochure.slice(1), title: k.name, path: k.brochure }); } }
-      setBrochureList(fall);
-    }
-    setBrochureLoading(false);
-  }, []);
-  useEffect(() => {
-    if (!presentOpen || !(isAdmin || isHost)) return;
-    loadBrochures();
-    const t = setInterval(loadBrochures, 20000);
-    return () => clearInterval(t);
-  }, [presentOpen, isAdmin, isHost, loadBrochures]);
-  // Page reports from the presented brochure's iframe. The presenter's own
-  // flips broadcast to the room; a follower's flips only move their own
-  // follow state (in sync = their page matches the presenter's page).
-  useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return;
-      if (!heroFrameRef.current || e.source !== heroFrameRef.current.contentWindow) return;
-      const d = e.data as { t?: string; page?: number } | null;
-      if (!d || d.t !== 'sfh-brochure-page' || typeof d.page !== 'number') return;
-      setMyBrochurePage(d.page);
-      if (presentMine.current) {
-        if (presenterPageRef.current !== d.page) { presenterPageRef.current = d.page; setPresenterPage(d.page); broadcast({ t: 'bpage', page: d.page }); }
-      } else {
-        setFollow(d.page === presenterPageRef.current);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, []); // eslint-disable-line
+  useEffect(() => { if (presentMine.current && presenting) broadcast({ t: 'present', p: presenting }); }, [peerCount, token]); // eslint-disable-line
   const onFiles = async (list: FileList | null) => {
     const f = list?.[0];
     if (!f) return;
@@ -708,6 +670,14 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const totalPeers = token ? peerCount : 1;
+  const copyCamLink = async () => {
+    const u = new URL(window.location.href);
+    u.searchParams.set('room', name);
+    u.searchParams.set('cam', '1');
+    u.searchParams.delete('host');
+    try { await navigator.clipboard.writeText(u.toString()); setNotice('Camera link copied — open it on your phone or second camera'); }
+    catch { setNotice(u.toString()); }
+  };
   const timeLabel = `${Math.floor(timeLimit / 60)}h ${timeLimit % 60}m`;
   const checkout = () => { if (cartItems.length) pay('cart', { items: cartItems }); };
 
@@ -752,7 +722,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-10 max-w-sm w-full text-center">
           <p className="text-white font-medium">You left the call</p>
-          {txLines.length > 0 && !recDismissed && (
+          {!camMode && txLines.length > 0 && !recDismissed && (
             <div className="mt-6 text-left rounded-2xl bg-white/[0.05] border border-white/[0.08] p-4">
               <p className="text-white text-sm font-medium">Your session record is ready</p>
               <p className="text-zinc-400 text-xs mt-1">{txLines.length} transcript lines from this call. Want it in your inbox?</p>
@@ -844,41 +814,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <span className="block font-mono text-xs text-zinc-500">{priceLabel(drop)}</span>
           </span>
           <button disabled={paying === drop.id} onClick={() => buy(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{drop.pkg ? (paying === drop.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
-          {drop.brochure && <button onClick={() => openBrochure(drop.brochure, drop.name)} className="px-3.5 py-2 rounded-full border border-emerald-600/40 bg-emerald-50 text-emerald-700 text-sm flex items-center gap-1.5 shrink-0"><BookOpen className="w-3.5 h-3.5" />Brochure</button>}
           <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
-        </div>
-      )}
-      {drop && !brochureView && brochureStickers.length > 0 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-end gap-2 max-w-[94%] overflow-x-auto px-1 py-0.5">
-          {brochureStickers.map((p) => (
-            <button key={p.id} onClick={() => openBrochure(p.brochure, p.name)} title={`${p.name} — view the brochure`} className="group flex flex-col items-center gap-1 shrink-0">
-              <span className="relative block w-11 h-11 rounded-full ring-2 ring-white/80 shadow-xl overflow-hidden transition-transform group-hover:scale-110">
-                <Thumb p={p} className="w-full h-full" />
-                <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white flex items-center justify-center py-px"><BookOpen className="w-2.5 h-2.5" /></span>
-              </span>
-              <span className="max-w-[64px] truncate text-[9px] font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">{p.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-      {brochureView && (
-        <div className="absolute inset-0 z-40 flex flex-col bg-zinc-950/95 backdrop-blur-sm">
-          <div className="flex items-center gap-2 px-3 py-2 shrink-0">
-            <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="flex-1 min-w-0 truncate text-sm font-medium text-white">{brochureView.name} — brochure</span>
-            <a href={absUrl(brochureView.url)} target="_blank" rel="noreferrer" title="Open in new tab" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs shrink-0"><ExternalLink className="w-3.5 h-3.5" />New tab</a>
-            <button onClick={copyFlipLink} title="Copy the flipbook link" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs shrink-0">{flipCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Link2 className="w-3.5 h-3.5" />}{flipCopied ? 'Link copied' : 'Flip link'}</button>
-            <button aria-label="Close brochure" onClick={() => setBrochureView(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0"><X className="w-4 h-4" /></button>
-          </div>
-          <iframe title={`${brochureView.name} brochure`} src={brochureView.url} className="flex-1 w-full min-h-0 bg-white" />
-        </div>
-      )}
-      {presenting?.brochure && !presentMine.current && !following && pillDismissedFor !== presenterPage && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-zinc-900/95 border border-white/15 shadow-2xl text-white max-w-[94%]">
-          <BookOpen className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-          <span className="text-xs truncate">You're browsing on your own — the presenter is on page {presenterPage + 1}</span>
-          <button onClick={() => { setFollow(true); setMyBrochurePage(presenterPage); gotoBrochurePage(presenterPage); }} className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs shrink-0">Follow presenter</button>
-          <button onClick={() => setPillDismissedFor(presenterPage)} className="px-2 py-1 text-xs text-zinc-300 shrink-0">Stay</button>
         </div>
       )}
       <div className={`h-full ${mobile ? 'p-1.5' : 'p-3'}`}>
@@ -890,7 +826,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
                   ? <img src={presenting.url} alt={presenting.name} className="w-full h-full object-contain" />
                   : presenting.kind === 'video' ? <video src={presenting.url} controls autoPlay className="w-full h-full object-contain" />
                   : presenting.kind === 'pdf' ? <object data={presenting.url} type="application/pdf" className="w-full h-full bg-white"><a href={presenting.url} target="_blank" rel="noreferrer" className="block p-6 text-white underline">Open {presenting.name}</a></object>
-                  : <iframe ref={heroFrameRef} onLoad={() => { try { heroFrameRef.current?.contentWindow?.postMessage({ t: 'sfh-brochure-hello' }, window.location.origin); } catch { /* ignore */ } }} title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
+                  : <iframe title="presentation" src={presenting.url.includes('docs.google.com') ? presenting.url.replace(/\/edit.*$/, '/preview') : presenting.url} className="w-full h-full bg-white" />)}
               <button aria-label="Stop presenting" onClick={() => { if (sharing) toggleShare(); else present(null); }} className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
             </div>
           ) : null;
@@ -930,27 +866,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <button onClick={openLink} className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs">Open</button>
             </div>
             <button onClick={() => fileInput.current?.click()} className="w-full flex items-center justify-center gap-2 py-2 rounded-full border border-white/10 text-zinc-200 text-sm"><Upload className="w-4 h-4" />Upload a file (or drop it on the call)</button>
-            {(isAdmin || isHost) && (
-              <div className="space-y-1.5">
-                <p className="flex items-center gap-1.5 px-1 font-mono text-[10px] tracking-wider text-zinc-400"><BookOpen className="w-3.5 h-3.5 text-emerald-400" />BROCHURES — SHARE TO THE SCREEN{brochureLoading && <Loader2 className="w-3 h-3 animate-spin" />}</p>
-                {brochureList.length === 0 && !brochureLoading && <p className="px-1 text-xs text-zinc-500">No published brochures yet — create one in the Brochure Studio and it shows up here automatically.</p>}
-                {brochureList.length > 0 && (
-                  <div className="max-h-44 overflow-y-auto space-y-1">
-                    {brochureList.map((b) => (
-                      <button key={b.slug} onClick={() => { present({ name: b.title, url: b.path, kind: 'link', brochure: true }); setPresentOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-left hover:bg-white/5">
-                        <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span className="flex-1 min-w-0"><span className="block truncate text-sm text-zinc-100">{b.title}</span><span className="block font-mono text-[10px] text-zinc-500">{b.path}</span></span>
-                        <span className="px-2.5 py-1 rounded-full bg-white text-zinc-900 text-[11px] shrink-0">Share</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
         <div className={`flex items-center gap-1.5 px-2 py-1.5 bg-zinc-900 border border-white/10 ${mobile ? 'w-full rounded-2xl justify-between' : 'rounded-full'}`}>
-          {(() => { const all = [
+          {(() => { const all = camMode ? [
+            { on: true, icon: SwitchCamera, fn: () => flipRef.current(), label: 'Flip camera', danger: false },
+            { on: cam, icon: cam ? Video : VideoOff, fn: () => setCam((v) => !v), label: 'Camera', danger: true },
+          ] : [
             { on: mic, icon: mic ? Mic : MicOff, fn: () => canSpeak ? setMic((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Microphone' : 'Microphone (host invite needed)', danger: true },
             { on: cam, icon: cam ? Video : VideoOff, fn: () => canSpeak ? setCam((v) => !v) : setNotice('Raise your hand. The host can invite you to speak.'), label: canSpeak ? 'Camera' : 'Camera (host invite needed)', danger: true },
             { on: bgOpen || bg.kind !== 'none', icon: Sparkles, fn: () => { setBgOpen((v) => !v); setPresentOpen(false); }, label: 'Background' },
@@ -962,7 +884,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           const cls = (b: typeof all[number]) => `${mobile ? 'w-11 h-11' : 'w-10 h-10'} shrink-0 rounded-full flex items-center justify-center ${b.danger ? (b.on ? 'bg-zinc-800 text-white' : 'bg-red-500 text-white') : b.on ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-white'}`;
           const btn = (b: typeof all[number]) => <button key={b.label} aria-label={b.label} title={b.label} onClick={() => { b.fn(); setMoreOpen(false); }} className={cls(b)}><b.icon className="w-4 h-4" /></button>;
           if (!mobile) return all.map(btn);
-          const main = all.filter((b) => ['Microphone', 'Camera', 'Transcript'].some((k) => b.label.startsWith(k)));
+          const main = all.filter((b) => ['Microphone', 'Camera', 'Transcript', 'Flip camera'].some((k) => b.label.startsWith(k)));
           const rest = all.filter((b) => !main.includes(b));
           return <>
             {main.map(btn)}
@@ -1008,7 +930,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="font-medium truncate">{drop.name}</p>
               <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
               <button disabled={paying === drop.id} onClick={() => buy(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm disabled:opacity-60"><ShoppingBag className="w-4 h-4" />{drop.pkg ? (paying === drop.id ? 'Opening checkout…' : 'Subscribe now') : 'Add to Cart'}</button>
-              {drop.brochure && <button onClick={() => openBrochure(drop.brochure, drop.name)} className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</button>}
+              {drop.brochure && <a href={drop.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
             </div>
           </div>
         </div>
@@ -1072,7 +994,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               <p className="text-[14px] text-zinc-900">{k.name}</p>
               <p className="font-mono text-[11px] text-zinc-500">${k.price.toLocaleString()}/{k.interval === 'year' ? 'yr' : 'mo'}</p>
               <ul className="mt-1 text-[11px] text-zinc-500">{k.perks.map((x) => <li key={x}>{x}</li>)}</ul>
-              {k.brochure && <button onClick={() => openBrochure(k.brochure, k.name)} className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs font-medium"><BookOpen className="w-3.5 h-3.5" />View the brochure</button>}
+              {k.brochure && <a href={k.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-xs font-medium"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
               <div className="mt-2 flex gap-2">
                 <button onClick={() => addPackage(k)} disabled={inCat} className="flex-1 py-2 rounded-full border border-zinc-200 text-xs text-zinc-800 disabled:opacity-50">{inCat ? 'In catalog' : 'Add to catalog'}</button>
                 <button onClick={() => addPackage(k, true)} className="flex-1 py-2 rounded-full bg-zinc-900 text-white text-xs">Drop live now</button>
@@ -1123,7 +1045,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
                 <button disabled={paying === p.id} onClick={() => buy(p)} className="mt-2 w-full py-2 rounded-full bg-zinc-900 text-white text-xs font-medium disabled:opacity-60">{p.pkg ? (paying === p.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
                 {(p.brochure || canSell) && (
                   <div className="mt-1.5 flex gap-1.5">
-                    {p.brochure && <button onClick={() => openBrochure(p.brochure, p.name)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-[11px] font-medium"><BookOpen className="w-3 h-3" />Brochure</button>}
+                    {p.brochure && <a href={p.brochure} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 text-emerald-700 text-[11px] font-medium"><BookOpen className="w-3 h-3" />Brochure</a>}
                     {canSell && <button onClick={() => pushToAll(p)} className="flex-1 py-1.5 rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-800">Push to All</button>}
                   </div>
                 )}
@@ -1167,6 +1089,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
         <div className="flex items-center gap-2 pr-8 lg:pr-0">
           <span className="font-mono text-xs px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-500 truncate max-w-[150px]">ROOM {name}</span>
           <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 font-mono text-xs text-white shadow-sm hover:bg-zinc-700 transition">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
+          <button onClick={copyCamLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-700 hover:bg-zinc-50 transition"><SwitchCamera className="w-3.5 h-3.5" />Add camera</button>
           <span className={`ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full ${isHost ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>{isHost ? 'HOST' : 'GUEST'}</span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1255,8 +1178,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const body = (
     <div className={`w-full h-[100dvh] overflow-hidden ${mobile ? 'bg-zinc-950 flex flex-col' : 'bg-zinc-100 p-3 flex gap-3'}`}>
       {stage}
-      {mobile && sheetOpen && <div className="fixed inset-0 z-[55] bg-black/50" onClick={() => setSheetOpen(false)} />}
-      {sidebar}
+      {!camMode && mobile && sheetOpen && <div className="fixed inset-0 z-[55] bg-black/50" onClick={() => setSheetOpen(false)} />}
+      {!camMode && sidebar}
     </div>
   );
 
@@ -1283,7 +1206,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       }}
       onError={(e) => setConnError(e.message)} style={{ height: '100dvh' }}>
       <ShopSync onSend={setSend} onMessage={onShopMessage} />
-      <LocalPublisher cam={cam} mic={mic} />
+      <LocalPublisher cam={cam} mic={camMode ? false : mic} />
+      {camMode && <CamFlipBridge register={(fn) => { flipRef.current = fn; }} />}
       <ScreenPublisher on={shareOn} onStream={onShareStream} onEnd={stopShare} onFail={setNotice} />
       <BackgroundApplier choice={bg} cam={cam} />
       <PeerCount onCount={setPeerCount} />

@@ -205,14 +205,7 @@ export default function PublicBooking() {
 
       let meetingLink: string | null = null;
       if (meetingType === 'virtual') {
-        try {
-          const { data: roomData, error: roomErr } = await supabase.functions.invoke('create-whereby-room', {
-            body: { roomName: `meeting-${slug}-${Date.now()}` }
-          });
-          if (!roomErr && roomData?.roomUrl) meetingLink = roomData.roomUrl;
-        } catch (err) {
-          console.warn('Could not create video room:', err);
-        }
+        meetingLink = `https://startupfactoryhub.com/live-video?room=booking-${crypto.randomUUID().slice(0, 8)}&host=${settings.user_id}`;
       }
 
       const { data, error } = await supabase
