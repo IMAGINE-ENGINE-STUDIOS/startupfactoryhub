@@ -937,7 +937,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
 
       <div className={`flex-1 overflow-y-auto space-y-3 ${mobile ? 'px-4 py-4' : 'px-5 py-5'}`}>
         <div className={tab === 'chat' ? 'h-full' : 'hidden'}>
-          {token ? <LiveChat onCount={setChatCount} onSent={(t) => saveLiveLog(name, 'chat', displayName, t, user?.id)} /> : <LocalChat onCount={setChatCount} />}
+          {token ? <LiveChat room={name} onCount={setChatCount} onSent={(t) => saveLiveLog(name, 'chat', displayName, t, user?.id)} /> : <LocalChat room={name} onCount={setChatCount} />}
         </div>
         {tab === 'text' && <TranscriptPanel room={name} lines={txLines} on={txOn} onToggle={toggleTx} />}
         {tab === 'shop' && shop}
