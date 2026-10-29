@@ -8,9 +8,10 @@ import {
   MessageSquare, Radio, Circle, Trash2, ImagePlus, Link2, Sparkles, Captions,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { durableGetSync, durableSet } from '@/lib/durableStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen } from 'lucide-react';
+import { ShoppingBag as ShopIcon, FileText, MoreHorizontal, PanelRightClose, PanelRightOpen, ChevronDown, BookOpen, PenLine } from 'lucide-react';
 import { LiveChat, LocalChat } from './LiveChatPanel';
 import LiveStage from './live/LiveStage';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
@@ -191,6 +192,10 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [serverUrl, setServerUrl] = useState('');
   const [connError, setConnError] = useState('');
   const [left, setLeft] = useState(false);
+  const [recEmail, setRecEmail] = useState('');
+  const [recState, setRecState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [recDismissed, setRecDismissed] = useState(false);
+  useEffect(() => { if (user?.email) setRecEmail((e) => e || (user.email as string)); }, [user?.email]);
 
   const [seconds, setSeconds] = useState(0);
   // Hosts start live; guests start muted with camera off.
@@ -222,13 +227,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   const [link, setLink] = useState('');
   const [presenting, setPresenting] = useState<{ name: string; url: string; kind: 'image' | 'video' | 'pdf' | 'link' } | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
-  const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'money' | 'rules'>('chat');
+  const [tab, setTab] = useState<'shop' | 'chat' | 'text' | 'journal' | 'money' | 'rules'>('chat');
   const mobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [sideHidden, setSideHidden] = useState(false);
   const openSheet = (k: 'shop' | 'chat' | 'text') => { setTab(k); setSheetOpen(true); };
-  const [txOn, setTxOn] = useState(false);
+  const [txOn, setTxOn] = useState(true);
   const [txLines, setTxLines] = useState<TxLine[]>([]);
   const [txPartial, setTxPartial] = useState('');
   const [hostAsk, setHostAsk] = useState<'unmute' | 'camon' | null>(null);
@@ -410,6 +415,27 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     saveLiveLog(name, 'transcript', displayName, text, user?.id);
   }, setTxPartial);
   const toggleTx = () => { setTxOn((v) => { if (!v && !mic) setNotice('Transcript is on. Turn your mic on so your words are written.'); return !v; }); };
+  // Journal: a session notepad. The draft and saved notes persist on this
+  // device per room; "Save note to Genius" also drops the note into the
+  // user's Genius bubble thread.
+  const journalKey = `sfh-journal-${name}`;
+  const [journal, setJournal] = useState<string>(() => { try { return localStorage.getItem(`${journalKey}-draft`) || ''; } catch { return ''; } });
+  const [savedNotes, setSavedNotes] = useState<{ ts: number; text: string }[]>(() => { try { return JSON.parse(localStorage.getItem(`${journalKey}-saved`) || '[]'); } catch { return []; } });
+  useEffect(() => { try { localStorage.setItem(`${journalKey}-draft`, journal); } catch { /* private mode */ } }, [journal, journalKey]);
+  useEffect(() => { try { localStorage.setItem(`${journalKey}-saved`, JSON.stringify(savedNotes.slice(0, 50))); } catch { /* private mode */ } }, [savedNotes, journalKey]);
+  const saveNoteToGenius = () => {
+    const text = journal.trim(); if (!text) return;
+    const content = `📓 Journal note — live session "${name}" • ${new Date().toLocaleString()}\n\n${text}`;
+    try {
+      const KEY = 'sfh:genius:thread:v1';
+      const cur = durableGetSync<{ role: string; content: string }[]>(KEY) || [];
+      if (!cur.some((m) => m?.content === content)) durableSet(KEY, [...cur, { role: 'assistant', content }].slice(-80));
+    } catch { /* the bubble also adopts via the event below */ }
+    window.dispatchEvent(new CustomEvent('sfh:genius:append', { detail: { content } }));
+    setSavedNotes((n) => [{ ts: Date.now(), text }, ...n]);
+    setJournal('');
+    setNotice('Note saved to your Genius bubble');
+  };
   useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
 
   // Removed people can knock; the host admits or denies them (works while they're out of the call).
@@ -581,11 +607,51 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
       </div>
     );
   }
+  const fmtClock = (ts: number) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const recordText = () => {
+    const mins = Math.floor(seconds / 60); const dur = mins >= 60 ? `${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m` : `${mins}m`;
+    const head = ['Startup Factory Hub — live session record', `Room: ${name}`, `Date: ${new Date().toLocaleString()}`, `Duration: ${dur}`, `Transcript lines: ${txLines.length}`, ''];
+    return [...head, ...txLines.map((l) => `[${fmtClock(l.ts)}] ${l.speaker}: ${l.text}`)].join('\n');
+  };
+  const emailRecord = async () => {
+    const to = recEmail.trim(); if (!to || recState === 'sending') return;
+    setRecState('sending');
+    const lines = txLines.slice(0, 450).map((l) => `<b>${escHtml(l.speaker)}</b> <span style="color:#9ca3af">[${fmtClock(l.ts)}]</span> ${escHtml(l.text)}`).join('<br>');
+    const more = txLines.length > 450 ? `<br><br>…and ${txLines.length - 450} more lines. The complete record is saved in Startup Factory Hub.` : '';
+    const message = `Here is the full transcript record of your live session.<br><br><b>Room:</b> ${escHtml(name)}<br><b>Date:</b> ${escHtml(new Date().toLocaleString())}<br><b>Lines:</b> ${txLines.length}<br><br>${lines}${more}`;
+    const { error } = await supabase.functions.invoke('send-notification-email', { body: { to, title: `Your live session record — ${name}`, message, type: 'session-record', recipientName: displayName } });
+    setRecState(error ? 'error' : 'sent');
+  };
+  const downloadRecord = () => {
+    const blob = new Blob([recordText()], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `session-record-${name}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+
   if (left) {
     return (
       <div className="w-full h-screen bg-zinc-950 flex items-center justify-center p-6">
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] rounded-[2rem] p-10 max-w-sm w-full text-center">
           <p className="text-white font-medium">You left the call</p>
+          {txLines.length > 0 && !recDismissed && (
+            <div className="mt-6 text-left rounded-2xl bg-white/[0.05] border border-white/[0.08] p-4">
+              <p className="text-white text-sm font-medium">Your session record is ready</p>
+              <p className="text-zinc-400 text-xs mt-1">{txLines.length} transcript lines from this call. Want it in your inbox?</p>
+              {recState === 'sent' ? (
+                <p className="mt-3 text-emerald-400 text-sm">Sent. Check your email.</p>
+              ) : (
+                <>
+                  <input value={recEmail} onChange={(e) => setRecEmail(e.target.value)} placeholder="you@email.com" inputMode="email" className="mt-3 w-full text-sm px-3 py-2 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-zinc-500 outline-none" />
+                  {recState === 'error' && <p className="mt-2 text-xs text-red-400">Sending failed. Try again, or download the record instead.</p>}
+                  <div className="mt-3 flex gap-2">
+                    <button onClick={emailRecord} disabled={recState === 'sending' || !recEmail.trim()} className="flex-1 py-2 rounded-full bg-emerald-600 text-white text-sm disabled:opacity-50">{recState === 'sending' ? 'Sending…' : 'Email it to me'}</button>
+                    <button onClick={downloadRecord} className="px-4 py-2 rounded-full border border-white/15 text-white text-sm">Download</button>
+                  </div>
+                  <button onClick={() => setRecDismissed(true)} className="mt-2 w-full text-center text-xs text-zinc-500 underline underline-offset-2">No thanks</button>
+                </>
+              )}
+            </div>
+          )}
           <button onClick={() => { setLeft(false); setSeconds(0); if (!kicked) { setToken(''); setMintNonce((n) => n + 1); } }} className="mt-6 px-5 py-2 rounded-full bg-white text-zinc-900 text-sm">Rejoin</button>
         </div>
       </div>
@@ -754,6 +820,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     { k: 'chat', label: `CHAT • ${chatCount}` },
     { k: 'shop', label: `SHOP • ${catalog.length}` },
     { k: 'text', label: 'TEXT' },
+    { k: 'journal', label: 'JOURNAL' },
     ...(isHost ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
   ] as const;
 
@@ -922,7 +989,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           <div className="flex gap-1 p-1 rounded-2xl bg-zinc-100 font-mono text-[11px] max-w-full overflow-x-auto">
             {pills.map((t) => (
               <button key={t.k} onClick={() => setTab(t.k as any)} className={`relative flex-1 flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl transition ${tab === t.k ? 'bg-zinc-900 text-white shadow' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.k === 'chat' ? <><MessageSquare className="w-3.5 h-3.5" />{t.label}</> : t.k === 'shop' ? <><ShopIcon className="w-3.5 h-3.5" />{t.label}</> : <><FileText className="w-3.5 h-3.5" />{t.label}</>}
+                {t.k === 'money' ? <DollarSign className="w-3.5 h-3.5" /> : t.k === 'rules' ? <Sliders className="w-3.5 h-3.5" /> : t.k === 'chat' ? <><MessageSquare className="w-3.5 h-3.5" />{t.label}</> : t.k === 'shop' ? <><ShopIcon className="w-3.5 h-3.5" />{t.label}</> : t.k === 'journal' ? <><PenLine className="w-3.5 h-3.5" />{t.label}</> : <><FileText className="w-3.5 h-3.5" />{t.label}</>}
                 {t.k === 'chat' && unread > 0 && <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{unread}</span>}
               </button>
             ))}
@@ -940,6 +1007,36 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           {token ? <LiveChat room={name} onCount={setChatCount} onSent={(t) => saveLiveLog(name, 'chat', displayName, t, user?.id)} /> : <LocalChat room={name} onCount={setChatCount} />}
         </div>
         {tab === 'text' && <TranscriptPanel room={name} lines={txLines} on={txOn} onToggle={toggleTx} />}
+        {tab === 'journal' && (
+          <div className="space-y-3">
+            <div className="rounded-3xl overflow-hidden border border-amber-200 shadow-sm">
+              <div className="flex items-center gap-2.5 px-4 py-3 bg-amber-50 border-b border-amber-100">
+                <span className="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center shrink-0"><PenLine className="w-4 h-4 text-amber-900" /></span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-zinc-900 leading-tight">Journal</p>
+                  <p className="font-mono text-[10px] text-zinc-500">Session notes • saved to your Genius bubble</p>
+                </div>
+              </div>
+              <div style={{ backgroundColor: '#fffdf4', backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, rgba(120,90,0,0.10) 28px)' }}>
+                <textarea value={journal} onChange={(e) => setJournal(e.target.value)} placeholder="Write your notes for this session…" className="w-full min-h-[240px] bg-transparent resize-y px-4 py-1 text-[15px] leading-[28px] text-zinc-800 outline-none placeholder:text-zinc-400" />
+              </div>
+              <div className="px-4 py-3 bg-amber-50 border-t border-amber-100">
+                <button onClick={saveNoteToGenius} disabled={!journal.trim()} className="w-full py-2.5 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-40">Save note to Genius</button>
+              </div>
+            </div>
+            {savedNotes.length > 0 && (
+              <div className="space-y-2">
+                <p className="font-mono text-[10px] tracking-[0.2em] text-zinc-500">SAVED THIS SESSION</p>
+                {savedNotes.map((n) => (
+                  <div key={n.ts} className="border-l-2 border-amber-400 bg-white rounded-r-2xl border border-zinc-100 px-3 py-2">
+                    <p className="font-mono text-[10px] text-zinc-400">{new Date(n.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-sm text-zinc-700 line-clamp-3">{n.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         {tab === 'shop' && shop}
         {tab === 'money' && (
           <div className="space-y-3">

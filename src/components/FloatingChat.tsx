@@ -309,6 +309,19 @@ export default function FloatingChat() {
   useEffect(() => durableOnAdopt(GENIUS_THREAD_KEY, (data) => {
     if (Array.isArray(data)) setAiMessages((cur) => (cur.length ? cur : (data as AIMessage[]).slice(-80)));
   }), []);
+  /* Journal notes saved during live sessions land in this thread: the live
+   * room dispatches 'sfh:genius:append' and the note joins the conversation
+   * (the mirror effect below persists it). Deduped by exact content, since
+   * the room also writes the durable store directly for cold starts. */
+  useEffect(() => {
+    const onAppend = (e: Event) => {
+      const content = (e as CustomEvent).detail?.content;
+      if (typeof content !== 'string' || !content) return;
+      setAiMessages((cur) => (cur.some((m) => m.content === content) ? cur : [...cur, { role: 'assistant', content } as AIMessage]));
+    };
+    window.addEventListener('sfh:genius:append', onAppend);
+    return () => window.removeEventListener('sfh:genius:append', onAppend);
+  }, []);
   useEffect(() => {
     if (aiMessages.length === 0 && !geniusHydratedRef.current) return;
     durableSet(GENIUS_THREAD_KEY, aiMessages.slice(-80));
