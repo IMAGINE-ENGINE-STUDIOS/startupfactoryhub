@@ -97,7 +97,25 @@ function ScreenPublisher({ on, onStream, onEnd, onFail }: { on: boolean; onStrea
 function LocalPublisher({ cam, mic }: { cam: boolean; mic: boolean }) {
   const { localParticipant } = useLocalParticipant();
   const state = useConnectionState();
+  const camOnRef = useRef(false);
   useEffect(() => { if (state === 'connected') localParticipant.setCameraEnabled(cam).catch(() => {}); }, [cam, state, localParticipant]);
+  // SIDEWAYS-CAMERA REPAIR (founder report 2026-10-29): after rotating the
+  // phone, or turning the camera off and back on, iOS can keep publishing
+  // the track in the old orientation — the picture stays sideways. Restart
+  // the camera track so capture re-negotiates in the current orientation.
+  useEffect(() => {
+    const was = camOnRef.current;
+    camOnRef.current = cam;
+    if (state !== 'connected' || !cam || was) return;
+    const tm = setTimeout(() => { localParticipant.restartTrack(Track.Source.Camera).catch(() => {}); }, 400);
+    return () => clearTimeout(tm);
+  }, [cam, state, localParticipant]);
+  useEffect(() => {
+    if (state !== 'connected') return;
+    const repair = () => { if (camOnRef.current) localParticipant.restartTrack(Track.Source.Camera).catch(() => {}); };
+    window.addEventListener('orientationchange', repair);
+    return () => window.removeEventListener('orientationchange', repair);
+  }, [state, localParticipant]);
   useEffect(() => { if (state === 'connected') localParticipant.setMicrophoneEnabled(mic).catch(() => {}); }, [mic, state, localParticipant]);
   return null;
 }
@@ -117,6 +135,7 @@ function CamFlipBridge({ register }: { register: (fn: () => void) => void }) {
         const idx = cams.findIndex((d) => d.deviceId === cur);
         const next = cams[(idx + 1) % cams.length];
         await localParticipant.switchActiveDevice('videoinput', next.deviceId);
+        localParticipant.restartTrack(Track.Source.Camera).catch(() => {});
       } catch { /* single-camera devices ignore flips */ }
     });
   }, [localParticipant, register]);
@@ -814,6 +833,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <span className="block font-mono text-xs text-zinc-500">{priceLabel(drop)}</span>
           </span>
           <button disabled={paying === drop.id} onClick={() => buy(drop)} className="px-3.5 py-2 rounded-full bg-zinc-900 text-white text-sm disabled:opacity-60">{drop.pkg ? (paying === drop.id ? 'Opening…' : 'Subscribe') : 'Add to cart'}</button>
+          {drop.brochure && <a aria-label="View the brochure" title="View the brochure" href={drop.brochure} target="_blank" rel="noreferrer" className="w-8 h-8 shrink-0 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center"><BookOpen className="w-4 h-4 text-emerald-700" /></a>}
           <button aria-label="Hide offer" onClick={() => setStageOffer(false)} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"><X className="w-4 h-4 text-zinc-700" /></button>
         </div>
       )}

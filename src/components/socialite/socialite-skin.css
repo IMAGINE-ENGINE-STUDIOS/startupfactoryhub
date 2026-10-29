@@ -1,0 +1,15 @@
+/* Extracted from Wonderlands src/index.css (HEAD 2df15b7) — the .socialite-skin
+   scoped block SOCIALITE's UI depends on. Merge into SFH's src/index.css on
+   integration; not imported by any staged component directly. */
+/* SOCIALITE skin — re-themes the embedded admin email panels (cyan "command center"
+   look) to SOCIALITE's monochrome zinc style. Scoped to .socialite-skin only. */
+.socialite-skin [class*="text-cyan-"] { color: #f4f4f5 !important; }
+.socialite-skin [class*="text-cyan-400/"] { color: #71717a !important; }
+.socialite-skin [class*="border-cyan-"], .socialite-skin [class*="border-slate-"] { border-color: #27272a !important; }
+.socialite-skin [class*="bg-gray-900"], .socialite-skin [class*="bg-slate-900"], .socialite-skin .bg-card { background-color: #161617 !important; }
+.socialite-skin [class*="bg-gray-800"] { background-color: #18181b !important; }
+.socialite-skin [class*="bg-cyan-600"] { background-color: #fff !important; color: #000 !important; }
+.socialite-skin [class*="bg-cyan-600"]:hover { background-color: #e4e4e7 !important; }
+.socialite-skin .rounded-lg, .socialite-skin .rounded-xl { border-radius: 18px; }
+.socialite-skin input, .socialite-skin textarea, .socialite-skin [role="combobox"] { background-color: #18181b !important; border-color: #27272a !important; border-radius: 12px; }
+.socialite-skin button[class*="rounded-md"] { border-radius: 9999px; }
