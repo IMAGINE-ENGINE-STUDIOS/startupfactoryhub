@@ -223,6 +223,79 @@ export const ResourcesIcon: GeniusIcon = (p) => (
   </svg>
 );
 
+/* ── CODE ────────────────────────────────────────────────── */
+export const CodeIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <path d="m8.2 6.5-4.7 5.5 4.7 5.5" />
+    <path d="m15.8 6.5 4.7 5.5-4.7 5.5" />
+    <path d="M13.4 4.2 10.6 19.8" opacity={0.7} />
+  </svg>
+);
+
+export const DebugIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <ellipse cx="12" cy="13.5" rx="4.4" ry="5.8" />
+    <path d="M12 7.7V19.3" opacity={0.7} />
+    <path d="M9.2 5.2 7.4 3.4M14.8 5.2l1.8-1.8" />
+    <path d="M10.2 4.4h3.6l-.9 3.3H11l-.8-3.3Z" />
+    <path d="M7.6 10.6 4 8.8M7.4 13.5H3.4M7.6 16.4l-3.6 1.8M16.4 10.6 20 8.8M16.6 13.5h4M16.4 16.4l3.6 1.8" />
+  </svg>
+);
+
+export const ExplainCodeIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <circle cx="10.5" cy="10.5" r="6.8" />
+    <path d="m15.6 15.6 5 5" />
+    <path d="m8.4 8.3-1.7 2.2 1.7 2.2M12.6 8.3l1.7 2.2-1.7 2.2" />
+  </svg>
+);
+
+export const ReviewIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <rect x="5" y="4.5" width="14" height="16.5" rx="2" />
+    <path d="M9.5 4.5V2.8h5v1.7" />
+    <path d="m8.8 13.6 2.1 2.1 4.3-4.7" />
+  </svg>
+);
+
+export const ConvertIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <path d="M3.8 7h13.4" />
+    <path d="m14.2 3.8 3.2 3.2-3.2 3.2" />
+    <path d="M20.2 17H6.8" />
+    <path d="m9.8 20.2-3.2-3.2 3.2-3.2" />
+  </svg>
+);
+
+export const SqlIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <ellipse cx="12" cy="5.4" rx="7.6" ry="2.9" />
+    <path d="M4.4 5.4v13.2c0 1.6 3.4 2.9 7.6 2.9s7.6-1.3 7.6-2.9V5.4" />
+    <path d="M4.4 12c0 1.6 3.4 2.9 7.6 2.9s7.6-1.3 7.6-2.9" opacity={0.7} />
+  </svg>
+);
+
+/* ── ANALYZE extras ──────────────────────────────────────── */
+export const TranslateIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <circle cx="12" cy="12" r="8.6" />
+    <ellipse cx="12" cy="12" rx="3.7" ry="8.6" opacity={0.6} />
+    <path d="M3.4 12h17.2" opacity={0.6} />
+    <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const NotesIcon: GeniusIcon = (p) => (
+  <svg {...S(p)}>
+    <rect x="5" y="3.4" width="14" height="17.2" rx="2" />
+    <path d="m8.4 8.8 1.1 1.1 2-2.2" />
+    <path d="M14.3 8.6h2.3" />
+    <path d="m8.4 13.8 1.1 1.1 2-2.2" />
+    <path d="M14.3 13.6h2.3" />
+    <path d="M8.4 18.4h8.2" opacity={0.7} />
+  </svg>
+);
+
 /* ── Utility marks used in the deck chrome ───────────────── */
 export const DeckSparkIcon: GeniusIcon = (p) => (
   <svg {...S(p)}>
