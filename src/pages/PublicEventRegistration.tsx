@@ -164,8 +164,7 @@ const PublicEventRegistration = () => {
               title: `You're registered: ${event.title}`,
               type: 'event',
               recipientName: formData.full_name.trim(),
-              message: `<p>Hi ${esc(formData.full_name.trim())},</p>
-                <p>You're registered for <strong>${esc(event.title)}</strong>.</p>
+              message: `<p>You're registered for <strong>${esc(event.title)}</strong>.</p>
                 <p>${dateLine}<br/>${timeLine}</p>
                 ${accessHtml}
                 <p style="margin-top:18px;">See you there,<br/>Startup Factory Hub</p>`,
