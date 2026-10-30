@@ -30,6 +30,7 @@ interface Event {
   start_date: string;
   end_date: string;
   location: string | null;
+  meeting_room_url?: string | null;
   max_attendees: number | null;
   is_virtual: boolean | null;
   organizer_id: string;
@@ -137,6 +138,44 @@ const PublicEventRegistration = () => {
         throw error;
       }
 
+      // Send the confirmation email the success screen promises, carrying the
+      // event's live-video join link for virtual events (venue for in-person).
+      // Email failure must never fail the registration itself.
+      if (event) {
+        try {
+          const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          const startD = parseISO(event.start_date);
+          const endD = parseISO(event.end_date);
+          const joinLink = event.is_virtual
+            ? (event.meeting_room_url || (event.location && event.location.startsWith('http') ? event.location : null))
+            : null;
+          const dateLine = format(startD, 'EEEE, MMMM d, yyyy');
+          const timeLine = `${format(startD, 'h:mm a')} - ${format(endD, 'h:mm a')}`;
+          const accessHtml = joinLink
+            ? `<p style="margin:18px 0 6px;"><strong>Join the event here:</strong></p>
+               <p style="margin:0 0 6px;"><a href="${joinLink}" style="color:#34d399;word-break:break-all;">${joinLink}</a></p>
+               <p style="margin:0;">Save this link. It is how you enter the event on Startup Factory Hub Live Video. No account needed, just your name and email.</p>`
+            : (!event.is_virtual && event.location
+              ? `<p style="margin:18px 0 0;"><strong>Where:</strong> ${esc(event.location)}</p>`
+              : '');
+          await supabase.functions.invoke('send-notification-email', {
+            body: {
+              to: formData.email.trim().toLowerCase(),
+              title: `You're registered: ${event.title}`,
+              type: 'event',
+              recipientName: formData.full_name.trim(),
+              message: `<p>Hi ${esc(formData.full_name.trim())},</p>
+                <p>You're registered for <strong>${esc(event.title)}</strong>.</p>
+                <p>${dateLine}<br/>${timeLine}</p>
+                ${accessHtml}
+                <p style="margin-top:18px;">See you there,<br/>Startup Factory Hub</p>`,
+            },
+          });
+        } catch (emailError) {
+          console.error('Registration confirmation email failed:', emailError);
+        }
+      }
+
       setRegistered(true);
       toast({ title: 'Registration successful!', description: "You're all set for this event." });
     } catch (error) {
@@ -177,6 +216,9 @@ const PublicEventRegistration = () => {
   }
 
   const eventDate = parseISO(event.start_date);
+  const joinLink = event.is_virtual
+    ? (event.meeting_room_url || (event.location && event.location.startsWith('http') ? event.location : null))
+    : null;
   const isEventPast = isPast(parseISO(event.end_date));
   const isFull = event.max_attendees && registrationCount >= event.max_attendees;
   const spotsLeft = event.max_attendees ? event.max_attendees - registrationCount : null;
@@ -212,6 +254,21 @@ const PublicEventRegistration = () => {
                   </div>
                 )}
               </div>
+
+              {joinLink && (
+                <div className="mb-6">
+                  <a href={joinLink} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                      <Video className="h-4 w-4 mr-2" />
+                      Join the event on SFH Live Video
+                    </Button>
+                  </a>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    This is your event link. Save it, because it is how you enter the event.
+                  </p>
+                  <p className="text-xs break-all bg-muted/50 rounded-md p-2 mt-1">{joinLink}</p>
+                </div>
+              )}
 
               <p className="text-sm text-muted-foreground mb-4">
                 A confirmation email will be sent to <span className="font-medium">{formData.email}</span>
