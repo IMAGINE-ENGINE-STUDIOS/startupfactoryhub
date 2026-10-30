@@ -89,13 +89,13 @@ PROFESSIONAL FORMAT RULES (ABSOLUTE):
 
     const systemPrompt = (systemOverride || defaultSystem) + formatRules + docContext + languageDirective;
 
-    /* "fast", not "free": the free chain leads with gpt-oss-120b, a
-     * reasoning model that thinks at length before its first token —
-     * Genius "thinking" for a minute or more (founder report
-     * 2026-10-26). The fast chain leads with gpt-oss-20b, and the
-     * router now pins gpt-oss reasoning effort to low, so the first
-     * token lands in seconds. */
-    const { resp: response } = await routeChat("fast", {
+    /* The "llama" tier: Genius chat runs on Llama 3.3 70B — Workers AI
+     * (@cf/meta/llama-3.3-70b-instruct-fp8-fast, the Phase 0 bake-off winner,
+     * founder pick 2026-10-30) first, then self-hosted Ollama, then
+     * Groq-hosted Llama; if every Llama hop fails the router falls through
+     * to the standard chain so chat never goes dark. (Before this, "fast"
+     * led with gpt-oss-20b — not the Genius brain the founder picked.) */
+    const { resp: response } = await routeChat("llama", {
       messages: [{ role: "system", content: systemPrompt }, ...messages],
       stream: true,
       max_tokens: 8000,
