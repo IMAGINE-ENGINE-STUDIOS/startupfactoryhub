@@ -130,19 +130,26 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 /**
- * Task pipeline for the Agents tab: a client-side queue (persisted in
+ * Task queue for the Agents tab: a client-side queue (persisted in
  * localStorage) drained one task at a time through the same call-agents run
  * action Mission Control uses, an in-progress lane with a live elapsed
  * timer, and a Done carousel fed by the server-side call_agent_runs table
  * (runs are only recorded there once they finish). Any run error halts the
  * queue on the spot — the remaining tasks are never burned through.
+ *
+ * Unified under Mission Control (founder, 2026-10-30): in the Agents
+ * console this renders EMBEDDED inside the Mission Control panel — one
+ * surface for running agents and queueing their work. The standalone
+ * panel form remains for the 3D office bot Tasks view.
  */
 export default function TaskPipeline({
   agents,
   onRunComplete,
+  embedded = false,
 }: {
   agents: { id: string; name: string }[];
   onRunComplete?: () => void;
+  embedded?: boolean;
 }) {
   const [queue, setQueue] = useState<TaskQueueItem[]>(loadStoredQueue);
   const [current, setCurrent] = useState<{ item: TaskQueueItem; startedAt: number } | null>(null);
@@ -277,23 +284,42 @@ export default function TaskPipeline({
     agents.find((a) => a.id === run.agent_id)?.name ?? "Agent";
 
   return (
-    <section className={`${GLASS_PANEL} relative overflow-hidden px-4 py-5 sm:px-8 sm:py-6`}>
-      <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-emerald-300/25 blur-3xl" />
+    <section className={embedded ? "relative" : `${GLASS_PANEL} relative overflow-hidden px-4 py-5 sm:px-8 sm:py-6`}>
+      {!embedded && (
+        <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-emerald-300/25 blur-3xl" />
+      )}
       <div className="relative">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)]">
-            <KanbanSquare className="h-5 w-5" />
-          </span>
-          <div>
-            <h3 className="text-xl font-bold tracking-tight text-foreground">
-              Task pipeline
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Queue tasks for your agents — they run one at a time, and finished
-              work lands in Done.
-            </p>
+        {embedded ? (
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)]">
+              <KanbanSquare className="h-4 w-4" />
+            </span>
+            <div>
+              <h4 className="text-base font-bold tracking-tight text-foreground">
+                Task queue
+              </h4>
+              <p className="text-[11px] text-muted-foreground">
+                Queue tasks for your agents — they run one at a time, and
+                finished work lands in Done.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)]">
+              <KanbanSquare className="h-5 w-5" />
+            </span>
+            <div>
+              <h3 className="text-xl font-bold tracking-tight text-foreground">
+                Task pipeline
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Queue tasks for your agents — they run one at a time, and finished
+                work lands in Done.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-5 grid min-w-0 items-start gap-4 lg:grid-cols-2">
           {/* ── In progress ─────────────────────────────────────────── */}

@@ -2047,13 +2047,16 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
                     </div>
                   </div>
                 )}
+
+                {/* Task queue — unified into Mission Control (the former
+                    standalone Task pipeline section lives here now) */}
+                <div className="border-t border-border pt-5">
+                  <TaskPipeline agents={agents} onRunComplete={refreshAfterQueueRun} embedded />
+                </div>
               </div>
             </div>
           </section>
         </div>
-
-        {/* ── Task pipeline ─────────────────────────────── */}
-        <TaskPipeline agents={agents} onRunComplete={refreshAfterQueueRun} />
       </div>
     </div>
   );
