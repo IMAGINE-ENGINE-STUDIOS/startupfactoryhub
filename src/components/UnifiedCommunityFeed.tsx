@@ -1775,7 +1775,7 @@ export default function UnifiedCommunityFeed({
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 auto-rows-[47vw] sm:auto-rows-[104px] gap-2 [grid-auto-flow:dense]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 auto-rows-[47vw] sm:auto-rows-[min(23vw,250px)] gap-2 [grid-auto-flow:dense]">
           {wallEntries.map(entry => renderWallTile(entry))}
         </div>
         {/* Infinite Scroll Trigger */}
