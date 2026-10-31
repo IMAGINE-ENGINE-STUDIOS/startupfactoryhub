@@ -10,7 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Brain, Wrench, Rocket, Bot, Megaphone
+  ChevronDown, Check, X, Brain, Wrench, Rocket, Bot
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -60,7 +60,6 @@ import AcceleratorProfileView from '@/components/AcceleratorProfileView';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
-import SocialitePage from '@/pages/Socialite';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 
 const AcceleratorDashboard = () => {
@@ -363,7 +362,6 @@ const AcceleratorDashboard = () => {
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -607,9 +605,6 @@ const AcceleratorDashboard = () => {
             <SFHCallAgents />
           </TabsContent>
 
-          <TabsContent value="marketing" className="space-y-4">
-            <SocialitePage embedded />
-          </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">
             <LightPaperWorkspace />

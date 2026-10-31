@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
-import { Bot, Megaphone, Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle, ChevronDown } from 'lucide-react';
+import { Bot, Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle, ChevronDown } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
@@ -26,7 +26,6 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
-import SocialitePage from '@/pages/Socialite';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import JobsSection from '@/components/JobsSection';
 import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
@@ -283,7 +282,6 @@ export default function AdvisorDashboard() {
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -503,9 +501,6 @@ export default function AdvisorDashboard() {
             <SFHCallAgents />
           </TabsContent>
 
-          <TabsContent value="marketing" className="space-y-4">
-            <SocialitePage embedded />
-          </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">
             <LightPaperWorkspace />

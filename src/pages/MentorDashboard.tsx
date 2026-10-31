@@ -16,7 +16,6 @@ import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import SFHCallAgents from "@/components/call-agents/SFHCallAgents";
-import SocialitePage from "@/pages/Socialite";
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MentorshipRequests from "@/components/MentorshipRequests";
 
@@ -43,7 +42,7 @@ import MeetingsHubHeader from "@/components/MeetingsHubHeader";
 import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
-import { Bot, Megaphone, Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
+import { Bot, Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -129,7 +128,6 @@ const MentorDashboard = () => {
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
@@ -331,9 +329,6 @@ const MentorDashboard = () => {
             <SFHCallAgents />
           </TabsContent>
 
-          <TabsContent value="marketing" className="space-y-6">
-            <SocialitePage embedded />
-          </TabsContent>
           {/* LightPaper Tab */}
           <TabsContent value="lightpaper" className="space-y-4">
             <LightPaperWorkspace />

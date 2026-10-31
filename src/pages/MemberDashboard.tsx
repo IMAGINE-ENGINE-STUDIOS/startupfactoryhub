@@ -5,12 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Building, Calendar as CalendarIcon, MessageCircle, Network,
   Briefcase, GraduationCap, Brain, Wrench, Globe, BarChart, Presentation,
-  FileText, Bot, Megaphone,
+  FileText, Bot,
 } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import SFHCallAgents from '@/components/call-agents/SFHCallAgents';
-import SocialitePage from '@/pages/Socialite';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import BookingsList from '@/components/BookingsList';
 import MVPReferralCard from '@/components/referral/MVPReferralCard';
@@ -99,7 +98,6 @@ const MemberDashboard = () => {
               { value: 'tools', icon: Wrench, label: t('nav.tools') },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
               { value: 'call-agents', icon: Bot, label: 'Agents' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network', icon: Network, label: t('nav.network') },
               { value: 'learn', icon: GraduationCap, label: t('nav.learn') },
@@ -137,12 +135,6 @@ const MemberDashboard = () => {
           {activeTab === 'call-agents' && (
             <TabsContent value="call-agents" className="space-y-4">
               <SFHCallAgents />
-            </TabsContent>
-          )}
-
-          {activeTab === 'marketing' && (
-            <TabsContent value="marketing" className="space-y-4">
-              <SocialitePage embedded />
             </TabsContent>
           )}
 
