@@ -139,7 +139,7 @@ export function spanForPost(post: FeedMixPost): WallSpan {
 }
 
 export interface WallPartner {
-  kind: 'firm' | 'cohort';
+  kind: 'firm' | 'cohort' | 'fund';
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;

@@ -1338,13 +1338,22 @@ export default function UnifiedCommunityFeed({
     comments_count: (p as any).comments_count ?? p._count?.post_comments ?? 0,
     created_at: p.created_at,
   })).filter(sh => sh.video_url), [posts]);
+  const FEATURED_FUNDS = [
+    { id: 'a16z', name: 'Andreessen Horowitz (a16z)', logo: 'https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/feed-media/fund-logos/a16z.png', focus: 'AI · Software · Growth', description: 'Backing founders from pre-seed through growth. Home of a16z Speedrun for early-stage founders.', cta: 'Visit fund', url: 'https://a16z.com' },
+    { id: 'sequoia', name: 'Sequoia Capital', logo: 'https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/feed-media/fund-logos/sequoia.png', focus: 'Idea to IPO', description: 'Partnering with founders from idea to IPO. Arc is its company-building program for pre-seed and seed founders.', cta: 'Visit fund', url: 'https://www.sequoiacap.com' },
+    { id: 'pegasus', name: 'Pegasus Tech Ventures', logo: 'https://www.google.com/s2/favicons?domain=pegasustechventures.com&sz=128', focus: 'Global · Deep Tech', description: 'Silicon Valley firm investing globally; host of the Startup World Cup pitch competition.', cta: 'Visit fund', url: 'https://www.pegasustechventures.com' },
+    { id: 'yc', name: 'Y Combinator', logo: 'https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/feed-media/fund-logos/y-combinator.png', focus: 'Accelerator · $500K deal', description: 'The original startup accelerator. Standard deal: $500,000 for each batch company.', cta: 'Apply', url: 'https://www.ycombinator.com' },
+    { id: 'founders-fund', name: 'Founders Fund', logo: 'https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/feed-media/fund-logos/founders-fund.png', focus: 'Frontier Tech', description: "Backing category-defining technology companies, from SpaceX and Palantir to today's frontier startups.", cta: 'Visit fund', url: 'https://foundersfund.com' },
+  ];
   const wallEntries = useMemo(() => {
     const firmPartners: WallPartner[] = FIRMS.map(f => ({ kind: 'firm', id: `firm-${f.id}`, data: f }));
+    const fundPartners: WallPartner[] = FEATURED_FUNDS.map(f => ({ kind: 'fund', id: `fund-${f.id}`, data: f }));
     const cohortPartners: WallPartner[] = wallCohorts.map(c => ({ kind: 'cohort', id: `cohort-${c.id}`, data: c }));
     const partners: WallPartner[] = [];
-    const max = Math.max(firmPartners.length, cohortPartners.length);
+    const max = Math.max(firmPartners.length, fundPartners.length, cohortPartners.length);
     for (let i = 0; i < max; i++) {
       if (firmPartners[i]) partners.push(firmPartners[i]);
+      if (fundPartners[i]) partners.push(fundPartners[i]);
       if (cohortPartners[i]) partners.push(cohortPartners[i]);
     }
     return buildWallLayout(posts, partners);
@@ -1406,6 +1415,29 @@ export default function UnifiedCommunityFeed({
       <div className="mt-2 flex items-center justify-between">
         <span className="text-[8px] font-mono uppercase tracking-[0.22em] text-muted-foreground">Investor partner</span>
         <span className="text-[11px] font-bold text-primary">{firm.cta} →</span>
+      </div>
+    </article>
+  );
+
+  const renderFundTile = (fund: any) => (
+    <article key={`fund-${fund.id}`} onClick={() => window.open(fund.url, '_blank', 'noopener')}
+      className="group relative flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(160deg,hsl(220_25%_11%),hsl(220_25%_7%))] p-3 transition duration-300 hover:scale-[1.02] hover:border-primary/40 col-span-2 row-span-1">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-[13px] font-bold text-slate-900">
+          {fund.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('')}
+          <img src={fund.logo} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="absolute inset-0 h-full w-full bg-white object-contain p-1" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="truncate text-[13px] font-bold">{fund.name}</h4>
+            <span className="shrink-0 rounded-full border border-primary/30 bg-primary/15 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.12em] text-primary">{fund.focus}</span>
+          </div>
+          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{fund.description}</p>
+        </div>
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-[8px] font-mono uppercase tracking-[0.22em] text-muted-foreground">Featured fund</span>
+        <span className="text-[11px] font-bold text-primary">{fund.cta} →</span>
       </div>
     </article>
   );
@@ -1576,6 +1608,7 @@ export default function UnifiedCommunityFeed({
 
   const renderWallTile = (entry: WallEntry<FeedPost>) => {
     if (entry.partner?.kind === 'firm') return renderFirmTile(entry.partner.data);
+    if (entry.partner?.kind === 'fund') return renderFundTile(entry.partner.data);
     if (entry.partner?.kind === 'cohort') return renderCohortTile(entry.partner.data);
     return entry.post ? renderTile(entry.post, entry.span) : null;
   };
