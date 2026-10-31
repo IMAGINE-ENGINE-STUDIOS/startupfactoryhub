@@ -23,13 +23,20 @@ const ollamaUrl = () => {
   return base ? `${base}/chat/completions` : "";
 };
 
-// Workers AI (the founder's own Cloudflare account) — OpenAI-compatible chat
-// endpoint. Genius Consolidation Phase 1 (founder pick 2026-10-30): Llama 3.3
-// 70B fp8-fast is the launch brain — it won the Phase 0 bake-off (tool calling
-// 95.4%, [[ACT]] 100%, chat median 4.1s vs gpt-oss-120b's 10.6s). Empty account
-// id = provider skipped silently, like Ollama, so this stays inert until the
-// CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN Supabase secrets exist.
+// Workers AI (the founder's own Cloudflare account). Genius Consolidation
+// Phase 1 (founder pick 2026-10-30): Llama 3.3 70B fp8-fast is the launch
+// brain — it won the Phase 0 bake-off (tool calling 95.4%, [[ACT]] 100%,
+// chat median 4.1s vs gpt-oss-120b's 10.6s).
+// Two ways in, first hit wins:
+//  1. CLOUDFLARE_BRAIN_URL — the genius-brain Worker (Workers AI binding, so
+//     NO Cloudflare API token exists in Supabase at all; the CLOUDFLARE_API_TOKEN
+//     secret then holds the Worker's own shared key). Live since 2026-10-30.
+//  2. The direct Workers AI OpenAI-compatible endpoint, when
+//     CLOUDFLARE_ACCOUNT_ID + a real CLOUDFLARE_API_TOKEN are set.
+// Neither set = provider skipped silently, like Ollama.
 const cfUrl = () => {
+  const override = (Deno.env.get("CLOUDFLARE_BRAIN_URL") || "").trim();
+  if (override) return override;
   const acct = (Deno.env.get("CLOUDFLARE_ACCOUNT_ID") || "").trim();
   return acct ? `https://api.cloudflare.com/client/v4/accounts/${acct}/ai/v1/chat/completions` : "";
 };
