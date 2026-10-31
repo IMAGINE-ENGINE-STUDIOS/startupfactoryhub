@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isLogoImageUrl, highResLogoUrl } from '@/lib/imageUrl';
 
 interface ImageLightboxProps {
   images: string[];
@@ -45,10 +46,21 @@ const ImageLightbox = ({ images, initialIndex = 0, open, onOpenChange }: ImageLi
 
   if (images.length === 0) return null;
 
+  const currentSrc = images[currentIndex] ?? '';
+  const currentIsLogo = isLogoImageUrl(currentSrc);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 bg-black/95 border-none overflow-hidden [&>button]:hidden">
-        <div className="relative flex items-center justify-center w-full h-[90vh]">
+      {/* Fixed responsive width — the old `w-auto` collapsed the viewer
+          into a narrow strip around small images (logos). The inline
+          black background is deliberate: the shared DialogContent base
+          carries the `tech-card` gradient, whose unlayered CSS beats
+          the bg-black/95 utility and turned the viewer pale. */}
+      <DialogContent
+        className="w-[min(95vw,60rem)] max-w-[95vw] max-h-[95vh] p-0 border-none overflow-hidden [&>button]:hidden"
+        style={{ background: '#050505' }}
+      >
+        <div className="relative flex items-center justify-center w-full h-[min(88vh,52rem)]">
           {/* Close button */}
           <Button
             variant="ghost"
@@ -59,15 +71,17 @@ const ImageLightbox = ({ images, initialIndex = 0, open, onOpenChange }: ImageLi
             <X className="h-5 w-5" />
           </Button>
 
-          {/* Zoom toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-3 right-14 z-50 text-white/80 hover:text-white hover:bg-white/10 rounded-full"
-            onClick={() => setZoomed(!zoomed)}
-          >
-            {zoomed ? <ZoomOut className="h-5 w-5" /> : <ZoomIn className="h-5 w-5" />}
-          </Button>
+          {/* Zoom toggle — pointless (pure blur) for small logo files, so hidden for them */}
+          {!currentIsLogo && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-3 right-14 z-50 text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+              onClick={() => setZoomed(!zoomed)}
+            >
+              {zoomed ? <ZoomOut className="h-5 w-5" /> : <ZoomIn className="h-5 w-5" />}
+            </Button>
+          )}
 
           {/* Navigation arrows */}
           {images.length > 1 && (
@@ -101,17 +115,30 @@ const ImageLightbox = ({ images, initialIndex = 0, open, onOpenChange }: ImageLi
               transition={{ duration: 0.2 }}
               className="flex items-center justify-center w-full h-full p-4 overflow-auto"
             >
-              <img
-                src={images[currentIndex]}
-                alt={`Image ${currentIndex + 1}`}
-                className={`transition-all duration-300 rounded-lg ${
-                  zoomed
-                    ? 'max-w-none max-h-none w-auto h-auto cursor-zoom-out'
-                    : 'max-w-full max-h-full object-contain cursor-zoom-in'
-                }`}
-                onClick={() => setZoomed(!zoomed)}
-                draggable={false}
-              />
+              {currentIsLogo ? (
+                // Logos: sharpest rendition, contained on a clean white
+                // panel at a sensible size — never blown up full-bleed.
+                <div className="flex items-center justify-center rounded-2xl bg-white px-10 py-8 sm:px-14 sm:py-10 max-w-[85%]">
+                  <img
+                    src={highResLogoUrl(currentSrc)}
+                    alt={`Logo ${currentIndex + 1}`}
+                    className="max-h-[38vh] w-auto max-w-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+              ) : (
+                <img
+                  src={currentSrc}
+                  alt={`Image ${currentIndex + 1}`}
+                  className={`transition-all duration-300 rounded-lg ${
+                    zoomed
+                      ? 'max-w-none max-h-none w-auto h-auto cursor-zoom-out'
+                      : 'max-w-full max-h-full object-contain cursor-zoom-in'
+                  }`}
+                  onClick={() => setZoomed(!zoomed)}
+                  draggable={false}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
 
