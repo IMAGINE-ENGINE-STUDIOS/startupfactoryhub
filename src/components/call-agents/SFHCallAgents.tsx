@@ -319,35 +319,53 @@ function SkillsLibrarySection({ agents, onAdded }: { agents: any[]; onAdded: () 
   if (skills === null) return <div className="px-1 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Loading the Genius skills library…</div>;
   const needle = q.trim().toLowerCase();
   const list = skills.filter((s) => !needle || `${s.name} ${s.description} ${s.slug}`.toLowerCase().includes(needle)).slice(0, 60);
+  const GRADIENTS = [
+    "from-cyan-500 to-teal-500",
+    "from-emerald-500 to-teal-600",
+    "from-fuchsia-500 to-purple-600",
+    "from-amber-500 to-orange-600",
+    "from-sky-500 to-blue-600",
+    "from-rose-500 to-pink-600",
+  ];
+  const initialsOf = (name: string) => String(name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
+  const gradientOf = (slug: string) => GRADIENTS[[...String(slug || "")].reduce((a, c) => a + c.charCodeAt(0), 0) % GRADIENTS.length];
   return (
-    <section className="rounded-[2rem] border border-border bg-card/70 px-4 py-5 backdrop-blur-xl sm:px-6">
+    <section className="rounded-[2rem] border border-border bg-card/70 px-4 py-4 backdrop-blur-xl sm:px-6">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white"><Sparkles className="h-5 w-5" /></span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white"><Sparkles className="h-4.5 w-4.5" /></span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold tracking-tight text-foreground">Genius skills library</h3>
-          <p className="text-xs text-muted-foreground">{skills.length} Genius skills — add any of them as a real agent. It joins your team here, in every dashboard, and in the 3D office.</p>
+          <h3 className="text-base font-bold tracking-tight text-foreground">Genius skills library</h3>
+          <p className="text-[11px] text-muted-foreground">{skills.length} skills — tap one to add it as an agent on your team.</p>
         </div>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search skills…" className="h-9 w-44 rounded-full" />
       </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 max-h-[340px] overflow-y-auto pr-0.5">
+      <div className="mt-3 flex gap-2.5 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
         {list.map((s) => {
           const added = addedNames.has(String(s.name).toLowerCase());
+          const busy = adding === s.slug;
           return (
-            <div key={s.slug} className="rounded-2xl border border-border bg-background/60 p-3 flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-sm font-medium text-foreground truncate">{s.name}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${s.source === "Custom" ? "bg-fuchsia-500/15 text-fuchsia-600" : "bg-cyan-500/15 text-cyan-600"}`}>{s.source}</span>
-              </div>
-              <div className="text-[11px] text-muted-foreground line-clamp-2 flex-1">{s.description}</div>
-              <button disabled={added || adding === s.slug} onClick={() => void add(s)} className="self-start h-7 px-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1.5 hover:from-emerald-600 hover:to-teal-600">
-                {adding === s.slug ? <Loader2 className="h-3 w-3 animate-spin" /> : null}{added ? "Added ✓" : "Add as agent"}
-              </button>
-            </div>
+            <button
+              key={s.slug}
+              type="button"
+              disabled={added || busy}
+              onClick={() => void add(s)}
+              title={s.description}
+              className="group w-[104px] shrink-0 rounded-2xl border border-border bg-background/60 p-2.5 flex flex-col items-center gap-1.5 text-center transition hover:border-primary/40 hover:bg-background disabled:opacity-60"
+            >
+              <span className={`relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${gradientOf(s.slug)} text-white text-sm font-bold shadow`}>
+                {initialsOf(s.name)}
+                <span className={`absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border-2 border-background ${added ? "bg-emerald-500" : "bg-primary"} text-white`}>
+                  {busy ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : added ? <Check className="h-2.5 w-2.5" /> : <Plus className="h-2.5 w-2.5" />}
+                </span>
+              </span>
+              <span className="w-full text-[11px] font-medium leading-tight text-foreground line-clamp-2 min-h-[26px]">{s.name}</span>
+              <span className={`text-[9px] px-1.5 py-px rounded-full ${s.source === "Custom" ? "bg-fuchsia-500/15 text-fuchsia-600" : "bg-cyan-500/15 text-cyan-600"}`}>{added ? "Added" : s.source}</span>
+            </button>
           );
         })}
-        {list.length === 0 && <div className="text-xs text-muted-foreground">No skills match that search.</div>}
+        {list.length === 0 && <div className="text-xs text-muted-foreground py-2">No skills match that search.</div>}
       </div>
-      {note && <div className="mt-3 text-xs text-muted-foreground">{note}</div>}
+      {note && <div className="mt-2 text-xs text-muted-foreground">{note}</div>}
     </section>
   );
 }
