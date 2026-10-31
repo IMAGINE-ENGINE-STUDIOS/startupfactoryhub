@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { Bot, DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
+import { Bot, DollarSign, TrendingUp, Building, Target, User, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2, FileText} from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -636,7 +636,6 @@ export default function InvestorDashboard() {
               { value: 'meetings', icon: Video, label: 'Meetings' },
               { value: 'network', icon: Network, label: 'Net' },
               { value: 'portfolio', icon: Building, label: 'Portfolio' },
-              { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
@@ -874,6 +873,18 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
+            <Tabs defaultValue="profile" className="space-y-4">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+                <TabsTrigger value="profile" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <User className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Profile</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <BarChart className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Analytics</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="profile" className="space-y-4">
             <InvestorProfileView />
             
             
@@ -887,6 +898,11 @@ export default function InvestorDashboard() {
 
 
 
+              </TabsContent>
+              <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="social" className="space-y-4">
@@ -912,10 +928,6 @@ export default function InvestorDashboard() {
               onJoin={setActiveVideoUrl}
               onOutcomeChange={handleOutcomeChange}
             />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-4">
-            <AnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-4">

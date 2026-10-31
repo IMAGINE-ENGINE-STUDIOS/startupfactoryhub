@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
-import { Bot, Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle, ChevronDown } from 'lucide-react';
+import { Bot, Calendar as CalendarIcon, User, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle, ChevronDown } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
@@ -277,7 +277,6 @@ export default function AdvisorDashboard() {
               { value: 'meetings', icon: Video, label: 'Meetings' },
               { value: 'network', icon: Network, label: 'Net' },
               { value: 'jobs', icon: Briefcase, label: 'Jobs' },
-              { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
@@ -466,28 +465,6 @@ export default function AdvisorDashboard() {
 
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4">
-            {/* Advisor Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
-              {stats.map(stat => <Card key={stat.title} className="tech-card border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      </div>
-                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
-                  </CardContent>
-                </Card>)}
-            </div>
-            
-            {/* Session History with Ratings */}
-            <MentorSessionHistory showStats={false} />
-            
-            <AnalyticsDashboard />
-          </TabsContent>
-
           <TabsContent value="intelligence" className="space-y-4">
             <IntelligenceHub />
           </TabsContent>
@@ -515,8 +492,43 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
+            <Tabs defaultValue="profile" className="space-y-4">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+                <TabsTrigger value="profile" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <User className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Profile</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <BarChart className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Analytics</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="profile" className="space-y-4">
             <AdvisorProfileView />
             <DangerZoneCard />
+              </TabsContent>
+              <TabsContent value="analytics" className="space-y-4">
+            {/* Advisor Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
+              {stats.map(stat => <Card key={stat.title} className="tech-card border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                      </div>
+                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                    </div>
+                  </CardContent>
+                </Card>)}
+            </div>
+            
+            {/* Session History with Ratings */}
+            <MentorSessionHistory showStats={false} />
+            
+            <AnalyticsDashboard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

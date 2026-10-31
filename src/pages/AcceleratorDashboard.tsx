@@ -10,7 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Brain, Wrench, Rocket, Bot
+  ChevronDown, Check, X, Brain, Wrench, Rocket, Bot, User
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -357,7 +357,6 @@ const AcceleratorDashboard = () => {
               { value: 'portfolio', icon: Building2, label: 'Portfolio' },
               { value: 'meetings', icon: Presentation, label: 'Meetings' },
               { value: 'jobs', icon: Briefcase, label: 'Jobs' },
-              { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
@@ -584,11 +583,6 @@ const AcceleratorDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-4">
-            <AnalyticsDashboard />
-          </TabsContent>
-
           {/* Intelligence Tab */}
           <TabsContent value="intelligence" className="space-y-4">
             <IntelligenceHub />
@@ -623,7 +617,24 @@ const AcceleratorDashboard = () => {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            <Tabs defaultValue="profile" className="space-y-4">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+                <TabsTrigger value="profile" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <User className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Profile</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <BarChart className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Analytics</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="profile" className="space-y-4">
             <AcceleratorProfileView />
+              </TabsContent>
+              <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

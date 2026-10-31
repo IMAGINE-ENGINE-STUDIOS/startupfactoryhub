@@ -42,7 +42,7 @@ import MeetingsHubHeader from "@/components/MeetingsHubHeader";
 import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
-import { Bot, Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
+import { Bot, User, Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp, FileText} from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -123,7 +123,6 @@ const MentorDashboard = () => {
               { value: 'meetings', icon: Video, label: 'Meetings' },
               { value: 'network', icon: Network, label: 'Net' },
               { value: 'jobs', icon: Briefcase, label: 'Jobs' },
-              { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
               { value: 'calendar', icon: CalendarIcon, label: 'Calendar' },
@@ -309,13 +308,6 @@ const MentorDashboard = () => {
             </div>
 
           </TabsContent>
-          <TabsContent value="analytics" className="space-y-6">
-            {/* Mentor Rating Stats */}
-            <MentorSessionHistory showStats={true} />
-            
-            <AnalyticsDashboard />
-          </TabsContent>
-
           <TabsContent value="intelligence" className="space-y-6">
             <IntelligenceHub />
           </TabsContent>
@@ -346,8 +338,28 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
+            <Tabs defaultValue="profile" className="space-y-4">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+                <TabsTrigger value="profile" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <User className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Profile</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all data-[state=active]:bg-white/[0.12] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)] data-[state=active]:border-white/[0.12]">
+                  <BarChart className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">Analytics</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="profile" className="space-y-4">
             <AdvisorProfileView />
             <DangerZoneCard />
+              </TabsContent>
+              <TabsContent value="analytics" className="space-y-4">
+            {/* Mentor Rating Stats */}
+            <MentorSessionHistory showStats={true} />
+            
+            <AnalyticsDashboard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
