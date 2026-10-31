@@ -1441,8 +1441,12 @@ export default function UnifiedCommunityFeed({
     const shell = 'group relative flex overflow-hidden rounded-xl border cursor-pointer min-h-0 transition duration-300 hover:scale-[1.015] hover:shadow-[0_16px_40px_-14px_hsl(var(--primary)/0.45)]';
     const countsPills = (
       <span className="flex items-center gap-1.5">
-        <span className="flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[10px] font-bold text-white/90 backdrop-blur"><Heart className="h-[11px] w-[11px]" /> {post._count?.post_likes || 0}</span>
-        <span className="flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[10px] font-bold text-white/90 backdrop-blur"><MessageCircle className="h-[11px] w-[11px]" /> {post._count?.post_comments || 0}</span>
+        <button type="button" aria-label="Like" onClick={(e) => { e.stopPropagation(); toggleLike(post.id); }} className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold backdrop-blur transition active:scale-90 ${likedPosts.has(post.id) ? 'bg-[#ff3b5c] text-white' : 'bg-black/45 text-white/90 hover:bg-black/65'}`}>
+          <Heart className="h-[11px] w-[11px]" fill={likedPosts.has(post.id) ? 'currentColor' : 'none'} /> {post._count?.post_likes || 0}
+        </button>
+        <button type="button" aria-label="Comment" onClick={(e) => { e.stopPropagation(); if (!expandedComments.has(post.id)) toggleComments(post.id); setOpenPostId(post.id); }} className="flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[10px] font-bold text-white/90 backdrop-blur transition hover:bg-black/65 active:scale-90">
+          <MessageCircle className="h-[11px] w-[11px]" /> {post._count?.post_comments || 0}
+        </button>
       </span>
     );
     const authorChip = (
@@ -1462,15 +1466,15 @@ export default function UnifiedCommunityFeed({
         setReelViewer({ open: true, index: idx >= 0 ? idx : 0 });
       };
       return <article key={post.id} onClick={openReel} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} preload="metadata" playsInline muted className="absolute inset-0 h-full w-full object-contain" />
+        <video src={videoUrl} preload="metadata" playsInline muted className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
         <span className="absolute left-1/2 top-1/2 z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition group-hover:scale-110">
           <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
         </span>
         {authorChip}
         <span className="absolute right-2 top-2 z-[2] rounded bg-red-500/85 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">REEL</span>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug">
+        <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug">
           <p className="line-clamp-2">{post.content}</p>
-          <p className="mt-1"><span className="text-[11px] opacity-80">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span></p>
+          <div className="mt-1.5">{countsPills}</div>
         </div>
       </article>;
     }
@@ -1482,8 +1486,8 @@ export default function UnifiedCommunityFeed({
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
         {ev.banner_url
           ? <>
-              <img src={bannerSrc(ev.banner_url)} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
-              <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
+              <img src={bannerSrc(ev.banner_url)} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
+              <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
             </>
           : <div className="absolute inset-0 bg-gradient-primary" />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
@@ -1503,20 +1507,24 @@ export default function UnifiedCommunityFeed({
     // Video post — full-bleed, caption rides the top so controls stay free.
     if (videoUrl) {
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-contain" />
+        <video src={videoUrl} preload="metadata" playsInline muted className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+        <span className="absolute left-1/2 top-1/2 z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition group-hover:scale-110">
+          <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
+        </span>
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] bg-gradient-to-b from-black/70 to-transparent px-2.5 pb-6 pt-2">
           <p className="truncate text-[10px] font-semibold text-white/90">{post.profiles?.full_name || 'Anonymous User'}</p>
           <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-white/85">{post.content}</p>
         </div>
+        <div className="absolute bottom-2 right-2 z-[2]">{countsPills}</div>
       </article>;
     }
 
     // Photo post — full-bleed wide tile, caption on a bottom scrim.
     if (imageUrl) {
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <img src={imageUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
-        <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6">
+        <img src={imageUrl} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
+        <img src={imageUrl} alt="" loading="lazy" decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+        <div className="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6">
           <p className="min-w-0 text-[11px] leading-snug">
             <span className="font-semibold">{post.profiles?.full_name || 'Anonymous User'}</span>
             {post.content ? <span className="block truncate text-white/80">{post.content}</span> : null}
@@ -1557,7 +1565,10 @@ export default function UnifiedCommunityFeed({
           : tileAuthor(post, <span className="shrink-0 rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">{label}</span>)}
         <p className={`mt-1 font-medium leading-snug ${textCls}`}>{post.content}</p>
         {span === '11'
-          ? <p className="mt-auto text-[10px] opacity-75">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</p>
+          ? <p className="mt-auto flex items-center gap-2.5 text-[10px]">
+              <button type="button" aria-label="Like" onClick={() => toggleLike(post.id)} className={likedPosts.has(post.id) ? 'font-bold text-red-500' : 'opacity-75'}>♥ {post._count?.post_likes || 0}</button>
+              <button type="button" aria-label="Comments" onClick={() => { if (!expandedComments.has(post.id)) toggleComments(post.id); setOpenPostId(post.id); }} className="opacity-75">💬 {post._count?.post_comments || 0}</button>
+            </p>
           : tileActions(post, tone)}
       </div>
     </article>;
