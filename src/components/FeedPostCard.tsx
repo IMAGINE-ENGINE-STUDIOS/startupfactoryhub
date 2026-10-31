@@ -18,6 +18,7 @@ import {
 import { Heart, MessageCircle, Share, Repeat2, Linkedin, Bookmark, Trash2, Send, CornerDownRight, X } from 'lucide-react';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import OfficialBadge from './OfficialBadge';
+import { isLogoImageUrl, highResLogoUrl, isSmallLoadedImage } from '@/lib/imageUrl';
 
 interface FeedPostCardProps {
   post: any;
@@ -103,6 +104,10 @@ export function FeedPostCard({
 }: FeedPostCardProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState('');
+  // Media URLs proven to be tiny files (logos/icons) once loaded — they
+  // render contained on a logo panel instead of stretched full-width.
+  const [tinyMedia, setTinyMedia] = useState<ReadonlySet<string>>(new Set());
+  const markTiny = (url: string) => setTinyMedia(prev => prev.has(url) ? prev : new Set(prev).add(url));
 
   const buildCommentTree = (flat: any[]) => {
     const map = new Map<string, any>();
@@ -287,6 +292,12 @@ export function FeedPostCard({
                 {post.media_urls.filter(Boolean).map((url: string, idx: number) => {
                   const isVideo =
                     url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video');
+                  // Organization logos (featured-fund/firm posts) are small
+                  // files: never stretch them full-width like a photo. They
+                  // sit contained, at a sensible height, on a clean white
+                  // panel — and favicon URLs are upgraded to the largest
+                  // rendition first so they stay sharp.
+                  const isLogo = isLogoImageUrl(url) || tinyMedia.has(url);
                   return isVideo ? (
                     <video
                       key={idx}
@@ -294,15 +305,38 @@ export function FeedPostCard({
                       controls
                       className="w-full rounded-xl max-h-64 sm:max-h-96 object-cover border border-white/5"
                     />
+                  ) : isLogo ? (
+                    <div
+                      key={idx}
+                      className="relative cursor-pointer group/media overflow-hidden rounded-xl border border-white/10 bg-white flex items-center justify-center px-6 py-6 sm:py-8"
+                      onClick={() => onImageClick(post.media_urls!, idx)}
+                    >
+                      <img
+                        src={highResLogoUrl(url)}
+                        alt={post.company_name ? `${post.company_name} logo` : 'Organization logo'}
+                        loading="lazy"
+                        decoding="async"
+                        onLoad={e => { if (isSmallLoadedImage(e.currentTarget)) markTiny(url); }}
+                        className="h-24 sm:h-32 w-auto max-w-[72%] object-contain"
+                      />
+                      {post.media_urls!.length > 1 && idx === 0 && (
+                        <Badge className="absolute top-2 right-2 bg-black/60 text-white border-none text-xs">
+                          1/{post.media_urls!.length}
+                        </Badge>
+                      )}
+                    </div>
                   ) : (
                     <div
                       key={idx}
-                      className="relative cursor-pointer group/media overflow-hidden rounded-xl border border-white/5"
+                      className="relative cursor-pointer group/media overflow-hidden rounded-xl border border-white/5 bg-muted/20"
                       onClick={() => onImageClick(post.media_urls!, idx)}
                     >
                       <img
                         src={url}
                         alt={`Media ${idx + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        onLoad={e => { if (isSmallLoadedImage(e.currentTarget)) markTiny(url); }}
                         className="w-full max-h-64 sm:max-h-96 object-cover transition-transform duration-500 group-hover/media:scale-105"
                       />
                       {post.media_urls!.length > 1 && idx === 0 && (
