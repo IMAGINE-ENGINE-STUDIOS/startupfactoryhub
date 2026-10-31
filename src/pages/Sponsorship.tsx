@@ -13,7 +13,9 @@ import heroBg from "@/assets/accelerated-fundraising-bg.jpg";
   THE SPONSOR CIRCLE — Private Offering · v2 "Amazing"
   Founder directions: 2026-10-28 private offering FIRST (no public prices/terms);
   2026-10-30 take it to the Accelerated Fundraising page's level — cinematic hero,
-  live canvas decahedron hologram, HUD, AR bento tiles, orbital finale.
+  HUD, AR bento tiles, orbital finale. Rotating centerpiece is ORIGINAL
+  to this page (founder, 2026-10-30): an armillary of the four Circle rings
+  over a disc of 66 event-stars — not the Accelerated Fundraising hologram.
   Terms live only in the private prospectus via info@ / Calendly.
 */
 
@@ -42,92 +44,114 @@ function useCountUp(target: number, ms = 1600) {
   return v;
 }
 
-/* ── Canvas decahedron hologram (emerald / gold) ─────── */
-function DecaHologram() {
+/* ── ORIGINAL centerpiece: The Armillary Circle ────────
+   Designed for this page (founder 2026-10-30: the rotating piece must be
+   original, not the Accelerated Fundraising hologram). Four tilted rings —
+   one per Circle, each in its tier color — precess around a golden core,
+   above a rotating disc of exactly 66 event-stars, one per event of the year. */
+function ArmillaryCircle() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext("2d"); if (!ctx) return;
     let raf = 0; let t = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const em = (a: number) => `rgba(52,211,153,${a})`;
-    const gold = (a: number) => `rgba(232,201,135,${a})`;
-    const cyan = (a: number) => `rgba(34,211,238,${a})`;
     const resize = () => {
       const r = canvas.getBoundingClientRect();
       canvas.width = r.width * dpr; canvas.height = r.height * dpr;
     };
     resize();
     const ro = new ResizeObserver(resize); ro.observe(canvas);
-    const PHI = (1 + Math.sqrt(5)) / 2;
-    const verts = [
-      [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
-      [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
-      [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1],
-    ].map(([x, y, z]) => { const n = Math.hypot(x, y, z); return [x / n, y / n, z / n]; });
-    const edges: [number, number][] = [];
-    for (let i = 0; i < verts.length; i++) for (let j = i + 1; j < verts.length; j++) {
-      const d = Math.hypot(verts[i][0] - verts[j][0], verts[i][1] - verts[j][1], verts[i][2] - verts[j][2]);
-      if (d < 1.1) edges.push([i, j]);
-    }
-    const sparks = Array.from({ length: 46 }, (_, i) => ({
-      ang: Math.random() * Math.PI * 2, rad: 0.62 + Math.random() * 0.55,
-      speed: 0.4 + Math.random() * 0.9, tilt: (Math.random() - 0.5) * Math.PI,
-      size: 0.8 + Math.random() * 1.6, hot: i % 3 === 0,
-    }));
-    const project = (x: number, y: number, z: number, cx: number, cy: number, R: number) => {
-      const s = 1 / (2.6 - z); return { x: cx + x * R * s * 2.6, y: cy + y * R * s * 2.6, s, z };
+
+    const RINGS = [
+      { r: 0.52, tilt: 0.9, speed: 0.55, col: [52, 211, 153], node: 0.0 },   // EARTHLING emerald
+      { r: 0.68, tilt: 0.55, speed: -0.4, col: [251, 191, 36], node: 2.1 },   // STAR amber
+      { r: 0.84, tilt: 1.15, speed: 0.3, col: [167, 139, 250], node: 4.0 },   // NEBULA violet
+      { r: 1.0, tilt: 0.72, speed: -0.22, col: [232, 201, 135], node: 1.2 },  // GALAXY gold
+    ];
+    const bgStars = Array.from({ length: 80 }, () => ({
+      x: Math.random() * 2 - 1, y: Math.random() * 2 - 1,
+      s: 0.5 + Math.random() * 1.1, ph: Math.random() * Math.PI * 2,
+    })).filter((s) => Math.hypot(s.x, s.y) < 1.05);
+    // 66 event-stars on a golden-angle spiral disc
+    const disc = Array.from({ length: 66 }, (_, i) => {
+      const f = (i + 0.5) / 66;
+      return { rad: 1.12 * Math.sqrt(f), ang: i * 2.39996, gold: i % 5 === 0, s: 0.7 + ((i * 37) % 10) / 9 };
+    });
+    const rot = (x: number, y: number, z: number, ax: number, ay: number) => {
+      const y1 = y * Math.cos(ax) - z * Math.sin(ax);
+      const z1 = y * Math.sin(ax) + z * Math.cos(ax);
+      const x2 = x * Math.cos(ay) + z1 * Math.sin(ay);
+      const z2 = -x * Math.sin(ay) + z1 * Math.cos(ay);
+      return [x2, y1, z2] as const;
     };
-    const rotY = (v: number[], a: number) => [v[0] * Math.cos(a) + v[2] * Math.sin(a), v[1], -v[0] * Math.sin(a) + v[2] * Math.cos(a)];
-    const rotX = (v: number[], a: number) => [v[0], v[1] * Math.cos(a) - v[2] * Math.sin(a), v[1] * Math.sin(a) + v[2] * Math.cos(a)];
+
     const draw = () => {
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0, 0, w, h);
-      const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.3;
-      t += 0.0042;
-      // orbital rings
-      [1.45, 1.18].forEach((rr, ri) => {
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, R * rr, R * rr * 0.34, ri ? 0.5 : -0.35, 0, Math.PI * 2);
-        ctx.strokeStyle = ri ? cyan(0.14) : em(0.18); ctx.lineWidth = dpr; ctx.stroke();
-        const a = t * (ri ? -1.4 : 2.0) + ri * 2;
-        const px = cx + Math.cos(a) * R * rr, py = cy + Math.sin(a) * R * rr * 0.34;
-        ctx.beginPath(); ctx.arc(px, py, 2.6 * dpr, 0, Math.PI * 2);
-        ctx.fillStyle = ri ? cyan(0.9) : gold(0.95);
-        ctx.shadowColor = ri ? "rgba(34,211,238,0.9)" : "rgba(232,201,135,0.9)"; ctx.shadowBlur = 12 * dpr; ctx.fill(); ctx.shadowBlur = 0;
+      const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.36;
+      t += 0.005;
+
+      // background stars
+      bgStars.forEach((s, i) => {
+        const tw = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 2 + s.ph));
+        ctx.beginPath(); ctx.arc(cx + s.x * R * 1.35, cy + s.y * R * 1.35, s.s * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(190,242,220,${tw * 0.5})`; ctx.fill(); void i;
       });
-      const ry = t * 1.1, rx = Math.sin(t * 0.6) * 0.35;
-      const proj = verts.map((v) => { const r = rotX(rotY(v, ry), rx); return project(r[0], r[1], r[2], cx, cy, R); });
-      edges.forEach(([a, b]) => {
-        const pa = proj[a], pb = proj[b], depth = (pa.z + pb.z) / 2;
-        ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y);
-        ctx.strokeStyle = em(0.14 + (depth + 1) * 0.3); ctx.lineWidth = (0.8 + (depth + 1) * 0.7) * dpr; ctx.stroke();
+
+      // 66 event-stars disc (flat, rotating)
+      disc.forEach((d) => {
+        const a = d.ang + t * 0.35;
+        const x = Math.cos(a) * d.rad * R, y = Math.sin(a) * d.rad * R * 0.3;
+        ctx.beginPath(); ctx.arc(cx + x, cy + y + R * 0.1, d.s * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = d.gold ? "rgba(232,201,135,0.75)" : "rgba(52,211,153,0.5)";
+        ctx.fill();
       });
-      proj.forEach((p, i) => {
-        const pulse = 0.5 + 0.5 * Math.sin(t * 5 + i * 1.3);
-        ctx.beginPath(); ctx.arc(p.x, p.y, (1.6 + pulse * 1.6) * dpr * (0.6 + p.s), 0, Math.PI * 2);
-        ctx.fillStyle = gold(0.35 + (p.z + 1) * 0.3);
-        ctx.shadowColor = "rgba(232,201,135,0.9)"; ctx.shadowBlur = 10 * dpr; ctx.fill(); ctx.shadowBlur = 0;
+
+      // vertical axis beam
+      const beam = ctx.createLinearGradient(cx, cy - R * 1.3, cx, cy + R * 1.3);
+      beam.addColorStop(0, "rgba(232,201,135,0)"); beam.addColorStop(0.5, "rgba(232,201,135,0.4)"); beam.addColorStop(1, "rgba(232,201,135,0)");
+      ctx.fillStyle = beam; ctx.fillRect(cx - dpr * 0.75, cy - R * 1.3, dpr * 1.5, R * 2.6);
+
+      // the four rings, drawn as depth-shaded segments
+      RINGS.forEach((ring) => {
+        const prec = t * ring.speed;
+        const SEG = 90;
+        for (let sIdx = 0; sIdx < SEG; sIdx++) {
+          const a1 = (sIdx / SEG) * Math.PI * 2, a2 = ((sIdx + 1.6) / SEG) * Math.PI * 2;
+          const p1 = rot(Math.cos(a1) * ring.r, Math.sin(a1) * ring.r, 0, ring.tilt, prec);
+          const p2 = rot(Math.cos(a2) * ring.r, Math.sin(a2) * ring.r, 0, ring.tilt, prec);
+          const depth = (p1[2] + 1) / 2;
+          ctx.beginPath();
+          ctx.moveTo(cx + p1[0] * R, cy + p1[1] * R);
+          ctx.lineTo(cx + p2[0] * R, cy + p2[1] * R);
+          ctx.strokeStyle = `rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${0.12 + depth * 0.55})`;
+          ctx.lineWidth = (0.7 + depth * 1.3) * dpr; ctx.stroke();
+        }
+        // the sponsor's travelling node on this ring
+        const na = ring.node + t * (0.7 + ring.speed * 0.4);
+        const np = rot(Math.cos(na) * ring.r, Math.sin(na) * ring.r, 0, ring.tilt, prec);
+        ctx.beginPath(); ctx.arc(cx + np[0] * R, cy + np[1] * R, 3 * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},0.95)`;
+        ctx.shadowColor = `rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},0.9)`; ctx.shadowBlur = 14 * dpr; ctx.fill(); ctx.shadowBlur = 0;
       });
-      const corePulse = 0.5 + 0.5 * Math.sin(t * 3.4);
-      const coreR = R * (0.2 + corePulse * 0.05);
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.6);
-      grad.addColorStop(0, gold(0.8)); grad.addColorStop(0.35, em(0.32)); grad.addColorStop(1, "rgba(52,211,153,0)");
-      ctx.beginPath(); ctx.arc(cx, cy, coreR * 2.6, 0, Math.PI * 2); ctx.fillStyle = grad; ctx.fill();
-      ctx.beginPath(); ctx.arc(cx, cy, coreR * 0.5, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,248,220,0.95)"; ctx.fill();
-      sparks.forEach((s) => {
-        s.ang += 0.01 * s.speed;
-        let p = rotX([Math.cos(s.ang) * s.rad, 0, Math.sin(s.ang) * s.rad], s.tilt);
-        p = rotY(p, t * 0.5);
-        const pr = project(p[0], p[1], p[2], cx, cy, R);
-        const tw = 0.4 + 0.6 * Math.sin(t * 7 * s.speed + s.ang * 3);
-        ctx.beginPath(); ctx.arc(pr.x, pr.y, s.size * dpr * pr.s, 0, Math.PI * 2);
-        ctx.fillStyle = s.hot ? gold(0.9 * tw) : cyan(0.55 * tw); ctx.fill();
-      });
-      const sy = cy + Math.sin(t * 1.7) * R * 1.3;
-      const sweep = ctx.createLinearGradient(cx - R * 1.6, sy, cx + R * 1.6, sy);
-      sweep.addColorStop(0, "rgba(232,201,135,0)"); sweep.addColorStop(0.5, gold(0.26)); sweep.addColorStop(1, "rgba(232,201,135,0)");
-      ctx.fillStyle = sweep; ctx.fillRect(cx - R * 1.6, sy - dpr, R * 3.2, 2 * dpr);
+
+      // expanding pulse from the core
+      const pulse = (t * 0.5) % 1;
+      ctx.beginPath(); ctx.arc(cx, cy, pulse * R * 1.05, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(232,201,135,${(1 - pulse) * 0.3})`; ctx.lineWidth = dpr; ctx.stroke();
+
+      // golden core
+      const cp = 0.5 + 0.5 * Math.sin(t * 3.2);
+      const coreR = R * (0.13 + cp * 0.02);
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 3);
+      grad.addColorStop(0, "rgba(255,248,220,0.95)");
+      grad.addColorStop(0.25, "rgba(232,201,135,0.75)");
+      grad.addColorStop(0.6, "rgba(52,211,153,0.25)");
+      grad.addColorStop(1, "rgba(52,211,153,0)");
+      ctx.beginPath(); ctx.arc(cx, cy, coreR * 3, 0, Math.PI * 2); ctx.fillStyle = grad; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, coreR * 0.55, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,252,240,1)"; ctx.fill();
+
       raf = requestAnimationFrame(draw);
     };
     draw();
@@ -135,16 +159,12 @@ function DecaHologram() {
   }, []);
   return (
     <div className="relative w-full aspect-square max-w-[540px] mx-auto">
+      <div aria-hidden className="absolute inset-4 rounded-full border border-dashed border-[#e8c987]/20" style={{ animation: "sp-orbit 70s linear infinite" }} />
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
-      <div className="pointer-events-none absolute inset-6">
-        {["top-0 left-0 border-l-2 border-t-2", "top-0 right-0 border-r-2 border-t-2", "bottom-0 left-0 border-l-2 border-b-2", "bottom-0 right-0 border-r-2 border-b-2"].map((c) => (
-          <div key={c} className={`absolute h-8 w-8 border-[#e8c987]/50 ${c}`} />
-        ))}
-      </div>
       {[
-        { pos: "left-0 top-[16%]", k: "Reach", v: "270+ FOUNDERS" },
-        { pos: "right-0 top-[44%]", k: "Signal", v: "PRIVATE / LIVE" },
-        { pos: "bottom-[12%] left-[8%]", k: "The Year", v: "66 EVENTS" },
+        { pos: "left-0 top-[14%]", k: "The Form", v: "4 RINGS · ONE SPHERE" },
+        { pos: "right-0 top-[46%]", k: "Signal", v: "PRIVATE / LIVE" },
+        { pos: "bottom-[10%] left-[6%]", k: "The Disc", v: "66 EVENT-STARS" },
       ].map((l) => (
         <div key={l.k} className={`pointer-events-none absolute ${l.pos}`}>
           <div className="rounded-lg border border-emerald-300/25 bg-[#04120c]/70 px-3 py-1.5 backdrop-blur-md">
@@ -301,7 +321,7 @@ const Sponsorship = () => {
             </div>
 
             <div className="relative hidden lg:block" style={{ animation: "sp-float 8s ease-in-out infinite" }}>
-              <DecaHologram />
+              <ArmillaryCircle />
             </div>
           </div>
         </section>
