@@ -1,5 +1,5 @@
 import { prepareImageForUpload } from '@/lib/upload/prepareImage';
-import { useState, useEffect, useRef, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
+import { useState, useEffect, useRef, useMemo, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,6 @@ import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
-import ShortsCarousel from '@/components/ShortsCarousel';
 import ShortsCreator from '@/components/ShortsCreator';
 import GuestPrompt from '@/components/GuestPrompt';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
@@ -32,7 +31,7 @@ import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { UniversalFileUploader, type UploadedFile } from '@/components/upload/UniversalFileUploader';
 import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
 import { getFileKind } from '@/lib/upload/fileKinds';
-import { mixFeed, isEligible, pickSpotlights, buildNetLayout, postVideoUrl, postImageUrl, loadSeenIds, rememberSeenIds, FEED_WINDOW_DAYS, type NetTile } from '@/lib/feedMix';
+import { mixFeed, isEligible, buildNetLayout, postVideoUrl, postImageUrl, loadSeenIds, rememberSeenIds, type NetTile } from '@/lib/feedMix';
 import { Paperclip } from 'lucide-react';
 import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
@@ -103,7 +102,6 @@ export default function UnifiedCommunityFeed({
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [openPostId, setOpenPostId] = useState<string | null>(null);
-  const spotlightIdsRef = useRef<Set<string>>(new Set());
   const seenRef = useRef<Set<string>>(loadSeenIds());
   const [newPost, setNewPost] = useState('');
   const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Social feed posting');
@@ -331,7 +329,7 @@ export default function UnifiedCommunityFeed({
           user_id,
           parent_comment_id
         )
-      `).neq('post_type', 'short').gte('created_at', new Date(Date.now() - FEED_WINDOW_DAYS * 86400000).toISOString()).order('created_at', {
+      `).neq('post_type', 'short').order('created_at', {
       ascending: false
     }).range(currentOffset, currentOffset + FEED_PAGE - 1);
 
@@ -346,8 +344,28 @@ export default function UnifiedCommunityFeed({
     }
 
     const formattedPosts = await formatPostBatch(postsData || []);
-    // Mosaic Mix gate: only the last 21 days, and events only until they end.
-    const eligiblePosts = formattedPosts.filter(p => isEligible(p, Date.now()));
+    let poolPosts = formattedPosts;
+    if (!loadMore) {
+      // Reels (shorts) live inside the mosaic now — fetch them on fresh
+      // loads and merge them into the same ranked pool.
+      const { data: shortsData } = await supabase.from('feed_posts').select(`
+        *,
+        post_likes (user_id),
+        post_comments (
+          id,
+          content,
+          created_at,
+          user_id,
+          parent_comment_id
+        )
+      `).eq('post_type', 'short').order('created_at', { ascending: false }).range(0, FEED_PAGE - 1);
+      if (shortsData?.length) {
+        poolPosts = [...formattedPosts, ...await formatPostBatch(shortsData)];
+      }
+    }
+    // Mosaic Mix gates: 21 days for posts, 90 for reels, and events are
+    // governed by their event date (upcoming within 30 days, never past).
+    const eligiblePosts = poolPosts.filter(p => isEligible(p, Date.now()));
 
     if (loadMore) {
       const mixedNew = mixFeed(eligiblePosts, seenRef.current);
@@ -364,8 +382,7 @@ export default function UnifiedCommunityFeed({
       const mixed = mixFeed(eligiblePosts, seenRef.current);
       setPosts(prev => {
         if (!prev.length) {
-          // First load: pure mix, spotlights chosen from this pool.
-          spotlightIdsRef.current = new Set(pickSpotlights(mixed).map(p => p.id));
+          // First load: pure mix.
           mixed.forEach(p => seenRef.current.add(p.id));
           rememberSeenIds(seenRef.current);
           return mixed;
@@ -1270,7 +1287,7 @@ export default function UnifiedCommunityFeed({
 
   const openPost = openPostId ? posts.find(p => p.id === openPostId) || null : null;
 
-  const netLayout = useMemo(() => buildNetLayout(posts, spotlightIdsRef.current), [posts]);
+  const netLayout = useMemo(() => buildNetLayout(posts), [posts]);
 
   const shuffleMix = () => {
     setPosts(prev => {
@@ -1285,13 +1302,14 @@ export default function UnifiedCommunityFeed({
     ? url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=900&quality=75&resize=cover'
     : url || undefined;
 
-  const tileAuthor = (post: FeedPost) => (
+  const tileAuthor = (post: FeedPost, trailing?: ReactNode) => (
     <div className="flex items-center gap-1.5 text-[11px] font-semibold min-w-0">
       <span className="h-5 w-5 shrink-0 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[9px] font-bold overflow-hidden">
         {post.profiles?.avatar_url ? <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" /> : (post.profiles?.full_name?.charAt(0) || 'U')}
       </span>
       <span className="truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
       <span className="ml-auto shrink-0 font-normal opacity-60">{formatDate(post.created_at)}</span>
+      {trailing}
     </div>
   );
 
@@ -1319,26 +1337,47 @@ export default function UnifiedCommunityFeed({
 
   const renderTile = (entry: NetTile<FeedPost>) => {
     const post = entry.post;
+    const slot = entry.slot;
     const videoUrl = postVideoUrl(post);
     const imageUrl = postImageUrl(post);
     const onTileClick = (e: ReactMouseEvent) => {
       if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
       setOpenPostId(post.id);
     };
-    const shell = 'group relative flex flex-col overflow-hidden rounded-lg border cursor-pointer min-h-0';
+    const shell = 'group relative flex overflow-hidden rounded-lg border cursor-pointer min-h-0';
+    const counts = <span className="text-[11px] opacity-75">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span>;
+    const authorChip = (
+      <div className="pointer-events-none absolute left-2 top-2 z-[2] flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
+        <span className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full bg-gradient-primary text-[8px] font-bold text-primary-foreground">
+          {post.profiles?.avatar_url ? <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" /> : (post.profiles?.full_name?.charAt(0) || 'U')}
+        </span>
+        <span className="max-w-[110px] truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
+      </div>
+    );
 
-    if (videoUrl) {
-      return <article key={post.id} onClick={onTileClick} className={`${shell} border-border bg-black text-white ${entry.className}`}>
+    // Reels and tall-slot video: full-bleed portrait, the reel's own format.
+    if (videoUrl && (post.post_type === 'short' || slot === 'T')) {
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${entry.className}`}>
         <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute top-2 left-2 z-[2] flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold backdrop-blur-sm pointer-events-none">
-          <span className="h-4 w-4 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[8px] font-bold overflow-hidden">
-            {post.profiles?.avatar_url ? <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" /> : (post.profiles?.full_name?.charAt(0) || 'U')}
-          </span>
-          <span className="max-w-[120px] truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug pointer-events-none">
+        {authorChip}
+        <span className="absolute right-2 top-2 z-[2] rounded bg-red-500/85 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">REEL</span>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug">
           <p className="line-clamp-2">{post.content}</p>
-          <p className="mt-1 opacity-80">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</p>
+          <p className="mt-1">{counts}</p>
+        </div>
+      </article>;
+    }
+
+    // Media in a small or tall slot: full-bleed with a counts scrim.
+    if ((videoUrl || imageUrl) && (slot === 'S' || slot === 'T')) {
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${entry.className}`}>
+        {videoUrl
+          ? <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+          : <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
+        {authorChip}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-5 text-[10px]">
+          <span className="max-w-[65%] truncate font-semibold">{post.content || post.profiles?.full_name || ''}</span>
+          {counts}
         </div>
       </article>;
     }
@@ -1346,20 +1385,79 @@ export default function UnifiedCommunityFeed({
     if (post.post_type === 'event' && post.event_data) {
       const ev = post.event_data;
       const startLabel = new Date(ev.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + new Date(ev.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      return <article key={post.id} onClick={onTileClick} className={`${shell} tech-card border-0 ${entry.className}`}>
-        {ev.banner_url
-          ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="w-full flex-1 min-h-[72px] object-cover" />
-          : <div className="w-full flex-1 min-h-[72px] bg-gradient-primary" />}
-        <div className="flex flex-col gap-0.5 p-2.5">
+      const banner = ev.banner_url
+        ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        : <div className="absolute inset-0 bg-gradient-primary" />;
+      const body = (
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
           {tileAuthor(post)}
-          <h4 className={`font-semibold leading-snug ${entry.small ? 'text-xs line-clamp-1' : 'text-[13px] line-clamp-2'}`}>{ev.title}</h4>
-          {!entry.small && <>
-            <p className="text-[11px] font-medium text-blue-500">{startLabel}{ev.is_virtual ? ' · Virtual' : ev.location ? ` · ${ev.location}` : ''}</p>
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] font-bold text-blue-500">Register →</span>
-              <span className="text-[11px] text-muted-foreground">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span>
-            </div>
-          </>}
+          <h4 className={`font-semibold leading-snug ${slot === 'B' ? 'text-[13px] line-clamp-2' : 'text-xs line-clamp-1'}`}>{ev.title}</h4>
+          {slot !== 'S' && <p className="text-[11px] font-medium text-blue-500">{startLabel}{ev.is_virtual ? ' · Virtual' : ev.location ? ` · ${ev.location}` : ''}</p>}
+          <div className="mt-auto flex items-center justify-between pt-0.5">
+            <span className="text-[11px] font-bold text-blue-500">Register →</span>
+            {counts}
+          </div>
+        </div>
+      );
+      if (slot === 'W') {
+        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
+          <div className="relative h-full w-2/5 shrink-0 overflow-hidden">{banner}</div>
+          {body}
+        </article>;
+      }
+      // The banner keeps its own 16:9 format — never stretched to the tile.
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden">{banner}</div>
+        {body}
+      </article>;
+    }
+
+    if (videoUrl) {
+      if (slot === 'W') {
+        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
+          <div className="relative h-full w-1/2 shrink-0 overflow-hidden bg-black">
+            <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col p-2.5 min-h-0">
+            {tileAuthor(post)}
+            <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
+            {tileActions(post, 'text-muted-foreground')}
+          </div>
+        </article>;
+      }
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-black">
+          <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+        </div>
+        <div className="flex flex-1 flex-col p-2.5 min-h-0">
+          {tileAuthor(post)}
+          <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
+          {tileActions(post, 'text-muted-foreground')}
+        </div>
+      </article>;
+    }
+
+    if (imageUrl) {
+      if (slot === 'W') {
+        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
+          <div className="relative h-full w-2/5 shrink-0 overflow-hidden">
+            <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col p-2.5 min-h-0">
+            {tileAuthor(post)}
+            <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
+            {tileActions(post, 'text-muted-foreground')}
+          </div>
+        </article>;
+      }
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+          <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        </div>
+        <div className="flex flex-1 flex-col p-2.5 min-h-0">
+          {tileAuthor(post)}
+          <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
+          {tileActions(post, 'text-muted-foreground')}
         </div>
       </article>;
     }
@@ -1371,60 +1469,23 @@ export default function UnifiedCommunityFeed({
       post.post_type === 'announcement' ? 'border-primary/40 bg-[linear-gradient(135deg,hsl(160_84%_42%/0.28),hsl(180_95%_50%/0.12))]' :
       'tech-card border-0';
     const tone = ['live_room', 'cohort', 'journey_completion'].includes(post.post_type) ? 'text-white/70' : 'text-muted-foreground';
-    const label = TYPE_LABEL[post.post_type] || (imageUrl ? 'PHOTO' : 'UPDATE');
+    const label = TYPE_LABEL[post.post_type] || 'UPDATE';
+    const clamp = slot === 'B' ? 'line-clamp-[7]' : slot === 'T' ? 'line-clamp-[10]' : slot === 'W' ? 'line-clamp-2' : 'line-clamp-3';
 
-    return <article key={post.id} onClick={onTileClick} className={`${shell} ${theme} ${entry.className}`}>
-      {imageUrl && !entry.small ? <img src={imageUrl} alt="" loading="lazy" decoding="async" className="w-full flex-1 min-h-[64px] object-cover" /> : null}
+    return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col ${theme} ${entry.className}`}>
       <div className="flex flex-1 flex-col p-2.5 min-h-0">
-        {tileAuthor(post)}
-        <span className="mt-1.5 self-start rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">
-          {post.post_type === 'live_room' ? '● LIVE ROOM' : label}
-        </span>
+        {tileAuthor(post, <span className="shrink-0 rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">{post.post_type === 'live_room' ? '● LIVE' : label}</span>)}
         {post.post_type === 'live_room' && (post as any).room_data?.room_name
           ? <p className="mt-1 text-[13px] font-semibold leading-snug line-clamp-2">{(post as any).room_data.room_name}</p>
           : null}
-        <p className={`mt-1 text-[12.5px] leading-relaxed ${entry.small ? 'line-clamp-3' : 'line-clamp-[6]'}`}>{post.content}</p>
+        <p className={`mt-1 text-[12.5px] leading-relaxed ${clamp}`}>{post.content}</p>
         {tileActions(post, tone)}
-      </div>
-    </article>;
-  };
-
-  const renderSpotlight = (post: FeedPost) => {
-    const videoUrl = postVideoUrl(post);
-    const banner = post.post_type === 'event' ? post.event_data?.banner_url : undefined;
-    const img = banner || postImageUrl(post);
-    const onTileClick = (e: ReactMouseEvent) => {
-      if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
-      setOpenPostId(post.id);
-    };
-    return <article key={post.id} onClick={onTileClick} className="flex cursor-pointer overflow-hidden rounded-lg border border-primary/40 bg-[linear-gradient(180deg,hsl(165_84%_40%/0.18),hsl(212_45%_14%/0.35))] shadow-[0_0_38px_hsl(170_90%_45%/0.18)] min-h-[180px]">
-      {videoUrl
-        ? <video src={videoUrl} controls preload="metadata" playsInline className="w-2/5 shrink-0 object-cover" />
-        : img
-          ? <img src={banner ? bannerSrc(banner) : img} alt="" loading="lazy" className="w-2/5 shrink-0 object-cover" />
-          : <div className="w-2/5 shrink-0 bg-gradient-primary" />}
-      <div className="flex min-w-0 flex-1 flex-col p-3.5">
-        <span className="self-start rounded-full bg-gradient-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-primary-foreground">★ Spotlight</span>
-        <div className="mt-2">{tileAuthor(post)}</div>
-        {post.post_type === 'event' && post.event_data
-          ? <>
-              <h4 className="mt-1 text-[15px] font-bold leading-snug line-clamp-2">{post.event_data.title}</h4>
-              <p className="text-[11px] font-medium text-blue-500">{new Date(post.event_data.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-            </>
-          : <p className="mt-1 text-sm leading-relaxed line-clamp-4">{post.content}</p>}
-        {tileActions(post, 'text-muted-foreground')}
       </div>
     </article>;
   };
 
   return <div className="space-y-4 sm:space-y-6">
       {membershipDialog}
-
-      {/* Shorts Carousel */}
-      <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
-
-      {/* Community Districts interstitial */}
-      {interstitialContent}
 
       {/* Create Post */}
       {showCreatePost && <div className="relative group">
@@ -1547,21 +1608,26 @@ export default function UnifiedCommunityFeed({
       <div className="feed-window space-y-1.5">
         <div className="flex items-center justify-between pb-1">
           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-            Network mix · last {FEED_WINDOW_DAYS} days
+            Network mix · fresh posts & reels · events this month
           </span>
-          <Button variant="ghost" size="sm" onClick={shuffleMix} className="text-muted-foreground hover:text-primary">
-            <Shuffle className="h-4 w-4 mr-1.5" />
-            Shuffle
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={handleCreateShort} className="text-muted-foreground hover:text-primary">
+              <Video className="h-4 w-4 mr-1.5" />
+              Reel
+            </Button>
+            <Button variant="ghost" size="sm" onClick={shuffleMix} className="text-muted-foreground hover:text-primary">
+              <Shuffle className="h-4 w-4 mr-1.5" />
+              Shuffle
+            </Button>
+          </div>
         </div>
-        {netLayout.leadSpotlights.map(post => <div key={`lead-${post.id}`} className="contents">{renderSpotlight(post)}</div>)}
         {netLayout.blocks.map((block, bi) => <div key={bi} className="contents">
             <div className={block.dense
               ? 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 [grid-auto-flow:dense]'
               : 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:[grid-template-rows:repeat(4,minmax(0,1fr))] sm:aspect-[6/4]'}>
               {block.tiles.map(entry => renderTile(entry))}
             </div>
-            {netLayout.spotAfter.get(bi) && renderSpotlight(netLayout.spotAfter.get(bi)!)}
+            {bi === 0 && interstitialContent ? <div className="mt-1.5">{interstitialContent}</div> : null}
           </div>)}
         {/* Infinite Scroll Trigger */}
         {hasMore && posts.length > 0 && <div ref={loadMoreRef} className="py-8 flex justify-center">
