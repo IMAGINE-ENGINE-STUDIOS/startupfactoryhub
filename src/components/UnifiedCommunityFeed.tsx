@@ -1498,7 +1498,11 @@ export default function UnifiedCommunityFeed({
         setReelViewer({ open: true, index: idx >= 0 ? idx : 0 });
       };
       return <article key={post.id} onClick={openReel} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} preload="metadata" playsInline muted className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="aspect-[9/16] max-h-full w-full overflow-hidden rounded-md ring-1 ring-white/15">
+            <video src={videoUrl} preload="metadata" playsInline muted className="h-full w-full object-contain" />
+          </div>
+        </div>
         <span className="absolute left-1/2 top-1/2 z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition group-hover:scale-110">
           <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
         </span>
