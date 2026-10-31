@@ -182,8 +182,8 @@ type Tier = { id: string; name: string; icon: typeof Globe; tagline: string; ess
 const TIERS: Tier[] = [
   { id: "earthling", name: "EARTHLING", icon: Globe, tagline: "The entry into the Circle", essence: "For organizations beginning their presence inside the ecosystem — seen, listed, and welcomed into the room.", accent: "border-emerald-300/40 text-emerald-200", dot: "bg-emerald-300", includes: ["Recognition across SFH communications", "Logo placement in the Earthling tier on the SFH website", "Welcome moment on LinkedIn and in community updates", "Access to selected virtual accelerator events", "Offer perks, credits or tools directly to founders", "Listing in the platform and the Partner Resource Hub"] },
   { id: "star", name: "STAR", icon: Star, tagline: "Presence with a voice", essence: "For organizations ready to be heard — elevated placement, a stage for your experts, and curated founder access.", accent: "border-amber-200/40 text-amber-100", dot: "bg-amber-200", includes: ["Elevated logo position and event recognition", "Monthly ecosystem spotlight in the SFH newsletter", "Host a workshop, AMA or technical talk", "Invitations to networking in New York, San Francisco, Orlando, Santiago and Tokyo", "Curated scouting reports and early deal-flow previews", "Feature interview inside the SFH Media Hub"] },
-  { id: "nebula", name: "NEBULA", icon: Sparkles, tagline: "Deep engagement, real pilots", essence: "For companies seeking integration — guaranteed speaking, structured matching, and pilots with cohort startups.", accent: "border-violet-300/40 text-violet-200", dot: "bg-violet-300", includes: ["Premium visibility across website, platform, cohorts and Demo Day", "Guaranteed speaking at a flagship SFH event", "Co-branded SFH x Sponsor campaign", "Full access to all global networking events", "Structured 1:1 startup matching sessions", "Run pilot programs with startups, with a dedicated sponsor resource page"] },
-  { id: "galaxy", name: "GALAXY", icon: Award, tagline: "The strategic partnership", essence: "The highest circle — premier placement everywhere, keynote voice, private dinners, and technology woven into the platform itself.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Premier placement across website, all major events, summits and PR", "Joint global PR announcement across SFH hubs", "Keynote-level speaking at the Global Summit and Demo Day", "Lead role in one innovation track", "Private investor-startup dinners and priority deal-flow introductions", "Dedicated Sponsor Pavilion and a custom founder-engagement analytics view"] },
+  { id: "nebula", name: "NEBULA", icon: Sparkles, tagline: "Deep engagement, real pilots", essence: "For companies seeking integration — guaranteed speaking, structured matching, and premium placement inside the platform itself.", accent: "border-violet-300/40 text-violet-200", dot: "bg-violet-300", includes: ["Premium visibility across website, platform, cohorts and Demo Day", "Guaranteed speaking at a flagship SFH event", "Co-branded SFH x Sponsor campaign", "Full access to all global networking events", "Structured 1:1 startup matching sessions", "Presenting rotation across the daily Top 10 and the weekly video", "A dedicated sponsor page inside the platform, with your offer in founder journeys"] },
+  { id: "galaxy", name: "GALAXY", icon: Award, tagline: "The strategic partnership", essence: "The highest circle — premier placement everywhere, keynote voice, private dinners, and technology woven into the platform itself.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Premier placement across website, all major events, summits and PR", "Joint global PR announcement across SFH hubs", "Keynote-level speaking at the Global Summit and Demo Day", "Lead program sponsor — Accelerated Fundraising and the year's flagship moments (Programs are Galaxy-only)", "Private investor-startup dinners and priority deal-flow introductions", "Your own Live Video sponsor room, a platform sponsor page, and a founder-engagement report"] },
 ];
 const SERIES = [
   { name: "Pitch Events", count: 24, cadence: "Twice monthly", note: "Founders on stage, investors in the room", glow: "rgba(52,211,153,0.5)" },
@@ -382,6 +382,35 @@ const Sponsorship = () => {
               <Lock className="h-5 w-5 text-[#e8c987] shrink-0" />
               <p className="text-sm text-emerald-100/70">Pricing, inventory and exclusivity live only in the private prospectus. Nothing is published, nothing is auctioned.</p>
             </div>
+          </div>
+        </section>
+
+                {/* ── FOUR WAYS IN · P1–P4 ───────────────────────── */}
+        <section className="px-5 sm:px-8 py-24 border-t border-white/[0.06]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto">
+              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">What Sponsorship Buys Today</p>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">Four ways in. One circle.</h2>
+              <p className="mt-4 text-emerald-100/55">Every product below is a real surface of Startup Factory Hub today — the circles combine them by altitude.</p>
+            </div>
+            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { n: "P1", t: "Event Rooms", b: "The 66 rooms of the year, live inside SFH Live Video — stage moments, banners on every asset, and placement across registration and confirmation.", tag: "Every circle, by altitude", gold: false },
+                { n: "P2", t: "Distribution", b: "Our daily engine: the LinkedIn Top 10, the weekly video, and five daily posts across Instagram, X and Facebook — presenting rotations for sponsors.", tag: "Star and above", gold: false },
+                { n: "P3", t: "In-Platform", b: "A labeled place inside the product itself: the resources globe, founder journeys, and an upgraded perks listing where founders actually work.", tag: "Every circle", gold: false },
+                { n: "P4", t: "Programs", b: "Lead sponsor of a living program: the Accelerated Fundraising sprint, Hot Deals in Space, Demo Day and the Global Summit.", tag: "Galaxy only", gold: true },
+              ].map((w) => (
+                <div key={w.n} className={`relative overflow-hidden rounded-3xl border p-7 transition-all duration-500 hover:-translate-y-1 ${w.gold ? "border-[#e8c987]/40 bg-gradient-to-b from-[#e8c987]/[0.08] to-white/[0.015] shadow-[0_24px_60px_-30px_rgba(232,201,135,0.45)]" : "border-white/[0.09] bg-[#061a11]/80"}`}>
+                  <div className="flex items-baseline justify-between">
+                    <span className={`font-mono text-sm tracking-[0.2em] ${w.gold ? "text-[#e8c987]" : "text-emerald-300/70"}`}>{w.n}</span>
+                    <span className={`font-mono text-[9px] tracking-[0.18em] uppercase rounded-full border px-2.5 py-1 ${w.gold ? "border-[#e8c987]/50 text-[#e8c987]" : "border-white/10 text-emerald-100/45"}`}>{w.tag}</span>
+                  </div>
+                  <h3 className="mt-5 text-xl font-semibold text-white">{w.t}</h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-emerald-100/55">{w.b}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-8 text-center text-xs text-emerald-100/35">Sponsorship is partnership, not investment. Investment conversations live behind a different, private door.</p>
           </div>
         </section>
 
