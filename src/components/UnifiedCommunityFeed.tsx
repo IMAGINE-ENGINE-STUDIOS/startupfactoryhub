@@ -89,6 +89,10 @@ interface FeedPost {
 }
 /** Mosaic pool page: the mix ranks windows of 80 recent posts. */
 const FEED_PAGE = 80;
+// Founder direction (2026-10-31): while the network is still growing the
+// wall runs LATEST-FIRST. The Mosaic Mix shuffle (mixFeed in feedMix.ts)
+// returns when there is a considerable amount of posts.
+const orderLatest = (list: FeedPost[]) => [...list].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
 interface UnifiedCommunityFeedProps {
   showCreatePost?: boolean;
@@ -405,7 +409,7 @@ export default function UnifiedCommunityFeed({
     const eligiblePosts = poolPosts.filter(p => isEligible(p, Date.now()));
 
     if (loadMore) {
-      const mixedNew = mixFeed(eligiblePosts, seenRef.current);
+      const mixedNew = orderLatest(eligiblePosts);
       mixedNew.forEach(p => seenRef.current.add(p.id));
       rememberSeenIds(seenRef.current);
       setPosts(prev => {
@@ -416,10 +420,10 @@ export default function UnifiedCommunityFeed({
       setOffset(currentOffset + FEED_PAGE);
       offsetRef.current = currentOffset + FEED_PAGE;
     } else {
-      const mixed = mixFeed(eligiblePosts, seenRef.current);
+      const mixed = orderLatest(eligiblePosts);
       setPosts(prev => {
         if (!prev.length) {
-          // First load: pure mix.
+          // First load: latest first.
           mixed.forEach(p => seenRef.current.add(p.id));
           rememberSeenIds(seenRef.current);
           return mixed;
@@ -1346,15 +1350,6 @@ export default function UnifiedCommunityFeed({
     return buildWallLayout(posts, partners);
   }, [posts, wallCohorts]);
 
-  const shuffleMix = () => {
-    setPosts(prev => {
-      const mixed = mixFeed(prev, seenRef.current);
-      mixed.forEach(p => seenRef.current.add(p.id));
-      rememberSeenIds(seenRef.current);
-      return mixed;
-    });
-  };
-
   const bannerSrc = (url?: string | null) => url && url.includes('/storage/v1/object/public/') && !url.includes('?')
     ? url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=900&quality=75&resize=cover'
     : url || undefined;
@@ -1467,7 +1462,7 @@ export default function UnifiedCommunityFeed({
         setReelViewer({ open: true, index: idx >= 0 ? idx : 0 });
       };
       return <article key={post.id} onClick={openReel} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} preload="metadata" playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+        <video src={videoUrl} preload="metadata" playsInline muted className="absolute inset-0 h-full w-full object-contain" />
         <span className="absolute left-1/2 top-1/2 z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition group-hover:scale-110">
           <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
         </span>
@@ -1486,7 +1481,10 @@ export default function UnifiedCommunityFeed({
       const startLabel = new Date(ev.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + new Date(ev.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
         {ev.banner_url
-          ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+          ? <>
+              <img src={bannerSrc(ev.banner_url)} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
+              <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
+            </>
           : <div className="absolute inset-0 bg-gradient-primary" />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
         {authorChip}
@@ -1505,7 +1503,7 @@ export default function UnifiedCommunityFeed({
     // Video post — full-bleed, caption rides the top so controls stay free.
     if (videoUrl) {
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-contain" />
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] bg-gradient-to-b from-black/70 to-transparent px-2.5 pb-6 pt-2">
           <p className="truncate text-[10px] font-semibold text-white/90">{post.profiles?.full_name || 'Anonymous User'}</p>
           <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-white/85">{post.content}</p>
@@ -1516,7 +1514,8 @@ export default function UnifiedCommunityFeed({
     // Photo post — full-bleed wide tile, caption on a bottom scrim.
     if (imageUrl) {
       return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={imageUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" />
+        <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6">
           <p className="min-w-0 text-[11px] leading-snug">
             <span className="font-semibold">{post.profiles?.full_name || 'Anonymous User'}</span>
@@ -1709,16 +1708,12 @@ export default function UnifiedCommunityFeed({
       <div className="feed-window space-y-1.5">
         <div className="flex items-center justify-between pb-1">
           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-            Network mix · fresh posts & reels · events this month
+            Latest · posts & reels · events this month
           </span>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" onClick={handleCreateShort} className="text-muted-foreground hover:text-primary">
               <Video className="h-4 w-4 mr-1.5" />
               Reel
-            </Button>
-            <Button variant="ghost" size="sm" onClick={shuffleMix} className="text-muted-foreground hover:text-primary">
-              <Shuffle className="h-4 w-4 mr-1.5" />
-              Shuffle
             </Button>
           </div>
         </div>
