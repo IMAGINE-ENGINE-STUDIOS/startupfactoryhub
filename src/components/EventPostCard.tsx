@@ -244,18 +244,28 @@ export const EventPostCard = ({
 
         {/* Banner Image or Gradient Header */}
         {eventData.banner_url ? (
-          <div className="h-32 sm:h-40 relative overflow-hidden">
+          <div className="relative aspect-[1200/630] overflow-hidden bg-black/30">
+            <img
+              aria-hidden
+              src={eventData.banner_url.includes('/storage/v1/object/public/') && !eventData.banner_url.includes('?')
+                ? eventData.banner_url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=1200&quality=80'
+                : eventData.banner_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-xl"
+            />
             <img
               src={eventData.banner_url.includes('/storage/v1/object/public/') && !eventData.banner_url.includes('?')
-                ? eventData.banner_url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=900&quality=75&resize=cover'
+                ? eventData.banner_url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=1200&quality=80'
                 : eventData.banner_url}
               alt={eventData.title}
               loading="lazy"
               decoding="async"
               onError={(e) => { const img = e.currentTarget; if (img.src !== eventData.banner_url) img.src = eventData.banner_url!; }}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 h-full w-full object-contain"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
           </div>
         ) : (
           <div className="h-24 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 relative">

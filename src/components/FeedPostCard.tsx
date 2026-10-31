@@ -303,7 +303,7 @@ export function FeedPostCard({
                       key={idx}
                       src={url}
                       controls
-                      className="w-full rounded-xl max-h-64 sm:max-h-96 object-cover border border-white/5"
+                      className="w-full rounded-xl max-h-64 sm:max-h-96 object-contain bg-black border border-white/5"
                     />
                   ) : isLogo ? (
                     <div
@@ -337,7 +337,7 @@ export function FeedPostCard({
                         loading="lazy"
                         decoding="async"
                         onLoad={e => { if (isSmallLoadedImage(e.currentTarget)) markTiny(url); }}
-                        className="w-full max-h-64 sm:max-h-96 object-cover transition-transform duration-500 group-hover/media:scale-105"
+                        className="w-full max-h-64 sm:max-h-96 object-contain"
                       />
                       {post.media_urls!.length > 1 && idx === 0 && (
                         <Badge className="absolute top-2 right-2 bg-black/60 text-white border-none text-xs">
