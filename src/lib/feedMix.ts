@@ -1,25 +1,29 @@
 /**
- * Feed Mix — the square-net mosaic ranking for the Social feed.
+ * Feed Mix — the mosaic wall ranking + layout for the Social feed.
  *
- * Rules (founder-approved 2026-10-30, revised same day):
+ * Ranking (founder-approved 2026-10-30):
  * - Freshness gates: regular posts only from the last 21 days; reels
- *   (shorts) from the last 90 days (they are evergreen video and few);
- *   event posts are governed by the EVENT date, not the post date —
- *   shown only while the event is upcoming within the next 30 days and
- *   never after it ends, so future series appear as their month arrives.
+ *   (shorts) from the last 90 days (evergreen video, and few); event
+ *   posts are governed by the EVENT date, not the post date — shown
+ *   only while the event is upcoming within the next 30 days and never
+ *   after it ends, so future series appear as their month arrives.
  * - Score = (1 + likes + 3 * comments) * 0.5^(ageDays / 4), with boosts:
  *   live rooms x1.6, events starting within 72h x1.4, announcements and
- *   reels x1.2.
- * - Weighted shuffle (Efraimidis–Spirakis) so every visit is a different
- *   mix with strong posts tending to land early.
- * - Posts already seen this session are demoted to x0.25 weight.
- * - Interleave: never two posts by the same author back to back, never
- *   three of the same type in a row.
- * - Layout is a format-true net: big squares (2x2) for events/features,
- *   tall tiles (1x2) for reels, wide tiles (2x1) for landscape media and
- *   long text, small squares (1x1) for short posts — poured into a
- *   repeating 11-slot block that tiles exactly. Media keeps its own
- *   format inside the tile (16:9 areas, no stretched banners).
+ *   reels x1.2. Weighted shuffle (Efraimidis–Spirakis) so every visit is
+ *   a different mix; posts seen this session are demoted to x0.25;
+ *   never two posts by the same author back to back, never three of the
+ *   same type in a row.
+ *
+ * Layout — a dense mosaic wall (auto-flow dense, 104px row unit):
+ * every tile's span follows its format, media fills its tile edge to
+ * edge, and nothing is ever more than 2 rows tall:
+ * - events and videos: 2x2 feature tiles (banner/video full-bleed)
+ * - reels: 1x2 tall tiles — ALWAYS this exact size
+ * - photos, announcements, cohorts, journeys: 2x1 wide tiles
+ * - live rooms (no picture): 1x1 small tiles
+ * - text posts sized by length: 2x2 / 2x1 / 1x2 / 1x1
+ * Investor firms and accelerator cohorts join the wall as partner
+ * tiles (2x1), spliced through the stream.
  */
 
 export interface FeedMixPost {
@@ -108,94 +112,70 @@ export const postVideoUrl = (post: FeedMixPost): string | undefined =>
 export const postImageUrl = (post: FeedMixPost): string | undefined =>
   (post.media_urls || []).filter(Boolean).find((u) => hasExt(u, IMAGE_EXT));
 
-export type TileKind = 'B' | 'T' | 'W' | 'S';
+/* ── Wall layout ───────────────────────────────────────────────────── */
 
-/**
- * The tile format a post wants:
- * B = big square (events, live rooms, cohorts, journeys, announcements, videos)
- * T = tall (reels/shorts — portrait video)
- * W = wide (landscape photo posts, long text)
- * S = small square (short text)
- */
-export function tileKind(post: FeedMixPost): TileKind {
-  if (post.post_type === 'short') return 'T';
-  if (['event', 'live_room', 'cohort', 'journey_completion', 'announcement'].includes(post.post_type)) return 'B';
-  if (postVideoUrl(post)) return 'B';
-  if (postImageUrl(post)) return 'W';
-  return (post.content?.length || 0) > 140 ? 'W' : 'S';
-}
+export type WallSpan = '22' | '21' | '12' | '11';
 
-/* ── Format-true net layout ────────────────────────────────────────── */
-
-export interface NetTile<T> {
-  post: T;
-  className: string;
-  /** The slot's format: B big square, T tall, W wide, S small square. */
-  slot: TileKind;
-}
-export interface NetBlock<T> {
-  tiles: NetTile<T>[];
-  dense: boolean;
-}
-export interface NetLayout<T> {
-  blocks: NetBlock<T>[];
-}
-
-interface SlotDef {
-  kind: TileKind;
-  cls: string;
-  fallbacks: TileKind[];
-}
-/** Repeating block on a 6-col × 4-row net of square cells (11 tiles). */
-const SLOTS: SlotDef[] = [
-  { kind: 'B', cls: 'sm:[grid-column:1/span_2] sm:[grid-row:1/span_2]', fallbacks: ['B', 'T', 'W', 'S'] },
-  { kind: 'T', cls: 'sm:[grid-column:3/span_1] sm:[grid-row:1/span_2]', fallbacks: ['T', 'B', 'W', 'S'] },
-  { kind: 'B', cls: 'sm:[grid-column:4/span_2] sm:[grid-row:1/span_2]', fallbacks: ['B', 'T', 'W', 'S'] },
-  { kind: 'S', cls: 'sm:[grid-column:6/span_1] sm:[grid-row:1/span_1]', fallbacks: ['S', 'W', 'T', 'B'] },
-  { kind: 'S', cls: 'sm:[grid-column:6/span_1] sm:[grid-row:2/span_1]', fallbacks: ['S', 'W', 'T', 'B'] },
-  { kind: 'W', cls: 'sm:[grid-column:1/span_2] sm:[grid-row:3/span_1]', fallbacks: ['W', 'B', 'S', 'T'] },
-  { kind: 'T', cls: 'sm:[grid-column:3/span_1] sm:[grid-row:3/span_2]', fallbacks: ['T', 'B', 'W', 'S'] },
-  { kind: 'B', cls: 'sm:[grid-column:4/span_2] sm:[grid-row:3/span_2]', fallbacks: ['B', 'T', 'W', 'S'] },
-  { kind: 'S', cls: 'sm:[grid-column:6/span_1] sm:[grid-row:3/span_1]', fallbacks: ['S', 'W', 'T', 'B'] },
-  { kind: 'W', cls: 'sm:[grid-column:1/span_2] sm:[grid-row:4/span_1]', fallbacks: ['W', 'B', 'S', 'T'] },
-  { kind: 'S', cls: 'sm:[grid-column:6/span_1] sm:[grid-row:4/span_1]', fallbacks: ['S', 'W', 'T', 'B'] },
-];
-const BASE_CLASS: Record<TileKind, string> = {
-  B: 'col-span-2 row-span-2 aspect-square sm:aspect-auto',
-  T: 'row-span-2 aspect-[1/2] sm:aspect-auto',
-  W: 'col-span-2 aspect-[2/1] sm:aspect-auto',
-  S: 'aspect-square sm:aspect-auto',
+export const SPAN_CLASS: Record<WallSpan, string> = {
+  '22': 'col-span-2 row-span-2',
+  '21': 'col-span-2 row-span-1',
+  '12': 'col-span-1 row-span-2',
+  '11': 'col-span-1 row-span-1',
 };
 
+/** The span a post's format earns. Reels are always '12', no exceptions. */
+export function spanForPost(post: FeedMixPost): WallSpan {
+  if (post.post_type === 'short') return '12';
+  if (post.post_type === 'event') return '22';
+  if (postVideoUrl(post)) return '22';
+  if (postImageUrl(post)) return '21';
+  if (post.post_type === 'live_room') return '11';
+  if (['announcement', 'cohort', 'journey_completion'].includes(post.post_type)) return '21';
+  const len = post.content?.length || 0;
+  if (len > 280) return '22';
+  if (len > 140) return '21';
+  if (len > 60) return '12';
+  return '11';
+}
+
+export interface WallPartner {
+  kind: 'firm' | 'cohort';
+  id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+}
+
+export interface WallEntry<T> {
+  key: string;
+  span: WallSpan;
+  post?: T;
+  partner?: WallPartner;
+}
+
 /**
- * Pour the mixed order into repeating 11-slot net blocks. The final
- * partial block (when the pool runs out) becomes a dense segment whose
- * tiles pack by span, so the net never shows a named hole.
+ * Build the wall: posts in mixed order with partner tiles (investor
+ * firms, accelerator cohorts) spliced in every few tiles. The grid's
+ * dense auto-flow packs the spans into a tight mosaic.
  */
-export function buildNetLayout<T extends FeedMixPost>(ordered: T[]): NetLayout<T> {
-  const pool = [...ordered];
-  const blocks: NetBlock<T>[] = [];
-  while (pool.length >= SLOTS.length) {
-    const tiles: NetTile<T>[] = [];
-    for (const slot of SLOTS) {
-      let idx = -1;
-      for (const kind of slot.fallbacks) {
-        idx = pool.findIndex((p) => tileKind(p) === kind);
-        if (idx >= 0) break;
+export function buildWallLayout<T extends FeedMixPost>(ordered: T[], partners: WallPartner[] = []): WallEntry<T>[] {
+  const entries: WallEntry<T>[] = ordered.map((post) => ({ key: post.id, span: spanForPost(post), post }));
+  if (partners.length) {
+    const spliced: WallEntry<T>[] = [];
+    let pi = 0;
+    entries.forEach((entry, i) => {
+      spliced.push(entry);
+      if ((i + 1) % 5 === 4 && pi < partners.length) {
+        const partner = partners[pi++];
+        spliced.push({ key: partner.id, span: '21', partner });
       }
-      if (idx < 0) idx = 0;
-      const [post] = pool.splice(idx, 1);
-      tiles.push({ post, className: `${BASE_CLASS[slot.kind]} ${slot.cls}`, slot: slot.kind });
-    }
-    blocks.push({ tiles, dense: false });
-  }
-  if (pool.length) {
-    blocks.push({
-      tiles: pool.map((post) => ({ post, className: BASE_CLASS[tileKind(post)], slot: tileKind(post) })),
-      dense: true,
     });
+    while (pi < partners.length) {
+      const partner = partners[pi++];
+      spliced.push({ key: partner.id, span: '21', partner });
+    }
+    return spliced;
   }
-  return { blocks };
+  return entries;
 }
 
 /* ── Seen-this-session tracking ────────────────────────────────────── */

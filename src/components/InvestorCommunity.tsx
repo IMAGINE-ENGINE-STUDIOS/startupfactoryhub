@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 
-interface InvestorFirm {
+export interface InvestorFirm {
   id: string;
   name: string;
   description: string;
@@ -20,7 +20,7 @@ interface InvestorFirm {
   cta: string;
 }
 
-const FIRMS: InvestorFirm[] = [
+export const FIRMS: InvestorFirm[] = [
   {
     id: 'advantary',
     name: 'Advantary Capital Partners',

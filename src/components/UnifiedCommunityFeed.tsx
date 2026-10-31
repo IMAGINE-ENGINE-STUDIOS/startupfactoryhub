@@ -31,7 +31,8 @@ import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { UniversalFileUploader, type UploadedFile } from '@/components/upload/UniversalFileUploader';
 import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
 import { getFileKind } from '@/lib/upload/fileKinds';
-import { mixFeed, isEligible, buildNetLayout, postVideoUrl, postImageUrl, loadSeenIds, rememberSeenIds, type NetTile } from '@/lib/feedMix';
+import { mixFeed, isEligible, buildWallLayout, SPAN_CLASS, postVideoUrl, postImageUrl, loadSeenIds, rememberSeenIds, type WallEntry, type WallPartner, type WallSpan } from '@/lib/feedMix';
+import { FIRMS } from '@/components/InvestorCommunity';
 import { Paperclip } from 'lucide-react';
 import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
@@ -102,7 +103,41 @@ export default function UnifiedCommunityFeed({
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [wallCohorts, setWallCohorts] = useState<any[]>([]);
   const seenRef = useRef<Set<string>>(loadSeenIds());
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from('accelerator_cohorts')
+        .select('id,name,description,status,application_deadline,enrollment_fee,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
+        .in('status', ['applications_open', 'active', 'upcoming'])
+        .order('application_deadline', { ascending: true })
+        .limit(6);
+      if (!data || cancelled) return;
+      const ids = Array.from(new Set(data.map((c: any) => c.accelerator_id).filter(Boolean)));
+      let profiles: any[] = [];
+      if (ids.length) {
+        const [byId, byUser] = await Promise.all([
+          supabase.from('accelerator_profiles').select('id,user_id,organization_name,logo_url').in('id', ids),
+          supabase.from('accelerator_profiles').select('id,user_id,organization_name,logo_url').in('user_id', ids),
+        ]);
+        profiles = [...(byId.data || []), ...(byUser.data || [])];
+      }
+      const lookup = new Map<string, any>();
+      profiles.forEach(p => { lookup.set(p.id, p); if (p.user_id) lookup.set(p.user_id, p); });
+      if (cancelled) return;
+      const mapped = data.map((c: any) => ({
+        ...c,
+        org_name: lookup.get(c.accelerator_id)?.organization_name || 'Startup Factory Hub',
+        logo_url: lookup.get(c.accelerator_id)?.logo_url || null,
+      }));
+      const rank = (n: string) => (/mvp/i.test(n || '') ? 2 : /accelerated fundraising/i.test(n || '') ? 1 : 0);
+      mapped.sort((a: any, b: any) => rank(b.name) - rank(a.name));
+      setWallCohorts(mapped);
+    })();
+    return () => { cancelled = true; };
+  }, []);
   const [newPost, setNewPost] = useState('');
   const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Social feed posting');
   const [loading, setLoading] = useState(false);
@@ -1287,7 +1322,17 @@ export default function UnifiedCommunityFeed({
 
   const openPost = openPostId ? posts.find(p => p.id === openPostId) || null : null;
 
-  const netLayout = useMemo(() => buildNetLayout(posts), [posts]);
+  const wallEntries = useMemo(() => {
+    const firmPartners: WallPartner[] = FIRMS.map(f => ({ kind: 'firm', id: `firm-${f.id}`, data: f }));
+    const cohortPartners: WallPartner[] = wallCohorts.map(c => ({ kind: 'cohort', id: `cohort-${c.id}`, data: c }));
+    const partners: WallPartner[] = [];
+    const max = Math.max(firmPartners.length, cohortPartners.length);
+    for (let i = 0; i < max; i++) {
+      if (firmPartners[i]) partners.push(firmPartners[i]);
+      if (cohortPartners[i]) partners.push(cohortPartners[i]);
+    }
+    return buildWallLayout(posts, partners);
+  }, [posts, wallCohorts]);
 
   const shuffleMix = () => {
     setPosts(prev => {
@@ -1335,17 +1380,64 @@ export default function UnifiedCommunityFeed({
     journey_completion: 'JOURNEY', announcement: 'ANNOUNCEMENT', update: 'UPDATE',
   };
 
-  const renderTile = (entry: NetTile<FeedPost>) => {
-    const post = entry.post;
-    const slot = entry.slot;
+  const renderFirmTile = (firm: any) => (
+    <article key={`firm-${firm.id}`} onClick={() => window.open(firm.url, '_blank', 'noopener,noreferrer')}
+      className="group relative flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(160deg,hsl(220_25%_11%),hsl(220_25%_7%))] p-3 transition duration-300 hover:scale-[1.02] hover:border-primary/40 col-span-2 row-span-1">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white text-[13px] font-bold text-slate-900">
+          {firm.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('')}
+          <img src={firm.logo} alt="" loading="lazy" onError={e => { e.currentTarget.style.display = 'none'; }} className="absolute inset-0 h-full w-full bg-white object-contain p-1" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="truncate text-[13px] font-bold">{firm.name}</h4>
+            <span className="shrink-0 rounded-full border border-primary/30 bg-primary/15 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.12em] text-primary">{firm.focus}</span>
+          </div>
+          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{firm.description}</p>
+        </div>
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-[8px] font-mono uppercase tracking-[0.22em] text-muted-foreground">Investor partner</span>
+        <span className="text-[11px] font-bold text-primary">{firm.cta} →</span>
+      </div>
+    </article>
+  );
+
+  const renderCohortTile = (c: any) => {
+    const funding = c.funding_per_startup ? `$${Math.round(c.funding_per_startup / 1000)}K per startup` : null;
+    const deadline = c.application_deadline ? new Date(c.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+    const meta = [funding, c.equity_percentage ? `${c.equity_percentage}% equity` : null, deadline ? `apply by ${deadline}` : null].filter(Boolean).join(' · ');
+    return (
+      <article key={`cohort-${c.id}`} onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+        className="group relative flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-fuchsia-500/40 bg-[linear-gradient(150deg,hsl(280_60%_16%/0.95),hsl(190_70%_11%/0.95))] p-3 text-white transition duration-300 hover:scale-[1.02] hover:border-fuchsia-400/70 col-span-2 row-span-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-[8px] font-mono uppercase tracking-[0.22em] text-fuchsia-300">Accelerator · {c.org_name}</span>
+          <span className="ml-auto shrink-0 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/40 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.1em] text-fuchsia-200">{c.status === 'applications_open' ? 'APPLICATIONS OPEN' : c.status === 'active' ? 'IN PROGRESS' : 'UPCOMING'}</span>
+        </div>
+        <h4 className="mt-1 truncate text-[13.5px] font-bold">{c.name}</h4>
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <span className="truncate text-[11px] text-white/75">{meta}</span>
+          <span className="shrink-0 text-[11px] font-bold text-cyan-300">Apply →</span>
+        </div>
+      </article>
+    );
+  };
+
+  const renderTile = (post: FeedPost, span: WallSpan) => {
     const videoUrl = postVideoUrl(post);
     const imageUrl = postImageUrl(post);
+    const spanCls = SPAN_CLASS[span];
     const onTileClick = (e: ReactMouseEvent) => {
       if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
       setOpenPostId(post.id);
     };
-    const shell = 'group relative flex overflow-hidden rounded-lg border cursor-pointer min-h-0';
-    const counts = <span className="text-[11px] opacity-75">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span>;
+    const shell = 'group relative flex overflow-hidden rounded-xl border cursor-pointer min-h-0 transition duration-300 hover:scale-[1.015] hover:shadow-[0_16px_40px_-14px_hsl(var(--primary)/0.45)]';
+    const countsPills = (
+      <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[10px] font-bold text-white/90 backdrop-blur"><Heart className="h-[11px] w-[11px]" /> {post._count?.post_likes || 0}</span>
+        <span className="flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[10px] font-bold text-white/90 backdrop-blur"><MessageCircle className="h-[11px] w-[11px]" /> {post._count?.post_comments || 0}</span>
+      </span>
+    );
     const authorChip = (
       <div className="pointer-events-none absolute left-2 top-2 z-[2] flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
         <span className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full bg-gradient-primary text-[8px] font-bold text-primary-foreground">
@@ -1355,140 +1447,129 @@ export default function UnifiedCommunityFeed({
       </div>
     );
 
-    // Reels and tall-slot video: full-bleed portrait, the reel's own format.
-    if (videoUrl && (post.post_type === 'short' || slot === 'T')) {
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${entry.className}`}>
+    // Reel — full-bleed portrait video, always the same 1x2 size.
+    if (videoUrl && post.post_type === 'short') {
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
         <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
         {authorChip}
         <span className="absolute right-2 top-2 z-[2] rounded bg-red-500/85 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">REEL</span>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug">
           <p className="line-clamp-2">{post.content}</p>
-          <p className="mt-1">{counts}</p>
+          <p className="mt-1"><span className="text-[11px] opacity-80">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span></p>
         </div>
       </article>;
     }
 
-    // Media in a small or tall slot: full-bleed with a counts scrim.
-    if ((videoUrl || imageUrl) && (slot === 'S' || slot === 'T')) {
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${entry.className}`}>
-        {videoUrl
-          ? <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
-          : <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
-        {authorChip}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-5 text-[10px]">
-          <span className="max-w-[65%] truncate font-semibold">{post.content || post.profiles?.full_name || ''}</span>
-          {counts}
-        </div>
-      </article>;
-    }
-
+    // Event — the banner IS the tile, full-bleed, details overlaid.
     if (post.post_type === 'event' && post.event_data) {
       const ev = post.event_data;
       const startLabel = new Date(ev.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + new Date(ev.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      const banner = ev.banner_url
-        ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-        : <div className="absolute inset-0 bg-gradient-primary" />;
-      const body = (
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
-          {tileAuthor(post)}
-          <h4 className={`font-semibold leading-snug ${slot === 'B' ? 'text-[13px] line-clamp-2' : 'text-xs line-clamp-1'}`}>{ev.title}</h4>
-          {slot !== 'S' && <p className="text-[11px] font-medium text-blue-500">{startLabel}{ev.is_virtual ? ' · Virtual' : ev.location ? ` · ${ev.location}` : ''}</p>}
-          <div className="mt-auto flex items-center justify-between pt-0.5">
-            <span className="text-[11px] font-bold text-blue-500">Register →</span>
-            {counts}
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
+        {ev.banner_url
+          ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+          : <div className="absolute inset-0 bg-gradient-primary" />}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+        {authorChip}
+        <span className="absolute right-2 top-2 z-[2] rounded bg-blue-500/85 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">EVENT</span>
+        <div className="absolute inset-x-0 bottom-0 z-[2] p-3">
+          <h4 className="text-[15px] font-bold leading-snug line-clamp-2">{ev.title}</h4>
+          <p className="mt-0.5 text-[11px] font-medium text-cyan-300">{startLabel}{ev.is_virtual ? ' · Virtual' : ev.location ? ` · ${ev.location}` : ''}</p>
+          <div className="mt-2 flex items-center justify-between">
+            <span className="rounded-full bg-blue-500 px-2.5 py-1 text-[10px] font-bold text-white">Register</span>
+            {countsPills}
           </div>
         </div>
-      );
-      if (slot === 'W') {
-        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
-          <div className="relative h-full w-2/5 shrink-0 overflow-hidden">{banner}</div>
-          {body}
-        </article>;
-      }
-      // The banner keeps its own 16:9 format — never stretched to the tile.
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden">{banner}</div>
-        {body}
       </article>;
     }
 
+    // Video post — full-bleed, caption rides the top so controls stay free.
     if (videoUrl) {
-      if (slot === 'W') {
-        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
-          <div className="relative h-full w-1/2 shrink-0 overflow-hidden bg-black">
-            <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col p-2.5 min-h-0">
-            {tileAuthor(post)}
-            <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
-            {tileActions(post, 'text-muted-foreground')}
-          </div>
-        </article>;
-      }
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-black">
-          <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
-        </div>
-        <div className="flex flex-1 flex-col p-2.5 min-h-0">
-          {tileAuthor(post)}
-          <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
-          {tileActions(post, 'text-muted-foreground')}
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
+        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] bg-gradient-to-b from-black/70 to-transparent px-2.5 pb-6 pt-2">
+          <p className="truncate text-[10px] font-semibold text-white/90">{post.profiles?.full_name || 'Anonymous User'}</p>
+          <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-white/85">{post.content}</p>
         </div>
       </article>;
     }
 
+    // Photo post — full-bleed wide tile, caption on a bottom scrim.
     if (imageUrl) {
-      if (slot === 'W') {
-        return <article key={post.id} onClick={onTileClick} className={`${shell} flex-row tech-card border-0 ${entry.className}`}>
-          <div className="relative h-full w-2/5 shrink-0 overflow-hidden">
-            <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col p-2.5 min-h-0">
-            {tileAuthor(post)}
-            <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
-            {tileActions(post, 'text-muted-foreground')}
-          </div>
-        </article>;
-      }
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col tech-card border-0 ${entry.className}`}>
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden">
-          <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
+        <img src={imageUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6">
+          <p className="min-w-0 text-[11px] leading-snug">
+            <span className="font-semibold">{post.profiles?.full_name || 'Anonymous User'}</span>
+            {post.content ? <span className="block truncate text-white/80">{post.content}</span> : null}
+          </p>
+          {countsPills}
         </div>
-        <div className="flex flex-1 flex-col p-2.5 min-h-0">
-          {tileAuthor(post)}
-          <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed">{post.content}</p>
-          {tileActions(post, 'text-muted-foreground')}
+      </article>;
+    }
+
+    // Live room — no picture, so it stays a small tile.
+    if (post.post_type === 'live_room') {
+      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-red-500/50 bg-[linear-gradient(150deg,#4a1220,hsl(222_40%_11%))] p-2.5 text-rose-50 ${spanCls}`}>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded bg-red-500 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">● LIVE</span>
+          <span className="ml-auto text-[9px] opacity-70">{formatDate(post.created_at)}</span>
         </div>
+        <p className="mt-1.5 line-clamp-2 text-[12.5px] font-semibold leading-snug">{(post as any).room_data?.room_name || post.content}</p>
+        <p className="mt-auto flex items-center justify-between gap-2 text-[10px] text-rose-200/80">
+          <span className="truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
+          <span className="shrink-0 font-bold text-rose-100">Join →</span>
+        </p>
       </article>;
     }
 
     const theme =
-      post.post_type === 'live_room' ? 'border-red-500/50 text-rose-50 bg-[linear-gradient(150deg,#4a1220,hsl(222_40%_13%))]' :
       post.post_type === 'cohort' ? 'border-fuchsia-500/40 text-white bg-[linear-gradient(135deg,hsl(280_65%_21%/0.94),hsl(190_70%_15%/0.92))]' :
       post.post_type === 'journey_completion' ? 'border-yellow-400/70 text-amber-50 bg-[linear-gradient(135deg,hsl(45_85%_18%/0.95),hsl(330_70%_16%/0.93))]' :
       post.post_type === 'announcement' ? 'border-primary/40 bg-[linear-gradient(135deg,hsl(160_84%_42%/0.28),hsl(180_95%_50%/0.12))]' :
       'tech-card border-0';
-    const tone = ['live_room', 'cohort', 'journey_completion'].includes(post.post_type) ? 'text-white/70' : 'text-muted-foreground';
+    const tone = ['cohort', 'journey_completion'].includes(post.post_type) ? 'text-white/70' : 'text-muted-foreground';
     const label = TYPE_LABEL[post.post_type] || 'UPDATE';
-    const clamp = slot === 'B' ? 'line-clamp-[7]' : slot === 'T' ? 'line-clamp-[10]' : slot === 'W' ? 'line-clamp-2' : 'line-clamp-3';
+    const textCls = span === '22' ? 'text-[15px] line-clamp-5' : span === '12' ? 'text-[13px] line-clamp-5' : span === '21' ? 'text-[12.5px] line-clamp-2' : 'text-[12px] line-clamp-3';
 
-    return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col ${theme} ${entry.className}`}>
+    return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col ${theme} ${spanCls}`}>
       <div className="flex flex-1 flex-col p-2.5 min-h-0">
-        {tileAuthor(post, <span className="shrink-0 rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">{post.post_type === 'live_room' ? '● LIVE' : label}</span>)}
-        {post.post_type === 'live_room' && (post as any).room_data?.room_name
-          ? <p className="mt-1 text-[13px] font-semibold leading-snug line-clamp-2">{(post as any).room_data.room_name}</p>
-          : null}
-        <p className={`mt-1 text-[12.5px] leading-relaxed ${clamp}`}>{post.content}</p>
-        {tileActions(post, tone)}
+        {span === '11'
+          ? <p className="truncate text-[10px] font-semibold opacity-80">{post.profiles?.full_name || 'Anonymous User'}</p>
+          : tileAuthor(post, <span className="shrink-0 rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">{label}</span>)}
+        <p className={`mt-1 font-medium leading-snug ${textCls}`}>{post.content}</p>
+        {span === '11'
+          ? <p className="mt-auto text-[10px] opacity-75">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</p>
+          : tileActions(post, tone)}
       </div>
     </article>;
+  };
+
+  const renderWallTile = (entry: WallEntry<FeedPost>) => {
+    if (entry.partner?.kind === 'firm') return renderFirmTile(entry.partner.data);
+    if (entry.partner?.kind === 'cohort') return renderCohortTile(entry.partner.data);
+    return entry.post ? renderTile(entry.post, entry.span) : null;
   };
 
   return <div className="space-y-4 sm:space-y-6">
       {membershipDialog}
 
       {/* Create Post */}
-      {showCreatePost && <div className="relative group">
+      {showCreatePost && !composerOpen && (
+        <button type="button" data-tour="composer" onClick={() => setComposerOpen(true)} className="flex w-full items-center gap-2.5 rounded-full border border-border/70 bg-card/60 py-2 pl-2.5 pr-2 text-left backdrop-blur transition hover:border-primary/50">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground">
+            <Plus className="h-4 w-4" />
+          </span>
+          <span className="flex-1 truncate text-[13px] text-muted-foreground">Broadcast to the district — share an update, insight, or ask…</span>
+          <span className="shrink-0 rounded-full bg-gradient-primary px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">Post</span>
+        </button>
+      )}
+      {showCreatePost && composerOpen && <>
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={() => setComposerOpen(false)} className="h-7 text-[11px] text-muted-foreground hover:text-primary">
+            <X className="mr-1 h-3.5 w-3.5" /> Close
+          </Button>
+        </div>
+        <div className="relative group">
           <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-sm opacity-60 group-focus-within:opacity-100 transition duration-500 pointer-events-none" />
           <Card data-tour="composer" className="relative tech-card border-0 backdrop-blur-2xl overflow-hidden">
             <div className="absolute top-0 left-0 h-px w-24 bg-gradient-to-r from-primary/80 to-transparent" />
@@ -1595,16 +1676,16 @@ export default function UnifiedCommunityFeed({
             </div>
           </CardContent>
         </Card>
-        </div>}
+        </div></>}
 
 
       {/* Posts Grid — .feed-window lets the browser skip rendering and
           release image memory for off-screen cards (see index.css);
           without it a long feed of full-size banners crashes mobile. */}
-      {/* Square-net mosaic — the mixed stream pours into repeating
-          square blocks (see src/lib/feedMix.ts). Tiles are compact;
-          the full post opens in a dialog. feed-window keeps off-screen
-          rendering and image memory cheap on long feeds. */}
+      {/* Mosaic wall — dense-flow grid on a 104px row unit; spans
+          follow each post's format (see src/lib/feedMix.ts) and media
+          fills its tile edge to edge. The full post opens in a dialog.
+          feed-window keeps off-screen rendering cheap on long feeds. */}
       <div className="feed-window space-y-1.5">
         <div className="flex items-center justify-between pb-1">
           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
@@ -1621,14 +1702,9 @@ export default function UnifiedCommunityFeed({
             </Button>
           </div>
         </div>
-        {netLayout.blocks.map((block, bi) => <div key={bi} className="contents">
-            <div className={block.dense
-              ? 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 [grid-auto-flow:dense]'
-              : 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:[grid-template-rows:repeat(4,minmax(0,1fr))] sm:aspect-[6/4]'}>
-              {block.tiles.map(entry => renderTile(entry))}
-            </div>
-            {bi === 0 && interstitialContent ? <div className="mt-1.5">{interstitialContent}</div> : null}
-          </div>)}
+        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 auto-rows-[104px] gap-2 [grid-auto-flow:dense]">
+          {wallEntries.map(entry => renderWallTile(entry))}
+        </div>
         {/* Infinite Scroll Trigger */}
         {hasMore && posts.length > 0 && <div ref={loadMoreRef} className="py-8 flex justify-center">
             {loadingMore && <div className="flex items-center gap-2 text-muted-foreground">
