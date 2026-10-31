@@ -117,7 +117,7 @@ export const postImageUrl = (post: FeedMixPost): string | undefined =>
 export type WallSpan = '22' | '21' | '12' | '11';
 
 export const SPAN_CLASS: Record<WallSpan, string> = {
-  '22': 'col-span-2 row-span-2',
+  '22': 'col-span-2 row-span-2 max-sm:row-span-1',
   '21': 'col-span-2 row-span-1',
   '12': 'col-span-1 row-span-2',
   '11': 'col-span-1 row-span-1',

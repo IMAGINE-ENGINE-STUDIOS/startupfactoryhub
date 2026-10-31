@@ -1462,10 +1462,10 @@ export default function UnifiedCommunityFeed({
     );
   };
 
-  const renderTile = (post: FeedPost, span: WallSpan) => {
+  const renderTile = (post: FeedPost, span: WallSpan, mobileHalf = false) => {
     const videoUrl = postVideoUrl(post);
     const imageUrl = postImageUrl(post);
-    const spanCls = SPAN_CLASS[span];
+    const spanCls = SPAN_CLASS[span] + (mobileHalf ? ' max-sm:col-span-1' : '');
     const onTileClick = (e: ReactMouseEvent) => {
       if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
       setOpenPostId(post.id);
@@ -1606,11 +1606,25 @@ export default function UnifiedCommunityFeed({
     </article>;
   };
 
+  // Mobile scramble: every second image tile renders as a half-width
+  // square on phones, so the wall mixes squares and banners instead of
+  // stacking full-width rows.
+  const mobileHalfIds = new Set<string>();
+  {
+    let flip = false;
+    for (const e of wallEntries) {
+      if (e.post && e.span === '21' && postImageUrl(e.post)) {
+        if (flip) mobileHalfIds.add(e.post.id);
+        flip = !flip;
+      }
+    }
+  }
+
   const renderWallTile = (entry: WallEntry<FeedPost>) => {
     if (entry.partner?.kind === 'firm') return renderFirmTile(entry.partner.data);
     if (entry.partner?.kind === 'fund') return renderFundTile(entry.partner.data);
     if (entry.partner?.kind === 'cohort') return renderCohortTile(entry.partner.data);
-    return entry.post ? renderTile(entry.post, entry.span) : null;
+    return entry.post ? renderTile(entry.post, entry.span, mobileHalfIds.has(entry.post.id)) : null;
   };
 
   return <div className="space-y-4 sm:space-y-6">
@@ -1761,7 +1775,7 @@ export default function UnifiedCommunityFeed({
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 auto-rows-[104px] gap-2 [grid-auto-flow:dense]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 auto-rows-[47vw] sm:auto-rows-[104px] gap-2 [grid-auto-flow:dense]">
           {wallEntries.map(entry => renderWallTile(entry))}
         </div>
         {/* Infinite Scroll Trigger */}
