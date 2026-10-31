@@ -1,5 +1,5 @@
 import { prepareImageForUpload } from '@/lib/upload/prepareImage';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn, Wand2, Loader2 } from 'lucide-react';
+import { Heart, MessageCircle, Share, Shuffle, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn, Wand2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { UniversalFileUploader, type UploadedFile } from '@/components/upload/UniversalFileUploader';
 import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
 import { getFileKind } from '@/lib/upload/fileKinds';
+import { mixFeed, isEligible, pickSpotlights, buildNetLayout, postVideoUrl, postImageUrl, loadSeenIds, rememberSeenIds, FEED_WINDOW_DAYS, type NetTile } from '@/lib/feedMix';
 import { Paperclip } from 'lucide-react';
 import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
@@ -85,6 +86,9 @@ interface FeedPost {
     post_comments: number;
   };
 }
+/** Mosaic pool page: the mix ranks windows of 80 recent posts. */
+const FEED_PAGE = 80;
+
 interface UnifiedCommunityFeedProps {
   showCreatePost?: boolean;
   limit?: number;
@@ -98,6 +102,9 @@ export default function UnifiedCommunityFeed({
   interstitialAfterIndex = 3
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const spotlightIdsRef = useRef<Set<string>>(new Set());
+  const seenRef = useRef<Set<string>>(loadSeenIds());
   const [newPost, setNewPost] = useState('');
   const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Social feed posting');
   const [loading, setLoading] = useState(false);
@@ -172,7 +179,7 @@ export default function UnifiedCommunityFeed({
     // page), that yanks the list out from under them mid-scroll (a
     // visible glitch/jump). While paged, skip the reset; new posts
     // surface on the next remount or manual refresh instead.
-    const refreshIfAtTop = () => { if (offsetRef.current <= limit) fetchPosts(); };
+    const refreshIfAtTop = () => { if (offsetRef.current <= FEED_PAGE) fetchPosts(); };
     const channel = supabase.channel('feed-posts').on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -324,9 +331,9 @@ export default function UnifiedCommunityFeed({
           user_id,
           parent_comment_id
         )
-      `).neq('post_type', 'short').order('created_at', {
+      `).neq('post_type', 'short').gte('created_at', new Date(Date.now() - FEED_WINDOW_DAYS * 86400000).toISOString()).order('created_at', {
       ascending: false
-    }).range(currentOffset, currentOffset + limit - 1);
+    }).range(currentOffset, currentOffset + FEED_PAGE - 1);
 
     if (postsError) {
       console.error('Error fetching posts:', postsError);
@@ -334,24 +341,44 @@ export default function UnifiedCommunityFeed({
       return;
     }
 
-    if ((postsData || []).length < limit) {
+    if ((postsData || []).length < FEED_PAGE) {
       setHasMore(false);
     }
 
     const formattedPosts = await formatPostBatch(postsData || []);
+    // Mosaic Mix gate: only the last 21 days, and events only until they end.
+    const eligiblePosts = formattedPosts.filter(p => isEligible(p, Date.now()));
 
     if (loadMore) {
+      const mixedNew = mixFeed(eligiblePosts, seenRef.current);
+      mixedNew.forEach(p => seenRef.current.add(p.id));
+      rememberSeenIds(seenRef.current);
       setPosts(prev => {
         const existingIds = new Set(prev.map(p => p.id));
-        const uniqueNew = formattedPosts.filter(p => !existingIds.has(p.id));
+        const uniqueNew = mixedNew.filter(p => !existingIds.has(p.id));
         return [...prev, ...uniqueNew];
       });
-      setOffset(currentOffset + limit);
-      offsetRef.current = currentOffset + limit;
+      setOffset(currentOffset + FEED_PAGE);
+      offsetRef.current = currentOffset + FEED_PAGE;
     } else {
-      setPosts(formattedPosts);
-      setOffset(limit);
-      offsetRef.current = limit;
+      const mixed = mixFeed(eligiblePosts, seenRef.current);
+      setPosts(prev => {
+        if (!prev.length) {
+          // First load: pure mix, spotlights chosen from this pool.
+          spotlightIdsRef.current = new Set(pickSpotlights(mixed).map(p => p.id));
+          mixed.forEach(p => seenRef.current.add(p.id));
+          rememberSeenIds(seenRef.current);
+          return mixed;
+        }
+        // Background refresh (realtime): keep the order already on screen,
+        // surface genuinely new posts first in mixed order, drop deleted.
+        const prevIndex = new Map(prev.map((p, i) => [p.id, i] as const));
+        const fresh = mixed.filter(p => !prevIndex.has(p.id));
+        const kept = mixed.filter(p => prevIndex.has(p.id)).sort((a, b) => (prevIndex.get(a.id) ?? 0) - (prevIndex.get(b.id) ?? 0));
+        return [...fresh, ...kept];
+      });
+      setOffset(FEED_PAGE);
+      offsetRef.current = FEED_PAGE;
       setHasMore(true);
     }
     setLoadingMore(false);
@@ -933,131 +960,8 @@ export default function UnifiedCommunityFeed({
         </div>
       </div>;
   }
-  return <div className="space-y-4 sm:space-y-6">
-      {membershipDialog}
 
-      {/* Shorts Carousel */}
-      <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
-
-      {/* Community Districts interstitial */}
-      {interstitialContent}
-
-      {/* Create Post */}
-      {showCreatePost && <div className="relative group">
-          <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-sm opacity-60 group-focus-within:opacity-100 transition duration-500 pointer-events-none" />
-          <Card data-tour="composer" className="relative tech-card border-0 backdrop-blur-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 h-px w-24 bg-gradient-to-r from-primary/80 to-transparent" />
-            <div className="absolute bottom-0 right-0 h-px w-24 bg-gradient-to-l from-accent/80 to-transparent" />
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between text-base sm:text-lg">
-              <div className="flex items-center space-x-2">
-                <span>Post about your Journey or Opportunities&nbsp;</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />
-                Uplink · Active
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl pr-12" />
-              <VoiceMicButton onText={(t) => setNewPost((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="absolute right-2 bottom-2 h-9 w-9 bg-background/70" />
-            </div>
-
-            
-            {/* Media Preview */}
-            {mediaPreview.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {mediaPreview.map((preview, index) => <div key={index} className="relative group">
-                    {mediaFiles[index].type.startsWith('video/') ? <video src={preview} className="w-full h-24 sm:h-32 object-cover rounded-lg" /> : <img src={preview} alt={`Preview ${index}`} className="w-full h-24 sm:h-32 object-cover rounded-lg" />}
-                    <Button variant="destructive" size="sm" className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeMedia(index)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>)}
-              </div>}
-
-            {/* Universal file uploader — any file type (3D/AR, docs, data, media) */}
-            {showUploader && (
-              <UniversalFileUploader
-                folder="feed"
-                maxFiles={10}
-                maxSizeMB={500}
-                compact
-                onUploaded={files => setAttachedFiles(prev => [...prev, ...files])}
-                onRemoved={file => setAttachedFiles(prev => prev.filter(f => f.path !== file.path))}
-              />
-            )}
-
-
-            {/* Hashtags Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input value={newHashtag} onChange={e => setNewHashtag(e.target.value)} placeholder="Add hashtags (optional)" className="pl-10" onKeyPress={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  if (newHashtag.trim() && postHashtags.length < 10) {
-                    setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
-                    setNewHashtag('');
-                  }
-                }
-              }} />
-                </div>
-                <Button type="button" size="sm" variant="outline" onClick={() => {
-              if (newHashtag.trim() && postHashtags.length < 10) {
-                setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
-                setNewHashtag('');
-              }
-            }}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              {postHashtags.length > 0 && <div className="flex flex-wrap gap-2">
-                  {postHashtags.map((tag, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      #{tag}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => setPostHashtags(postHashtags.filter((_, i) => i !== index))} />
-                    </Badge>)}
-                </div>}
-            </div>
-
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              <div className="flex gap-1 sm:gap-2">
-                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMediaSelect} />
-                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleMediaSelect} />
-                <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
-                  <ImageIcon className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Photo</span>
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => videoInputRef.current?.click()}>
-                  <Video className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Video</span>
-                </Button>
-                <Button variant={showUploader ? 'secondary' : 'ghost'} size="sm" onClick={() => setShowUploader(v => !v)}>
-                  <Paperclip className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Files{attachedFiles.length > 0 ? ` (${attachedFiles.length})` : ''}</span>
-                </Button>
-
-                <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
-                  <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
-                  <span className="hidden sm:inline">Imaginaly</span>
-                </Button>
-              </div>
-              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[0_0_20px_hsl(var(--primary)/0.4)] text-primary-foreground font-bold tracking-widest uppercase text-xs">
-                <Plus className="h-4 w-4 mr-2" />
-                {loading ? 'Transmitting...' : 'Transmit'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        </div>}
-
-
-      {/* Posts Grid — .feed-window lets the browser skip rendering and
-          release image memory for off-screen cards (see index.css);
-          without it a long feed of full-size banners crashes mobile. */}
-      <div className="space-y-4 feed-window">
-        {posts.map((post, index) => {
+  const renderFullPost = (post: FeedPost) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
@@ -1362,9 +1266,303 @@ export default function UnifiedCommunityFeed({
                 onReplySubmit={(parentId, content) => addReply(post.id, parentId, content)}
                 onImageClick={(urls, idx) => openLightbox(urls, idx)}
               />;
-      })}
-        
-        
+  };
+
+  const openPost = openPostId ? posts.find(p => p.id === openPostId) || null : null;
+
+  const netLayout = useMemo(() => buildNetLayout(posts, spotlightIdsRef.current), [posts]);
+
+  const shuffleMix = () => {
+    setPosts(prev => {
+      const mixed = mixFeed(prev, seenRef.current);
+      mixed.forEach(p => seenRef.current.add(p.id));
+      rememberSeenIds(seenRef.current);
+      return mixed;
+    });
+  };
+
+  const bannerSrc = (url?: string | null) => url && url.includes('/storage/v1/object/public/') && !url.includes('?')
+    ? url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=900&quality=75&resize=cover'
+    : url || undefined;
+
+  const tileAuthor = (post: FeedPost) => (
+    <div className="flex items-center gap-1.5 text-[11px] font-semibold min-w-0">
+      <span className="h-5 w-5 shrink-0 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[9px] font-bold overflow-hidden">
+        {post.profiles?.avatar_url ? <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" /> : (post.profiles?.full_name?.charAt(0) || 'U')}
+      </span>
+      <span className="truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
+      <span className="ml-auto shrink-0 font-normal opacity-60">{formatDate(post.created_at)}</span>
+    </div>
+  );
+
+  const tileActions = (post: FeedPost, tone: string) => (
+    <div className={`flex items-center gap-3 pt-2 mt-auto text-[11px] ${tone}`}>
+      <button type="button" aria-label="Like" className={`flex items-center gap-1 hover:opacity-100 ${likedPosts.has(post.id) ? 'text-red-500 opacity-100' : 'opacity-75'}`} onClick={() => toggleLike(post.id)}>
+        <Heart className={`h-3.5 w-3.5 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />{post._count?.post_likes || 0}
+      </button>
+      <button type="button" aria-label="Comments" className="flex items-center gap-1 opacity-75 hover:opacity-100" onClick={() => { if (!expandedComments.has(post.id)) toggleComments(post.id); setOpenPostId(post.id); }}>
+        <MessageCircle className="h-3.5 w-3.5" />{post._count?.post_comments || 0}
+      </button>
+      <button type="button" aria-label="Share" className="flex items-center gap-1 opacity-75 hover:opacity-100" onClick={() => sharePost(post.id, false)}>
+        <Share className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" aria-label="Bookmark" className={`ml-auto flex items-center opacity-75 hover:opacity-100 ${bookmarkedPosts.has(post.id) ? 'text-primary opacity-100' : ''}`} onClick={() => toggleBookmark(post.id)}>
+        <Bookmark className={`h-3.5 w-3.5 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
+      </button>
+    </div>
+  );
+
+  const TYPE_LABEL: Record<string, string> = {
+    event: 'EVENT', live_room: 'LIVE ROOM', cohort: 'COHORT',
+    journey_completion: 'JOURNEY', announcement: 'ANNOUNCEMENT', update: 'UPDATE',
+  };
+
+  const renderTile = (entry: NetTile<FeedPost>) => {
+    const post = entry.post;
+    const videoUrl = postVideoUrl(post);
+    const imageUrl = postImageUrl(post);
+    const onTileClick = (e: ReactMouseEvent) => {
+      if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
+      setOpenPostId(post.id);
+    };
+    const shell = 'group relative flex flex-col overflow-hidden rounded-lg border cursor-pointer min-h-0';
+
+    if (videoUrl) {
+      return <article key={post.id} onClick={onTileClick} className={`${shell} border-border bg-black text-white ${entry.className}`}>
+        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute top-2 left-2 z-[2] flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold backdrop-blur-sm pointer-events-none">
+          <span className="h-4 w-4 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[8px] font-bold overflow-hidden">
+            {post.profiles?.avatar_url ? <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" /> : (post.profiles?.full_name?.charAt(0) || 'U')}
+          </span>
+          <span className="max-w-[120px] truncate">{post.profiles?.full_name || 'Anonymous User'}</span>
+        </div>
+        <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug pointer-events-none">
+          <p className="line-clamp-2">{post.content}</p>
+          <p className="mt-1 opacity-80">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</p>
+        </div>
+      </article>;
+    }
+
+    if (post.post_type === 'event' && post.event_data) {
+      const ev = post.event_data;
+      const startLabel = new Date(ev.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + new Date(ev.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return <article key={post.id} onClick={onTileClick} className={`${shell} tech-card border-0 ${entry.className}`}>
+        {ev.banner_url
+          ? <img src={bannerSrc(ev.banner_url)} onError={e => { const img = e.currentTarget; if (ev.banner_url && img.src !== ev.banner_url) img.src = ev.banner_url; }} alt="" loading="lazy" decoding="async" className="w-full flex-1 min-h-[72px] object-cover" />
+          : <div className="w-full flex-1 min-h-[72px] bg-gradient-primary" />}
+        <div className="flex flex-col gap-0.5 p-2.5">
+          {tileAuthor(post)}
+          <h4 className={`font-semibold leading-snug ${entry.small ? 'text-xs line-clamp-1' : 'text-[13px] line-clamp-2'}`}>{ev.title}</h4>
+          {!entry.small && <>
+            <p className="text-[11px] font-medium text-blue-500">{startLabel}{ev.is_virtual ? ' · Virtual' : ev.location ? ` · ${ev.location}` : ''}</p>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] font-bold text-blue-500">Register →</span>
+              <span className="text-[11px] text-muted-foreground">♥ {post._count?.post_likes || 0} · 💬 {post._count?.post_comments || 0}</span>
+            </div>
+          </>}
+        </div>
+      </article>;
+    }
+
+    const theme =
+      post.post_type === 'live_room' ? 'border-red-500/50 text-rose-50 bg-[linear-gradient(150deg,#4a1220,hsl(222_40%_13%))]' :
+      post.post_type === 'cohort' ? 'border-fuchsia-500/40 text-white bg-[linear-gradient(135deg,hsl(280_65%_21%/0.94),hsl(190_70%_15%/0.92))]' :
+      post.post_type === 'journey_completion' ? 'border-yellow-400/70 text-amber-50 bg-[linear-gradient(135deg,hsl(45_85%_18%/0.95),hsl(330_70%_16%/0.93))]' :
+      post.post_type === 'announcement' ? 'border-primary/40 bg-[linear-gradient(135deg,hsl(160_84%_42%/0.28),hsl(180_95%_50%/0.12))]' :
+      'tech-card border-0';
+    const tone = ['live_room', 'cohort', 'journey_completion'].includes(post.post_type) ? 'text-white/70' : 'text-muted-foreground';
+    const label = TYPE_LABEL[post.post_type] || (imageUrl ? 'PHOTO' : 'UPDATE');
+
+    return <article key={post.id} onClick={onTileClick} className={`${shell} ${theme} ${entry.className}`}>
+      {imageUrl && !entry.small ? <img src={imageUrl} alt="" loading="lazy" decoding="async" className="w-full flex-1 min-h-[64px] object-cover" /> : null}
+      <div className="flex flex-1 flex-col p-2.5 min-h-0">
+        {tileAuthor(post)}
+        <span className="mt-1.5 self-start rounded bg-primary/15 border border-primary/30 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-primary">
+          {post.post_type === 'live_room' ? '● LIVE ROOM' : label}
+        </span>
+        {post.post_type === 'live_room' && (post as any).room_data?.room_name
+          ? <p className="mt-1 text-[13px] font-semibold leading-snug line-clamp-2">{(post as any).room_data.room_name}</p>
+          : null}
+        <p className={`mt-1 text-[12.5px] leading-relaxed ${entry.small ? 'line-clamp-3' : 'line-clamp-[6]'}`}>{post.content}</p>
+        {tileActions(post, tone)}
+      </div>
+    </article>;
+  };
+
+  const renderSpotlight = (post: FeedPost) => {
+    const videoUrl = postVideoUrl(post);
+    const banner = post.post_type === 'event' ? post.event_data?.banner_url : undefined;
+    const img = banner || postImageUrl(post);
+    const onTileClick = (e: ReactMouseEvent) => {
+      if ((e.target as HTMLElement).closest('button, a, video, input, textarea, select')) return;
+      setOpenPostId(post.id);
+    };
+    return <article key={post.id} onClick={onTileClick} className="flex cursor-pointer overflow-hidden rounded-lg border border-primary/40 bg-[linear-gradient(180deg,hsl(165_84%_40%/0.18),hsl(212_45%_14%/0.35))] shadow-[0_0_38px_hsl(170_90%_45%/0.18)] min-h-[180px]">
+      {videoUrl
+        ? <video src={videoUrl} controls preload="metadata" playsInline className="w-2/5 shrink-0 object-cover" />
+        : img
+          ? <img src={banner ? bannerSrc(banner) : img} alt="" loading="lazy" className="w-2/5 shrink-0 object-cover" />
+          : <div className="w-2/5 shrink-0 bg-gradient-primary" />}
+      <div className="flex min-w-0 flex-1 flex-col p-3.5">
+        <span className="self-start rounded-full bg-gradient-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-primary-foreground">★ Spotlight</span>
+        <div className="mt-2">{tileAuthor(post)}</div>
+        {post.post_type === 'event' && post.event_data
+          ? <>
+              <h4 className="mt-1 text-[15px] font-bold leading-snug line-clamp-2">{post.event_data.title}</h4>
+              <p className="text-[11px] font-medium text-blue-500">{new Date(post.event_data.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+            </>
+          : <p className="mt-1 text-sm leading-relaxed line-clamp-4">{post.content}</p>}
+        {tileActions(post, 'text-muted-foreground')}
+      </div>
+    </article>;
+  };
+
+  return <div className="space-y-4 sm:space-y-6">
+      {membershipDialog}
+
+      {/* Shorts Carousel */}
+      <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
+
+      {/* Community Districts interstitial */}
+      {interstitialContent}
+
+      {/* Create Post */}
+      {showCreatePost && <div className="relative group">
+          <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-sm opacity-60 group-focus-within:opacity-100 transition duration-500 pointer-events-none" />
+          <Card data-tour="composer" className="relative tech-card border-0 backdrop-blur-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 h-px w-24 bg-gradient-to-r from-primary/80 to-transparent" />
+            <div className="absolute bottom-0 right-0 h-px w-24 bg-gradient-to-l from-accent/80 to-transparent" />
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+              <div className="flex items-center space-x-2">
+                <span>Post about your Journey or Opportunities&nbsp;</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />
+                Uplink · Active
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl pr-12" />
+              <VoiceMicButton onText={(t) => setNewPost((cur) => (cur.trim() ? `${cur.trim()} ${t}` : t))} className="absolute right-2 bottom-2 h-9 w-9 bg-background/70" />
+            </div>
+
+            
+            {/* Media Preview */}
+            {mediaPreview.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {mediaPreview.map((preview, index) => <div key={index} className="relative group">
+                    {mediaFiles[index].type.startsWith('video/') ? <video src={preview} className="w-full h-24 sm:h-32 object-cover rounded-lg" /> : <img src={preview} alt={`Preview ${index}`} className="w-full h-24 sm:h-32 object-cover rounded-lg" />}
+                    <Button variant="destructive" size="sm" className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeMedia(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>)}
+              </div>}
+
+            {/* Universal file uploader — any file type (3D/AR, docs, data, media) */}
+            {showUploader && (
+              <UniversalFileUploader
+                folder="feed"
+                maxFiles={10}
+                maxSizeMB={500}
+                compact
+                onUploaded={files => setAttachedFiles(prev => [...prev, ...files])}
+                onRemoved={file => setAttachedFiles(prev => prev.filter(f => f.path !== file.path))}
+              />
+            )}
+
+
+            {/* Hashtags Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input value={newHashtag} onChange={e => setNewHashtag(e.target.value)} placeholder="Add hashtags (optional)" className="pl-10" onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (newHashtag.trim() && postHashtags.length < 10) {
+                    setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                    setNewHashtag('');
+                  }
+                }
+              }} />
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={() => {
+              if (newHashtag.trim() && postHashtags.length < 10) {
+                setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                setNewHashtag('');
+              }
+            }}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {postHashtags.length > 0 && <div className="flex flex-wrap gap-2">
+                  {postHashtags.map((tag, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      #{tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setPostHashtags(postHashtags.filter((_, i) => i !== index))} />
+                    </Badge>)}
+                </div>}
+            </div>
+
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <div className="flex gap-1 sm:gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMediaSelect} />
+                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleMediaSelect} />
+                <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <ImageIcon className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Photo</span>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => videoInputRef.current?.click()}>
+                  <Video className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Video</span>
+                </Button>
+                <Button variant={showUploader ? 'secondary' : 'ghost'} size="sm" onClick={() => setShowUploader(v => !v)}>
+                  <Paperclip className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Files{attachedFiles.length > 0 ? ` (${attachedFiles.length})` : ''}</span>
+                </Button>
+
+                <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
+                  <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
+                  <span className="hidden sm:inline">Imaginaly</span>
+                </Button>
+              </div>
+              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[0_0_20px_hsl(var(--primary)/0.4)] text-primary-foreground font-bold tracking-widest uppercase text-xs">
+                <Plus className="h-4 w-4 mr-2" />
+                {loading ? 'Transmitting...' : 'Transmit'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        </div>}
+
+
+      {/* Posts Grid — .feed-window lets the browser skip rendering and
+          release image memory for off-screen cards (see index.css);
+          without it a long feed of full-size banners crashes mobile. */}
+      {/* Square-net mosaic — the mixed stream pours into repeating
+          square blocks (see src/lib/feedMix.ts). Tiles are compact;
+          the full post opens in a dialog. feed-window keeps off-screen
+          rendering and image memory cheap on long feeds. */}
+      <div className="feed-window space-y-1.5">
+        <div className="flex items-center justify-between pb-1">
+          <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+            Network mix · last {FEED_WINDOW_DAYS} days
+          </span>
+          <Button variant="ghost" size="sm" onClick={shuffleMix} className="text-muted-foreground hover:text-primary">
+            <Shuffle className="h-4 w-4 mr-1.5" />
+            Shuffle
+          </Button>
+        </div>
+        {netLayout.leadSpotlights.map(post => <div key={`lead-${post.id}`} className="contents">{renderSpotlight(post)}</div>)}
+        {netLayout.blocks.map((block, bi) => <div key={bi} className="contents">
+            <div className={block.dense
+              ? 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 [grid-auto-flow:dense]'
+              : 'grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:[grid-template-rows:repeat(4,minmax(0,1fr))] sm:aspect-[6/4]'}>
+              {block.tiles.map(entry => renderTile(entry))}
+            </div>
+            {netLayout.spotAfter.get(bi) && renderSpotlight(netLayout.spotAfter.get(bi)!)}
+          </div>)}
         {/* Infinite Scroll Trigger */}
         {hasMore && posts.length > 0 && <div ref={loadMoreRef} className="py-8 flex justify-center">
             {loadingMore && <div className="flex items-center gap-2 text-muted-foreground">
@@ -1372,7 +1570,6 @@ export default function UnifiedCommunityFeed({
                 <span>Loading more posts...</span>
               </div>}
           </div>}
-        
         {!hasMore && posts.length > 0 && <div className="text-center py-8 text-muted-foreground">
             <p>You've reached the end of the feed</p>
           </div>}
@@ -1383,6 +1580,13 @@ export default function UnifiedCommunityFeed({
           <h3 className="text-lg sm:text-xl font-semibold mb-2">No posts yet</h3>
           <p className="text-sm sm:text-base text-muted-foreground">Be the first to share your startup journey!</p>
         </Card>}
+
+      {/* Full post — opened from a mosaic tile */}
+      <Dialog open={!!openPost} onOpenChange={o => { if (!o) setOpenPostId(null); }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-3 sm:p-4">
+          {openPost && renderFullPost(openPost)}
+        </DialogContent>
+      </Dialog>
 
       {/* Shorts Creator Modal */}
       <ShortsCreator isOpen={isCreatorOpen} onClose={() => setIsCreatorOpen(false)} onSave={handleSaveShort} />
