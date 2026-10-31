@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Shuffle, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn, Wand2, Loader2 } from 'lucide-react';
+import { Heart, MessageCircle, Share, Shuffle, Plus, Play, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn, Wand2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import ShortsCreator from '@/components/ShortsCreator';
+import ShortsViewer from '@/components/ShortsViewer';
 import GuestPrompt from '@/components/GuestPrompt';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import OfficialBadge from './OfficialBadge';
@@ -104,6 +105,7 @@ export default function UnifiedCommunityFeed({
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [openPostId, setOpenPostId] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [reelViewer, setReelViewer] = useState<{ open: boolean; index: number }>({ open: false, index: 0 });
   const [wallCohorts, setWallCohorts] = useState<any[]>([]);
   const seenRef = useRef<Set<string>>(loadSeenIds());
   useEffect(() => {
@@ -1322,6 +1324,16 @@ export default function UnifiedCommunityFeed({
 
   const openPost = openPostId ? posts.find(p => p.id === openPostId) || null : null;
 
+  const reelShorts = useMemo(() => posts.filter(p => p.post_type === 'short').map(p => ({
+    id: p.id,
+    video_url: postVideoUrl(p) || '',
+    content: p.content || '',
+    user_id: p.user_id,
+    profiles: p.profiles ? { full_name: p.profiles.full_name, avatar_url: p.profiles.avatar_url } : undefined,
+    likes_count: (p as any).likes_count ?? p._count?.post_likes ?? 0,
+    comments_count: (p as any).comments_count ?? p._count?.post_comments ?? 0,
+    created_at: p.created_at,
+  })).filter(sh => sh.video_url), [posts]);
   const wallEntries = useMemo(() => {
     const firmPartners: WallPartner[] = FIRMS.map(f => ({ kind: 'firm', id: `firm-${f.id}`, data: f }));
     const cohortPartners: WallPartner[] = wallCohorts.map(c => ({ kind: 'cohort', id: `cohort-${c.id}`, data: c }));
@@ -1448,9 +1460,17 @@ export default function UnifiedCommunityFeed({
     );
 
     // Reel — full-bleed portrait video, always the same 1x2 size.
+    // Clicking opens the ShortsViewer, exactly as it did from the carousel.
     if (videoUrl && post.post_type === 'short') {
-      return <article key={post.id} onClick={onTileClick} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
-        <video src={videoUrl} controls preload="metadata" playsInline className="absolute inset-0 h-full w-full object-cover" />
+      const openReel = () => {
+        const idx = reelShorts.findIndex(sh => sh.id === post.id);
+        setReelViewer({ open: true, index: idx >= 0 ? idx : 0 });
+      };
+      return <article key={post.id} onClick={openReel} className={`${shell} flex-col border-border bg-black text-white ${spanCls}`}>
+        <video src={videoUrl} preload="metadata" playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+        <span className="absolute left-1/2 top-1/2 z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition group-hover:scale-110">
+          <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
+        </span>
         {authorChip}
         <span className="absolute right-2 top-2 z-[2] rounded bg-red-500/85 px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.14em] text-white">REEL</span>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-[11px] leading-snug">
@@ -1732,6 +1752,9 @@ export default function UnifiedCommunityFeed({
 
       {/* Shorts Creator Modal */}
       <ShortsCreator isOpen={isCreatorOpen} onClose={() => setIsCreatorOpen(false)} onSave={handleSaveShort} />
+
+      {/* Reel viewer — the original full-screen shorts player */}
+      <ShortsViewer shorts={reelShorts} initialIndex={reelViewer.index} open={reelViewer.open} onOpenChange={o => setReelViewer(v => ({ ...v, open: o }))} />
 
       {/* User Profile Dialog */}
       <UserProfileDialog userId={selectedUserId} open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen} />
