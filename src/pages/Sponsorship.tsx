@@ -183,7 +183,7 @@ const TIERS: Tier[] = [
   { id: "earthling", name: "EARTHLING", icon: Globe, tagline: "The entry into the Circle", essence: "For organizations beginning their presence inside the ecosystem — seen, listed, and welcomed into the room.", accent: "border-emerald-300/40 text-emerald-200", dot: "bg-emerald-300", includes: ["Recognition across SFH communications", "Logo placement in the Earthling tier on the SFH website", "Welcome moment on LinkedIn and in community updates", "Access to selected virtual accelerator events", "Offer perks, credits or tools directly to founders", "Listing in the platform and the Partner Resource Hub"] },
   { id: "star", name: "STAR", icon: Star, tagline: "Presence with a voice", essence: "For organizations ready to be heard — elevated placement, a stage for your experts, and curated founder access.", accent: "border-amber-200/40 text-amber-100", dot: "bg-amber-200", includes: ["Elevated logo position and event recognition", "Monthly ecosystem spotlight in the SFH newsletter", "Host a workshop, AMA or technical talk", "Invitations to networking in New York, San Francisco, Orlando, Santiago and Tokyo", "Curated scouting reports and early deal-flow previews", "Feature interview inside the SFH Media Hub"] },
   { id: "nebula", name: "NEBULA", icon: Sparkles, tagline: "Deep engagement, real pilots", essence: "For companies seeking integration — guaranteed speaking, structured matching, and premium placement inside the platform itself.", accent: "border-violet-300/40 text-violet-200", dot: "bg-violet-300", includes: ["Premium visibility across website, platform, cohorts and Demo Day", "Guaranteed speaking at a flagship SFH event", "Co-branded SFH x Sponsor campaign", "Full access to all global networking events", "Structured 1:1 startup matching sessions", "Presenting rotation across the daily Top 10 and the weekly video", "A dedicated sponsor page inside the platform, with your offer in founder journeys"] },
-  { id: "galaxy", name: "GALAXY", icon: Award, tagline: "The strategic partnership", essence: "The highest circle — premier placement everywhere, keynote voice, private dinners, and technology woven into the platform itself.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Premier placement across website, all major events, summits and PR", "Joint global PR announcement across SFH hubs", "Keynote-level speaking at the Global Summit and Demo Day", "Lead program sponsor — Accelerated Fundraising and the year's flagship moments (Programs are Galaxy-only)", "Private investor-startup dinners and priority deal-flow introductions", "Your own Live Video sponsor room, a platform sponsor page, and a founder-engagement report"] },
+  { id: "galaxy", name: "GALAXY", icon: Award, tagline: "The strategic partnership", essence: "The highest circle — premier placement everywhere, keynote voice, private dinners, and technology woven into the platform itself.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Premier placement across website, all major events, summits and PR", "Joint global PR announcement across SFH hubs", "Keynote-level speaking at the Global Summit and Demo Day", "Presenting partner across every placement, all year — Top 10, weekly video, social, newsletter and platform", "Private investor-startup dinners and priority deal-flow introductions", "Your own Live Video sponsor room, a platform sponsor page, and a founder-engagement report"] },
 ];
 const SERIES = [
   { name: "Pitch Events", count: 24, cadence: "Twice monthly", note: "Founders on stage, investors in the room", glow: "rgba(52,211,153,0.5)" },
@@ -196,7 +196,7 @@ const PILLARS = [
   { code: "VIS", icon: Eye, title: "Visibility, with taste", body: "Your brand across the platform, the events and the materials — placed elegantly, never pasted on.", detail: ["Platform + event placement", "Cohort & Demo Day materials", "Media Hub features"], glow: "rgba(52,211,153,0.55)" },
   { code: "VOX", icon: Presentation, title: "A voice in the room", body: "Keynotes, panels, workshops and fireside chats in front of founders who are actively building.", detail: ["Keynote & panel slots", "Workshops & AMAs", "Co-branded firesides"], glow: "rgba(232,201,135,0.55)" },
   { code: "ACC", icon: Handshake, title: "Curated access", body: "Structured introductions, matching sessions and private dinners — not a logo wall and a hope.", detail: ["1:1 matching sessions", "Private dinners", "Deal-flow previews"], glow: "rgba(34,211,238,0.5)" },
-  { code: "PLT", icon: Zap, title: "Inside the platform", body: "Your tools, credits and pilots offered to founders at the exact moment in their journey when they need them.", detail: ["Perks & credits in-journey", "Pilot programs", "Engagement analytics"], glow: "rgba(167,139,250,0.5)" },
+  { code: "PLT", icon: Zap, title: "Inside the platform", body: "Your tools and offers placed in front of founders at the exact moment in their journey when they need them.", detail: ["Perks directory listing", "Globe + journey placement", "Founder-engagement report"], glow: "rgba(167,139,250,0.5)" },
 ];
 const HUBS = ["New York", "San Francisco", "Orlando · HQ", "Santiago, Chile", "Tokyo, Japan"];
 const MARQUEE = ["Pitch Events", "Reverse Pitch", "Innovation Coffee Table", "Accelerators Networking", "Hot Deals in Space", "Demo Day", "Global Summit"];
@@ -385,26 +385,27 @@ const Sponsorship = () => {
           </div>
         </section>
 
-                {/* ── FOUR WAYS IN · P1–P4 ───────────────────────── */}
+                        {/* ── MARKETING PLACEMENTS ───────────────────────── */}
         <section className="px-5 sm:px-8 py-24 border-t border-white/[0.06]">
           <div className="max-w-6xl mx-auto">
             <div className="text-center max-w-2xl mx-auto">
-              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">What Sponsorship Buys Today</p>
-              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">Four ways in. One circle.</h2>
-              <p className="mt-4 text-emerald-100/55">Every product below is a real surface of Startup Factory Hub today — the circles combine them by altitude.</p>
+              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">Platform Marketing Placements</p>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">The placements. Plus the events. That is the offer.</h2>
+              <p className="mt-4 text-emerald-100/55">Every placement below is live on Startup Factory Hub today. Sponsors take their place inside them, and inside the 66-event year.</p>
             </div>
             <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { n: "P1", t: "Event Rooms", b: "The 66 rooms of the year, live inside SFH Live Video — stage moments, banners on every asset, and placement across registration and confirmation.", tag: "Every circle, by altitude", gold: false },
-                { n: "P2", t: "Distribution", b: "Our daily engine: the LinkedIn Top 10, the weekly video, and five daily posts across Instagram, X and Facebook — presenting rotations for sponsors.", tag: "Star and above", gold: false },
-                { n: "P3", t: "In-Platform", b: "A labeled place inside the product itself: the resources globe, founder journeys, and an upgraded perks listing where founders actually work.", tag: "Every circle", gold: false },
-                { n: "P4", t: "Programs", b: "Lead sponsor of a living program: the Accelerated Fundraising sprint, Hot Deals in Space, Demo Day and the Global Summit.", tag: "Galaxy only", gold: true },
+                { t: "The Daily Top 10", b: "Our LinkedIn list series, published every day with its banner. Sponsors take the presenting rotation.", tag: "LINKEDIN · DAILY" },
+                { t: "The Weekly Video", b: "A new SFH video every Wednesday on LinkedIn and Facebook, animated in the living-orb style. Presenting credit for sponsors.", tag: "VIDEO · WEEKLY" },
+                { t: "Social Spotlights", b: "Five posts a day across Instagram, X and Facebook from our Marketing engine. Dedicated spotlight posts for sponsors.", tag: "SOCIAL · 5 A DAY" },
+                { t: "Member Newsletter", b: "The monthly newsletter to the platform's members. A sponsor spotlight in every edition.", tag: "EMAIL · MONTHLY" },
+                { t: "Perks Directory", b: "Your offer listed in the partner perks directory, where members claim the tools they run on.", tag: "IN PLATFORM" },
+                { t: "Resources Globe", b: "A labeled pin on the global resources globe, alongside 545 mapped resources founders navigate by.", tag: "IN PLATFORM" },
+                { t: "Founder Journeys", b: "Your offer placed inside founder journeys, surfacing at the stage where a founder needs it.", tag: "IN PLATFORM" },
+                { t: "Sponsor Page", b: "Your own page inside the platform: your story, your offer, your rooms, kept current all year.", tag: "IN PLATFORM" },
               ].map((w) => (
-                <div key={w.n} className={`relative overflow-hidden rounded-3xl border p-7 transition-all duration-500 hover:-translate-y-1 ${w.gold ? "border-[#e8c987]/40 bg-gradient-to-b from-[#e8c987]/[0.08] to-white/[0.015] shadow-[0_24px_60px_-30px_rgba(232,201,135,0.45)]" : "border-white/[0.09] bg-[#061a11]/80"}`}>
-                  <div className="flex items-baseline justify-between">
-                    <span className={`font-mono text-sm tracking-[0.2em] ${w.gold ? "text-[#e8c987]" : "text-emerald-300/70"}`}>{w.n}</span>
-                    <span className={`font-mono text-[9px] tracking-[0.18em] uppercase rounded-full border px-2.5 py-1 ${w.gold ? "border-[#e8c987]/50 text-[#e8c987]" : "border-white/10 text-emerald-100/45"}`}>{w.tag}</span>
-                  </div>
+                <div key={w.t} className="relative overflow-hidden rounded-3xl border border-white/[0.09] bg-[#061a11]/80 p-7 transition-all duration-500 hover:-translate-y-1">
+                  <span className="font-mono text-[9px] tracking-[0.18em] uppercase rounded-full border border-white/10 px-2.5 py-1 text-emerald-100/45">{w.tag}</span>
                   <h3 className="mt-5 text-xl font-semibold text-white">{w.t}</h3>
                   <p className="mt-2.5 text-sm leading-relaxed text-emerald-100/55">{w.b}</p>
                 </div>
