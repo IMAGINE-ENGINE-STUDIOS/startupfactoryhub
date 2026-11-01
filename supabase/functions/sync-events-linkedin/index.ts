@@ -18,8 +18,7 @@ const json = (body: unknown, status = 200) =>
 const SITE_URL = 'https://startupfactoryhub.com'
 
 function buildTrackedUrl(eventId: string) {
-  const url = new URL(`${SITE_URL}/events`)
-  url.searchParams.set('event', eventId)
+  const url = new URL(`${SITE_URL}/events/${eventId}/register`)
   url.searchParams.set('utm_source', 'linkedin')
   url.searchParams.set('utm_medium', 'social')
   url.searchParams.set('utm_campaign', 'events_auto')
