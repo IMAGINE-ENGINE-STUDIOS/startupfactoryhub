@@ -53,6 +53,7 @@ import GuestPrompt from '@/components/GuestPrompt';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
 import MeetingsHubHeader from '@/components/MeetingsHubHeader';
+import MeetingsConsole from '@/components/MeetingsConsole';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -631,10 +632,8 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-4">
-              <MeetingsHubHeader
-                subtitle="Pitches, mentoring & live rooms — orchestrated in one stream."
-                action={
-                  <DropdownMenu>
+              <MeetingsConsole subtitle="Pitches, mentoring & live rooms — orchestrated in one stream." icon={Presentation} action={
+<DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" className="gap-1.5 h-9">
                         <Plus className="h-3.5 w-3.5" />
@@ -676,17 +675,8 @@ const Dashboard = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                }
-              />
-
-              <BookingsList variant="requests" />
-
-              <LiveRooms />
-
-              {/* Districts hidden from users for now — work on them at /districts-lab */}
-
-              {/* Top-level section toggle: Pitches vs Mentorship */}
-              <MeetingsTwoLane
+              }>
+<MeetingsTwoLane
                 pitches={
                   <div className="space-y-4">
                     <BookingsList variant="scheduled" category="pitch" title="Booked Pitch Meetings" />
@@ -712,7 +702,7 @@ const Dashboard = () => {
                   </div>
                 }
               />
-
+              </MeetingsConsole>
             </TabsContent>
           )}
 

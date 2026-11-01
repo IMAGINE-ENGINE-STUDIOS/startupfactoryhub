@@ -39,6 +39,7 @@ import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardTabsNav } from "@/components/DashboardTabsNav";
 import MeetingsHubHeader from "@/components/MeetingsHubHeader";
+import MeetingsConsole from '@/components/MeetingsConsole';
 import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
@@ -139,18 +140,13 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
-            <MeetingsHubHeader
-              subtitle="Sessions, mentees & live rooms — all in one place."
-              action={
-                <Button size="sm" onClick={() => setCreateSessionDialogOpen(true)} className="gap-1.5 h-9">
+            <MeetingsConsole subtitle="Sessions, mentees & live rooms — all in one place." action={
+<Button size="sm" onClick={() => setCreateSessionDialogOpen(true)} className="gap-1.5 h-9">
                   <Plus className="h-3.5 w-3.5" />
                   Schedule
                 </Button>
-              }
-            />
-            <LiveRooms />
-
-            {todaySessions.length > 0 && (
+            }>
+{todaySessions.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Today</p>
                 {todaySessions.map((session: any) => (
@@ -216,6 +212,7 @@ const MentorDashboard = () => {
                 ) : undefined
               }
             />
+            </MeetingsConsole>
           </TabsContent>
 
 

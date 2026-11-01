@@ -46,6 +46,7 @@ import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
 import MeetingsHubHeader from '@/components/MeetingsHubHeader';
+import MeetingsConsole from '@/components/MeetingsConsole';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 
@@ -439,22 +440,13 @@ const AcceleratorDashboard = () => {
 
           {/* Meetings Tab - Simplified chip-row layout */}
           <TabsContent value="meetings" className="space-y-4">
-            <MeetingsHubHeader
-              subtitle="Pitches with startups & investors."
-              icon={Presentation}
-              action={
-                <Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9">
+            <MeetingsConsole subtitle="Pitches with startups & investors." icon={Presentation} action={
+<Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9">
                   <Plus className="h-3.5 w-3.5" />
                   Schedule
                 </Button>
-              }
-            />
-
-            <BookingsList variant="requests" />
-
-            <LiveRooms />
-
-            <MeetingsTwoLane
+            }>
+<MeetingsTwoLane
               labels={{ pitches: 'Startup Pitches', mentorship: 'Investor Meetings' }}
               icons={{ pitches: 'startups', mentorship: 'investors' }}
               pitches={
@@ -480,7 +472,7 @@ const AcceleratorDashboard = () => {
                 </div>
               }
             />
-
+            </MeetingsConsole>
           </TabsContent>
 
           {/* Jobs Tab */}
