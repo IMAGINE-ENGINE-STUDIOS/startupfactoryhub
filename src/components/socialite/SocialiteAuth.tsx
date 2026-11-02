@@ -32,18 +32,18 @@ export function SocialiteAuth() {
     setBusy(false);
   };
 
-  const inp = "w-full bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] text-zinc-100 outline-none focus:border-zinc-600";
+  const inp = "w-full bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] text-zinc-100 outline-none focus:border-cyan-400/30";
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-zinc-100 grid place-items-center px-4">
+    <div className="min-h-screen bg-[#04140f] text-zinc-100 grid place-items-center px-4">
       <div className="w-full max-w-[380px]">
         <div className="text-center mb-8">
           <div className="text-[26px] font-semibold tracking-tight">SOCIALITE</div>
-          <p className="text-[13px] text-zinc-500 mt-1">by Startup Factory Hub · your Startup Factory Hub account works here</p>
+          <p className="text-[13px] text-[#4E7A73] mt-1">by Startup Factory Hub · your Startup Factory Hub account works here</p>
         </div>
-        <div className="flex p-1 rounded-full bg-zinc-900 mb-5">
+        <div className="flex p-1 rounded-full bg-white/[0.03] mb-5">
           {(["in", "up"] as const).map((m) => (
             <button key={m} onClick={() => { setMode(m); setMsg(""); }}
-              className={`flex-1 py-2 rounded-full text-[12.5px] font-medium transition ${mode === m ? "bg-white text-black" : "text-zinc-400"}`}>
+              className={`flex-1 py-2 rounded-full text-[12.5px] font-medium transition ${mode === m ? "bg-white text-black" : "text-white/55"}`}>
               {m === "in" ? "Sign in" : "Create account"}
             </button>
           ))}
@@ -57,7 +57,7 @@ export function SocialiteAuth() {
           )}
           <input required type="email" autoComplete="email" placeholder="Email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} className={inp} />
           <input required type="password" autoComplete={mode === "in" ? "current-password" : "new-password"} placeholder="Password" value={f.pass} onChange={(e) => setF({ ...f, pass: e.target.value })} className={inp} />
-          {msg && <p className="text-[12px] text-zinc-400">{msg}</p>}
+          {msg && <p className="text-[12px] text-white/55">{msg}</p>}
           <button disabled={busy} className="w-full py-2.5 rounded-full bg-white text-black text-[13px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />}{mode === "in" ? "Sign in" : "Create account"}
           </button>
@@ -70,7 +70,7 @@ export function SocialiteAuth() {
 /** Signed out → SocialiteAuth. Signed in → children (any Startup Factory Hub account). */
 export function SocialiteGate({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-[#0a0a0b] grid place-items-center"><Loader2 className="w-6 h-6 animate-spin text-zinc-500" /></div>;
+  if (loading) return <div className="min-h-screen bg-[#04140f] grid place-items-center"><Loader2 className="w-6 h-6 animate-spin text-[#4E7A73]" /></div>;
   if (!user) return <SocialiteAuth />;
   return <>{children}</>;
 }

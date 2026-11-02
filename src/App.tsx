@@ -68,7 +68,6 @@ const ImagineEngine = lazy(() => import("./pages/ImagineEngine"));
 const ImagineEngineAdmin = lazy(() => import("./pages/ImagineEngineAdmin"));
 const DemoAccounts = lazy(() => import("./pages/DemoAccounts"));
 const LiveVideo = lazy(() => import("./pages/LiveVideo"));
-const Socialite = lazy(() => import("./pages/Socialite"));
 const AcceleratedFundraising = lazy(() => import("./pages/AcceleratedFundraising"));
 const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
 const MembersClub = lazy(() => import("./pages/MembersClub"));
@@ -223,7 +222,10 @@ const App = () => (
                     <Route path="/imagine-engine" element={<ImagineEngine />} />
                     <Route path="/demo" element={<DemoAccounts />} />
                     <Route path="/live-video" element={<LiveVideo />} />
-                    <Route path="/socialite" element={<Socialite />} />
+                    {/* Unified Marketing tool (founder 2026-11-01): Socialite lives
+                        inside the admin Marketing Command Center (AutoPostingHub).
+                        /socialite points at that same single surface — no second copy. */}
+                    <Route path="/socialite" element={<Navigate to="/admin?tab=marketing" replace />} />
                     <Route path="/accelerated-fundraising" element={<AcceleratedFundraising />} />
                    <Route path="/linkedin/return" element={<LinkedInReturn />} />
                     <Route path="/emails" element={<EmailTemplates />} />

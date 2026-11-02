@@ -10,12 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const KINDS: { id: string; label: string; hint: string }[] = [
   { id: "face", label: "Face", hint: "Who is this? e.g. Khalia, founder — always smiling" },
-  { id: "scenario", label: "Scenario", hint: "Describe the setting, e.g. Our showroom backyard at golden hour" },
+  { id: "scenario", label: "Scenario", hint: "Describe the setting, e.g. Our Orlando hub during a founder workshop" },
   { id: "wording", label: "Wording", hint: "Phrases, tone or sign-offs to use" },
   { id: "prohibited_words", label: "Banned words", hint: "Words or phrases Genius must never use" },
   { id: "prohibited_imagery", label: "Banned imagery", hint: "Things Genius must never show" },
   { id: "pitch", label: "Pitch", hint: "Your pitch, word for word" },
-  { id: "logic", label: "Logic", hint: "A rule, e.g. Always mention free consultation for offers over $5k" },
+  { id: "logic", label: "Logic", hint: "A rule, e.g. Always mention the application deadline in cohort posts" },
   { id: "pipeline", label: "Pipeline", hint: "Steps to follow, one per line" },
   { id: "note", label: "Note", hint: "Anything else to remember" },
 ];
@@ -81,44 +81,44 @@ export default function SocialiteKnowledge() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-[18px] border border-zinc-800 bg-[#161617] p-5 space-y-3">
-        <div className="text-[13px] text-zinc-300">Teach Genius something to remember. Everything switched on is used in every post, picture and campaign.</div>
+      <div className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5 space-y-3">
+        <div className="text-[13px] text-[#E6FFFA]">Teach Genius something to remember. Everything switched on is used in every post, picture and campaign.</div>
         <div className="flex flex-wrap gap-2">
-          {KINDS.map((x) => <button key={x.id} onClick={() => setKind(x.id)} className={`px-3 py-1 rounded-full text-[11.5px] border ${kind === x.id ? "bg-white text-black border-white" : "border-zinc-800 text-zinc-400 hover:text-zinc-100"}`}>{x.label}</button>)}
+          {KINDS.map((x) => <button key={x.id} onClick={() => setKind(x.id)} className={`px-3 py-1 rounded-full text-[11.5px] border ${kind === x.id ? "bg-white text-black border-white" : "border-cyan-400/15 text-white/55 hover:text-zinc-100"}`}>{x.label}</button>)}
         </div>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Name it, e.g. Khalia's face" className="w-full bg-[#0f0f10] border border-zinc-800 rounded-[12px] px-3 py-2 text-[13px] text-zinc-100 outline-none focus:border-zinc-600" />
-        <textarea rows={3} value={content} onChange={(e) => setContent(e.target.value)} maxLength={8000} placeholder={k.hint} className="w-full bg-[#0f0f10] border border-zinc-800 rounded-[12px] p-3 text-[13px] text-zinc-100 outline-none focus:border-zinc-600" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Name it, e.g. Khalia's face" className="w-full bg-[#05201a] border border-cyan-400/15 rounded-[12px] px-3 py-2 text-[13px] text-zinc-100 outline-none focus:border-cyan-400/30" />
+        <textarea rows={3} value={content} onChange={(e) => setContent(e.target.value)} maxLength={8000} placeholder={k.hint} className="w-full bg-[#05201a] border border-cyan-400/15 rounded-[12px] p-3 text-[13px] text-zinc-100 outline-none focus:border-cyan-400/30" />
         <div className="flex flex-wrap items-center gap-3">
-          <label className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[12px] text-zinc-200 cursor-pointer">
+          <label className="px-4 py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[12px] text-white cursor-pointer">
             {file ? file.name.slice(0, 28) : "Add a picture (optional)"}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           </label>
           <button disabled={busy || !title.trim()} onClick={add} className="px-5 py-2 rounded-full bg-white text-black text-[12.5px] font-semibold disabled:opacity-40">{busy ? "Saving…" : "Remember this"}</button>
-          {msg && <span className="text-[12px] text-zinc-400">{msg}</span>}
+          {msg && <span className="text-[12px] text-white/55">{msg}</span>}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-[12px] text-zinc-500 mr-1">{items.length} saved · {items.filter((i) => i.active).length} on</span>
-        {["all", ...KINDS.map((x) => x.id)].map((f) => <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1 rounded-full text-[11px] ${filter === f ? "bg-zinc-200 text-black" : "bg-zinc-900 text-zinc-500 hover:text-zinc-200"}`}>{f === "all" ? "All" : label(f)}</button>)}
+        <span className="text-[12px] text-[#4E7A73] mr-1">{items.length} saved · {items.filter((i) => i.active).length} on</span>
+        {["all", ...KINDS.map((x) => x.id)].map((f) => <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1 rounded-full text-[11px] ${filter === f ? "bg-zinc-200 text-black" : "bg-white/[0.03] text-[#4E7A73] hover:text-white"}`}>{f === "all" ? "All" : label(f)}</button>)}
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
         {shown.map((it) => (
-          <div key={it.id} className={`rounded-[16px] border border-zinc-800 bg-[#161617] p-4 flex gap-3 ${it.active ? "" : "opacity-50"}`}>
-            {it.image_path && thumbs[it.image_path] && <img src={thumbs[it.image_path]} alt={it.title} loading="lazy" className="w-16 h-16 rounded-[10px] object-cover border border-zinc-800 shrink-0" />}
+          <div key={it.id} className={`rounded-[16px] border border-cyan-400/15 bg-[#0A1418] p-4 flex gap-3 ${it.active ? "" : "opacity-50"}`}>
+            {it.image_path && thumbs[it.image_path] && <img src={thumbs[it.image_path]} alt={it.title} loading="lazy" className="w-16 h-16 rounded-[10px] object-cover border border-cyan-400/15 shrink-0" />}
             <div className="min-w-0 flex-1">
-              <div className="text-[10.5px] uppercase tracking-wider text-zinc-500">{label(it.kind)}</div>
+              <div className="text-[10.5px] uppercase tracking-wider text-[#4E7A73]">{label(it.kind)}</div>
               <div className="text-[13px] text-zinc-100 font-medium truncate">{it.title}</div>
-              {it.content && <div className="text-[12px] text-zinc-400 line-clamp-3 whitespace-pre-wrap">{it.content}</div>}
+              {it.content && <div className="text-[12px] text-white/55 line-clamp-3 whitespace-pre-wrap">{it.content}</div>}
               <div className="flex gap-3 mt-2 text-[11.5px]">
-                <button onClick={() => toggle(it)} className="text-zinc-300 hover:text-white">{it.active ? "Switch off" : "Switch on"}</button>
-                <button onClick={() => remove(it)} className="text-zinc-500 hover:text-zinc-200">Forget</button>
+                <button onClick={() => toggle(it)} className="text-[#E6FFFA] hover:text-white">{it.active ? "Switch off" : "Switch on"}</button>
+                <button onClick={() => remove(it)} className="text-[#4E7A73] hover:text-white">Forget</button>
               </div>
             </div>
           </div>
         ))}
-        {!shown.length && <div className="text-[12.5px] text-zinc-500">Nothing saved here yet.</div>}
+        {!shown.length && <div className="text-[12.5px] text-[#4E7A73]">Nothing saved here yet.</div>}
       </div>
     </div>
   );

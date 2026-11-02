@@ -23,10 +23,10 @@ const QUICK: [string, string][] = [
   ["Reminder", "Hi {first_name}, a friendly reminder about our appointment. Reply here if you need to reschedule."],
 ];
 
-const card = "rounded-[20px] border border-zinc-800 bg-[#161617]";
-const label = "text-[11px] font-semibold tracking-[0.18em] uppercase text-zinc-500";
-const chip = (on: boolean) => `text-[12px] px-3 py-1.5 rounded-full transition ${on ? "bg-white text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"}`;
-const input = "w-full rounded-[12px] bg-zinc-900 border border-zinc-800 px-3 py-2 text-[13px] outline-none focus:border-zinc-600";
+const card = "rounded-[20px] border border-cyan-400/15 bg-[#0A1418]";
+const label = "text-[11px] font-semibold tracking-[0.18em] uppercase text-[#4E7A73]";
+const chip = (on: boolean) => `text-[12px] px-3 py-1.5 rounded-full transition ${on ? "bg-white text-black" : "bg-white/[0.03] border border-cyan-400/15 text-white/55 hover:text-white"}`;
+const input = "w-full rounded-[12px] bg-white/[0.03] border border-cyan-400/15 px-3 py-2 text-[13px] outline-none focus:border-cyan-400/30";
 
 /* ---------- bulk file parsing (CSV / TXT / vCard) ---------- */
 const EMAIL_RE = /[^\s,;<>"]+@[^\s,;<>"]+\.[a-z]{2,}/i;
@@ -108,16 +108,16 @@ function ContactsTools({ onChange }: { onChange: () => void }) {
       {open === "upload" && (
         <div className="space-y-2">
           <div onClick={() => file.current?.click()} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files[0]); }}
-            className="rounded-[14px] border border-dashed border-zinc-700 p-5 text-center cursor-pointer hover:border-zinc-500">
-            <div className="text-[13px] text-zinc-200">Drop a file or click to choose</div>
-            <div className="text-[11.5px] text-zinc-500 mt-1">CSV, TXT or vCard (.vcf) — columns like name, email, phone. Phone exports and exports from Google, Outlook, Facebook or Instagram tools work.</div>
+            className="rounded-[14px] border border-dashed border-cyan-400/25 p-5 text-center cursor-pointer hover:border-zinc-500">
+            <div className="text-[13px] text-white">Drop a file or click to choose</div>
+            <div className="text-[11.5px] text-[#4E7A73] mt-1">CSV, TXT or vCard (.vcf) — columns like name, email, phone. Phone exports and exports from Google, Outlook, Facebook or Instagram tools work.</div>
           </div>
           <input ref={file} type="file" accept=".csv,.txt,.vcf,text/csv,text/vcard" className="hidden" onChange={e => onFile(e.target.files?.[0])} />
           <textarea className={input} rows={3} placeholder="…or paste: one contact per line, e.g. Jane Doe, jane@mail.com, +12395550100" value={paste} onChange={e => setPaste(e.target.value)} />
           <button disabled={!paste.trim()} onClick={() => save(parseContacts(paste, "paste"))} className="w-full py-2 rounded-full bg-white text-black text-[12.5px] font-semibold disabled:opacity-40">Import pasted contacts</button>
         </div>
       )}
-      {note && <div className="text-[12px] text-zinc-400">{note}</div>}
+      {note && <div className="text-[12px] text-white/55">{note}</div>}
     </div>
   );
 }
@@ -188,28 +188,28 @@ function Composer({ channel, source, isOwner }: { channel: Channel; source: Sour
       <div className={`${card} p-5 space-y-4`}>
         <div className="flex items-center justify-between">
           <div className={label}>My contacts</div>
-          <div className="text-[12px] text-zinc-500 mono">{picked.size} selected · {shown.length} shown</div>
+          <div className="text-[12px] text-[#4E7A73] mono">{picked.size} selected · {shown.length} shown</div>
         </div>
         {source === "contacts" && <ContactsTools onChange={load} />}
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search name, email or phone" className={input} />
-        <div className="flex gap-4 text-[12px] text-zinc-500">
+        <div className="flex gap-4 text-[12px] text-[#4E7A73]">
           <button className="hover:text-white" onClick={() => setPicked(new Set(shown.map(p => p.id)))}>Select all shown</button>
           <button className="hover:text-white" onClick={() => setPicked(new Set())}>Clear</button>
           {source === "contacts" && picked.size > 0 && <button className="hover:text-white ml-auto" onClick={removeSelected}>Delete selected</button>}
         </div>
         <div className="max-h-[520px] overflow-y-auto divide-y divide-zinc-900 -mx-2">
-          {shown.length === 0 && <div className="text-[13px] text-zinc-500 py-10 text-center">
+          {shown.length === 0 && <div className="text-[13px] text-[#4E7A73] py-10 text-center">
             {`No contacts with ${channel === "email" ? "an email" : "a phone number"} yet — add some or upload a file.`}
           </div>}
           {shown.map(p => (
-            <label key={p.id} className={`flex items-center gap-3 py-2.5 px-2 rounded-[10px] cursor-pointer transition ${picked.has(p.id) ? "bg-zinc-900" : "hover:bg-zinc-900/50"}`}>
+            <label key={p.id} className={`flex items-center gap-3 py-2.5 px-2 rounded-[10px] cursor-pointer transition ${picked.has(p.id) ? "bg-white/[0.03]" : "hover:bg-white/[0.04]/50"}`}>
               <input type="checkbox" className="accent-white" checked={picked.has(p.id)} onChange={() => toggle(p.id)} />
-              <div className="w-8 h-8 rounded-full bg-zinc-800 grid place-items-center text-[11px] font-semibold uppercase">{p.name.split(" ").map(s => s[0]).join("").slice(0, 2)}</div>
+              <div className="w-8 h-8 rounded-full bg-cyan-400/10 grid place-items-center text-[11px] font-semibold uppercase">{p.name.split(" ").map(s => s[0]).join("").slice(0, 2)}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] truncate">{p.name}</div>
-                <div className="text-[11px] text-zinc-500 truncate">{p.note}</div>
+                <div className="text-[11px] text-[#4E7A73] truncate">{p.note}</div>
               </div>
-              <div className="text-[12px] mono text-zinc-500 truncate max-w-[180px]">{reach(p)}</div>
+              <div className="text-[12px] mono text-[#4E7A73] truncate max-w-[180px]">{reach(p)}</div>
             </label>
           ))}
         </div>
@@ -225,17 +225,17 @@ function Composer({ channel, source, isOwner }: { channel: Channel; source: Sour
         <textarea value={message} onChange={e => setMessage(e.target.value)} rows={8} className={input}
           placeholder={channel === "calls" ? "Read aloud on the call. Use {first_name}." : "Hi {first_name}, …"} />
         {isOwner && channel !== "email" && channel !== "calls" && (
-          <label className="flex items-center gap-2 text-[12px] text-zinc-400"><input type="checkbox" className="accent-white" checked={sign} onChange={e => setSign(e.target.checked)} />Add signature</label>
+          <label className="flex items-center gap-2 text-[12px] text-white/55"><input type="checkbox" className="accent-white" checked={sign} onChange={e => setSign(e.target.checked)} />Add signature</label>
         )}
         <ShieldNotice shield={shield} />
-        <div className="text-[11px] text-zinc-500 mono">{len} chars{channel === "sms" ? ` · ${Math.max(1, Math.ceil(len / 160))} segment(s)` : ""}</div>
+        <div className="text-[11px] text-[#4E7A73] mono">{len} chars{channel === "sms" ? ` · ${Math.max(1, Math.ceil(len / 160))} segment(s)` : ""}</div>
         {canSchedule && (
           <div className="space-y-2">
             <div className="flex gap-1.5">{([["Send now", false], ["Schedule", true]] as const).map(([l, v]) => <button key={l} className={chip(later === v)} onClick={() => setLater(v)}>{l}</button>)}</div>
             {later && <SendTimePicker value={at} onChange={setAt} tz={tz} onTzChange={setTz} />}
           </div>
         )}
-        {note && <div className="text-[12px] text-zinc-400">{note}</div>}
+        {note && <div className="text-[12px] text-white/55">{note}</div>}
         <button disabled={!!busy || !targets.length || !message.trim() || (later && canSchedule && !at)} onClick={send}
           className="w-full py-2.5 rounded-full bg-white text-black text-[13px] font-semibold disabled:opacity-40">
           {busy || (later && canSchedule ? "Schedule" : `${{ email: "Send email", sms: "Send texts", whatsapp: "Send WhatsApp", calls: "Start calls" }[channel]} · ${targets.length}`)}
@@ -258,12 +258,12 @@ export default function SocialiteMessaging({ isOwner = false }: { isOwner?: bool
     <div className="p-4 lg:p-8 space-y-6">
       <div>
         <h1 className="text-[22px] font-semibold tracking-tight">Email · SMS · Calls</h1>
-        <p className="text-[13px] text-zinc-500">Add or upload your contacts, then send emails, texts, WhatsApp messages and calls.</p>
+        <p className="text-[13px] text-[#4E7A73]">Add or upload your contacts, then send emails, texts, WhatsApp messages and calls.</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex p-1 rounded-full bg-zinc-900 border border-zinc-800">
+        <div className="inline-flex p-1 rounded-full bg-white/[0.03] border border-cyan-400/15">
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setChannel(t.id)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12.5px] font-medium transition ${channel === t.id ? "bg-white text-black" : "text-zinc-400 hover:text-white"}`}>
+            <button key={t.id} onClick={() => setChannel(t.id)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12.5px] font-medium transition ${channel === t.id ? "bg-white text-black" : "text-white/55 hover:text-white"}`}>
               <t.icon className="w-4 h-4" /> {t.label}
             </button>
           ))}

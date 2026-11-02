@@ -68,44 +68,44 @@ export default function SocialiteAccounts({ onChange, isOwner = false }: { onCha
     <div className="p-4 lg:p-8 max-w-[820px] space-y-6">
       <div>
         <h1 className="text-[22px] font-semibold">Accounts</h1>
-        <p className="text-[13px] text-zinc-500">Paste your keys here. They're checked, encrypted and never shown again.</p>
+        <p className="text-[13px] text-[#4E7A73]">Paste your keys here. They're checked, encrypted and never shown again.</p>
       </div>
-      {msg && <div className={`rounded-[14px] border px-4 py-3 text-[13px] ${msg.ok ? "border-emerald-900 bg-emerald-950/40 text-emerald-300" : "border-zinc-700 bg-zinc-900 text-zinc-300"}`}>{msg.text}</div>}
+      {msg && <div className={`rounded-[14px] border px-4 py-3 text-[13px] ${msg.ok ? "border-emerald-900 bg-emerald-950/40 text-[#2EF8A0]" : "border-cyan-400/25 bg-white/[0.03] text-[#E6FFFA]"}`}>{msg.text}</div>}
       {isOwner && <SocialiteGeniusConnect />}
       <div className="grid gap-3">
         {DEFS.map((p) => {
           const s = status[p.id];
           return (
-            <div key={p.id} className="rounded-[18px] border border-zinc-800 bg-[#161617] p-5">
+            <div key={p.id} className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5">
               <div className="flex items-center gap-4">
                 <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${p.bg} grid place-items-center text-white`}>{p.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-medium flex items-center gap-2">{p.name}
-                    {!("live" in p) && <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">Posting coming soon</span>}
+                    {!("live" in p) && <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-white/55">Posting coming soon</span>}
                   </div>
-                  <div className="text-[12px] text-zinc-500 truncate">
+                  <div className="text-[12px] text-[#4E7A73] truncate">
                     {s ? <span className="text-emerald-400">Connected{s.verified_name ? ` as ${s.verified_name}` : ""} · key {s.token_hint}</span> : "Not connected"}
                   </div>
                 </div>
-                {s && <button onClick={() => remove(p.id)} aria-label={`Disconnect ${p.name}`} className="px-3 h-9 rounded-full text-[12px] bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white">Disconnect</button>}
+                {s && <button onClick={() => remove(p.id)} aria-label={`Disconnect ${p.name}`} className="px-3 h-9 rounded-full text-[12px] bg-white/[0.03] border border-cyan-400/15 text-white/55 hover:text-white">Disconnect</button>}
                 <button onClick={() => { setOpen(open === p.id ? null : p.id); setForm({ account_id: s?.account_id || "", token: "" }); setMsg(null); }}
-                  className="px-4 py-2 rounded-full text-[12px] font-semibold border bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-white hover:text-black transition">
+                  className="px-4 py-2 rounded-full text-[12px] font-semibold border bg-white/[0.03] border-cyan-400/15 text-[#E6FFFA] hover:bg-white hover:text-black transition">
                   {s ? "Update key" : "Connect"}
                 </button>
               </div>
               {open === p.id && (
-                <div className="mt-5 grid gap-3 border-t border-zinc-800 pt-5">
-                  {"help" in p && <p className="text-[12px] text-zinc-500 leading-[1.6]">{p.help} <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-zinc-300 underline">Open Graph API Explorer</a></p>}
-                  <label className="text-[11px] uppercase tracking-widest text-zinc-500">{p.idLabel}
+                <div className="mt-5 grid gap-3 border-t border-cyan-400/15 pt-5">
+                  {"help" in p && <p className="text-[12px] text-[#4E7A73] leading-[1.6]">{p.help} <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#E6FFFA] underline">Open Graph API Explorer</a></p>}
+                  <label className="text-[11px] uppercase tracking-widest text-[#4E7A73]">{p.idLabel}
                     <input value={form.account_id} onChange={(e) => setForm((f) => ({ ...f, account_id: e.target.value }))} autoComplete="off"
-                      className="mt-1.5 w-full rounded-[12px] bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-[13px] normal-case tracking-normal text-zinc-100 outline-none focus:border-zinc-600" />
+                      className="mt-1.5 w-full rounded-[12px] bg-white/[0.03] border border-cyan-400/15 px-3 py-2.5 text-[13px] normal-case tracking-normal text-zinc-100 outline-none focus:border-cyan-400/30" />
                   </label>
-                  <label className="text-[11px] uppercase tracking-widest text-zinc-500">{p.tokenLabel}
+                  <label className="text-[11px] uppercase tracking-widest text-[#4E7A73]">{p.tokenLabel}
                     <input type="password" value={form.token} onChange={(e) => setForm((f) => ({ ...f, token: e.target.value }))} autoComplete="new-password" spellCheck={false}
-                      className="mt-1.5 w-full rounded-[12px] bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-[13px] mono normal-case tracking-normal text-zinc-100 outline-none focus:border-zinc-600" />
+                      className="mt-1.5 w-full rounded-[12px] bg-white/[0.03] border border-cyan-400/15 px-3 py-2.5 text-[13px] mono normal-case tracking-normal text-zinc-100 outline-none focus:border-cyan-400/30" />
                   </label>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">Encrypted on the server · only used to publish</span>
+                    <span className="flex items-center gap-1.5 text-[11px] text-[#4E7A73]">Encrypted on the server · only used to publish</span>
                     <button disabled={busy || form.token.length < 10} onClick={() => save(p.id)}
                       className="px-5 py-2.5 rounded-full bg-white text-black text-[12.5px] font-semibold flex items-center gap-1.5 disabled:opacity-40">
                       {busy ? "Verifying…" : "Verify & save"}

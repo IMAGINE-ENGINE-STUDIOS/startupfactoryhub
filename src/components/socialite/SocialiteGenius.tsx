@@ -11,9 +11,9 @@ import SocialiteKnowledge from "./SocialiteKnowledge";
 
 type Task = "post" | "hashtags" | "rewrite" | "email" | "sms" | "image" | "campaign" | "analyse";
 const TASKS: { id: Task; label: string; hint: string }[] = [
-  { id: "post", label: "Write a post", hint: "What is the post about? e.g. New outdoor kitchen collection, 10% off this week" },
-  { id: "image", label: "Create a picture", hint: "Describe the picture, e.g. Luxury backyard pool at sunset, editorial photo" },
-  { id: "campaign", label: "Plan a campaign", hint: "Goal, offer, audience and length, e.g. 2-week spring pool campaign for Florida homeowners" },
+  { id: "post", label: "Write a post", hint: "What is the post about? e.g. Applications open for our next accelerator cohort" },
+  { id: "image", label: "Create a picture", hint: "Describe the picture, e.g. Founders pitching on stage at demo day, editorial photo" },
+  { id: "campaign", label: "Plan a campaign", hint: "Goal, offer, audience and length, e.g. 2-week campaign to recruit Orlando founders for the spring cohort" },
   { id: "email", label: "Write an email", hint: "What should the email say?" },
   { id: "sms", label: "Write a text", hint: "What should the text say?" },
   { id: "rewrite", label: "Improve text", hint: "Paste the text to improve" },
@@ -75,11 +75,11 @@ export default function SocialiteGenius({ onUsePost, onAddPosts, queueSummary }:
     }));
   };
 
-  if (on === null) return <div className="p-8 text-[13px] text-zinc-400">Loading Genius…</div>;
+  if (on === null) return <div className="p-8 text-[13px] text-white/55">Loading Genius…</div>;
   if (!on) return (
     <div className="p-4 lg:p-8 max-w-[760px]">
       <h1 className="text-[22px] font-semibold">Genius</h1>
-      <div className="mt-4 rounded-[18px] border border-zinc-800 bg-[#161617] p-6 text-[13px] text-zinc-400">Genius is not switched on yet. The owner connects it in Accounts.</div>
+      <div className="mt-4 rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-6 text-[13px] text-white/55">Genius is not switched on yet. The owner connects it in Accounts.</div>
     </div>
   );
   const t = TASKS.find((x) => x.id === task)!;
@@ -88,21 +88,21 @@ export default function SocialiteGenius({ onUsePost, onAddPosts, queueSummary }:
     <div className="p-4 lg:p-8 max-w-[1000px] space-y-5">
       <div>
         <h1 className="text-[22px] font-semibold tracking-tight">Genius</h1>
-        <p className="text-[12px] text-zinc-500 mt-1">Your helper for posts, pictures, emails, texts, full campaigns and reading your results.</p>
-        <div className="mt-3 inline-flex rounded-full border border-zinc-800 p-1">
-          {(["create", "knowledge"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-4 py-1.5 rounded-full text-[12px] font-medium ${view === v ? "bg-white text-black" : "text-zinc-400"}`}>{v === "create" ? "Create" : "Knowledge"}</button>)}
+        <p className="text-[12px] text-[#4E7A73] mt-1">Your helper for posts, pictures, emails, texts, full campaigns and reading your results.</p>
+        <div className="mt-3 inline-flex rounded-full border border-cyan-400/15 p-1">
+          {(["create", "knowledge"] as const).map((v) => <button key={v} onClick={() => setView(v)} className={`px-4 py-1.5 rounded-full text-[12px] font-medium ${view === v ? "bg-white text-black" : "text-white/55"}`}>{v === "create" ? "Create" : "Knowledge"}</button>)}
         </div>
       </div>
       {view === "knowledge" ? <SocialiteKnowledge /> : <>
       <div className="flex flex-wrap gap-2">
-        {TASKS.map((x) => <button key={x.id} onClick={() => { setTask(x.id); setOut(null); }} className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition ${task === x.id ? "bg-white text-black" : "bg-zinc-900 text-zinc-400 hover:text-zinc-100"}`}>{x.label}</button>)}
+        {TASKS.map((x) => <button key={x.id} onClick={() => { setTask(x.id); setOut(null); }} className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition ${task === x.id ? "bg-white text-black" : "bg-white/[0.03] text-white/55 hover:text-zinc-100"}`}>{x.label}</button>)}
       </div>
-      <div className="rounded-[18px] border border-zinc-800 bg-[#161617] p-5 space-y-3">
+      <div className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5 space-y-3">
         <textarea rows={task === "rewrite" || task === "hashtags" ? 6 : 3} value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={t.hint}
-          className="w-full bg-[#0f0f10] border border-zinc-800 rounded-[12px] p-3 text-[13px] text-zinc-100 outline-none focus:border-zinc-600" />
+          className="w-full bg-[#05201a] border border-cyan-400/15 rounded-[12px] p-3 text-[13px] text-zinc-100 outline-none focus:border-cyan-400/30" />
         {(task === "post" || task === "campaign") && (
           <div className="flex flex-wrap gap-2">
-            {PLATS.map((p) => <button key={p} onClick={() => setPlatforms((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p])} className={`px-3 py-1 rounded-full text-[11.5px] border ${platforms.includes(p) ? "bg-white text-black border-white" : "border-zinc-800 text-zinc-400"}`}>{p}</button>)}
+            {PLATS.map((p) => <button key={p} onClick={() => setPlatforms((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p])} className={`px-3 py-1 rounded-full text-[11.5px] border ${platforms.includes(p) ? "bg-white text-black border-white" : "border-cyan-400/15 text-white/55"}`}>{p}</button>)}
           </div>
         )}
         <button disabled={busy || (!prompt.trim() && task !== "analyse")} onClick={run} className="px-5 py-2 rounded-full bg-white text-black text-[12.5px] font-semibold disabled:opacity-40">{busy ? "Working…" : t.label}</button>
@@ -110,28 +110,28 @@ export default function SocialiteGenius({ onUsePost, onAddPosts, queueSummary }:
       </div>
 
       {out && (
-        <div className="rounded-[18px] border border-zinc-800 bg-[#161617] p-5 space-y-3">
-          {out.image && <img src={out.image} alt="Created by Genius" loading="lazy" className="w-full max-w-[420px] rounded-[12px] border border-zinc-800" />}
+        <div className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5 space-y-3">
+          {out.image && <img src={out.image} alt="Created by Genius" loading="lazy" className="w-full max-w-[420px] rounded-[12px] border border-cyan-400/15" />}
           {out.campaign ? (
             <div className="space-y-3 text-[12.5px]">
               <div className="text-[16px] font-semibold">{out.campaign.name}</div>
-              <div className="text-zinc-400">{out.campaign.summary}</div>
-              <div className="text-[12px] text-zinc-500">{out.campaign.posts?.length ?? 0} posts · {out.campaign.emails?.length ?? 0} emails · {out.campaign.sms?.length ?? 0} texts</div>
-              <div className="divide-y divide-zinc-800">
-                {(out.campaign.posts ?? []).map((p: any, i: number) => <div key={i} className="py-2"><span className="text-zinc-500 mono">Day {p.day} · {p.time} · {(p.platforms ?? []).join(", ")}</span><div className="text-zinc-200 whitespace-pre-wrap mt-1">{p.text}</div></div>)}
-                {(out.campaign.emails ?? []).map((e: any, i: number) => <div key={`e${i}`} className="py-2"><span className="text-zinc-500 mono">Day {e.day} · Email</span><div className="text-zinc-200 font-medium mt-1">{e.subject}</div><div className="text-zinc-400 whitespace-pre-wrap">{e.body}</div></div>)}
-                {(out.campaign.sms ?? []).map((s: any, i: number) => <div key={`s${i}`} className="py-2"><span className="text-zinc-500 mono">Day {s.day} · Text</span><div className="text-zinc-200 mt-1">{s.text}</div></div>)}
+              <div className="text-white/55">{out.campaign.summary}</div>
+              <div className="text-[12px] text-[#4E7A73]">{out.campaign.posts?.length ?? 0} posts · {out.campaign.emails?.length ?? 0} emails · {out.campaign.sms?.length ?? 0} texts</div>
+              <div className="divide-y divide-cyan-400/15">
+                {(out.campaign.posts ?? []).map((p: any, i: number) => <div key={i} className="py-2"><span className="text-[#4E7A73] mono">Day {p.day} · {p.time} · {(p.platforms ?? []).join(", ")}</span><div className="text-white whitespace-pre-wrap mt-1">{p.text}</div></div>)}
+                {(out.campaign.emails ?? []).map((e: any, i: number) => <div key={`e${i}`} className="py-2"><span className="text-[#4E7A73] mono">Day {e.day} · Email</span><div className="text-white font-medium mt-1">{e.subject}</div><div className="text-white/55 whitespace-pre-wrap">{e.body}</div></div>)}
+                {(out.campaign.sms ?? []).map((s: any, i: number) => <div key={`s${i}`} className="py-2"><span className="text-[#4E7A73] mono">Day {s.day} · Text</span><div className="text-white mt-1">{s.text}</div></div>)}
               </div>
               <button onClick={addCampaign} className="px-4 py-2 rounded-full bg-white text-black text-[12px] font-semibold">Add the posts to my queue</button>
-              <div className="text-[11px] text-zinc-500">Emails and texts can be copied into Email · SMS · Calls.</div>
+              <div className="text-[11px] text-[#4E7A73]">Emails and texts can be copied into Email · SMS · Calls.</div>
             </div>
-          ) : out.text ? <div className="text-[13px] text-zinc-200 whitespace-pre-wrap">{out.text}</div> : null}
+          ) : out.text ? <div className="text-[13px] text-white whitespace-pre-wrap">{out.text}</div> : null}
           <div className="flex flex-wrap gap-2 items-center">
             {(out.text && !out.campaign && ["post", "rewrite", "hashtags"].includes(task)) || out.image ? (
               <button onClick={() => onUsePost(out.text ?? "", out.image)} className="px-4 py-2 rounded-full bg-white text-black text-[12px] font-semibold">Open in Composer</button>
             ) : null}
-            {out.text && <button onClick={() => navigator.clipboard.writeText(out.text!)} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[12px] text-zinc-200">Copy</button>}
-            {!!out.credits && <span className="text-[11px] text-zinc-500 ml-auto">{out.credits} credits used</span>}
+            {out.text && <button onClick={() => navigator.clipboard.writeText(out.text!)} className="px-4 py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[12px] text-white">Copy</button>}
+            {!!out.credits && <span className="text-[11px] text-[#4E7A73] ml-auto">{out.credits} credits used</span>}
           </div>
         </div>
       )}

@@ -34,12 +34,12 @@ export default function SocialiteCostMargins({ cfg, setC, card, input }: { cfg: 
     <div className={card}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
         <div className="text-[14px] font-semibold">Your cost vs. your price</div>
-        <div className="text-[11px] text-zinc-500">1 credit ≈ <span className="text-zinc-200 mono">{perCredit ? money(perCredit) : "set a credit pack"}</span></div>
+        <div className="text-[11px] text-[#4E7A73]">1 credit ≈ <span className="text-white mono">{perCredit ? money(perCredit) : "set a credit pack"}</span></div>
       </div>
-      <div className="text-[11px] text-zinc-500 mb-3">Costs are estimates from each provider's list price — edit them to match your bills. Price comes from the credits you set above.</div>
+      <div className="text-[11px] text-[#4E7A73] mb-3">Costs are estimates from each provider's list price — edit them to match your bills. Price comes from the credits you set above.</div>
       <div className="overflow-x-auto">
         <table className="w-full text-[12px]">
-          <thead className="text-[10.5px] text-zinc-500 text-left">
+          <thead className="text-[10.5px] text-[#4E7A73] text-left">
             <tr><th className="py-1.5 font-normal">Item</th><th className="font-normal">Provider</th><th className="font-normal w-28">Your cost $</th><th className="font-normal">You charge</th><th className="font-normal text-right">Margin</th></tr>
           </thead>
           <tbody>
@@ -48,13 +48,13 @@ export default function SocialiteCostMargins({ cfg, setC, card, input }: { cfg: 
               const credits = r.price(cfg);
               const price = credits * perCredit;
               const margin = price > 0 ? Math.round(((price - cost) / price) * 100) : null;
-              const tone = margin === null ? "text-zinc-500" : margin < 0 ? "text-[#f97066]" : margin < 50 ? "text-amber-300" : "text-emerald-300";
+              const tone = margin === null ? "text-[#4E7A73]" : margin < 0 ? "text-[#f97066]" : margin < 50 ? "text-amber-300" : "text-[#2EF8A0]";
               return (
-                <tr key={r.key} className="border-t border-zinc-800">
-                  <td className="py-2"><div className="text-zinc-100">{r.label}</div><div className="text-[10.5px] text-zinc-500">{r.unit}</div></td>
-                  <td className="text-zinc-400">{r.provider}</td>
+                <tr key={r.key} className="border-t border-cyan-400/15">
+                  <td className="py-2"><div className="text-zinc-100">{r.label}</div><div className="text-[10.5px] text-[#4E7A73]">{r.unit}</div></td>
+                  <td className="text-white/55">{r.provider}</td>
                   <td className="pr-3"><input type="number" min={0} step="any" className={input} value={cost} onChange={(e) => setC({ provider_costs: { ...costs, [r.key]: Number(e.target.value) } })} /></td>
-                  <td className="mono text-zinc-200">{credits ? `${credits} cr · ${money(price)}` : <span className="text-zinc-500">free / plan</span>}</td>
+                  <td className="mono text-white">{credits ? `${credits} cr · ${money(price)}` : <span className="text-[#4E7A73]">free / plan</span>}</td>
                   <td className={`text-right mono ${tone}`}>{margin === null ? (cost > 0 ? "you pay" : "—") : `${margin}%`}</td>
                 </tr>
               );

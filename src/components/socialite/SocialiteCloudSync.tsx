@@ -69,6 +69,6 @@ export default function SocialiteCloudSync({ children }: { children: ReactNode }
     return () => { window.clearInterval(id); window.removeEventListener("beforeunload", push); push(); };
   }, [ready]);
 
-  if (!ready) return <div className="min-h-screen grid place-items-center bg-[#0a0a0b] text-zinc-500 text-sm">Loading SOCIALITE…</div>;
+  if (!ready) return <div className="min-h-screen grid place-items-center bg-[#04140f] text-[#4E7A73] text-sm">Loading SOCIALITE…</div>;
   return <>{children}</>;
 }

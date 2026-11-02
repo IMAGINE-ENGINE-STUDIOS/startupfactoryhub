@@ -75,15 +75,15 @@ import {
 } from "lucide-react";
 
 // ---- constants ----
-const META_APP_ID = import.meta.env.VITE_META_APP_ID || "1072785889011506";
+const META_APP_ID = import.meta.env.VITE_META_APP_ID || "1603558934078759";
 // META_APP_ID removed - use Supabase Edge Functions for secure publishing
 const PLATFORMS = [
-  { id: "facebook", name: "Facebook Page", limit: 63206, color: "#1877F2", bg: "from-[#1877F2] to-[#0d5bbf]", icon: <Facebook className="w-4 h-4" />, connected: true },
-  { id: "instagram", name: "Instagram", limit: 2200, color: "#E4405F", bg: "from-[#f09433] via-[#e6683c] to-[#dc2743]", icon: <Instagram className="w-4 h-4" />, connected: true },
-  { id: "threads", name: "Threads", limit: 500, color: "#000", bg: "from-zinc-800 to-black", icon: <AtSign className="w-4 h-4" />, connected: true },
-  { id: "x", name: "X", limit: 280, color: "#fff", bg: "from-zinc-800 to-black", icon: <div className="font-bold text-[13px] leading-none">𝕏</div>, connected: true },
-  { id: "tiktok", name: "TikTok", limit: 2200, color: "#ff0050", bg: "from-[#00f2ea] via-black to-[#ff0050]", icon: <div className="w-4 h-4 grid place-items-center">♪</div>, connected: false },
-  { id: "youtube", name: "YouTube", limit: 5000, color: "#FF0000", bg: "from-[#FF0000] to-[#cc0000]", icon: <Youtube className="w-4 h-4" />, connected: true },
+  { id: "facebook", name: "Facebook Page", limit: 63206, color: "#1877F2", bg: "from-[#1877F2] to-[#0d5bbf]", icon: <Facebook className="w-4 h-4" /> },
+  { id: "instagram", name: "Instagram", limit: 2200, color: "#E4405F", bg: "from-[#f09433] via-[#e6683c] to-[#dc2743]", icon: <Instagram className="w-4 h-4" /> },
+  { id: "threads", name: "Threads", limit: 500, color: "#000", bg: "from-zinc-800 to-black", icon: <AtSign className="w-4 h-4" /> },
+  { id: "x", name: "X", limit: 280, color: "#fff", bg: "from-zinc-800 to-black", icon: <div className="font-bold text-[13px] leading-none">𝕏</div> },
+  { id: "tiktok", name: "TikTok", limit: 2200, color: "#ff0050", bg: "from-[#00f2ea] via-black to-[#ff0050]", icon: <div className="w-4 h-4 grid place-items-center">♪</div> },
+  { id: "youtube", name: "YouTube", limit: 5000, color: "#FF0000", bg: "from-[#FF0000] to-[#cc0000]", icon: <Youtube className="w-4 h-4" /> },
 ] as const;
 
 const TIME_SLOT_OPTIONS: { label: string; value: string }[] = [
@@ -183,7 +183,7 @@ type ClientWorkspace = { id: string; name: string; logoUrl: string; brandColor: 
 type TeamRole = "Admin" | "Editor" | "Client" | "Viewer";
 type TeamMember = { id: string; email: string; role: TeamRole; createdAt: string };
 
-const HASHTAGS = ["#contentcreator", "#socialmedia", "#brandbuilding", "#creatoreconomy", "#aesthetic", "#minimal", "#design", "#socialite"];
+const HASHTAGS = ["#StartupFactoryHub", "#VentureBuilder", "#OrlandoStartups", "#Founders", "#PreSeed", "#BuildInPublic", "#AIStartups", "#SaaS"];
 const MENTIONS: string[] = [];
 const TONES: Tone[] = ["Professional", "Casual", "Edgy", "Funny", "Luxe", "Minimal"];
 const GOAL_OPTIONS = ["More engagement", "Drive sales", "Build community", "Go viral", "Educate audience", "Brand awareness"];
@@ -273,7 +273,7 @@ export default function Socialite({ embedded = false }: { embedded?: boolean }) 
       const raw = localStorage.getItem("pf_settings");
       if (raw) return JSON.parse(raw);
     } catch {}
-    return { glassmorphism: true, bestTimeAuto: true, timezone: "PST", recurring: false, igCrop: true, autoHashtags: true, crossAdapt: true, firstComment: false };
+    return { glassmorphism: true, bestTimeAuto: true, timezone: "EST", recurring: false, igCrop: true, autoHashtags: true, crossAdapt: true, firstComment: false };
   });
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -284,7 +284,7 @@ export default function Socialite({ embedded = false }: { embedded?: boolean }) 
   const [analyticsRange, setAnalyticsRange] = useState<"7d" | "30d" | "90d" | "all">("30d");
   const [isPublishing, setIsPublishing] = useState(false);
 
-  // Meta AI Studio
+  // AI Studio (local draft helpers)
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiStatus, setAiStatus] = useState<"idle" | "enhancing" | "generating" | "done">("idle");
   const [aiGeneratingType, setAiGeneratingType] = useState<"image" | "video" | null>(null);
@@ -300,14 +300,14 @@ export default function Socialite({ embedded = false }: { embedded?: boolean }) 
     try { const r = localStorage.getItem("pf_automation_tones"); return r ? JSON.parse(r) : ["Minimal", "Edgy"] as Tone[]; } catch { return ["Minimal", "Edgy"] as Tone[]; }
   });
   const [topics, setTopics] = useState<string[]>(() => {
-    try { const r = localStorage.getItem("pf_automation_topics"); return r ? JSON.parse(r) : ["product launch", "behind the scenes", "UGC", "drop culture", "studio life"]; } catch { return ["product launch", "behind the scenes", "UGC"]; }
+    try { const r = localStorage.getItem("pf_automation_topics"); return r ? JSON.parse(r) : ["founder stories", "startup launches", "investor insights", "program announcements", "behind the scenes"]; } catch { return ["founder stories", "startup launches", "behind the scenes"]; }
   });
   const [topicInput, setTopicInput] = useState("");
   const [selectedGoals, setSelectedGoals] = useState<string[]>(() => {
     try { const r = localStorage.getItem("pf_automation_goals"); return r ? JSON.parse(r) : ["More engagement", "Drive sales"]; } catch { return ["More engagement"]; }
   });
   const [keywords, setKeywords] = useState<string>(() => {
-    try { return localStorage.getItem("pf_automation_keywords") || "minimal, streetwear, drop, creators, daily, bold"; } catch { return "minimal, streetwear, drop"; }
+    try { return localStorage.getItem("pf_automation_keywords") || "startups, founders, venture building, pre-seed, Orlando, AI"; } catch { return "startups, founders, venture building"; }
   });
   const [autoMode, setAutoMode] = useState<AutoMode>(() => {
     try { return (localStorage.getItem("pf_automation_mode") as AutoMode) || "day"; } catch { return "day"; }
@@ -863,7 +863,7 @@ Use 2 hashtags max when promo present`;
       const ctr = p.performance?.ctr ?? calcCtr(likes, comments);
       const hour = `${String(p.scheduledAt.getHours()).padStart(2,"0")}:00`;
       const lower = p.text.toLowerCase();
-      let topicMatch = topics.find(t=> lower.includes(t.toLowerCase())) || "product launch";
+      let topicMatch = topics.find(t=> lower.includes(t.toLowerCase())) || "startup launch";
       if (!topics.some(t=>lower.includes(t.toLowerCase()))) {
         const words = lower.split(/\s+/).slice(0,4).join(" ");
         topicMatch = words || "general";
@@ -1078,10 +1078,10 @@ Use 2 hashtags max when promo present`;
     if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
   };
 
-  // Meta AI placeholder
+  // Local draft-preview generator (placeholder art — no external AI is called)
   const generatePlaceholder = useCallback((prompt: string, type: "image" | "video") => {
-    const colors = type === "image" ? ["#f09433", "#e6683c"] : ["#00f2ea", "#ff0050"];
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${colors[0]}'/><stop offset='100%' stop-color='${colors[1]}'/></linearGradient><filter id='blur'><feGaussianBlur stdDeviation='20'/></filter></defs><rect width='100%' height='100%' fill='url(#g)'/><circle cx='400' cy='320' r='140' fill='white' fill-opacity='0.18' filter='url(#blur)'/><circle cx='400' cy='400' r='100' fill='white'/><text x='50%' y='620' text-anchor='middle' font-family='Inter' font-size='18' font-weight='600' fill='white'>${prompt.slice(0, 48).replace(/</g, "")}</text><text x='50%' y='650' text-anchor='middle' font-family='Inter' font-size='12' fill='white' opacity='0.7'>Generated with Meta AI • Llama 3.2 + Emu</text><text x='50%' y='680' text-anchor='middle' font-family='Inter' font-size='10' fill='white' opacity='0.5'>${type.toUpperCase()} • 4K • studio lighting</text></svg>`;
+    const colors = type === "image" ? ["#14b8a6", "#22d3ee"] : ["#0f766e", "#2EF8A0"];
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${colors[0]}'/><stop offset='100%' stop-color='${colors[1]}'/></linearGradient><filter id='blur'><feGaussianBlur stdDeviation='20'/></filter></defs><rect width='100%' height='100%' fill='url(#g)'/><circle cx='400' cy='320' r='140' fill='white' fill-opacity='0.18' filter='url(#blur)'/><circle cx='400' cy='400' r='100' fill='white'/><text x='50%' y='620' text-anchor='middle' font-family='Inter' font-size='18' font-weight='600' fill='white'>${prompt.slice(0, 48).replace(/</g, "")}</text><text x='50%' y='650' text-anchor='middle' font-family='Inter' font-size='12' fill='white' opacity='0.7'>Socialite Studio • draft preview</text><text x='50%' y='680' text-anchor='middle' font-family='Inter' font-size='10' fill='white' opacity='0.5'>${type.toUpperCase()} • draft preview</text></svg>`;
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
   }, []);
 
@@ -1100,7 +1100,7 @@ Use 2 hashtags max when promo present`;
           const url = generatePlaceholder(enhanced, type);
           setMedia((m) => [...m, { url, type: (type === "video" ? "video" : "image") as MediaItem["type"], name: `${type}-${Date.now()}` }].slice(0, 4));
           setAiStatus("done");
-          showToast(`${type === "image" ? "Image" : "Video"} generated with Meta AI open source`, "success");
+          showToast(`${type === "image" ? "Image" : "Video"} draft preview generated`, "success");
           setTimeout(() => setAiStatus("idle"), 1500);
         }, 1200);
       }, 600);
@@ -1108,16 +1108,16 @@ Use 2 hashtags max when promo present`;
     [aiPrompt, generatePlaceholder, showToast]
   );
 
-  // Llama enhancer
+  // Caption enhancer (local templates)
   const enhanceWithLlama = useCallback(() => {
     if (!postText.trim()) {
       showToast("Write something first", "error");
       return;
     }
     const enhancements = [
-      (t: string) => `🔥 ${t}\n\nBuilt for creators who show up daily. Your audience is watching. 👇`,
-      (t: string) => `${t.replace(/\.$/, "")} — minimal, bold, engineered for high-output creators. What’s your take? 💭`,
-      (t: string) => `NEW DROP: ${t}\n\nLess noise. More signal. Crafted in studio, shipped worldwide. ⚡`,
+      (t: string) => `🔥 ${t}\n\nBuilt for founders who show up daily. Your audience is watching. 👇`,
+      (t: string) => `${t.replace(/\.$/, "")} — built with intent, engineered for high-output founders. What’s your take? 💭`,
+      (t: string) => `JUST LAUNCHED: ${t}\n\nLess noise. More signal. Venture-built in Orlando, shipped worldwide. ⚡`,
     ];
     const fn = enhancements[Math.floor(Math.random() * enhancements.length)];
     setPostText(fn(postText.slice(0, 300)));
@@ -1127,8 +1127,8 @@ Use 2 hashtags max when promo present`;
   const generateAiVariations = useCallback(() => {
     if (!postText.trim()) return;
     setAiVariations([
-      `${postText.slice(0, 100)} — built for daily creators. Thoughts? 👇 #design`,
-      `Minimal meets bold. Our new system is live — crafted for creators who ship every day. ${postText.slice(0, 60)}`,
+      `${postText.slice(0, 100)} — built for founders who ship daily. Thoughts? 👇 #StartupFactoryHub`,
+      `Our new cohort is live — built for founders who ship every day. ${postText.slice(0, 60)}`,
       `Just shipped: ${postText.slice(0, 90)} • Less noise, more signal. Drop your take 👇`,
     ]);
     showToast("AI variations ready", "success");
@@ -1225,11 +1225,11 @@ Use 2 hashtags max when promo present`;
     const tonesStr = selectedTones.join(", ").toLowerCase();
     const kwArr = keywords.split(",").map(k=>k.trim()).filter(Boolean);
     const hooks = [
-      "POV:", "Just shipped:", "New drop:", "Hot take:", "Behind the scenes:", "Your weekly reminder:", "We built this for", "Less noise. More signal.",
+      "POV:", "Just shipped:", "Now live:", "Hot take:", "Behind the scenes:", "Your weekly reminder:", "We built this for", "Less noise. More signal.",
       "This is how we", "The secret to", "Why we", "We tested", "Real talk:"
     ];
-    const ctas = [" Thoughts? 👇", " Link in bio.", " Drop your take 👇", " Thoughts?", " ⚡", " 🔥", " Tap to shop.", " Save this for later."];
-    const hashtagPool = kwArr.map(k=>`#${k.replace(/\s+/g,"")}` ).concat(["#socialite","#design","#creatoreconomy"]);
+    const ctas = [" Thoughts? 👇", " Link in bio.", " Drop your take 👇", " Thoughts?", " ⚡", " 🔥", " Join the Hub.", " Save this for later."];
+    const hashtagPool = kwArr.map(k=>`#${k.replace(/\s+/g,"")}` ).concat(["#StartupFactoryHub","#Founders","#BuildInPublic"]);
 
     const newPosts: QueuePost[] = [];
     let currentDate = new Date();
@@ -1243,24 +1243,24 @@ Use 2 hashtags max when promo present`;
       const todaysCount = dayIndex===0 ? Math.min(postsPerDayCalc, postsCount-generated) : Math.min(postsPerDayCalc, postsCount-generated);
       
       for (let i=0;i<todaysCount;i++) {
-        const topic = topics[Math.floor(Math.random()*topics.length)] || "product launch";
+        const topic = topics[Math.floor(Math.random()*topics.length)] || "startup launch";
         const hook = hooks[Math.floor(Math.random()*hooks.length)];
         const cta = ctas[Math.floor(Math.random()*ctas.length)];
         const tone = selectedTones[Math.floor(Math.random()*selectedTones.length)] || "Minimal";
         const goal = selectedGoals[Math.floor(Math.random()*selectedGoals.length)] || "More engagement";
-        const kw = kwArr.length ? kwArr[Math.floor(Math.random()*kwArr.length)] : "design";
-        const tag1 = hashtagPool[Math.floor(Math.random()*hashtagPool.length)] || "#design";
-        const tag2 = hashtagPool[Math.floor(Math.random()*hashtagPool.length)] || "#minimal";
+        const kw = kwArr.length ? kwArr[Math.floor(Math.random()*kwArr.length)] : "startups";
+        const tag1 = hashtagPool[Math.floor(Math.random()*hashtagPool.length)] || "#Founders";
+        const tag2 = hashtagPool[Math.floor(Math.random()*hashtagPool.length)] || "#PreSeed";
 
-        // Llama-style generation based on context
+        // Template generation based on context
         let caption = "";
         const brandSnippet = brandContext.slice(0,120);
         const baseTemplates = [
           `${hook} ${topic} — ${brandSnippet.slice(0,60)}. ${tone.toLowerCase()} energy, built for ${goal.toLowerCase()}. ${kw} at its core. ${tag1} ${tag2}${cta}`,
-          `${hook} ${topic.toUpperCase()}\n\n${brandSnippet}. Voice: ${tonesStr}. We obsessed over ${kw} so you don't have to. This one hits different.\n\n${tag1} ${tag2} ${hashtagPool[0]}${cta}`,
-          `We don't chase trends. We build ${kw}.\n\n${topic} dropping with ${tone.toLowerCase()} execution. ${brandSnippet.slice(0,80)}\n\nGoal: ${goal.toLowerCase()}. Tap in. ${tag1} ${tag2}`,
-          `${hook} Our ${topic} workflow is live. Minimal, bold, engineered for creators who ship daily.\n\n${kw} • ${tone} • ${goal}\n\n${tag1} ${tag2} ${tag1}`,
-          `Real talk: ${topic} isn't content, it's culture. ${brandSnippet.slice(0,70)}\n\nCrafted with ${tonesStr} tone. ${kw} first.\n\n${tag1} ${tag2}${cta}`
+          `${hook} ${topic.toUpperCase()}\n\n${brandSnippet}. Voice: ${tonesStr}. We built ${kw} so founders don't have to start from zero.\n\n${tag1} ${tag2} ${hashtagPool[0]}${cta}`,
+          `We don't chase trends. We build ${kw}.\n\n${topic} launching with ${tone.toLowerCase()} execution. ${brandSnippet.slice(0,80)}\n\nGoal: ${goal.toLowerCase()}. Tap in. ${tag1} ${tag2}`,
+          `${hook} Our ${topic} workflow is live. Built for founders who ship daily.\n\n${kw} • ${tone} • ${goal}\n\n${tag1} ${tag2} ${tag1}`,
+          `Real talk: ${topic} is how companies get built. ${brandSnippet.slice(0,70)}\n\nCrafted with ${tonesStr} tone. ${kw} first.\n\n${tag1} ${tag2}${cta}`
         ];
         caption = baseTemplates[Math.floor(Math.random()*baseTemplates.length)];
         if (caption.length > 380 && autoPlatforms.includes("x" as PlatformId)) caption = caption.slice(0,260) + ` ${tag1}`;
@@ -1577,7 +1577,7 @@ Use 2 hashtags max when promo present`;
   };
 
   return (
-    <div className={embedded ? "w-full bg-[#0a0a0b] text-zinc-100 selection:bg-emerald-500/30 font-[Inter,system-ui,sans-serif] flex rounded-2xl overflow-hidden border border-white/10" : "min-h-screen w-full bg-[#0a0a0b] text-zinc-100 selection:bg-emerald-500/30 font-[Inter,system-ui,sans-serif] flex"}>
+    <div className={embedded ? "w-full bg-[#04140f] text-zinc-100 selection:bg-[#2EF8A0]/20 font-[Space_Grotesk,ui-sans-serif,system-ui,sans-serif] flex rounded-2xl overflow-hidden border border-white/10" : "min-h-screen w-full bg-[#04140f] text-zinc-100 selection:bg-[#2EF8A0]/20 font-[Space_Grotesk,ui-sans-serif,system-ui,sans-serif] flex"}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         * { font-family: 'Inter', system-ui, sans-serif; }
@@ -1597,12 +1597,12 @@ Use 2 hashtags max when promo present`;
         </div>
       )}
 
-      <aside className={`hidden lg:flex w-[280px] shrink-0 flex-col border-r border-zinc-800/80 bg-[#0f0f10] sticky top-0 overflow-y-auto overscroll-contain ${embedded ? "max-h-[85vh]" : "h-screen"}`}>
+      <aside className={`hidden lg:flex w-[280px] shrink-0 flex-col border-r border-cyan-400/15 bg-[#05201a] sticky top-0 overflow-y-auto overscroll-contain ${embedded ? "max-h-[85vh]" : "h-screen"}`}>
         <div className="px-4 pt-6 pb-5 flex items-center justify-center gap-3">
           {whiteLabelConfig.enabled && whiteLabelConfig.logoUrl ? (
-            <img src={whiteLabelConfig.logoUrl} alt={whiteLabelConfig.platformName} className="w-9 h-9 rounded-xl object-cover bg-white border border-zinc-800" />
+            <img src={whiteLabelConfig.logoUrl} alt={whiteLabelConfig.platformName} className="w-9 h-9 rounded-xl object-cover bg-white border border-cyan-400/15" />
           ) : (
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]"><Megaphone className="h-5 w-5" /></span>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#14b8a6] to-[#22d3ee] text-white shadow-[0_6px_16px_rgba(34,211,238,0.35)]"><Megaphone className="h-5 w-5" /></span>
           )}
           <div className="min-w-0 flex-1">
             {whiteLabelConfig.enabled ? (
@@ -1610,7 +1610,7 @@ Use 2 hashtags max when promo present`;
             ) : (
               <div className="font-semibold text-[17px] leading-none tracking-tight">Marketing</div>
             )}
-            <div className="text-[11px] text-zinc-500 mono mt-1">{whiteLabelConfig.enabled && whiteLabelConfig.hideBranding ? 'White-label' : 'Startup Factory Hub'}</div>
+            <div className="text-[11px] text-[#4E7A73] mono mt-1">{whiteLabelConfig.enabled && whiteLabelConfig.hideBranding ? 'White-label' : 'Startup Factory Hub'}</div>
           </div>
         </div>
 
@@ -1634,15 +1634,15 @@ Use 2 hashtags max when promo present`;
               key={it.id}
               onClick={() => setView(it.id as any)}
               className={`w-full flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[13.5px] font-medium transition-all text-left relative ${
-                view === it.id ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35)]" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                view === it.id ? "bg-gradient-to-r from-[#14b8a6] to-[#22d3ee] text-[#05201a] shadow-[0_6px_16px_rgba(34,211,238,0.35)]" : "text-white/55 hover:text-zinc-100 hover:bg-white/[0.04]"
               }`}
             >
               <it.icon className="w-[18px] h-[18px]" />
               {it.label}
-              {it.id==="automation" && automationEnabled && <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />}
-              {it.id==="admin" && isAdmin && <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />}
+              {it.id==="automation" && automationEnabled && <span className="ml-auto w-2 h-2 rounded-full bg-[#2EF8A0] shadow-[0_0_8px_rgba(46,248,160,0.6)] animate-pulse" />}
+              {it.id==="admin" && isAdmin && <span className="ml-auto w-2 h-2 rounded-full bg-[#2EF8A0] shadow-[0_0_8px_rgba(46,248,160,0.6)] animate-pulse" />}
               {it.badge ? (
-                <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full mono ${view === it.id ? "bg-white/25 text-white" : "bg-zinc-800 text-zinc-300"}`}>
+                <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full mono ${view === it.id ? "bg-[#05201a]/15 text-[#05201a]" : "bg-cyan-400/10 text-[#E6FFFA]"}`}>
                   {it.badge}
                 </span>
               ) : null}
@@ -1651,27 +1651,27 @@ Use 2 hashtags max when promo present`;
         </nav>
 
         <div className="mt-auto p-4">
-          <div className="rounded-[14px] border border-zinc-800 bg-[#161617] p-4">
-            <div className="text-[12px] font-semibold tracking-wide text-zinc-300 mb-3">CONNECTED</div>
+          <div className="rounded-[14px] border border-cyan-400/15 bg-[#0A1418] p-4">
+            <div className="text-[12px] font-semibold tracking-wide text-[#E6FFFA] mb-3">CONNECTED</div>
             <div className="space-y-2.5">
               {PLATFORMS.map((p) => (
                 <div key={p.id} className="flex items-center gap-2.5">
                   <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${p.bg} grid place-items-center text-white`}>{p.icon}</div>
-                  <span className="text-[12.5px] text-zinc-300 flex-1">{p.name}</span>
-                  <div className={`w-2 h-2 rounded-full ${liveAccounts.has(p.id) ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "bg-zinc-600"}`} />
+                  <span className="text-[12.5px] text-[#E6FFFA] flex-1">{p.name}</span>
+                  <div className={`w-2 h-2 rounded-full ${liveAccounts.has(p.id) ? "bg-[#2EF8A0] shadow-[0_0_8px_rgba(46,248,160,0.5)]" : "bg-cyan-400/25"}`} />
                 </div>
               ))}
             </div>
-            <button onClick={() => setView("accounts")} className="mt-4 w-full text-[12.5px] font-medium py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors">
+            <button onClick={() => setView("accounts")} className="mt-4 w-full text-[12.5px] font-medium py-2 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 text-white transition-colors">
               Manage accounts
             </button>
           </div>
 
           <div className="mt-4 flex items-center gap-3 px-2">
-            <img src={profile.avatar} className="w-8 h-8 rounded-full object-cover bg-zinc-800" alt="avatar" />
+            <img src={profile.avatar} className="w-8 h-8 rounded-full object-cover bg-cyan-400/10" alt="avatar" />
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-medium truncate">{profile.name}</div>
-              <div className="text-[11px] text-zinc-500 truncate">{profile.email}</div>
+              <div className="text-[11px] text-[#4E7A73] truncate">{profile.email}</div>
             </div>
             <button
               onClick={() => {
@@ -1705,15 +1705,15 @@ Use 2 hashtags max when promo present`;
                   }
                 }
               }}
-              className="w-6 h-6 rounded-full bg-zinc-800 grid place-items-center"
+              className="w-6 h-6 rounded-full bg-cyan-400/10 grid place-items-center"
             >
-              <Ellipsis className="w-4 h-4 text-zinc-400" />
+              <Ellipsis className="w-4 h-4 text-white/55" />
             </button>
           </div>
           <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={onAvatarChange} />
           <button
             onClick={() => avatarInputRef.current?.click()}
-            className="mt-2 w-full text-[11px] text-zinc-500 hover:text-zinc-300 underline"
+            className="mt-2 w-full text-[11px] text-[#4E7A73] hover:text-[#E6FFFA] underline"
           >
             Edit avatar
           </button>
@@ -1721,7 +1721,7 @@ Use 2 hashtags max when promo present`;
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="lg:hidden sticky top-0 z-20 backdrop-blur-xl bg-[#0a0a0b]/80 border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+        <div className="lg:hidden sticky top-0 z-20 backdrop-blur-xl bg-[#04140f]/80 border-b border-cyan-400/15 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-white text-black grid place-items-center font-bold">P</div>
             <span className="font-semibold">Socialite</span>
@@ -1739,54 +1739,54 @@ Use 2 hashtags max when promo present`;
               <button
                 key={it.id}
                 onClick={() => setView(it.id as any)}
-                className={`w-9 h-9 rounded-full grid place-items-center shrink-0 relative ${view === it.id ? "bg-white text-black" : "bg-zinc-900 text-zinc-400"}`}
+                className={`w-9 h-9 rounded-full grid place-items-center shrink-0 relative ${view === it.id ? "bg-gradient-to-br from-[#14b8a6] to-[#22d3ee] text-[#05201a]" : "bg-white/[0.03] text-white/55"}`}
               >
                 <it.icon className="w-4 h-4" />
-                {it.id==="automation" && automationEnabled && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0a0a0b]" />}
-                {it.id==="admin" && isAdmin && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0a0a0b]" />}
+                {it.id==="automation" && automationEnabled && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#2EF8A0] border-2 border-[#04140f]" />}
+                {it.id==="admin" && isAdmin && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#2EF8A0] border-2 border-[#04140f]" />}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="border-b border-zinc-800/80 bg-[#0f0f10]/50 backdrop-blur">
+        <div className="border-b border-cyan-400/15 bg-[#05201a]/50 backdrop-blur">
           <div className="px-4 lg:px-8 py-4 flex flex-wrap gap-3 lg:gap-6 items-center">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 grid place-items-center">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-cyan-400/15 grid place-items-center">
                 <ChartColumn className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-widest text-zinc-500 mono">Queue</div>
+                <div className="text-[11px] uppercase tracking-widest text-[#4E7A73] mono">Queue</div>
                 <div className="text-[14px] font-semibold">{scheduledCount} scheduled</div>
               </div>
             </div>
-            <div className="h-8 w-px bg-zinc-800 hidden lg:block" />
+            <div className="h-8 w-px bg-cyan-400/10 hidden lg:block" />
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 grid place-items-center">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-cyan-400/15 grid place-items-center">
                 <TrendingUp className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-widest text-zinc-500 mono">This week</div>
+                <div className="text-[11px] uppercase tracking-widest text-[#4E7A73] mono">This week</div>
                 <div className="text-[14px] font-semibold">{postedCount} posts published</div>
               </div>
             </div>
-            <div className="h-8 w-px bg-zinc-800 hidden lg:block" />
+            <div className="h-8 w-px bg-cyan-400/10 hidden lg:block" />
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 grid place-items-center">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-cyan-400/15 grid place-items-center">
                 <Eye className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-widest text-zinc-500 mono">Posting to</div>
+                <div className="text-[11px] uppercase tracking-widest text-[#4E7A73] mono">Posting to</div>
                 <div className="text-[14px] font-semibold">{selected.length} platform{selected.length === 1 ? "" : "s"}</div>
               </div>
             </div>
             <div className="ml-auto flex items-center gap-2">
               {automationEnabled && (
-                <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-[11px] text-emerald-300 mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Bot ON • {autoStats.totalPreview} posts / {autoMode}
+                <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2EF8A0]/10 border border-[#2EF8A0]/25 text-[11px] text-[#2EF8A0] mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2EF8A0] animate-pulse" /> Bot ON • {autoStats.totalPreview} posts / {autoMode}
                 </span>
               )}
-              <span className="text-[12px] text-zinc-500 hidden lg:block">Best time today</span>
+              <span className="text-[12px] text-[#4E7A73] hidden lg:block">Best time today</span>
               <button
                 onClick={() => {
                   const t = getBestTime();
@@ -1814,17 +1814,17 @@ Use 2 hashtags max when promo present`;
                     { id: "visuals", n: "3", t: "Pictures", s: "Create images & video" },
                     { id: "publish", n: "4", t: "Publish", s: "Optimise & schedule" },
                   ] as const).map(st => (
-                    <button key={st.id} onClick={()=>setCStep(st.id)} className={`text-left rounded-[16px] border p-3.5 transition ${cStep===st.id ? "bg-white text-black border-white" : "bg-[#161617] border-zinc-800 text-zinc-300 hover:border-zinc-700"}`}>
-                      <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full grid place-items-center text-[10px] mono font-semibold ${cStep===st.id ? "bg-black text-white" : "bg-zinc-800 text-zinc-400"}`}>{st.n}</span><span className="text-[13px] font-semibold">{st.t}</span></div>
-                      <div className={`text-[11px] mt-1 truncate ${cStep===st.id ? "text-zinc-600" : "text-zinc-500"}`}>{st.s}</div>
+                    <button key={st.id} onClick={()=>setCStep(st.id)} className={`text-left rounded-[16px] border p-3.5 transition ${cStep===st.id ? "bg-white text-black border-white" : "bg-[#0A1418] border-cyan-400/15 text-[#E6FFFA] hover:border-cyan-400/25"}`}>
+                      <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full grid place-items-center text-[10px] mono font-semibold ${cStep===st.id ? "bg-black text-white" : "bg-cyan-400/10 text-white/55"}`}>{st.n}</span><span className="text-[13px] font-semibold">{st.t}</span></div>
+                      <div className={`text-[11px] mt-1 truncate ${cStep===st.id ? "text-[#4E7A73]/75" : "text-[#4E7A73]"}`}>{st.s}</div>
                     </button>
                   ))}
                 </div>
                 {cStep === "where" && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-400">Platforms</h2>
-                    <span className="text-[11px] mono text-zinc-500">{selected.length} selected</span>
+                    <h2 className="text-[13px] font-semibold tracking-widest uppercase text-white/55">Platforms</h2>
+                    <span className="text-[11px] mono text-[#4E7A73]">{selected.length} selected</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                     {PLATFORMS.map((p) => {
@@ -1834,15 +1834,15 @@ Use 2 hashtags max when promo present`;
                           key={p.id}
                           onClick={() => setSelected((s) => (s.includes(p.id as PlatformId) ? s.filter((x) => x !== p.id) : [...s, p.id as PlatformId]))}
                           className={`group relative flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all ${
-                            active ? "bg-white text-black border-white shadow-[0_8px_24px_rgba(255,255,255,0.15)]" : "bg-[#161617] border-zinc-800 hover:border-zinc-700 text-zinc-300"
+                            active ? "bg-white text-black border-white shadow-[0_8px_24px_rgba(255,255,255,0.15)]" : "bg-[#0A1418] border-cyan-400/15 hover:border-cyan-400/25 text-[#E6FFFA]"
                           }`}
                         >
                           <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${p.bg} grid place-items-center text-white shrink-0 ${active ? "ring-2 ring-black/10" : ""}`}>{p.icon}</div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[13px] font-medium leading-none truncate">{p.name}</div>
-                            <div className={`text-[11px] mono mt-1 ${active ? "text-zinc-600" : "text-zinc-500"}`}>{p.limit.toLocaleString()} chars</div>
+                            <div className={`text-[11px] mono mt-1 ${active ? "text-[#4E7A73]/75" : "text-[#4E7A73]"}`}>{p.limit.toLocaleString()} chars</div>
                           </div>
-                          <div className={`w-5 h-5 rounded-full grid place-items-center border transition ${active ? "bg-black text-white border-black" : "border-zinc-700 text-transparent"}`}>
+                          <div className={`w-5 h-5 rounded-full grid place-items-center border transition ${active ? "bg-black text-white border-black" : "border-cyan-400/25 text-transparent"}`}>
                             <Check className="w-3 h-3" />
                           </div>
                           {!liveAccounts.has(p.id) && (
@@ -1858,16 +1858,16 @@ Use 2 hashtags max when promo present`;
                 )}
 
                 {cStep === "write" && (
-                <div className="rounded-[20px] border border-zinc-800 bg-[#161617] overflow-hidden">
+                <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] overflow-hidden">
                   <div className="p-4 lg:p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2 text-[12px] text-zinc-400">
+                      <div className="flex items-center gap-2 text-[12px] text-white/55">
                         <PenTool className="w-4 h-4" /> Caption
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <button
                           onClick={generateAiVariations}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-[11px] font-medium transition"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 text-[11px] font-medium transition"
                         >
                           <WandSparkles className="w-3.5 h-3.5" /> AI Rewrite
                         </button>
@@ -1884,7 +1884,7 @@ Use 2 hashtags max when promo present`;
                       value={postText}
                       onChange={(e) => setPostText(e.target.value)}
                       placeholder="What's happening? Write your post..."
-                      className="w-full min-h-[132px] bg-transparent outline-none resize-none text-[15px] leading-[1.6] placeholder:text-zinc-600"
+                      className="w-full min-h-[132px] bg-transparent outline-none resize-none text-[15px] leading-[1.6] placeholder:text-[#4E7A73]/75"
                     />
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selected.map((pid) => {
@@ -1894,10 +1894,10 @@ Use 2 hashtags max when promo present`;
                         const pct = Math.min(100, (len / plat.limit) * 100);
                         const over = len > plat.limit;
                         return (
-                          <div key={pid} className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] mono border ${over ? "bg-red-500/10 border-red-500/30 text-red-300" : "bg-zinc-900 border-zinc-800 text-zinc-400"}`}>
+                          <div key={pid} className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] mono border ${over ? "bg-red-500/10 border-red-500/30 text-red-300" : "bg-white/[0.03] border-cyan-400/15 text-white/55"}`}>
                             <span className="w-2 h-2 rounded-full" style={{ background: plat.color }} />
                             {plat.name.split(" ")[0]} {len}/{plat.limit}
-                            <div className="w-12 h-1 rounded-full bg-zinc-800 overflow-hidden ml-1">
+                            <div className="w-12 h-1 rounded-full bg-cyan-400/10 overflow-hidden ml-1">
                               <div className="h-full bg-white transition-all" style={{ width: `${pct}%` }} />
                             </div>
                           </div>
@@ -1910,7 +1910,7 @@ Use 2 hashtags max when promo present`;
                           setShowHashtags(!showHashtags);
                           setShowMentions(false);
                         }}
-                        className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 transition border ${showHashtags ? "bg-white text-black border-white" : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-800"}`}
+                        className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 transition border ${showHashtags ? "bg-white text-black border-white" : "bg-cyan-400/10 hover:bg-cyan-400/20 text-[#E6FFFA] border-cyan-400/15"}`}
                       >
                         <Hash className="w-3 h-3" /> Hashtags
                       </button>
@@ -1919,27 +1919,27 @@ Use 2 hashtags max when promo present`;
                           setShowMentions(!showMentions);
                           setShowHashtags(false);
                         }}
-                        className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 transition border ${showMentions ? "bg-white text-black border-white" : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-800"}`}
+                        className={`px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 transition border ${showMentions ? "bg-white text-black border-white" : "bg-cyan-400/10 hover:bg-cyan-400/20 text-[#E6FFFA] border-cyan-400/15"}`}
                       >
                         <AtSign className="w-3 h-3" /> Mentions
                       </button>
-                      <div className="h-4 w-px bg-zinc-800 mx-1" />
-                      <span className="text-[11px] text-zinc-500">click to insert at cursor</span>
+                      <div className="h-4 w-px bg-cyan-400/10 mx-1" />
+                      <span className="text-[11px] text-[#4E7A73]">click to insert at cursor</span>
                     </div>
                     {(showHashtags || showMentions) && (
-                      <div className="mt-3 flex flex-wrap gap-1.5 p-3 rounded-xl bg-[#0f0f10] border border-zinc-800">
+                      <div className="mt-3 flex flex-wrap gap-1.5 p-3 rounded-xl bg-[#05201a] border border-cyan-400/15">
                         {(showHashtags ? HASHTAGS : MENTIONS).map((h) => (
-                          <button key={h} onClick={() => insertAtCursor(h)} className="px-2.5 py-1 rounded-full bg-zinc-800 hover:bg-white hover:text-black text-[11px] text-zinc-300 flex items-center gap-1 transition">
+                          <button key={h} onClick={() => insertAtCursor(h)} className="px-2.5 py-1 rounded-full bg-cyan-400/10 hover:bg-white hover:text-black text-[11px] text-[#E6FFFA] flex items-center gap-1 transition">
                             {showHashtags ? <Hash className="w-3 h-3" /> : <AtSign className="w-3 h-3" />} {h.replace(/^#|^@/, "")}
                           </button>
                         ))}
                       </div>
                     )}
                     {aiVariations.length > 0 && (
-                      <div className="mt-4 p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 space-y-2">
-                        <div className="text-[11px] font-semibold tracking-widest uppercase text-zinc-500">AI Variations</div>
+                      <div className="mt-4 p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 space-y-2">
+                        <div className="text-[11px] font-semibold tracking-widest uppercase text-[#4E7A73]">AI Variations</div>
                         {aiVariations.map((v, i) => (
-                          <button key={i} onClick={() => setPostText(v)} className="w-full text-left p-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[12.5px] leading-[1.5] text-zinc-300 transition">
+                          <button key={i} onClick={() => setPostText(v)} className="w-full text-left p-2.5 rounded-lg bg-white/[0.03] hover:bg-cyan-400/10 text-[12.5px] leading-[1.5] text-[#E6FFFA] transition">
                             {v}
                           </button>
                         ))}
@@ -1947,29 +1947,29 @@ Use 2 hashtags max when promo present`;
                     )}
                   </div>
 
-                  <div className="border-t border-zinc-800 p-4 bg-[#121213]">
+                  <div className="border-t border-cyan-400/15 p-4 bg-[#0A1418]">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-medium text-zinc-400 flex items-center gap-2">
+                        <span className="text-[12px] font-medium text-white/55 flex items-center gap-2">
                           <ImageIcon className="w-4 h-4" /> Media ({media.length}/4) + Files ({attachedFiles.length})
                         </span>
-                        <button onClick={() => fileInputRef.current?.click()} className="ml-2 w-7 h-7 rounded-full bg-zinc-800 hover:bg-zinc-700 grid place-items-center border border-zinc-700 transition" title="Add image">
+                        <button onClick={() => fileInputRef.current?.click()} className="ml-2 w-7 h-7 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 grid place-items-center border border-cyan-400/25 transition" title="Add image">
                           <ImageIcon className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => fileInputRef.current?.click()} className="w-7 h-7 rounded-full bg-zinc-800 hover:bg-zinc-700 grid place-items-center border border-zinc-700 transition" title="Add video">
+                        <button onClick={() => fileInputRef.current?.click()} className="w-7 h-7 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 grid place-items-center border border-cyan-400/25 transition" title="Add video">
                           <VideoIcon className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => fileInputRef.current?.click()} className="w-7 h-7 rounded-full bg-zinc-800 hover:bg-zinc-700 grid place-items-center border border-zinc-700 transition" title="Add docs">
+                        <button onClick={() => fileInputRef.current?.click()} className="w-7 h-7 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 grid place-items-center border border-cyan-400/25 transition" title="Add docs">
                           <FileText className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                      <span className="text-[11px] text-zinc-500 mono">Images • Video • PDF • DOC • TXT • CSV • 100MB max</span>
+                      <span className="text-[11px] text-[#4E7A73] mono">Images • Video • PDF • DOC • TXT • CSV • 100MB max</span>
                     </div>
 
                     {media.length > 0 && (
                       <div className="grid grid-cols-4 gap-2 mb-3">
                         {media.map((m, i) => (
-                          <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 group border border-zinc-800">
+                          <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-white/[0.03] group border border-cyan-400/15">
                             {m.type === "image" ? (
                               <img src={m.url} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -1999,20 +1999,20 @@ Use 2 hashtags max when promo present`;
                     )}
 
                     {attachedFiles.length > 0 && (
-                      <div className="mb-3 rounded-xl bg-[#0f0f10] border border-zinc-800 p-3 space-y-2">
-                        <div className="text-[11px] mono text-zinc-500 uppercase tracking-widest">Attached documents ({attachedFiles.length})</div>
+                      <div className="mb-3 rounded-xl bg-[#05201a] border border-cyan-400/15 p-3 space-y-2">
+                        <div className="text-[11px] mono text-[#4E7A73] uppercase tracking-widest">Attached documents ({attachedFiles.length})</div>
                         {attachedFiles.map((f) => (
-                          <div key={f.id} className="flex items-center gap-3 p-2 rounded-lg bg-[#161617] border border-zinc-800/60">
-                            <div className="w-8 h-8 rounded-lg bg-zinc-900 grid place-items-center border border-zinc-800">
-                              {f.type.includes("pdf") ? <FileText className="w-4 h-4 text-red-300" /> : f.name.endsWith(".csv") ? <FileIcon className="w-4 h-4 text-emerald-300" /> : <FileText className="w-4 h-4 text-zinc-300" />}
+                          <div key={f.id} className="flex items-center gap-3 p-2 rounded-lg bg-[#0A1418] border border-cyan-400/10">
+                            <div className="w-8 h-8 rounded-lg bg-white/[0.03] grid place-items-center border border-cyan-400/15">
+                              {f.type.includes("pdf") ? <FileText className="w-4 h-4 text-red-300" /> : f.name.endsWith(".csv") ? <FileIcon className="w-4 h-4 text-[#2EF8A0]" /> : <FileText className="w-4 h-4 text-[#E6FFFA]" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-[12.5px] truncate text-zinc-200">{f.name}</div>
-                              <div className="text-[11px] text-zinc-500 mono">
+                              <div className="text-[12.5px] truncate text-white">{f.name}</div>
+                              <div className="text-[11px] text-[#4E7A73] mono">
                                 {f.type || "file"} • {formatSize(f.size)}
                               </div>
                             </div>
-                            <button onClick={() => setAttachedFiles((arr) => arr.filter((x) => x.id !== f.id))} className="w-7 h-7 rounded-full bg-zinc-800 hover:bg-zinc-700 grid place-items-center">
+                            <button onClick={() => setAttachedFiles((arr) => arr.filter((x) => x.id !== f.id))} className="w-7 h-7 rounded-full bg-cyan-400/10 hover:bg-cyan-400/20 grid place-items-center">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -2024,13 +2024,13 @@ Use 2 hashtags max when promo present`;
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={onDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      className="rounded-xl border border-dashed border-zinc-700 bg-[#0f0f10] hover:bg-zinc-900/50 p-4 flex items-center justify-center gap-3 cursor-pointer transition"
+                      className="rounded-xl border border-dashed border-cyan-400/25 bg-[#05201a] hover:bg-white/[0.04]/50 p-4 flex items-center justify-center gap-3 cursor-pointer transition"
                     >
-                      <CloudUpload className="w-5 h-5 text-zinc-500" />
-                      <span className="text-[13px] text-zinc-400">
+                      <CloudUpload className="w-5 h-5 text-[#4E7A73]" />
+                      <span className="text-[13px] text-white/55">
                         Drop files or <span className="text-white underline">browse</span> • images, video, pdf, doc, txt, csv
                       </span>
-                      <span className="ml-auto hidden sm:flex items-center gap-1.5 text-[11px] text-zinc-500">
+                      <span className="ml-auto hidden sm:flex items-center gap-1.5 text-[11px] text-[#4E7A73]">
                         <VideoIcon className="w-3.5 h-3.5" /> Video + Docs supported
                       </span>
                     </div>
@@ -2047,7 +2047,7 @@ Use 2 hashtags max when promo present`;
                 )}
 
                 {cStep === "visuals" && (
-                <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5">
+                <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <h3 className="text-[13px] font-semibold tracking-wide">Picture Studio</h3>
                     
@@ -2056,19 +2056,19 @@ Use 2 hashtags max when promo present`;
                   <textarea
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="Describe image to generate... e.g., minimal studio shot of sneaker on pedestal, soft light"
-                    className="w-full min-h-[84px] bg-[#0f0f10] border border-zinc-800 rounded-[12px] p-3 text-[13px] leading-[1.5] outline-none focus:border-zinc-700 placeholder:text-zinc-600 resize-none"
+                    placeholder="Describe image to generate... e.g., founders collaborating at the hub, natural light"
+                    className="w-full min-h-[84px] bg-[#05201a] border border-cyan-400/15 rounded-[12px] p-3 text-[13px] leading-[1.5] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75 resize-none"
                   />
 
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {["Product shot", "UGC style", "Minimal background", "Bold typography", "Viral meme"].map((chip) => (
+                    {["Founder portrait", "Event shot", "Clean background", "Bold typography", "Quote card"].map((chip) => (
                       <button
                         key={chip}
                         onClick={() => {
                           setAiPrompt((p) => (p ? p + ", " : "") + chip.toLowerCase());
                           showToast(`Prompt: + ${chip}`, "success");
                         }}
-                        className="px-2.5 py-1 rounded-full bg-[#0f0f10] border border-zinc-800 text-[11px] text-zinc-300 hover:bg-white hover:text-black transition"
+                        className="px-2.5 py-1 rounded-full bg-[#05201a] border border-cyan-400/15 text-[11px] text-[#E6FFFA] hover:bg-white hover:text-black transition"
                       >
                         {chip}
                       </button>
@@ -2086,39 +2086,39 @@ Use 2 hashtags max when promo present`;
                     <button
                       onClick={() => handleGenerate("video")}
                       disabled={aiStatus === "enhancing" || aiStatus === "generating"}
-                      className="py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 font-medium text-[13px] flex items-center justify-center gap-2 hover:bg-zinc-800 transition disabled:opacity-50"
+                      className="py-2.5 rounded-xl bg-white/[0.03] border border-cyan-400/15 text-white font-medium text-[13px] flex items-center justify-center gap-2 hover:bg-cyan-400/10 transition disabled:opacity-50"
                     >
                       <VideoIcon className="w-4 h-4" /> Generate Video
                     </button>
                   </div>
 
                   {aiStatus !== "idle" && (
-                    <div className="mt-4 p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 flex items-center gap-2.5">
-                      <div className="w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
-                      <span className="text-[12px] text-zinc-300 mono">
-                        {aiStatus === "enhancing" ? "Llama enhancing prompt →" : aiStatus === "generating" ? `Emu generating ${aiGeneratingType}...` : "Done — added to media"}
+                    <div className="mt-4 p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 flex items-center gap-2.5">
+                      <div className="w-4 h-4 border-2 border-cyan-400/30 border-t-white rounded-full animate-spin" />
+                      <span className="text-[12px] text-[#E6FFFA] mono">
+                        {aiStatus === "enhancing" ? "Enhancing prompt →" : aiStatus === "generating" ? `Generating ${aiGeneratingType}...` : "Done — added to media"}
                       </span>
-                      <span className="ml-auto text-[11px] text-zinc-500 mono">Llama 3.2 + Emu</span>
+                      <span className="ml-auto text-[11px] text-[#4E7A73] mono">Socialite Studio</span>
                     </div>
                   )}
 
-                  <div className="mt-3 text-[11px] text-zinc-500 leading-[1.4]">App ID {META_APP_ID} • Token {META_APP_ID.slice(0, 4)}…{META_APP_ID.slice(-4)} preloaded • Open source models</div>
+                  <div className="mt-3 text-[11px] text-[#4E7A73] leading-[1.4]">App ID {META_APP_ID} • Publishing runs through Socialite's secure edge functions</div>
                 </div>
                 )}
 
                 <ShieldNotice shield={composerShield} />
                 {cStep === "publish" && (<>
-                <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5">
-                  <h3 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-400 mb-4">Optimizations</h3>
+                <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5">
+                  <h3 className="text-[13px] font-semibold tracking-widest uppercase text-white/55 mb-4">Optimizations</h3>
                   <div className="grid sm:grid-cols-3 gap-3">
                     {[
                       { label: "Instagram 1:1 crop", key: "igCrop" },
                       { label: "Auto-hashtags", key: "autoHashtags" },
                       { label: "Cross-post adapt", key: "crossAdapt" },
                     ].map((opt) => (
-                      <label key={opt.key} className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 cursor-pointer">
+                      <label key={opt.key} className="flex items-center justify-between p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 cursor-pointer">
                         <span className="text-[12.5px]">{opt.label}</span>
-                        <div className={`w-9 h-5 rounded-full p-0.5 transition ${settings[opt.key] ? "bg-white" : "bg-zinc-700"}`}>
+                        <div className={`w-9 h-5 rounded-full p-0.5 transition ${settings[opt.key] ? "bg-white" : "bg-cyan-400/15"}`}>
                           <div className={`w-4 h-4 rounded-full bg-black transition ${settings[opt.key] ? "translate-x-4" : ""}`} />
                         </div>
                         <input
@@ -2133,11 +2133,11 @@ Use 2 hashtags max when promo present`;
                       </label>
                     ))}
                   </div>
-                  <label className="mt-3 flex items-center justify-between p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 cursor-pointer">
+                  <label className="mt-3 flex items-center justify-between p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 cursor-pointer">
                     <span className="text-[12.5px] flex items-center gap-2">
                       <MessageCircle className="w-4 h-4" /> First comment for IG (link, hashtags)
                     </span>
-                    <div className={`w-9 h-5 rounded-full p-0.5 transition ${settings.firstComment ? "bg-white" : "bg-zinc-700"}`}>
+                    <div className={`w-9 h-5 rounded-full p-0.5 transition ${settings.firstComment ? "bg-white" : "bg-cyan-400/15"}`}>
                       <div className={`w-4 h-4 rounded-full bg-black transition ${settings.firstComment ? "translate-x-4" : ""}`} />
                     </div>
                     <input
@@ -2152,9 +2152,9 @@ Use 2 hashtags max when promo present`;
                   </label>
                 </div>
 
-                <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5">
+                <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-400">Schedule</h3>
+                    <h3 className="text-[13px] font-semibold tracking-widest uppercase text-white/55">Schedule</h3>
                     <button
                       onClick={() => {
                         const t = getBestTime();
@@ -2162,7 +2162,7 @@ Use 2 hashtags max when promo present`;
                         setScheduleMode("best");
                         showToast(`Best time set: ${t.toLocaleString()}`, "success");
                       }}
-                      className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 text-[11px] font-medium flex items-center gap-1 hover:bg-emerald-500/25 transition"
+                      className="px-2.5 py-1 rounded-full bg-[#2EF8A0]/10 text-[#2EF8A0] border border-[#2EF8A0]/25 text-[11px] font-medium flex items-center gap-1 hover:bg-[#2EF8A0]/20 transition"
                     >
                       <Send className="w-3 h-3" /> Best time: {getBestTime().toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}
                     </button>
@@ -2177,7 +2177,7 @@ Use 2 hashtags max when promo present`;
                       <button
                         key={opt.id}
                         onClick={() => setScheduleMode(opt.id as any)}
-                        className={`p-3 rounded-xl border text-left transition flex items-center gap-2.5 ${scheduleMode === opt.id ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-400 hover:border-zinc-700"}`}
+                        className={`p-3 rounded-xl border text-left transition flex items-center gap-2.5 ${scheduleMode === opt.id ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-white/55 hover:border-cyan-400/25"}`}
                       >
                         <opt.icon className="w-4 h-4" />
                         <span className="text-[12.5px] font-medium">{opt.label}</span>
@@ -2188,7 +2188,7 @@ Use 2 hashtags max when promo present`;
                     <div className="flex gap-3">
                       <div className="flex-1">{scheduleMode === "schedule"
                         ? <SendTimePicker value={scheduleAt} onChange={setScheduleAt} tz={sendTz} onTzChange={setSendTz} />
-                        : <input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} className="w-full bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-600" />}</div>
+                        : <input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} className="w-full bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/30" />}</div>
                       <button
                         onClick={() => {
                           const newVal = !settings.recurring;
@@ -2214,7 +2214,7 @@ Use 2 hashtags max when promo present`;
                             showToast("Recurring off", "success");
                           }
                         }}
-                        className={`hidden sm:flex items-center gap-2 px-3 rounded-xl border text-[11px] mono transition ${settings.recurring ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-500"}`}
+                        className={`hidden sm:flex items-center gap-2 px-3 rounded-xl border text-[11px] mono transition ${settings.recurring ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-[#4E7A73]"}`}
                       >
                         <Repeat className="w-3.5 h-3.5" /> Recurring?
                       </button>
@@ -2231,32 +2231,32 @@ Use 2 hashtags max when promo present`;
                 </div>
                 </>)}
                 <div className="flex items-center justify-between pt-1">
-                  <button disabled={cStep==="where"} onClick={()=>setCStep(C_STEPS[Math.max(0,C_STEPS.indexOf(cStep)-1)])} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[12.5px] text-zinc-200 disabled:opacity-30">Back</button>
+                  <button disabled={cStep==="where"} onClick={()=>setCStep(C_STEPS[Math.max(0,C_STEPS.indexOf(cStep)-1)])} className="px-4 py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[12.5px] text-white disabled:opacity-30">Back</button>
                   {cStep!=="publish" && <button onClick={()=>setCStep(C_STEPS[C_STEPS.indexOf(cStep)+1])} className="px-5 py-2 rounded-full bg-white text-black text-[12.5px] font-semibold">Next</button>}
                 </div>
               </div>
 
-              <div className="border-t xl:border-t-0 xl:border-l border-zinc-800 bg-[#0f0f10] p-4 lg:p-6">
+              <div className="border-t xl:border-t-0 xl:border-l border-cyan-400/15 bg-[#05201a] p-4 lg:p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-400">Live preview</h3>
-                  <span className="text-[11px] mono text-zinc-500">{selected.length} variants</span>
+                  <h3 className="text-[13px] font-semibold tracking-widest uppercase text-white/55">Live preview</h3>
+                  <span className="text-[11px] mono text-[#4E7A73]">{selected.length} variants</span>
                 </div>
                 <div className="space-y-5">
                   {selected.map((pid) => {
                     const plat = PLATFORMS.find((p) => p.id === pid)!;
                     return (
-                      <div key={pid} className="rounded-[18px] border border-zinc-800 bg-[#161617] overflow-hidden">
-                        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-zinc-800">
+                      <div key={pid} className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] overflow-hidden">
+                        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-cyan-400/15">
                           <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${plat.bg} grid place-items-center text-white`}>{plat.icon}</div>
                           <span className="text-[12.5px] font-medium">{plat.name}</span>
-                          <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400" />
+                          <span className="ml-auto w-2 h-2 rounded-full bg-[#2EF8A0]" />
                         </div>
                         {pid === "instagram" && (
                           <div className="p-0">
                             <div className="flex items-center gap-2 px-4 py-3">
-                              <img src={profile.avatar} className="w-7 h-7 rounded-full bg-zinc-800" alt="" />
+                              <img src={profile.avatar} className="w-7 h-7 rounded-full bg-cyan-400/10" alt="" />
                               <span className="text-[12.5px] font-semibold">{profile.name}</span>
-                              <Ellipsis className="w-4 h-4 ml-auto text-zinc-500" />
+                              <Ellipsis className="w-4 h-4 ml-auto text-[#4E7A73]" />
                             </div>
                             {media[0] && (
                               <img src={media[0].url} alt="" className={`w-full ${settings.igCrop ? "aspect-square object-cover" : "aspect-[4/5] object-cover"}`} />
@@ -2266,28 +2266,28 @@ Use 2 hashtags max when promo present`;
                               <p className="text-[12.5px] leading-[1.5] line-clamp-3">
                                 <span className="font-semibold">{profile.name}</span> {postText.slice(0, 120)}
                               </p>
-                              {settings.firstComment && <p className="text-[11px] text-zinc-500">First comment: 🔗 link in bio • hashtags</p>}
+                              {settings.firstComment && <p className="text-[11px] text-[#4E7A73]">First comment: 🔗 link in bio • hashtags</p>}
                             </div>
                           </div>
                         )}
                         {pid === "x" && (
                           <div className="p-4 flex gap-3">
-                            <img src={profile.avatar} className="w-9 h-9 rounded-full shrink-0 bg-zinc-800" alt="" />
+                            <img src={profile.avatar} className="w-9 h-9 rounded-full shrink-0 bg-cyan-400/10" alt="" />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-[13px] font-semibold">{profile.name}</span>
-                                <span className="text-[12px] text-zinc-500">@{profile.name} • now</span>
+                                <span className="text-[12px] text-[#4E7A73]">@{profile.name} • now</span>
                               </div>
                               <p className="text-[13px] leading-[1.5] mt-1 whitespace-pre-wrap break-words">{settings.crossAdapt ? postText.slice(0, 280) : postText.slice(0, 260)}</p>
-                              {media[0] && <img src={media[0].url} alt="" className="mt-3 rounded-[14px] w-full aspect-[16/10] object-cover border border-zinc-800" />}
+                              {media[0] && <img src={media[0].url} alt="" className="mt-3 rounded-[14px] w-full aspect-[16/10] object-cover border border-cyan-400/15" />}
                             </div>
                           </div>
                         )}
                         {pid === "threads" && (
                           <div className="p-4 flex gap-3">
-                            <img src={profile.avatar} className="w-8 h-8 rounded-full bg-zinc-800" alt="" />
+                            <img src={profile.avatar} className="w-8 h-8 rounded-full bg-cyan-400/10" alt="" />
                             <div className="flex-1 min-w-0">
-                              <span className="text-[13px] font-semibold">{profile.name}</span> <span className="text-[11px] text-zinc-500">• 2m</span>
+                              <span className="text-[13px] font-semibold">{profile.name}</span> <span className="text-[11px] text-[#4E7A73]">• 2m</span>
                               <p className="text-[13px] mt-1 leading-[1.5] whitespace-pre-wrap">{postText.slice(0, 450)}</p>
                             </div>
                           </div>
@@ -2295,10 +2295,10 @@ Use 2 hashtags max when promo present`;
                         {pid === "facebook" && (
                           <div className="p-4">
                             <div className="flex gap-2.5">
-                              <img src={profile.avatar} className="w-9 h-9 rounded-full bg-zinc-800" alt="" />
+                              <img src={profile.avatar} className="w-9 h-9 rounded-full bg-cyan-400/10" alt="" />
                               <div>
                                 <div className="text-[13px] font-semibold">{profile.name}</div>
-                                <div className="text-[11px] text-zinc-500">Sponsored • 🌎</div>
+                                <div className="text-[11px] text-[#4E7A73]">Sponsored • 🌎</div>
                               </div>
                             </div>
                             <p className="text-[13px] mt-3 leading-[1.5] whitespace-pre-wrap">{postText.slice(0, 280)}</p>
@@ -2310,7 +2310,7 @@ Use 2 hashtags max when promo present`;
                             {media[0] ? (
                               <img src={media[0].url} alt="" className="w-full aspect-[9/16] object-cover opacity-80" />
                             ) : (
-                              <div className="aspect-[9/16] grid place-items-center bg-zinc-900 text-zinc-600 text-[11px]">No video</div>
+                              <div className="aspect-[9/16] grid place-items-center bg-white/[0.03] text-[#4E7A73]/75 text-[11px]">No video</div>
                             )}
                             <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                               <p className="text-[12px] leading-[1.4] text-white line-clamp-2">{postText.slice(0, 140)}</p>
@@ -2324,7 +2324,7 @@ Use 2 hashtags max when promo present`;
                               {media[0] ? (
                                 <img src={media[0].url} alt="" className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full grid place-items-center bg-zinc-900 text-zinc-500 text-[11px]">No thumbnail • upload image/video</div>
+                                <div className="w-full h-full grid place-items-center bg-white/[0.03] text-[#4E7A73] text-[11px]">No thumbnail • upload image/video</div>
                               )}
                               <div className="absolute inset-0 grid place-items-center">
                                 <div className="w-14 h-10 rounded-[10px] bg-[#FF0000] grid place-items-center shadow-[0_4px_16px_rgba(255,0,0,0.45)]">
@@ -2336,17 +2336,17 @@ Use 2 hashtags max when promo present`;
                               </div>
                             </div>
                             <div className="p-3.5 flex gap-3">
-                              <img src={profile.avatar} className="w-9 h-9 rounded-full bg-zinc-800 shrink-0 mt-0.5" alt="" />
+                              <img src={profile.avatar} className="w-9 h-9 rounded-full bg-cyan-400/10 shrink-0 mt-0.5" alt="" />
                               <div className="min-w-0 flex-1">
                                 <div className="text-[14px] font-semibold leading-[1.25] line-clamp-2 text-zinc-100">
                                   {(postText.split("\n")[0] || "Untitled").slice(0, 100) || "New video title"}
                                 </div>
-                                <div className="text-[12px] text-zinc-500 mt-1 flex items-center gap-1">
+                                <div className="text-[12px] text-[#4E7A73] mt-1 flex items-center gap-1">
                                   <span>{profile.name}</span>
-                                  <span className="w-3 h-3 rounded-full bg-zinc-700 grid place-items-center text-[8px]">✓</span>
-                                  <span className="text-zinc-600">• preview</span>
+                                  <span className="w-3 h-3 rounded-full bg-cyan-400/15 grid place-items-center text-[8px]">✓</span>
+                                  <span className="text-[#4E7A73]/75">• preview</span>
                                 </div>
-                                <p className="text-[12px] leading-[1.5] mt-2 line-clamp-3 text-zinc-400 whitespace-pre-wrap">
+                                <p className="text-[12px] leading-[1.5] mt-2 line-clamp-3 text-white/55 whitespace-pre-wrap">
                                   {postText.split("\n").slice(1).join("\n").slice(0, 200) || postText.slice(0, 200) || "Description will appear here... Add details, links, chapters."}
                                 </p>
                                 <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -2354,18 +2354,18 @@ Use 2 hashtags max when promo present`;
                                     .match(/#\w+/g)
                                     ?.slice(0, 4)
                                     .map((t) => (
-                                      <span key={t} className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-400">
+                                      <span key={t} className="px-2 py-0.5 rounded-full bg-cyan-400/10 border border-cyan-400/25 text-[10px] text-white/55">
                                         {t}
                                       </span>
                                     ))}
                                 </div>
                               </div>
-                              <Ellipsis className="w-4 h-4 text-zinc-600 shrink-0" />
+                              <Ellipsis className="w-4 h-4 text-[#4E7A73]/75 shrink-0" />
                             </div>
                           </div>
                         )}
                         {attachedFiles.length > 0 && (
-                          <div className="px-4 py-2 border-t border-zinc-800 bg-[#0f0f10] flex items-center gap-2 text-[11px] text-zinc-400">
+                          <div className="px-4 py-2 border-t border-cyan-400/15 bg-[#05201a] flex items-center gap-2 text-[11px] text-white/55">
                             <FileText className="w-3.5 h-3.5" /> {attachedFiles.length} file(s) attached • {attachedFiles.map((f) => f.name).join(", ").slice(0, 60)}
                           </div>
                         )}
@@ -2373,8 +2373,8 @@ Use 2 hashtags max when promo present`;
                     );
                   })}
                   {selected.length === 0 && (
-                    <div className="rounded-[18px] border border-dashed border-zinc-700 p-10 text-center text-zinc-500">
-                      <div className="w-10 h-10 rounded-full bg-zinc-900 mx-auto grid place-items-center mb-3">
+                    <div className="rounded-[18px] border border-dashed border-cyan-400/25 p-10 text-center text-[#4E7A73]">
+                      <div className="w-10 h-10 rounded-full bg-white/[0.03] mx-auto grid place-items-center mb-3">
                         <Eye className="w-5 h-5" />
                       </div>
                       <div className="text-[13px]">Select platforms to preview</div>
@@ -2382,9 +2382,9 @@ Use 2 hashtags max when promo present`;
                   )}
                 </div>
 
-                <div className="mt-6 p-3 rounded-xl bg-[#161617] border border-zinc-800">
-                  <div className="text-[11px] mono text-zinc-500 mb-2">ADAPTATION • Auto</div>
-                  <div className="text-[12px] leading-[1.5] text-zinc-300">
+                <div className="mt-6 p-3 rounded-xl bg-[#0A1418] border border-cyan-400/15">
+                  <div className="text-[11px] mono text-[#4E7A73] mb-2">ADAPTATION • Auto</div>
+                  <div className="text-[12px] leading-[1.5] text-[#E6FFFA]">
                     {settings.crossAdapt ? "✓ Cross-post copy will be adapted: X will be trimmed to 280 chars, IG keeps hashtags in first comment." : "Cross-post adaptation off — same copy for all."}
                   </div>
                 </div>
@@ -2395,22 +2395,22 @@ Use 2 hashtags max when promo present`;
           {view === "automation" && (
             <div className="p-4 lg:p-8 max-w-[1200px] space-y-6">
               {/* Header */}
-              <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5 lg:p-6 flex flex-wrap gap-4 items-center justify-between">
+              <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5 lg:p-6 flex flex-wrap gap-4 items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div>
                     <h1 className="text-[18px] font-semibold tracking-tight flex items-center gap-2">
                       Automation
-                      {automationEnabled && <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 text-[10px] mono uppercase">Live</span>}
+                      {automationEnabled && <span className="px-2 py-0.5 rounded-full bg-[#2EF8A0]/15 text-[#2EF8A0] border border-[#2EF8A0]/25 text-[10px] mono uppercase">Live</span>}
                     </h1>
-                    <div className="text-[12px] text-zinc-500 mt-0.5">
+                    <div className="text-[12px] text-[#4E7A73] mt-0.5">
                       {automationEnabled ? `Bot running • next check in 60s • next run ${nextRunAt ? nextRunAt.toLocaleString() : "calculating..."}` : "Bot paused • enable to auto-create & auto-post from context"}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">
-                    <div className="text-[11px] mono text-zinc-500 uppercase tracking-widest">Bot Status</div>
-                    <div className={`text-[13px] font-semibold ${automationEnabled ? "text-emerald-300" : "text-zinc-400"}`}>{automationEnabled ? "ENABLED" : "DISABLED"}</div>
+                    <div className="text-[11px] mono text-[#4E7A73] uppercase tracking-widest">Bot Status</div>
+                    <div className={`text-[13px] font-semibold ${automationEnabled ? "text-[#2EF8A0]" : "text-white/55"}`}>{automationEnabled ? "ENABLED" : "DISABLED"}</div>
                   </div>
                   <button
                     onClick={()=>{
@@ -2418,10 +2418,10 @@ Use 2 hashtags max when promo present`;
                       setAutomationEnabled(next);
                       showToast(next ? "Bot ENABLED — will auto-post every 60s + auto-generate daily" : "Bot DISABLED — auto-post paused");
                     }}
-                    className={`relative w-[64px] h-[36px] rounded-full p-1 transition-all border ${automationEnabled ? "bg-emerald-500 border-emerald-400" : "bg-zinc-800 border-zinc-700"}`}
+                    className={`relative w-[64px] h-[36px] rounded-full p-1 transition-all border ${automationEnabled ? "bg-[#14b8a6] border-[#2EF8A0]" : "bg-cyan-400/10 border-cyan-400/25"}`}
                   >
                     <div className={`w-7 h-7 rounded-full bg-white shadow transition-transform grid place-items-center ${automationEnabled ? "translate-x-[26px]" : "translate-x-0"}`}>
-                      {automationEnabled ? <Send className="w-3.5 h-3.5 text-emerald-600" /> : <Pause className="w-3.5 h-3.5 text-zinc-600" />}
+                      {automationEnabled ? <Send className="w-3.5 h-3.5 text-[#14b8a6]" /> : <Pause className="w-3.5 h-3.5 text-[#4E7A73]/75" />}
                     </div>
                   </button>
                 </div>
@@ -2435,9 +2435,9 @@ Use 2 hashtags max when promo present`;
                   { id: "schedule", n: "3", t: "When & where", s: `${autoStats.perDay}/day · ${autoPlatforms.length} platforms` },
                   { id: "offers", n: "4", t: "Offers", s: `${promotions.filter(p=>p.enabled).length} active · ${allowPromoUse ? "bot uses them" : "off"}` },
                 ] as const).map(st => (
-                  <button key={st.id} onClick={()=>setAutoStep(st.id)} className={`text-left rounded-[16px] border p-3.5 transition ${autoStep===st.id ? "bg-white text-black border-white" : "bg-[#161617] border-zinc-800 text-zinc-300 hover:border-zinc-700"}`}>
-                    <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full grid place-items-center text-[10px] mono font-semibold ${autoStep===st.id ? "bg-black text-white" : "bg-zinc-800 text-zinc-400"}`}>{st.n}</span><span className="text-[13px] font-semibold">{st.t}</span></div>
-                    <div className={`text-[11px] mt-1 truncate ${autoStep===st.id ? "text-zinc-600" : "text-zinc-500"}`}>{st.s}</div>
+                  <button key={st.id} onClick={()=>setAutoStep(st.id)} className={`text-left rounded-[16px] border p-3.5 transition ${autoStep===st.id ? "bg-white text-black border-white" : "bg-[#0A1418] border-cyan-400/15 text-[#E6FFFA] hover:border-cyan-400/25"}`}>
+                    <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full grid place-items-center text-[10px] mono font-semibold ${autoStep===st.id ? "bg-black text-white" : "bg-cyan-400/10 text-white/55"}`}>{st.n}</span><span className="text-[13px] font-semibold">{st.t}</span></div>
+                    <div className={`text-[11px] mt-1 truncate ${autoStep===st.id ? "text-[#4E7A73]/75" : "text-[#4E7A73]"}`}>{st.s}</div>
                   </button>
                 ))}
               </div>
@@ -2445,66 +2445,66 @@ Use 2 hashtags max when promo present`;
 
                   {autoStep === "brain" && (<>
                   {/* Context & Brain */}
-                  <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5 lg:p-6">
+                  <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5 lg:p-6">
                     <div className="flex items-center gap-2.5 mb-5">
-                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-300">What should the bot know?</h2>
+                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-[#E6FFFA]">What should the bot know?</h2>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <label className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-2 block">Brand Context</label>
+                        <label className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-2 block">Brand Context</label>
                         <textarea
                           value={brandContext}
                           onChange={(e)=>setBrandContext(e.target.value)}
-                          placeholder="Describe your brand, product, audience, voice... e.g., We are a sneaker brand for Gen Z, edgy, minimal, we sell..."
-                          className="w-full min-h-[112px] bg-[#0f0f10] border border-zinc-800 rounded-[14px] p-3.5 text-[13px] leading-[1.6] outline-none focus:border-zinc-700 placeholder:text-zinc-600 resize-none"
+                          placeholder="Describe your brand, product, audience, voice... e.g., We are an AI venture builder in Orlando helping founders launch and scale startups..."
+                          className="w-full min-h-[112px] bg-[#05201a] border border-cyan-400/15 rounded-[14px] p-3.5 text-[13px] leading-[1.6] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75 resize-none"
                         />
-                        <div className="mt-2 flex justify-between text-[11px] mono text-zinc-500">
+                        <div className="mt-2 flex justify-between text-[11px] mono text-[#4E7A73]">
                           <span>{brandContext.length} chars • used for caption generation</span>
-                          <button onClick={()=>{ localStorage.setItem("pf_automation_context", brandContext); showToast("Context saved", "success"); }} className="px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 transition">Save context</button>
+                          <button onClick={()=>{ localStorage.setItem("pf_automation_context", brandContext); showToast("Context saved", "success"); }} className="px-2.5 py-1 rounded-full bg-white/[0.03] border border-cyan-400/15 hover:bg-cyan-400/10 text-[#E6FFFA] transition">Save context</button>
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-2 block">Tone — Multi-select</label>
+                        <label className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-2 block">Tone — Multi-select</label>
                         <div className="flex flex-wrap gap-2">
                           {TONES.map(t=>(
-                            <button key={t} onClick={()=>toggleTone(t)} className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition ${selectedTones.includes(t) ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"}`}>{t}</button>
+                            <button key={t} onClick={()=>toggleTone(t)} className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition ${selectedTones.includes(t) ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-white/55 hover:border-cyan-400/25 hover:text-white"}`}>{t}</button>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-2 block">Topics — Chips</label>
+                        <label className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-2 block">Topics — Chips</label>
                         <div className="flex flex-wrap gap-2 mb-3">
                           {topics.map((top,i)=>(
-                            <span key={i} className="px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-[11px] text-zinc-300 flex items-center gap-1.5">
+                            <span key={i} className="px-2.5 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/25 text-[11px] text-[#E6FFFA] flex items-center gap-1.5">
                               {top}
-                              <button onClick={()=>setTopics(t=>t.filter((_,idx)=>idx!==i))} className="w-4 h-4 rounded-full bg-zinc-700 hover:bg-zinc-600 grid place-items-center"><X className="w-3 h-3" /></button>
+                              <button onClick={()=>setTopics(t=>t.filter((_,idx)=>idx!==i))} className="w-4 h-4 rounded-full bg-cyan-400/15 hover:bg-cyan-400/25 grid place-items-center"><X className="w-3 h-3" /></button>
                             </span>
                           ))}
                         </div>
                         <div className="flex gap-2">
-                          <input value={topicInput} onChange={e=>setTopicInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); addTopic(); } }} placeholder="Add topic e.g. product launch, behind the scenes, UGC" className="flex-1 bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
+                          <input value={topicInput} onChange={e=>setTopicInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); addTopic(); } }} placeholder="Add topic e.g. founder stories, demo day, investor insights" className="flex-1 bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
                           <button onClick={addTopic} className="px-4 py-2.5 rounded-xl bg-white text-black text-[12px] font-semibold hover:bg-zinc-100 transition">Add</button>
                         </div>
                       </div>
 
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-2 block">Goals</label>
+                          <label className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-2 block">Goals</label>
                           <div className="flex flex-wrap gap-2">
                             {GOAL_OPTIONS.map(g=>(
-                              <button key={g} onClick={()=>toggleGoal(g)} className={`px-2.5 py-1 rounded-full text-[11px] border transition ${selectedGoals.includes(g) ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-500 hover:text-zinc-300"}`}>{g}</button>
+                              <button key={g} onClick={()=>toggleGoal(g)} className={`px-2.5 py-1 rounded-full text-[11px] border transition ${selectedGoals.includes(g) ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-[#4E7A73] hover:text-[#E6FFFA]"}`}>{g}</button>
                             ))}
                           </div>
                         </div>
                         <div>
-                          <label className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-2 block">Keywords to include (comma separated)</label>
-                          <input value={keywords} onChange={e=>setKeywords(e.target.value)} placeholder="minimal, streetwear, drop, creators..." className="w-full bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
+                          <label className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-2 block">Keywords to include (comma separated)</label>
+                          <input value={keywords} onChange={e=>setKeywords(e.target.value)} placeholder="startups, founders, venture building, pre-seed..." className="w-full bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {keywords.split(",").map(k=>k.trim()).filter(Boolean).slice(0,6).map(k=>(
-                              <span key={k} className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400">#{k.replace(/\s+/g,"")}</span>
+                              <span key={k} className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[10px] text-white/55">#{k.replace(/\s+/g,"")}</span>
                             ))}
                           </div>
                         </div>
@@ -2528,22 +2528,22 @@ Use 2 hashtags max when promo present`;
 
                   {autoStep === "offers" && (<>
                   {/* Offers the bot can use */}
-                  <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5">
+                  <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5">
                     <div className="flex items-center gap-2.5 mb-5">
-                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-300">Offers the bot can use</h2>
-                      <span className="ml-auto text-[10px] mono px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-500">{promotions.length} saved</span>
+                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-[#E6FFFA]">Offers the bot can use</h2>
+                      <span className="ml-auto text-[10px] mono px-2 py-0.5 rounded-full bg-cyan-400/10 border border-cyan-400/25 text-[#4E7A73]">{promotions.length} saved</span>
                     </div>
 
                     <div className="space-y-3">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input value={promoTitle} onChange={(e)=>setPromoTitle(e.target.value)} placeholder="Title e.g. Summer Drop" className="bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
-                        <input value={promoDiscount} onChange={(e)=>setPromoDiscount(e.target.value)} placeholder="20% OFF" className="bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
+                        <input value={promoTitle} onChange={(e)=>setPromoTitle(e.target.value)} placeholder="Title e.g. Spring Cohort Launch" className="bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
+                        <input value={promoDiscount} onChange={(e)=>setPromoDiscount(e.target.value)} placeholder="20% OFF" className="bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input value={promoCode} onChange={(e)=>setPromoCode(e.target.value)} placeholder="SUMMER20" className="bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] mono outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
-                        <input type="date" value={promoValidUntil} onChange={(e)=>setPromoValidUntil(e.target.value)} className="bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 text-zinc-300" />
+                        <input value={promoCode} onChange={(e)=>setPromoCode(e.target.value)} placeholder="SUMMER20" className="bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] mono outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
+                        <input type="date" value={promoValidUntil} onChange={(e)=>setPromoValidUntil(e.target.value)} className="bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 text-[#E6FFFA]" />
                       </div>
-                      <input value={promoDesc} onChange={(e)=>setPromoDesc(e.target.value)} placeholder="Description e.g. Limited edition prints — free shipping" className="w-full bg-[#0f0f10] border border-zinc-800 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-zinc-700 placeholder:text-zinc-600" />
+                      <input value={promoDesc} onChange={(e)=>setPromoDesc(e.target.value)} placeholder="Description e.g. Early-bird seats for the next cohort" className="w-full bg-[#05201a] border border-cyan-400/15 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-cyan-400/25 placeholder:text-[#4E7A73]/75" />
 
                       <button
                         onClick={()=>{
@@ -2573,44 +2573,44 @@ Use 2 hashtags max when promo present`;
                         <Plus className="w-4 h-4" /> Add Promotion
                       </button>
 
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f10] border border-zinc-800">
-                        <span className="text-[12px] text-zinc-300 flex items-center gap-2"><Send className="w-4 h-4 text-zinc-400" /> Allow bot to auto-use promos</span>
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-[#05201a] border border-cyan-400/15">
+                        <span className="text-[12px] text-[#E6FFFA] flex items-center gap-2"><Send className="w-4 h-4 text-white/55" /> Allow bot to auto-use promos</span>
                         <button
                           onClick={()=>setAllowPromoUse((v)=>!v)}
-                          className={`w-9 h-5 rounded-full p-0.5 transition ${allowPromoUse ? "bg-white" : "bg-zinc-700"}`}
+                          className={`w-9 h-5 rounded-full p-0.5 transition ${allowPromoUse ? "bg-white" : "bg-cyan-400/15"}`}
                         >
                           <div className={`w-4 h-4 rounded-full bg-black transition ${allowPromoUse ? "translate-x-4" : ""}`} />
                         </button>
                       </div>
-                      <div className="text-[11px] mono text-zinc-500 px-1">Saved to pf_automation_promotions • bot injects 30% of posts when enabled: 🔥 {"{title} - {discount} Use code {code} - ends {validUntil}"}</div>
+                      <div className="text-[11px] mono text-[#4E7A73] px-1">Saved to pf_automation_promotions • bot injects 30% of posts when enabled: 🔥 {"{title} - {discount} Use code {code} - ends {validUntil}"}</div>
 
                       <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
                         {promotions.length===0 && (
-                          <div className="rounded-xl border border-dashed border-zinc-700 p-6 text-center">
-                            <div className="text-[12px] text-zinc-500">No promotions yet</div>
-                            <div className="text-[11px] text-zinc-600 mt-1">Add offers like 20% OFF with code SUMMER20</div>
+                          <div className="rounded-xl border border-dashed border-cyan-400/25 p-6 text-center">
+                            <div className="text-[12px] text-[#4E7A73]">No promotions yet</div>
+                            <div className="text-[11px] text-[#4E7A73]/75 mt-1">Add offers like 20% OFF with code SUMMER20</div>
                           </div>
                         )}
                         {promotions.map((p)=>(
-                          <div key={p.id} className="flex items-center gap-2 p-3 rounded-[12px] bg-[#0f0f10] border border-zinc-800">
+                          <div key={p.id} className="flex items-center gap-2 p-3 rounded-[12px] bg-[#05201a] border border-cyan-400/15">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[12.5px] font-medium text-zinc-200 truncate">{p.title}</span>
+                                <span className="text-[12.5px] font-medium text-white truncate">{p.title}</span>
                                 <span className="px-2 py-0.5 rounded-full bg-white text-black text-[10px] font-semibold mono">{p.discount}</span>
-                                <span className="px-1.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] mono text-zinc-300">{p.code}</span>
-                                {p.validUntil && <span className="text-[10px] mono text-zinc-500">ends {p.validUntil}</span>}
+                                <span className="px-1.5 py-0.5 rounded-full bg-cyan-400/10 border border-cyan-400/25 text-[10px] mono text-[#E6FFFA]">{p.code}</span>
+                                {p.validUntil && <span className="text-[10px] mono text-[#4E7A73]">ends {p.validUntil}</span>}
                               </div>
-                              {p.desc && <div className="text-[11px] text-zinc-500 mt-1 truncate">{p.desc}</div>}
+                              {p.desc && <div className="text-[11px] text-[#4E7A73] mt-1 truncate">{p.desc}</div>}
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <button
                                 onClick={()=> setPromotions((prev)=> prev.map((x)=> x.id===p.id ? {...x, enabled: !x.enabled} : x))}
-                                className={`w-9 h-5 rounded-full p-0.5 transition ${p.enabled ? "bg-white" : "bg-zinc-700"}`}
+                                className={`w-9 h-5 rounded-full p-0.5 transition ${p.enabled ? "bg-white" : "bg-cyan-400/15"}`}
                                 title={p.enabled ? "Enabled" : "Disabled"}
                               >
                                 <div className={`w-4 h-4 rounded-full bg-black transition ${p.enabled ? "translate-x-4" : ""}`} />
                               </button>
-                              <button onClick={()=>{ setPromotions((prev)=> prev.filter((x)=> x.id!==p.id)); showToast("Promotion removed", "success"); }} className="w-7 h-7 rounded-full bg-zinc-900 hover:bg-red-500/20 hover:text-red-300 border border-zinc-800 grid place-items-center">
+                              <button onClick={()=>{ setPromotions((prev)=> prev.filter((x)=> x.id!==p.id)); showToast("Promotion removed", "success"); }} className="w-7 h-7 rounded-full bg-white/[0.03] hover:bg-red-500/20 hover:text-red-300 border border-cyan-400/15 grid place-items-center">
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -2623,50 +2623,50 @@ Use 2 hashtags max when promo present`;
 
                   {autoStep === "schedule" && (<>
                   {/* Frequency */}
-                  <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5 lg:p-6">
+                  <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5 lg:p-6">
                     <div className="flex items-center gap-2.5 mb-5">
-                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-300">How often</h2>
-                      <span className="ml-auto text-[11px] mono text-zinc-500">{autoStats.totalPreview} posts / {autoMode} preview</span>
+                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-[#E6FFFA]">How often</h2>
+                      <span className="ml-auto text-[11px] mono text-[#4E7A73]">{autoStats.totalPreview} posts / {autoMode} preview</span>
                     </div>
 
-                    <div className="flex p-1 rounded-full bg-[#0f0f10] border border-zinc-800 w-fit mb-5">
+                    <div className="flex p-1 rounded-full bg-[#05201a] border border-cyan-400/15 w-fit mb-5">
                       {(["day","week","month"] as AutoMode[]).map(m=>(
-                        <button key={m} onClick={()=>setAutoMode(m)} className={`px-4 py-2 rounded-full text-[12px] font-semibold mono uppercase tracking-wide transition ${autoMode===m ? "bg-white text-black shadow" : "text-zinc-500 hover:text-zinc-300"}`}>{m}</button>
+                        <button key={m} onClick={()=>setAutoMode(m)} className={`px-4 py-2 rounded-full text-[12px] font-semibold mono uppercase tracking-wide transition ${autoMode===m ? "bg-white text-black shadow" : "text-[#4E7A73] hover:text-[#E6FFFA]"}`}>{m}</button>
                       ))}
                     </div>
 
                     <div className="space-y-5">
                       <div className="grid sm:grid-cols-3 gap-3">
-                        <div className="rounded-[14px] bg-[#0f0f10] border border-zinc-800 p-4">
-                          <div className="text-[11px] mono uppercase text-zinc-500">Posts per day</div>
+                        <div className="rounded-[14px] bg-[#05201a] border border-cyan-400/15 p-4">
+                          <div className="text-[11px] mono uppercase text-[#4E7A73]">Posts per day</div>
                           <div className="mt-2 flex items-center gap-3">
                             <input type="range" min={1} max={10} value={postsPerDay} onChange={e=>setPostsPerDay(parseInt(e.target.value))} className="flex-1 accent-white" />
-                            <input type="number" min={1} max={10} value={postsPerDay} onChange={e=>setPostsPerDay(Math.max(1, Math.min(10, parseInt(e.target.value)||1)))} className="w-12 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
+                            <input type="number" min={1} max={10} value={postsPerDay} onChange={e=>setPostsPerDay(Math.max(1, Math.min(10, parseInt(e.target.value)||1)))} className="w-12 bg-white/[0.03] border border-cyan-400/15 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
                           </div>
-                          <div className="text-[11px] text-zinc-500 mt-1">= {postsPerDay*7}/week • {postsPerDay*30}/month</div>
+                          <div className="text-[11px] text-[#4E7A73] mt-1">= {postsPerDay*7}/week • {postsPerDay*30}/month</div>
                         </div>
-                        <div className={`rounded-[14px] bg-[#0f0f10] border p-4 transition ${autoMode==="week" ? "border-white/40" : "border-zinc-800"}`}>
-                          <div className="text-[11px] mono uppercase text-zinc-500">Posts per week</div>
+                        <div className={`rounded-[14px] bg-[#05201a] border p-4 transition ${autoMode==="week" ? "border-white/40" : "border-cyan-400/15"}`}>
+                          <div className="text-[11px] mono uppercase text-[#4E7A73]">Posts per week</div>
                           <div className="mt-2 flex items-center gap-3">
                             <input type="range" min={1} max={50} value={postsPerWeek} onChange={e=>setPostsPerWeek(parseInt(e.target.value))} className="flex-1 accent-white" />
-                            <input type="number" min={1} max={50} value={postsPerWeek} onChange={e=>setPostsPerWeek(Math.max(1, Math.min(50, parseInt(e.target.value)||1)))} className="w-12 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
+                            <input type="number" min={1} max={50} value={postsPerWeek} onChange={e=>setPostsPerWeek(Math.max(1, Math.min(50, parseInt(e.target.value)||1)))} className="w-12 bg-white/[0.03] border border-cyan-400/15 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
                           </div>
-                          <div className="text-[11px] text-zinc-500 mt-1">~{Math.ceil(postsPerWeek/7)}/day • {postsPerWeek*4}/month</div>
+                          <div className="text-[11px] text-[#4E7A73] mt-1">~{Math.ceil(postsPerWeek/7)}/day • {postsPerWeek*4}/month</div>
                         </div>
-                        <div className={`rounded-[14px] bg-[#0f0f10] border p-4 transition ${autoMode==="month" ? "border-white/40" : "border-zinc-800"}`}>
-                          <div className="text-[11px] mono uppercase text-zinc-500">Posts per month</div>
+                        <div className={`rounded-[14px] bg-[#05201a] border p-4 transition ${autoMode==="month" ? "border-white/40" : "border-cyan-400/15"}`}>
+                          <div className="text-[11px] mono uppercase text-[#4E7A73]">Posts per month</div>
                           <div className="mt-2 flex items-center gap-3">
                             <input type="range" min={1} max={100} value={postsPerMonth} onChange={e=>setPostsPerMonth(parseInt(e.target.value))} className="flex-1 accent-white" />
-                            <input type="number" min={1} max={100} value={postsPerMonth} onChange={e=>setPostsPerMonth(Math.max(1, Math.min(100, parseInt(e.target.value)||1)))} className="w-12 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
+                            <input type="number" min={1} max={100} value={postsPerMonth} onChange={e=>setPostsPerMonth(Math.max(1, Math.min(100, parseInt(e.target.value)||1)))} className="w-12 bg-white/[0.03] border border-cyan-400/15 rounded-lg px-2 py-1.5 text-[13px] text-center mono outline-none" />
                           </div>
-                          <div className="text-[11px] text-zinc-500 mt-1">~{Math.ceil(postsPerMonth/30)}/day</div>
+                          <div className="text-[11px] text-[#4E7A73] mt-1">~{Math.ceil(postsPerMonth/30)}/day</div>
                         </div>
                       </div>
 
                       <div className="space-y-3">
                         <div>
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <label className="text-[11px] mono uppercase tracking-widest text-zinc-300 block">Posting times</label>
+                            <label className="text-[11px] mono uppercase tracking-widest text-[#E6FFFA] block">Posting times</label>
                             <TimezoneSelect value={autoTz} onChange={setAutoTz} />
                           </div>
                           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -2685,7 +2685,7 @@ Use 2 hashtags max when promo present`;
                                       }
                                     });
                                   }}
-                                  className={`px-3 py-2 rounded-full text-[12px] font-medium mono border transition ${isSelected ? "bg-white text-black border-white" : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"}`}
+                                  className={`px-3 py-2 rounded-full text-[12px] font-medium mono border transition ${isSelected ? "bg-white text-black border-white" : "bg-white/[0.03] text-white/55 border-cyan-400/15 hover:border-cyan-400/25 hover:text-[#E6FFFA]"}`}
                                 >
                                   {opt.label}
                                 </button>
@@ -2693,7 +2693,7 @@ Use 2 hashtags max when promo present`;
                             })}
                           </div>
                           <div className="mt-3 flex items-center justify-between">
-                            <div className="text-[12px] text-zinc-300">
+                            <div className="text-[12px] text-[#E6FFFA]">
                               {timeSlots.length>0 ? (
                                 <span>
                                   <span className="font-semibold text-white">{autoStats.perDay} posts/day at </span>
@@ -2705,28 +2705,28 @@ Use 2 hashtags max when promo present`;
                                     .join(", ")}
                                 </span>
                               ) : (
-                                <span className="text-zinc-500">Select at least 1 slot</span>
+                                <span className="text-[#4E7A73]">Select at least 1 slot</span>
                               )}
                             </div>
-                            <button onClick={()=>setTimeSlots(["09:00","15:00","20:00"])} className="text-[11px] text-zinc-500 hover:text-zinc-300 underline">Reset to 9am, 3pm, 8pm</button>
+                            <button onClick={()=>setTimeSlots(["09:00","15:00","20:00"])} className="text-[11px] text-[#4E7A73] hover:text-[#E6FFFA] underline">Reset to 9am, 3pm, 8pm</button>
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[11px] mono uppercase text-zinc-500 block">Distribution</label>
+                          <label className="text-[11px] mono uppercase text-[#4E7A73] block">Distribution</label>
                           <div className="flex gap-2">
-                            <button onClick={()=>setUseBestTime(true)} className={`flex-1 py-2.5 rounded-xl border text-[12px] font-medium flex items-center justify-center gap-1.5 transition ${useBestTime ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-500"}`}><Send className="w-3.5 h-3.5" /> AI Best time</button>
-                            <button onClick={()=>setUseBestTime(false)} className={`flex-1 py-2.5 rounded-xl border text-[12px] font-medium flex items-center justify-center gap-1.5 transition ${!useBestTime ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-500"}`}><Clock className="w-3.5 h-3.5" /> Use Slots</button>
+                            <button onClick={()=>setUseBestTime(true)} className={`flex-1 py-2.5 rounded-xl border text-[12px] font-medium flex items-center justify-center gap-1.5 transition ${useBestTime ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-[#4E7A73]"}`}><Send className="w-3.5 h-3.5" /> AI Best time</button>
+                            <button onClick={()=>setUseBestTime(false)} className={`flex-1 py-2.5 rounded-xl border text-[12px] font-medium flex items-center justify-center gap-1.5 transition ${!useBestTime ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-[#4E7A73]"}`}><Clock className="w-3.5 h-3.5" /> Use Slots</button>
                           </div>
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-[11px] mono uppercase text-zinc-500 mb-2 block">Platforms for automation</label>
+                        <label className="text-[11px] mono uppercase text-[#4E7A73] mb-2 block">Platforms for automation</label>
                         <div className="grid grid-cols-3 gap-2">
                           {PLATFORMS.map(p=>{
                             const active = autoPlatforms.includes(p.id as PlatformId);
                             return (
-                              <button key={p.id} onClick={()=>setAutoPlatforms(s=> s.includes(p.id as PlatformId) ? s.filter(x=>x!==p.id) : [...s, p.id as PlatformId])} className={`p-2.5 rounded-[12px] border text-left flex items-center gap-2 transition ${active ? "bg-white text-black border-white" : "bg-[#0f0f10] border-zinc-800 text-zinc-400 hover:border-zinc-700"}`}>
+                              <button key={p.id} onClick={()=>setAutoPlatforms(s=> s.includes(p.id as PlatformId) ? s.filter(x=>x!==p.id) : [...s, p.id as PlatformId])} className={`p-2.5 rounded-[12px] border text-left flex items-center gap-2 transition ${active ? "bg-white text-black border-white" : "bg-[#05201a] border-cyan-400/15 text-white/55 hover:border-cyan-400/25"}`}>
                                 <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${p.bg} grid place-items-center text-white shrink-0`}>{p.icon}</div>
                                 <span className="text-[11px] font-medium truncate">{p.name.split(" ")[0]}</span>
                                 {active && <Check className="w-3 h-3 ml-auto" />}
@@ -2737,20 +2737,20 @@ Use 2 hashtags max when promo present`;
                       </div>
 
                       <div className="grid sm:grid-cols-2 gap-3">
-                        <label className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 cursor-pointer">
+                        <label className="flex items-center justify-between p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 cursor-pointer">
                           <span className="text-[12px] flex items-center gap-2"><Target className="w-4 h-4" /> Use AI best time slots</span>
-                          <div className={`w-9 h-5 rounded-full p-0.5 transition ${useBestTime ? "bg-white" : "bg-zinc-700"}`}><div className={`w-4 h-4 rounded-full bg-black transition ${useBestTime ? "translate-x-4" : ""}`} /></div>
+                          <div className={`w-9 h-5 rounded-full p-0.5 transition ${useBestTime ? "bg-white" : "bg-cyan-400/15"}`}><div className={`w-4 h-4 rounded-full bg-black transition ${useBestTime ? "translate-x-4" : ""}`} /></div>
                           <input type="checkbox" checked={useBestTime} onChange={e=>setUseBestTime(e.target.checked)} className="hidden" />
                         </label>
-                        <label className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 cursor-pointer">
+                        <label className="flex items-center justify-between p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 cursor-pointer">
                           <span className="text-[12px] flex items-center gap-2"><Send className="w-4 h-4" /> Auto-post when due</span>
-                          <div className={`w-9 h-5 rounded-full p-0.5 transition ${autoPostEnabled ? "bg-emerald-500" : "bg-zinc-700"}`}><div className={`w-4 h-4 rounded-full bg-black transition ${autoPostEnabled ? "translate-x-4" : ""}`} /></div>
+                          <div className={`w-9 h-5 rounded-full p-0.5 transition ${autoPostEnabled ? "bg-[#14b8a6]" : "bg-cyan-400/15"}`}><div className={`w-4 h-4 rounded-full bg-black transition ${autoPostEnabled ? "translate-x-4" : ""}`} /></div>
                           <input type="checkbox" checked={autoPostEnabled} onChange={e=>setAutoPostEnabled(e.target.checked)} className="hidden" />
                         </label>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 text-[12px] leading-[1.5] text-zinc-300">
-                        <span className="text-zinc-500 mono uppercase text-[11px]">Bot will create</span><br/>
+                      <div className="p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 text-[12px] leading-[1.5] text-[#E6FFFA]">
+                        <span className="text-[#4E7A73] mono uppercase text-[11px]">Bot will create</span><br/>
                         <span className="font-semibold text-white">{autoStats.perDay} posts/day = {autoStats.perWeek}/week = {autoStats.perMonth}/month</span> for next <span className="font-semibold">{autoMode==="day" ? "7 days" : autoMode==="week" ? "7 days" : "30 days"}</span> • scheduled {useBestTime ? "at AI best times" : `at ${timeSlots.map(v=>{const f=TIME_SLOT_OPTIONS.find(o=>o.value===v); return f?f.label:v;}).join(", ")}`} • {autoPlatforms.length} platforms • {autoPostEnabled ? "auto-publishes via publishQueueItem when due" : "adds to queue as scheduled"}
                       </div>
                     </div>
@@ -2760,55 +2760,55 @@ Use 2 hashtags max when promo present`;
 
                 {autoStep === "run" && <div className="grid lg:grid-cols-2 gap-6 items-start">
                   {/* Bot Actions */}
-                  <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5 lg:p-6">
+                  <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5 lg:p-6">
                     <div className="flex items-center gap-2.5 mb-5">
-                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-300">Bot Actions</h2>
+                      <h2 className="text-[13px] font-semibold tracking-widest uppercase text-[#E6FFFA]">Bot Actions</h2>
                     </div>
 
                     <div className="space-y-3">
                       <button onClick={()=>generateAutomatedPosts()} disabled={isGeneratingBatch || autoPlatforms.length===0} className="w-full py-3.5 rounded-xl bg-white text-black font-semibold text-[14px] flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-zinc-100 transition">
-                        {isGeneratingBatch ? <div className="w-4 h-4 border-2 border-zinc-400 border-t-black rounded-full animate-spin" /> : <Layers className="w-4 h-4" />}
+                        {isGeneratingBatch ? <div className="w-4 h-4 border-2 border-cyan-400/40 border-t-black rounded-full animate-spin" /> : <Layers className="w-4 h-4" />}
                         {isGeneratingBatch ? "Generating batch..." : `Generate Now (${autoStats.totalPreview} posts)`}
                       </button>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={()=>{ setAutomationEnabled(true); showToast("Bot STARTED — auto-generates + auto-posts every 60s", "success"); }} disabled={automationEnabled} className={`py-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 border transition ${automationEnabled ? "bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400"}`}>
+                        <button onClick={()=>{ setAutomationEnabled(true); showToast("Bot STARTED — auto-generates + auto-posts every 60s", "success"); }} disabled={automationEnabled} className={`py-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 border transition ${automationEnabled ? "bg-white/[0.03] border-cyan-400/15 text-[#4E7A73]/75 cursor-not-allowed" : "bg-gradient-to-r from-[#14b8a6] to-[#22d3ee] text-[#05201a] border-transparent hover:opacity-90"}`}>
                           <Play className="w-4 h-4" /> Start Bot
                         </button>
-                        <button onClick={()=>{ setAutomationEnabled(false); if(botIntervalRef.current) window.clearInterval(botIntervalRef.current); showToast("Bot STOPPED — paused generation & auto-post", "success"); }} disabled={!automationEnabled} className={`py-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 border transition ${!automationEnabled ? "bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800"}`}>
+                        <button onClick={()=>{ setAutomationEnabled(false); if(botIntervalRef.current) window.clearInterval(botIntervalRef.current); showToast("Bot STOPPED — paused generation & auto-post", "success"); }} disabled={!automationEnabled} className={`py-3 rounded-xl font-semibold text-[13px] flex items-center justify-center gap-2 border transition ${!automationEnabled ? "bg-white/[0.03] border-cyan-400/15 text-[#4E7A73]/75 cursor-not-allowed" : "bg-white/[0.03] border-cyan-400/25 text-white hover:bg-cyan-400/10"}`}>
                           <Pause className="w-4 h-4" /> Stop Bot
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={()=>generateAutomatedPosts(1)} disabled={isGeneratingBatch} className="py-2.5 rounded-xl bg-[#0f0f10] border border-zinc-800 text-zinc-300 text-[12px] font-medium hover:bg-zinc-900 transition">Test 1 post</button>
-                        <button onClick={()=>{ const s=queue.filter(p=>p.isAuto); if(s.length===0){ showToast("No auto posts to clear", "error"); return; } setQueue(q=>q.filter(p=>!p.isAuto)); showToast(`Cleared ${s.length} auto posts`, "success"); }} className="py-2.5 rounded-xl bg-[#0f0f10] border border-zinc-800 text-zinc-400 text-[12px] font-medium hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/20 transition">Clear auto posts</button>
+                        <button onClick={()=>generateAutomatedPosts(1)} disabled={isGeneratingBatch} className="py-2.5 rounded-xl bg-[#05201a] border border-cyan-400/15 text-[#E6FFFA] text-[12px] font-medium hover:bg-white/[0.04] transition">Test 1 post</button>
+                        <button onClick={()=>{ const s=queue.filter(p=>p.isAuto); if(s.length===0){ showToast("No auto posts to clear", "error"); return; } setQueue(q=>q.filter(p=>!p.isAuto)); showToast(`Cleared ${s.length} auto posts`, "success"); }} className="py-2.5 rounded-xl bg-[#05201a] border border-cyan-400/15 text-white/55 text-[12px] font-medium hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/20 transition">Clear auto posts</button>
                       </div>
-                      <div className="p-3 rounded-xl bg-[#0f0f10] border border-zinc-800 space-y-1.5">
-                        <div className="flex justify-between text-[11px] mono"><span className="text-zinc-500">Status</span><span className={automationEnabled ? "text-emerald-300" : "text-zinc-400"}>{automationEnabled ? "RUNNING" : "PAUSED"}</span></div>
-                        <div className="flex justify-between text-[11px] mono"><span className="text-zinc-500">Last run</span><span className="text-zinc-300">{lastGeneratedAt ? lastGeneratedAt.toLocaleString() : "never"}</span></div>
-                        <div className="flex justify-between text-[11px] mono"><span className="text-zinc-500">Next run</span><span className="text-zinc-300">{nextRunAt ? nextRunAt.toLocaleString() : "—"}</span></div>
-                        <div className="flex justify-between text-[11px] mono"><span className="text-zinc-500">Auto-post</span><span className={autoPostEnabled ? "text-emerald-300" : "text-zinc-500"}>{autoPostEnabled ? "ON • publishQueueItem" : "OFF • queue only"}</span></div>
-                        <div className="flex justify-between text-[11px] mono"><span className="text-zinc-500">Config</span><span className="text-zinc-300">saved to your account</span></div>
+                      <div className="p-3 rounded-xl bg-[#05201a] border border-cyan-400/15 space-y-1.5">
+                        <div className="flex justify-between text-[11px] mono"><span className="text-[#4E7A73]">Status</span><span className={automationEnabled ? "text-[#2EF8A0]" : "text-white/55"}>{automationEnabled ? "RUNNING" : "PAUSED"}</span></div>
+                        <div className="flex justify-between text-[11px] mono"><span className="text-[#4E7A73]">Last run</span><span className="text-[#E6FFFA]">{lastGeneratedAt ? lastGeneratedAt.toLocaleString() : "never"}</span></div>
+                        <div className="flex justify-between text-[11px] mono"><span className="text-[#4E7A73]">Next run</span><span className="text-[#E6FFFA]">{nextRunAt ? nextRunAt.toLocaleString() : "—"}</span></div>
+                        <div className="flex justify-between text-[11px] mono"><span className="text-[#4E7A73]">Auto-post</span><span className={autoPostEnabled ? "text-[#2EF8A0]" : "text-[#4E7A73]"}>{autoPostEnabled ? "ON • publishQueueItem" : "OFF • queue only"}</span></div>
+                        <div className="flex justify-between text-[11px] mono"><span className="text-[#4E7A73]">Config</span><span className="text-[#E6FFFA]">saved to your account</span></div>
                       </div>
                     </div>
                   </div>
 
                   {/* Automation Queue preview */}
-                  <div className="rounded-[20px] border border-zinc-800 bg-[#161617] p-5 lg:p-6">
+                  <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] p-5 lg:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2.5">
-                        <h2 className="text-[13px] font-semibold tracking-widest uppercase text-zinc-300">Latest bot posts</h2>
+                        <h2 className="text-[13px] font-semibold tracking-widest uppercase text-[#E6FFFA]">Latest bot posts</h2>
                       </div>
-                      <button onClick={()=>setView("queue")} className="text-[11px] text-zinc-500 hover:text-zinc-300">View all →</button>
+                      <button onClick={()=>setView("queue")} className="text-[11px] text-[#4E7A73] hover:text-[#E6FFFA]">View all →</button>
                     </div>
                     <div className="space-y-3">
                       {queue.filter(p=>p.isAuto).slice(0,5).map(p=>(
-                        <div key={p.id} className="p-3 rounded-[12px] bg-[#0f0f10] border border-zinc-800">
+                        <div key={p.id} className="p-3 rounded-[12px] bg-[#05201a] border border-cyan-400/15">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <span className={`px-1.5 py-0.5 rounded-full text-[9px] mono font-semibold uppercase ${p.status==="posted" ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20" : "bg-zinc-800 text-zinc-300 border border-zinc-700"}`}>{p.status}</span>
-                            <span className="text-[10px] mono text-zinc-500">{p.scheduledAt.toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"})}</span>
-                            <span className="ml-auto text-[9px] mono px-1.5 py-0.5 rounded-full bg-white/10 border border-white/10 text-zinc-300">BOT</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[9px] mono font-semibold uppercase ${p.status==="posted" ? "bg-[#2EF8A0]/10 text-[#2EF8A0] border border-[#2EF8A0]/25" : "bg-cyan-400/10 text-[#E6FFFA] border border-cyan-400/25"}`}>{p.status}</span>
+                            <span className="text-[10px] mono text-[#4E7A73]">{p.scheduledAt.toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"})}</span>
+                            <span className="ml-auto text-[9px] mono px-1.5 py-0.5 rounded-full bg-white/10 border border-white/10 text-[#E6FFFA]">BOT</span>
                           </div>
-                          <p className="text-[12px] leading-[1.4] text-zinc-200 line-clamp-2">{p.text}</p>
+                          <p className="text-[12px] leading-[1.4] text-white line-clamp-2">{p.text}</p>
                           <div className="mt-2 flex gap-1">
                             {p.platforms.map(pid=>{
                               const pl=PLATFORMS.find(x=>x.id===pid)!;
@@ -2818,19 +2818,19 @@ Use 2 hashtags max when promo present`;
                         </div>
                       ))}
                       {queue.filter(p=>p.isAuto).length===0 && (
-                        <div className="rounded-xl border border-dashed border-zinc-700 p-6 text-center">
-                          <Bot className="w-6 h-6 text-zinc-600 mx-auto mb-2" />
-                          <div className="text-[12px] text-zinc-500">No auto posts yet</div>
-                          <div className="text-[11px] text-zinc-600 mt-1">Generate Now to create {autoStats.totalPreview} posts from your context</div>
+                        <div className="rounded-xl border border-dashed border-cyan-400/25 p-6 text-center">
+                          <Bot className="w-6 h-6 text-[#4E7A73]/75 mx-auto mb-2" />
+                          <div className="text-[12px] text-[#4E7A73]">No auto posts yet</div>
+                          <div className="text-[11px] text-[#4E7A73]/75 mt-1">Generate Now to create {autoStats.totalPreview} posts from your context</div>
                         </div>
                       )}
                     </div>
-                    <div className="mt-4 p-3 rounded-xl bg-[#0f0f10] border border-zinc-800">
-                      <div className="text-[11px] mono uppercase tracking-widest text-zinc-500 mb-1.5">Logic</div>
-                      <div className="text-[11px] leading-[1.5] text-zinc-400">
+                    <div className="mt-4 p-3 rounded-xl bg-[#05201a] border border-cyan-400/15">
+                      <div className="text-[11px] mono uppercase tracking-widest text-[#4E7A73] mb-1.5">Logic</div>
+                      <div className="text-[11px] leading-[1.5] text-white/55">
                         • Topics mixed with hooks + {selectedTones.join("/")} tone<br/>
                         • {useBestTime ? "AI best-time slots (IG 7pm, YT 2pm Sat, TikTok noon)" : `Even spread ${timeStart}-${timeEnd}`} <br/>
-                        • Captions: Llama-style from brandContext + keywords<br/>
+                        • Captions: generated from brand context + keywords<br/>
                         • Auto-post: {autoPostEnabled ? "interval 60s checks scheduledAt <= now → publishQueueItem" : "queue only, manual publish"}
                       </div>
                     </div>
@@ -2846,16 +2846,16 @@ Use 2 hashtags max when promo present`;
                 <div>
                   <h1 className="text-[22px] font-semibold tracking-tight">Queue • {filteredQueue.length} posts</h1>
                   {(filterDate || filterPlatform) && (
-                    <div className="text-[12px] text-zinc-500 mt-1">
+                    <div className="text-[12px] text-[#4E7A73] mt-1">
                       Filtered: {filterDate?.toLocaleDateString()} {filterDate && filterPlatform ? "•" : ""} {filterPlatform || ""}{" "}
-                      <button onClick={() => { setFilterDate(null); setFilterPlatform(null); setSelectedDate(null); showToast("All filters cleared", "success"); }} className="ml-2 underline text-zinc-300">
+                      <button onClick={() => { setFilterDate(null); setFilterPlatform(null); setSelectedDate(null); showToast("All filters cleared", "success"); }} className="ml-2 underline text-[#E6FFFA]">
                         Clear filter
                       </button>
                     </div>
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => showToast("Drag mode: drag handles active - drag items to reorder", "success")} className="px-3 py-2 rounded-full border text-[12px] bg-zinc-900 border-zinc-800 hover:bg-zinc-800">Drag to reorder</button>
+                  <button onClick={() => showToast("Drag mode: drag handles active - drag items to reorder", "success")} className="px-3 py-2 rounded-full border text-[12px] bg-white/[0.03] border-cyan-400/15 hover:bg-cyan-400/10">Drag to reorder</button>
                   <button onClick={() => { setView("composer"); showToast("New post composer", "success"); }} className="px-4 py-2 rounded-full bg-white text-black text-[12px] font-semibold hover:bg-zinc-100 transition">New post</button>
                 </div>
               </div>
@@ -2881,40 +2881,40 @@ Use 2 hashtags max when promo present`;
                     }}
                     onDragEnd={() => { setDraggingId(null); showToast("Queue reordered", "success"); }}
                     onClick={() => setSelectedPostId(post.id)}
-                    className={`group rounded-[16px] border bg-[#161617] p-4 flex gap-4 hover:border-zinc-700 transition ${draggingId === post.id ? "border-white/40 opacity-60" : "border-zinc-800"} ${selectedPostId === post.id ? "ring-1 ring-white/20" : ""} ${post.isAuto ? "border-l-2 border-l-white/20" : ""}`}
+                    className={`group rounded-[16px] border bg-[#0A1418] p-4 flex gap-4 hover:border-cyan-400/25 transition ${draggingId === post.id ? "border-white/40 opacity-60" : "border-cyan-400/15"} ${selectedPostId === post.id ? "ring-1 ring-white/20" : ""} ${post.isAuto ? "border-l-2 border-l-white/20" : ""}`}
                   >
-                    <div className="hidden sm:grid place-items-center w-6 self-stretch text-zinc-600 cursor-grab">
+                    <div className="hidden sm:grid place-items-center w-6 self-stretch text-[#4E7A73]/75 cursor-grab">
                       <GripVertical className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         {post.isAuto && <span className="px-1.5 py-0.5 rounded-full text-[9px] mono font-semibold bg-white text-black">BOT</span>}
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold mono uppercase ${post.status === "posted" ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20" : post.status === "failed" ? "bg-red-500/15 text-red-300 border border-red-500/20" : "bg-zinc-800 text-zinc-300 border border-zinc-700"}`}>{post.status}</span>
-                        <span className="text-[11px] mono text-zinc-500">{post.scheduledAt.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold mono uppercase ${post.status === "posted" ? "bg-[#2EF8A0]/10 text-[#2EF8A0] border border-[#2EF8A0]/25" : post.status === "failed" ? "bg-red-500/15 text-red-300 border border-red-500/20" : "bg-cyan-400/10 text-[#E6FFFA] border border-cyan-400/25"}`}>{post.status}</span>
+                        <span className="text-[11px] mono text-[#4E7A73]">{post.scheduledAt.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                         <div className="flex gap-1 ml-1">
                           {post.platforms.map((pid) => {
                             const p = PLATFORMS.find((x) => x.id === pid)!;
                             return (
                               <div key={pid} className={`relative w-5 h-5 rounded-full bg-gradient-to-br ${p.bg} grid place-items-center text-white`}>
                                 <div className="scale-[0.8]">{p.icon}</div>
-                                {pid === "youtube" && <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#161617]" />}
+                                {pid === "youtube" && <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 border border-[#0A1418]" />}
                               </div>
                             );
                           })}
                         </div>
                       </div>
-                      <p className="text-[13.5px] leading-[1.5] text-zinc-200 line-clamp-2">{post.text}</p>
+                      <p className="text-[13.5px] leading-[1.5] text-white line-clamp-2">{post.text}</p>
                       {post.media.length > 0 && (
                         <div className="mt-3 flex gap-2">
                           {post.media.slice(0, 3).map((m, i) => (
-                            <img key={i} src={m.url} alt="" className="w-14 h-14 rounded-lg object-cover border border-zinc-800" />
+                            <img key={i} src={m.url} alt="" className="w-14 h-14 rounded-lg object-cover border border-cyan-400/15" />
                           ))}
                         </div>
                       )}
                       {post.attachedFiles && post.attachedFiles.length > 0 && (
                         <div className="mt-2 flex gap-1.5 flex-wrap">
                           {post.attachedFiles.map((f) => (
-                            <span key={f.id} className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 flex items-center gap-1"><FileText className="w-3 h-3" />{f.name}</span>
+                            <span key={f.id} className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[10px] text-white/55 flex items-center gap-1"><FileText className="w-3 h-3" />{f.name}</span>
                           ))}
                         </div>
                       )}
@@ -2924,7 +2924,7 @@ Use 2 hashtags max when promo present`;
                             e.stopPropagation();
                             syncEngagement(post);
                           }}
-                          className="mt-2 flex gap-3 text-[11px] mono text-zinc-500 hover:text-zinc-300"
+                          className="mt-2 flex gap-3 text-[11px] mono text-[#4E7A73] hover:text-[#E6FFFA]"
                         >
                           <span>♥ {post.engagement.likes}</span>
                           <span>💬 {post.engagement.comments}</span>
@@ -2943,12 +2943,12 @@ Use 2 hashtags max when promo present`;
                           setView("composer");
                           showToast("Loaded in composer", "success");
                         }}
-                        className="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 grid place-items-center border border-zinc-800"
+                        className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-cyan-400/10 grid place-items-center border border-cyan-400/15"
                       >
                         <PenTool className="w-4 h-4" />
                       </button>
                       {post.status==="scheduled" && (
-                        <button onClick={()=>publishQueueItem(post)} className="w-8 h-8 rounded-full bg-zinc-900 hover:bg-emerald-500/20 hover:text-emerald-300 grid place-items-center border border-zinc-800" title="Auto-post now">
+                        <button onClick={()=>publishQueueItem(post)} className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-[#2EF8A0]/15 hover:text-[#2EF8A0] grid place-items-center border border-cyan-400/15" title="Auto-post now">
                           <Send className="w-4 h-4" />
                         </button>
                       )}
@@ -2957,7 +2957,7 @@ Use 2 hashtags max when promo present`;
                           setQueue((q) => q.filter((p) => p.id !== post.id));
                           showToast("Post deleted", "success");
                         }}
-                        className="w-8 h-8 rounded-full bg-zinc-900 hover:bg-red-500/10 hover:text-red-300 grid place-items-center border border-zinc-800"
+                        className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-red-500/10 hover:text-red-300 grid place-items-center border border-cyan-400/15"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -2965,7 +2965,7 @@ Use 2 hashtags max when promo present`;
                   </div>
                 ))}
                 {filteredQueue.length === 0 && (
-                  <div className="rounded-[16px] border border-dashed border-zinc-700 p-10 text-center text-zinc-500">
+                  <div className="rounded-[16px] border border-dashed border-cyan-400/25 p-10 text-center text-[#4E7A73]">
                     <div className="text-[13px]">No posts for this filter</div>
                     <button onClick={() => { setFilterDate(null); setFilterPlatform(null); setView("composer"); }} className="mt-3 px-4 py-2 rounded-full bg-white text-black text-[12px] font-semibold">Create new post</button>
                   </div>
@@ -2980,20 +2980,20 @@ Use 2 hashtags max when promo present`;
                 <h1 className="text-[22px] font-semibold tracking-tight">Content Calendar</h1>
                 <div className="flex items-center gap-2">
                   <TimezoneSelect value={calTz} onChange={setCalTz} />
-                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 grid place-items-center hover:bg-zinc-800 transition"><ChevronLeft className="w-4 h-4" /></button>
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="w-8 h-8 rounded-full bg-white/[0.03] border border-cyan-400/15 grid place-items-center hover:bg-cyan-400/10 transition"><ChevronLeft className="w-4 h-4" /></button>
                   <span className="px-3 py-1.5 rounded-full bg-white text-black text-[12px] font-semibold mono">{calendarDate.toLocaleString("default", { month: "long", year: "numeric" })}</span>
-                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 grid place-items-center hover:bg-zinc-800 transition"><ChevronRight className="w-4 h-4" /></button>
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="w-8 h-8 rounded-full bg-white/[0.03] border border-cyan-400/15 grid place-items-center hover:bg-cyan-400/10 transition"><ChevronRight className="w-4 h-4" /></button>
                 </div>
               </div>
-              <div className="rounded-[20px] border border-zinc-800 bg-[#161617] overflow-hidden">
-                <div className="grid grid-cols-7 border-b border-zinc-800 bg-[#0f0f10]">
+              <div className="rounded-[20px] border border-cyan-400/15 bg-[#0A1418] overflow-hidden">
+                <div className="grid grid-cols-7 border-b border-cyan-400/15 bg-[#05201a]">
                   {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                    <div key={d} className="py-3 text-center text-[11px] mono text-zinc-500 tracking-widest">{d}</div>
+                    <div key={d} className="py-3 text-center text-[11px] mono text-[#4E7A73] tracking-widest">{d}</div>
                   ))}
                 </div>
                 <div className="grid grid-cols-7 auto-rows-[110px] lg:auto-rows-[132px]">
                   {cal.map((date, idx) => {
-                    if (!date) return <div key={idx} className="border-r border-b border-zinc-800/60 bg-[#0f0f10]/50" />;
+                    if (!date) return <div key={idx} className="border-r border-b border-cyan-400/10 bg-[#05201a]/50" />;
                     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
                     const posts = queue.filter((p) => dayIn(p.scheduledAt, calTz) === key);
                     const isToday = new Date().toDateString() === date.toDateString();
@@ -3007,18 +3007,18 @@ Use 2 hashtags max when promo present`;
                           setView("queue");
                           showToast(`${posts.length} posts on ${date.toLocaleDateString()} — filtered queue`, "success");
                         }}
-                        className={`border-r border-b border-zinc-800/60 p-2 flex flex-col gap-1 text-left hover:bg-white/[0.04] transition ${isToday ? "bg-white/[0.03]" : "bg-[#161617]"} ${isSelected ? "ring-1 ring-inset ring-white" : ""}`}
+                        className={`border-r border-b border-cyan-400/10 p-2 flex flex-col gap-1 text-left hover:bg-white/[0.04] transition ${isToday ? "bg-white/[0.03]" : "bg-[#0A1418]"} ${isSelected ? "ring-1 ring-inset ring-white" : ""}`}
                       >
-                        <div className={`text-[12px] mono w-6 h-6 rounded-full grid place-items-center ${isToday ? "bg-white text-black font-semibold" : isSelected ? "bg-zinc-700 text-white" : "text-zinc-400"}`}>{date.getDate()}</div>
+                        <div className={`text-[12px] mono w-6 h-6 rounded-full grid place-items-center ${isToday ? "bg-white text-black font-semibold" : isSelected ? "bg-cyan-400/15 text-white" : "text-white/55"}`}>{date.getDate()}</div>
                         <div className="space-y-1 w-full">
                           {posts.slice(0, 3).map((p) => (
-                            <div key={p.id} className="text-[10px] px-1.5 py-1 rounded-md bg-zinc-800 truncate flex items-center gap-1 w-full">
-                              <span className={`w-1.5 h-1.5 rounded-full ${p.status === "posted" ? "bg-emerald-400" : p.isAuto ? "bg-purple-400" : "bg-white"}`} />
-                              <span className="mono text-zinc-400 shrink-0">{p.scheduledAt.toLocaleTimeString([], { timeZone: calTz, hour: "numeric", minute: "2-digit" })}</span>
+                            <div key={p.id} className="text-[10px] px-1.5 py-1 rounded-md bg-cyan-400/10 truncate flex items-center gap-1 w-full">
+                              <span className={`w-1.5 h-1.5 rounded-full ${p.status === "posted" ? "bg-[#2EF8A0]" : p.isAuto ? "bg-purple-400" : "bg-white"}`} />
+                              <span className="mono text-white/55 shrink-0">{p.scheduledAt.toLocaleTimeString([], { timeZone: calTz, hour: "numeric", minute: "2-digit" })}</span>
                               <span className="truncate">{p.text.slice(0, 22)}</span>
                             </div>
                           ))}
-                          {posts.length > 3 && <div className="text-[10px] text-zinc-500 mono">+{posts.length - 3} more</div>}
+                          {posts.length > 3 && <div className="text-[10px] text-[#4E7A73] mono">+{posts.length - 3} more</div>}
                         </div>
                       </button>
                     );

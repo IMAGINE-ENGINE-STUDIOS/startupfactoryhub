@@ -198,11 +198,11 @@ export default function SocialiteAutopilot() {
     setCfg((c) => ({ ...c, platforms: c.platforms.includes(p) ? c.platforms.filter((x) => x !== p) : [...c.platforms, p] }));
 
   return (
-    <div className="rounded-2xl border border-zinc-800 p-5 space-y-5">
+    <div className="rounded-2xl border border-cyan-400/15 p-5 space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-[15px] font-semibold text-zinc-100">Autopilot — daily portfolio posts</h3>
-          <p className="text-[12.5px] text-zinc-500 max-w-[560px]">
+          <p className="text-[12.5px] text-[#4E7A73] max-w-[560px]">
             Posts your portfolio to Facebook and Instagram every day at your times — randomized,
             every item once before any repeats, captions rotated for you. Runs on the server with this page closed.
           </p>
@@ -210,7 +210,7 @@ export default function SocialiteAutopilot() {
         <button
           onClick={() => setCfg((c) => ({ ...c, active: !c.active }))}
           aria-pressed={cfg.active}
-          className={`px-4 py-2 rounded-full text-[12.5px] font-semibold ${cfg.active ? "bg-emerald-500 text-emerald-950" : "bg-zinc-800 text-zinc-300"}`}
+          className={`px-4 py-2 rounded-full text-[12.5px] font-semibold ${cfg.active ? "bg-[#14b8a6] text-emerald-950" : "bg-cyan-400/10 text-[#E6FFFA]"}`}
         >
           {cfg.active ? "ON" : "OFF"}
         </button>
@@ -219,67 +219,67 @@ export default function SocialiteAutopilot() {
       <div className="flex flex-wrap items-center gap-2">
         {(["facebook", "instagram"] as const).map((p) => (
           <button key={p} onClick={() => togglePlatform(p)} aria-pressed={cfg.platforms.includes(p)}
-            className={`px-3.5 py-2 rounded-full text-[12.5px] capitalize ${cfg.platforms.includes(p) ? "bg-zinc-100 text-zinc-900" : "bg-zinc-900 text-zinc-400 border border-zinc-800"}`}>
+            className={`px-3.5 py-2 rounded-full text-[12.5px] capitalize ${cfg.platforms.includes(p) ? "bg-zinc-100 text-zinc-900" : "bg-white/[0.03] text-white/55 border border-cyan-400/15"}`}>
             {p}
           </button>
         ))}
-        <span className="mx-1 h-5 w-px bg-zinc-800" />
+        <span className="mx-1 h-5 w-px bg-cyan-400/10" />
         {cfg.times.map((t, i) => (
           <input key={i} type="time" value={t} aria-label={`Post time ${i + 1}`}
             onChange={(e) => setCfg((c) => ({ ...c, times: c.times.map((x, j) => (j === i ? e.target.value : x)) }))}
-            className="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1.5 text-[12.5px] text-zinc-200" />
+            className="bg-white/[0.03] border border-cyan-400/15 rounded-full px-3 py-1.5 text-[12.5px] text-white" />
         ))}
         <TimezoneSelect value={cfg.timezone} onChange={(tz) => setCfg((c) => ({ ...c, timezone: tz }))} />
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-cyan-400/15 bg-white/[0.03]/40 p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-[13px] text-zinc-300">Daily format mix</div>
-            <p className="text-[11.5px] text-zinc-500 max-w-[560px]">
+            <div className="text-[13px] text-[#E6FFFA]">Daily format mix</div>
+            <p className="text-[11.5px] text-[#4E7A73] max-w-[560px]">
               Your {cfg.times.length} feed slots rotate Reel → Carousel → Photo, shifting one slot every day.
               Today: {cfg.times.map((t, i) => `${FEED_FORMATS[(daySerialIn(cfg.timezone) + i) % 3]} ${t}`).join(" · ")}.
               Carousels group 3–5 photos from one project; a slot falls back to a photo until reels are in the library.
             </p>
           </div>
-          <label className="flex items-center gap-2 text-[12.5px] text-zinc-400">
+          <label className="flex items-center gap-2 text-[12.5px] text-white/55">
             Stories per day
             <input type="number" min={1} max={4} step={1} value={cfg.story_count} aria-label="Stories per day"
               onChange={(e) => setCfg((c) => ({ ...c, story_count: clampStoryCount(e.target.value) }))}
-              className="w-16 bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1.5 text-[12.5px] text-zinc-200" />
+              className="w-16 bg-white/[0.03] border border-cyan-400/15 rounded-full px-3 py-1.5 text-[12.5px] text-white" />
           </label>
         </div>
-        <p className="text-[11.5px] text-zinc-500">Stories post at {STORY_TIMES.slice(0, clampStoryCount(cfg.story_count)).join(", ")} — the first {clampStoryCount(cfg.story_count)} of 07:00, 12:00, 17:00, 21:00.</p>
+        <p className="text-[11.5px] text-[#4E7A73]">Stories post at {STORY_TIMES.slice(0, clampStoryCount(cfg.story_count)).join(", ")} — the first {clampStoryCount(cfg.story_count)} of 07:00, 12:00, 17:00, 21:00.</p>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-cyan-400/15 bg-white/[0.03]/40 p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-[13px] text-zinc-300">
+          <div className="text-[13px] text-[#E6FFFA]">
             Media library: <span className="font-semibold text-zinc-100">{mediaCount === null ? "…" : mediaCount}</span> photos
             · <span className="font-semibold text-zinc-100">{reelCount === null ? "…" : reelCount}</span> reels
-            <span className="text-zinc-500"> — uploaded once, posted in random order. Project folder names appear in captions. Reels (.mp4) upload as rendered.</span>
+            <span className="text-[#4E7A73]"> — uploaded once, posted in random order. Project folder names appear in captions. Reels (.mp4) upload as rendered.</span>
           </div>
           <div className="flex gap-2">
             <button onClick={() => fileRef.current?.click()} className="px-3.5 py-2 rounded-full bg-zinc-100 text-zinc-900 text-[12.5px] font-semibold">Add photos</button>
-            <button onClick={() => folderRef.current?.click()} className="px-3.5 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-[12.5px]">Add a project folder</button>
+            <button onClick={() => folderRef.current?.click()} className="px-3.5 py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-white text-[12.5px]">Add a project folder</button>
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" multiple className="hidden" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
         <input ref={folderRef} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" multiple className="hidden"
           {...({ webkitdirectory: "" } as any)}
           onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
-        <p className="text-[11.5px] text-zinc-500">Tip: use “Add a project folder” with a folder named after the project (e.g. “The Solstice”) — big photos are shrunk to posting size automatically before upload.</p>
+        <p className="text-[11.5px] text-[#4E7A73]">Tip: use “Add a project folder” with a folder named after the project (e.g. “Northwind AI”) — big photos are shrunk to posting size automatically before upload.</p>
       </div>
 
-      <details className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-        <summary className="text-[13px] text-zinc-300 cursor-pointer">Captions & hashtags (rotated automatically)</summary>
+      <details className="rounded-xl border border-cyan-400/15 bg-white/[0.03]/40 p-4">
+        <summary className="text-[13px] text-[#E6FFFA] cursor-pointer">Captions & hashtags (rotated automatically)</summary>
         <div className="mt-3 space-y-3">
-          <label className="block text-[11.5px] text-zinc-500">One caption per line. {"{project}"} becomes the photo's project folder name.</label>
+          <label className="block text-[11.5px] text-[#4E7A73]">One caption per line. {"{project}"} becomes the photo's project folder name.</label>
           <textarea value={cfg.templates.join("\n")} rows={8} onChange={(e) => setCfg((c) => ({ ...c, templates: e.target.value.split("\n") }))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[12.5px] text-zinc-200" />
-          <label className="block text-[11.5px] text-zinc-500">One hashtag set per line.</label>
+            className="w-full bg-zinc-950 border border-cyan-400/15 rounded-xl p-3 text-[12.5px] text-white" />
+          <label className="block text-[11.5px] text-[#4E7A73]">One hashtag set per line.</label>
           <textarea value={cfg.hashtag_sets.join("\n")} rows={3} onChange={(e) => setCfg((c) => ({ ...c, hashtag_sets: e.target.value.split("\n") }))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[12.5px] text-zinc-200" />
+            className="w-full bg-zinc-950 border border-cyan-400/15 rounded-xl p-3 text-[12.5px] text-white" />
         </div>
       </details>
 
@@ -287,7 +287,7 @@ export default function SocialiteAutopilot() {
         <button onClick={save} disabled={!!busy} className="px-5 py-2.5 rounded-full bg-zinc-100 text-zinc-900 text-[13px] font-semibold disabled:opacity-50">
           {busy || "Save autopilot"}
         </button>
-        {note && <span className="text-[12.5px] text-zinc-400">{note}</span>}
+        {note && <span className="text-[12.5px] text-white/55">{note}</span>}
       </div>
     </div>
   );

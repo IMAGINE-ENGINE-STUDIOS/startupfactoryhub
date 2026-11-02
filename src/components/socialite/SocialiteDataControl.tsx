@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const db = supabase as any;
-const card = "rounded-[18px] border border-zinc-800 bg-[#161617] p-5";
+const card = "rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5";
 const btn = "px-4 py-2 rounded-full text-[12px] font-semibold transition disabled:opacity-40 shrink-0";
 const localKeys = () => Object.keys(localStorage).filter((k) => k.startsWith("pf_"));
 
@@ -77,22 +77,22 @@ export default function SocialiteDataControl({ isOwner, toast, onLocalCleared }:
     <div className="p-4 lg:p-8 max-w-[760px] space-y-5">
       <div>
         <h1 className="text-[22px] font-semibold tracking-tight">Data Control</h1>
-        <p className="text-[12px] text-zinc-500 mt-1">Your data, your choice. Everything here only touches your own account.</p>
+        <p className="text-[12px] text-[#4E7A73] mt-1">Your data, your choice. Everything here only touches your own account.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[["Contacts", counts.contacts], ["Waiting sends", counts.waiting], ["Connected accounts", counts.keys], ["Usage records", counts.usage]].map(([k, v]) => (
-          <div key={k as string} className={card}><div className="text-[11px] text-zinc-500">{k}</div><div className="text-[20px] font-semibold mono">{v}</div></div>
+          <div key={k as string} className={card}><div className="text-[11px] text-[#4E7A73]">{k}</div><div className="text-[20px] font-semibold mono">{v}</div></div>
         ))}
       </div>
       <div className="space-y-3">
         {items.map((it) => (
           <div key={it.k} className={`${card} flex items-center gap-4`}>
-            <div className="flex-1"><div className="text-[13px] font-medium">{it.title}</div><div className="text-[11.5px] text-zinc-500 mt-0.5">{it.desc}</div></div>
-            <button disabled={!uid || !!busy} onClick={it.run} className={`${btn} ${it.primary ? "bg-white text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-200 hover:bg-zinc-800"}`}>{busy === it.k ? "Working…" : it.label}</button>
+            <div className="flex-1"><div className="text-[13px] font-medium">{it.title}</div><div className="text-[11.5px] text-[#4E7A73] mt-0.5">{it.desc}</div></div>
+            <button disabled={!uid || !!busy} onClick={it.run} className={`${btn} ${it.primary ? "bg-white text-black" : "bg-white/[0.03] border border-cyan-400/15 text-white hover:bg-cyan-400/10"}`}>{busy === it.k ? "Working…" : it.label}</button>
           </div>
         ))}
       </div>
-      <div className="text-[11px] text-zinc-500">To close your SOCIALITE account completely, cancel your plan in Plan & billing, run Full reset, then contact info@startupfactoryhub.com.</div>
+      <div className="text-[11px] text-[#4E7A73]">To close your SOCIALITE account completely, cancel your plan in Plan & billing, run Full reset, then contact info@startupfactoryhub.com.</div>
     </div>
   );
 }

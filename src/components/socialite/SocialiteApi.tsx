@@ -104,7 +104,7 @@ console.log(await s.usage());`;
           </div>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Key name, e.g. My shop"
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="Key name, e.g. Main website"
             className="flex-1 min-w-[200px] rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm" />
           {["read", "write", "send"].map((s) => (
             <label key={s} className="flex items-center gap-1.5 text-sm text-white/80">
@@ -176,7 +176,7 @@ console.log(await s.usage());`;
         {reqs.length === 0 ? <p className="text-sm text-white/50">No API calls yet.</p> : (
           <div className="max-h-72 overflow-y-auto divide-y divide-white/5 text-xs font-mono">
             {reqs.map((r, i) => (
-              <div key={i} className="flex gap-4 py-1.5"><span className="text-white/40 w-40">{new Date(r.created_at).toLocaleString()}</span><span className="w-14">{r.method}</span><span className="flex-1">{r.path}</span><span className={r.status < 400 ? "text-emerald-300" : "text-amber-300"}>{r.status}</span></div>
+              <div key={i} className="flex gap-4 py-1.5"><span className="text-white/40 w-40">{new Date(r.created_at).toLocaleString()}</span><span className="w-14">{r.method}</span><span className="flex-1">{r.path}</span><span className={r.status < 400 ? "text-[#2EF8A0]" : "text-amber-300"}>{r.status}</span></div>
             ))}
           </div>
         )}

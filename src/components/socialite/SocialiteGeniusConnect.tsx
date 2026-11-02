@@ -17,7 +17,7 @@ const PROVIDERS = [
   { id: "xai", label: "xAI Grok", model: "grok-3", image: "" },
   { id: "custom", label: "Other (OpenAI-compatible)", model: "", image: "" },
 ];
-const input = "bg-[#0f0f10] border border-zinc-800 rounded-lg px-2.5 py-2 text-[12.5px] text-zinc-100 outline-none focus:border-zinc-600 w-full";
+const input = "bg-[#05201a] border border-cyan-400/15 rounded-lg px-2.5 py-2 text-[12.5px] text-zinc-100 outline-none focus:border-cyan-400/30 w-full";
 
 export default function SocialiteGeniusConnect() {
   const [f, setF] = useState({ provider: "openai", base_url: "", model: "gpt-4o-mini", image_model: "gpt-image-1", key: "", enabled: true });
@@ -42,32 +42,32 @@ export default function SocialiteGeniusConnect() {
   };
 
   return (
-    <div className="rounded-[18px] border border-zinc-800 bg-[#161617] p-5 space-y-4">
+    <div className="rounded-[18px] border border-cyan-400/15 bg-[#0A1418] p-5 space-y-4">
       <div>
         <div className="text-[15px] font-semibold">Genius — automation helper</div>
-        <div className="text-[12px] text-zinc-500 mt-1">Connect any AI provider. Genius writes posts, emails and texts, creates pictures, plans full campaigns and reads your results. Only you can change this; your customers use it through their plan.</div>
+        <div className="text-[12px] text-[#4E7A73] mt-1">Connect any AI provider. Genius writes posts, emails and texts, creates pictures, plans full campaigns and reads your results. Only you can change this; your customers use it through their plan.</div>
       </div>
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="text-[11px] text-zinc-500">Provider
+        <label className="text-[11px] text-[#4E7A73]">Provider
           <select className={input} value={f.provider} onChange={(e) => { const p = PROVIDERS.find((x) => x.id === e.target.value)!; setF({ ...f, provider: p.id, model: p.model, image_model: p.image }); }}>
             {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
           </select>
         </label>
-        <label className="text-[11px] text-zinc-500">API key {hint && <span className="text-zinc-400">(saved · ends {hint})</span>}
+        <label className="text-[11px] text-[#4E7A73]">API key {hint && <span className="text-white/55">(saved · ends {hint})</span>}
           <input type="password" autoComplete="off" className={input} placeholder={hint ? "Leave empty to keep the saved key" : "Paste the key"} value={f.key} onChange={(e) => setF({ ...f, key: e.target.value })} />
         </label>
-        <label className="text-[11px] text-zinc-500">Text model<input className={input} value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} /></label>
-        <label className="text-[11px] text-zinc-500">Picture model (optional)<input className={input} value={f.image_model} onChange={(e) => setF({ ...f, image_model: e.target.value })} /></label>
-        {(f.provider === "custom" || f.base_url) && <label className="text-[11px] text-zinc-500 sm:col-span-2">Address (base URL)<input className={input} placeholder="https://…/v1" value={f.base_url} onChange={(e) => setF({ ...f, base_url: e.target.value })} /></label>}
+        <label className="text-[11px] text-[#4E7A73]">Text model<input className={input} value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} /></label>
+        <label className="text-[11px] text-[#4E7A73]">Picture model (optional)<input className={input} value={f.image_model} onChange={(e) => setF({ ...f, image_model: e.target.value })} /></label>
+        {(f.provider === "custom" || f.base_url) && <label className="text-[11px] text-[#4E7A73] sm:col-span-2">Address (base URL)<input className={input} placeholder="https://…/v1" value={f.base_url} onChange={(e) => setF({ ...f, base_url: e.target.value })} /></label>}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button disabled={busy} onClick={() => go("save_config")} className="px-4 py-2 rounded-full bg-white text-black text-[12px] font-semibold disabled:opacity-40">{busy ? "Checking…" : "Save & check"}</button>
-        <button disabled={busy} onClick={() => go("test")} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[12px] text-zinc-200">Check again</button>
-        <label className="flex items-center gap-2 text-[12px] text-zinc-400 ml-auto">
+        <button disabled={busy} onClick={() => go("test")} className="px-4 py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[12px] text-white">Check again</button>
+        <label className="flex items-center gap-2 text-[12px] text-white/55 ml-auto">
           <input type="checkbox" checked={f.enabled} onChange={(e) => setF({ ...f, enabled: e.target.checked })} /> Genius on (save to apply)
         </label>
       </div>
-      {msg && <div className="text-[12px] text-zinc-300">{msg}</div>}
+      {msg && <div className="text-[12px] text-[#E6FFFA]">{msg}</div>}
     </div>
   );
 }

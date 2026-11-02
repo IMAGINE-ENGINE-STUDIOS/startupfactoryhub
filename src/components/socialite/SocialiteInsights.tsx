@@ -16,7 +16,7 @@ type QueueLike = { id: string; text: string; status: string; platforms: string[]
 
 const NAMES: Record<string, string> = { facebook: "Facebook", instagram: "Instagram", threads: "Threads", x: "X", tiktok: "TikTok", youtube: "YouTube" };
 const DAYS: Record<Range, number> = { "7d": 7, "30d": 30, "90d": 90, all: 3650 };
-const card = "rounded-[18px] border border-zinc-800 bg-[#161617]";
+const card = "rounded-[18px] border border-cyan-400/15 bg-[#0A1418]";
 const n = (v: number) => (v >= 1e6 ? (v / 1e6).toFixed(1) + "M" : v >= 1e4 ? (v / 1e3).toFixed(1) + "k" : Math.round(v).toLocaleString());
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
 const money = (v: number) => `$${Math.round(v).toLocaleString()}`;
@@ -105,21 +105,21 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
 
   const hour = new Date().getHours();
   const Stat = ({ l, v, s }: { l: string; v: React.ReactNode; s?: string }) => (
-    <div className={`${card} p-4`}><div className="text-[10.5px] uppercase tracking-widest text-zinc-500">{l}</div><div className="text-[24px] font-semibold mt-1 mono tracking-tight">{v}</div>{s && <div className="text-[11.5px] text-zinc-500 mt-0.5">{s}</div>}</div>
+    <div className={`${card} p-4`}><div className="text-[10.5px] uppercase tracking-widest text-[#4E7A73]">{l}</div><div className="text-[24px] font-semibold mt-1 mono tracking-tight">{v}</div>{s && <div className="text-[11.5px] text-[#4E7A73] mt-0.5">{s}</div>}</div>
   );
-  const H = ({ t, a }: { t: string; a?: React.ReactNode }) => <div className="flex items-center justify-between mb-4"><h3 className="text-[12px] font-semibold tracking-widest uppercase text-zinc-400">{t}</h3>{a}</div>;
-  const link = "text-[12px] text-zinc-400 hover:text-white";
+  const H = ({ t, a }: { t: string; a?: React.ReactNode }) => <div className="flex items-center justify-between mb-4"><h3 className="text-[12px] font-semibold tracking-widest uppercase text-white/55">{t}</h3>{a}</div>;
+  const link = "text-[12px] text-white/55 hover:text-white";
 
   return (
     <div className="p-4 lg:p-8 max-w-[1200px] space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-[24px] font-semibold tracking-tight">{hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"}, {firstName}</h1>
-          <p className="text-[13px] text-zinc-500 mt-0.5">Everything you posted and sent, with real results from your connected accounts.</p>
+          <p className="text-[13px] text-[#4E7A73] mt-0.5">Everything you posted and sent, with real results from your connected accounts.</p>
         </div>
-        <div className="flex gap-1.5 p-1 rounded-full bg-[#161617] border border-zinc-800">
+        <div className="flex gap-1.5 p-1 rounded-full bg-[#0A1418] border border-cyan-400/15">
           {(["7d", "30d", "90d", "all"] as Range[]).map(r => (
-            <button key={r} onClick={() => setRange(r)} className={`px-3 py-1 rounded-full text-[11px] mono font-medium transition ${range === r ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300"}`}>{r.toUpperCase()}</button>
+            <button key={r} onClick={() => setRange(r)} className={`px-3 py-1 rounded-full text-[11px] mono font-medium transition ${range === r ? "bg-white text-black" : "text-[#4E7A73] hover:text-[#E6FFFA]"}`}>{r.toUpperCase()}</button>
           ))}
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Activity chart */}
         <div className={`${card} p-5 lg:col-span-2`}>
-          <H t={`Daily activity · last ${span} days`} a={<div className="flex gap-3 text-[11px] text-zinc-500"><span className="flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-white" />Messages</span><span className="flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-zinc-500" />Posts</span></div>} />
+          <H t={`Daily activity · last ${span} days`} a={<div className="flex gap-3 text-[11px] text-[#4E7A73]"><span className="flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-white" />Messages</span><span className="flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-zinc-500" />Posts</span></div>} />
           <div className="h-[140px] flex items-end gap-[3px]">
             {bars.map(b => (
               <div key={b.d} title={`${b.d}: ${b.msgs} messages, ${b.posts} posts`} className="flex-1 flex flex-col justify-end h-full">
@@ -144,27 +144,27 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
               </div>
             ))}
           </div>
-          <div className="flex justify-between text-[10px] mono text-zinc-600 mt-2"><span>{bars[0]?.d}</span><span>today</span></div>
+          <div className="flex justify-between text-[10px] mono text-[#4E7A73]/75 mt-2"><span>{bars[0]?.d}</span><span>today</span></div>
         </div>
 
         {/* Bot + next up */}
         <div className="space-y-4">
-          <div className={`rounded-[18px] border p-5 ${bot.enabled ? "border-emerald-500/30 bg-emerald-500/10" : "border-zinc-800 bg-[#161617]"}`}>
-            <div className="flex items-center justify-between"><span className="text-[11px] font-semibold tracking-widest uppercase">Automation</span><span className={`w-2 h-2 rounded-full ${bot.enabled ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"}`} /></div>
+          <div className={`rounded-[18px] border p-5 ${bot.enabled ? "border-[#14b8a6]/30 bg-[#14b8a6]/10" : "border-cyan-400/15 bg-[#0A1418]"}`}>
+            <div className="flex items-center justify-between"><span className="text-[11px] font-semibold tracking-widest uppercase">Automation</span><span className={`w-2 h-2 rounded-full ${bot.enabled ? "bg-[#2EF8A0] animate-pulse" : "bg-cyan-400/25"}`} /></div>
             <div className="text-[15px] font-semibold mt-2">{bot.enabled ? `${bot.perDay} posts/day · ${bot.platforms} platforms` : "Paused"}</div>
-            <div className="text-[11.5px] text-zinc-500 mt-1">{bot.enabled ? `Next run ${bot.nextRunAt ? bot.nextRunAt.toLocaleString() : "soon"} · auto-post ${bot.autoPost ? "on" : "off"}` : "Turn it on to create and post for you"}</div>
-            <button onClick={() => go("automation")} className="mt-3 w-full py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[12px] font-medium hover:bg-zinc-800">Open Automation</button>
+            <div className="text-[11.5px] text-[#4E7A73] mt-1">{bot.enabled ? `Next run ${bot.nextRunAt ? bot.nextRunAt.toLocaleString() : "soon"} · auto-post ${bot.autoPost ? "on" : "off"}` : "Turn it on to create and post for you"}</div>
+            <button onClick={() => go("automation")} className="mt-3 w-full py-2 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[12px] font-medium hover:bg-cyan-400/10">Open Automation</button>
           </div>
           <div className={`${card} p-5`}>
             <H t="Up next" a={<button onClick={() => go("queue")} className={link}>Queue →</button>} />
-            {waiting.length === 0 && <div className="text-[12.5px] text-zinc-500">Nothing waiting. <button onClick={() => go("composer")} className="underline text-zinc-300">Create a post</button></div>}
+            {waiting.length === 0 && <div className="text-[12.5px] text-[#4E7A73]">Nothing waiting. <button onClick={() => go("composer")} className="underline text-[#E6FFFA]">Create a post</button></div>}
             <div className="space-y-2">
               {waiting.slice(0, 3).map(p => (
-                <div key={p.id} className="text-[12.5px]"><div className="mono text-[11px] text-zinc-500">{new Date(p.scheduledAt).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}{p.isAuto ? " · bot" : ""}</div><div className="truncate text-zinc-200">{p.text || "(media only)"}</div></div>
+                <div key={p.id} className="text-[12.5px]"><div className="mono text-[11px] text-[#4E7A73]">{new Date(p.scheduledAt).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}{p.isAuto ? " · bot" : ""}</div><div className="truncate text-white">{p.text || "(media only)"}</div></div>
               ))}
             </div>
-            <div className="mt-3 pt-3 border-t border-zinc-900 flex gap-4 text-[11.5px] text-zinc-500">
-              <span>Timed sends: <b className="text-zinc-200 mono">{sched("pending")}</b> waiting</span><span><b className="text-zinc-200 mono">{sched("sent")}</b> sent</span><span><b className="text-zinc-200 mono">{sched("failed")}</b> failed</span>
+            <div className="mt-3 pt-3 border-t border-zinc-900 flex gap-4 text-[11.5px] text-[#4E7A73]">
+              <span>Timed sends: <b className="text-white mono">{sched("pending")}</b> waiting</span><span><b className="text-white mono">{sched("sent")}</b> sent</span><span><b className="text-white mono">{sched("failed")}</b> failed</span>
             </div>
           </div>
         </div>
@@ -172,25 +172,25 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
 
       {/* Social accounts */}
       <div className={`${card} p-5`}>
-        <H t="Social accounts · live" a={<div className="flex items-center gap-3"><span className="text-[11px] text-zinc-600">{live ? `updated ${new Date(live.fetched_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}</span><button onClick={refreshLive} disabled={liveLoading} className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11.5px] hover:bg-zinc-800 disabled:opacity-40">{liveLoading ? "Refreshing…" : "Refresh"}</button></div>} />
+        <H t="Social accounts · live" a={<div className="flex items-center gap-3"><span className="text-[11px] text-[#4E7A73]/75">{live ? `updated ${new Date(live.fetched_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}</span><button onClick={refreshLive} disabled={liveLoading} className="px-3 py-1 rounded-full bg-white/[0.03] border border-cyan-400/15 text-[11.5px] hover:bg-cyan-400/10 disabled:opacity-40">{liveLoading ? "Refreshing…" : "Refresh"}</button></div>} />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {Object.keys(NAMES).map(k => {
             const p = live?.platforms?.[k];
             const ps = (p?.posts || []).filter(x => new Date(x.at) >= since);
             const e = ps.reduce((s, x) => s + x.likes + x.comments + x.shares, 0);
             return (
-              <div key={k} className="rounded-[14px] bg-[#0f0f10] border border-zinc-800 p-4">
-                <div className="flex items-center justify-between"><span className="text-[13px] font-semibold">{NAMES[k]}</span><span className={`text-[10px] mono uppercase ${p?.connected && !p.error ? "text-emerald-300" : "text-zinc-600"}`}>{!p ? "—" : !p.connected ? "not connected" : p.error ? "check key" : "live"}</span></div>
+              <div key={k} className="rounded-[14px] bg-[#05201a] border border-cyan-400/15 p-4">
+                <div className="flex items-center justify-between"><span className="text-[13px] font-semibold">{NAMES[k]}</span><span className={`text-[10px] mono uppercase ${p?.connected && !p.error ? "text-[#2EF8A0]" : "text-[#4E7A73]/75"}`}>{!p ? "—" : !p.connected ? "not connected" : p.error ? "check key" : "live"}</span></div>
                 {p?.connected && !p.error ? (<>
-                  <div className="text-[11.5px] text-zinc-500 truncate">{p.name}</div>
+                  <div className="text-[11.5px] text-[#4E7A73] truncate">{p.name}</div>
                   <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                    <div><div className="mono text-[16px] font-semibold">{n(p.followers || 0)}</div><div className="text-[10px] text-zinc-500">followers</div></div>
-                    <div><div className="mono text-[16px] font-semibold">{ps.length}</div><div className="text-[10px] text-zinc-500">posts</div></div>
-                    <div><div className="mono text-[16px] font-semibold">{n(e)}</div><div className="text-[10px] text-zinc-500">engagement</div></div>
+                    <div><div className="mono text-[16px] font-semibold">{n(p.followers || 0)}</div><div className="text-[10px] text-[#4E7A73]">followers</div></div>
+                    <div><div className="mono text-[16px] font-semibold">{ps.length}</div><div className="text-[10px] text-[#4E7A73]">posts</div></div>
+                    <div><div className="mono text-[16px] font-semibold">{n(e)}</div><div className="text-[10px] text-[#4E7A73]">engagement</div></div>
                   </div>
-                  {p.extra && <div className="mt-2 text-[10.5px] text-zinc-600 truncate">{Object.entries(p.extra).map(([a, b]) => `${a.replace(/_/g, " ")} ${n(b)}`).join(" · ")}</div>}
-                </>) : p?.error ? <div className="text-[11.5px] text-zinc-500 mt-2 line-clamp-2">{p.error}</div>
-                  : <button onClick={() => go("accounts")} className="mt-3 text-[12px] underline text-zinc-400 hover:text-white">Connect in Accounts</button>}
+                  {p.extra && <div className="mt-2 text-[10.5px] text-[#4E7A73]/75 truncate">{Object.entries(p.extra).map(([a, b]) => `${a.replace(/_/g, " ")} ${n(b)}`).join(" · ")}</div>}
+                </>) : p?.error ? <div className="text-[11.5px] text-[#4E7A73] mt-2 line-clamp-2">{p.error}</div>
+                  : <button onClick={() => go("accounts")} className="mt-3 text-[12px] underline text-white/55 hover:text-white">Connect in Accounts</button>}
               </div>
             );
           })}
@@ -204,11 +204,11 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
           <div className="space-y-3">
             {channels.map(c => (
               <div key={c.k} className="flex items-center gap-3 text-[12.5px]">
-                <c.I className="w-4 h-4 text-zinc-400 shrink-0" />
+                <c.I className="w-4 h-4 text-white/55 shrink-0" />
                 <span className="w-[74px]">{c.l}</span>
-                <div className="flex-1 h-1.5 rounded-full bg-zinc-900 overflow-hidden"><div className="h-full bg-white" style={{ width: `${totalMsgs ? (c.sent / totalMsgs) * 100 : 0}%` }} /></div>
+                <div className="flex-1 h-1.5 rounded-full bg-white/[0.03] overflow-hidden"><div className="h-full bg-white" style={{ width: `${totalMsgs ? (c.sent / totalMsgs) * 100 : 0}%` }} /></div>
                 <span className="mono w-12 text-right">{n(c.sent)}</span>
-                <span className="text-[11px] text-zinc-500 w-[150px] text-right">{c.k === "email" ? `${pct(c.opened, c.sent)} opened · ${pct(c.clicked, c.sent)} clicked` : `${pct(c.delivered, c.sent)} delivered`} · {c.failed} failed</span>
+                <span className="text-[11px] text-[#4E7A73] w-[150px] text-right">{c.k === "email" ? `${pct(c.opened, c.sent)} opened · ${pct(c.clicked, c.sent)} clicked` : `${pct(c.delivered, c.sent)} delivered`} · {c.failed} failed</span>
               </div>
             ))}
           </div>
@@ -216,14 +216,14 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
 
         {/* Top posts */}
         <div className={`${card} p-5`}>
-          <H t="Top posts" a={<span className="text-[11px] text-zinc-600">{postedLocal} published from SOCIALITE</span>} />
-          {top.length === 0 && <div className="text-[12.5px] text-zinc-500">No posts with results yet in this period.</div>}
+          <H t="Top posts" a={<span className="text-[11px] text-[#4E7A73]/75">{postedLocal} published from SOCIALITE</span>} />
+          {top.length === 0 && <div className="text-[12.5px] text-[#4E7A73]">No posts with results yet in this period.</div>}
           <div className="space-y-2.5">
             {top.map((p, i) => (
               <a key={i} href={p.url} target="_blank" rel="noreferrer" className="flex gap-3 items-center text-[12.5px] group">
-                <span className="text-[10px] mono uppercase text-zinc-500 w-16 shrink-0">{NAMES[p.platform]}</span>
-                <span className="flex-1 truncate text-zinc-300 group-hover:text-white">{p.text || "(no caption)"}</span>
-                <span className="mono text-[11.5px] text-zinc-400 shrink-0">{n(p.likes)} · {n(p.comments)} · {n(p.shares)}{p.views ? ` · ${n(p.views)} views` : ""}</span>
+                <span className="text-[10px] mono uppercase text-[#4E7A73] w-16 shrink-0">{NAMES[p.platform]}</span>
+                <span className="flex-1 truncate text-[#E6FFFA] group-hover:text-white">{p.text || "(no caption)"}</span>
+                <span className="mono text-[11.5px] text-white/55 shrink-0">{n(p.likes)} · {n(p.comments)} · {n(p.shares)}{p.views ? ` · ${n(p.views)} views` : ""}</span>
               </a>
             ))}
           </div>
@@ -240,14 +240,14 @@ export default function SocialiteInsights({ firstName, isOwner, queue, bot, go }
           </div>
           <div className={`${card} lg:col-span-2 p-5`}>
             <H t="Email campaigns" a={<button onClick={() => go("messaging")} className={link}>Campaigns →</button>} />
-            {camps.size === 0 && <div className="text-[12.5px] text-zinc-500">No campaign sends in this period.</div>}
+            {camps.size === 0 && <div className="text-[12.5px] text-[#4E7A73]">No campaign sends in this period.</div>}
             <div className="divide-y divide-zinc-900">
               {[...camps.entries()].map(([k, v]) => (
                 <div key={k} className="py-2.5 flex items-center gap-4 text-[12.5px]">
                   <div className="flex-1 truncate">{v.title}</div>
-                  <span className="text-zinc-500">{v.days} days</span>
+                  <span className="text-[#4E7A73]">{v.days} days</span>
                   <span className="mono">{n(v.ok)} delivered</span>
-                  <span className="mono text-zinc-500 w-24 text-right">{pct(v.ok, v.ok + v.fail)} success</span>
+                  <span className="mono text-[#4E7A73] w-24 text-right">{pct(v.ok, v.ok + v.fail)} success</span>
                 </div>
               ))}
             </div>
