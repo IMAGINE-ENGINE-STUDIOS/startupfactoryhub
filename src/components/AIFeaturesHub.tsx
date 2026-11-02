@@ -524,6 +524,9 @@ export default function AIFeaturesHub() {
             <RotateCcw className="h-3 w-3" /> Reset order
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground/70 mb-3 -mt-1">
+          Some perk links are affiliate links — Startup Factory Hub may earn a commission when you buy, at no extra cost to you.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {orderedPerks.map((perk) => (
             <PerkCard
