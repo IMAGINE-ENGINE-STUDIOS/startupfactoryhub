@@ -445,32 +445,7 @@ const AcceleratorDashboard = () => {
                   <Plus className="h-3.5 w-3.5" />
                   Schedule
                 </Button>
-            }>
-<MeetingsTwoLane
-              labels={{ pitches: 'Startup Pitches', mentorship: 'Investor Meetings' }}
-              icons={{ pitches: 'startups', mentorship: 'investors' }}
-              pitches={
-                <div className="space-y-4">
-                  <PitchMeetingsSection
-                    meetings={startupMeetings}
-                    viewerType="investor"
-                    onAccept={handleAcceptMeeting}
-                    onReject={handleRejectMeeting}
-                  />
-                </div>
-              }
-              mentorship={
-                <div className="space-y-4">
-                  <PitchMeetingsSection
-                    meetings={investorMeetings}
-                    viewerType="startup"
-                    onAccept={handleAcceptMeeting}
-                    onReject={handleRejectMeeting}
-                  />
-                </div>
-              }
-            />
-            </MeetingsConsole>
+            } pitchSets={[{ meetings: startupMeetings, viewerType: 'investor', onAccept: handleAcceptMeeting, onReject: handleRejectMeeting }, { meetings: investorMeetings, viewerType: 'startup', onAccept: handleAcceptMeeting, onReject: handleRejectMeeting }]} />
           </TabsContent>
 
           {/* Jobs Tab */}

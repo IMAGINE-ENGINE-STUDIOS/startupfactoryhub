@@ -15,6 +15,8 @@ interface Props {
   onJoin?: (url: string) => void;
   onOutcomeChange?: (id: string, outcome: PitchOutcome) => void;
   onOpenTranscript?: (meta: any) => void;
+  /** When set, render ONLY this group (no chips) — the Meetings console owns the sections. */
+  bareView?: View;
 }
 
 export default function PitchMeetingsSection({
@@ -25,6 +27,7 @@ export default function PitchMeetingsSection({
   onJoin,
   onOutcomeChange,
   onOpenTranscript,
+  bareView,
 }: Props) {
   // viewerType determines which host_id means "incoming" vs "sent"
   // - startup viewer: incoming = investor-hosted, sent = startup-hosted
@@ -45,6 +48,28 @@ export default function PitchMeetingsSection({
         .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()),
     };
   }, [meetings, incomingHostKey, sentHostKey]);
+
+  if (bareView) {
+    const bareItems = groups[bareView];
+    if (!bareItems.length) return null;
+    return (
+      <div className="grid gap-3">
+        {bareItems.map((meeting) => (
+          <PitchMeetingCard
+            key={meeting.id}
+            meeting={meeting}
+            variant={bareView}
+            viewerType={viewerType}
+            onAccept={bareView === 'incoming' ? onAccept : undefined}
+            onReject={bareView === 'incoming' ? onReject : undefined}
+            onJoin={bareView === 'upcoming' ? onJoin : undefined}
+            onOutcomeChange={bareView === 'past' ? onOutcomeChange : undefined}
+            onOpenTranscript={bareView === 'past' ? onOpenTranscript : undefined}
+          />
+        ))}
+      </div>
+    );
+  }
 
   // Default to the first chip with content
   const defaultView: View =

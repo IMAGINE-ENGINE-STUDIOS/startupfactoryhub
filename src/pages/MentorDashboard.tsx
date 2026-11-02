@@ -145,33 +145,7 @@ const MentorDashboard = () => {
                   <Plus className="h-3.5 w-3.5" />
                   Schedule
                 </Button>
-            }>
-{todaySessions.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Today</p>
-                {todaySessions.map((session: any) => (
-                  <div key={session.id} className="flex items-center justify-between p-4 rounded-[18px] border border-border bg-card shadow-sm">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Video className="h-4 w-4 text-primary shrink-0" />
-                      <div className="min-w-0">
-                        <h4 className="font-medium text-sm text-foreground truncate">
-                          {session.companies?.name || session.mentee?.full_name || 'Session'}
-                        </h4>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {session.topic || 'Mentoring Session'} • {new Date(session.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                        </p>
-                      </div>
-                    </div>
-                    <Button size="sm" className="gap-1.5 shrink-0" onClick={() => setActiveVideoSession(session)}>
-                      <Video className="h-3.5 w-3.5" />
-                      Join
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <MentorMeetingsSection
+            } panels={{ incoming: (<MentorMeetingsSection bareView="requests"
               onJoinMeeting={(_, sessionData) => setActiveVideoSession(sessionData)}
               activeMenteesCount={activeMentees.length}
               activeMentees={
@@ -211,8 +185,190 @@ const MentorDashboard = () => {
                   </ScrollArea>
                 ) : undefined
               }
-            />
-            </MeetingsConsole>
+            />), upcoming: (<>{todaySessions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Today</p>
+                {todaySessions.map((session: any) => (
+                  <div key={session.id} className="flex items-center justify-between p-4 rounded-[18px] border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Video className="h-4 w-4 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <h4 className="font-medium text-sm text-foreground truncate">
+                          {session.companies?.name || session.mentee?.full_name || 'Session'}
+                        </h4>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {session.topic || 'Mentoring Session'} • {new Date(session.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        </p>
+                      </div>
+                    </div>
+                    <Button size="sm" className="gap-1.5 shrink-0" onClick={() => setActiveVideoSession(session)}>
+                      <Video className="h-3.5 w-3.5" />
+                      Join
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}<MentorMeetingsSection bareView="upcoming"
+              onJoinMeeting={(_, sessionData) => setActiveVideoSession(sessionData)}
+              activeMenteesCount={activeMentees.length}
+              activeMentees={
+                activeMentees.length > 0 ? (
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
+                      {activeMentees.map((mentee: any) => (
+                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-[18px] border border-border bg-card shadow-sm">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee?.avatar_url} />
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                {mentee.mentee?.full_name?.[0] || 'M'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                              setSelectedMenteeId(mentee.mentee_id);
+                              setCreateSessionDialogOpen(true);
+                            }}>
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              Book
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentee.mentee_id } }))}>
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                ) : undefined
+              }
+            /><MentorMeetingsSection bareView="mentees"
+              onJoinMeeting={(_, sessionData) => setActiveVideoSession(sessionData)}
+              activeMenteesCount={activeMentees.length}
+              activeMentees={
+                activeMentees.length > 0 ? (
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
+                      {activeMentees.map((mentee: any) => (
+                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-[18px] border border-border bg-card shadow-sm">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee?.avatar_url} />
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                {mentee.mentee?.full_name?.[0] || 'M'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                              setSelectedMenteeId(mentee.mentee_id);
+                              setCreateSessionDialogOpen(true);
+                            }}>
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              Book
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentee.mentee_id } }))}>
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                ) : undefined
+              }
+            /></>), sent: (<MentorMeetingsSection bareView="offer"
+              onJoinMeeting={(_, sessionData) => setActiveVideoSession(sessionData)}
+              activeMenteesCount={activeMentees.length}
+              activeMentees={
+                activeMentees.length > 0 ? (
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
+                      {activeMentees.map((mentee: any) => (
+                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-[18px] border border-border bg-card shadow-sm">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee?.avatar_url} />
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                {mentee.mentee?.full_name?.[0] || 'M'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                              setSelectedMenteeId(mentee.mentee_id);
+                              setCreateSessionDialogOpen(true);
+                            }}>
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              Book
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentee.mentee_id } }))}>
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                ) : undefined
+              }
+            />), past: (<MentorMeetingsSection bareView="past"
+              onJoinMeeting={(_, sessionData) => setActiveVideoSession(sessionData)}
+              activeMenteesCount={activeMentees.length}
+              activeMentees={
+                activeMentees.length > 0 ? (
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
+                      {activeMentees.map((mentee: any) => (
+                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-[18px] border border-border bg-card shadow-sm">
+                          <div className="flex items-center gap-2.5 mb-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee?.avatar_url} />
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                {mentee.mentee?.full_name?.[0] || 'M'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                              setSelectedMenteeId(mentee.mentee_id);
+                              setCreateSessionDialogOpen(true);
+                            }}>
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              Book
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentee.mentee_id } }))}>
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                ) : undefined
+              }
+            />), }} />
           </TabsContent>
 
 

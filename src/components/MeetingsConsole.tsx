@@ -12,6 +12,7 @@ import { useLiveRooms } from '@/hooks/useLiveRooms';
 import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 import LiveRooms from '@/components/LiveRooms';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
+import PitchMeetingsSection from '@/components/PitchMeetingsSection';
 
 /**
  * MeetingsConsole — the modern Meetings tab (founder-approved design,
@@ -19,18 +20,39 @@ import VideoMeetingDialog from '@/components/VideoMeetingDialog';
  * REAL calendar_bookings data, a Live Now strip for rooms in session, and
  * the live room integrated in-tab — Join opens VideoMeetingDialog right
  * here instead of sending the user away. Each dashboard passes its own
- * header action (New Meeting / Schedule) and its existing lanes/sections
- * as children, rendered under Upcoming.
+ * header action (New Meeting / Schedule); pitch meetings and mentorship
+ * panels merge into the same four sections via pitchSets + panels —
+ * one section with all the data, no parallel lists.
  */
 
 type Section = 'upcoming' | 'incoming' | 'sent' | 'past';
 type View = 'list' | 'timeline';
 
+export interface MeetingsPitchSet {
+  meetings: any[];
+  viewerType: 'startup' | 'investor';
+  onAccept?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onJoin?: (url: string) => void;
+  onOutcomeChange?: (id: string, outcome: any) => void;
+  onOpenTranscript?: (meta: any) => void;
+}
+
+interface SectionPanels {
+  incoming?: ReactNode;
+  sent?: ReactNode;
+  upcoming?: ReactNode;
+  past?: ReactNode;
+}
+
 interface Props {
   subtitle?: string;
   icon?: ComponentType<{ className?: string }>;
   action?: ReactNode;
-  children?: ReactNode;
+  /** Pitch meetings (pitch_meetings table) merged into the same four sections. */
+  pitchSets?: MeetingsPitchSet[];
+  /** Extra panels per section (mentorship offers/sessions, mentees, offer board). */
+  panels?: SectionPanels;
 }
 
 const GRADIENT_BTN =
@@ -89,7 +111,7 @@ function MetaChip({ children, accent = false }: { children: ReactNode; accent?: 
   );
 }
 
-export default function MeetingsConsole({ subtitle, icon, action, children }: Props) {
+export default function MeetingsConsole({ subtitle, icon, action, pitchSets, panels }: Props) {
   const { user } = useAuth();
   const { bookings, loading, updateBookingStatus } = useCalendarBookings();
   const { rooms, joinRoom } = useLiveRooms();
@@ -143,11 +165,28 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
     if (ok) setRoom({ link: r.meeting_link, title: r.name, hostId: r.creator_id });
   };
 
+  const pitchCounts = useMemo(() => {
+    const counts = { upcoming: 0, incoming: 0, sent: 0, past: 0 };
+    const nowMs = now.getTime();
+    for (const ps of pitchSets ?? []) {
+      const incomingKey = ps.viewerType === 'startup' ? 'investor_id' : 'startup_id';
+      const sentKey = ps.viewerType === 'startup' ? 'startup_id' : 'investor_id';
+      for (const m of ps.meetings) {
+        const t = new Date(m.scheduled_date).getTime();
+        if (m.status === 'pending' && m.host_id === m[incomingKey]) counts.incoming++;
+        else if (m.status === 'pending' && m.host_id === m[sentKey]) counts.sent++;
+        else if (m.status === 'scheduled' && t >= nowMs) counts.upcoming++;
+        else if ((m.status === 'scheduled' || m.status === 'completed') && t < nowMs) counts.past++;
+      }
+    }
+    return counts;
+  }, [pitchSets, now]);
+
   const chips: { key: Section; label: string; count?: number; alert?: boolean }[] = [
-    { key: 'upcoming', label: 'Upcoming', count: upcoming.length },
-    { key: 'incoming', label: 'Incoming', count: incoming.length, alert: incoming.length > 0 },
-    { key: 'sent', label: 'Sent', count: sent.filter((b) => b.status === 'pending').length },
-    { key: 'past', label: 'Past', count: past.length },
+    { key: 'upcoming', label: 'Upcoming', count: upcoming.length + pitchCounts.upcoming },
+    { key: 'incoming', label: 'Incoming', count: incoming.length + pitchCounts.incoming, alert: incoming.length + pitchCounts.incoming > 0 },
+    { key: 'sent', label: 'Sent', count: sent.filter((b) => b.status === 'pending').length + pitchCounts.sent },
+    { key: 'past', label: 'Past', count: past.length + pitchCounts.past },
   ];
 
   const groupedUpcoming = useMemo(() => {
@@ -283,7 +322,7 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
       {/* ------------------------------- UPCOMING ------------------------------- */}
       {section === 'upcoming' && (
         <div className="space-y-4">
-          {loading ? null : upcoming.length === 0 ? (
+          {loading ? null : upcoming.length === 0 && pitchCounts.upcoming === 0 && !panels?.upcoming ? (
             <div className="rounded-[18px] border border-border bg-card p-6 text-center">
               <Inbox className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -319,15 +358,18 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
             </div>
           )}
 
+          {pitchSets?.map((ps, i) => (
+            <PitchMeetingsSection key={i} {...ps} bareView="upcoming" />
+          ))}
           <LiveRooms />
-          {children}
+          {panels?.upcoming}
         </div>
       )}
 
       {/* ------------------------------- INCOMING ------------------------------- */}
       {section === 'incoming' && (
         <div className="space-y-3">
-          {incoming.length === 0 ? (
+          {incoming.length === 0 && pitchCounts.incoming === 0 && !panels?.incoming ? (
             <div className="rounded-[18px] border border-border bg-card p-6 text-center">
               <Inbox className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">No meeting requests waiting on you.</p>
@@ -385,13 +427,17 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
               );
             })
           )}
+          {pitchSets?.map((ps, i) => (
+            <PitchMeetingsSection key={i} {...ps} bareView="incoming" />
+          ))}
+          {panels?.incoming}
         </div>
       )}
 
       {/* --------------------------------- SENT --------------------------------- */}
       {section === 'sent' && (
         <div className="space-y-3">
-          {sent.length === 0 ? (
+          {sent.length === 0 && pitchCounts.sent === 0 && !panels?.sent ? (
             <div className="rounded-[18px] border border-border bg-card p-6 text-center">
               <Send className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">You haven't sent any meeting requests yet.</p>
@@ -453,13 +499,17 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
               );
             })
           )}
+          {pitchSets?.map((ps, i) => (
+            <PitchMeetingsSection key={i} {...ps} bareView="sent" />
+          ))}
+          {panels?.sent}
         </div>
       )}
 
       {/* --------------------------------- PAST --------------------------------- */}
       {section === 'past' && (
         <div className="space-y-3">
-          {past.length === 0 ? (
+          {past.length === 0 && pitchCounts.past === 0 && !panels?.past ? (
             <div className="rounded-[18px] border border-border bg-card p-6 text-center">
               <History className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">No past meetings yet.</p>
@@ -493,6 +543,10 @@ export default function MeetingsConsole({ subtitle, icon, action, children }: Pr
               );
             })
           )}
+          {pitchSets?.map((ps, i) => (
+            <PitchMeetingsSection key={i} {...ps} bareView="past" />
+          ))}
+          {panels?.past}
         </div>
       )}
 

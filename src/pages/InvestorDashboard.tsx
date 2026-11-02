@@ -916,16 +916,7 @@ export default function InvestorDashboard() {
                   <Plus className="h-3.5 w-3.5" />
                   Schedule
                 </Button>
-            }>
-<PitchMeetingsSection
-              meetings={pitchMeetings}
-              viewerType="investor"
-              onAccept={handleAcceptPitch}
-              onReject={handleRejectPitch}
-              onJoin={setActiveVideoUrl}
-              onOutcomeChange={handleOutcomeChange}
-            />
-            </MeetingsConsole>
+            } pitchSets={[{ meetings: pitchMeetings, viewerType: 'investor', onAccept: handleAcceptPitch, onReject: handleRejectPitch, onJoin: setActiveVideoUrl, onOutcomeChange: handleOutcomeChange }]} />
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-4">

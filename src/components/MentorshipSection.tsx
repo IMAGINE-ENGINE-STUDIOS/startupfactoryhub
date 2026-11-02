@@ -15,6 +15,8 @@ interface Props {
   onOfferHandled?: () => void;
   onSessionUpdated?: () => void;
   onCountsChange?: (counts: { offers: number; active: number; upcoming: number; past: number }) => void;
+  /** When set, render ONLY this panel (no chips) — the Meetings console owns the sections. */
+  bareView?: View;
 }
 
 export default function MentorshipSection({
@@ -23,6 +25,7 @@ export default function MentorshipSection({
   onOfferHandled,
   onSessionUpdated,
   onCountsChange,
+  bareView,
 }: Props) {
   const [view, setView] = useState<View>('offers');
   const [counts, setCounts] = useState({ offers: 0, active: 0, upcoming: 0, past: 0 });
@@ -35,6 +38,30 @@ export default function MentorshipSection({
       return next;
     });
   };
+
+  if (bareView) {
+    return (
+      <div className="space-y-4">
+        {bareView === 'offers' && (
+          <StartupMentorshipOffers onOfferHandled={onOfferHandled} onCountChange={(n) => update('offers', n)} />
+        )}
+        {bareView === 'active' && (
+          <StartupActiveMentors onJoin={onJoin} onCountChange={(n) => update('active', n)} />
+        )}
+        {bareView === 'upcoming' && (
+          <StartupMentoringSessions type="upcoming" onJoin={onJoin} onCountChange={(n) => update('upcoming', n)} />
+        )}
+        {bareView === 'past' && (
+          <StartupMentoringSessions
+            type="past"
+            onSessionUpdated={onSessionUpdated}
+            onCountChange={(n) => update('past', n)}
+            onOpenTranscript={onOpenTranscript}
+          />
+        )}
+      </div>
+    );
+  }
 
   const chips: Array<{ key: View; label: string; icon: any; count: number; tone: string }> = [
     { key: 'offers', label: 'Offers', icon: Sparkles, count: counts.offers, tone: 'text-amber-500' },

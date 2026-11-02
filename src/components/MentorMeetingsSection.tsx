@@ -14,10 +14,34 @@ interface Props {
   onJoinMeeting?: (link: string, session: any) => void;
   activeMenteesCount?: number;
   activeMentees?: React.ReactNode; // optional preview row
+  /** When set, render ONLY this panel (no chips) — the Meetings console owns the sections. */
+  bareView?: View;
 }
 
-export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCount = 0, activeMentees }: Props) {
+export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCount = 0, activeMentees, bareView }: Props) {
   const [view, setView] = useState<View>('upcoming');
+
+  if (bareView) {
+    return (
+      <div className="space-y-4">
+        {bareView === 'requests' && (
+          <>
+            <MentorshipRequests />
+            <MenteeSessions onJoinMeeting={onJoinMeeting} requestsOnly />
+          </>
+        )}
+        {bareView === 'upcoming' && <MenteeSessions onJoinMeeting={onJoinMeeting} />}
+        {bareView === 'past' && <MentorSessionHistory showStats={false} />}
+        {bareView === 'mentees' &&
+          (activeMentees ?? (
+            <div className="text-center py-10 rounded-[18px] border border-border bg-card shadow-sm">
+              <p className="text-sm text-muted-foreground">No active mentees yet</p>
+            </div>
+          ))}
+        {bareView === 'offer' && <MentorOffersBoard />}
+      </div>
+    );
+  }
 
   const chips: Array<{ key: View; label: string; icon: any; tone: string }> = [
     { key: 'requests', label: 'Requests', icon: Bell, tone: 'text-amber-500' },

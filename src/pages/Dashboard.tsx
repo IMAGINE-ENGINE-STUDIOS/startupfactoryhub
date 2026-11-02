@@ -675,33 +675,7 @@ const Dashboard = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-              }>
-<MeetingsTwoLane
-                pitches={
-                  <div className="space-y-4">
-                    <PitchMeetingsSection
-                      meetings={pitchMeetings}
-                      viewerType="startup"
-                      onAccept={handleAcceptPitch}
-                      onReject={handleRejectPitch}
-                      onJoin={setActiveVideoUrl}
-                      onOutcomeChange={handleOutcomeChange}
-                      onOpenTranscript={openPitchTranscript}
-                    />
-                  </div>
-                }
-                mentorship={
-                  <div className="space-y-4">
-                    <MentorshipSection
-                      onJoin={setActiveVideoUrl}
-                      onOpenTranscript={openMentorshipTranscript}
-                      onOfferHandled={fetchPitchMeetings}
-                      onSessionUpdated={fetchPitchMeetings}
-                    />
-                  </div>
-                }
-              />
-              </MeetingsConsole>
+              } pitchSets={[{ meetings: pitchMeetings, viewerType: 'startup', onAccept: handleAcceptPitch, onReject: handleRejectPitch, onJoin: setActiveVideoUrl, onOutcomeChange: handleOutcomeChange, onOpenTranscript: openPitchTranscript }]} panels={{ incoming: (<MentorshipSection bareView="offers" onJoin={setActiveVideoUrl} onOpenTranscript={openMentorshipTranscript} onOfferHandled={fetchPitchMeetings} onSessionUpdated={fetchPitchMeetings} />), upcoming: (<><MentorshipSection bareView="active" onJoin={setActiveVideoUrl} onOpenTranscript={openMentorshipTranscript} onOfferHandled={fetchPitchMeetings} onSessionUpdated={fetchPitchMeetings} /><MentorshipSection bareView="upcoming" onJoin={setActiveVideoUrl} onOpenTranscript={openMentorshipTranscript} onOfferHandled={fetchPitchMeetings} onSessionUpdated={fetchPitchMeetings} /></>), past: (<MentorshipSection bareView="past" onJoin={setActiveVideoUrl} onOpenTranscript={openMentorshipTranscript} onOfferHandled={fetchPitchMeetings} onSessionUpdated={fetchPitchMeetings} />), }} />
             </TabsContent>
           )}
 
