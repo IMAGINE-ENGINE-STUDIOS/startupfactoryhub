@@ -451,7 +451,6 @@ const AcceleratorDashboard = () => {
               icons={{ pitches: 'startups', mentorship: 'investors' }}
               pitches={
                 <div className="space-y-4">
-                  <BookingsList variant="scheduled" category="pitch" title="Booked Pitch Meetings" />
                   <PitchMeetingsSection
                     meetings={startupMeetings}
                     viewerType="investor"
@@ -462,7 +461,6 @@ const AcceleratorDashboard = () => {
               }
               mentorship={
                 <div className="space-y-4">
-                  <BookingsList variant="scheduled" category="mentorship" title="Booked Investor Meetings" />
                   <PitchMeetingsSection
                     meetings={investorMeetings}
                     viewerType="startup"

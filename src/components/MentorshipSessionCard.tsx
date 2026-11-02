@@ -91,20 +91,20 @@ export const MentorshipSessionCard = ({
     switch (variant) {
       case 'offer':
         return {
-          container: 'bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-red-500/5 border-amber-500/20 hover:border-amber-500/40',
+          container: '',
           accent: 'from-amber-500 to-orange-500',
           badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
         };
       case 'active':
       case 'upcoming':
         return {
-          container: 'bg-gradient-to-br from-emerald-500/5 via-green-500/5 to-teal-500/5 border-emerald-500/20 hover:border-emerald-500/40',
+          container: '',
           accent: 'from-emerald-500 to-teal-500',
           badge: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
         };
       case 'past':
         return {
-          container: 'bg-gradient-to-br from-slate-500/5 via-gray-500/5 to-zinc-500/5 border-muted/40 hover:border-muted/60',
+          container: '',
           accent: 'from-slate-400 to-gray-400',
           badge: 'bg-muted text-muted-foreground border-muted',
         };
@@ -114,7 +114,7 @@ export const MentorshipSessionCard = ({
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
       case 'advisor':
-        return 'bg-violet-500/10 text-violet-600 border-violet-500/20 dark:text-violet-400';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'mentor':
         return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400';
       default:
@@ -126,8 +126,8 @@ export const MentorshipSessionCard = ({
 
   return (
     <div className={cn(
-      'tech-card group relative rounded-xl border-0 p-3 sm:p-5 transition-all duration-300',
-      'hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
+      'group relative rounded-[18px] border border-border bg-card p-4 shadow-sm',
+      '',
       styles.container
     )}>
       {/* Accent Line */}

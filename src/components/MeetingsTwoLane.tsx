@@ -31,7 +31,7 @@ export default function MeetingsTwoLane({
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-2 md:gap-3">
+      <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-xl border border-border bg-card p-[3px]">
         {lanes.map((l) => {
           const Icon = l.icon;
           const active = lane === l.key;
@@ -40,43 +40,12 @@ export default function MeetingsTwoLane({
               key={l.key}
               onClick={() => setLane(l.key)}
               className={cn(
-                'group relative overflow-hidden rounded-2xl border p-3 md:p-4 text-left transition-all duration-300',
-                active
-                  ? 'border-transparent text-white shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)] scale-[1.02]'
-                  : 'border-border/60 bg-background/40 backdrop-blur-xl hover:border-primary/40 hover:-translate-y-0.5'
+                'flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-colors',
+                active ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {active && (
-                <span className={cn('absolute inset-0 bg-gradient-to-br', l.color)} />
-              )}
-              <div className="relative flex items-center gap-3">
-                <div
-                  className={cn(
-                    'h-10 w-10 rounded-xl flex items-center justify-center shrink-0',
-                    active ? 'bg-white/20' : 'bg-primary/10'
-                  )}
-                >
-                  <Icon className={cn('h-5 w-5', active ? 'text-white' : 'text-primary')} />
-                </div>
-                <div className="min-w-0">
-                  <div
-                    className={cn(
-                      'text-sm font-semibold leading-tight',
-                      active ? 'text-white' : 'text-foreground'
-                    )}
-                  >
-                    {l.label}
-                  </div>
-                  <div
-                    className={cn(
-                      'text-[10px] md:text-xs leading-tight mt-0.5',
-                      active ? 'text-white/80' : 'text-muted-foreground'
-                    )}
-                  >
-                    {active ? 'Currently viewing' : 'Tap to switch'}
-                  </div>
-                </div>
-              </div>
+              <Icon className={cn('h-4 w-4', active ? 'text-primary' : 'text-muted-foreground')} />
+              {l.label}
             </button>
           );
         })}

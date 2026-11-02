@@ -304,7 +304,7 @@ export default function AdvisorDashboard() {
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Today</p>
                 {todaySessions.map((session: any) => (
-                  <div key={session.id} className="flex items-center justify-between p-3 rounded-xl tech-card border-0">
+                  <div key={session.id} className="flex items-center justify-between p-4 rounded-[18px] border border-border bg-card shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
                       <Video className="h-4 w-4 text-primary shrink-0" />
                       <div className="min-w-0">
@@ -333,7 +333,7 @@ export default function AdvisorDashboard() {
                   <ScrollArea className="w-full">
                     <div className="flex gap-3 pb-2">
                       {activeMentees.map((mentee: any) => (
-                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-lg tech-card border-0">
+                        <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-[18px] border border-border bg-card shadow-sm">
                           <div className="flex items-center gap-2.5 mb-2">
                             <Avatar className="h-8 w-8">
                               <AvatarImage src={mentee.mentee?.avatar_url} />

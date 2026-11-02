@@ -129,7 +129,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
     <div className="space-y-6">
       {/* Requested Sessions */}
       {requestedSessions.length > 0 && (
-        <Card className="tech-card border-0">
+        <Card className="rounded-[18px] border border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-primary" />
@@ -140,7 +140,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {requestedSessions.map((session) => (
-                <Card key={session.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                <Card key={session.id} className="rounded-[18px] border border-border bg-card shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="flex items-start gap-3 flex-1">
@@ -210,7 +210,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
 
       {/* Scheduled Sessions */}
       {scheduledSessions.length > 0 && (
-        <Card className="tech-card border-0">
+        <Card className="rounded-[18px] border border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Video className="h-5 w-5 text-primary" />
@@ -229,7 +229,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
                 return (
                   <Card 
                     key={session.id} 
-                    className={cn("tech-card border-0 hover:scale-[1.02] transition-transform", isWithin2Hours && 'ring-2 ring-primary')}
+                    className={cn("rounded-[18px] border border-border bg-card shadow-sm", isWithin2Hours && 'ring-2 ring-primary')}
                   >
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row gap-4">
@@ -309,7 +309,7 @@ export default function MenteeSessions({ onJoinMeeting, requestsOnly = false }: 
 
       {/* Empty State */}
       {!requestsOnly && requestedSessions.length === 0 && scheduledSessions.length === 0 && (
-        <Card className="tech-card border-0">
+        <Card className="rounded-[18px] border border-border bg-card shadow-sm">
           <CardContent className="py-12 text-center">
             <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-semibold mb-2">No Sessions Yet</h3>

@@ -168,7 +168,7 @@ export default function MentorshipRequests({ onRequestHandled }: MentorshipReque
   }
 
   return (
-    <Card className="tech-card border-0">
+    <Card className="rounded-[18px] border border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Users className="h-5 w-5 text-primary" />

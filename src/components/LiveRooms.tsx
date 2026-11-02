@@ -89,8 +89,8 @@ const LiveRooms = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-            <Video className="h-5 w-5 text-violet-500" />
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Video className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-foreground">Rooms</h2>
@@ -100,7 +100,7 @@ const LiveRooms = () => {
 
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2 border-0 bg-[linear-gradient(90deg,#0FD68F,#1FC8A9)] text-[#03301F] hover:opacity-90">
               <Plus className="h-4 w-4" />
               Create Room
             </Button>
@@ -168,9 +168,9 @@ const LiveRooms = () => {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : rooms.length === 0 ? (
-        <div className="rounded-2xl border border-border/40 bg-background/30 backdrop-blur-xl py-8 px-6 text-center">
-          <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3">
-            <Video className="h-5 w-5 text-violet-500" />
+        <div className="rounded-[18px] border border-border bg-card shadow-sm py-8 px-6 text-center">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <Video className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm text-muted-foreground">
             No active rooms — use <span className="text-foreground font-medium">Create Room</span> above to go live.
@@ -182,7 +182,7 @@ const LiveRooms = () => {
           {rooms.map((room) => (
             <Card
               key={room.id}
-              className="border border-border/40 bg-background/30 backdrop-blur-xl shadow-none hover:border-primary/40 transition-colors"
+              className="rounded-[18px] border border-border bg-card shadow-sm hover:border-primary/40 transition-colors"
             >
                 {room.cover_image_url && (
                   <div className="aspect-[16/7] overflow-hidden rounded-t-lg">
@@ -246,7 +246,7 @@ const LiveRooms = () => {
                           <X className="h-3 w-3" />
                         </Button>
                       )}
-                      <Button size="sm" className="h-7 text-xs px-3" onClick={() => handleJoin(room)}>
+                      <Button size="sm" className="h-7 text-xs px-3 border-0 bg-[linear-gradient(90deg,#0FD68F,#1FC8A9)] text-[#03301F] hover:opacity-90" onClick={() => handleJoin(room)}>
                         Join
                       </Button>
                     </div>

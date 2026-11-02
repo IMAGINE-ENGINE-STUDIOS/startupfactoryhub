@@ -679,7 +679,6 @@ const Dashboard = () => {
 <MeetingsTwoLane
                 pitches={
                   <div className="space-y-4">
-                    <BookingsList variant="scheduled" category="pitch" title="Booked Pitch Meetings" />
                     <PitchMeetingsSection
                       meetings={pitchMeetings}
                       viewerType="startup"

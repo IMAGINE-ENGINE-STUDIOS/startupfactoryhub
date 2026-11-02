@@ -5,7 +5,6 @@ import { Bell, Calendar as CalendarIcon, Clock, TrendingUp, Users } from 'lucide
 import { cn } from '@/lib/utils';
 import MentorshipRequests from '@/components/MentorshipRequests';
 import MenteeSessions from '@/components/MenteeSessions';
-import BookingsList from '@/components/BookingsList';
 import MentorSessionHistory from '@/components/MentorSessionHistory';
 import MentorOffersBoard from '@/components/MentorOffersBoard';
 
@@ -39,9 +38,9 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
             <Button
               key={c.key}
               size="sm"
-              variant={active ? 'default' : 'outline'}
+              variant="outline"
               onClick={() => setView(c.key)}
-              className={cn('rounded-full h-8 px-3 text-xs gap-1.5 flex-shrink-0')}
+              className={cn('rounded-full h-9 px-3.5 text-xs font-semibold gap-1.5 flex-shrink-0 bg-card hover:bg-card', active && 'border-primary/40 bg-primary/10 text-foreground hover:bg-primary/10')}
             >
               <Icon className={cn('h-3.5 w-3.5', !active && c.tone)} />
               {c.label}
@@ -59,7 +58,6 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
         {view === 'requests' && (
           <div className="space-y-4">
             <MentorshipRequests />
-            <BookingsList variant="requests" />
             <MenteeSessions onJoinMeeting={onJoinMeeting} requestsOnly />
           </div>
         )}
@@ -67,7 +65,7 @@ export default function MentorMeetingsSection({ onJoinMeeting, activeMenteesCoun
         {view === 'past' && <MentorSessionHistory showStats={false} />}
         {view === 'mentees' && (
           activeMentees ?? (
-            <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+            <div className="text-center py-10 rounded-[18px] border border-border bg-card shadow-sm">
               <p className="text-sm text-muted-foreground">No active mentees yet</p>
             </div>
           )
