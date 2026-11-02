@@ -256,7 +256,7 @@ export const PERKS: Perk[] = [
     name: "Carta",
     description: "Cap table and equity management for startups. Free Carta Launch up to $1M raised or 25 stakeholders, plus 20% off your first year and waived implementation fees on premium plans, Total Comp and Equity Advisory for companies referred by Startup Factory Hub (new customers).",
     badge: "Cap Table",
-    href: "https://carta.com/",
+    href: "https://carta.com/partners/referral/?utm_medium=ChannelReferral&utm_source=startupfactory&PID=startupfactory",
     accent: "from-zinc-700 to-zinc-900",
     glow: "hsl(250 40% 55%)",
     domain: "carta.com",
