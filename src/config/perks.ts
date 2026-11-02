@@ -175,7 +175,7 @@ export const PERKS: Perk[] = [
     name: "10 Credits on Lovable",
     description: "Bonus credits to ship your next idea on Lovable.",
     badge: "AI Credits",
-    href: "https://lovable.dev/",
+    href: "https://lovable.dev/invite/ZTRY5P6",
     accent: "from-pink-500 via-fuchsia-500 to-violet-500",
     glow: "hsl(310 85% 60%)",
     domain: "lovable.dev",
@@ -260,6 +260,8 @@ export const PERKS: Perk[] = [
     accent: "from-zinc-700 to-zinc-900",
     glow: "hsl(250 40% 55%)",
     domain: "carta.com",
+    secondaryHref: "mailto:partners@carta.com",
+    secondaryLabel: "Claim via Carta Partners",
     links: [
       { label: "QSBS one-pager (PDF)", href: "/partners/carta-qsbs-one-pager.pdf" },
       { label: "Tax one-pager (PDF)", href: "/partners/carta-tax-one-pager.pdf" },
