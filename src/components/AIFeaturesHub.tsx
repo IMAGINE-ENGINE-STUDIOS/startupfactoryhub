@@ -694,6 +694,22 @@ function PerkCard({
             </a>
           </div>
         </div>
+        {perk.links && perk.links.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {perk.links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="h-8 px-3 rounded-full border border-border/60 bg-background/60 hover:bg-background flex items-center gap-1.5 text-xs font-medium transition"
+              >
+                <FileText className="h-3.5 w-3.5" /> {l.label}
+              </a>
+            ))}
+          </div>
+        )}
       </button>
     </div>
   );

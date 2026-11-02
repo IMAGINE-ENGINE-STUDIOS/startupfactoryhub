@@ -12,6 +12,7 @@ export interface Perk {
   domain: string;
   secondaryHref?: string;
   secondaryLabel?: string;
+  links?: { label: string; href: string }[];
 }
 
 export const PERKS: Perk[] = [
@@ -250,5 +251,19 @@ export const PERKS: Perk[] = [
     accent: "from-blue-500 to-sky-600",
     glow: "hsl(210 80% 55%)",
     domain: "oo-software.com",
+  },
+  {
+    name: "Carta",
+    description: "Cap table and equity management for startups. Free Carta Launch up to $1M raised or 25 stakeholders, plus 20% off your first year and waived implementation fees on premium plans, Total Comp and Equity Advisory for companies referred by Startup Factory Hub (new customers).",
+    badge: "Cap Table",
+    href: "https://carta.com/",
+    accent: "from-zinc-700 to-zinc-900",
+    glow: "hsl(250 40% 55%)",
+    domain: "carta.com",
+    links: [
+      { label: "QSBS one-pager (PDF)", href: "/partners/carta-qsbs-one-pager.pdf" },
+      { label: "Tax one-pager (PDF)", href: "/partners/carta-tax-one-pager.pdf" },
+      { label: "Total Comp one-pager (PDF)", href: "/partners/carta-total-comp-one-pager.pdf" },
+    ],
   },
 ];
