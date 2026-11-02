@@ -185,7 +185,7 @@ export default function ReferralProgram() {
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Apply to become a referral partner. Once approved, share your unique links, track conversions, 
-              and earn a one-time 20% commission on the first month's subscription of every referred member.
+              and earn a one-time 20% commission on the first payment of every referred member — monthly or yearly.
             </p>
 
             {user ? (
@@ -224,7 +224,7 @@ export default function ReferralProgram() {
               {[
                 { icon: Link2, title: "Apply & Get Approved", desc: "Submit your application. Once approved by our team, you get access to create referral links." },
                 { icon: Users, title: "Share & Refer", desc: "Create multiple tracking links for different campaigns. Share them with your network." },
-                { icon: DollarSign, title: "Get Paid", desc: "Earn a one-time 20% commission on the first month's subscription only. Connect your bank to withdraw." },
+                { icon: DollarSign, title: "Get Paid", desc: "Earn a one-time 20% commission on the first payment — if your referral pays yearly, you earn 20% of the full annual payment. Connect your bank to withdraw." },
               ].map((step, i) => (
                 <Card key={i} className="tech-card border-0 text-left">
                   <CardContent className="pt-6">
@@ -246,7 +246,7 @@ export default function ReferralProgram() {
                   Commission Structure
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Members can subscribe monthly or yearly (saving 10%). Your commission is 20% of the first payment regardless of billing cycle.
+                  Members can subscribe monthly or yearly on most plans. Your commission is 20% of the first payment regardless of billing cycle.
                 </p>
               </CardHeader>
               <CardContent>
@@ -262,26 +262,37 @@ export default function ReferralProgram() {
                   </TableHeader>
                   <TableBody>
                     {[
+                      { plan: "Members Club", price: 50 * 100, yearlyPrice: 480 * 100 },
                       { plan: MEMBERSHIP_TIERS.community.name, price: MEMBERSHIP_TIERS.community.price * 100, yearlyPrice: MEMBERSHIP_TIERS.community.yearly_price * 100 },
                       { plan: MEMBERSHIP_TIERS.self_paced_office.name, price: MEMBERSHIP_TIERS.self_paced_office.price * 100, yearlyPrice: MEMBERSHIP_TIERS.self_paced_office.yearly_price * 100 },
+                      { plan: MEMBERSHIP_TIERS.advisor.name, price: MEMBERSHIP_TIERS.advisor.price * 100, yearlyPrice: MEMBERSHIP_TIERS.advisor.yearly_price * 100 },
                       { plan: MEMBERSHIP_TIERS.global_access.name, price: MEMBERSHIP_TIERS.global_access.price * 100, yearlyPrice: MEMBERSHIP_TIERS.global_access.yearly_price * 100 },
                       { plan: MEMBERSHIP_TIERS.corporate.name, price: MEMBERSHIP_TIERS.corporate.price * 100, yearlyPrice: MEMBERSHIP_TIERS.corporate.yearly_price * 100 },
+                      { plan: "Institutional", price: 5000 * 100, yearlyPrice: null },
                     ].map((tier) => (
                       <TableRow key={tier.plan}>
                         <TableCell className="font-medium">{tier.plan}</TableCell>
                         <TableCell className="text-right">{formatCents(tier.price)}</TableCell>
                         <TableCell className="text-right">
-                          {formatCents(tier.yearlyPrice)}
-                          <span className="text-xs text-muted-foreground">/yr</span>
+                          {tier.yearlyPrice !== null ? (
+                            <>
+                              {formatCents(tier.yearlyPrice)}
+                              <span className="text-xs text-muted-foreground">/yr</span>
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-right text-primary font-semibold">{formatCents(tier.price * 0.2)}</TableCell>
-                        <TableCell className="text-right text-primary font-semibold">{formatCents(tier.yearlyPrice * 0.2)}</TableCell>
+                        <TableCell className="text-right text-primary font-semibold">
+                          {tier.yearlyPrice !== null ? formatCents(tier.yearlyPrice * 0.2) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
                 <p className="text-xs text-muted-foreground mt-4">
-                  💡 <strong>Tip:</strong> Referred users who choose yearly billing save 10% — and you earn a higher one-time commission based on the full annual payment.
+                  💡 <strong>Tip:</strong> Referred users who choose yearly billing pay less — and you earn a higher one-time commission based on the full annual payment.
                 </p>
                 <div className="mt-3 p-3 rounded-lg border border-amber-400/20 bg-amber-400/5">
                   <p className="text-xs text-amber-400 font-medium flex items-center gap-1.5">
