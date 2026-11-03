@@ -16,18 +16,16 @@ import heroBg from "@/assets/accelerated-fundraising-bg.jpg";
   HUD, AR bento tiles, orbital finale. Rotating centerpiece is ORIGINAL
   to this page (founder, 2026-10-30): an armillary of the four Circle rings
   over a disc of 66 event-stars — not the Accelerated Fundraising hologram.
-  2026-11-03: the Coreis annual packages are published on the page with prices
-  and benefits; the four original Circle names (EARTHLING, STAR, NEBULA,
-  GALAXY) are retained — each Circle now carries one Coreis package.
+  Terms live only in the private prospectus via info@ / Calendly.
 */
 
 const CALENDLY = "https://calendly.com/startupfactoryhub/30min";
 const REQUEST_MAILTO =
   "mailto:info@startupfactoryhub.com?subject=" +
-  encodeURIComponent("Coreis Sponsorship — Package Conversation") +
+  encodeURIComponent("Private Sponsorship Prospectus — Request") +
   "&body=" +
   encodeURIComponent(
-    "Hi Khalia,\n\nWe would like to discuss the Startup Factory Hub x Coreis annual sponsorship packages.\n\nOrganization: Coreis\nName / Title:\nPackage of interest (EARTHLING / STAR / NEBULA / GALAXY):\nWhat we would like to reach (founders / accelerators / investors / space ecosystem):\n\nThank you."
+    "Hi Khalia,\n\nPlease send me the private Startup Factory Hub sponsorship prospectus.\n\nOrganization:\nName / Title:\nWhat we would like to reach (founders / accelerators / investors / space ecosystem):\nSeries or events of interest:\n\nThank you."
   );
 
 /* ── Count-up ─────────────────────────────────────────── */
@@ -180,19 +178,12 @@ function ArmillaryCircle() {
 }
 
 /* ── Data ─────────────────────────────────────────────── */
-type Tier = { id: string; name: string; packageName: string; price: string; icon: typeof Globe; tagline: string; essence: string; accent: string; dot: string; includes: string[] };
+type Tier = { id: string; name: string; icon: typeof Globe; tagline: string; essence: string; accent: string; dot: string; includes: string[] };
 const TIERS: Tier[] = [
-  { id: "earthling", name: "EARTHLING", packageName: "Community Partner", price: "$5,000 / year", icon: Globe, tagline: "The entry into the Circle", essence: "Brand visibility and access to the Startup Factory Hub community — the foundation of the Coreis partnership.", accent: "border-emerald-300/40 text-emerald-200", dot: "bg-emerald-300", includes: ["Official social media announcement introducing Coreis as an SFH partner", "Dedicated email announcement to the SFH community", "Dedicated Coreis listing in the Perks section of the startup dashboard", "Opportunity to share exclusive offers, benefits, and services with participating startups"] },
-  { id: "star", name: "STAR", packageName: "Event Sponsor", price: "$15,000 / year", icon: Star, tagline: "Presence with a voice", essence: "Year-round brand visibility across the SFH event portfolio — Coreis recognized at every room, all year.", accent: "border-amber-200/40 text-amber-100", dot: "bg-amber-200", includes: ["Everything in EARTHLING · Community Partner", "Official sponsorship recognition across all Startup Factory Hub events, virtual and in-person", "Brand visibility on event promotions, registration pages, and communications", "Recognition as an official event sponsor during events", "Opportunities to connect with startups, investors, mentors, and industry leaders", "Exposure across a planned calendar of 66 or more events in 2027"] },
-  { id: "nebula", name: "NEBULA", packageName: "Strategic Partner & Featured Speaker", price: "$25,000 / year", icon: Sparkles, tagline: "Deep engagement, real pilots", essence: "Thought leadership, executive visibility, and direct engagement with the innovation ecosystem.", accent: "border-violet-300/40 text-violet-200", dot: "bg-violet-300", includes: ["Everything in EARTHLING · Community Partner and STAR · Event Sponsor", "Speaking opportunities for Coreis executives and team members at selected SFH events", "Opportunities to showcase Coreis' expertise, services, and company initiatives", "Participation in panels, workshops, webinars, and industry discussions", "Featured speaker recognition in event promotions and communications", "Opportunities to engage directly with founders, investors, and ecosystem partners"] },
-  { id: "galaxy", name: "GALAXY", packageName: "Cohort Strategic Partner", price: "$50,000 / year", icon: Award, tagline: "The strategic partnership", essence: "The premium partnership — Coreis becomes the official Satellite Partner of a selected Startup Factory Hub cohort, with early access to its companies and direct relationships with its founders.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Official recognition as the Satellite Partner of the selected cohort", "Early access to all startups participating in the cohort, including their profiles, technologies, and business opportunities", "Personal introductions to all cohort founders", "Opportunities to explore strategic partnerships, pilot programs, and commercial collaborations", "Brand visibility across cohort announcements, communications, and program activities", "Opportunities to participate in dedicated cohort events, workshops, and networking sessions", "Direct engagement with emerging companies to identify potential technology and business opportunities"] },
-];
-const COREIS_VALUE = [
-  "Increase visibility across an international startup and innovation ecosystem.",
-  "Build relationships with founders, investors, and technology leaders.",
-  "Showcase expertise through speaking opportunities and industry events.",
-  "Discover opportunities by accessing emerging companies and technologies.",
-  "Develop strategic partnerships with startups that may become future customers, suppliers, or collaborators.",
+  { id: "earthling", name: "EARTHLING", icon: Globe, tagline: "The entry into the Circle", essence: "For organizations beginning their presence inside the ecosystem — seen, listed, and welcomed into the room.", accent: "border-emerald-300/40 text-emerald-200", dot: "bg-emerald-300", includes: ["Recognition across SFH communications", "Logo placement in the Earthling tier on the SFH website", "Welcome moment on LinkedIn and in community updates", "Access to selected virtual accelerator events", "Offer perks, credits or tools directly to founders", "Listing in the platform and the Partner Resource Hub"] },
+  { id: "star", name: "STAR", icon: Star, tagline: "Presence with a voice", essence: "For organizations ready to be heard — elevated placement, a stage for your experts, and curated founder access.", accent: "border-amber-200/40 text-amber-100", dot: "bg-amber-200", includes: ["Elevated logo position and event recognition", "Monthly ecosystem spotlight in the SFH newsletter", "Host a workshop, AMA or technical talk", "Invitations to networking in New York, San Francisco, Orlando, Santiago and Tokyo", "Curated scouting reports and early deal-flow previews", "Feature interview inside the SFH Media Hub"] },
+  { id: "nebula", name: "NEBULA", icon: Sparkles, tagline: "Deep engagement, real pilots", essence: "For companies seeking integration — guaranteed speaking, structured matching, and premium placement inside the platform itself.", accent: "border-violet-300/40 text-violet-200", dot: "bg-violet-300", includes: ["Premium visibility across website, platform, cohorts and Demo Day", "Guaranteed speaking at a flagship SFH event", "Co-branded SFH x Sponsor campaign", "Full access to all global networking events", "Structured 1:1 startup matching sessions", "Presenting rotation across the daily Top 10 and the weekly video", "A dedicated sponsor page inside the platform, with your offer in founder journeys"] },
+  { id: "galaxy", name: "GALAXY", icon: Award, tagline: "The strategic partnership", essence: "The highest circle — premier placement everywhere, keynote voice, private dinners, and technology woven into the platform itself.", accent: "border-[#e8c987]/50 text-[#e8c987]", dot: "bg-[#e8c987]", includes: ["Premier placement across website, all major events, summits and PR", "Joint global PR announcement across SFH hubs", "Keynote-level speaking at the Global Summit and Demo Day", "Presenting partner across every placement, all year — Top 10, weekly video, social, newsletter and platform", "Private investor-startup dinners and priority deal-flow introductions", "Your own Live Video sponsor room, a platform sponsor page, and a founder-engagement report"] },
 ];
 const SERIES = [
   { name: "Pitch Events", count: 24, cadence: "Twice monthly", note: "Founders on stage, investors in the room", glow: "rgba(52,211,153,0.5)" },
@@ -274,14 +265,14 @@ const Sponsorship = () => {
             <div>
               <div className="sp-rise flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#e8c987]/40 bg-[#e8c987]/[0.07] px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#e8c987]">
-                  <Handshake className="h-3 w-3" /> Startup Factory Hub × Coreis · Annual Sponsorship
+                  <Lock className="h-3 w-3" /> Private Offering · By Invitation &amp; Request
                 </span>
                 <span className="relative inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-300/[0.07] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-200">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300 opacity-75" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
                   </span>
-                  Annual Packages · 2027
+                  Founding Circle · Open
                 </span>
               </div>
 
@@ -302,17 +293,17 @@ const Sponsorship = () => {
               </h1>
 
               <p className="sp-rise mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-[#e8c987]/90" style={{ animationDelay: "0.18s" }}>
-                Four annual partnership opportunities designed to position Coreis within the Startup Factory Hub ecosystem — connecting Coreis with startups, founders, investors, mentors, and industry leaders.
+                A private partnership with Startup Factory Hub — an AI-powered venture builder, and a year of rooms where founders, accelerators and investors actually meet.
               </p>
               <p className="sp-rise mt-3 max-w-xl text-sm leading-relaxed text-white/55" style={{ animationDelay: "0.22s" }}>
-                Each package keeps its original Circle name — EARTHLING, STAR, NEBULA and GALAXY — with its annual investment and Coreis benefits set out in full below.
+                Terms are not published. They are shared, privately, in the prospectus — shaped around who you want to reach, never sold off a rate card.
               </p>
 
               <div className="sp-rise mt-6 h-px w-full max-w-md" style={{ background: "linear-gradient(90deg, rgba(52,211,153,0.8), rgba(232,201,135,0.35), transparent)", animationDelay: "0.26s" }} />
 
               <div className="sp-rise mt-8 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "0.3s" }}>
                 <a href={REQUEST_MAILTO} className="group relative overflow-hidden rounded-full px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white transition-transform duration-300 hover:scale-[1.03] bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600 border border-cyan-300/50 shadow-[0_0_45px_-8px_rgba(52,211,153,0.75)]">
-                  <span className="relative z-10 inline-flex items-center gap-2"><Mail className="h-4 w-4" /> Discuss the Packages</span>
+                  <span className="relative z-10 inline-flex items-center gap-2"><Mail className="h-4 w-4" /> Request Prospectus</span>
                   <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 </a>
                 <a href={CALENDLY} target="_blank" rel="noreferrer" className="rounded-full px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white text-center transition-transform duration-300 hover:scale-[1.03] bg-gradient-to-r from-amber-600 via-[#c9a96a] to-amber-600 border border-[#e8c987]/60 shadow-[0_0_45px_-10px_rgba(232,201,135,0.65)]">
@@ -352,9 +343,9 @@ const Sponsorship = () => {
           <div aria-hidden className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-emerald-300/30" style={{ animation: "sp-scan 9s linear infinite" }} />
           <div className="relative max-w-6xl mx-auto">
             <div className="max-w-3xl">
-              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">Partnership Approach · What You Get</p>
-              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">Four packages. One strategic<br className="hidden sm:block" /> position for Coreis.</h2>
-              <p className="mt-5 text-emerald-100/60 leading-relaxed max-w-2xl">The packages position Coreis across the SFH community, the 66-event year, the speaking calendar and a selected accelerator cohort. Tap a tile to expand it.</p>
+              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">Why Private · What You Get</p>
+              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">Sponsorship here is curated,<br className="hidden sm:block" /> not sold off a rate card.</h2>
+              <p className="mt-5 text-emerald-100/60 leading-relaxed max-w-2xl">Every placement is matched to what a sponsor actually wants to reach — and no two sponsors in the same circle compete for the same room. Tap a tile to expand it.</p>
             </div>
             <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {PILLARS.map((p) => {
@@ -389,7 +380,7 @@ const Sponsorship = () => {
             </div>
             <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[#e8c987]/25 bg-[#e8c987]/[0.04] px-5 py-4 max-w-3xl">
               <Lock className="h-5 w-5 text-[#e8c987] shrink-0" />
-              <p className="text-sm text-emerald-100/70">The original Circle names stay exactly as they are — EARTHLING, STAR, NEBULA and GALAXY. Each now carries one Coreis package, with its annual investment and benefits defined for this partnership.</p>
+              <p className="text-sm text-emerald-100/70">Pricing, inventory and exclusivity live only in the private prospectus. Nothing is published, nothing is auctioned.</p>
             </div>
           </div>
         </section>
@@ -436,9 +427,9 @@ const Sponsorship = () => {
           </div>
           <div className="relative max-w-6xl mx-auto">
             <div className="text-center max-w-2xl mx-auto">
-              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">The Four Circles · Coreis Packages</p>
+              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">The Four Circles</p>
               <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">Choose your altitude</h2>
-              <p className="mt-4 text-emerald-100/55">Four partnership opportunities, mapped to the Circle’s original names. Select one to see its annual investment and Coreis benefits.</p>
+              <p className="mt-4 text-emerald-100/55">Select a circle to preview its experience. Full terms arrive privately.</p>
             </div>
             <div className="mt-10 flex flex-wrap justify-center gap-2.5" role="tablist" aria-label="Sponsor circles">
               {TIERS.map((t) => (
@@ -454,16 +445,14 @@ const Sponsorship = () => {
                   <div className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 ${active.accent}`}>
                     <active.icon className="h-4 w-4" /><span className="font-mono text-[11px] tracking-[0.24em]">{active.name}</span>
                   </div>
-                  <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.24em] text-emerald-100/45">{active.packageName}</p>
-                  <h3 className="mt-2 text-3xl font-semibold text-white tracking-tight">{active.tagline}</h3>
+                  <h3 className="mt-6 text-3xl font-semibold text-white tracking-tight">{active.tagline}</h3>
                   <p className="mt-4 text-emerald-100/60 leading-relaxed">{active.essence}</p>
-                  <div className="mt-8 rounded-2xl bg-black/25 border border-white/[0.07] px-5 py-4">
-                    <p className="text-sm font-medium text-white">Annual investment</p>
-                    <p className="mt-1 text-3xl font-semibold text-white">{active.price}</p>
-                    <p className="text-xs text-emerald-100/50 mt-1">Startup Factory Hub × Coreis · {active.packageName}</p>
+                  <div className="mt-8 flex items-center gap-3 rounded-2xl bg-black/25 border border-white/[0.07] px-5 py-4">
+                    <Lock className="h-5 w-5 text-[#e8c987] shrink-0" />
+                    <div><p className="text-sm font-medium text-white">Private terms</p><p className="text-xs text-emerald-100/50 mt-0.5">Investment, inventory &amp; exclusivity — in the prospectus only.</p></div>
                   </div>
                   <a href={REQUEST_MAILTO} className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-emerald-200 hover:text-emerald-100">
-                    Discuss this package <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    Request this circle, privately <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </a>
                 </div>
                 <ul className="p-8 sm:p-12 grid sm:grid-cols-2 gap-x-8 gap-y-4 content-start">
@@ -473,50 +462,6 @@ const Sponsorship = () => {
                     </li>
                   ))}
                 </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── ANNUAL OVERVIEW + STRATEGIC VALUE ─────────── */}
-        <section className="px-5 sm:px-8 py-24 border-t border-white/[0.06] bg-white/[0.012]">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto">
-              <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">Annual Investment Overview</p>
-              <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">The Coreis packages at a glance</h2>
-              <p className="mt-4 text-emerald-100/55">The Circle’s original names, unchanged — each carrying its Coreis partnership package.</p>
-            </div>
-            <div className="mt-12 overflow-hidden rounded-[28px] border border-white/[0.09] bg-[#061a11]/80">
-              <div className="hidden md:grid md:grid-cols-[0.8fr_1.4fr_auto] gap-4 px-7 py-4 border-b border-white/[0.08] font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-100/40">
-                <span>Circle</span><span>Partnership</span><span>Annual investment</span>
-              </div>
-              {TIERS.map((t) => (
-                <div key={t.id} className="grid md:grid-cols-[0.8fr_1.4fr_auto] gap-2 md:gap-4 items-center px-7 py-5 border-b border-white/[0.05] last:border-b-0">
-                  <span className="inline-flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-white"><t.icon className="h-4 w-4 text-emerald-200" />{t.name}</span>
-                  <span className="text-sm text-emerald-100/70">{t.packageName}</span>
-                  <span className="font-mono text-sm font-semibold text-white">{t.price}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-6 text-center text-sm text-emerald-100/45">Entry-level community sponsorships can also be structured starting at $50, with benefits scaled to the contribution.</p>
-
-            <div className="mt-20">
-              <div className="max-w-3xl">
-                <p className="font-mono text-[11px] tracking-[0.32em] uppercase text-[#e8c987]">Strategic Value</p>
-                <h2 className="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Strategic value for Coreis</h2>
-                <p className="mt-4 text-emerald-100/55 leading-relaxed">Through this partnership, Coreis can:</p>
-              </div>
-              <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {COREIS_VALUE.map((v, i) => (
-                  <div key={v} className="relative overflow-hidden rounded-3xl border border-white/[0.09] bg-[#061a11]/80 p-7">
-                    <span className="font-mono text-xs text-[#e8c987]">{String(i + 1).padStart(2, "0")}</span>
-                    <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">{v}</p>
-                  </div>
-                ))}
-                <div className="rounded-3xl border border-[#e8c987]/25 bg-[#e8c987]/[0.04] p-7">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#e8c987]">Partnership objective</p>
-                  <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
-                </div>
               </div>
             </div>
           </div>
@@ -600,7 +545,7 @@ const Sponsorship = () => {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-emerald-200">Coreis packages · open now</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-emerald-200">Founding placements · shaping now</span>
                 <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-100/40">Nov 6 opens</span>
               </div>
               <h2 className="text-[13vw] sm:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
@@ -612,11 +557,11 @@ const Sponsorship = () => {
               </h2>
               <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.5em] text-cyan-200/80">in the circle</p>
               <p className="mx-auto mt-8 max-w-xl text-sm sm:text-base leading-relaxed text-white/60">
-                The year opens Friday, November 6, 2026 with Accelerators Networking. Coreis can enter at the community level — or take the premium cohort partnership.
+                The year opens Friday, November 6, 2026 with Accelerators Networking. Founding placements for the first series are being shaped now — privately.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3.5">
                 <a href={REQUEST_MAILTO} className="group relative overflow-hidden rounded-full px-9 py-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03] bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600 border border-cyan-300/50 shadow-[0_0_50px_-8px_rgba(52,211,153,0.8)]">
-                  <span className="relative z-10 inline-flex items-center gap-2">Discuss Coreis Sponsorship <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                  <span className="relative z-10 inline-flex items-center gap-2">Request the Prospectus <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                   <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 </a>
                 <a href={CALENDLY} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.03] px-8 py-4 text-sm font-medium hover:border-[#e8c987]/50 hover:text-[#e8c987] transition-all">
@@ -624,7 +569,7 @@ const Sponsorship = () => {
                 </a>
               </div>
               <p className="mt-8 flex items-center justify-center gap-2 font-mono text-[10px] tracking-[0.22em] uppercase text-emerald-100/35">
-                Annual Sponsorship · Strategic Partnership · Startup Factory Hub × Coreis
+                <Lock className="h-3 w-3" /> Private offering · No public rate card · No obligation
               </p>
             </div>
           </div>
