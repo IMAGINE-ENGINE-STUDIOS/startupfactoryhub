@@ -59,7 +59,6 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
-import WhiteLabelPartnerPage from './partners/WhiteLabelPartnerPage';
 import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
@@ -219,7 +218,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 18</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 16</div>
     </div>
 
     {/* bottom hud bar */}
@@ -1447,7 +1446,7 @@ export default function SponsorsBrochure() {
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
-                        ACCELERATOR<br />AS A<br />SERVICE
+                        SPONSORS
                       </motion.h1>
 
                       {/* neon underline */}
@@ -1479,7 +1478,7 @@ export default function SponsorsBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SYSTEM · ONLINE</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>SERVICE · PER BATCH</span>
+                        <span style={{ color: NEON.cyan }}>SPONSORSHIP · ANNUAL</span>
                         <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
                       </div>
                     </div>
@@ -2039,136 +2038,7 @@ export default function SponsorsBrochure() {
 
 
 
-              {/* ====================================================
-                   PAGE 5 — JOINT VENTURE STRUCTURE
-                  ==================================================== */}
-              <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="COMMERCIAL MODEL" pageNum={5}>
-                    <PageTitle kicker="05 · Commercial Model" title={<>You drive the vision. We <span style={{ color: NEON.cyan }}>accelerate the impact</span>.</>} />
-
-                    {/* ---------- FACTURA DE BATCH ---------- */}
-                    <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
-                      style={{
-                        background: `linear-gradient(135deg, #022c22 0%, #064e3b 30%, #065f46 55%, #04382c 80%, #021b16 100%)`,
-                        border: `1px solid rgba(255,255,255,0.35)`,
-                        boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
-                      }}
-                    >
-                      {/* static aurora backdrop (GPU-cheap) */}
-                      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(52,211,153,0.25) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 60%)` }} />
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
-
-
-                      {/* ---------- AGREEMENT HEADER ---------- */}
-                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
-                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)` }}>
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-12 w-12' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <Handshake className={compact ? 'w-6 h-6' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
-                            <div className="text-white break-words" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
-                          </div>
-                        </div>
-                        <div className={`flex items-center shrink-0 ${compact ? 'gap-6' : 'gap-5'}`}>
-                          <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duration</div>
-                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>4 MONTHS</div>
-                          </div>
-                          <div className="h-10 w-[1px]" style={{ background: 'rgba(255,255,255,0.35)' }} />
-                          <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Minimum</div>
-                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>15 STARTUPS</div>
-                          </div>
-                        </div>
-                      </div>
-
-
-                      {/* ---------- SERVICE LINES (no pricing) ---------- */}
-                      <div className="relative z-10 flex-1 flex flex-col gap-3 min-h-0">
-                        {[
-                          {
-                            code: 'SERVICE · 01',
-                            t: 'Acceleration Batch',
-                            note: 'Minimum 15 startups · 4-month program',
-                            desc: 'A full 4-month program with weekly mentorship, investment readiness and a Demo Day with your organization\'s network.',
-                            i: Rocket,
-                          },
-                          {
-                            code: 'SERVICE · 02',
-                            t: 'Platform & License',
-                            note: 'Comprehensive software and services license',
-                            desc: 'Investment and capital network, management and operations, AI tooling, Business Intelligence Engine and co-branding with your organization.',
-                            i: Cpu,
-                          },
-                          {
-                            code: 'SERVICE · 03',
-                            t: 'Mentor Certification',
-                            note: 'Official 10-hour training for your mentors',
-                            desc: 'Official 10-hour mentorship curriculum, evaluation and digital credential, access to the SFH mentor network and program updates.',
-                            i: GraduationCap,
-                          },
-                        ].map((p, idx) => (
-                          <div
-                            key={p.code}
-                            className={`relative rounded-2xl overflow-hidden flex-1 min-h-0 ${compact ? 'flex flex-col gap-2 px-5 py-3.5' : 'flex items-center gap-6 px-6 py-4'}`}
-                            style={{
-                              background: 'rgba(2,32,25,0.55)',
-                              border: `1px solid rgba(255,255,255,0.22)`,
-                            }}
-                          >
-                            {/* left: icon + code + title + note */}
-                            <div className={`min-w-0 flex items-start gap-3.5 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
-                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-10 w-10' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
-                                <p.i className={compact ? 'w-5 h-5' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>{p.code}</div>
-                                <div className="text-white break-words" style={{ ...ct(compact).title }}>{p.t}</div>
-                                <div className="mt-0.5 break-words" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
-                              </div>
-                            </div>
-
-                            {/* right: description text only */}
-                            <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-2'}`}>
-                              <p className="text-white break-words" style={{ ...ct(compact).body }}>{p.desc}</p>
-                            </div>
-                          </div>
-                        ))}
-
-                      </div>
-
-                      {/* ---------- SUMMARY STRIP ---------- */}
-                      <div
-                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
-                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)', boxShadow: `0 0 30px -10px ${NEON.lime}` }}
-                      >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-11 w-11' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <ShieldCheck className={compact ? 'w-6 h-6' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>What every batch includes</div>
-                            <div className="text-white break-words" style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
-                          </div>
-                        </div>
-                        <div className={compact ? 'text-left' : 'text-right shrink-0 max-w-[46%]'}>
-                          <div className="text-white font-futuristic break-words" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
-                          <div className="font-mono uppercase break-words" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
-                        </div>
-                      </div>
-
-
-
-                    </div>
-
-
-                  </PageFrame>
-                </A4Wrapper>
-              </BookPage>
-
+              
 
               {/* ====================================================
                    PAGE 6 — PARTNER CONTRIBUTION (timeline rail left → right)
@@ -2393,44 +2263,63 @@ export default function SponsorsBrochure() {
                 <PartnersNasdaqPage />
               </BookPage>
 
-              {/* WHITE-LABEL · PARTNER EDITION (silver) */}
-              <BookPage>
-                <A4Wrapper>
-                  <WhiteLabelPartnerPage pageNum={13} />
-                </A4Wrapper>
-              </BookPage>
-
-              {/* ====================================================
+              
+                            {/* ====================================================
                    SPONSOR PLANS — OVERVIEW
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.cyan} code="SP-01" label="SPONSOR PLANS · 2027" pageNum={14}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="ANNUAL SPONSORSHIP & STRATEGIC PARTNERSHIP" title={<>THE SPONSOR<br />PLANS</>} accent={NEON.cyan} />
-                      <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[560px]">
-                        Four partnership opportunities designed to position Coreis within the Startup Factory Hub ecosystem — connecting the company with startups, founders, investors, mentors, and industry leaders. The plans keep the Circle’s original names.
+                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
+                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin 46s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.cyan}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
+                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.cyan}1e`, animation: 'slow-spin 38s linear infinite' }} />
+                      <PageTitle kicker="ANNUAL SPONSORSHIP & STRATEGIC PARTNERSHIP" title={<>THE SPONSOR <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.lime})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>PLANS</span></>} accent={NEON.cyan} />
+                      <p className="relative mt-3 text-[17px] leading-snug text-slate-700 max-w-[560px]">
+                        Four partnership opportunities designed to position Coreis within the Startup Factory Hub ecosystem — plugged directly into the community of startups, founders, investors, mentors, and industry leaders. The plans keep the Circle’s original names.
                       </p>
-                      <div className="mt-6 flex flex-col gap-3">
+                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, ${NEON.cyan})` }} />
+                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
+                          <span key={n} className="flex items-center">
+                            <span className="relative flex h-3 w-3">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.cyan }} />
+                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
+                            </span>
+                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
+                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.cyan}55` }} />}
+                          </span>
+                        ))}
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.cyan}66, transparent)` }} />
+                      </div>
+                      <div className="relative mt-6 flex flex-col gap-3">
                         {SPONSOR_PLANS.map((plan) => (
-                          <div key={plan.name} className="flex items-center gap-5 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${plan.accent}55`, boxShadow: `0 0 24px ${plan.accent}18` }}>
-                            <div className="min-w-0 flex-1">
+                          <div key={plan.name} className="relative flex items-stretch gap-5 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${plan.accent}55`, boxShadow: `0 10px 34px -12px ${plan.accent}45` }}>
+                            <span aria-hidden className="w-1.5 shrink-0" style={{ background: `linear-gradient(180deg, ${plan.accent}, ${plan.accent}30)`, boxShadow: `0 0 16px ${plan.accent}66` }} />
+                            <div className="min-w-0 flex-1 py-4 pr-2">
                               <div className="flex items-center gap-3">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: plan.accent }} />
+                                  <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: plan.accent }} />
+                                </span>
                                 <span className="font-mono text-[13px] tracking-[0.3em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
-                                {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full" style={{ background: `${plan.accent}18`, color: plan.accent, border: `1px solid ${plan.accent}55` }}>Premium partnership</span>}
+                                {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full" style={{ background: `${plan.accent}14`, color: plan.accent, border: `1px solid ${plan.accent}55` }}>Premium partnership</span>}
                               </div>
                               <div className="font-futuristic text-[22px] font-black text-slate-900 leading-tight">{plan.packageName}</div>
                               <div className="text-[14px] text-slate-600 leading-snug">{plan.essence}</div>
                             </div>
-                            <div className="text-right shrink-0">
-                              <div className="font-futuristic text-[24px] font-black" style={{ color: plan.accent }}>{plan.price.split(' / ')[0]}</div>
-                              <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-slate-500">per year</div>
+                            <div className="text-right shrink-0 py-4 pr-6 flex flex-col justify-center">
+                              <div className="font-futuristic text-[26px] font-black leading-none" style={{ backgroundImage: `linear-gradient(120deg, ${plan.accent}, #0b1220)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price.split(' / ')[0]}</div>
+                              <div className="mt-1 font-mono text-[11px] tracking-[0.2em] uppercase text-slate-500">per year</div>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-auto pt-4 font-mono text-[13px] uppercase tracking-[0.16em] text-slate-500">
-                        Entry-level community sponsorships can also be structured starting at $50, with benefits scaled to the contribution.
+                      <div className="relative mt-auto pt-4">
+                        <span className="inline-block rounded-full border border-dashed px-4 py-2 font-mono text-[12px] uppercase tracking-[0.16em] text-slate-500" style={{ borderColor: `${NEON.cyan}66` }}>
+                          Entry-level community sponsorships can also be structured starting at $50 · benefits scaled to the contribution
+                        </span>
                       </div>
                     </div>
                   </PageFrame>
@@ -2443,24 +2332,54 @@ export default function SponsorsBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.emerald} code="SP-02" label="COMMUNITY · EVENT" pageNum={15}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 1–2" title={<>ENTER THE<br />CIRCLE</>} accent={NEON.emerald} />
-                      <div className="mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
+                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
+                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.emerald}30`, animation: 'slow-spin 46s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.emerald}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.emerald, boxShadow: `0 0 14px ${NEON.emerald}` }} />
+                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.emerald}1e`, animation: 'slow-spin 38s linear infinite' }} />
+                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 1–2" title={<>ENTER THE <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.emerald}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>CIRCLE</span></>} accent={NEON.emerald} />
+                      <div className="relative mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
                         {SPONSOR_PLANS.slice(0, 2).map((plan) => (
-                          <div key={plan.name} className="rounded-2xl p-6 flex flex-col" style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${plan.accent}55`, boxShadow: `0 0 24px ${plan.accent}18` }}>
-                            <div className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: plan.accent }}>{plan.name}</div>
-                            <div className="mt-1 font-futuristic text-[21px] font-black text-slate-900 leading-tight">{plan.packageName}</div>
-                            <div className="mt-1 font-futuristic text-[24px] font-black" style={{ color: plan.accent }}>{plan.price}</div>
-                            <p className="mt-2 text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
-                            <ul className="mt-4 space-y-2.5">
-                              {plan.includes.map((inc) => (
-                                <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
-                                  <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: plan.accent }} />{inc}
-                                </li>
-                              ))}
-                            </ul>
+                          <div key={plan.name} className="relative rounded-3xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.96)', border: `1px solid ${plan.accent}55`, boxShadow: `0 18px 44px -16px ${plan.accent}50` }}>
+                            <div className="px-6 py-5" style={{ background: `linear-gradient(120deg, #0b1220 55%, ${plan.accent} 130%)` }}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#a7f3d0' }}>{plan.name}</span>
+                                <span className="relative flex h-2 w-2">
+                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} />
+                                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                                </span>
+                              </div>
+                              <div className="mt-1.5 font-futuristic text-[20px] font-black text-white leading-tight">{plan.packageName}</div>
+                              <div className="mt-1 font-futuristic text-[25px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price}</div>
+                            </div>
+                            <div className="p-6 flex flex-col flex-1">
+                              <p className="text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
+                              <ul className="mt-4 space-y-2.5">
+                                {plan.includes.map((inc) => (
+                                  <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
+                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}14`, border: `1px solid ${plan.accent}40` }}>
+                                      <Check className="h-3 w-3" style={{ color: plan.accent }} />
+                                    </span>{inc}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         ))}
+                      </div>
+                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald}66, ${NEON.emerald})` }} />
+                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
+                          <span key={n} className="flex items-center">
+                            <span className="relative flex h-3 w-3">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.emerald }} />
+                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.emerald, boxShadow: `0 0 12px ${NEON.emerald}` }} />
+                            </span>
+                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
+                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.emerald}55` }} />}
+                          </span>
+                        ))}
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.emerald}, ${NEON.emerald}66, transparent)` }} />
                       </div>
                     </div>
                   </PageFrame>
@@ -2473,27 +2392,53 @@ export default function SponsorsBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="SP-03" label="STRATEGIC · COHORT" pageNum={16}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 3–4" title={<>LEAD THE<br />ECOSYSTEM</>} accent={NEON.magenta} />
-                      <div className="mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
+                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
+                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.magenta}30`, animation: 'slow-spin 46s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.magenta}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.magenta, boxShadow: `0 0 14px ${NEON.magenta}` }} />
+                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.magenta}1e`, animation: 'slow-spin 38s linear infinite' }} />
+                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 3–4" title={<>LEAD THE <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.magenta}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>ECOSYSTEM</span></>} accent={NEON.magenta} />
+                      <div className="relative mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
                         {SPONSOR_PLANS.slice(2, 4).map((plan) => (
-                          <div key={plan.name} className="rounded-2xl p-6 flex flex-col" style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${plan.accent}55`, boxShadow: `0 0 24px ${plan.accent}18` }}>
-                            <div className="flex items-center gap-3">
-                              <span className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
-                              {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full" style={{ background: `${plan.accent}18`, color: plan.accent, border: `1px solid ${plan.accent}55` }}>Premium</span>}
+                          <div key={plan.name} className="relative rounded-3xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.96)', border: `1px solid ${plan.accent}55`, boxShadow: `0 18px 44px -16px ${plan.accent}50` }}>
+                            <div className="px-6 py-5" style={{ background: `linear-gradient(120deg, #0b1220 55%, ${plan.accent} 130%)` }}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#a7f3d0' }}>{plan.name}</span>
+                                {plan.premium
+                                  ? <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-white" style={{ border: '1px solid rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.12)' }}>Premium</span>
+                                  : <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} /><span className="relative inline-flex h-2 w-2 rounded-full bg-white" /></span>}
+                              </div>
+                              <div className="mt-1.5 font-futuristic text-[20px] font-black text-white leading-tight">{plan.packageName}</div>
+                              <div className="mt-1 font-futuristic text-[25px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price}</div>
                             </div>
-                            <div className="mt-1 font-futuristic text-[21px] font-black text-slate-900 leading-tight">{plan.packageName}</div>
-                            <div className="mt-1 font-futuristic text-[24px] font-black" style={{ color: plan.accent }}>{plan.price}</div>
-                            <p className="mt-2 text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
-                            <ul className="mt-4 space-y-2.5">
-                              {plan.includes.map((inc) => (
-                                <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
-                                  <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: plan.accent }} />{inc}
-                                </li>
-                              ))}
-                            </ul>
+                            <div className="p-6 flex flex-col flex-1">
+                              <p className="text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
+                              <ul className="mt-4 space-y-2.5">
+                                {plan.includes.map((inc) => (
+                                  <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
+                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}14`, border: `1px solid ${plan.accent}40` }}>
+                                      <Check className="h-3 w-3" style={{ color: plan.accent }} />
+                                    </span>{inc}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         ))}
+                      </div>
+                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta}66, ${NEON.magenta})` }} />
+                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
+                          <span key={n} className="flex items-center">
+                            <span className="relative flex h-3 w-3">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.magenta }} />
+                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.magenta, boxShadow: `0 0 12px ${NEON.magenta}` }} />
+                            </span>
+                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
+                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.magenta}55` }} />}
+                          </span>
+                        ))}
+                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.magenta}, ${NEON.magenta}66, transparent)` }} />
                       </div>
                     </div>
                   </PageFrame>
@@ -2506,27 +2451,35 @@ export default function SponsorsBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.amber} code="SP-04" label="STRATEGIC VALUE" pageNum={17}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="WHY THIS PARTNERSHIP" title={<>STRATEGIC VALUE<br />FOR COREIS</>} accent={NEON.amber} />
-                      <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[520px]">Through this partnership, Coreis can:</p>
-                      <div className="mt-6 flex flex-col gap-3">
+                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
+                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.amber}30`, animation: 'slow-spin 46s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.amber}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
+                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.amber, boxShadow: `0 0 14px ${NEON.amber}` }} />
+                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.amber}1e`, animation: 'slow-spin 38s linear infinite' }} />
+                      <PageTitle kicker="WHY THIS PARTNERSHIP" title={<>STRATEGIC VALUE<br />FOR <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.amber}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>COREIS</span></>} accent={NEON.amber} />
+                      <p className="relative mt-3 text-[17px] leading-snug text-slate-700 max-w-[520px]">Through this partnership, Coreis can:</p>
+                      <div className="relative mt-6 flex flex-col gap-3">
+                        <span aria-hidden className="absolute left-[27px] top-4 bottom-4 w-[2px]" style={{ background: `linear-gradient(180deg, ${NEON.amber}00, ${NEON.amber}88, ${NEON.cyan}88, ${NEON.cyan}00)` }} />
                         {COREIS_VALUE.map((v, i) => (
-                          <div key={v} className="flex items-center gap-5 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.amber}45` }}>
-                            <span className="font-futuristic font-black text-[26px]" style={{ color: NEON.amber }}>{String(i + 1).padStart(2, '0')}</span>
-                            <p className="text-[16px] leading-snug text-slate-700">{v}</p>
+                          <div key={v} className="relative flex items-center gap-5">
+                            <span className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[20px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: `1px solid ${NEON.amber}88`, boxShadow: `0 0 22px ${NEON.amber}40` }}>{String(i + 1).padStart(2, '0')}</span>
+                            <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${NEON.amber}40`, boxShadow: `0 10px 30px -14px ${NEON.amber}45` }}>
+                              <p className="text-[16px] leading-snug text-slate-700">{v}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-6 rounded-2xl px-6 py-5" style={{ background: `${NEON.amber}12`, border: `1px solid ${NEON.amber}55` }}>
-                        <div className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: NEON.amber }}>Partnership objective</div>
-                        <p className="mt-2 text-[16px] leading-snug text-slate-700">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
+                      <div className="relative mt-6 rounded-3xl px-7 py-6 overflow-hidden" style={{ background: 'linear-gradient(120deg, #0b1220 60%, #134e4a 130%)', boxShadow: `0 18px 44px -16px ${NEON.amber}55` }}>
+                        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.22)', animation: 'slow-spin 40s linear infinite' }} />
+                        <div className="relative font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#5eead4' }}>Partnership objective</div>
+                        <p className="relative mt-2 text-[16.5px] leading-snug text-white/90 max-w-[600px]">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
                       </div>
                     </div>
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
 
-              {/* ====================================================
+{/* ====================================================
                    PAGE 11 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
                   ==================================================== */}
 
