@@ -770,10 +770,10 @@ BookPage.displayName = "BookPage";
 /* ── SPONSOR PLANS — the four original Circles carrying the Coreis packages
    (same data as the Sponsorship page, founder 2026-11-03). ── */
 const SPONSOR_PLANS = [
-  { name: 'EARTHLING', packageName: 'Community Partner', price: '$5,000 / year', accent: '#059669', essence: 'Brand visibility and access to the Startup Factory Hub community.', includes: ['Official social media announcement introducing Coreis as an SFH partner', 'Dedicated email announcement to the SFH community', 'Dedicated Coreis listing in the Perks section of the startup dashboard', 'Share exclusive offers, benefits, and services with participating startups'] },
-  { name: 'STAR', packageName: 'Event Sponsor', price: '$15,000 / year', accent: '#0d9488', essence: 'Year-round brand visibility across the SFH event portfolio.', includes: ['Everything in EARTHLING · Community Partner', 'Official sponsorship recognition across all SFH events, virtual and in-person', 'Brand visibility on event promotions, registration pages, and communications', 'Recognition as an official event sponsor during events', 'Connect with startups, investors, mentors, and industry leaders', 'Exposure across a planned calendar of 66 or more events in 2027'] },
-  { name: 'NEBULA', packageName: 'Strategic Partner & Featured Speaker', price: '$25,000 / year', accent: '#0ea5b7', essence: 'Thought leadership, executive visibility, and direct engagement with the innovation ecosystem.', includes: ['Everything in EARTHLING and STAR', 'Speaking opportunities for Coreis executives and team members at selected SFH events', 'Showcase Coreis expertise, services, and company initiatives', 'Participation in panels, workshops, webinars, and industry discussions', 'Featured speaker recognition in event promotions and communications', 'Engage directly with founders, investors, and ecosystem partners'] },
-  { name: 'GALAXY', packageName: 'Cohort Strategic Partner', price: '$50,000 / year', accent: '#1f2a44', premium: true, essence: 'Become the official Satellite Partner of a selected Startup Factory Hub cohort.', includes: ['Official recognition as the Satellite Partner of the selected cohort', 'Early access to all startups in the cohort — profiles, technologies, and business opportunities', 'Personal introductions to all cohort founders', 'Explore strategic partnerships, pilot programs, and commercial collaborations', 'Brand visibility across cohort announcements, communications, and program activities', 'Participate in dedicated cohort events, workshops, and networking sessions', 'Direct engagement with emerging companies to identify technology and business opportunities'] },
+  { name: 'EARTHLING', packageName: 'Community Partner', reach: 'Community-wide announcement', price: '$5,000 / year', accent: '#059669', essence: 'Brand visibility and access to the Startup Factory Hub community.', includes: ['Official social media announcement introducing Coreis as an SFH partner', 'Dedicated email announcement to the SFH community', 'Dedicated Coreis listing in the Perks section of the startup dashboard', 'Share exclusive offers, benefits, and services with participating startups'] },
+  { name: 'STAR', packageName: 'Event Sponsor', reach: '66+ events in 2027', price: '$15,000 / year', accent: '#0d9488', essence: 'Year-round brand visibility across the SFH event portfolio.', includes: ['Everything in EARTHLING · Community Partner', 'Official sponsorship recognition across all SFH events, virtual and in-person', 'Brand visibility on event promotions, registration pages, and communications', 'Recognition as an official event sponsor during events', 'Connect with startups, investors, mentors, and industry leaders', 'Exposure across a planned calendar of 66 or more events in 2027'] },
+  { name: 'NEBULA', packageName: 'Strategic Partner & Featured Speaker', reach: 'Stage, panels & spotlight', price: '$25,000 / year', accent: '#0ea5b7', essence: 'Thought leadership, executive visibility, and direct engagement with the innovation ecosystem.', includes: ['Everything in EARTHLING and STAR', 'Speaking opportunities for Coreis executives and team members at selected SFH events', 'Showcase Coreis expertise, services, and company initiatives', 'Participation in panels, workshops, webinars, and industry discussions', 'Featured speaker recognition in event promotions and communications', 'Engage directly with founders, investors, and ecosystem partners'] },
+  { name: 'GALAXY', packageName: 'Cohort Strategic Partner', reach: 'Full cohort access', price: '$50,000 / year', accent: '#1f2a44', premium: true, essence: 'Become the official Satellite Partner of a selected Startup Factory Hub cohort.', includes: ['Official recognition as the Satellite Partner of the selected cohort', 'Early access to all startups in the cohort — profiles, technologies, and business opportunities', 'Personal introductions to all cohort founders', 'Explore strategic partnerships, pilot programs, and commercial collaborations', 'Brand visibility across cohort announcements, communications, and program activities', 'Participate in dedicated cohort events, workshops, and networking sessions', 'Direct engagement with emerging companies to identify technology and business opportunities'] },
 ];
 const COREIS_VALUE = [
   'Increase visibility across an international startup and innovation ecosystem.',
@@ -1024,97 +1024,122 @@ const PlugStrip = ({ accent, big = false }: { accent: string; big?: boolean }) =
   </div>
 );
 
+const Armillary = ({ accent }: { accent: string }) => (
+  <div aria-hidden className="relative h-[240px] w-[240px] shrink-0 pointer-events-none">
+    <div className="absolute inset-0 rounded-full border border-dashed" style={{ borderColor: `${accent}30`, animation: 'slow-spin 46s linear infinite' }}>
+      <span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: accent, boxShadow: `0 0 16px ${accent}` }} />
+    </div>
+    <div className="absolute inset-8 rounded-full border" style={{ borderColor: 'rgba(232,201,135,0.35)', animation: 'slow-spin-reverse 34s linear infinite' }}>
+      <span className="absolute right-0 top-1/2 h-2 w-2 translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e8c987]" style={{ boxShadow: '0 0 14px #e8c987' }} />
+    </div>
+    <div className="absolute inset-16 rounded-full border" style={{ borderColor: `${accent}40`, animation: 'slow-spin 26s linear infinite' }} />
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full" style={{ background: `radial-gradient(circle, #fff8dc 0%, #e8c987 38%, ${accent}55 68%, transparent 75%)`, boxShadow: `0 0 54px 14px ${accent}40` }} />
+  </div>
+);
+
 const SponsorOverviewPage = () => (
   <A4Wrapper>
     <section className="absolute inset-0 overflow-hidden">
       <SpaceNebula accent={NEON.cyan} />
       <SpaceHud code="01" label="Sponsor Plans · Deep Field" page="14" accent={NEON.cyan} />
-      <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
-        <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>Annual Sponsorship &amp; Strategic Partnership</div>
-        <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '76px', textShadow: `0 0 60px ${NEON.cyan}55` }}>
-          THE SPONSOR<br />
-          <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>PLANS</span>
-        </h2>
-        <p className="mt-4 max-w-[600px] text-[17px] leading-snug text-white/70">
-          Four partnership opportunities that plug Coreis directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
-        </p>
+      <div className="relative z-20 h-full flex flex-col px-11 pt-20 pb-16">
+        <div className="flex items-start justify-between gap-6">
+          <div className="min-w-0">
+            <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>Annual Sponsorship &amp; Strategic Partnership</div>
+            <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '84px', textShadow: `0 0 60px ${NEON.cyan}55` }}>
+              THE SPONSOR<br />
+              <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>PLANS</span>
+            </h2>
+            <p className="mt-4 max-w-[540px] text-[17.5px] leading-snug text-white/70">
+              Four partnership opportunities that plug Coreis directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
+            </p>
+          </div>
+          <Armillary accent={NEON.cyan} />
+        </div>
         <PlugStrip accent={NEON.cyan} big />
-        <div className="mt-7 flex flex-col gap-3">
-          {SPONSOR_PLANS.map((plan) => (
+        <div className="mt-6 flex flex-col gap-3 flex-1">
+          {SPONSOR_PLANS.map((plan, idx) => (
             <motion.div key={plan.name} whileHover={{ scale: 1.012 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-              className="relative flex items-center gap-5 rounded-2xl px-6 py-4 overflow-hidden"
+              className="relative flex items-center gap-5 rounded-2xl px-6 py-4 overflow-hidden flex-1"
               style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${plan.accent}66`, backdropFilter: 'blur(6px)', boxShadow: `0 0 34px -8px ${plan.accent}55, inset 0 0 24px rgba(255,255,255,0.02)` }}>
               <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: `linear-gradient(180deg, ${plan.accent}, transparent)`, boxShadow: `0 0 18px ${plan.accent}` }} />
+              <span aria-hidden className="font-futuristic font-black text-[44px] leading-none text-white/[0.13] w-[74px] shrink-0">{String(idx + 1).padStart(2, '0')}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-[12px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
+                  <span className="font-mono text-[12.5px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
                   {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Premium partnership</span>}
                 </div>
-                <div className="font-futuristic text-[23px] font-black text-white leading-tight" style={{ textShadow: '0 0 24px rgba(255,255,255,0.25)' }}>{plan.packageName}</div>
-                <div className="text-[13.5px] text-white/55 leading-snug">{plan.essence}</div>
+                <div className="font-futuristic text-[26px] font-black text-white leading-tight" style={{ textShadow: '0 0 24px rgba(255,255,255,0.25)' }}>{plan.packageName}</div>
+                <div className="text-[15px] text-white/55 leading-snug">{plan.essence}</div>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-futuristic text-[34px] font-black leading-none" style={{ backgroundImage: `linear-gradient(120deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 16px ${plan.accent}55)` }}>{plan.price.split(' / ')[0]}</div>
-                <div className="mt-1 font-mono text-[10px] tracking-[0.24em] uppercase text-white/40">per year</div>
+                <div className="font-futuristic text-[40px] font-black leading-none" style={{ backgroundImage: `linear-gradient(120deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 16px ${plan.accent}55)` }}>{plan.price.split(' / ')[0]}</div>
+                <div className="mt-1.5 font-mono text-[10.5px] tracking-[0.22em] uppercase text-white/45">{plan.reach}</div>
               </div>
             </motion.div>
           ))}
         </div>
-        <div className="mt-auto pt-4 font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">
-          Entry-level community sponsorships can also be structured starting at $50 · benefits scaled to the contribution
+        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+          <span className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">Entry-level community sponsorships from $50 · benefits scaled to the contribution</span>
+          <span className="font-mono text-[11.5px] uppercase tracking-[0.24em]" style={{ color: NEON.cyan }}>SFH × Coreis</span>
         </div>
       </div>
     </section>
   </A4Wrapper>
 );
 
-const SponsorPackagesPage = ({ plans, code, page, kicker, titleA, titleB, accent, defaultOpen }: { plans: typeof SPONSOR_PLANS; code: string; page: string; kicker: string; titleA: string; titleB: string; accent: string; defaultOpen: string }) => {
-  const [open, setOpen] = useState<string | null>(defaultOpen);
+const SponsorPackagesPage = ({ plans, code, page, kicker, titleA, titleB, accent }: { plans: typeof SPONSOR_PLANS; code: string; page: string; kicker: string; titleA: string; titleB: string; accent: string }) => {
+  const [spot, setSpot] = useState<string | null>(null);
   return (
     <A4Wrapper>
       <section className="absolute inset-0 overflow-hidden">
         <SpaceNebula accent={accent} />
         <SpaceHud code={code} label="Sponsor Plans · Deep Field" page={page} accent={accent} />
-        <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
-          <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: accent }}>{kicker}</div>
-          <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '62px', textShadow: `0 0 54px ${accent}55` }}>
-            {titleA}<br />
-            <span style={{ backgroundImage: `linear-gradient(92deg, ${accent}, #e8c987)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 24px ${accent}66)` }}>{titleB}</span>
-          </h2>
-          <div className="mt-7 grid grid-cols-2 gap-5 flex-1 min-h-0" data-no-flip>
-            {plans.map((plan) => {
-              const isOpen = open === plan.name;
-              const shown = isOpen ? plan.includes : plan.includes.slice(0, 3);
+        <div className="relative z-20 h-full flex flex-col px-11 pt-20 pb-16">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: accent }}>{kicker}</div>
+              <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '68px', textShadow: `0 0 54px ${accent}55` }}>
+                {titleA}{' '}
+                <span style={{ backgroundImage: `linear-gradient(92deg, ${accent}, #e8c987)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 24px ${accent}66)` }}>{titleB}</span>
+              </h2>
+            </div>
+            <div className="font-mono text-[11px] tracking-[0.24em] uppercase text-white/35 pb-2">Tap a package to spotlight it</div>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0" data-no-flip>
+            {plans.map((plan, idx) => {
+              const dim = spot !== null && spot !== plan.name;
               return (
-                <motion.div key={plan.name} whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                  className="relative rounded-3xl overflow-hidden flex flex-col"
-                  style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${plan.accent}66`, backdropFilter: 'blur(6px)', boxShadow: isOpen ? `0 0 54px -10px ${plan.accent}80` : `0 0 30px -12px ${plan.accent}45` }}>
-                  <div className="px-6 pt-5 pb-4" style={{ background: `linear-gradient(120deg, rgba(1,4,9,0.85) 50%, ${plan.accent}59 130%)`, borderBottom: `1px solid ${plan.accent}40` }}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[12px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
-                      {plan.premium
-                        ? <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Premium</span>
-                        : <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} /><span className="relative inline-flex h-2 w-2 rounded-full bg-white" /></span>}
+                <motion.div key={plan.name} onClick={() => setSpot(spot === plan.name ? null : plan.name)}
+                  whileHover={{ rotateX: 2.5, rotateY: idx === 0 ? 3 : -3, y: -4 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                  style={{ transformPerspective: 1100, opacity: dim ? 0.45 : 1, background: 'rgba(255,255,255,0.045)', border: `1px solid ${plan.accent}66`, backdropFilter: 'blur(6px)', boxShadow: spot === plan.name ? `0 0 64px -10px ${plan.accent}90` : `0 0 30px -12px ${plan.accent}45` }}
+                  className="relative rounded-3xl overflow-hidden flex flex-col cursor-pointer">
+                  <div className="relative px-6 pt-5 pb-4" style={{ background: `linear-gradient(120deg, rgba(1,4,9,0.88) 50%, ${plan.accent}59 130%)`, borderBottom: `1px solid ${plan.accent}40` }}>
+                    <span aria-hidden className="absolute right-4 top-2 font-futuristic font-black text-[54px] leading-none text-white/[0.10]">{String(SPONSOR_PLANS.indexOf(plan) + 1).padStart(2, '0')}</span>
+                    <div className="relative flex items-center gap-3">
+                      <span className="font-mono text-[12.5px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
+                      {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Premium</span>}
                     </div>
-                    <div className="mt-1.5 font-futuristic text-[21px] font-black text-white leading-tight">{plan.packageName}</div>
-                    <div className="mt-1 font-futuristic text-[30px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 14px ${plan.accent}55)` }}>{plan.price}</div>
+                    <div className="relative mt-1.5 font-futuristic text-[23px] font-black text-white leading-tight">{plan.packageName}</div>
+                    <div className="relative mt-1 font-futuristic text-[36px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 14px ${plan.accent}55)` }}>{plan.price}</div>
                   </div>
                   <div className="p-6 flex flex-col flex-1">
-                    <p className="text-[13.5px] text-white/55 leading-snug">{plan.essence}</p>
+                    <p className="text-[14.5px] text-white/60 leading-snug">{plan.essence}</p>
                     <ul className="mt-4 space-y-2.5">
-                      {shown.map((inc) => (
-                        <motion.li key={inc} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="flex gap-2.5 text-[14px] leading-snug text-white/80">
+                      {plan.includes.map((inc) => (
+                        <li key={inc} className="flex gap-2.5 text-[15px] leading-snug text-white/85">
                           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}1f`, border: `1px solid ${plan.accent}59`, boxShadow: `0 0 10px ${plan.accent}30` }}>
                             <Check className="h-3 w-3" style={{ color: plan.accent }} />
                           </span>{inc}
-                        </motion.li>
+                        </li>
                       ))}
                     </ul>
-                    <button type="button" onClick={() => setOpen(isOpen ? null : plan.name)}
-                      className="mt-auto pt-4 self-start font-mono text-[11px] tracking-[0.26em] uppercase transition-all hover:tracking-[0.34em]"
-                      style={{ color: plan.accent }}>
-                      {isOpen ? '— Show fewer' : `+ All ${plan.includes.length} benefits`}
-                    </button>
+                    <div className="mt-auto pt-5">
+                      <div className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: `${plan.accent}12`, border: `1px solid ${plan.accent}35` }}>
+                        <span className="font-mono text-[10.5px] tracking-[0.22em] uppercase text-white/45">Reach</span>
+                        <span className="font-futuristic text-[13px] font-bold tracking-wide" style={{ color: plan.accent }}>{plan.reach}</span>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -1132,38 +1157,54 @@ const SponsorValuePage = () => (
     <section className="absolute inset-0 overflow-hidden">
       <SpaceNebula accent="#e8c987" />
       <SpaceHud code="04" label="Strategic Value · Deep Field" page="17" accent="#e8c987" />
-      <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
+      <div className="relative z-20 h-full flex flex-col px-11 pt-20 pb-16">
         <div className="font-mono text-[13px] tracking-[0.4em] uppercase text-[#e8c987]">Why this partnership</div>
-        <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '62px', textShadow: '0 0 54px rgba(232,201,135,0.35)' }}>
+        <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '68px', textShadow: '0 0 54px rgba(232,201,135,0.35)' }}>
           STRATEGIC VALUE<br />
           <span style={{ backgroundImage: 'linear-gradient(92deg, #e8c987, #67e8f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 24px rgba(232,201,135,0.5))' }}>FOR COREIS</span>
         </h2>
-        <p className="mt-4 text-[16px] leading-snug text-white/65 max-w-[520px]">Through this partnership, Coreis can:</p>
-        <div className="relative mt-6 flex flex-col gap-3">
-          <span aria-hidden className="absolute left-[27px] top-4 bottom-4 w-[2px]" style={{ background: 'linear-gradient(180deg, transparent, rgba(232,201,135,0.75), rgba(103,232,249,0.75), transparent)' }} />
-          {COREIS_VALUE.map((v, i) => (
-            <motion.div key={v} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }} className="relative flex items-center gap-5">
-              <span className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[19px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: '1px solid rgba(232,201,135,0.7)', boxShadow: '0 0 26px rgba(232,201,135,0.35)' }}>{String(i + 1).padStart(2, '0')}</span>
-              <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(232,201,135,0.30)', backdropFilter: 'blur(6px)', boxShadow: '0 0 26px -10px rgba(232,201,135,0.4)' }}>
-                <p className="text-[15.5px] leading-snug text-white/85">{v}</p>
+        <div className="mt-7 grid grid-cols-[1.25fr_1fr] gap-6 flex-1 min-h-0">
+          <div className="relative flex flex-col gap-3">
+            <span aria-hidden className="absolute left-[31px] top-4 bottom-4 w-[2px]" style={{ background: 'linear-gradient(180deg, transparent, rgba(232,201,135,0.75), rgba(103,232,249,0.75), transparent)' }} />
+            {COREIS_VALUE.map((v, i) => (
+              <motion.div key={v} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }} className="relative flex items-center gap-5 flex-1">
+                <span className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[21px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: '1px solid rgba(232,201,135,0.7)', boxShadow: '0 0 26px rgba(232,201,135,0.35)' }}>{String(i + 1).padStart(2, '0')}</span>
+                <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(232,201,135,0.30)', backdropFilter: 'blur(6px)', boxShadow: '0 0 26px -10px rgba(232,201,135,0.4)' }}>
+                  <p className="text-[16.5px] leading-snug text-white/85">{v}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-5 min-h-0">
+            <div className="relative rounded-3xl p-6 overflow-hidden flex flex-col items-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(232,201,135,0.35)', backdropFilter: 'blur(6px)' }}>
+              <Armillary accent="#e8c987" />
+              <div className="mt-2 grid grid-cols-2 gap-x-8 gap-y-4 w-full">
+                {[
+                  { v: '66+', l: 'Events in 2027' },
+                  { v: '270+', l: 'Members on platform' },
+                  { v: '50+', l: 'Strategic partners' },
+                  { v: '5', l: 'Global hubs' },
+                ].map((st) => (
+                  <div key={st.l} className="text-center">
+                    <div className="font-futuristic text-[30px] font-black leading-none" style={{ backgroundImage: 'linear-gradient(120deg, #ffffff, #e8c987)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{st.v}</div>
+                    <div className="mt-1 font-mono text-[10px] tracking-[0.2em] uppercase text-white/45">{st.l}</div>
+                  </div>
+                ))}
               </div>
-            </motion.div>
-          ))}
-        </div>
-        <div className="relative mt-6 rounded-3xl px-7 py-6 overflow-hidden" style={{ background: 'linear-gradient(120deg, rgba(232,201,135,0.14), rgba(103,232,249,0.08))', border: '1px solid rgba(232,201,135,0.45)', boxShadow: '0 0 44px -10px rgba(232,201,135,0.5)' }}>
-          <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.25)', animation: 'slow-spin 40s linear infinite' }} />
-          <div className="relative font-mono text-[12px] tracking-[0.32em] uppercase text-[#e8c987]">Partnership objective</div>
-          <p className="relative mt-2 text-[16.5px] leading-snug text-white/90 max-w-[620px]">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
+            </div>
+            <div className="relative rounded-3xl px-7 py-6 overflow-hidden flex-1" style={{ background: 'linear-gradient(120deg, rgba(232,201,135,0.14), rgba(103,232,249,0.08))', border: '1px solid rgba(232,201,135,0.45)', boxShadow: '0 0 44px -10px rgba(232,201,135,0.5)' }}>
+              <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.25)', animation: 'slow-spin 40s linear infinite' }} />
+              <div className="relative font-mono text-[12px] tracking-[0.32em] uppercase text-[#e8c987]">Partnership objective</div>
+              <p className="relative mt-3 text-[17.5px] leading-snug text-white/90">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
+              <div className="relative mt-5 font-mono text-[11px] tracking-[0.26em] uppercase text-white/40">Startup Factory Hub × Coreis · 2027</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </A4Wrapper>
 );
 
-
-/* =========================================================================
-   MAIN COMPONENT
-   ========================================================================= */
 /** Shared with the APEX brochure. */
 export const PartnersNasdaqPage = () => (
                 <A4Wrapper>
@@ -2483,11 +2524,11 @@ export default function SponsorsBrochure() {
               </BookPage>
 
               <BookPage>
-                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(0, 2)} code="02" page="15" kicker="Sponsor Plans · Packages 1–2" titleA="ENTER THE" titleB="CIRCLE" accent={NEON.emerald} defaultOpen="STAR" />
+                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(0, 2)} code="02" page="15" kicker="Sponsor Plans · Packages 1–2" titleA="ENTER THE" titleB="CIRCLE" accent={NEON.emerald} />
               </BookPage>
 
               <BookPage>
-                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(2, 4)} code="03" page="16" kicker="Sponsor Plans · Packages 3–4" titleA="LEAD THE" titleB="ECOSYSTEM" accent={NEON.magenta} defaultOpen="GALAXY" />
+                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(2, 4)} code="03" page="16" kicker="Sponsor Plans · Packages 3–4" titleA="LEAD THE" titleB="ECOSYSTEM" accent={NEON.magenta} />
               </BookPage>
 
               <BookPage>
