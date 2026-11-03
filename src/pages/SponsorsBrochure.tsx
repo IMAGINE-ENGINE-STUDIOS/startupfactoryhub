@@ -669,7 +669,6 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan, serif }: { kicker: strin
       paddingBottom: '6px',
       ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
-      ...(serif ? { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 800, letterSpacing: '-0.03em' } : null),
     }}>
       {title}
     </h2>
@@ -1766,7 +1765,7 @@ export default function SponsorsBrochure() {
                           <span
                             className="text-[44px] font-light tracking-tighter italic"
                             style={{
-                              fontFamily: "'Playfair Display', serif",
+                              fontFamily: "'Orbitron', sans-serif",
                               color: 'rgba(15,23,42,0.18)',
                               textDecoration: `underline`,
                               textDecorationColor: NEON.lime,
@@ -1792,11 +1791,10 @@ export default function SponsorsBrochure() {
                           </span>
 
                           <h1
-                            className="font-extrabold tracking-tight text-slate-900 mb-8"
+                            className="font-futuristic font-extrabold tracking-tight text-slate-900 mb-8"
                             style={{
                               fontSize: '46px',
                               lineHeight: '1.04',
-                              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                               maxWidth: '100%',
                             }}
                           >
@@ -1988,7 +1986,7 @@ export default function SponsorsBrochure() {
                         <span
                           className="text-[44px] font-light tracking-tighter italic"
                           style={{
-                            fontFamily: "'Playfair Display', serif",
+                            fontFamily: "'Orbitron', sans-serif",
                             color: 'rgba(15,23,42,0.18)',
                             textDecoration: 'underline',
                             textDecorationColor: NEON.magenta,
@@ -2003,8 +2001,8 @@ export default function SponsorsBrochure() {
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.05 }}
-                        className="font-extrabold tracking-tight text-slate-900 mb-5"
-                        style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                        className="font-futuristic font-extrabold tracking-tight text-slate-900 mb-5"
+                        style={{ fontSize: '46px', lineHeight: 1.04 }}
                       >
                         Where the{' '}
                         <span
@@ -2039,8 +2037,8 @@ export default function SponsorsBrochure() {
                               Official Host · Featured
                             </span>
                             <h3
-                              className="font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
-                              style={{ fontSize: '30px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                              className="font-futuristic font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
+                              style={{ fontSize: '30px' }}
                             >
                               Artemis 2 Watch Party — AR Experience
                             </h3>
@@ -2079,8 +2077,8 @@ export default function SponsorsBrochure() {
                               <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
                               <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
                               <h4
-                                className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
-                                style={{ fontSize: '18px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                                className="font-futuristic font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
+                                style={{ fontSize: '18px' }}
                               >
                                 {e.title}
                               </h4>
@@ -2143,7 +2141,7 @@ export default function SponsorsBrochure() {
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
                             <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
-                            <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
+                            <h2 className="font-futuristic font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
                               Built Ventures Worldwide.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
                             </h2>
