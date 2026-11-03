@@ -947,6 +947,221 @@ const SponsorRequestForm = memo(() => {
 });
 SponsorRequestForm.displayName = 'SponsorRequestForm';
 
+/* ════════════════════════════════════════════════════════════════
+   DEEP SPACE SPONSOR PAGES — artwork edition (founder, 2026-11-03):
+   full-bleed galaxy pages, huge glowing type, dynamic orbits and
+   interactive package cards (tap to expand the full benefits).
+   ════════════════════════════════════════════════════════════════ */
+const SpaceStars = () => (
+  <>
+    <div aria-hidden className="absolute inset-0" style={{
+      backgroundImage: 'radial-gradient(rgba(255,255,255,0.85) 1px, transparent 1.4px), radial-gradient(rgba(165,243,252,0.7) 1px, transparent 1.3px), radial-gradient(rgba(255,255,255,0.4) 1.5px, transparent 2px)',
+      backgroundSize: '190px 190px, 260px 260px, 340px 340px',
+      backgroundPosition: '0 0, 60px 90px, 130px 40px',
+      opacity: 0.55,
+    }} />
+    {[
+      { l: '12%', t: '18%', d: '0s', c: '#67e8f9' }, { l: '78%', t: '12%', d: '0.7s', c: '#e8c987' },
+      { l: '88%', t: '38%', d: '1.3s', c: '#ffffff' }, { l: '22%', t: '66%', d: '0.4s', c: '#a5f3fc' },
+      { l: '64%', t: '78%', d: '1.8s', c: '#e8c987' }, { l: '40%', t: '30%', d: '1.1s', c: '#ffffff' },
+      { l: '8%', t: '84%', d: '2.2s', c: '#67e8f9' }, { l: '52%', t: '8%', d: '0.9s', c: '#ffffff' },
+    ].map((st, i) => (
+      <span key={i} aria-hidden className="absolute h-[3px] w-[3px] rounded-full animate-pulse" style={{ left: st.l, top: st.t, background: st.c, boxShadow: `0 0 12px 3px ${st.c}66`, animationDelay: st.d, animationDuration: '2.8s' }} />
+    ))}
+  </>
+);
+
+const SpaceNebula = ({ accent }: { accent: string }) => (
+  <>
+    <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #010409 0%, #030b1e 52%, #020617 100%)' }} />
+    <div aria-hidden className="absolute -left-32 top-16 h-96 w-96 rounded-full blur-3xl" style={{ background: `radial-gradient(circle, ${accent}38 0%, transparent 65%)` }} />
+    <div aria-hidden className="absolute right-[-120px] top-1/3 h-[420px] w-[420px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 65%)' }} />
+    <div aria-hidden className="absolute left-1/3 bottom-[-140px] h-96 w-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(232,201,135,0.16) 0%, transparent 65%)' }} />
+    <SpaceStars />
+    <div aria-hidden className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+      <div className="relative">
+        <div className="absolute -inset-[300px] rounded-full border" style={{ borderColor: `${accent}1c`, animation: 'slow-spin 52s linear infinite' }} />
+        <div className="absolute -inset-[225px] rounded-full border border-dashed" style={{ borderColor: `${accent}26`, animation: 'slow-spin-reverse 68s linear infinite' }} />
+        <div className="absolute -inset-[150px] rounded-full border" style={{ borderColor: 'rgba(232,201,135,0.14)', animation: 'slow-spin 40s linear infinite' }} />
+      </div>
+    </div>
+  </>
+);
+
+const SpaceHud = ({ code, label, page, accent }: { code: string; label: string; page: string; accent: string }) => (
+  <>
+    <div className="absolute top-6 left-10 right-10 z-30 flex items-center justify-between font-mono text-[13px] tracking-[0.34em] uppercase">
+      <span className="flex items-center gap-2" style={{ color: accent }}>
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: accent }} />
+          <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
+        </span>
+        SP // {code}
+      </span>
+      <span className="text-white/45">{label}</span>
+      <span style={{ color: accent }}>P/{page} · 16</span>
+    </div>
+    <div className="absolute bottom-6 left-10 right-10 z-30 flex items-center justify-between font-mono text-[11px] tracking-[0.28em] uppercase">
+      <span className="text-white/40">Startup Factory Hub · Sponsorship</span>
+      <span style={{ color: accent }}>Deep field · Live</span>
+    </div>
+  </>
+);
+
+const PlugStrip = ({ accent, big = false }: { accent: string; big?: boolean }) => (
+  <div className={`relative flex items-center ${big ? 'mt-8' : 'mt-6'}`} aria-hidden>
+    <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${accent}88)` }} />
+    {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
+      <span key={n} className="flex items-center">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: accent }} />
+          <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: accent, boxShadow: `0 0 14px ${accent}` }} />
+        </span>
+        <span className={`mx-2.5 font-mono ${big ? 'text-[12px]' : 'text-[10px]'} tracking-[0.26em] text-white/55`}>{n}</span>
+        {i < 4 && <span className="h-[2px] w-7" style={{ background: `${accent}55` }} />}
+      </span>
+    ))}
+    <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${accent}88, transparent)` }} />
+  </div>
+);
+
+const SponsorOverviewPage = () => (
+  <A4Wrapper>
+    <section className="absolute inset-0 overflow-hidden">
+      <SpaceNebula accent={NEON.cyan} />
+      <SpaceHud code="01" label="Sponsor Plans · Deep Field" page="14" accent={NEON.cyan} />
+      <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
+        <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>Annual Sponsorship &amp; Strategic Partnership</div>
+        <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '76px', textShadow: `0 0 60px ${NEON.cyan}55` }}>
+          THE SPONSOR<br />
+          <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>PLANS</span>
+        </h2>
+        <p className="mt-4 max-w-[600px] text-[17px] leading-snug text-white/70">
+          Four partnership opportunities that plug Coreis directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
+        </p>
+        <PlugStrip accent={NEON.cyan} big />
+        <div className="mt-7 flex flex-col gap-3">
+          {SPONSOR_PLANS.map((plan) => (
+            <motion.div key={plan.name} whileHover={{ scale: 1.012 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+              className="relative flex items-center gap-5 rounded-2xl px-6 py-4 overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${plan.accent}66`, backdropFilter: 'blur(6px)', boxShadow: `0 0 34px -8px ${plan.accent}55, inset 0 0 24px rgba(255,255,255,0.02)` }}>
+              <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: `linear-gradient(180deg, ${plan.accent}, transparent)`, boxShadow: `0 0 18px ${plan.accent}` }} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-[12px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
+                  {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Premium partnership</span>}
+                </div>
+                <div className="font-futuristic text-[23px] font-black text-white leading-tight" style={{ textShadow: '0 0 24px rgba(255,255,255,0.25)' }}>{plan.packageName}</div>
+                <div className="text-[13.5px] text-white/55 leading-snug">{plan.essence}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-futuristic text-[34px] font-black leading-none" style={{ backgroundImage: `linear-gradient(120deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 16px ${plan.accent}55)` }}>{plan.price.split(' / ')[0]}</div>
+                <div className="mt-1 font-mono text-[10px] tracking-[0.24em] uppercase text-white/40">per year</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-auto pt-4 font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">
+          Entry-level community sponsorships can also be structured starting at $50 · benefits scaled to the contribution
+        </div>
+      </div>
+    </section>
+  </A4Wrapper>
+);
+
+const SponsorPackagesPage = ({ plans, code, page, kicker, titleA, titleB, accent, defaultOpen }: { plans: typeof SPONSOR_PLANS; code: string; page: string; kicker: string; titleA: string; titleB: string; accent: string; defaultOpen: string }) => {
+  const [open, setOpen] = useState<string | null>(defaultOpen);
+  return (
+    <A4Wrapper>
+      <section className="absolute inset-0 overflow-hidden">
+        <SpaceNebula accent={accent} />
+        <SpaceHud code={code} label="Sponsor Plans · Deep Field" page={page} accent={accent} />
+        <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
+          <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: accent }}>{kicker}</div>
+          <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '62px', textShadow: `0 0 54px ${accent}55` }}>
+            {titleA}<br />
+            <span style={{ backgroundImage: `linear-gradient(92deg, ${accent}, #e8c987)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 24px ${accent}66)` }}>{titleB}</span>
+          </h2>
+          <div className="mt-7 grid grid-cols-2 gap-5 flex-1 min-h-0" data-no-flip>
+            {plans.map((plan) => {
+              const isOpen = open === plan.name;
+              const shown = isOpen ? plan.includes : plan.includes.slice(0, 3);
+              return (
+                <motion.div key={plan.name} whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+                  className="relative rounded-3xl overflow-hidden flex flex-col"
+                  style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${plan.accent}66`, backdropFilter: 'blur(6px)', boxShadow: isOpen ? `0 0 54px -10px ${plan.accent}80` : `0 0 30px -12px ${plan.accent}45` }}>
+                  <div className="px-6 pt-5 pb-4" style={{ background: `linear-gradient(120deg, rgba(1,4,9,0.85) 50%, ${plan.accent}59 130%)`, borderBottom: `1px solid ${plan.accent}40` }}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[12px] tracking-[0.32em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
+                      {plan.premium
+                        ? <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Premium</span>
+                        : <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} /><span className="relative inline-flex h-2 w-2 rounded-full bg-white" /></span>}
+                    </div>
+                    <div className="mt-1.5 font-futuristic text-[21px] font-black text-white leading-tight">{plan.packageName}</div>
+                    <div className="mt-1 font-futuristic text-[30px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 14px ${plan.accent}55)` }}>{plan.price}</div>
+                  </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <p className="text-[13.5px] text-white/55 leading-snug">{plan.essence}</p>
+                    <ul className="mt-4 space-y-2.5">
+                      {shown.map((inc) => (
+                        <motion.li key={inc} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="flex gap-2.5 text-[14px] leading-snug text-white/80">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}1f`, border: `1px solid ${plan.accent}59`, boxShadow: `0 0 10px ${plan.accent}30` }}>
+                            <Check className="h-3 w-3" style={{ color: plan.accent }} />
+                          </span>{inc}
+                        </motion.li>
+                      ))}
+                    </ul>
+                    <button type="button" onClick={() => setOpen(isOpen ? null : plan.name)}
+                      className="mt-auto pt-4 self-start font-mono text-[11px] tracking-[0.26em] uppercase transition-all hover:tracking-[0.34em]"
+                      style={{ color: plan.accent }}>
+                      {isOpen ? '— Show fewer' : `+ All ${plan.includes.length} benefits`}
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+          <PlugStrip accent={accent} />
+        </div>
+      </section>
+    </A4Wrapper>
+  );
+};
+
+const SponsorValuePage = () => (
+  <A4Wrapper>
+    <section className="absolute inset-0 overflow-hidden">
+      <SpaceNebula accent="#e8c987" />
+      <SpaceHud code="04" label="Strategic Value · Deep Field" page="17" accent="#e8c987" />
+      <div className="relative z-20 h-full flex flex-col px-12 pt-24 pb-20">
+        <div className="font-mono text-[13px] tracking-[0.4em] uppercase text-[#e8c987]">Why this partnership</div>
+        <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '62px', textShadow: '0 0 54px rgba(232,201,135,0.35)' }}>
+          STRATEGIC VALUE<br />
+          <span style={{ backgroundImage: 'linear-gradient(92deg, #e8c987, #67e8f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 24px rgba(232,201,135,0.5))' }}>FOR COREIS</span>
+        </h2>
+        <p className="mt-4 text-[16px] leading-snug text-white/65 max-w-[520px]">Through this partnership, Coreis can:</p>
+        <div className="relative mt-6 flex flex-col gap-3">
+          <span aria-hidden className="absolute left-[27px] top-4 bottom-4 w-[2px]" style={{ background: 'linear-gradient(180deg, transparent, rgba(232,201,135,0.75), rgba(103,232,249,0.75), transparent)' }} />
+          {COREIS_VALUE.map((v, i) => (
+            <motion.div key={v} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }} className="relative flex items-center gap-5">
+              <span className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[19px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: '1px solid rgba(232,201,135,0.7)', boxShadow: '0 0 26px rgba(232,201,135,0.35)' }}>{String(i + 1).padStart(2, '0')}</span>
+              <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(232,201,135,0.30)', backdropFilter: 'blur(6px)', boxShadow: '0 0 26px -10px rgba(232,201,135,0.4)' }}>
+                <p className="text-[15.5px] leading-snug text-white/85">{v}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="relative mt-6 rounded-3xl px-7 py-6 overflow-hidden" style={{ background: 'linear-gradient(120deg, rgba(232,201,135,0.14), rgba(103,232,249,0.08))', border: '1px solid rgba(232,201,135,0.45)', boxShadow: '0 0 44px -10px rgba(232,201,135,0.5)' }}>
+          <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.25)', animation: 'slow-spin 40s linear infinite' }} />
+          <div className="relative font-mono text-[12px] tracking-[0.32em] uppercase text-[#e8c987]">Partnership objective</div>
+          <p className="relative mt-2 text-[16.5px] leading-snug text-white/90 max-w-[620px]">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
+        </div>
+      </div>
+    </section>
+  </A4Wrapper>
+);
+
+
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
@@ -2264,219 +2479,21 @@ export default function SponsorsBrochure() {
               </BookPage>
 
               
-                            {/* ====================================================
-                   SPONSOR PLANS — OVERVIEW
-                  ==================================================== */}
+                                          {/* ═══ SPONSOR PLANS — DEEP SPACE ARTWORK EDITION ═══ */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="SP-01" label="SPONSOR PLANS · 2027" pageNum={14}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
-                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin 46s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.cyan}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
-                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.cyan}1e`, animation: 'slow-spin 38s linear infinite' }} />
-                      <PageTitle kicker="ANNUAL SPONSORSHIP & STRATEGIC PARTNERSHIP" title={<>THE SPONSOR <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.lime})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>PLANS</span></>} accent={NEON.cyan} />
-                      <p className="relative mt-3 text-[17px] leading-snug text-slate-700 max-w-[560px]">
-                        Four partnership opportunities designed to position Coreis within the Startup Factory Hub ecosystem — plugged directly into the community of startups, founders, investors, mentors, and industry leaders. The plans keep the Circle’s original names.
-                      </p>
-                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, ${NEON.cyan})` }} />
-                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
-                          <span key={n} className="flex items-center">
-                            <span className="relative flex h-3 w-3">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.cyan }} />
-                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
-                            </span>
-                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
-                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.cyan}55` }} />}
-                          </span>
-                        ))}
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.cyan}66, transparent)` }} />
-                      </div>
-                      <div className="relative mt-6 flex flex-col gap-3">
-                        {SPONSOR_PLANS.map((plan) => (
-                          <div key={plan.name} className="relative flex items-stretch gap-5 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${plan.accent}55`, boxShadow: `0 10px 34px -12px ${plan.accent}45` }}>
-                            <span aria-hidden className="w-1.5 shrink-0" style={{ background: `linear-gradient(180deg, ${plan.accent}, ${plan.accent}30)`, boxShadow: `0 0 16px ${plan.accent}66` }} />
-                            <div className="min-w-0 flex-1 py-4 pr-2">
-                              <div className="flex items-center gap-3">
-                                <span className="relative flex h-2 w-2">
-                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: plan.accent }} />
-                                  <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: plan.accent }} />
-                                </span>
-                                <span className="font-mono text-[13px] tracking-[0.3em] uppercase" style={{ color: plan.accent }}>{plan.name}</span>
-                                {plan.premium && <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full" style={{ background: `${plan.accent}14`, color: plan.accent, border: `1px solid ${plan.accent}55` }}>Premium partnership</span>}
-                              </div>
-                              <div className="font-futuristic text-[22px] font-black text-slate-900 leading-tight">{plan.packageName}</div>
-                              <div className="text-[14px] text-slate-600 leading-snug">{plan.essence}</div>
-                            </div>
-                            <div className="text-right shrink-0 py-4 pr-6 flex flex-col justify-center">
-                              <div className="font-futuristic text-[26px] font-black leading-none" style={{ backgroundImage: `linear-gradient(120deg, ${plan.accent}, #0b1220)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price.split(' / ')[0]}</div>
-                              <div className="mt-1 font-mono text-[11px] tracking-[0.2em] uppercase text-slate-500">per year</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="relative mt-auto pt-4">
-                        <span className="inline-block rounded-full border border-dashed px-4 py-2 font-mono text-[12px] uppercase tracking-[0.16em] text-slate-500" style={{ borderColor: `${NEON.cyan}66` }}>
-                          Entry-level community sponsorships can also be structured starting at $50 · benefits scaled to the contribution
-                        </span>
-                      </div>
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
+                <SponsorOverviewPage />
               </BookPage>
 
-              {/* ====================================================
-                   SPONSOR PLANS — EARTHLING + STAR
-                  ==================================================== */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.emerald} code="SP-02" label="COMMUNITY · EVENT" pageNum={15}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
-                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.emerald}30`, animation: 'slow-spin 46s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.emerald}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.emerald, boxShadow: `0 0 14px ${NEON.emerald}` }} />
-                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.emerald}1e`, animation: 'slow-spin 38s linear infinite' }} />
-                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 1–2" title={<>ENTER THE <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.emerald}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>CIRCLE</span></>} accent={NEON.emerald} />
-                      <div className="relative mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
-                        {SPONSOR_PLANS.slice(0, 2).map((plan) => (
-                          <div key={plan.name} className="relative rounded-3xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.96)', border: `1px solid ${plan.accent}55`, boxShadow: `0 18px 44px -16px ${plan.accent}50` }}>
-                            <div className="px-6 py-5" style={{ background: `linear-gradient(120deg, #0b1220 55%, ${plan.accent} 130%)` }}>
-                              <div className="flex items-center justify-between">
-                                <span className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#a7f3d0' }}>{plan.name}</span>
-                                <span className="relative flex h-2 w-2">
-                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} />
-                                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-                                </span>
-                              </div>
-                              <div className="mt-1.5 font-futuristic text-[20px] font-black text-white leading-tight">{plan.packageName}</div>
-                              <div className="mt-1 font-futuristic text-[25px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price}</div>
-                            </div>
-                            <div className="p-6 flex flex-col flex-1">
-                              <p className="text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
-                              <ul className="mt-4 space-y-2.5">
-                                {plan.includes.map((inc) => (
-                                  <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
-                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}14`, border: `1px solid ${plan.accent}40` }}>
-                                      <Check className="h-3 w-3" style={{ color: plan.accent }} />
-                                    </span>{inc}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald}66, ${NEON.emerald})` }} />
-                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
-                          <span key={n} className="flex items-center">
-                            <span className="relative flex h-3 w-3">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.emerald }} />
-                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.emerald, boxShadow: `0 0 12px ${NEON.emerald}` }} />
-                            </span>
-                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
-                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.emerald}55` }} />}
-                          </span>
-                        ))}
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.emerald}, ${NEON.emerald}66, transparent)` }} />
-                      </div>
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
+                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(0, 2)} code="02" page="15" kicker="Sponsor Plans · Packages 1–2" titleA="ENTER THE" titleB="CIRCLE" accent={NEON.emerald} defaultOpen="STAR" />
               </BookPage>
 
-              {/* ====================================================
-                   SPONSOR PLANS — NEBULA + GALAXY
-                  ==================================================== */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="SP-03" label="STRATEGIC · COHORT" pageNum={16}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
-                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.magenta}30`, animation: 'slow-spin 46s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.magenta}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.magenta, boxShadow: `0 0 14px ${NEON.magenta}` }} />
-                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.magenta}1e`, animation: 'slow-spin 38s linear infinite' }} />
-                      <PageTitle kicker="SPONSOR PLANS · PACKAGES 3–4" title={<>LEAD THE <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.magenta}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>ECOSYSTEM</span></>} accent={NEON.magenta} />
-                      <div className="relative mt-6 grid grid-cols-2 gap-5 flex-1 min-h-0">
-                        {SPONSOR_PLANS.slice(2, 4).map((plan) => (
-                          <div key={plan.name} className="relative rounded-3xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.96)', border: `1px solid ${plan.accent}55`, boxShadow: `0 18px 44px -16px ${plan.accent}50` }}>
-                            <div className="px-6 py-5" style={{ background: `linear-gradient(120deg, #0b1220 55%, ${plan.accent} 130%)` }}>
-                              <div className="flex items-center justify-between">
-                                <span className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#a7f3d0' }}>{plan.name}</span>
-                                {plan.premium
-                                  ? <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-white" style={{ border: '1px solid rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.12)' }}>Premium</span>
-                                  : <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: plan.accent }} /><span className="relative inline-flex h-2 w-2 rounded-full bg-white" /></span>}
-                              </div>
-                              <div className="mt-1.5 font-futuristic text-[20px] font-black text-white leading-tight">{plan.packageName}</div>
-                              <div className="mt-1 font-futuristic text-[25px] font-black leading-none" style={{ backgroundImage: `linear-gradient(90deg, #ffffff, ${plan.accent})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{plan.price}</div>
-                            </div>
-                            <div className="p-6 flex flex-col flex-1">
-                              <p className="text-[14px] text-slate-600 leading-snug">{plan.essence}</p>
-                              <ul className="mt-4 space-y-2.5">
-                                {plan.includes.map((inc) => (
-                                  <li key={inc} className="flex gap-2.5 text-[14.5px] leading-snug text-slate-700">
-                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: `${plan.accent}14`, border: `1px solid ${plan.accent}40` }}>
-                                      <Check className="h-3 w-3" style={{ color: plan.accent }} />
-                                    </span>{inc}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="relative mt-5 flex items-center gap-0" aria-hidden>
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta}66, ${NEON.magenta})` }} />
-                        {['FOUNDERS', 'INVESTORS', 'MENTORS', 'EVENTS', 'COHORTS'].map((n, i) => (
-                          <span key={n} className="flex items-center">
-                            <span className="relative flex h-3 w-3">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: NEON.magenta }} />
-                              <span className="relative inline-flex h-3 w-3 rounded-full" style={{ background: NEON.magenta, boxShadow: `0 0 12px ${NEON.magenta}` }} />
-                            </span>
-                            <span className="mx-2 font-mono text-[10px] tracking-[0.24em] text-slate-500">{n}</span>
-                            {i < 4 && <span className="h-[2px] w-6" style={{ background: `${NEON.magenta}55` }} />}
-                          </span>
-                        ))}
-                        <span className="h-[2px] flex-1" style={{ background: `linear-gradient(90deg, ${NEON.magenta}, ${NEON.magenta}66, transparent)` }} />
-                      </div>
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
+                <SponsorPackagesPage plans={SPONSOR_PLANS.slice(2, 4)} code="03" page="16" kicker="Sponsor Plans · Packages 3–4" titleA="LEAD THE" titleB="ECOSYSTEM" accent={NEON.magenta} defaultOpen="GALAXY" />
               </BookPage>
 
-              {/* ====================================================
-                   SPONSOR PLANS — STRATEGIC VALUE FOR COREIS
-                  ==================================================== */}
               <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.amber} code="SP-04" label="STRATEGIC VALUE" pageNum={17}>
-                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8 overflow-hidden">
-                      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-dashed" style={{ borderColor: `${NEON.amber}30`, animation: 'slow-spin 46s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border" style={{ borderColor: `${NEON.amber}22`, animation: 'slow-spin-reverse 32s linear infinite' }} />
-                      <div aria-hidden className="pointer-events-none absolute right-16 top-24 h-2 w-2 rounded-full animate-pulse" style={{ background: NEON.amber, boxShadow: `0 0 14px ${NEON.amber}` }} />
-                      <div aria-hidden className="pointer-events-none absolute -left-16 bottom-24 h-40 w-40 rounded-full border" style={{ borderColor: `${NEON.amber}1e`, animation: 'slow-spin 38s linear infinite' }} />
-                      <PageTitle kicker="WHY THIS PARTNERSHIP" title={<>STRATEGIC VALUE<br />FOR <span style={{ backgroundImage: `linear-gradient(90deg, ${NEON.amber}, ${NEON.cyan})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>COREIS</span></>} accent={NEON.amber} />
-                      <p className="relative mt-3 text-[17px] leading-snug text-slate-700 max-w-[520px]">Through this partnership, Coreis can:</p>
-                      <div className="relative mt-6 flex flex-col gap-3">
-                        <span aria-hidden className="absolute left-[27px] top-4 bottom-4 w-[2px]" style={{ background: `linear-gradient(180deg, ${NEON.amber}00, ${NEON.amber}88, ${NEON.cyan}88, ${NEON.cyan}00)` }} />
-                        {COREIS_VALUE.map((v, i) => (
-                          <div key={v} className="relative flex items-center gap-5">
-                            <span className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[20px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: `1px solid ${NEON.amber}88`, boxShadow: `0 0 22px ${NEON.amber}40` }}>{String(i + 1).padStart(2, '0')}</span>
-                            <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${NEON.amber}40`, boxShadow: `0 10px 30px -14px ${NEON.amber}45` }}>
-                              <p className="text-[16px] leading-snug text-slate-700">{v}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="relative mt-6 rounded-3xl px-7 py-6 overflow-hidden" style={{ background: 'linear-gradient(120deg, #0b1220 60%, #134e4a 130%)', boxShadow: `0 18px 44px -16px ${NEON.amber}55` }}>
-                        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.22)', animation: 'slow-spin 40s linear infinite' }} />
-                        <div className="relative font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: '#5eead4' }}>Partnership objective</div>
-                        <p className="relative mt-2 text-[16.5px] leading-snug text-white/90 max-w-[600px]">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
-                      </div>
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
+                <SponsorValuePage />
               </BookPage>
 
 {/* ====================================================
