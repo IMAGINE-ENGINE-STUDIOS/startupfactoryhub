@@ -107,6 +107,7 @@ const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const AcceleratorBrochure = lazy(() => import("./pages/AcceleratorBrochure"));
+const SponsorsBrochure = lazy(() => import("./pages/SponsorsBrochure"));
 const CorporateBrochure = lazy(() => import("./pages/corporate/CorporateBrochure"));
 const ApexBrochure = lazy(() => import("./pages/ApexBrochure"));
 const StudioBrochure = lazy(() => import("./pages/StudioBrochure"));
@@ -262,6 +263,7 @@ const App = () => (
                     <Route path="/BDVbrochure" element={<BDVBrochure />} />
                     <Route path="/bdvbrochure" element={<BDVBrochure />} />
                     <Route path="/forpartners" element={<AcceleratorBrochure />} />
+                    <Route path="/forsponsors" element={<SponsorsBrochure />} />
                     <Route path="/forcorporate" element={<CorporateBrochure />} />
                     <Route path="/corporate-package" element={<CorporateBrochure />} />
                     <Route path="/apex" element={<ApexBrochure />} />
