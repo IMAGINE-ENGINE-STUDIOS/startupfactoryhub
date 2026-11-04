@@ -367,8 +367,10 @@ export default function ApexBrochure() {
               <BookPage key={p.key} hard={i === 0 || i === PAGES.length - 1}>
                 <div className="relative w-full h-full overflow-hidden">
                   {size.w < 560 ? (
-                    /* Phone: lay the page out at its design size, then scale it down to fit so nothing overlaps or clips. */
-                    <div style={{ width: 560, height: 560 * (size.h / size.w), transform: `scale(${size.w / 560})`, transformOrigin: 'top left' }}>
+                    /* Phone: lay the page out at a phone design width, then scale it to fit so nothing overlaps or clips.
+                       440 (was 560) makes every fluid page's text ~27% larger on phones; ScaledA4 pages are
+                       unaffected — their total scale is pageWidth/842 either way. */
+                    <div style={{ width: 440, height: 440 * (size.h / size.w), transform: `scale(${size.w / 440})`, transformOrigin: 'top left' }}>
                       <div data-bp-root={i} className="relative w-full h-full">{p.node}</div>
                     </div>
                   ) : (
