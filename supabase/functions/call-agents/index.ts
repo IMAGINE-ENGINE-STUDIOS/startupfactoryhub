@@ -44,8 +44,8 @@ const DEFAULT_MODEL = "llama-3.3-70b-versatile";
  * Workers AI account (that route needs a Workers AI branch in
  * _shared/ai.ts — deliberately NOT wired in this phase). */
 const VOICE_FAST_PIN: { provider: "groq"; model: string } = { provider: "groq", model: "llama-3.3-70b-versatile" };
-const MARKUP = 10; // credits charged = real USD cost x MARKUP
-const RESERVE = 1; // credits held per run, settled against actual usage
+const CREDITS_PER_ACTION = 1; // Global Credit (founder, 2026-11-03): 1 Credit = $0.06, every agent run costs exactly 1 Credit
+const RESERVE = 1; // credits held per run (= the flat charge, settled at the same 1 Credit)
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const clampTokens = (n: unknown) => {
@@ -812,13 +812,13 @@ serve(async (req) => {
         return json({ error: e instanceof Error ? e.message : "The run failed." }, 502);
       }
 
-      // Settle: charge the real cost x markup, adjusting against the reserve
-      // exactly like imagine-ai (grant back the unused part, consume the
-      // extra, never take more than the reserve if the balance runs out).
+      // Settle: the flat Global Credit charge — exactly 1 Credit per run,
+      // matching the reserve, so no adjustment moves. (Raw USD cost stays in
+      // the per-step run rows for profit reporting.)
       const totalUsd = steps.reduce((sum, s) => sum + s.usd, 0);
       let charged = 0;
       if (!isAdmin) {
-        charged = Math.max(0.05, round2(totalUsd * MARKUP));
+        charged = CREDITS_PER_ACTION;
         const diff = round2(charged - reserve);
         if (diff < 0) {
           await grant(-diff, "call-agents:adjust");
@@ -1036,7 +1036,7 @@ serve(async (req) => {
               : costUsd(servedModel, promptTokens, completionTokens);
             let charged = 0;
             if (!isAdmin) {
-              charged = usage ? Math.max(0.05, round2(usd * MARKUP)) : reserve;
+              charged = CREDITS_PER_ACTION;
               const diff = round2(charged - reserve);
               if (diff < 0) {
                 await admin.rpc("ai_credits_grant", {
@@ -1398,11 +1398,11 @@ serve(async (req) => {
         ? (promptTokens / 1e6) * price.inPrice + (completionTokens / 1e6) * price.outPrice
         : costUsd(servedModel, promptTokens, completionTokens);
 
-      // Settle exactly like the run action: real cost x markup against the
-      // reserve, never taking more than the reserve if the balance runs out.
+      // Settle exactly like the run action: the flat Global Credit charge
+      // of 1 Credit, equal to the reserve, so no adjustment moves.
       let charged = 0;
       if (!isAdmin) {
-        charged = Math.max(0.05, round2(usd * MARKUP));
+        charged = CREDITS_PER_ACTION;
         const diff = round2(charged - RESERVE);
         if (diff < 0) {
           await grant(-diff, "call-agents:adjust");
