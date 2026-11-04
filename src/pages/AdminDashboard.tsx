@@ -39,6 +39,7 @@ import {
   GraduationCap,
   Megaphone,
   ShoppingBag,
+  ContactRound,
 } from 'lucide-react';
 import ProfileSalesManagement from '@/components/admin/ProfileSalesManagement';
 import SuperAdminCommand from '@/components/admin/SuperAdminCommand';
@@ -78,6 +79,7 @@ import InternsManagement from '@/components/admin/InternsManagement';
 import InvoiceBilling from '@/components/admin/InvoiceBilling';
 import EquityContractsManager from '@/components/admin/EquityContractsManager';
 import MembershipGrants from '@/components/admin/MembershipGrants';
+import CrmManagement from '@/components/admin/CrmManagement';
 import LiveGuestsManagement from '@/components/admin/LiveGuestsManagement';
 import LiveSessionLogs from '@/components/admin/LiveSessionLogs';
 import Invoice from '@/pages/Invoice';
@@ -159,6 +161,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Users className="h-4 w-4" />
               <span className="whitespace-nowrap">Users</span>
+            <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
+            <TabsTrigger value="crm" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+              <ContactRound className="h-4 w-4" />
+              <span className="whitespace-nowrap">CRM</span>
             <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full bg-[#2EF8A0] opacity-0 shadow-[0_0_6px_#2EF8A0]" /></TabsTrigger>
             <TabsTrigger value="network" className="w-full shrink-0 lg:shrink flex items-center gap-2.5 px-3 py-[9px] rounded-[4px] border border-transparent text-left text-[10px] tracking-[0.08em] uppercase text-white/55 transition-all hover:text-white hover:bg-white/[0.04] data-[state=active]:text-[#00E5FF] data-[state=active]:bg-[#00E5FF]/[0.08] data-[state=active]:border-[#00E5FF]/30" style={{ fontFamily: '"JetBrains Mono", monospace' }}>
               <Globe className="h-4 w-4" />
@@ -312,6 +318,7 @@ const AdminDashboard = () => {
               network is not working". The Follow mechanism itself was
               live-proven working on public profile pages. */}
           <TabsContent value="network"><MatchingSystem /></TabsContent>
+          <TabsContent value="crm"><CrmManagement /></TabsContent>
           <TabsContent value="investors"><InvestorsManagement /></TabsContent>
           <TabsContent value="startups"><StartupsManagement /></TabsContent>
           <TabsContent value="accelerators"><AcceleratorsManagement /></TabsContent>
