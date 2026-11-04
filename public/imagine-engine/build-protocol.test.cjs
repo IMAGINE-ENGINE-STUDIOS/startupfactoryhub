@@ -47,4 +47,24 @@ test('SSE EOF without completion is an error',async()=>{
 });
 test('existing JSON responses still work',async()=>{
   const r=await build.readResponse(new Response('{"text":"ok"}',{headers:{'content-type':'application/json'}})); assert.equal(r.j.text,'ok');
+});test('raw control characters inside JSON strings are repaired, content intact', () => {
+  const bad = '{"type":"file","path":"apps/demo/Notes.ts","content":"line one' + String.fromCharCode(10) + 'line two' + String.fromCharCode(9) + 'end"}';
+  assert.throws(() => JSON.parse(bad), /control character/i);
+  const seen = [], parser = build.parser(r => seen.push(r));
+  parser.feed(bad + '\n');
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].content, 'line one\nline two\tend');
+  assert.equal(parser.finish().errors.length, 0);
+});
+test('repair never touches structure: broken JSON still fails', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  assert.throws(() => parser.feed('{"type":"file", oops}\n'), /Invalid structured build record/);
+  assert.equal(seen.length, 0);
+});
+test('fenced actions block with raw newline in a string parses', () => {
+  const inner = '{"actions":[{"type":"addFile","name":"src/note.ts","content":"a' + String.fromCharCode(10) + 'b"}]}';
+  const seen = [], parser = build.parser(r => seen.push(r));
+  parser.feed('```actions\n' + inner + '\n```\n');
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].content, 'a\nb');
 });

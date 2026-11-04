@@ -25,8 +25,55 @@
     if (/^apps\/[^/]+\.(tsx|jsx|html)$/.test(path)) return { type: "addLiveApp", name: path.replace(/^apps\//, "").replace(/\.[^.]+$/, ""), kind: /\.html$/.test(path) ? "html" : "react", code: content };
     return { type: "addFile", name: path, content: content };
   }
+  // Models sometimes emit RAW control characters (a literal newline or tab)
+  // inside JSON string values instead of the escaped forms. Strict JSON.parse
+  // then kills the whole build with "Bad control character in string literal"
+  // even though the intended content is unambiguous. Repair pass: escape
+  // control characters ONLY while inside a string literal; structural text is
+  // never touched, and the decoded value is identical to the escaped form.
+  function repairJson(text) {
+    var out = "", inStr = false, esc = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i], code = text.charCodeAt(i);
+      if (esc) { out += ch; esc = false; continue; }
+      if (inStr && ch === "\\") { out += ch; esc = true; continue; }
+      if (ch === '"') { inStr = !inStr; out += ch; continue; }
+      if (inStr && code < 32) {
+        out += code === 10 ? "\\n" : code === 13 ? "\\r" : code === 9 ? "\\t" : "\\u" + ("000" + code.toString(16)).slice(-4);
+        continue;
+      }
+      out += ch;
+    }
+    return out;
+  }
+  function parseJson(text) {
+    try { return JSON.parse(text); }
+    catch (e) { return JSON.parse(repairJson(text)); }
+  }
   function parser(onRecord) {
-    var pending = "", fence = null, prose = [], records = [], errors = [];
+    var pending = "", fence = null, prose = [], records = [], errors = [], jsonBuf = null;
+    // A structured record whose string values contain RAW newlines arrives
+    // split across several lines. Buffer it and retry (with repair) as lines
+    // accumulate; brace depth over the repaired text tells a complete-but-
+    // unparseable record (a real error) from one that is still arriving.
+    function bufDepth(text) {
+      var t = repairJson(text), depth = 0, inStr = false, esc = false;
+      for (var i = 0; i < t.length; i++) {
+        var ch = t[i];
+        if (esc) { esc = false; continue; }
+        if (inStr && ch === "\\") { esc = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (ch === "{" || ch === "[") depth++;
+        else if (ch === "}" || ch === "]") depth--;
+      }
+      return depth;
+    }
+    function bufTry(flush) {
+      try { var text = jsonBuf; jsonBuf = null; json(text); return; } catch (e) { /* not whole yet */ }
+      if (jsonBuf === null) jsonBuf = text;
+      if (flush || bufDepth(jsonBuf) <= 0 || jsonBuf.length > 262144) { errors.push("Invalid structured build record"); jsonBuf = null; }
+    }
     function emit(r) {
       try {
         if (r.type === "summary") { if (typeof r.text !== "string") throw new Error("Invalid summary"); prose.push(r.text); }
@@ -37,7 +84,7 @@
       if (onRecord) onRecord(r);
     }
     function json(text) {
-      var value = JSON.parse(text), list = Array.isArray(value) ? value : value.actions || [value];
+      var value = parseJson(text), list = Array.isArray(value) ? value : value.actions || [value];
       list.forEach(emit);
     }
     function line(ln) {
@@ -47,7 +94,7 @@
           try {
             if (fence.path) emit({ type: "file", path: fence.path, content: fence.lines.join("\n") + "\n" });
             else if (/^(actions|json)$/.test(fence.kind)) json(fence.lines.join("\n"));
-            else if (fence.kind === "phases") emit(Object.assign({ type: "phases" }, JSON.parse(fence.lines.join("\n"))));
+            else if (fence.kind === "phases") emit(Object.assign({ type: "phases" }, parseJson(fence.lines.join("\n"))));
           } catch (e) { errors.push("Invalid " + fence.kind + " block: " + e.message); }
           fence = null;
         } else {
@@ -63,14 +110,15 @@
         var path = /(?:file|path|name|title|filename)\s*=\s*["']?([^\s"']+)/.exec(open[2]) || /[:\s]+["']?((?:apps|components|lib|src|styles|hooks|pages|scenes|custom-scripts)\/[^\s"']+)/.exec(open[2]);
         fence = { kind: open[1], path: path && safePath(path[1]) ? path[1] : null, lines: [] }; return;
       }
+      if (jsonBuf !== null) { jsonBuf += "\n" + ln; bufTry(false); return; }
       if (trimmed[0] === "{" || trimmed[0] === "[") {
-        try { json(trimmed); } catch (e) { errors.push("Invalid structured build record"); } return;
+        try { json(trimmed); } catch (e) { jsonBuf = trimmed; bufTry(false); } return;
       }
       if (trimmed) prose.push(ln);
     }
     return {
       feed: function (chunk) { pending += chunk; var i; while ((i = pending.indexOf("\n")) >= 0) { line(pending.slice(0, i).replace(/\r$/, "")); pending = pending.slice(i + 1); } if (errors.length) throw new Error(errors.join("; ")); },
-      finish: function () { if (pending) { line(pending); pending = ""; } if (fence) errors.push("Incomplete source block; no partial file was saved"); return this.result(); },
+      finish: function () { if (pending) { line(pending); pending = ""; } if (jsonBuf !== null) bufTry(true); if (fence) errors.push("Incomplete source block; no partial file was saved"); return this.result(); },
       result: function () { return { records: records.slice(), list: records.filter(function (r) { return ["summary", "phases", "done"].indexOf(r.type) < 0; }), clean: prose.join("\n").trim(), errors: errors.slice() }; }
     };
   }
@@ -166,5 +214,5 @@
       });
     }
   }
-  host.__IEBuild = { prepare: prepare, validateSource: validateSource, safePath: safePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse };
+  host.__IEBuild = { prepare: prepare, validateSource: validateSource, safePath: safePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse, repairJson: repairJson };
 })(typeof window === "undefined" ? globalThis : window);
