@@ -83,3 +83,13 @@ test('fenced bare filename becomes a live app', () => {
   parser.feed('```html file=landing.html\n<h1>Shop</h1>\n```\n');
   assert.equal(seen[0].type, 'addLiveApp'); assert.equal(seen[0].name, 'landing');
 });
+test('foreign roots and spaces normalize; error names the path', () => {
+  assert.equal(build.normalizePath('app/page.tsx'), 'apps/page.tsx');
+  assert.equal(build.normalizePath('public/index.html'), 'apps/index.html');
+  assert.equal(build.normalizePath('coffee shop.html'), 'apps/coffee-shop.html');
+  const seen = [], parser = build.parser(r => seen.push(r));
+  parser.feed('{"type":"addFile","name":"weird//x.ts","content":"x"}\n');
+  const fin = parser.finish();
+  assert.equal(fin.list.length, 0);
+  assert.match(fin.errors.join(' '), /Unsafe source path: weird/);
+});

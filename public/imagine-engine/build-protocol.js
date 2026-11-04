@@ -11,26 +11,30 @@
   // only true traversal (.., absolute drives, empty segments) stays rejected.
   function normalizePath(path) {
     if (typeof path !== "string") return null;
-    var p = path.trim().replace(/\\/g, "/").replace(/^\/+/, "").replace(/^(\.\/)+/, "");
+    var p = path.trim().replace(/\\/g, "/").replace(/^\/+/, "").replace(/^(\.\/)+/, "").replace(/\s+/g, "-");
     if (!p || p.indexOf("..") >= 0 || /^[a-zA-Z]:/.test(p)) return null;
     if (p.indexOf("/") < 0) {
-      if (/\.(tsx|jsx|html)$/.test(p)) p = "apps/" + p;
-      else if (/\.css$/.test(p)) p = "styles/" + p;
-      else if (/\.(ts|js|json)$/.test(p)) p = "src/" + p;
+      if (/\.(tsx|jsx|html)$/i.test(p)) p = "apps/" + p;
+      else if (/\.css$/i.test(p)) p = "styles/" + p;
+      else if (/\.(ts|js|json)$/i.test(p)) p = "src/" + p;
     }
+    // Foreign conventions models reach for: Next.js app/ routes and public/
+    // web roots both mean the app root here.
+    if (/^app\//.test(p)) p = "apps/" + p.slice(4);
+    else if (/^public\//.test(p)) { var rest = p.slice(7); p = /\.(tsx|jsx|html)$/i.test(rest) && rest.indexOf("/") < 0 ? "apps/" + rest : "src/" + rest; }
     return safePath(p) ? p : null;
   }
   function action(record) {
     if (!record || typeof record !== "object") throw new Error("Invalid build record");
     if (record.type === "file") {
       var np = normalizePath(record.path);
-      if (!np || typeof record.content !== "string" || !record.content.trim()) throw new Error("Invalid source file");
+      if (!np || typeof record.content !== "string" || !record.content.trim()) throw new Error("Invalid source file: " + String(record.path || "?").slice(0, 120));
       return sourceAction(np, record.content);
     }
     if (record.type === "action") return action(record.action);
     if (["addFile", "updateFile", "patchFile"].indexOf(record.type) >= 0) {
       var nn = normalizePath(record.name);
-      if (!nn) throw new Error("Unsafe source path");
+      if (!nn) throw new Error("Unsafe source path: " + String(record.name || "?").slice(0, 120));
       record = Object.assign({}, record, { name: nn });
       if (record.type === "patchFile" && (!Array.isArray(record.edits) || !record.edits.length)) throw new Error("Empty patch");
       if (record.type !== "patchFile" && typeof (record.content || record.code) !== "string") throw new Error("Missing source");
@@ -218,7 +222,7 @@
     return compilerPromise;
   }
   function validateSource(path, content) {
-    if (!safePath(path)) throw new Error("Unsafe file path");
+    if (!safePath(path)) { var nz = normalizePath(path); if (!nz) throw new Error("Unsafe file path: " + String(path || "?").slice(0, 120)); }
     if (/\.json$/.test(path)) JSON.parse(content);
     if (/\.(tsx|ts|jsx|js)$/.test(path)) {
       if (!host.Babel) throw new Error("Source validator is not ready");
