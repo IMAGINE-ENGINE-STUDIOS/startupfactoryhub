@@ -258,16 +258,20 @@ serve(async (req) => {
     if (body.context && (!Array.isArray(body.context.files || []) || (body.context.files || []).length > 500 || !(body.context.files || []).every((f: any) => f && typeof f.name === "string" && f.name.length < 240 && (f.content == null || typeof f.content === "string")))) return json({ error: "Invalid project files" }, 400);
     const tab = String(body.tab || "canvas").slice(0, 20);
 
-    // Smart Model Router: fast (Groq 8B) for chat/tweaks, standard (Groq 70B -> Gemini) for builds,
-    // heavy (OpenAI / Gemini Pro) only for paid plans. Global Credit (founder, 2026-11-03):
+    // Smart Model Router: fast (Groq 8B) for chat/tweaks, HEAVY (OpenAI GPT-4.1 ->
+    // Gemini 2.5 Pro) for EVERY build (founder law 2026-11-04: builds were running
+    // on the standard gpt-oss chain - weaker code, more broken output, more
+    // continuation passes; Lovable-class quality needs the frontier models on
+    // every build). Global Credit (founder, 2026-11-03):
     // 1 Credit = $0.06 and every AI action costs exactly 1 Credit on every platform.
     // Raw USD cost is still recorded in the ledger tag and the monthly usage file for profit reporting.
     const light = (body.model === "chat" && body.mode !== "chat") || !!body.context?.plain;
     const lastText = String(messages[messages.length - 1]?.content || "");
-    const wantsHeavy = body.mode !== "chat" && (body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText));
+    const heavyKw = /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText);
+    const wantsHeavy = body.mode !== "chat" || body.model === "heavy" || heavyKw;
     const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
     const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
-    const tier: Tier = /llama/i.test(String(settings.model || "")) ? "llama" : light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
+    const tier: Tier = /llama/i.test(String(settings.model || "")) ? "llama" : light ? "fast" : wantsHeavy ? "heavy" : "standard";
     const GLOBAL_CREDIT_USD = 0.06;
     const CREDITS_PER_ACTION = 1;
     const RESERVE: Record<Tier, number> = { fast: 1, standard: 1, vision: 1, heavy: 1, free: 1, llama: 1 };
@@ -348,7 +352,7 @@ No invented production records: use empty states unless the user supplied data. 
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
-    return { text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: wantsHeavy && !paid ? "Heavy models are available on paid plans." : undefined };
+    return { text, usage: { input: inTok, output: outTok }, credits: { charged: price, balance }, model: `${routed.provider}/${routed.model}`, tier, upgrade: undefined };
     };
     if (!body.stream) return json(await run(() => {}));
     const encoder = new TextEncoder();
