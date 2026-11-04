@@ -110,3 +110,18 @@ test('valid escapes pass through untouched; incomplete unicode escape keeps its 
   assert.equal(parser.finish().errors.length, 0);
   assert.equal(seen[0].content, 'AB\nX' + bs + 'u12Y');
 });
+test('unescaped quotes inside JSON string content are repaired', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  const bad = '{"type":"file","path":"apps/Q.ts","content":"he said "hi" loudly"}';
+  assert.throws(() => JSON.parse(bad));
+  parser.feed('```json\n' + bad + '\n```\n');
+  assert.equal(parser.finish().errors.length, 0);
+  assert.equal(seen[0].content, 'he said "hi" loudly');
+});
+test('quote repair never eats real string ends (keys, values, arrays)', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  const ok = '{"type":"file","path":"apps/R.ts","content":"plain"}';
+  parser.feed('```json\n' + ok + '\n```\n');
+  assert.equal(parser.finish().errors.length, 0);
+  assert.equal(seen[0].content, 'plain');
+});

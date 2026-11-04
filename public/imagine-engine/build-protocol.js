@@ -68,7 +68,19 @@
         // character in JSON") even though the intent is unambiguous.
         out += "\\\\"; continue;
       }
-      if (ch === '"') { inStr = !inStr; out += ch; continue; }
+      if (ch === '"') {
+        if (inStr) {
+          // A quote inside a string is the string's end ONLY when the next
+          // meaningful character is structural (, } ] :) or the input ends.
+          // Otherwise it is an unescaped quote inside the content (the model
+          // quoting text inside file contents) - escape it and stay inside.
+          var j = i + 1; while (j < text.length && (text[j] === " " || text[j] === "\t" || text[j] === "\n" || text[j] === "\r")) j++;
+          var nx = j < text.length ? text[j] : "";
+          if (nx === "" || nx === "," || nx === "}" || nx === "]" || nx === ":") { inStr = false; out += ch; continue; }
+          out += "\\\""; continue;
+        }
+        inStr = true; out += ch; continue;
+      }
       if (inStr && code < 32) {
         out += code === 10 ? "\\n" : code === 13 ? "\\r" : code === 9 ? "\\t" : "\\u" + ("000" + code.toString(16)).slice(-4);
         continue;
