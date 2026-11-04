@@ -1051,7 +1051,7 @@ const SponsorOverviewPage = () => (
               <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>PLANS</span>
             </h2>
             <p className="mt-4 max-w-[540px] text-[17.5px] leading-snug text-white/70">
-              Four partnership opportunities that plug your company directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
+              Partnership opportunities that plug your company directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
             </p>
           </div>
           <Armillary accent={NEON.cyan} />
@@ -1078,6 +1078,25 @@ const SponsorOverviewPage = () => (
               </div>
             </motion.div>
           ))}
+          {/* Single-event option — shown on this overview page only (founder, 2026-11-03). */}
+          <motion.div whileHover={{ scale: 1.012 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            className="relative flex items-center gap-5 rounded-2xl px-6 py-4 overflow-hidden flex-1"
+            style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid #e8c98766', backdropFilter: 'blur(6px)', boxShadow: '0 0 34px -8px #e8c98755, inset 0 0 24px rgba(255,255,255,0.02)' }}>
+            <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: 'linear-gradient(180deg, #e8c987, transparent)', boxShadow: '0 0 18px #e8c987' }} />
+            <span aria-hidden className="font-futuristic font-black text-[44px] leading-none text-white/[0.13] w-[74px] shrink-0">05</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[12.5px] tracking-[0.32em] uppercase" style={{ color: '#e8c987' }}>Event Sponsor</span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 rounded-full text-[#e8c987]" style={{ border: '1px solid rgba(232,201,135,0.55)', background: 'rgba(232,201,135,0.10)' }}>Per event</span>
+              </div>
+              <div className="font-futuristic text-[26px] font-black text-white leading-tight" style={{ textShadow: '0 0 24px rgba(255,255,255,0.25)' }}>Sponsor Only One Event</div>
+              <div className="text-[15px] text-white/55 leading-snug">Sponsor a single Startup Factory Hub event — one event, one sponsorship.</div>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="font-futuristic text-[40px] font-black leading-none" style={{ backgroundImage: 'linear-gradient(120deg, #ffffff, #e8c987)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 16px #e8c98755)' }}>$1,000</div>
+              <div className="mt-1.5 font-mono text-[10.5px] tracking-[0.22em] uppercase text-white/45">Per event</div>
+            </div>
+          </motion.div>
         </div>
         <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
           <span className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">Entry-level community sponsorships from $50 · benefits scaled to the contribution</span>
