@@ -6,6 +6,7 @@ export const PROVIDERS: Record<string, { secret: string; url: string; kind: "ope
   groq: { secret: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions", kind: "openai" },
   gemini: { secret: "GEMINI_API_KEY", url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", kind: "openai" },
   openai: { secret: "OPENAI_API_KEY", url: "https://api.openai.com/v1/chat/completions", kind: "openai" },
+  brain: { secret: "CLOUDFLARE_API_TOKEN", url: "https://genius-brain.nameless-tree-0e27.workers.dev/v1/chat/completions", kind: "openai" },
   xai: { secret: "XAI_API_KEY", url: "https://api.x.ai/v1/chat/completions", kind: "openai" },
   anthropic: { secret: "ANTHROPIC_API_KEY", url: "https://api.anthropic.com/v1/messages", kind: "anthropic" },
 };
@@ -55,7 +56,7 @@ export async function configuredChat(tier: Tier, body: Record<string, unknown>, 
   if (error) throw new Error(error);
   const overrides = { groq: keys.groq, gemini: keys.gemini, openai: keys.openai };
   if (["router", "lovable"].includes(settings.provider)) return routeChat(tier, body, overrides);
-  if (["groq", "gemini", "openai"].includes(settings.provider)) {
+  if (["groq", "gemini", "openai", "brain"].includes(settings.provider)) {
     return routeChat(tier, body, overrides, { provider: settings.provider as Provider, model: settings.model });
   }
   const builtin = PROVIDERS[settings.provider];

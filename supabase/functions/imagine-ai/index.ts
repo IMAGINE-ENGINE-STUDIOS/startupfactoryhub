@@ -311,7 +311,18 @@ No invented production records: use empty states unless the user supplied data. 
     const MAX_PARTS = body.mode === "chat" || light ? 4 : 8;
     for (let part = 0; part < MAX_PARTS; part++) {
       emit({ type: "status", message: part ? "Continuing the remaining files..." : "Working on your project..." });
-      routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
+      // THE ASSEMBLY (founder law, 2026-11-04): a build is a mix of models,
+      // never one model alone. Pass 1 is led by Llama 3.3 70B on the
+      // founder's own Genius Brain (pinned first; on any failure the pass
+      // falls through to the heavy chain in the same request). The frontier
+      // models (heavy chain) then continue and complete the build pass by
+      // pass. A provider the user pinned themselves always wins - the
+      // assembly only drives the default auto mode.
+      const assembly = body.mode !== "chat" && ["router", "lovable"].includes(settings.provider);
+      const passSettings = assembly && part === 0
+        ? { provider: "brain", model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", custom_providers: settings.custom_providers }
+        : settings;
+      routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, passSettings, storedKeys);
       if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "Genius is at capacity right now; please try again shortly" : "Something went wrong while building; please try again");
       const completion = await readCompletion(routed.resp, (delta) => { text += delta; emit({ type: "delta", text: delta }); });
       inTok += completion.input; outTok += completion.output;

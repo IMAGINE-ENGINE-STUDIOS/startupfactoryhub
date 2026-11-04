@@ -4,21 +4,31 @@
 // OpenAI-style chat-completions fetch so existing callers keep their request/response shapes.
 
 export type Tier = "fast" | "standard" | "vision" | "heavy" | "free" | "llama";
-export type Provider = "groq" | "gemini" | "openai" | "ollama";
+export type Provider = "groq" | "gemini" | "openai" | "ollama" | "brain";
 
 const URLS: Record<Provider, string> = {
   groq: "https://api.groq.com/openai/v1/chat/completions",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   ollama: "", // resolved from OLLAMA_BASE_URL at call time
+  brain: "", // resolved from CLOUDFLARE_BRAIN_URL at call time (the founder's own Genius Brain worker)
 };
-const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY", ollama: "OLLAMA_API_KEY" };
+const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY", ollama: "OLLAMA_API_KEY", brain: "CLOUDFLARE_API_TOKEN" };
 
 // Self-hosted Ollama (OpenAI-compatible /v1/chat/completions), e.g. the user's own
 // GPU box behind a tunnel. Empty = provider skipped silently.
 const ollamaUrl = () => {
   const base = (Deno.env.get("OLLAMA_BASE_URL") || "").replace(/\/+$/, "");
   return base ? `${base}/chat/completions` : "";
+};
+
+// The founder's own Genius Brain: a Cloudflare Worker serving Llama 3.3 70B
+// (Workers AI) behind an OpenAI-compatible /v1/chat/completions endpoint,
+// authenticated with the BRAIN_KEY (stored as the CLOUDFLARE_API_TOKEN secret).
+const brainUrl = () => {
+  const base = (Deno.env.get("CLOUDFLARE_BRAIN_URL") || "").replace(/\/+$/, "");
+  if (!base) return "";
+  return base.endsWith("/chat/completions") ? base : `${base}/v1/chat/completions`;
 };
 
 export const CHAINS: Record<Tier, [Provider, string][]> = {
@@ -28,8 +38,9 @@ export const CHAINS: Record<Tier, [Provider, string][]> = {
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"], ["gemini", "gemini-2.5-flash"]],
   // Groq free-plan models only (no paid OpenAI hop).
   free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
-  // Llama: self-hosted Ollama first (free when OLLAMA_BASE_URL is set), then Groq-hosted.
-  llama: [["ollama", "llama3.1:8b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "llama-3.1-8b-instant"]],
+  // Llama: the founder's own Genius Brain (Workers AI Llama 3.3 70B) first,
+  // then self-hosted Ollama, then Groq-hosted Llama.
+  llama: [["brain", "@cf/meta/llama-3.3-70b-instruct-fp8-fast"], ["ollama", "llama3.1:8b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "llama-3.1-8b-instant"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
@@ -46,6 +57,7 @@ export const PRICES: Record<string, [number, number]> = {
   "gpt-4.1": [2, 8],
   "llama-3.1-8b-instant": [0.05, 0.08],
   "llama3.1:8b": [0, 0], // self-hosted: no provider cost
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast": [0, 0], // founder's own Workers AI brain; metered by the worker itself
 };
 export const costUsd = (model: string, inTok: number, outTok: number) => {
   const p = PRICES[model] || [2, 10];
@@ -93,7 +105,7 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
     ? [[selected.provider, selected.model], ...tierChain.filter(([p, m]) => !(p === selected.provider && m === selected.model))]
     : tierChain;
   for (const [prov, model] of chain) {
-    const url = prov === "ollama" ? ollamaUrl() : URLS[prov];
+    const url = prov === "ollama" ? ollamaUrl() : prov === "brain" ? brainUrl() : URLS[prov];
     const key = keyOf(prov) || String(keyOverrides[prov] || "");
     if (!url || (!key && prov !== "ollama")) { console.warn(`[ai] skip ${prov}/${model}: no url/key`); continue; }
     const payload: Record<string, unknown> = { ...clean, model };
