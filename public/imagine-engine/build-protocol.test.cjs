@@ -88,8 +88,6 @@ test('foreign roots and spaces normalize; error names the path', () => {
   assert.equal(build.normalizePath('public/index.html'), 'apps/index.html');
   assert.equal(build.normalizePath('coffee shop.html'), 'apps/coffee-shop.html');
   const seen = [], parser = build.parser(r => seen.push(r));
-  parser.feed('{"type":"addFile","name":"weird//x.ts","content":"x"}\n');
-  const fin = parser.finish();
-  assert.equal(fin.list.length, 0);
-  assert.match(fin.errors.join(' '), /Unsafe source path: weird/);
+  assert.throws(() => parser.feed('{"type":"addFile","name":"weird//x.ts","content":"x"}\n'), /Unsafe source path: weird/);
+  assert.equal(parser.finish().list.length, 0);
 });
