@@ -176,7 +176,9 @@
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
         else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEBuild.validateSource(a.name, nc); window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
         else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
-          var cur = window.__IEFiles.get(a.name); if (cur == null) { done.push("Missing file " + a.name); return; }
+          var cur = window.__IEFiles.get(a.name);
+          if (cur == null) { var rf = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (f) { return f.name === a.name; })[0]; if (rf && typeof rf.content === "string") cur = rf.content; }
+          if (cur == null) { done.push("Missing file " + a.name); return; }
           var next = window.__IEBuild.patch(cur, a.edits);
           window.__IEBuild.validateSource(a.name, next);
           window.__IEFiles.put(a.name, next); try { localStorage.setItem("ie-live:" + a.name, next); } catch (e) {}
@@ -687,6 +689,22 @@
         var remaining = finalParsed.list.filter(function (a) { return !appliedKeys[JSON.stringify(a)]; });
         var out = remaining.length ? runActions(remaining.map(function (a) { return JSON.stringify(a); }).join("\n")) : { done: [], text: "" };
         out.done = applied.concat(out.done); out.text = finalParsed.clean;
+        // Renderable-output gate: a build that produced no app, no file, no
+        // section and no widget has NOT built anything, whatever the reply
+        // text claims. Retry once with corrective instructions; after that,
+        // report honestly instead of a false success.
+        var renderable = out.done.some(function (d) { return /^(Live app|File |Updated |Edited |Built section|Added |Template |Table )/.test(d); });
+        if (!renderable && !doSend._retried) {
+          doSend._retried = true;
+          messages.push({ role: "assistant", content: res.j.text || "" });
+          messages.push({ role: "user", content: "That attempt produced nothing visible — no page sections, no files, no app. Build it now for real: for a landing page or site, emit addCustomSection actions carrying the complete content as children (headings, paragraphs, buttons, cards with real items and prices), OR write a complete React live app as a file record for apps/<Name>.tsx (export default function App). Never patch a file that does not exist yet — create it with its full content. Never create an empty page." });
+          setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
+        }
+        if (!renderable && doSend._retried) {
+          messages.push({ role: "assistant", error: true, content: "Genius could not build that this time — nothing was added to your project. Please try again, or describe it a little differently." });
+          doSend._retried = false;
+          return;
+        }
         if (!finalParsed.list.length && !doSend._retried) throw new Error("The AI returned no applicable changes; no files were changed");
         var ph = parsePhases(res.j.text || "");
         messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```phases[\s\S]*?```/g, "").trim(), done: out.done, phases: ph });
