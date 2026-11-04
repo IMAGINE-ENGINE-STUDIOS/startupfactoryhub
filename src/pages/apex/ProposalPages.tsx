@@ -1,7 +1,9 @@
 /**
- * APEX proposal — the short proposal that opens the brochure (pages 2–4),
+ * APEX proposal — the short proposal that opens the brochure,
  * followed by a divider introducing the supporting material.
- * Aligned to the seven ways APEX Accelerators help businesses (apexaccelerators.us).
+ * Proposal text set by the founder 2026-11-03: Objective first, then the
+ * APEX Accelerator — AI-Powered Innovation Ecosystem proposal with its
+ * seven capabilities, then pricing, then why it matters.
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
@@ -24,7 +26,23 @@ const Shell = ({ no, label, children }: { no: string; label: string; children: R
   </section>
 );
 
-/** Page 1 — why APEX should care. */
+/** Page 1 — the objective of the proposal (founder text, 2026-11-03). */
+export const ProposalObjectivePage = () => (
+  <Shell no="01" label="OBJECTIVE">
+    <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.06 }}>Objective</h2>
+    <p className="mt-5" style={{ fontSize: 16.5, lineHeight: 1.65, color: BODY }}>
+      The objective of this proposal is to introduce Startup Factory Hub as a centralized, AI-powered innovation ecosystem designed to maximize the impact and effectiveness of APEX Accelerator&rsquo;s programs.
+    </p>
+    <p className="mt-4" style={{ fontSize: 16.5, lineHeight: 1.65, color: BODY }}>
+      Our platform integrates technology, resources, expertise, and business opportunities into a single environment, empowering APEX counselors to deliver personalized support, streamline operations, and help clients navigate the journey from business readiness to government contracting and commercial growth.
+    </p>
+    <p className="mt-4" style={{ fontSize: 16.5, lineHeight: 1.65, color: BODY }}>
+      By leveraging artificial intelligence to connect businesses with relevant funding, procurement opportunities, strategic partners, and specialized resources, Startup Factory Hub will strengthen APEX&rsquo;s ability to support entrepreneurs, accelerate innovation, and generate measurable economic impact.
+    </p>
+  </Shell>
+);
+
+/** Page 4 — why APEX should care. */
 export const ProposalWhyPage = () => (
   <Shell no="04" label="WHY THIS MATTERS TO APEX">
     <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.06 }}>More businesses ready to compete, with the same counselors</h2>
@@ -49,27 +67,28 @@ export const ProposalWhyPage = () => (
 );
 
 const SEVEN = [
-  ['Suitability Assessment', 'An online readiness profile for each client, so counselors start every first meeting already knowing the gaps.'],
-  ['Networking', 'Matched introductions to prime contractors, mentors, advisors and investors across our network, plus events.'],
-  ['Registration Assistance', 'A guided checklist in each client’s journey, with status visible to their counselor.'],
-  ['Proposals', 'AI writing help and a shared document workspace for preparing solicitation packages with counselor review.'],
-  ['Market Research', 'Strategic business intelligence tools that help clients see which agencies and markets fit their product or service.'],
-  ['Centralized Resources & Strategic Business Intelligence', 'One place for resources, advisors and business intelligence to help counselors and clients make informed decisions.'],
-  ['Bid Opportunity Identification', 'Opportunity updates matched to each client’s profile, set up with APEX during the setup phase.'],
+  ['AI-Powered Business Readiness', 'Create a comprehensive digital profile for every client, identifying business capabilities, certifications, readiness gaps, and growth opportunities. AI-powered assessments help counselors deliver personalized guidance and track client progress.'],
+  ['AI-Powered Opportunity & Grant Matching', 'Automatically match clients with relevant government grants, funding programs, procurement opportunities, and other resources based on their business profile, capabilities, eligibility, and strategic objectives.'],
+  ['AI-Powered Government Contracting Readiness', 'Help clients assess their readiness to work with government agencies by identifying registration requirements, certifications, compliance gaps, and recommended next steps. Give counselors visibility into each client’s progress and readiness.'],
+  ['AI-Powered Grant & Funding Intelligence', 'Identify relevant government grants, funding programs, and non-dilutive funding opportunities based on each client’s technology, business stage, eligibility, and development objectives. Help counselors connect clients with funding resources that support innovation and growth.'],
+  ['Market Intelligence & Strategic Research', 'Provide AI-powered market research to identify target agencies, procurement trends, competitors, potential partners, and market opportunities aligned with each client’s products and services.'],
+  ['Centralized Innovation Resources & Expert Network', 'Connect clients and counselors to a centralized ecosystem of mentors, advisors, technical experts, industry partners, and educational resources to support business development, commercialization, and growth.'],
+  ['Client Progress & Impact Intelligence', 'Provide APEX counselors and program administrators with a centralized dashboard to monitor client progress, identify support needs, track milestones, and measure program outcomes. Turn client activity into actionable insights that help APEX improve service delivery and demonstrate its impact.'],
 ];
 
-/** Page 2 — the seven APEX services, and how the platform strengthens each. */
+/** Page 2 — the proposal: title, promise, and its seven capabilities (founder text, 2026-11-03). */
 export const ProposalSevenPage = () => (
-  <Shell no="02" label="ALIGNED TO THE SEVEN APEX SERVICES">
-    <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>An innovation platform built around what APEX already does</h2>
-    <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>We don’t replace counselors. We give them and their clients one place to carry each service forward.</p>
-    <div className="mt-4 flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
+  <Shell no="02" label="THE PROPOSAL">
+    <h2 style={{ fontFamily: SERIF, fontSize: 31, fontWeight: 800, lineHeight: 1.08 }}>APEX Accelerator — AI-Powered Innovation Ecosystem</h2>
+    <p className="mt-2" style={{ fontSize: 15.5, lineHeight: 1.45, color: P, fontWeight: 700 }}>One centralized platform. Smarter support. Better outcomes.</p>
+    <p className="mt-2" style={{ fontSize: 13.5, lineHeight: 1.5, color: BODY }}>We don’t replace APEX counselors. We empower them and their clients with an AI-powered platform that centralizes resources, streamlines workflows, and connects businesses with the right opportunities, expertise, and support to accelerate their growth.</p>
+    <div className="mt-3 flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
       {SEVEN.map(([t, d], i) => (
-        <div key={t} className="flex gap-4 py-2" style={{ borderBottom: '1px solid rgba(15,23,42,0.08)' }}>
-          <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 800, color: P, width: 34, lineHeight: 1 }}>{i + 1}</div>
+        <div key={t} className="flex gap-4 py-1.5" style={{ borderBottom: '1px solid rgba(15,23,42,0.08)' }}>
+          <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 800, color: P, width: 32, lineHeight: 1 }}>{i + 1}</div>
           <div className="flex-1">
-            <div style={{ fontSize: 15, fontWeight: 800 }}>{t}</div>
-            <div className="mt-0.5" style={{ fontSize: 13.5, lineHeight: 1.45, color: BODY }}>{d}</div>
+            <div style={{ fontSize: 14.5, fontWeight: 800 }}>{t}</div>
+            <div className="mt-0.5" style={{ fontSize: 12.8, lineHeight: 1.42, color: BODY }}>{d}</div>
           </div>
         </div>
       ))}
