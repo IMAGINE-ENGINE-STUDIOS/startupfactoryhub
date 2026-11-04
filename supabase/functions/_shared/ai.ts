@@ -1,53 +1,24 @@
 // Credits: Imagine Engine Studios Corp.
-// Direct-provider AI client. Uses OPENAI_API_KEY, GROQ_API_KEY, GEMINI_API_KEY and
-// CLOUDFLARE_API_TOKEN (+ CLOUDFLARE_ACCOUNT_ID) from Supabase secrets. No Lovable
-// gateway. `aiFetch` is a drop-in replacement for the old
+// Direct-provider AI client. Uses OPENAI_API_KEY, GROQ_API_KEY and GEMINI_API_KEY from
+// Supabase secrets. No Lovable gateway. `aiFetch` is a drop-in replacement for the old
 // OpenAI-style chat-completions fetch so existing callers keep their request/response shapes.
 
 export type Tier = "fast" | "standard" | "vision" | "heavy" | "free" | "llama";
-export type Provider = "groq" | "gemini" | "openai" | "ollama" | "cloudflare";
+export type Provider = "groq" | "gemini" | "openai" | "ollama";
 
 const URLS: Record<Provider, string> = {
   groq: "https://api.groq.com/openai/v1/chat/completions",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   ollama: "", // resolved from OLLAMA_BASE_URL at call time
-  cloudflare: "", // resolved from CLOUDFLARE_ACCOUNT_ID at call time
 };
-const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY", ollama: "OLLAMA_API_KEY", cloudflare: "CLOUDFLARE_API_TOKEN" };
+const SECRETS: Record<Provider, string> = { groq: "GROQ_API_KEY", gemini: "GEMINI_API_KEY", openai: "OPENAI_API_KEY", ollama: "OLLAMA_API_KEY" };
 
 // Self-hosted Ollama (OpenAI-compatible /v1/chat/completions), e.g. the user's own
 // GPU box behind a tunnel. Empty = provider skipped silently.
 const ollamaUrl = () => {
   const base = (Deno.env.get("OLLAMA_BASE_URL") || "").replace(/\/+$/, "");
   return base ? `${base}/chat/completions` : "";
-};
-
-// Workers AI (the founder's own Cloudflare account). Genius Consolidation
-// Phase 1 (founder pick 2026-10-30): Llama 3.3 70B fp8-fast is the launch
-// brain — it won the Phase 0 bake-off (tool calling 95.4%, [[ACT]] 100%,
-// chat median 4.1s vs gpt-oss-120b's 10.6s).
-// Two ways in, first hit wins:
-//  1. CLOUDFLARE_BRAIN_URL — the genius-brain Worker (Workers AI binding, so
-//     NO Cloudflare API token exists in Supabase at all; the CLOUDFLARE_API_TOKEN
-//     secret then holds the Worker's own shared key). Live since 2026-10-30.
-//  2. The direct Workers AI OpenAI-compatible endpoint, when
-//     CLOUDFLARE_ACCOUNT_ID + a real CLOUDFLARE_API_TOKEN are set.
-// Neither set = provider skipped silently, like Ollama.
-const cfUrl = () => {
-  const override = (Deno.env.get("CLOUDFLARE_BRAIN_URL") || "").trim();
-  if (override) return override;
-  const acct = (Deno.env.get("CLOUDFLARE_ACCOUNT_ID") || "").trim();
-  return acct ? `https://api.cloudflare.com/client/v4/accounts/${acct}/ai/v1/chat/completions` : "";
-};
-// Router model names -> Workers AI catalog ids (only models verified in the
-// account catalog belong here; unmapped names pass through unchanged).
-const CF_MODELS: Record<string, string> = {
-  "llama-3.3-70b-versatile": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-  "llama-3.1-8b-instant": "@cf/meta/llama-3.1-8b-instruct",
-  "openai/gpt-oss-120b": "@cf/openai/gpt-oss-120b",
-  "openai/gpt-oss-20b": "@cf/openai/gpt-oss-20b",
-  "meta-llama/llama-4-scout-17b-16e-instruct": "@cf/meta/llama-4-scout-17b-16e-instruct",
 };
 
 export const CHAINS: Record<Tier, [Provider, string][]> = {
@@ -57,10 +28,8 @@ export const CHAINS: Record<Tier, [Provider, string][]> = {
   heavy: [["openai", "gpt-4.1"], ["gemini", "gemini-2.5-pro"], ["gemini", "gemini-2.5-flash"]],
   // Groq free-plan models only (no paid OpenAI hop).
   free: [["groq", "openai/gpt-oss-120b"], ["groq", "openai/gpt-oss-20b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "qwen/qwen3.8-27b"], ["gemini", "gemini-2.5-flash"]],
-  // Llama: Workers AI in the founder's Cloudflare account first (Llama 3.3 70B
-  // fp8-fast, the Phase 0 bake-off winner), then self-hosted Ollama (free when
-  // OLLAMA_BASE_URL is set), then Groq-hosted Llama.
-  llama: [["cloudflare", "llama-3.3-70b-versatile"], ["ollama", "llama3.1:8b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "llama-3.1-8b-instant"]],
+  // Llama: self-hosted Ollama first (free when OLLAMA_BASE_URL is set), then Groq-hosted.
+  llama: [["ollama", "llama3.1:8b"], ["groq", "llama-3.3-70b-versatile"], ["groq", "llama-3.1-8b-instant"]],
 };
 
 // USD per 1M tokens [input, output] — provider list prices.
@@ -77,7 +46,6 @@ export const PRICES: Record<string, [number, number]> = {
   "gpt-4.1": [2, 8],
   "llama-3.1-8b-instant": [0.05, 0.08],
   "llama3.1:8b": [0, 0], // self-hosted: no provider cost
-  "@cf/meta/llama-3.3-70b-instruct-fp8-fast": [0.293, 2.253], // Workers AI list price
 };
 export const costUsd = (model: string, inTok: number, outTok: number) => {
   const p = PRICES[model] || [2, 10];
@@ -86,7 +54,7 @@ export const costUsd = (model: string, inTok: number, outTok: number) => {
 
 const keyOf = (p: Provider) => Deno.env.get(SECRETS[p]) || "";
 /** Truthy when at least one direct provider key is configured. */
-export const aiKeysConfigured = () => (keyOf("groq") || keyOf("gemini") || keyOf("openai") || ollamaUrl() || cfUrl() ? "direct" : "");
+export const aiKeysConfigured = () => (keyOf("groq") || keyOf("gemini") || keyOf("openai") || ollamaUrl() ? "direct" : "");
 
 const jsonResp = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
@@ -114,25 +82,26 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
   // (e.g. the Groq key loses Llama access) the whole platform must not go
   // dark: fall through to the standard chain. Llama stays first, so it
   // takes over again automatically when it serves.
+  const tierChain: [Provider, string][] = tier === "llama"
+    ? [...CHAINS.llama, ...CHAINS.standard.filter(([p, m]) => !CHAINS.llama.some(([lp, lm]) => lp === p && lm === m))]
+    : CHAINS[tier];
+  // A pinned provider/model is tried FIRST, but a failure there (a model the
+  // key cannot serve, an outage, a rate limit) must not kill the request:
+  // fall through to the tier's normal chain, the same pattern the llama
+  // tier uses above. The pin takes over again automatically when it serves.
   const chain: [Provider, string][] = selected
-    ? [[selected.provider, selected.model]]
-    : tier === "llama"
-      ? [...CHAINS.llama, ...CHAINS.standard.filter(([p, m]) => !CHAINS.llama.some(([lp, lm]) => lp === p && lm === m))]
-      : CHAINS[tier];
+    ? [[selected.provider, selected.model], ...tierChain.filter(([p, m]) => !(p === selected.provider && m === selected.model))]
+    : tierChain;
   for (const [prov, model] of chain) {
-    const url = prov === "ollama" ? ollamaUrl() : prov === "cloudflare" ? cfUrl() : URLS[prov];
+    const url = prov === "ollama" ? ollamaUrl() : URLS[prov];
     const key = keyOf(prov) || String(keyOverrides[prov] || "");
     if (!url || (!key && prov !== "ollama")) { console.warn(`[ai] skip ${prov}/${model}: no url/key`); continue; }
-    // For Cloudflare, report the catalog id actually served so usage logs and
-    // cost accounting show the real model, not the router alias.
-    const servedModel = prov === "cloudflare" ? (CF_MODELS[model] || model) : model;
-    const payload: Record<string, unknown> = { ...clean, model: servedModel };
+    const payload: Record<string, unknown> = { ...clean, model };
     if (prov === "openai" && payload.max_tokens) { payload.max_completion_tokens = payload.max_tokens; delete payload.max_tokens; }
     if (prov === "groq" && Number(payload.max_tokens) > 8000) payload.max_tokens = 8000;
     if (prov === "groq" && /gpt-oss|qwen/.test(model)) { payload.reasoning_format = "hidden"; if (/gpt-oss/.test(model)) { delete payload.reasoning_format; payload.include_reasoning = false; /* gpt-oss reasons BEFORE its first visible token; at the default effort that was a minute of dead air in chat (founder report 2026-10-26). Pin effort low on these conversational routes — deep-reasoning work belongs on the heavy tier. */ payload.reasoning_effort = "low"; } }
     if (payload.stream) payload.stream_options = { include_usage: true };
     if (prov === "gemini") delete payload.stream_options;
-    if (prov === "cloudflare") delete payload.stream_options; // Workers AI's OpenAI-compat endpoint doesn't take it
     try {
       const send = () => fetch(url, {
         method: "POST",
@@ -147,8 +116,8 @@ export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOv
         await new Promise((r) => setTimeout(r, Math.min(ra, 6) * 1000));
         resp = await send();
       }
-      if (resp.ok) return { resp, provider: prov, model: servedModel };
-      last = { resp, provider: prov, model: servedModel };
+      if (resp.ok) return { resp, provider: prov, model };
+      last = { resp, provider: prov, model };
       if (!RETRY.has(resp.status)) return last;
       console.warn(`[ai] ${prov}/${model} ${resp.status}: ${(await resp.clone().text()).slice(0, 300)}`);
     } catch (e) {

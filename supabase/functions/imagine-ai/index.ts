@@ -303,7 +303,8 @@ No invented production records: use empty states unless the user supplied data. 
     const baseMessages = [{ role: "system", content: sys }, ...clean];
     let text = "", inTok = 0, outTok = 0, routed: Awaited<ReturnType<typeof configuredChat>> | null = null;
     let accumulatedCost = 0;
-    for (let part = 0; part < 4; part++) {
+    const MAX_PARTS = body.mode === "chat" || light ? 4 : 8;
+    for (let part = 0; part < MAX_PARTS; part++) {
       emit({ type: "status", message: part ? "Continuing the remaining files..." : "Connecting to your AI provider..." });
       routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
       if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "AI providers are at their usage limit; please try again shortly" : "The AI provider returned an error");
@@ -311,7 +312,7 @@ No invented production records: use empty states unless the user supplied data. 
       inTok += completion.input; outTok += completion.output;
       accumulatedCost += costUsd(routed.model, completion.input, completion.output);
       if (!continuation(text, completion.finish)) break;
-      if (part === 3) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
+      if (part === MAX_PARTS - 1) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
     }
     if (!routed || !text.trim()) throw new Error("The AI produced no result");
     const realCost = accumulatedCost;
