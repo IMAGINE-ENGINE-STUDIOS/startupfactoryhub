@@ -340,6 +340,10 @@ No invented production records: use empty states unless the user supplied data. 
       const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
       u.requests++; u.input += inTok; u.output += outTok; u.cost += cost; u.charge += charge;
       u.days[dayKey()] = (u.days[dayKey()] || 0) + 1;
+      if (Array.isArray(body.clientErrors) && body.clientErrors.length) {
+        const cleaned = body.clientErrors.slice(0, 20).map((e: any) => ({ at: String(e?.at || ""), kind: String(e?.kind || "build").slice(0, 24), msg: String(e?.msg || "").slice(0, 300) }));
+        u.clientErrors = [...(Array.isArray(u.clientErrors) ? u.clientErrors : []), ...cleaned].slice(-50);
+      }
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
