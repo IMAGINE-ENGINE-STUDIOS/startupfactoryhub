@@ -91,6 +91,16 @@
     try { localStorage.setItem(vkey(), JSON.stringify(list.slice(0, 30))); } catch (e) { alert("Not enough browser storage to save another version. Delete an old one first."); return; }
     say("Version saved");
   }
+  // Labeled checkpoints pushed by other modules (design.js "Background",
+  // github.js "Before GitHub pull"). Same store as manual versions, no
+  // prompt; a repeated label inside a minute is folded into one entry.
+  window.__IEPushHistory = function (label) {
+    var s = snap(); if (!s) return;
+    var list = versions(), last = list[0];
+    if (last && last.name === label && Date.now() - (last.id || 0) < 60000) return;
+    list.unshift({ id: Date.now(), name: label || "Checkpoint", at: new Date().toISOString(), data: s });
+    try { localStorage.setItem(vkey(), JSON.stringify(list.slice(0, 30))); } catch (e) {}
+  };
   function restore(v) {
     if (!confirm("Restore \"" + v.name + "\"? You can undo afterwards.")) return;
     past.push(snap()); if (past.length > MAX) past.shift(); future = []; busy = true; apply(v.data); cur = v.data; paint(); closeLog();
