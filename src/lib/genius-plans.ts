@@ -1,4 +1,4 @@
-// AI credit plans. 1 credit = 1 build generation = 5 quick chat/tweak messages.
+// AI credit plans. Global Credit: 1 Credit = $0.06 = any one AI action, on every platform.
 // Monthly credits roll over (unused credits stay in your balance).
 export const GENIUS_PLANS = {
   free: {
@@ -68,7 +68,9 @@ export const PLAN_LABELS: Record<string, string> = {
 export const getGeniusPlan = (plan: string) =>
   GENIUS_PLANS[(SERVER_PLAN_TO_KEY[plan] ?? plan) as GeniusPlanKey] ?? GENIUS_PLANS.free;
 
-/** One-time credits: $15 minimum, no maximum. $0.05/credit with volume bonus up to 15% at $500+. */
+/** One-time credits, sold separately from plans: $15 minimum, no maximum.
+ * Global Credit standard (founder, 2026-11-03): exactly $0.06 per Credit —
+ * one price everywhere, no volume bonus. */
 export const CREDIT_PRESETS = [15, 30, 60, 100, 250, 500];
-export const creditBonus = (usd: number) => (usd >= 500 ? 0.15 : usd >= 250 ? 0.12 : usd >= 100 ? 0.08 : usd >= 60 ? 0.05 : 0);
-export const creditsForUsd = (usd: number) => Math.floor(usd * 20 * (1 + creditBonus(usd)));
+export const creditBonus = (_usd: number) => 0;
+export const creditsForUsd = (usd: number) => Math.floor(usd / 0.06);

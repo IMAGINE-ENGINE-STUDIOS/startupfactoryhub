@@ -15,11 +15,11 @@ const SUBSCRIPTION_PRICES = new Set([
   "price_1UNapwK5N1RcUVuYx1SW05kL", // Imagine Studio $60/mo - 1400 credits
   "price_1UMWhHK5N1RcUVuY1bB3pmLA", // legacy Studio $79/mo - 1600 credits
 ]);
-// One-time credits: any amount >= $15, no cap. $0.05/credit; bonus rises to 15% at $500+.
-const creditsFor = (usd: number) => {
-  const bonus = usd >= 500 ? 0.15 : usd >= 250 ? 0.12 : usd >= 100 ? 0.08 : usd >= 60 ? 0.05 : 0;
-  return Math.floor(usd * 20 * (1 + bonus));
-};
+// One-time credits, sold separately from plans: any amount >= $15, no cap.
+// Global Credit standard (founder, 2026-11-03): exactly $0.06 per Credit —
+// one price everywhere, no volume bonus. (Every account also always gets
+// the 100 free welcome credits + 5 free credits daily via ai_credits_sync.)
+const creditsFor = (usd: number) => Math.floor(usd / 0.06);
 
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
