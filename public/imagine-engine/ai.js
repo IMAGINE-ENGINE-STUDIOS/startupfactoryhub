@@ -492,7 +492,7 @@
   var root = document.createElement("div");
   root.className = "iea";
   root.innerHTML =
-    '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Genius AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-clr">New chat</button></div>' +
+    '<div class="iea-h"><img src="' + LOGO + '" alt=""><div><div class="iea-t">Genius AI</div><div class="iea-s" id="iea-tab"></div></div><button class="iea-x" id="iea-hide" title="Hide chat (full-screen canvas)">&#171;</button><button class="iea-x" id="iea-clr">New chat</button></div>' +
     '<div class="iea-l" id="iea-l"></div>' +
     '<div class="iea-att" id="iea-att"></div>' +
     '<div class="iea-f"><div class="iea-pl"><button id="iea-plus" title="Add files">+</button><div class="iea-menu" id="iea-menu"><div class="iea-mh">Upload</div><button data-up="file">Upload file</button><button data-up="media">Upload image or video</button><div class="iea-mh">Models</div><button data-m="chat">Chat <small>ideas, analysis, plans</small></button><button data-m="build">Build <small>makes the changes</small></button><div class="iea-ms">More models coming soon</div></div></div><textarea id="iea-in" rows="2" placeholder="Describe what to build..."></textarea><button id="iea-go">&#8593;</button><button id="iea-mic" title="Dictate with your voice — transcribed on your device by our self-hosted Whisper">&#127908;</button><button id="iea-talk" title="Talk with Genius — hands-free voice conversation, replies spoken aloud">&#128222;</button></div><div class="iea-cr" data-ie-credits-pill style="display:flex;justify-content:space-between;align-items:center;padding:2px 10px 6px;font:10px system-ui;color:#a1a1aa;cursor:pointer"><span data-ie-credits-text>Credits</span><span style="color:#a78bfa">Get more</span></div>' +
@@ -504,6 +504,8 @@
     ".iea-menu small{color:#71717a;font-size:10px}.iea-mh{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#71717a;padding:6px 8px 2px}.iea-ms{font-size:10px;color:#52525b;padding:4px 8px}" +
     ".iea-att{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px}.iea-att span{background:#18181b;border:1px solid #3f3f46;border-radius:8px;padding:2px 8px;font-size:10px;cursor:pointer}" +
     "#iea-mic,#iea-talk{width:34px;height:38px;flex:none;border-radius:10px;border:1px solid #3f3f46;background:#18181b;color:#e4e4e7;font-size:15px;cursor:pointer;margin-left:4px}" +
+    ".iea-h{flex-wrap:nowrap}.iea-h>div{min-width:0}.iea-t,.iea-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.iea-x{flex:none;white-space:nowrap}" +
+    "#iea-open{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:90;writing-mode:vertical-rl;background:#18181b;color:#e4e4e7;border:1px solid #3f3f46;border-left:0;border-radius:0 10px 10px 0;padding:10px 5px;font:11px system-ui;cursor:pointer;display:none}" +
     "#iea-mic.rec{background:#7f1d1d;border-color:#ef4444;animation:ieaPulse 1.1s infinite}" +
     "#iea-talk.on{background:#065f46;border-color:#10b981;animation:ieaPulse 1.1s infinite}" +
     "@keyframes ieaPulse{0%,100%{opacity:1}50%{opacity:.55}}";
@@ -862,6 +864,18 @@
   });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); } });
   root.querySelector("#iea-clr").onclick = function () { messages = []; save(); render(); };
+  /* Chat collapse (founder, 2026-11-03): hide the chat column for a
+   * full-screen canvas; a slim left-edge tab brings it back. */
+  var chatHidden = localStorage.getItem("iea-hide") === "1", openPill = null;
+  function applyChatVis() {
+    var slot = document.getElementById("ie-ai-slot");
+    if (slot) slot.style.display = chatHidden ? "none" : "";
+    if (!openPill) { openPill = document.createElement("button"); openPill.id = "iea-open"; openPill.type = "button"; openPill.textContent = "Genius AI \u00BB"; openPill.title = "Open Genius AI chat"; openPill.onclick = function () { chatHidden = false; localStorage.setItem("iea-hide", "0"); applyChatVis(); }; document.body.appendChild(openPill); }
+    openPill.style.display = chatHidden ? "block" : "none";
+  }
+  var hideBtn = root.querySelector("#iea-hide");
+  if (hideBtn) hideBtn.onclick = function () { chatHidden = true; localStorage.setItem("iea-hide", "1"); applyChatVis(); };
+  setInterval(applyChatVis, 700);
 
   // Floating launcher for Flow / Dev / Database / Deploy (and canvas when AI tab closed)
   var fab = document.createElement("button");

@@ -41,7 +41,7 @@
     "#ie-rp-pin{display:none}body.ie-rp-hide.ie-rp-open #ie-rp-pin{display:block;position:fixed;top:58px;right:378px;z-index:81;height:26px;padding:0 10px;border-radius:9999px;background:#18181b;color:#e4e4e7;border:1px solid #3f3f46;font:11px system-ui;cursor:pointer}" +
     "#ie-rp-btn{height:28px;border-radius:9999px;background:#18181b;color:#e4e4e7;border:1px solid #27272a;font:11px system-ui;padding:0 10px;cursor:pointer;white-space:nowrap;margin-right:4px;display:inline-flex;align-items:center;gap:5px}#ie-rp-btn.on{background:#e4e4e7;color:#18181b}";
   document.head.appendChild(pcss);
-  var hidden = localStorage.getItem("ie-rp-hide") === "1";
+  var hidden = localStorage.getItem("ie-rp-hide") !== "0"; // hidden by default (founder, 2026-11-03): the canvas gets the full screen; the panel opens from the Panel button, and only an explicit Pin to side ("0") keeps it docked
   function apply() {
     document.body.classList.toggle("ie-rp-hide", hidden);
     if (!hidden) document.body.classList.remove("ie-rp-open");
