@@ -124,7 +124,7 @@ export const ProposalPricingPage = ({ url }: { url: string }) => (
       {[
         ['White-label and setup', 'One-time', `$${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} to set up the APEX-branded platform.`],
         ['Platform license', 'Annual', `$${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per ${APEX_LICENSING.billingUnit} per year, covering counselors, clients and reporting.`],
-        ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual APEX license.' : 'AI credits are purchased separately, in addition to the annual APEX license.'],
+        ['AI credits', 'Additional', APEX_LICENSING.aiCreditsIncluded ? 'Included in the annual APEX license.' : `Purchased separately at the global price — $${APEX_LICENSING.aiCreditUnitPriceUsd.toFixed(2)} per Credit, and 1 Credit runs any AI action. An enterprise option is available for APEX Accelerators.`],
       ].map(([t, k, d]) => (
         <div key={t} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.88)', border: '1px solid rgba(15,23,42,0.08)', borderTop: `3px solid ${P}` }}>
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
@@ -135,7 +135,7 @@ export const ProposalPricingPage = ({ url }: { url: string }) => (
         </div>
       ))}
     </div>
-    <p className="mt-4" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per {APEX_LICENSING.billingUnit}, plus AI credits and ${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} for one-time white-label and setup.</p>
+    <p className="mt-4" style={{ fontSize: 14, lineHeight: 1.5, color: BODY }}>${APEX_LICENSING.annualPriceUsd.toLocaleString('en-US')} per {APEX_LICENSING.billingPeriod} per {APEX_LICENSING.billingUnit}, plus AI credits at ${APEX_LICENSING.aiCreditUnitPriceUsd.toFixed(2)} per Credit (enterprise option available for APEX) and ${APEX_LICENSING.whiteLabelSetupUsd.toLocaleString('en-US')} for one-time white-label and setup.</p>
     <div className="mt-auto rounded-2xl p-5" style={{ background: 'linear-gradient(135deg,#1e1033,#3b1d6e)', color: '#f5f3ff' }}>
       <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.22em', color: '#c4b5fd' }}>PROPOSED NEXT STEP</div>
       <p className="mt-2" style={{ fontSize: 15, lineHeight: 1.5 }}>A 30-minute working session to pick the offices for the first phase and agree the scope.</p>

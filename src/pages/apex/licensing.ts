@@ -6,4 +6,5 @@ export const APEX_LICENSING = {
   billingPeriod: 'year',
   billingUnit: 'APEX',
   aiCreditsIncluded: false,
+  aiCreditUnitPriceUsd: 0.06,
 } as const;
