@@ -200,7 +200,25 @@
     }
     return lines.join("\n");
   }
+  /* Root-content guard (founder report 2026-11-04): models sometimes write a
+     prose preamble inside the file fence ("Here is the root file content:")
+     or leave a stray markdown fence; one bad first line killed the whole app
+     at token (1:0) and the canvas sat on placeholder sections forever. Strip
+     a leading fence and any prose before the first real code line. */
+  function stripProse(source) {
+    var s = String(source == null ? "" : source);
+    s = s.replace(/^\s*```[a-zA-Z]*\s*\n/, "").replace(/\n\s*```\s*$/, "");
+    var lines = s.split("\n"), i = 0;
+    while (i < lines.length) {
+      var t = lines[i].trim();
+      if (!t) { i++; continue; }
+      if (/^(import\b|export\b|const\b|let\b|var\b|function\b|class\b|interface\b|type\b|enum\b|declare\b|abstract\b|async\b|if\b|for\b|while\b|switch\b|return\b|throw\b|try\b|do\b|@|<!doctype|<[a-zA-Z]|\/\/|\/\*|\*)/.test(t)) break;
+      i++;
+    }
+    return i > 0 && i < lines.length ? lines.slice(i).join("\n") : s;
+  }
   function transformRaw(source, name, loc) {
+    source = stripProse(source);
     var fn = /\.(tsx|jsx)$/.test(name) ? name : name.replace(/\.js$/, ".jsx").replace(/\.ts$/, ".tsx");
     if (window.__sucrase && !window.__ieUseBabel) {
       try { return window.__sucrase.transform(loc ? tagLoc(source, name) : source, { transforms: ["typescript", "jsx"], jsxRuntime: "automatic", production: true, filePath: fn, disableESTransforms: true }).code; }

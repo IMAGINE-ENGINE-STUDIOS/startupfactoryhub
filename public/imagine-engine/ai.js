@@ -1033,7 +1033,22 @@
 (function () {
   function langOf(n, l) { if (l) return l; var m = /\.(\w+)$/.exec(n); return m ? m[1] : "ts"; }
   function pid() { var ie = window.__IE; return (ie && ie.raw && ie.raw.pid) || "default"; }
+  function stripProseText(source) {
+    var s = String(source == null ? "" : source);
+    s = s.replace(/^\s*```[a-zA-Z]*\s*\n/, "").replace(/\n\s*```\s*$/, "");
+    var lines = s.split("\n"), i = 0;
+    while (i < lines.length) {
+      var t = lines[i].trim();
+      if (!t) { i++; continue; }
+      if (/^(import\b|export\b|const\b|let\b|var\b|function\b|class\b|interface\b|type\b|enum\b|declare\b|abstract\b|async\b|if\b|for\b|while\b|switch\b|return\b|throw\b|try\b|do\b|@|<!doctype|<[a-zA-Z]|\/\/|\/\*|\*)/.test(t)) break;
+      i++;
+    }
+    return i > 0 && i < lines.length ? lines.slice(i).join("\n") : s;
+  }
   function put(name, content, lang) {
+    // Write-time twin of the liveapp root-content guard: code files are
+    // stored clean, so a prose preamble never reaches the compiler at all.
+    if (/\.(tsx?|jsx?|mts)$/.test(name)) content = stripProseText(content);
     var ie = window.__IE; if (!ie || !ie.raw || !ie.raw.setFiles) return null;
     var id = "file_" + name.replace(/[^A-Za-z0-9]/g, "_");
     var folder = name.indexOf("/") > -1 ? name.split("/")[0] : undefined;
