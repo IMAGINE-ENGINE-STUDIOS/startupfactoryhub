@@ -68,3 +68,18 @@ test('fenced actions block with raw newline in a string parses', () => {
   assert.equal(seen.length, 1);
   assert.equal(seen[0].content, 'a\nb');
 });
+test('benign path shapes normalize instead of killing the build', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  parser.feed('{"type":"file","path":"index.html","content":"<h1>Hi</h1>"}\n');
+  assert.equal(seen[0].type, 'addLiveApp'); assert.equal(seen[0].name, 'index');
+  assert.equal(build.normalizePath('./apps/Demo.tsx'), 'apps/Demo.tsx');
+  assert.equal(build.normalizePath('/apps/Demo.tsx'), 'apps/Demo.tsx');
+  assert.equal(build.normalizePath('styles.css'), 'styles/styles.css');
+  assert.equal(build.normalizePath('apps/../secret.ts'), null);
+  assert.equal(build.normalizePath('../secret.ts'), null);
+});
+test('fenced bare filename becomes a live app', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  parser.feed('```html file=landing.html\n<h1>Shop</h1>\n```\n');
+  assert.equal(seen[0].type, 'addLiveApp'); assert.equal(seen[0].name, 'landing');
+});

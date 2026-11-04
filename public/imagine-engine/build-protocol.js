@@ -5,15 +5,33 @@
     return typeof path === "string" && path.length < 240 && !path.split("/").some(function (p) { return !p || p === "." || p === ".."; }) &&
       /^(apps|components|lib|src|styles|custom-scripts|hooks|pages|scenes)\/[\w./-]+\.(tsx|ts|jsx|js|html|css|json)$/.test(path);
   }
+  // Models often emit benign path shapes the strict check used to kill the
+  // whole build over ("Unsafe source path"): a bare "index.html", "./apps/X",
+  // a leading slash, backslashes. Normalize those into the project layout;
+  // only true traversal (.., absolute drives, empty segments) stays rejected.
+  function normalizePath(path) {
+    if (typeof path !== "string") return null;
+    var p = path.trim().replace(/\\/g, "/").replace(/^\/+/, "").replace(/^(\.\/)+/, "");
+    if (!p || p.indexOf("..") >= 0 || /^[a-zA-Z]:/.test(p)) return null;
+    if (p.indexOf("/") < 0) {
+      if (/\.(tsx|jsx|html)$/.test(p)) p = "apps/" + p;
+      else if (/\.css$/.test(p)) p = "styles/" + p;
+      else if (/\.(ts|js|json)$/.test(p)) p = "src/" + p;
+    }
+    return safePath(p) ? p : null;
+  }
   function action(record) {
     if (!record || typeof record !== "object") throw new Error("Invalid build record");
     if (record.type === "file") {
-      if (!safePath(record.path) || typeof record.content !== "string" || !record.content.trim()) throw new Error("Invalid source file");
-      return sourceAction(record.path, record.content);
+      var np = normalizePath(record.path);
+      if (!np || typeof record.content !== "string" || !record.content.trim()) throw new Error("Invalid source file");
+      return sourceAction(np, record.content);
     }
     if (record.type === "action") return action(record.action);
     if (["addFile", "updateFile", "patchFile"].indexOf(record.type) >= 0) {
-      if (!safePath(record.name)) throw new Error("Unsafe source path");
+      var nn = normalizePath(record.name);
+      if (!nn) throw new Error("Unsafe source path");
+      record = Object.assign({}, record, { name: nn });
       if (record.type === "patchFile" && (!Array.isArray(record.edits) || !record.edits.length)) throw new Error("Empty patch");
       if (record.type !== "patchFile" && typeof (record.content || record.code) !== "string") throw new Error("Missing source");
     }
@@ -100,7 +118,7 @@
         } else {
           if (!fence.lines.length && !fence.path) {
             var header = /^\s*(?:\/\/|<!--|\/\*)\s*(?:file|path)\s*[:=]\s*(\S+)/.exec(ln);
-            if (header && safePath(header[1])) { fence.path = header[1]; return; }
+            if (header && normalizePath(header[1])) { fence.path = normalizePath(header[1]); return; }
           }
           fence.lines.push(ln);
         }
@@ -108,7 +126,7 @@
       }
       if ((open = /^\s*`{3,}([\w-]*)(.*)$/.exec(ln))) {
         var path = /(?:file|path|name|title|filename)\s*=\s*["']?([^\s"']+)/.exec(open[2]) || /[:\s]+["']?((?:apps|components|lib|src|styles|hooks|pages|scenes|custom-scripts)\/[^\s"']+)/.exec(open[2]);
-        fence = { kind: open[1], path: path && safePath(path[1]) ? path[1] : null, lines: [] }; return;
+        fence = { kind: open[1], path: path && normalizePath(path[1]) ? normalizePath(path[1]) : null, lines: [] }; return;
       }
       if (jsonBuf !== null) { jsonBuf += "\n" + ln; bufTry(false); return; }
       if (trimmed[0] === "{" || trimmed[0] === "[") {
@@ -214,5 +232,5 @@
       });
     }
   }
-  host.__IEBuild = { prepare: prepare, validateSource: validateSource, safePath: safePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse, repairJson: repairJson };
+  host.__IEBuild = { prepare: prepare, validateSource: validateSource, safePath: safePath, normalizePath: normalizePath, action: action, parser: parser, parse: parse, patch: patch, rank: rank, readResponse: readResponse, repairJson: repairJson };
 })(typeof window === "undefined" ? globalThis : window);

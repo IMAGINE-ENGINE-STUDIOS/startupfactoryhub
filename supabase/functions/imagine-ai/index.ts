@@ -305,9 +305,9 @@ No invented production records: use empty states unless the user supplied data. 
     let accumulatedCost = 0;
     const MAX_PARTS = body.mode === "chat" || light ? 4 : 8;
     for (let part = 0; part < MAX_PARTS; part++) {
-      emit({ type: "status", message: part ? "Continuing the remaining files..." : "Connecting to your AI provider..." });
+      emit({ type: "status", message: part ? "Continuing the remaining files..." : "Working on your project..." });
       routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
-      if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "AI providers are at their usage limit; please try again shortly" : "The AI provider returned an error");
+      if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "Genius is at capacity right now; please try again shortly" : "Something went wrong while building; please try again");
       const completion = await readCompletion(routed.resp, (delta) => { text += delta; emit({ type: "delta", text: delta }); });
       inTok += completion.input; outTok += completion.output;
       accumulatedCost += costUsd(routed.model, completion.input, completion.output);

@@ -16,7 +16,7 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
   function consume(raw: string) {
     if (raw === "[DONE]") { ended = true; return; }
     const data = JSON.parse(raw);
-    if (data.error || data.type === "error") throw new Error("AI provider interrupted the response");
+    if (data.error || data.type === "error") throw new Error("The build was interrupted; please try again");
     const delta = data.choices?.[0]?.delta?.content || data.delta?.text || data.message?.content || "";
     if (delta) { result.text += delta; if (result.text.length > 300000) throw new Error("Build output exceeded the safety limit"); onDelta(delta); }
     const usage = data.usage || data.message?.usage;
