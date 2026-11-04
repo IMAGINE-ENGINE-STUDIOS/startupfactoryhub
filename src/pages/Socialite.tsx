@@ -1054,11 +1054,18 @@ Use 2 hashtags max when promo present`;
           // this tab and is silently dropped by the publish functions' https
           // filter — that is why composer posts lost their banner on Facebook
           // and failed outright on Instagram (root-caused 2026-11-04). Upload
-          // the file to public storage first and keep the public URL.
+          // the file to public storage first and keep the public URL. The
+          // feed-media bucket's insert policy requires the FIRST path segment
+          // to be the uploader's user id (every working upload in this app —
+          // feed, FloatingChat, room covers — is uid-prefixed); a bare
+          // "socialite-media/…" prefix is rejected (proven live 2026-11-04).
+          const { data: authData } = await supabase.auth.getUser();
+          const uid = authData?.user?.id;
+          if (!uid) { showToast(`Could not upload ${f.name} — you are not signed in`, "error"); continue; }
           const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-          const path = `socialite-media/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
+          const path = `${uid}/socialite-media/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
           const { error: upErr } = await supabase.storage.from("feed-media").upload(path, f, { contentType: f.type || undefined });
-          if (upErr) { showToast(`Could not upload ${f.name} — it was not added`, "error"); continue; }
+          if (upErr) { showToast(`Could not upload ${f.name}: ${upErr.message}`, "error"); continue; }
           const url = supabase.storage.from("feed-media").getPublicUrl(path).data.publicUrl;
           if (media.length + newMedia.length < 4) newMedia.push({ url, type: isImage ? "image" : "video", name: f.name });
         } else if (isDoc) {
