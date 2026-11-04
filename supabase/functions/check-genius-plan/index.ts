@@ -20,8 +20,20 @@ const PLANS: Record<string, { plan: string; credits: number }> = {
   // Legacy plans converted to credits
   prod_UyMR3vZjOO9AGS: { plan: "starter", credits: 180 },
   prod_UyMS4Bfe7DgCzR: { plan: "pro", credits: 600 },
-  prod_VBmemZuuco0yOB: { plan: "members_club", credits: 1000 },
-  prod_VBmgE3TZ1f0O7F: { plan: "members_club", credits: 1000 },
+  prod_VBmemZuuco0yOB: { plan: "members_club", credits: 830 },
+  prod_VBmgE3TZ1f0O7F: { plan: "members_club", credits: 830 },
+  // SFH membership tiers — Global Credit standard (founder, 2026-11-03):
+  // monthly credits = plan price / $0.06, floored to the nearest ten.
+  prod_U3oDmSPMy4Lher: { plan: "community", credits: 5830 },
+  prod_U5ckFYb3Xqa9SZ: { plan: "community", credits: 5830 },
+  prod_U3oENLbFqHIiRA: { plan: "venture_resident", credits: 9160 },
+  prod_U5ckRlglYZ8Ffn: { plan: "venture_resident", credits: 9160 },
+  prod_VRmbmRgvi4SxOH: { plan: "venture_advisor", credits: 9160 },
+  prod_VRmbX0aH067NJx: { plan: "venture_advisor", credits: 9160 },
+  prod_U5cjB9wci6HRRg: { plan: "global_venture_partner", credits: 15830 },
+  prod_U5clE9BMHJn7es: { plan: "global_venture_partner", credits: 15830 },
+  prod_U5ck4Q7g8fNZ9L: { plan: "corporate", credits: 25000 },
+  prod_U5clTYgMxNAnYI: { plan: "corporate", credits: 25000 },
 };
 
 serve(async (req) => {
