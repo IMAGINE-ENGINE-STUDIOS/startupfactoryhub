@@ -56,7 +56,7 @@ export async function configuredChat(tier: Tier, body: Record<string, unknown>, 
   if (error) throw new Error(error);
   const overrides = { groq: keys.groq, gemini: keys.gemini, openai: keys.openai };
   if (["router", "lovable"].includes(settings.provider)) return routeChat(tier, body, overrides);
-  if (["groq", "gemini", "openai", "brain"].includes(settings.provider)) {
+  if (["groq", "gemini", "openai"].includes(settings.provider)) {
     return routeChat(tier, body, overrides, { provider: settings.provider as Provider, model: settings.model });
   }
   const builtin = PROVIDERS[settings.provider];
