@@ -1038,28 +1038,35 @@ Use 2 hashtags max when promo present`;
 
   // uploader
   const handleFiles = useCallback(
-    (files: FileList | File[]) => {
+    async (files: FileList | File[]) => {
       const list = Array.from(files);
       let newMedia: MediaItem[] = [];
       let newAttached: AttachedFile[] = [];
 
-      list.forEach((f) => {
+      for (const f of list) {
         const ext = f.name.split(".").pop()?.toLowerCase() || "";
         const isImage = f.type.startsWith("image/");
         const isVideo = f.type.startsWith("video/");
         const isDoc = ["pdf", "doc", "docx", "txt", "csv"].includes(ext) || ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "text/csv"].some((t) => f.type.includes(t));
 
-        const url = URL.createObjectURL(f);
-        if (isImage) {
-          if (media.length + newMedia.length < 4) newMedia.push({ url, type: "image", name: f.name });
-        } else if (isVideo) {
-          if (media.length + newMedia.length < 4) newMedia.push({ url, type: "video", name: f.name });
+        if (isImage || isVideo) {
+          // Meta can only fetch PUBLIC https URLs. A blob: object URL dies with
+          // this tab and is silently dropped by the publish functions' https
+          // filter — that is why composer posts lost their banner on Facebook
+          // and failed outright on Instagram (root-caused 2026-11-04). Upload
+          // the file to public storage first and keep the public URL.
+          const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const path = `socialite-media/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
+          const { error: upErr } = await supabase.storage.from("feed-media").upload(path, f, { contentType: f.type || undefined });
+          if (upErr) { showToast(`Could not upload ${f.name} — it was not added`, "error"); continue; }
+          const url = supabase.storage.from("feed-media").getPublicUrl(path).data.publicUrl;
+          if (media.length + newMedia.length < 4) newMedia.push({ url, type: isImage ? "image" : "video", name: f.name });
         } else if (isDoc) {
-          newAttached.push({ id: `${Date.now()}-${Math.random()}`, name: f.name, type: f.type || ext, size: f.size, url });
+          newAttached.push({ id: `${Date.now()}-${Math.random()}`, name: f.name, type: f.type || ext, size: f.size, url: URL.createObjectURL(f) });
         } else {
-          newAttached.push({ id: `${Date.now()}-${Math.random()}`, name: f.name, type: f.type || ext, size: f.size, url });
+          newAttached.push({ id: `${Date.now()}-${Math.random()}`, name: f.name, type: f.type || ext, size: f.size, url: URL.createObjectURL(f) });
         }
-      });
+      }
 
       if (newMedia.length) setMedia((m) => [...m, ...newMedia].slice(0, 4));
       if (newAttached.length) setAttachedFiles((a) => [...a, ...newAttached]);

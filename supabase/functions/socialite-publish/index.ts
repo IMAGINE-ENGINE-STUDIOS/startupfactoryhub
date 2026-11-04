@@ -24,8 +24,15 @@ Deno.serve(async (req) => {
     const check = await meter(auth.userId, auth.isAdmin, "posts", Math.max(1, platforms.length), {}, true);
     if (!check.ok) return json({ success: false, error: check.reason, billing: true }, 402);
     const result = await publishAll(text, platforms, media, auth.userId, typeof body?.format === "string" ? body.format : undefined);
-    await record(auth.userId, "post", { text, platforms });
-    await meter(auth.userId, auth.isAdmin, "posts", Math.max(1, platforms.length), { platforms });
+    // Record + meter ONLY the platforms that actually posted. Recording a
+    // FAILED attempt poisons Shield's duplicate + min-gap checks for 24h and
+    // blocks the legitimate retry (root-caused 2026-11-04 from the Nov 2–3
+    // false-flag blocks).
+    const okCount = Object.values(result?.results ?? {}).filter((r: any) => r && !r.error && (r.id ?? r.success)).length;
+    if (okCount > 0) {
+      await record(auth.userId, "post", { text, platforms });
+      await meter(auth.userId, auth.isAdmin, "posts", okCount, { platforms });
+    }
     return json({ ...result, shield });
   } catch (e) {
     return json({ success: false, error: (e as Error).message }, 500);

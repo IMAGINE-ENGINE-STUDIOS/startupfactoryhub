@@ -54,8 +54,13 @@ Deno.serve(async (req) => {
         result = await publishAll(String(p.text ?? ""), p.platforms ?? [], p.media ?? [], row.created_by, typeof p.format === "string" ? p.format : undefined);
         const resultsList: any[] = Array.isArray(result?.results) ? result.results : Object.values(result?.results ?? {});
         const n = resultsList.filter((x: any) => x && !x.error && (x.id ?? x.success)).length;
-        await record(row.created_by, "post", { text: p.text, platforms: p.platforms });
-        if (n) await meter(row.created_by, isAdm, "posts", n, { via: "schedule" });
+        // Record only real sends — recording a FAILED attempt poisons
+        // Shield's duplicate + min-gap checks against the retry
+        // (root-caused 2026-11-04).
+        if (n) {
+          await record(row.created_by, "post", { text: p.text, platforms: p.platforms });
+          await meter(row.created_by, isAdm, "posts", n, { via: "schedule" });
+        }
       }
       else if (row.kind === "email") result = await call("send-bulk-email", p);
       else if (row.kind === "sms" || row.kind === "whatsapp") {
