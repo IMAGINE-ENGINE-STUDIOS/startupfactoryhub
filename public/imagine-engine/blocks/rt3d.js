@@ -39,6 +39,26 @@
       if (d.rotateY != null) o.rotation.y += +d.rotateY * Math.PI / 180;
     } else if (d.op === "remove") { var r0 = objs[d.id] || s.getObjectByName(d.id); if (r0) { s.remove(r0); delete objs[d.id]; } }
     else if (d.op === "color") { var c0 = objs[d.id] || s.getObjectByName(d.id); if (c0 && c0.material) c0.material.color = new T.Color(d.color); }
+    else if (d.op === "scale" || d.op === "rotate") {
+      var o2 = objs[d.id] || s.getObjectByName(d.id); if (!o2) { up({ ie: "state", key: "3d:error", value: "no object " + d.id }); return; }
+      var isS = d.op === "scale", tgt = isS ? (d.scale || [1, 1, 1]) : (d.rotation || [0, 0, 0]).map(function (v) { return +v * Math.PI / 180; });
+      var frm = isS ? o2.scale.clone() : { x: o2.rotation.x, y: o2.rotation.y, z: o2.rotation.z }, t02 = performance.now(), dur2 = Math.max(1, d.duration || 500);
+      (function step2() { var k = Math.min(1, (performance.now() - t02) / dur2), e = k * k * (3 - 2 * k), x = frm.x + (tgt[0] - frm.x) * e, y = frm.y + (tgt[1] - frm.y) * e, z = frm.z + (tgt[2] - frm.z) * e; if (isS) o2.scale.set(x, y, z); else o2.rotation.set(x, y, z); if (k < 1) requestAnimationFrame(step2); })();
+    }
+    else if (d.op === "spin") {
+      var o3 = objs[d.id] || s.getObjectByName(d.id); if (!o3) { up({ ie: "state", key: "3d:error", value: "no object " + d.id }); return; }
+      cancelAnimationFrame(o3.userData.__spin); var sp = (+d.speed || 0) * Math.PI / 180, ax = d.axis === "x" || d.axis === "z" ? d.axis : "y", last = performance.now();
+      if (!sp) return;
+      (function tick() { var now = performance.now(); o3.rotation[ax] += sp * (now - last) / 1000; last = now; o3.userData.__spin = requestAnimationFrame(tick); })();
+    }
+    else if (d.op === "visible") { var o4 = objs[d.id] || s.getObjectByName(d.id); if (o4) o4.visible = d.visible !== false; else up({ ie: "state", key: "3d:error", value: "no object " + d.id }); }
+    else if (d.op === "camera") {
+      var cam = reg.camera; if (!cam) return; var to3 = d.position || [cam.position.x, cam.position.y, cam.position.z], from3 = cam.position.clone(), t03 = performance.now(), dur3 = Math.max(1, d.duration || 800), look = d.lookAt ? new T.Vector3(+d.lookAt[0] || 0, +d.lookAt[1] || 0, +d.lookAt[2] || 0) : null;
+      (function step3() { var k = Math.min(1, (performance.now() - t03) / dur3), e = k * k * (3 - 2 * k); cam.position.set(from3.x + (to3[0] - from3.x) * e, from3.y + (to3[1] - from3.y) * e, from3.z + (to3[2] - from3.z) * e); if (look) cam.lookAt(look); if (k < 1) requestAnimationFrame(step3); })();
+    }
+    else if (d.op === "light") { s.traverse(function (o5) { if (!o5.isLight || (d.id && o5.name !== d.id)) return; if (d.intensity != null) o5.intensity = +d.intensity; if (d.color) o5.color = new T.Color(d.color); }); }
+    else if (d.op === "theater") { try { window.dispatchEvent(new CustomEvent("ie-theater", { detail: { id: d.id, kind: d.kind || "screen", url: d.url, page: d.page, dir: d.dir } })); } catch (e) {} up({ ie: "state", key: "3d:theater", value: d.kind || "screen" }); }
+    else if (d.op) { up({ ie: "state", key: "3d:error", value: "unknown op " + d.op }); }
   }
   addEventListener("message", function (e) {
     var d = e.data; if (!d || typeof d !== "object") return;
