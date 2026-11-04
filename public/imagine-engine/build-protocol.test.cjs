@@ -91,3 +91,20 @@ test('foreign roots and spaces normalize; error names the path', () => {
   assert.throws(() => parser.feed('{"type":"addFile","name":"weird//x.ts","content":"x"}\n'), /Unsafe source path: weird/);
   assert.equal(parser.finish().list.length, 0);
 });
+
+test('invalid backslash escapes inside JSON strings are repaired, backslash preserved', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  const bad = '{"type":"file","path":"apps/Re.ts","content":"const re = /\\d+/; const s = \\'ok\\';"}';
+  assert.throws(() => JSON.parse(bad), /escaped character/i);
+  parser.feed('```json\n' + bad + '\n```\n');
+  assert.equal(parser.finish().errors.length, 0);
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].content, "const re = /\\d+/; const s = \\'ok\\';");
+});
+test('valid escapes pass through untouched; incomplete \\u keeps its backslash', () => {
+  const seen = [], parser = build.parser(r => seen.push(r));
+  const ok = '{"type":"file","path":"apps/U.ts","content":"A\\u0042 \\n \\u12 end"}';
+  parser.feed('```json\n' + ok + '\n```\n');
+  assert.equal(parser.finish().errors.length, 0);
+  assert.equal(seen[0].content, "AB \n \\u12 end");
+});

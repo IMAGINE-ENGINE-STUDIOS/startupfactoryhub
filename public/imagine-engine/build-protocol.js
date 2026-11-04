@@ -54,11 +54,20 @@
   // control characters ONLY while inside a string literal; structural text is
   // never touched, and the decoded value is identical to the escaped form.
   function repairJson(text) {
-    var out = "", inStr = false, esc = false;
+    var out = "", inStr = false;
     for (var i = 0; i < text.length; i++) {
       var ch = text[i], code = text.charCodeAt(i);
-      if (esc) { out += ch; esc = false; continue; }
-      if (inStr && ch === "\\") { out += ch; esc = true; continue; }
+      if (inStr && ch === "\\") {
+        var n = text[i + 1];
+        if (n === '"' || n === "\\" || n === "/" || n === "b" || n === "f" || n === "n" || n === "r" || n === "t") { out += ch + n; i++; continue; }
+        if (n === "u" && /^[0-9a-fA-F]{4}$/.test(text.substr(i + 2, 4))) { out += text.substr(i, 6); i += 5; continue; }
+        // Invalid escape: a regex \d, an escaped apostrophe, a stray path
+        // backslash. The model meant a literal backslash, so emit it escaped
+        // and let the following character be processed on its own. Strict
+        // JSON.parse used to kill the whole build here ("Bad escaped
+        // character in JSON") even though the intent is unambiguous.
+        out += "\\\\"; continue;
+      }
       if (ch === '"') { inStr = !inStr; out += ch; continue; }
       if (inStr && code < 32) {
         out += code === 10 ? "\\n" : code === 13 ? "\\r" : code === 9 ? "\\t" : "\\u" + ("000" + code.toString(16)).slice(-4);
