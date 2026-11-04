@@ -90,6 +90,29 @@
     }
   }, 700);
 
+  /* Project rename (founder, 2026-11-04): the Projects panel offers create,
+     switch and delete but no rename. Decorate each project row (found via
+     its Delete project control) with a Rename control that writes through
+     window.__IE.raw.setProjects; the bundle persists projects itself. */
+  setInterval(function () {
+    var ie = window.__IE; if (!ie || !ie.raw || !ie.raw.projects) return;
+    document.querySelectorAll('span[title="Delete project"]').forEach(function (del) {
+      var row = del.closest("button"); if (!row || row.querySelector("[data-ie-rename]")) return;
+      var name = (row.childNodes[0] && row.childNodes[0].textContent || "").trim(); if (!name) return;
+      var proj = (ie.raw.projects || []).filter(function (x) { return x.name === name; })[0]; if (!proj) return;
+      var b = document.createElement("span");
+      b.setAttribute("role", "button"); b.setAttribute("data-ie-rename", proj.id); b.title = "Rename project";
+      b.className = "px-2 py-0.5 rounded-full text-zinc-500 hover:text-teal-300 hover:bg-zinc-800";
+      b.textContent = "Rename";
+      b.onclick = function (ev) {
+        ev.stopPropagation();
+        var v = prompt("Rename project", proj.name); if (v == null) return; v = v.trim(); if (!v || v === proj.name) return;
+        ie.raw.setProjects(function (q) { return q.map(function (x) { return x.id === proj.id ? Object.assign({}, x, { name: v }) : x; }); });
+      };
+      del.parentNode.insertBefore(b, del);
+    });
+  }, 800);
+
   /* clicking the canvas closes the drop menu (clicks inside the panel keep it open) */
   document.addEventListener("mousedown", function (e) {
     if (!document.body.classList.contains("ie-rp-open")) return;
