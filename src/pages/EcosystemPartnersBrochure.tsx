@@ -22,10 +22,31 @@ import { EcosystemOutcomesPage } from './ecosystem/EcosystemOutcomesPage';
 import { EcosystemConclusionPage } from './ecosystem/EcosystemConclusionPage';
 import { EcosystemOpportunityPage } from './ecosystem/EcosystemOpportunityPage';
 import { EcosystemTeamPage, EcosystemRoadmapPage, EcosystemNextStepsPage } from './ecosystem/EcosystemTeamRoadmap';
+import { TechFeaturePage, type FeatureBrand } from './apex/TechFeaturePage';
+import { ApexPerksPage } from './apex/PerksPage';
+import { ECOSYSTEM_FEATURES } from './ecosystem/EcosystemFeatures';
+import { EcosystemImagineEnginePage } from './ecosystem/EcosystemImaginePage';
+import { EcosystemVideoMeetingsPage } from './ecosystem/EcosystemVideoPage';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 
 const CONTACT_URL = 'https://startupfactoryhub.com/ecosystempartners';
-const TOTAL = '21';
+const TOTAL = '40';
+
+/** Brand overrides so the shared feature-page design speaks to licensing partners, not APEX. */
+const ECO_BRAND: FeatureBrand = {
+  proposalTo: 'ECOSYSTEM PARTNERS',
+  badge: 'PARTNER-READY',
+  journeySupport: 'Contracting support, sales mentors',
+  hideLogo: true,
+  brandDomain: 'your.innovation',
+};
+/** Theme text overrides by FEATURES index where the APEX themes name APEX (resource map, mentors, admin, brand). */
+const ECO_THEME_TEXT: Record<number, { cmd?: string; url?: string; status?: string }> = {
+  0: { cmd: 'sfh resources --map' },
+  2: { cmd: 'sfh mentors' },
+  5: { url: 'partner_admin://console' },
+  13: { cmd: 'sfh brand --tenant partner', url: 'your.innovation://journey', status: 'YOUR BRAND · SFH POWERED' },
+};
 
 const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode; hard?: boolean }>(({ children, hard }, ref) => (
   <div ref={ref} data-density={hard ? 'hard' : 'soft'} className="overflow-hidden" style={{ background: '#ffffff' }}>{children}</div>
@@ -46,6 +67,17 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   { key: 'summary', node: <EcosystemSummaryPage /> },
   { key: 'opportunity', node: <EcosystemOpportunityPage total={TOTAL} /> },
   { key: 'conclusion', node: <EcosystemConclusionPage logo={sfhLogo} url={CONTACT_URL} /> },
+  ...ECOSYSTEM_FEATURES.flatMap((f, i) => f.no === '11' ? [] : f.no === '04' || f.no === '05' || f.no === '13'
+    ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="main" brand={ECO_BRAND} themeText={ECO_THEME_TEXT[i]} /> },
+       { key: `feature-${f.no}-${i}-detail`, node: <TechFeaturePage f={f} index={i} total={TOTAL} part="detail" brand={ECO_BRAND} themeText={ECO_THEME_TEXT[i]} /> },
+       ...(f.no === '04' ? [{ key: 'feature-video', node: <EcosystemVideoMeetingsPage total={TOTAL} brand={ECO_BRAND} /> }] : [])]
+    : f.no === '12'
+    ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} brand={ECO_BRAND} themeText={ECO_THEME_TEXT[i]} /> },
+       { key: 'imagine-engine', node: <EcosystemImagineEnginePage total={TOTAL} brand={ECO_BRAND} /> }]
+    : f.no === '06'
+    ? [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} brand={ECO_BRAND} themeText={ECO_THEME_TEXT[i]} /> },
+       { key: 'perks', node: <ApexPerksPage /> }]
+    : [{ key: `feature-${f.no}-${i}`, node: <TechFeaturePage f={f} index={i} total={TOTAL} brand={ECO_BRAND} themeText={ECO_THEME_TEXT[i]} /> }]),
   { key: 'outcomes', node: <EcosystemOutcomesPage /> },
   { key: 'implementation', node: <EcosystemRoadmapPage /> },
   { key: 'next', node: <EcosystemNextStepsPage /> },

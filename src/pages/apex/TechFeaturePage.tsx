@@ -126,7 +126,7 @@ const STAGES: { name: string; trl: string; icon: LucideIcon; milestones: string[
   { name: 'Growth', trl: 'Scale', icon: LineChart, milestones: ['Hiring and operations', 'New markets', 'Partner programs'], support: 'Workspace network, soft-landing' },
 ];
 
-const JourneyBlock = ({ th, wide }: { th: Theme; wide?: boolean }) => (
+const JourneyBlock = ({ th, wide, journeySupport }: { th: Theme; wide?: boolean; journeySupport?: string }) => (
   <div className="flex-1 min-h-0 flex flex-col">
     <div className={`grid ${wide ? 'grid-cols-2 gap-3' : 'grid-cols-3 gap-2'}`}>
       {STAGES.map((s, i) => {
@@ -147,7 +147,7 @@ const JourneyBlock = ({ th, wide }: { th: Theme; wide?: boolean }) => (
                 </li>
               ))}
             </ul>
-            <div className="mt-1.5 pt-1" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.support}</div>
+            <div className="mt-1.5 pt-1" style={{ borderTop: BORDER, fontFamily: MONO, fontSize: 12, color: DIM, lineHeight: 1.4 }}>{s.name === 'Commercialization' && journeySupport ? journeySupport : s.support}</div>
           </div>
         );
       })}
@@ -262,12 +262,12 @@ const MENTOR_TAGS = ['PROFILES_AND_BOOKING', 'RECORDS_AND_FEEDBACK'];
 
 
 /** Mock of the platform's Journey tab as APEX would see it, white-labeled. */
-const BrandedJourney = ({ th }: { th: Theme }) => (
+const BrandedJourney = ({ th, brand }: { th: Theme; brand?: FeatureBrand }) => (
   <div className="flex-1 min-h-0 flex flex-col rounded-xl overflow-hidden" style={{ background: 'rgba(5,8,18,0.82)', border: BORDER, boxShadow: `0 30px 60px -30px rgba(0,0,0,0.8), 0 0 40px ${th.a}18` }}>
     <div className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: BORDER, background: `linear-gradient(90deg, ${th.a}22, transparent)` }}>
-      <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
+      {!brand?.hideLogo && <img src={APEX_LOGO} alt="APEX Accelerators" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />}
       <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.18em', color: DIM }}>INNOVATION PLATFORM</span>
-      <span className="ml-auto rounded-full px-2.5 py-0.5" style={{ fontFamily: MONO, fontSize: 9.5, color: th.a, border: `1px solid ${th.a}55` }}>apex.innovation</span>
+      <span className="ml-auto rounded-full px-2.5 py-0.5" style={{ fontFamily: MONO, fontSize: 9.5, color: th.a, border: `1px solid ${th.a}55` }}>{brand?.brandDomain ?? 'apex.innovation'}</span>
     </div>
     <div className="flex items-center gap-1.5 px-4 py-2" style={{ borderBottom: BORDER }}>
       {['Home', 'Journey', 'Resources', 'Mentors', 'Investors', 'Events'].map((t) => (
@@ -283,8 +283,16 @@ const BrandedJourney = ({ th }: { th: Theme }) => (
   </div>
 );
 
-export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string; theme?: Theme; capLabel?: string }) => {
-  const th = theme ?? THEMES[index] ?? THEMES[2];
+export interface FeatureBrand {
+  proposalTo: string;
+  badge: string;
+  journeySupport: string;
+  hideLogo?: boolean;
+  brandDomain: string;
+}
+
+export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel, brand, themeText }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string; theme?: Theme; capLabel?: string; brand?: FeatureBrand; themeText?: Partial<Pick<Theme, 'cmd' | 'url' | 'status'>> }) => {
+  const th = { ...(theme ?? THEMES[index] ?? THEMES[2]), ...(themeText ?? {}) };
   const Icon = th.icon;
   const accents = [th.a, th.b];
   const factIcons = [ListChecks, Star, Activity];
@@ -306,7 +314,7 @@ export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel 
             <div className="flex items-center justify-center rounded-lg" style={{ width: 34, height: 34, background: th.a, color: '#050a12', fontFamily: MONO, fontWeight: 700, fontSize: 14, boxShadow: `0 0 18px ${th.a}66` }}>SF</div>
             <div>
               <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 16, letterSpacing: '0.12em' }}>STARTUP FACTORY <span style={{ color: FAINT }}>//</span> HUB</div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em', color: DIM }}>PROPOSAL TO APEX ACCELERATORS</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em', color: DIM }}>PROPOSAL TO {brand?.proposalTo ?? 'APEX ACCELERATORS'}</div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -314,7 +322,7 @@ export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel 
               <div>{capLabel ?? `CAPABILITY ${f.no} / 14 // ${f.section.toUpperCase()}`}</div>
               <div style={{ color: FAINT }}>EDITION 2026</div>
             </div>
-            <img src={APEX_LOGO} alt="APEX Accelerators" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
+            {!brand?.hideLogo && <img src={APEX_LOGO} alt="APEX Accelerators" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />}
           </div>
         </header>
 
@@ -350,7 +358,7 @@ export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel 
                   <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.18em', color: th.a }}>&#8627; {th.status}</div>
                 </div>
               </div>
-              <div className="absolute bottom-[-10px] left-4 rotate-[-2deg] z-10 rounded-full px-3 py-1" style={{ background: th.c, color: '#120c04', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em' }}>APEX-READY</div>
+              <div className="absolute bottom-[-10px] left-4 rotate-[-2deg] z-10 rounded-full px-3 py-1" style={{ background: th.c, color: '#120c04', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em' }}>{brand?.badge ?? 'APEX-READY'}</div>
             </div>
           </div>
 
@@ -397,10 +405,10 @@ export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel 
           {special && (
             <div style={detail ? { zoom: special === 'journey' ? 1.3 : 1.1 } : undefined} className={`${special === 'map' ? 'mt-6' : special === 'journey' ? 'mt-2.5' : 'mt-4'} flex-1 min-h-0 flex flex-col`}>
               {special === 'map' && <><Kicker color={DIM}>Resource map // {String(f.map!.length).padStart(2, '0')} categories</Kicker><div className="mt-3 flex-1 min-h-0 flex flex-col"><ResourceMap f={f} th={th} /></div></>}
-              {special === 'journey' && <JourneyBlock th={th} wide={detail} />}
+              {special === 'journey' && <JourneyBlock th={th} wide={detail} journeySupport={brand?.journeySupport} />}
               {special === 'admin' && <AdminDashboard th={th} />}
               {special === 'analytics' && <AnalyticsBlock th={th} />}
-              {special === 'brand' && <BrandedJourney th={th} />}
+              {special === 'brand' && <BrandedJourney th={th} brand={brand} />}
             </div>
           )}
 
