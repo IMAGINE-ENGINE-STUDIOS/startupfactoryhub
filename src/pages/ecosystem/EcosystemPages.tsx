@@ -10,6 +10,7 @@
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
+import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 const SERIF = "'Playfair Display', Georgia, serif";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
@@ -182,6 +183,43 @@ export const EcosystemWhyPage = () => (
     </div>
     <p className="mt-auto pt-4" style={{ fontSize: 13, color: '#64748b' }}>Everything runs under your brand — your members see your ecosystem, powered by Startup Factory Hub.</p>
   </Shell>
+);
+
+/** Executive summary — the APEX book's globe page, partner wording. */
+export const EcosystemSummaryPage = () => (
+  <section className="absolute inset-0 overflow-hidden" style={{ background: 'linear-gradient(155deg,#050b16 0%,#08182a 45%,#04121b 100%)' }}>
+    <div className="absolute inset-0 z-0 apex-globe">
+      <BrochureResourceMap />
+      <style>{`.apex-globe .mapboxgl-ctrl{display:none!important}`}</style>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(3,8,18,0.92) 0%, rgba(3,8,18,0.55) 34%, rgba(3,8,18,0.05) 55%, rgba(3,8,18,0.25) 78%, rgba(3,8,18,0.9) 100%)' }} />
+    </div>
+    <div className="relative z-10 h-full flex flex-col justify-between pointer-events-none" style={{ padding: '6% 6% 4%' }}>
+      <div>
+        <div className="flex items-center justify-between font-mono uppercase" style={{ fontSize: 11, letterSpacing: '0.3em', color: '#67e8f9' }}>
+          <span>SEC // 03 · Executive Summary</span>
+          <span>ECOSYSTEM PARTNERS</span>
+        </div>
+        <h2 className="mt-4" style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 800, lineHeight: 1.04, color: '#f8fafc' }}>Acceleration at scale</h2>
+        <p className="mt-3" style={{ fontSize: 14.5, lineHeight: 1.55, color: '#cbd5e1', maxWidth: '92%' }}>One platform for your ecosystem: startups find resources, meet mentors, receive AI-driven strategy and follow a clear path from idea to investment, while you manage and measure the whole program.</p>
+        <div className="mt-4 grid grid-cols-3" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
+          {[['Right resources, right time', 'The right resource to the right founder at the right moment.'], ['The right people', 'Mentors, advisors and investors who can help.'], ['Knowing what works', 'Visibility into progress, resource use and outcomes.']].map(([t, d], i) => (
+            <div key={t} className="pt-2.5 pr-3" style={{ paddingLeft: i ? 12 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#f8fafc', lineHeight: 1.2 }}>{t}</div>
+              <div className="mt-1" style={{ fontSize: 11.5, lineHeight: 1.4, color: '#94a3b8' }}>{d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-5" style={{ borderTop: '1px solid rgba(103,232,249,0.45)' }}>
+        {[['5,800', 'Office locations'], ['130', 'Countries'], ['1,500', 'U.S. locations'], ['350+', 'Network members'], ['04', 'Global hubs']].map(([v, l], i) => (
+          <div key={l} className="pt-2.5" style={{ paddingLeft: i ? 10 : 0, borderLeft: i ? '1px solid rgba(255,255,255,0.12)' : undefined }}>
+            <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 800, lineHeight: 1, color: '#f8fafc' }}>{v}</div>
+            <div className="mt-1 font-mono uppercase" style={{ fontSize: 9, letterSpacing: '0.16em', color: '#67e8f9' }}>{l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
 );
 
 /** Closing page. */

@@ -12,8 +12,20 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import {
   EcosystemCoverPage, EcosystemObjectivePage, EcosystemProposalPage, EcosystemProposalMorePage,
-  EcosystemVideoPage, EcosystemPricingPage, EcosystemWhyPage, EcosystemClosingPage,
+  EcosystemPricingPage, EcosystemWhyPage, EcosystemClosingPage, EcosystemSummaryPage,
 } from './ecosystem/EcosystemPages';
+import { SupportingDividerPage } from './apex/ProposalPages';
+import { PartnersAboutPage, PartnersEcosystemPage } from './apex/PartnersPages';
+import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
+import { EcosystemValuePage } from './ecosystem/EcosystemValuePage';
+import { EcosystemOutcomesPage } from './ecosystem/EcosystemOutcomesPage';
+import { EcosystemConclusionPage } from './ecosystem/EcosystemConclusionPage';
+import { EcosystemOpportunityPage } from './ecosystem/EcosystemOpportunityPage';
+import { EcosystemTeamPage, EcosystemRoadmapPage, EcosystemNextStepsPage } from './ecosystem/EcosystemTeamRoadmap';
+import sfhLogo from '@/assets/sfh-logo-combined.png';
+
+const CONTACT_URL = 'https://startupfactoryhub.com/ecosystempartners';
+const TOTAL = '21';
 
 const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode; hard?: boolean }>(({ children, hard }, ref) => (
   <div ref={ref} data-density={hard ? 'hard' : 'soft'} className="overflow-hidden" style={{ background: '#ffffff' }}>{children}</div>
@@ -25,9 +37,21 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   { key: 'objective', node: <EcosystemObjectivePage /> },
   { key: 'proposal', node: <EcosystemProposalPage /> },
   { key: 'proposal-more', node: <EcosystemProposalMorePage /> },
-  { key: 'video', node: <EcosystemVideoPage /> },
   { key: 'pricing', node: <EcosystemPricingPage /> },
   { key: 'why', node: <EcosystemWhyPage /> },
+  { key: 'appendix', node: <SupportingDividerPage /> },
+  { key: 'how', node: <EcosystemValuePage /> },
+  { key: 'about', node: <PartnersAboutPage /> },
+  { key: 'ecosystem', node: <PartnersEcosystemPage /> },
+  { key: 'summary', node: <EcosystemSummaryPage /> },
+  { key: 'opportunity', node: <EcosystemOpportunityPage total={TOTAL} /> },
+  { key: 'conclusion', node: <EcosystemConclusionPage logo={sfhLogo} url={CONTACT_URL} /> },
+  { key: 'outcomes', node: <EcosystemOutcomesPage /> },
+  { key: 'implementation', node: <EcosystemRoadmapPage /> },
+  { key: 'next', node: <EcosystemNextStepsPage /> },
+  { key: 'team', node: <EcosystemTeamPage /> },
+  { key: 'ar-events', node: <PartnersARPage /> },
+  { key: 'nasdaq', node: <PartnersNasdaqPage /> },
   { key: 'closing', node: <EcosystemClosingPage /> },
 ];
 /** Back hard cover: same design as the front cover. */
