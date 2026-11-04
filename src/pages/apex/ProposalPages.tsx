@@ -42,9 +42,9 @@ export const ProposalObjectivePage = () => (
   </Shell>
 );
 
-/** Page 4 — why APEX should care. */
+/** Page 5 — why APEX should care. */
 export const ProposalWhyPage = () => (
-  <Shell no="04" label="WHY THIS MATTERS TO APEX">
+  <Shell no="05" label="WHY THIS MATTERS TO APEX">
     <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.06 }}>More businesses ready to compete, with the same counselors</h2>
     <p className="mt-4" style={{ fontSize: 15, lineHeight: 1.6, color: BODY }}>
       APEX Accelerators are the front door for American businesses entering government contracting, with more than 300 offices giving one-on-one help.
@@ -76,29 +76,49 @@ const SEVEN = [
   ['Client Progress & Impact Intelligence', 'Provide APEX counselors and program administrators with a centralized dashboard to monitor client progress, identify support needs, track milestones, and measure program outcomes. Turn client activity into actionable insights that help APEX improve service delivery and demonstrate its impact.'],
 ];
 
-/** Page 2 — the proposal: title, promise, and its seven capabilities (founder text, 2026-11-03). */
+const SevenRows = ({ items, from }: { items: typeof SEVEN; from: number }) => (
+  <div className="flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
+    {items.map(([t, d], i) => (
+      <div key={t} className="flex gap-4 py-2.5" style={{ borderBottom: '1px solid rgba(15,23,42,0.08)' }}>
+        <div style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 800, color: P, width: 36, lineHeight: 1 }}>{from + i + 1}</div>
+        <div className="flex-1">
+          <div style={{ fontSize: 16, fontWeight: 800 }}>{t}</div>
+          <div className="mt-1" style={{ fontSize: 13.8, lineHeight: 1.5, color: BODY }}>{d}</div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/** Page 2 — the proposal opens: title, promise, intro, capabilities 1–4 (founder text, 2026-11-03).
+ *  All seven points on one page overflowed the fixed page — split across two pages. */
 export const ProposalSevenPage = () => (
   <Shell no="02" label="THE PROPOSAL">
-    <h2 style={{ fontFamily: SERIF, fontSize: 31, fontWeight: 800, lineHeight: 1.08 }}>APEX Accelerator — AI-Powered Innovation Ecosystem</h2>
+    <h2 style={{ fontFamily: SERIF, fontSize: 30, fontWeight: 800, lineHeight: 1.08 }}>APEX Accelerator — AI-Powered Innovation Ecosystem</h2>
     <p className="mt-2" style={{ fontSize: 15.5, lineHeight: 1.45, color: P, fontWeight: 700 }}>One centralized platform. Smarter support. Better outcomes.</p>
-    <p className="mt-2" style={{ fontSize: 13.5, lineHeight: 1.5, color: BODY }}>We don’t replace APEX counselors. We empower them and their clients with an AI-powered platform that centralizes resources, streamlines workflows, and connects businesses with the right opportunities, expertise, and support to accelerate their growth.</p>
-    <div className="mt-3 flex-1 min-h-0 flex flex-col justify-between" style={{ borderTop: '1px solid rgba(15,23,42,0.12)' }}>
-      {SEVEN.map(([t, d], i) => (
-        <div key={t} className="flex gap-4 py-1.5" style={{ borderBottom: '1px solid rgba(15,23,42,0.08)' }}>
-          <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 800, color: P, width: 32, lineHeight: 1 }}>{i + 1}</div>
-          <div className="flex-1">
-            <div style={{ fontSize: 14.5, fontWeight: 800 }}>{t}</div>
-            <div className="mt-0.5" style={{ fontSize: 12.8, lineHeight: 1.42, color: BODY }}>{d}</div>
-          </div>
-        </div>
-      ))}
+    <p className="mt-2" style={{ fontSize: 13.8, lineHeight: 1.5, color: BODY }}>We don’t replace APEX counselors. We empower them and their clients with an AI-powered platform that centralizes resources, streamlines workflows, and connects businesses with the right opportunities, expertise, and support to accelerate their growth.</p>
+    <div className="mt-3 flex-1 min-h-0 flex flex-col">
+      <SevenRows items={SEVEN.slice(0, 4)} from={0} />
     </div>
   </Shell>
 );
 
-/** Page 3 — annual location licensing, additional AI credits and the next step. */
+/** Page 3 — the proposal continues: capabilities 5–7 and the closing line. */
+export const ProposalSevenMorePage = () => (
+  <Shell no="03" label="THE PROPOSAL · CONTINUED">
+    <div className="flex-1 min-h-0 flex flex-col">
+      <SevenRows items={SEVEN.slice(4)} from={4} />
+    </div>
+    <div className="mt-5 rounded-2xl p-5" style={{ background: 'linear-gradient(135deg,#1e1033,#3b1d6e)', color: '#f5f3ff' }}>
+      <p style={{ fontSize: 17, lineHeight: 1.45, fontWeight: 700 }}>One centralized platform. Smarter support. Better outcomes.</p>
+      <p className="mt-1.5" style={{ fontSize: 13.5, lineHeight: 1.5, color: '#ddd6fe' }}>Seven capabilities, one ecosystem — working for APEX counselors and the businesses they serve.</p>
+    </div>
+  </Shell>
+);
+
+/** Page 4 — annual location licensing, additional AI credits and the next step. */
 export const ProposalPricingPage = ({ url }: { url: string }) => (
-  <Shell no="03" label="HOW PRICING IS STRUCTURED">
+  <Shell no="04" label="HOW PRICING IS STRUCTURED">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Simple to start, grows with the program</h2>
     <div className="mt-4 grid grid-cols-2 gap-3">
       {[
