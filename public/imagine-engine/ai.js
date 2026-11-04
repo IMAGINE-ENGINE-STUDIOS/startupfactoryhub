@@ -176,13 +176,26 @@
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
         else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEBuild.validateSource(a.name, nc); window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
         else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
-          var cur = window.__IEFiles.get(a.name);
-          if (cur == null) { var rf = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (f) { return f.name === a.name; })[0]; if (rf && typeof rf.content === "string") cur = rf.content; }
+          // Resolve the target across BOTH stores and the App.tsx naming
+          // collision: the canvas-generated Dev file is "App.tsx" while the
+          // model usually aims at "apps/App.tsx". Patch the file that EXISTS
+          // and write back under its real name.
+          var cur = window.__IEFiles.get(a.name), rname = a.name;
+          if (cur == null) {
+            var rawFiles = (window.__IE && window.__IE.raw && window.__IE.raw.files) || [];
+            var variants = [a.name, a.name.replace(/^apps\//, ""), "apps/" + a.name.replace(/^apps\//, "")];
+            for (var vi = 0; vi < variants.length && cur == null; vi++) {
+              var v = variants[vi], got = window.__IEFiles.get(v);
+              if (got != null) { cur = got; rname = v; break; }
+              var rf = rawFiles.filter(function (f) { return f.name === v; })[0];
+              if (rf && typeof rf.content === "string") { cur = rf.content; rname = v; }
+            }
+          }
           if (cur == null) { done.push("Missing file " + a.name); return; }
           var next = window.__IEBuild.patch(cur, a.edits);
-          window.__IEBuild.validateSource(a.name, next);
-          window.__IEFiles.put(a.name, next); try { localStorage.setItem("ie-live:" + a.name, next); } catch (e) {}
-          done.push("Edited " + a.name + " (" + a.edits.length + " changes)");
+          window.__IEBuild.validateSource(rname, next);
+          window.__IEFiles.put(rname, next); try { if (/^apps\//.test(rname)) localStorage.setItem("ie-live:" + rname, next); } catch (e) {}
+          done.push("Edited " + rname + " (" + a.edits.length + " changes)");
         }
         else if (a.type === "dispatchApp" && a.action) { var n2 = window.__IEAppBus.broadcast(a.action, a.payload); done.push("Sent " + a.action + " to " + n2 + " app" + (n2 === 1 ? "" : "s")); }
         else if (a.type === "addLiveApp" && (a.code || a.content) && window.__IEFiles) { window.__IEBuild.validateSource("apps/" + a.name + (a.kind === "html" ? ".html" : ".tsx"), a.code || a.content); var lf = window.__IEFiles.liveApp(a.name || "App", a.code || a.content, a.kind); done.push("Live app " + (lf || a.name || "App")); }
