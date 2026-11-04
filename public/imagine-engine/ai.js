@@ -559,7 +559,7 @@
       if (m.hidden) return; // internal build machinery: model context only, never shown (founder: builds happen without showing code or instructions)
       if (m.role === "user") h += '<div class="iea-u">' + esc(m.content) + "</div>";
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
-      else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + fileChips(m.done) + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
+      else h += '<div class="iea-a">' + md(m.display != null ? m.display : (m.chat ? m.content : stripFences(m.content))) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + fileChips(m.done) + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
     });
     if (busy && liveProgress) h += '<div class="iea-a">' + md(liveProgress) + "</div>";
     if (busy) h += '<div class="iea-a"><span class="iea-dot"></span><span class="iea-dot" style="animation-delay:.2s"></span><span class="iea-dot" style="animation-delay:.4s"></span> <span id="iea-stage" style="color:#a1a1aa;font-size:11px">' + esc(stageText()) + '</span></div>';
@@ -592,19 +592,19 @@
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(messages.slice(-60))); } catch (e) {} }
 
-  function send(text) {
+  function send(text, opts) {
     text = (text || "").trim();
     var ready = atts.filter(function (a) { return a.url; });
     if (ready.length) { text += "\n\nReference files:\n" + ready.map(function (a) { return "- " + a.name + " (" + (a.type || "file") + "): " + a.url; }).join("\n"); atts = atts.filter(function (a) { return !a.url; }); drawAtts(); }
     if (!text || busy) return;
     var t = token();
-    messages.push({ role: "user", content: text });
+    messages.push({ role: "user", content: text, hidden: !!(opts && opts.hidden) });
     input.value = "";
     if (!t) { messages.push({ role: "assistant", error: true, content: "Please sign in to Startup Factory Hub to use Genius AI." }); render(); save(); return; }
     var mode = model === "chat" ? "chat" : "build";
     liveProgress = ""; progressLabel = "Reading your project..."; stageAt = Date.now(); stageKind = mode === "chat" ? "chat" : buildKind(text);
     busy = true; render();
-    migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode); if (window.__IEPin) { window.__IEPin = null; drawAtts(); } }, 200); });
+    migrateLegacy().then(function () { setTimeout(function () { doSend(t, text, mode, !!(opts && opts.internal)); if (window.__IEPin) { window.__IEPin = null; drawAtts(); } }, 200); });
   }
   /* 3D Studio route: 3D world/level/scene requests (or any Build while a studio scene is on the page) go to Genius 3D inside the studio frame */
   var STUDIO3D = /\b(3d|three[- ]?d)\b|\bin the (3d )?studio\b|\b(new|another|next|game|playable|sci[- ]?fi|cyberpunk|racing|open[- ]world)\s+(level|world|map|arena)\b|\b(level|world|arena)\b.*\b(character|player|npc|car|vehicle|sketchfab|drivable|walk)|\b(game|simulator|shooter|racer|platformer|rpg)\b.*\b(character|player|level|world|drivable|car|sketchfab)\b|\bsketchfab\b|\bdrivable\b|\bplaza\b/i;
@@ -661,8 +661,8 @@
     try { var ring = JSON.parse(localStorage.getItem("ie-errors") || "[]"); if (ring.length) localStorage.removeItem("ie-errors"); return ring.slice(-20); } catch (e) { return []; }
   }
   window.__IENoteError = ieNoteError;
-  function doSend(t, text, mode) {
-    if (mode !== "chat" && !doSend._retried && (STUDIO3D.test(text) || studioFrames().length && /\b(scene|level|model|object|this|it)\b/i.test(text) && !/\b(page|website|app|dashboard|store)\b/i.test(text))) {
+  function doSend(t, text, mode, internal) {
+    if (!internal && mode !== "chat" && !doSend._retried && (STUDIO3D.test(text) || studioFrames().length && /\b(scene|level|model|object|this|it)\b/i.test(text) && !/\b(page|website|app|dashboard|store)\b/i.test(text))) {
       if (send3DStudio(text)) { busy = false; render(); save(); return; }
     }
     var history = messages.filter(function (m) { return !m.error; }).map(function (m) { return { role: m.role, content: m.content }; });
@@ -722,7 +722,7 @@
         }
         if (!finalParsed.list.length && !doSend._retried) throw new Error("The AI returned no applicable changes; no files were changed");
         var ph = parsePhases(res.j.text || "");
-        messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```[\s\S]*?```/g, "").replace(/\n{3,}/g, "\n\n").trim(), done: out.done, phases: ph });
+        messages.push({ role: "assistant", content: res.j.text || "", display: stripFences(out.text || ""), done: out.done, phases: ph });
         if (res.j.credits && res.j.credits.refunded) messages.push({ role: "assistant", error: true, content: "Genius hit an error, so your credits for that request were returned." });
         if (ph && autoPhases && ph.current < ph.list.length) { var lastM = messages[messages.length - 1]; setTimeout(function () { nextPhase(lastM, true); }, 600); }
         else if (!ph || ph.current >= ph.list.length) autoPhases = false;
@@ -749,6 +749,14 @@
   var vRec = null, vChunks = [], talkOn = false, talkTimer = 0, talkHeard = 0, vSpeaking = false, vListening = false;
   function vBridge() { try { var w = window; while (w) { if (w.__sfhVoice) return w.__sfhVoice; if (w.parent === w) return null; w = w.parent; } } catch (e) {} return null; }
   function vNote(t) { var s = root.querySelector("#iea-tab"); if (!s) return; s.textContent = t; setTimeout(function () { try { render(); } catch (e) {} }, 2800); }
+  function stripFences(t) {
+    var lines = String(t || "").split("\n"), out = [], inF = false;
+    for (var i = 0; i < lines.length; i++) {
+      if (/^\s*```/.test(lines[i])) { inF = !inF; continue; }
+      if (!inF) out.push(lines[i]);
+    }
+    return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
   function vStrip(t) { return String(t || "").replace(/```[\s\S]*?```/g, " code block ").replace(/`([^`]*)`/g, "$1").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/https?:\/\/\S+/g, "").replace(/[#>*_~|]{2,}/g, " ").replace(/\s+/g, " ").trim().slice(0, 1200); }
   function vStopTracks(stream) { try { stream && stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
   function vRecord(onBlob) {
@@ -880,7 +888,7 @@
     if (healAt[f] && Date.now() - healAt[f] < 20000) return false; healAt[f] = Date.now();
     var srcTxt = ""; try { srcTxt = (window.__IEFiles && window.__IEFiles.get(f)) || ""; } catch (e) {}
     if (model === "chat") { model = "build"; try { localStorage.setItem("iea-model", model); } catch (e) {} }
-    send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : ""));
+    send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : "", { hidden: true, internal: true });
     return true;
   };
   // Automatic repair: at most 2 tries per file every 5 minutes, waits while Genius is busy
