@@ -258,15 +258,18 @@ serve(async (req) => {
     const tab = String(body.tab || "canvas").slice(0, 20);
 
     // Smart Model Router: fast (Groq 8B) for chat/tweaks, standard (Groq 70B -> Gemini) for builds,
-    // heavy (OpenAI / Gemini Pro) only for paid plans. Credits = real cost x tier markup / $0.05.
+    // heavy (OpenAI / Gemini Pro) only for paid plans. Global Credit (founder, 2026-11-03):
+    // 1 Credit = $0.06 and every AI action costs exactly 1 Credit on every platform.
+    // Raw USD cost is still recorded in the ledger tag and the monthly usage file for profit reporting.
     const light = (body.model === "chat" && body.mode !== "chat") || !!body.context?.plain;
     const lastText = String(messages[messages.length - 1]?.content || "");
     const wantsHeavy = body.mode !== "chat" && (body.model === "heavy" || /\b(game|3d|webgl|three\.?js|full app|backend|api|computer vision|machine learning|ml model|sensor|complex|multi-?page|physics)\b/i.test(lastText));
     const { data: planRow } = await admin.from("user_ai_credits").select("plan").eq("user_id", user.id).maybeSingle();
     const paid = isAdmin || (!!planRow?.plan && planRow.plan !== "free");
     const tier: Tier = /llama/i.test(String(settings.model || "")) ? "llama" : light ? "fast" : wantsHeavy && paid ? "heavy" : "standard";
-    const MARKUP: Record<Tier, number> = { fast: 50, standard: 10, vision: 5, heavy: 2, free: 10, llama: 10 };
-    const RESERVE: Record<Tier, number> = { fast: 0.2, standard: 1, vision: 1, heavy: 2, free: 1, llama: 1 };
+    const GLOBAL_CREDIT_USD = 0.06;
+    const CREDITS_PER_ACTION = 1;
+    const RESERVE: Record<Tier, number> = { fast: 1, standard: 1, vision: 1, heavy: 1, free: 1, llama: 1 };
     const reserve = isAdmin ? 0 : RESERVE[tier];
     let balance: number | null = null;
     if (reserve > 0) {
@@ -312,11 +315,17 @@ No invented production records: use empty states unless the user supplied data. 
     }
     if (!routed || !text.trim()) throw new Error("The AI produced no result");
     const realCost = accumulatedCost;
-    let price = isAdmin ? 0 : Math.max(0.05, Math.round((realCost * MARKUP[tier] / 0.05) * 100) / 100);
+    let price = isAdmin ? 0 : CREDITS_PER_ACTION;
     const tag = `${tier}:${routed.provider}/${routed.model}:${inTok}/${outTok}:$${realCost.toFixed(6)}`;
     if (!isAdmin) {
       const diff = Math.round((price - reserve) * 100) / 100;
       if (diff < 0) await grant(-diff, "adjust:" + tag);
+      else if (diff === 0) {
+        // Flat 1-Credit charge: reserve already took the full price. Record the raw-cost
+        // tag in the ledger at zero delta so profit reporting keeps the real cost trail.
+        const { data: nb } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: 0, _reason: "usage:" + tag });
+        if (Number(nb) >= 0) balance = Number(nb);
+      }
       else if (diff > 0) {
         const { data: nb } = await admin.rpc("ai_credits_consume", { _user_id: user.id, _amount: diff, _reason: "usage:" + tag });
         if (Number(nb) >= 0) balance = Number(nb); else price = reserve;
@@ -324,7 +333,7 @@ No invented production records: use empty states unless the user supplied data. 
     }
     failRefund = null;
     const cost = realCost;
-    const charge = price * 0.05;
+    const charge = price * GLOBAL_CREDIT_USD;
     try {
       const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
       const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
