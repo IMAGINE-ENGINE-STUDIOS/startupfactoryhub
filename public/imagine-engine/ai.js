@@ -624,6 +624,22 @@
     lastStudioJson = cur;
     studioFrames().forEach(function (f) { try { f.contentWindow.postMessage({ __IEStudio: "load", json: cur }, "*"); } catch (e) {} });
   }, 1500);
+  /* Client error beacon (2026-11-03): browser-side build failures never
+   * reached the server, so they were invisible. Record them in a small
+   * local ring and piggyback them on the next build request; imagine-ai
+   * files them into the monthly usage record where they can be counted. */
+  function ieNoteError(kind, msg) {
+    try {
+      var ring = JSON.parse(localStorage.getItem("ie-errors") || "[]");
+      ring.push({ at: new Date().toISOString(), kind: String(kind || "build"), msg: String(msg || "").slice(0, 300) });
+      localStorage.setItem("ie-errors", JSON.stringify(ring.slice(-50)));
+    } catch (e) {}
+    try { if (window.__IErrors) window.__IErrors.push({ kind: kind, msg: String(msg || "").slice(0, 300) }); } catch (e) {}
+  }
+  function ieTakeErrors() {
+    try { var ring = JSON.parse(localStorage.getItem("ie-errors") || "[]"); if (ring.length) localStorage.removeItem("ie-errors"); return ring.slice(-20); } catch (e) { return []; }
+  }
+  window.__IENoteError = ieNoteError;
   function doSend(t, text, mode) {
     if (mode !== "chat" && !doSend._retried && (STUDIO3D.test(text) || studioFrames().length && /\b(scene|level|model|object|this|it)\b/i.test(text) && !/\b(page|website|app|dashboard|store)\b/i.test(text))) {
       if (send3DStudio(text)) { busy = false; render(); save(); return; }
@@ -638,7 +654,7 @@
     window.__IEBuild.prepare().then(function () { return     fetch(FN, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON, Authorization: "Bearer " + t },
-      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, context: Object.assign(ctx(text), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode, stream: true, protocol: "records-v1" }),
+      body: JSON.stringify({ action: "chat", tab: currentTab(), messages: history, clientErrors: ieTakeErrors(), context: Object.assign(ctx(text), { intent: REBUILD.test(text) ? "rebuild" : "edit", build: buildKind(text), backend: (window.__IEBackend && window.__IEBackend.summary().slice(0, 4000)) || undefined }), model: mode === "chat" ? "chat" : model, mode: mode, stream: true, protocol: "records-v1" }),
     }); })
       .then(function (r) { return window.__IEBuild.readResponse(r, function (event) {
         if (event.type === "delta") {
@@ -651,7 +667,7 @@
       }); })
       .then(function (res) {
         if (res.j.credits && res.j.credits.balance != null) window.__IECredits.set(res.j.credits.balance);
-        if (!res.ok || res.j.error) { messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
+        if (!res.ok || res.j.error) { ieNoteError("server", res.j.error || ("HTTP " + (res.j.status || "?"))); messages.push({ role: "assistant", error: true, content: res.j.error || "Something went wrong." }); if (res.j.code === "no_credits") window.__IECredits.openPlans(); return; }
         if (mode === "chat") { messages.push({ role: "assistant", content: res.j.text || "", display: res.j.text, done: [], chat: true }); return; }
         needFix = false;
         var kindNow = buildKind(text), exNow = extractActions(res.j.text || "").list;
@@ -679,7 +695,7 @@
         }
         doSend._retried = false;
       })
-      .catch(function (e) { autoPhases = false; doSend._retried = false; messages.push({ role: "assistant", error: true, content: (e.message || "Network error. Please try again.") + (applied.length ? " Completed changes were kept." : "") }); })
+      .catch(function (e) { autoPhases = false; doSend._retried = false; ieNoteError("build", e.message || "Network error"); messages.push({ role: "assistant", error: true, content: (e.message || "Network error. Please try again.") + (applied.length ? " Completed changes were kept." : "") }); })
       .then(function (v) { if (v === "retry") { render(); return; } busy = false; liveProgress = ""; render(); save(); input.focus(); });
   }
   go.onclick = function () { send(input.value); };
@@ -841,7 +857,7 @@
   window.addEventListener("message", function (ev) {
     if (ev.origin !== location.origin && ev.origin !== "null") return;
     var d = ev.data; if (!d || typeof d !== "object") return;
-    if (d.ie === "liveapp-error") { try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message + " (Genius AI is repairing it)", "error"); } catch (e) {} setTimeout(function () { autoHeal(d); }, 800); }
+    if (d.ie === "liveapp-error") { ieNoteError("liveapp", (d.file || "") + ": " + (d.message || "")); try { window.__IE && window.__IE.log("Live app " + d.file + " crashed: " + d.message + " (Genius AI is repairing it)", "error"); } catch (e) {} setTimeout(function () { autoHeal(d); }, 800); }
     if (d.ie === "liveapp-autoheal") window.__IEAutoHeal(d);
   });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); } });
