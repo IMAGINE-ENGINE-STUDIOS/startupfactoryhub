@@ -767,15 +767,15 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
   <div ref={ref} className="overflow-hidden" style={{ background: 'transparent' }}>{children}</div>
 ));
 BookPage.displayName = "BookPage";
-/* ── SPONSOR PLANS — the four original Circles carrying the Coreis packages
+/* ── SPONSOR PLANS — the four original Circles carrying the sponsorship packages
    (same data as the Sponsorship page, founder 2026-11-03). ── */
 const SPONSOR_PLANS = [
-  { name: 'EARTHLING', packageName: 'Community Partner', reach: 'Community-wide announcement', price: '$5,000 / year', accent: '#059669', essence: 'Brand visibility and access to the Startup Factory Hub community.', includes: ['Official social media announcement introducing Coreis as an SFH partner', 'Dedicated email announcement to the SFH community', 'Dedicated Coreis listing in the Perks section of the startup dashboard', 'Share exclusive offers, benefits, and services with participating startups'] },
+  { name: 'EARTHLING', packageName: 'Community Partner', reach: 'Community-wide announcement', price: '$5,000 / year', accent: '#059669', essence: 'Brand visibility and access to the Startup Factory Hub community.', includes: ['Official social media announcement introducing your company as an SFH partner', 'Dedicated email announcement to the SFH community', 'Dedicated partner listing in the Perks section of the startup dashboard', 'Share exclusive offers, benefits, and services with participating startups'] },
   { name: 'STAR', packageName: 'Event Sponsor', reach: '66+ events in 2027', price: '$15,000 / year', accent: '#0d9488', essence: 'Year-round brand visibility across the SFH event portfolio.', includes: ['Everything in EARTHLING · Community Partner', 'Official sponsorship recognition across all SFH events, virtual and in-person', 'Brand visibility on event promotions, registration pages, and communications', 'Recognition as an official event sponsor during events', 'Connect with startups, investors, mentors, and industry leaders', 'Exposure across a planned calendar of 66 or more events in 2027'] },
-  { name: 'NEBULA', packageName: 'Strategic Partner & Featured Speaker', reach: 'Stage, panels & spotlight', price: '$25,000 / year', accent: '#0ea5b7', essence: 'Thought leadership, executive visibility, and direct engagement with the innovation ecosystem.', includes: ['Everything in EARTHLING and STAR', 'Speaking opportunities for Coreis executives and team members at selected SFH events', 'Showcase Coreis expertise, services, and company initiatives', 'Participation in panels, workshops, webinars, and industry discussions', 'Featured speaker recognition in event promotions and communications', 'Engage directly with founders, investors, and ecosystem partners'] },
+  { name: 'NEBULA', packageName: 'Strategic Partner & Featured Speaker', reach: 'Stage, panels & spotlight', price: '$25,000 / year', accent: '#0ea5b7', essence: 'Thought leadership, executive visibility, and direct engagement with the innovation ecosystem.', includes: ['Everything in EARTHLING and STAR', 'Speaking opportunities for your executives and team members at selected SFH events', 'Showcase your expertise, services, and company initiatives', 'Participation in panels, workshops, webinars, and industry discussions', 'Featured speaker recognition in event promotions and communications', 'Engage directly with founders, investors, and ecosystem partners'] },
   { name: 'GALAXY', packageName: 'Cohort Strategic Partner', reach: 'Full cohort access', price: '$50,000 / year', accent: '#1f2a44', premium: true, essence: 'Become the official Satellite Partner of a selected Startup Factory Hub cohort.', includes: ['Official recognition as the Satellite Partner of the selected cohort', 'Early access to all startups in the cohort — profiles, technologies, and business opportunities', 'Personal introductions to all cohort founders', 'Explore strategic partnerships, pilot programs, and commercial collaborations', 'Brand visibility across cohort announcements, communications, and program activities', 'Participate in dedicated cohort events, workshops, and networking sessions', 'Direct engagement with emerging companies to identify technology and business opportunities'] },
 ];
-const COREIS_VALUE = [
+const SPONSOR_VALUE = [
   'Increase visibility across an international startup and innovation ecosystem.',
   'Build relationships with founders, investors, and technology leaders.',
   'Showcase expertise through speaking opportunities and industry events.',
@@ -1051,7 +1051,7 @@ const SponsorOverviewPage = () => (
               <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>PLANS</span>
             </h2>
             <p className="mt-4 max-w-[540px] text-[17.5px] leading-snug text-white/70">
-              Four partnership opportunities that plug Coreis directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
+              Four partnership opportunities that plug your company directly into the Startup Factory Hub community — startups, founders, investors, mentors and industry leaders, in one living field.
             </p>
           </div>
           <Armillary accent={NEON.cyan} />
@@ -1081,7 +1081,7 @@ const SponsorOverviewPage = () => (
         </div>
         <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
           <span className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">Entry-level community sponsorships from $50 · benefits scaled to the contribution</span>
-          <span className="font-mono text-[11.5px] uppercase tracking-[0.24em]" style={{ color: NEON.cyan }}>SFH × Coreis</span>
+          <span className="font-mono text-[11.5px] uppercase tracking-[0.24em]" style={{ color: NEON.cyan }}>SFH · Sponsorship</span>
         </div>
       </div>
     </section>
@@ -1161,12 +1161,12 @@ const SponsorValuePage = () => (
         <div className="font-mono text-[13px] tracking-[0.4em] uppercase text-[#e8c987]">Why this partnership</div>
         <h2 className="mt-3 font-futuristic font-black leading-[0.88] tracking-tight text-white" style={{ fontSize: '68px', textShadow: '0 0 54px rgba(232,201,135,0.35)' }}>
           STRATEGIC VALUE<br />
-          <span style={{ backgroundImage: 'linear-gradient(92deg, #e8c987, #67e8f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 24px rgba(232,201,135,0.5))' }}>FOR COREIS</span>
+          <span style={{ backgroundImage: 'linear-gradient(92deg, #e8c987, #67e8f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 24px rgba(232,201,135,0.5))' }}>FOR SPONSORS</span>
         </h2>
         <div className="mt-7 grid grid-cols-[1.25fr_1fr] gap-6 flex-1 min-h-0">
           <div className="relative flex flex-col gap-3">
             <span aria-hidden className="absolute left-[31px] top-4 bottom-4 w-[2px]" style={{ background: 'linear-gradient(180deg, transparent, rgba(232,201,135,0.75), rgba(103,232,249,0.75), transparent)' }} />
-            {COREIS_VALUE.map((v, i) => (
+            {SPONSOR_VALUE.map((v, i) => (
               <motion.div key={v} whileHover={{ x: 6 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }} className="relative flex items-center gap-5 flex-1">
                 <span className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full font-futuristic font-black text-[21px] text-white" style={{ background: 'linear-gradient(135deg, #0b1220, #1e293b)', border: '1px solid rgba(232,201,135,0.7)', boxShadow: '0 0 26px rgba(232,201,135,0.35)' }}>{String(i + 1).padStart(2, '0')}</span>
                 <div className="flex-1 rounded-2xl px-6 py-4" style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(232,201,135,0.30)', backdropFilter: 'blur(6px)', boxShadow: '0 0 26px -10px rgba(232,201,135,0.4)' }}>
@@ -1195,8 +1195,8 @@ const SponsorValuePage = () => (
             <div className="relative rounded-3xl px-7 py-6 overflow-hidden flex-1" style={{ background: 'linear-gradient(120deg, rgba(232,201,135,0.14), rgba(103,232,249,0.08))', border: '1px solid rgba(232,201,135,0.45)', boxShadow: '0 0 44px -10px rgba(232,201,135,0.5)' }}>
               <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.25)', animation: 'slow-spin 40s linear infinite' }} />
               <div className="relative font-mono text-[12px] tracking-[0.32em] uppercase text-[#e8c987]">Partnership objective</div>
-              <p className="relative mt-3 text-[17.5px] leading-snug text-white/90">Position Coreis as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
-              <div className="relative mt-5 font-mono text-[11px] tracking-[0.26em] uppercase text-white/40">Startup Factory Hub × Coreis · 2027</div>
+              <p className="relative mt-3 text-[17.5px] leading-snug text-white/90">Position your company as an active strategic partner in the Startup Factory Hub ecosystem, supporting innovation while building meaningful relationships and business opportunities with the next generation of companies.</p>
+              <div className="relative mt-5 font-mono text-[11px] tracking-[0.26em] uppercase text-white/40">Startup Factory Hub · 2027</div>
             </div>
           </div>
         </div>
