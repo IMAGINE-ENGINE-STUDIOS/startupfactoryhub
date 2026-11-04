@@ -1,12 +1,14 @@
 /**
- * APEX proposal — Online Video Meetings page.
- * Sits inside the proposal (after the seven capabilities, before pricing)
- * and reuses the capability-page design (TechFeaturePage) with its own
- * teal-blue theme, per the founder's direction 2026-11-03.
+ * APEX brochure — Online Video Meetings page.
+ * A platform feature page placed right after the Journey Mapping feature
+ * pages (founder, 2026-11-03), reusing the capability-page design
+ * (TechFeaturePage) with its own teal-blue theme.
  * Capabilities listed are the platform's real live-video features:
  * in-platform rooms (no Zoom/Teams), instant or calendar-booked meetings,
  * screen share, chat, reactions, raise hand, backgrounds, host controls,
  * recording, transcripts and session notes saved to the client record.
+ * Copy is kept short on purpose — the first version overflowed the fixed
+ * page and the quote band overlapped the module cards.
  * Credits: Imagine Engine Studios Corp.
  */
 import React from 'react';
@@ -19,13 +21,13 @@ const VIDEO_FEATURE: Feature = {
   section: 'Online Video Meetings',
   title: 'Online Video Meetings',
   headline: 'live-video://apex-counseling',
-  deck: 'Counselors and clients meet face to face inside the platform — no Zoom links, no Teams, no outside tools, nothing to install.',
-  lead: 'Every APEX meeting runs on the platform’s own live video: booked from the calendar, joined from the dashboard, and kept on the client’s record.',
+  deck: 'Counselors and clients meet face to face inside the platform — no Zoom, no Teams, nothing to install.',
+  lead: 'Every APEX meeting runs on the platform’s own live video — booked from the calendar, joined from the dashboard, kept on the client’s record.',
   body: [
-    'Meet anywhere, inside the platform. Start a room instantly or book ahead from the calendar — the meeting opens on Startup Factory Hub’s own live video page, and the client joins from their dashboard or a meeting link. Sessions run up to eight hours, and if a connection drops, the meeting lets you straight back in.',
-    'Everything a working session needs. Share your screen to walk a client through a SAM.gov registration, a certification form or a proposal draft. Live chat, raise hand and reactions, virtual backgrounds and blur, and host controls that let the counselor admit guests and manage the room.',
+    'Start a room instantly or book ahead from the calendar. The client joins from their dashboard or a meeting link. Sessions run up to eight hours, and a dropped connection lets you straight back in.',
+    'Share your screen to walk a client through a SAM.gov registration or a proposal draft. Live chat, raise hand and reactions, virtual backgrounds and blur, host controls — and recording, with the transcript and notes saved to the client’s record.',
   ],
-  quote: 'Record the session and the transcript and notes are saved to the client’s record — so what was agreed on the call becomes progress the whole program can see.',
+  quote: '',
   facts: [
     ['8 HRS', 'Session length'],
     ['1 CLICK', 'Join from the dashboard'],
@@ -53,6 +55,6 @@ export const VideoMeetingsPage = ({ total }: { total: string }) => (
     index={2}
     total={total}
     theme={VIDEO_THEME}
-    capLabel="PROPOSAL HIGHLIGHT // ONLINE VIDEO MEETINGS"
+    capLabel="PLATFORM FEATURE // ONLINE VIDEO MEETINGS"
   />
 );

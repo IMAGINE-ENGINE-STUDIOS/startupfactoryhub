@@ -42,9 +42,9 @@ export const ProposalObjectivePage = () => (
   </Shell>
 );
 
-/** Page 6 — why APEX should care. */
+/** Page 5 — why APEX should care. */
 export const ProposalWhyPage = () => (
-  <Shell no="06" label="WHY THIS MATTERS TO APEX">
+  <Shell no="05" label="WHY THIS MATTERS TO APEX">
     <h2 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 800, lineHeight: 1.06 }}>More businesses ready to compete, with the same counselors</h2>
     <p className="mt-4" style={{ fontSize: 15, lineHeight: 1.6, color: BODY }}>
       APEX Accelerators are the front door for American businesses entering government contracting, with more than 300 offices giving one-on-one help.
@@ -116,9 +116,9 @@ export const ProposalSevenMorePage = () => (
   </Shell>
 );
 
-/** Page 5 — annual location licensing, additional AI credits and the next step. */
+/** Page 4 — annual location licensing, additional AI credits and the next step. */
 export const ProposalPricingPage = ({ url }: { url: string }) => (
-  <Shell no="05" label="HOW PRICING IS STRUCTURED">
+  <Shell no="04" label="HOW PRICING IS STRUCTURED">
     <h2 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 800, lineHeight: 1.06 }}>Simple to start, grows with the program</h2>
     <div className="mt-4 grid grid-cols-2 gap-3">
       {[
