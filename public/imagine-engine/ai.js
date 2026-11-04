@@ -1032,6 +1032,7 @@
 /* ---------- Dev tab files + live apps (React/TSX or A-Frame HTML) ---------- */
 (function () {
   function langOf(n, l) { if (l) return l; var m = /\.(\w+)$/.exec(n); return m ? m[1] : "ts"; }
+  function pid() { var ie = window.__IE; return (ie && ie.raw && ie.raw.pid) || "default"; }
   function put(name, content, lang) {
     var ie = window.__IE; if (!ie || !ie.raw || !ie.raw.setFiles) return null;
     var id = "file_" + name.replace(/[^A-Za-z0-9]/g, "_");
@@ -1042,6 +1043,10 @@
       if (!hit) out.push({ id: id, name: name, lang: langOf(name, lang), folder: folder, content: content });
       return out;
     });
+    // Durable per-project copy of EVERY app file (not just roots): the
+    // bundle's project save does not always keep runtime-added files, and a
+    // multi-file app whose modules vanish after reload renders broken.
+    try { localStorage.setItem("ie-live:" + pid() + ":" + name, content); } catch (e) {}
     return id;
   }
   function liveApp(name, code, kind) {
@@ -1059,6 +1064,26 @@
     return file;
   }
   /* live apps read their source from the Dev tab, so edits there re-render the canvas */
-  function get(name) { var f = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (x) { return x.name === name; })[0]; return f ? f.content : localStorage.getItem("ie-live:" + name); }
+  function get(name) { var f = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (x) { return x.name === name; })[0]; if (f) return f.content; try { return localStorage.getItem("ie-live:" + pid() + ":" + name) || localStorage.getItem("ie-live:" + name); } catch (e) { return null; } }
   window.__IEFiles = { put: put, liveApp: liveApp, get: get };
+  // Rehydrate: if the bundle restored a project without some runtime-added
+  // app files, put back the stored modules of every app that is still alive
+  // (referenced by a project file or by a live app frame on the canvas), so
+  // built apps survive reloads whole and show in the project file explorer.
+  setInterval(function () {
+    var ie = window.__IE; if (!ie || !ie.raw || !ie.raw.setFiles) return;
+    var prefix = "ie-live:" + pid() + ":", stored = [];
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf(prefix) === 0) stored.push(k.slice(prefix.length)); } } catch (e) { return; }
+    if (!stored.length) return;
+    var have = {}; (ie.raw.files || []).forEach(function (f) { have[f.name] = 1; });
+    var alive = {};
+    Object.keys(have).forEach(function (n) { var m = /^apps\/([^/]+)/.exec(n); if (m) alive[m[1].replace(/\.(tsx|html)$/, "")] = 1; });
+    document.querySelectorAll('iframe[src*="liveapp.html"]').forEach(function (fr) { var m = /file=apps%2F([^%&]+)/.exec(fr.getAttribute("src") || ""); if (m) alive[decodeURIComponent(m[1]).replace(/\.(tsx|html)$/, "")] = 1; });
+    stored.forEach(function (n) {
+      if (have[n]) return;
+      var m = /^apps\/([^/]+)/.exec(n); if (!m || !alive[m[1].replace(/\.(tsx|html)$/, "")]) return;
+      var c = null; try { c = localStorage.getItem(prefix + n); } catch (e) {}
+      if (c != null) put(n, c);
+    });
+  }, 3000);
 })();
