@@ -556,6 +556,7 @@
         (SUG[tab] || SUG.canvas).map(function (s) { return "<button>" + esc(s) + "</button>"; }).join("") + "</div>";
     }
     messages.forEach(function (m, i) {
+      if (m.hidden) return; // internal build machinery: model context only, never shown (founder: builds happen without showing code or instructions)
       if (m.role === "user") h += '<div class="iea-u">' + esc(m.content) + "</div>";
       else if (m.error) h += '<div class="iea-e">' + esc(m.content) + "</div>";
       else h += '<div class="iea-a">' + md(m.display || m.content) + (m.done && m.done.length ? '<div class="iea-d">&#10003; ' + esc(m.done.join(" · ")) + "</div>" : "") + fileChips(m.done) + (m.phases && i === messages.length - 1 && !busy ? phaseBox(m) : "") + (m.chat && i === messages.length - 1 && !busy ? '<div class="iea-sug" style="margin-top:6px"><button data-impl>Build this plan</button></div>' : "") + "</div>";
@@ -680,7 +681,8 @@
         if (event.type === "delta") {
           streamed += event.text; if (mode !== "chat") { try { streamParser.feed(event.text); } catch (fe) { ieNoteError("stream", fe.message); } }
           var partial = streamParser.result();
-          liveProgress = mode === "chat" ? streamed : partial.clean;
+          var pc = partial.clean || ""; var fi = pc.indexOf("```"); if (fi >= 0) pc = pc.slice(0, fi);
+          liveProgress = mode === "chat" ? streamed : pc;
           if (!applied.length) progressLabel = "Writing your changes (" + streamed.length + " characters)...";
           render();
         } else if (event.type === "status") { progressLabel = event.message; render(); }
@@ -694,8 +696,8 @@
         var builtApp = exNow.some(function (a) { return /^(addLiveApp|applyTemplate|updateFile|patchFile)$/.test(a.type); });
         if (kindNow === "app" && !builtApp && !doSend._retried) {
           doSend._retried = true;
-          messages.push({ role: "assistant", content: res.j.text || "" });
-          messages.push({ role: "user", content: "That did not build a working app. Build it now as a real React live app: write each file as a code fence like ```tsx file=apps/<Name>.tsx (root, export default function App) plus module fences under apps/<name>/..., using real libraries (lucide-react, framer-motion, recharts, zustand, date-fns, three/@react-three/fiber when 3D) and IE.db for saved data. No widgets, no Flow nodes." });
+          messages.push({ role: "assistant", content: res.j.text || "", hidden: true });
+          messages.push({ role: "user", hidden: true, content: "That did not build a working app. Build it now as a real React live app: write each file as a code fence like ```tsx file=apps/<Name>.tsx (root, export default function App) plus module fences under apps/<name>/..., using real libraries (lucide-react, framer-motion, recharts, zustand, date-fns, three/@react-three/fiber when 3D) and IE.db for saved data. No widgets, no Flow nodes." });
           setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
         }
         var finalParsed = extractActions(res.j.text || "");
@@ -709,8 +711,8 @@
         var renderable = out.done.some(function (d) { return /^(Live app|File |Updated |Edited |Built section|Added |Template |Table )/.test(d); });
         if (!renderable && !doSend._retried) {
           doSend._retried = true;
-          messages.push({ role: "assistant", content: res.j.text || "" });
-          messages.push({ role: "user", content: "That attempt produced nothing visible — no page sections, no files, no app. Build it now for real: for a landing page or site, emit addCustomSection actions carrying the complete content as children (headings, paragraphs, buttons, cards with real items and prices), OR write a complete React live app as a file record for apps/<Name>.tsx (export default function App). Never patch a file that does not exist yet — create it with its full content. Never create an empty page." });
+          messages.push({ role: "assistant", content: res.j.text || "", hidden: true });
+          messages.push({ role: "user", hidden: true, content: "That attempt produced nothing visible — no page sections, no files, no app. Build it now for real: for a landing page or site, emit addCustomSection actions carrying the complete content as children (headings, paragraphs, buttons, cards with real items and prices), OR write a complete React live app as a file record for apps/<Name>.tsx (export default function App). Never patch a file that does not exist yet — create it with its full content. Never create an empty page." });
           setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
         }
         if (!renderable && doSend._retried) {
@@ -720,13 +722,13 @@
         }
         if (!finalParsed.list.length && !doSend._retried) throw new Error("The AI returned no applicable changes; no files were changed");
         var ph = parsePhases(res.j.text || "");
-        messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```phases[\s\S]*?```/g, "").trim(), done: out.done, phases: ph });
+        messages.push({ role: "assistant", content: res.j.text || "", display: String(out.text || "").replace(/```[\s\S]*?```/g, "").replace(/\n{3,}/g, "\n\n").trim(), done: out.done, phases: ph });
         if (res.j.credits && res.j.credits.refunded) messages.push({ role: "assistant", error: true, content: "Genius hit an error, so your credits for that request were returned." });
         if (ph && autoPhases && ph.current < ph.list.length) { var lastM = messages[messages.length - 1]; setTimeout(function () { nextPhase(lastM, true); }, 600); }
         else if (!ph || ph.current >= ph.list.length) autoPhases = false;
         if (needFix && !doSend._retried) {
           needFix = false; doSend._retried = true;
-          messages.push({ role: "user", content: "Those Flow nodes cannot change the running app. Make the change by editing the existing apps/* file with patchFile (exact find/replace snippets copied from the current file). Do not add Flow nodes." });
+          messages.push({ role: "user", hidden: true, content: "Those Flow nodes cannot change the running app. Make the change by editing the existing apps/* file with patchFile (exact find/replace snippets copied from the current file). Do not add Flow nodes." });
           setTimeout(function () { doSend(t, text, mode); }, 50); return "retry";
         }
         doSend._retried = false;
