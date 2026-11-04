@@ -28,6 +28,7 @@ import { ApexImagineEnginePage } from './apex/ImagineEnginePage';
 import { ApexTeamPage, ApexRoadmapPage, ApexNextStepsPage } from './apex/TeamRoadmapPages';
 import { PartnersARPage, PartnersNasdaqPage } from './AcceleratorBrochure';
 import { ProposalObjectivePage, ProposalWhyPage, ProposalSevenPage, ProposalSevenMorePage, ProposalPricingPage, SupportingDividerPage } from './apex/ProposalPages';
+import { VideoMeetingsPage } from './apex/VideoMeetingsPage';
 
 const APEX_LOGO = '/partners/apex-accelerators-logo.png';
 const CONTACT_URL = 'https://startupfactoryhub.com/apex';
@@ -163,7 +164,7 @@ const Bullets = ({ items, accent = C.emerald }: { items: string[]; accent?: stri
 );
 
 /* ---------- Pages ---------- */
-const TOTAL = '38';
+const TOTAL = '39';
 const PAGES: { key: string; node: React.ReactNode }[] = [
   {
     key: 'cover',
@@ -192,6 +193,7 @@ const PAGES: { key: string; node: React.ReactNode }[] = [
   { key: 'proposal-objective', node: <ProposalObjectivePage /> },
   { key: 'proposal-seven', node: <ProposalSevenPage /> },
   { key: 'proposal-seven-more', node: <ProposalSevenMorePage /> },
+  { key: 'proposal-video', node: <VideoMeetingsPage total={TOTAL} /> },
   { key: 'proposal-pricing', node: <ProposalPricingPage url={CONTACT_URL} /> },
   { key: 'proposal-why', node: <ProposalWhyPage /> },
   { key: 'appendix', node: <SupportingDividerPage /> },

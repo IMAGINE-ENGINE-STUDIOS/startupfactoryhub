@@ -25,7 +25,7 @@ const FAINT = '#64748b';
 
 type Pattern = 'grid' | 'dots' | 'diagonal' | 'rings' | 'lines' | 'hex';
 type TitleStyle = 'outline' | 'gradient' | 'glow';
-interface Theme {
+export interface Theme {
   bg: string; panel: string; a: string; b: string; c: string; pattern: Pattern; title: TitleStyle;
   icon: LucideIcon; cmd: string; url: string; status: string;
 }
@@ -283,8 +283,8 @@ const BrandedJourney = ({ th }: { th: Theme }) => (
   </div>
 );
 
-export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string }) => {
-  const th = THEMES[index] ?? THEMES[2];
+export const TechFeaturePage = ({ f, index, total, part, image, theme, capLabel }: { f: Feature; index: number; total: string; part?: 'main' | 'detail'; image?: string; theme?: Theme; capLabel?: string }) => {
+  const th = theme ?? THEMES[index] ?? THEMES[2];
   const Icon = th.icon;
   const accents = [th.a, th.b];
   const factIcons = [ListChecks, Star, Activity];
@@ -311,7 +311,7 @@ export const TechFeaturePage = ({ f, index, total, part, image }: { f: Feature; 
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right" style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.2em', color: DIM, lineHeight: 1.7 }}>
-              <div>CAPABILITY {f.no} / 14 // {f.section.toUpperCase()}</div>
+              <div>{capLabel ?? `CAPABILITY ${f.no} / 14 // ${f.section.toUpperCase()}`}</div>
               <div style={{ color: FAINT }}>EDITION 2026</div>
             </div>
             <img src={APEX_LOGO} alt="APEX Accelerators" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
