@@ -7,7 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useGeniusPlan } from '@/hooks/useGeniusPlan';
 import { GENIUS_PLANS, GENIUS_PLAN_ORDER, PLAN_LABELS, SERVER_PLAN_TO_KEY, CREDIT_PRESETS, creditBonus, creditsForUsd, type GeniusPlanKey } from '@/lib/genius-plans';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp, Settings2, Coins, ChevronDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sparkles, Zap, Crown, Building2, Check, Loader2, RefreshCw, ArrowUp, Settings2, Coins } from 'lucide-react';
 
 const ICONS: Record<GeniusPlanKey, typeof Zap> = {
   free: Sparkles,
@@ -32,7 +33,6 @@ export default function GeniusAIPlans() {
   const isLegacy = usage.plan !== 'free' && !SERVER_PLAN_TO_KEY[usage.plan];
 
   const [buyAmount, setBuyAmount] = useState('60');
-  const [presetOpen, setPresetOpen] = useState(false);
   const buyUsd = Number(buyAmount) || 0;
 
   const handleSubscribe = async (priceId: string, amount?: number) => {
@@ -194,25 +194,16 @@ export default function GeniusAIPlans() {
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">Choose an amount</p>
-              <div className="relative">
-                <button type="button" onClick={() => setPresetOpen((o) => !o)} className="w-full flex items-center justify-between px-3 py-2 rounded-md border border-input bg-background text-sm hover:bg-accent/40">
-                  <span>{CREDIT_PRESETS.includes(buyUsd) ? `$${buyUsd} - ${creditsForUsd(buyUsd).toLocaleString()} credits${creditBonus(buyUsd) ? ` (${Math.round(creditBonus(buyUsd) * 100)}% bonus)` : ''}` : 'Custom amount'}</span>
-                  <ChevronDown className={`h-4 w-4 opacity-60 transition-transform ${presetOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {presetOpen && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setPresetOpen(false)} />
-                    <div className="absolute left-0 right-0 top-full mt-1 z-30 rounded-md border bg-popover text-popover-foreground shadow-lg max-h-64 overflow-y-auto py-1">
-                      {CREDIT_PRESETS.map((usd) => (
-                        <button type="button" key={usd} onClick={() => { setBuyAmount(String(usd)); setPresetOpen(false); }} className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-accent text-left">
-                          <span>${usd} - {creditsForUsd(usd).toLocaleString()} credits{creditBonus(usd) ? ` (${Math.round(creditBonus(usd) * 100)}% bonus)` : ''}</span>
-                          {buyUsd === usd && <Check className="h-4 w-4" />}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+              <Select value={CREDIT_PRESETS.includes(buyUsd) ? String(buyUsd) : ''} onValueChange={setBuyAmount}>
+                <SelectTrigger><SelectValue placeholder="Custom amount" /></SelectTrigger>
+                <SelectContent className="bg-background backdrop-blur-none">
+                  {CREDIT_PRESETS.map((usd) => (
+                    <SelectItem key={usd} value={String(usd)}>
+                      ${usd} - {creditsForUsd(usd).toLocaleString()} credits{creditBonus(usd) ? ` (${Math.round(creditBonus(usd) * 100)}% bonus)` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">Or enter any amount (USD, $15 minimum)</p>
@@ -228,7 +219,7 @@ export default function GeniusAIPlans() {
             </Button>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            $0.05 per credit. Bonus credits: 5% from $60, 8% from $100, 12% from $250, 15% from $500. No maximum. Credits never expire. All sales are final.
+            $0.06 per credit — one single price everywhere. No maximum. Credits never expire. All sales are final.
           </p>
         </CardContent>
       </Card>
@@ -237,8 +228,8 @@ export default function GeniusAIPlans() {
       <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2">
         <p className="text-xs font-semibold text-foreground">How credits work</p>
         <ul className="space-y-1 text-[11px] text-muted-foreground">
-          <li>• 1 credit = 1 AI build (a new section, database table, automation or page redesign).</li>
-          <li>• Quick chat answers and small text or style tweaks cost 0.2 credits (5 per credit).</li>
+          <li>• 1 credit = 1 AI action (a build, a new section, database table, automation, page redesign — or a chat answer).</li>
+          <li>• Every AI action costs exactly 1 credit — builds, chats and tweaks alike, at the same $0.06 price whether credits come from a plan or are bought separately.</li>
           <li>• Editing by hand, undo, redo and restoring versions are always free.</li>
           <li>• Everyone gets 100 welcome credits plus 5 free credits every day.</li>
           <li>• Monthly plans add credits each billing month. Unused credits roll over while you stay subscribed.</li>
