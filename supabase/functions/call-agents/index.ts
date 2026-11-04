@@ -31,6 +31,19 @@ const MODELS: Record<string, { inPrice: number; outPrice: number }> = {
   "llama-3.1-8b-instant": { inPrice: 0.05, outPrice: 0.08 },
 };
 const DEFAULT_MODEL = "llama-3.3-70b-versatile";
+/* Voice v3 Phase 1 — PINNED FAST VOICE BRAIN. Voice turns (chat
+ * action with fast_voice: true) try this route FIRST: a model that
+ * is fast on Groq AND already the platform's workhorse, so a voice
+ * reply never waits on the agent ladder's slow fallthrough hops
+ * (reasoning models, provider retry sleeps). The agent's own model
+ * ladder remains the fallthrough, and settlement follows whichever
+ * model actually served. Reasoning effort is pinned low inside
+ * _shared/ai.ts for the Groq reasoning models.
+ * SWAP TARGET: when the Genius Consolidation bake-off is final, this
+ * one line becomes Llama 3.3 70B fp8-fast on the founder's Cloudflare
+ * Workers AI account (that route needs a Workers AI branch in
+ * _shared/ai.ts — deliberately NOT wired in this phase). */
+const VOICE_FAST_PIN: { provider: "groq"; model: string } = { provider: "groq", model: "llama-3.3-70b-versatile" };
 const MARKUP = 10; // credits charged = real USD cost x MARKUP
 const RESERVE = 1; // credits held per run, settled against actual usage
 
@@ -952,9 +965,31 @@ serve(async (req) => {
         stream: true,
       };
       const tier: "llama" | "standard" = /llama/i.test(String(agent.model)) ? "llama" : "standard";
-      let routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
-      if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
-      if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+      /* Voice v3 Phase 1 routing (voice turns only; "run" above and
+       * text chat keep the classic ladder):
+       *  - fast_voice: the pinned fast model goes FIRST, then the
+       *    agent's own model, then the classic ladder.
+       *  - ttft_retry (the client's first-token budget expired on
+       *    the pinned route): skip the pin AND the agent model and
+       *    go straight to the "fast" tier chain — a different path,
+       *    not a re-try of the route that just stalled. */
+      const fastVoice = voice && (body as any).fast_voice === true;
+      const ttftRetry = fastVoice && (body as any).ttft_retry === true;
+      let routed: Awaited<ReturnType<typeof routeChat>>;
+      if (ttftRetry) {
+        routed = await routeChat("fast", chatBody);
+        if (!routed.resp.ok) routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
+        if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+      } else if (fastVoice) {
+        routed = await routeChat(tier, chatBody, {}, VOICE_FAST_PIN);
+        if (!routed.resp.ok) routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
+        if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
+        if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+      } else {
+        routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
+        if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
+        if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+      }
       const resp = routed.resp;
       const servedModel = routed.model || String(agent.model);
       if (!resp.ok || !resp.body) {
