@@ -28,6 +28,7 @@ const CORE = [
   { title: "Investor one-pager", desc: "Seed round summary, downloadable as PDF", href: "/onepager" },
   { title: "APEX partnership proposal", desc: "Accelerator-at-scale brochure", href: "/apex" },
   { title: "Use of Funds", desc: "Venture Builder Runway — 18-month plan & projections", href: "/uof" },
+  { title: "Innovation Pipeline", desc: "Venture pipeline — IP to product to capital", href: "/lmspace" },
 ];
 
 interface Doc { id: string; category: string; title: string; description: string | null; file_path: string | null; external_url: string | null; created_at: string; }
