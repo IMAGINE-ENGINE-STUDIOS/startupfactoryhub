@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowUpRight, Lock, FileText, Link2 } from "lucide-react";
+import { ArrowUpRight, Lock, FileText, Link2, MapPin, Rocket, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { WEBSITE_PARTNERS } from "@/config/partners";
@@ -85,6 +85,33 @@ export default function SharedDataRoom() {
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             One secure place for due diligence: the deck, the one-pager, our partner network, accelerator startup contracts and company documents.
           </p>
+        </section>
+
+        <section className="tech-card border-0 rounded-2xl overflow-hidden">
+          <div className="h-24 sm:h-32" style={{ background: "linear-gradient(120deg,#06251c 0%,#0a3b2e 45%,#083344 100%)" }} />
+          <div className="px-6 pb-6">
+            <div className="-mt-10 flex flex-wrap items-end gap-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg ring-1 ring-border">
+                <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/7f591579-b346-4234-a52b-c8d8e38a6f9f/logo.png" alt="Startup Factory Hub logo" className="max-h-full max-w-full object-contain" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-2xl font-bold text-foreground">Startup Factory Hub</h2>
+                <p className="text-sm text-muted-foreground">Deep tech, aerospace and quantum accelerator</p>
+              </div>
+              <a href="https://startupfactoryhub.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground">
+                <Globe className="h-3.5 w-3.5" /> startupfactoryhub.com
+              </a>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary"><MapPin className="h-3.5 w-3.5" /> Orlando, Florida</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary"><Rocket className="h-3.5 w-3.5" /> AI venture builder &amp; accelerator</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">Raising a $1.5M seed round</span>
+            </div>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              Startup Factory Hub is an AI-powered venture builder and accelerator for deep tech, aerospace and quantum startups.
+              This data room is shared by the Startup Factory Hub team for investor due diligence.
+            </p>
+          </div>
         </section>
 
         {invalid ? (
