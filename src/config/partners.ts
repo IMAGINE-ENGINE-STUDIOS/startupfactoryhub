@@ -58,7 +58,9 @@ export const PARTNERS: Partner[] = [
   { name: "O&O Software", logo: "https://www.google.com/s2/favicons?domain=oo-software.com&sz=128", tier: "Software" },
   { name: "Carta", logo: "https://www.google.com/s2/favicons?domain=carta.com&sz=128", tier: "Cap Table" },
   { name: "Defense Innovation Unit (DIU)", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/diu-logo.png", tier: "Defense" },
-  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },
+  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },,
+  { name: "SpaceWERX", logo: "https://www.google.com/s2/favicons?domain=spacewerx.us&sz=128", tier: "Defense" },
+  { name: "University of Central Florida", logo: "https://www.google.com/s2/favicons?domain=ucf.edu&sz=128", tier: "Academic" },
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
