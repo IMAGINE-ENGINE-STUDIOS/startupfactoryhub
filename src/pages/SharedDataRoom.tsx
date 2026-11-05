@@ -140,7 +140,7 @@ export default function SharedDataRoom() {
             </section>
 
             <section>
-              <Eyebrow>Partner network · {WEBSITE_PARTNERS.length} partners</Eyebrow>
+              <Eyebrow>Partners and Collaborators · {WEBSITE_PARTNERS.length} partners</Eyebrow>
               <div className="tech-card border-0 rounded-xl p-4 grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3">
                 {WEBSITE_PARTNERS.map((p) => (
                   <div key={p.name} className="flex flex-col items-center gap-1.5 text-center">

@@ -117,13 +117,25 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
     setBusy(true); setMsg("");
     const { error } = await db.from("data_room_access").upsert({ email: e });
     if (error) { setBusy(false); return setMsg(error.message); }
-    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e } });
+    // Personal share link for this investor: reuse the one labeled with their
+    // email if it exists, otherwise create it — so the invite email carries a
+    // link that opens the room directly, no account or sign-in needed.
+    let token: string | null = null;
+    const { data: mine } = await db.from("data_room_links").select("token").eq("label", e).maybeSingle();
+    if (mine?.token) token = mine.token as string;
+    if (!token) {
+      const t = Array.from(crypto.getRandomValues(new Uint8Array(24))).map((b) => b.toString(16).padStart(2, "0")).join("");
+      const { error: linkErr } = await db.from("data_room_links").insert({ token: t, label: e, created_by: user?.id });
+      if (!linkErr) token = t;
+    }
+    const linkUrl = token ? shareUrl(token) : undefined;
+    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e, linkUrl } });
     setBusy(false);
     setEmail("");
-    setMsg(mailError ? `${e} has access, but the invitation email could not be sent.` : `${e} has access — invitation email sent.`);
+    setMsg(mailError ? `${e} has access, but the invitation email could not be sent.` : `${e} has access — invitation email sent${linkUrl ? " with their personal data room link" : ""}.`);
     void load();
   };
-  const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); void load(); };
+  const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); await db.from("data_room_links").delete().eq("label", e); void load(); };
 
   const shareUrl = (token: string) => `${window.location.origin}/data-room/shared/${token}`;
   const createLink = async () => {
@@ -142,6 +154,12 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
     catch { setMsg(shareUrl(token)); }
   };
   const revokeLink = async (token: string) => { await db.from("data_room_links").delete().eq("token", token); void load(); };
+  const linkByLabel = new Map(links.map((l) => [l.label ?? "", l.token]));
+  const resendInvite = async (e: string) => {
+    const token = linkByLabel.get(e);
+    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e, linkUrl: token ? shareUrl(token) : undefined } });
+    setMsg(mailError ? `Could not resend the invitation to ${e}.` : `Invitation re-sent to ${e}${token ? " with their personal data room link" : ""}.`);
+  };
 
   const field = "w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
   return (
@@ -200,7 +218,7 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
             </section>
 
             <section>
-              <Eyebrow>Partner network · {WEBSITE_PARTNERS.length} partners</Eyebrow>
+              <Eyebrow>Partners and Collaborators · {WEBSITE_PARTNERS.length} partners</Eyebrow>
               <div className="tech-card border-0 rounded-xl p-4 grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-3">
                 {WEBSITE_PARTNERS.map((p) => (
                   <div key={p.name} className="flex flex-col items-center gap-1.5 text-center">
@@ -261,12 +279,18 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
                       <UserPlus className="h-4 w-4" /> Grant &amp; email
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Granting access emails the investor a sign-in link automatically.</p>
+                  <p className="text-xs text-muted-foreground">Granting access emails the investor their personal data room link — it opens the room directly, no account or sign-in needed.</p>
                   <div className="flex max-h-56 flex-col gap-1 overflow-y-auto">
                     {access.length === 0 && <div className="text-sm text-muted-foreground">No investors approved yet.</div>}
                     {access.map((a) => (
-                      <div key={a.email} className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5">
-                        <span className="text-sm text-foreground">{a.email}</span>
+                      <div key={a.email} className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5">
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{a.email}</span>
+                        {linkByLabel.get(a.email) && (
+                          <button onClick={() => copyLink(linkByLabel.get(a.email)!)} aria-label="Copy personal link" className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                            <Copy className="h-3.5 w-3.5" /> Link
+                          </button>
+                        )}
+                        <button onClick={() => resendInvite(a.email)} className="text-xs font-medium text-primary">Resend email</button>
                         <button onClick={() => revoke(a.email)} className="text-xs font-medium text-destructive">Revoke</button>
                       </div>
                     ))}
