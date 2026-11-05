@@ -18,6 +18,10 @@ const escapeHtml = (s: string) =>
 
 function buildHtml(link: string): string {
   const safeLink = escapeHtml(link);
+  const shared = link.includes("/data-room/shared/");
+  const note = shared
+    ? "This link opens the data room directly — no account or sign-in needed. It is personal to you, please do not forward it."
+    : "If the link asks you to sign in, use this same email address — access is tied to it.";
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#0a0f0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;box-sizing:border-box;">
@@ -35,7 +39,7 @@ function buildHtml(link: string): string {
           <div style="margin-top:12px;font-size:12px;color:#6f857b;word-break:break-all;">Or copy this link: <a href="${safeLink}" style="color:#34d399;">${safeLink}</a></div>
         </div>
         <p style="margin:0;font-size:13px;line-height:1.7;color:#9fb3a9;">
-          If the link asks you to sign in, use this same email address — access is tied to it.
+          ${note}
         </p>
       </div>
       <div style="margin-top:28px;padding:18px 32px;border-top:1px solid #1e2f27;font-size:11px;color:#6f857b;line-height:1.6;">

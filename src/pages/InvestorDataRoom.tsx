@@ -116,13 +116,33 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
     setBusy(true); setMsg("");
     const { error } = await db.from("data_room_access").upsert({ email: e });
     if (error) { setBusy(false); return setMsg(error.message); }
-    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e } });
+    // Personal external link for this investor: reuse the link labeled with
+    // their email, or create it, then email THAT link so the investor can
+    // open the room directly, with no account or sign-in.
+    const { data: existing } = await db.from("data_room_links").select("token").eq("label", e).order("created_at", { ascending: false }).limit(1);
+    let token = existing?.[0]?.token as string | undefined;
+    if (!token) {
+      token = crypto.randomUUID().replaceAll("-", "") + crypto.randomUUID().replaceAll("-", "").slice(0, 8);
+      const { error: linkError } = await db.from("data_room_links").insert({ token, label: e, created_by: user?.id });
+      if (linkError) { setBusy(false); return setMsg(linkError.message); }
+    }
+    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e, linkUrl: shareUrl(token) } });
     setBusy(false);
     setEmail("");
-    setMsg(mailError ? `${e} has access, but the invitation email could not be sent.` : `${e} has access — invitation email sent.`);
+    setMsg(mailError ? `${e} has access, but the invitation email could not be sent.` : `${e} has access — invitation email sent with their personal data room link.`);
     void load();
   };
-  const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); void load(); };
+  const resendInvite = async (e: string, token: string) => {
+    setBusy(true); setMsg("");
+    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e, linkUrl: shareUrl(token) } });
+    setBusy(false);
+    setMsg(mailError ? `The invitation email to ${e} could not be sent.` : `Invitation email re-sent to ${e} with their data room link.`);
+  };
+  const revoke = async (e: string) => {
+    await db.from("data_room_access").delete().eq("email", e);
+    await db.from("data_room_links").delete().eq("label", e);
+    void load();
+  };
 
   const shareUrl = (token: string) => `${window.location.origin}/data-room/shared/${token}`;
   const createLink = async () => {
@@ -260,15 +280,26 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
                       <UserPlus className="h-4 w-4" /> Grant &amp; email
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Granting access emails the investor a sign-in link automatically.</p>
+                  <p className="text-xs text-muted-foreground">Granting access emails the investor their personal data room link automatically — it opens the room directly, no account or sign-in needed.</p>
                   <div className="flex max-h-56 flex-col gap-1 overflow-y-auto">
                     {access.length === 0 && <div className="text-sm text-muted-foreground">No investors approved yet.</div>}
-                    {access.map((a) => (
-                      <div key={a.email} className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5">
-                        <span className="text-sm text-foreground">{a.email}</span>
-                        <button onClick={() => revoke(a.email)} className="text-xs font-medium text-destructive">Revoke</button>
-                      </div>
-                    ))}
+                    {access.map((a) => {
+                      const l = links.find((x) => x.label === a.email);
+                      return (
+                        <div key={a.email} className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5">
+                          <span className="min-w-0 flex-1 truncate text-sm text-foreground">{a.email}</span>
+                          {l && (
+                            <button onClick={() => copyLink(l.token)} className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                              <Copy className="h-3.5 w-3.5" /> Link
+                            </button>
+                          )}
+                          {l && (
+                            <button onClick={() => resendInvite(a.email, l.token)} className="text-xs font-medium text-primary">Resend email</button>
+                          )}
+                          <button onClick={() => revoke(a.email)} className="text-xs font-medium text-destructive">Revoke</button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="tech-card border-0 rounded-xl p-5 flex flex-col gap-2.5 lg:col-span-2">
