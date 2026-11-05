@@ -25,7 +25,11 @@ const CORE = [
   { title: "Investor pitch deck", desc: "Full company presentation", href: "/deck" },
   { title: "Investor one-pager", desc: "Seed round summary, downloadable as PDF", href: "/onepager" },
   { title: "APEX partnership proposal", desc: "Accelerator-at-scale brochure", href: "/apex" },
-  { title: "Startup Factory overview", desc: "Program, offer and team", href: "/startup-factory" },
+  { title: "Use of Funds", desc: "Venture Builder Runway \u2014 18-month plan & projections", href: "/uof" },
+  { title: "Innovation Pipeline", desc: "Venture pipeline \u2014 IP to product to capital", href: "/lmspace" },
+  { title: "For Partners", desc: "Partnership brochure", href: "/forpartners" },
+  { title: "Memberships", desc: "Membership plans & pricing", href: "/memberships" },
+  { title: "For Sponsors", desc: "Sponsorship plans & packages", href: "/forsponsors" },
 ];
 
 interface SharedDoc {
