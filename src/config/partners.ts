@@ -62,5 +62,5 @@ export const PARTNERS: Partner[] = [
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
-const DECK_ONLY = new Set(["UK Space Agency", "APEX Accelerators"]);
+const DECK_ONLY = new Set<string>([]); // UK Space Agency + APEX Accelerators moved onto the Partners and Collaborators wall (founder, 2026-11-04)
 export const WEBSITE_PARTNERS: Partner[] = PARTNERS.filter(p => !DECK_ONLY.has(p.name));

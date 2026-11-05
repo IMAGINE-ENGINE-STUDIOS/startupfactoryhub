@@ -17,7 +17,6 @@ const CATEGORIES = [
   "Cap table & round terms",
   "Legal & corporate",
   "Traction & metrics",
-  "Partnership agreements",
   "Product & technology",
 ];
 
