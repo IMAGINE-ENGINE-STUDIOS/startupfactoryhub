@@ -48,6 +48,17 @@ export const PARTNERS: Partner[] = [
   { name: "Chase", logo: "/partners/chase-logo.png", tier: "Banking" },
   { name: "Papermark", logo: "/partners/papermark-logo.png", tier: "Documents" },
   { name: "Airtable", logo: "/partners/airtable-logo.png", tier: "Productivity" },
+  { name: "Sucuri", logo: "https://www.google.com/s2/favicons?domain=sucuri.net&sz=128", tier: "Security" },
+  { name: "NordVPN", logo: "https://www.google.com/s2/favicons?domain=nordvpn.com&sz=128", tier: "VPN" },
+  { name: "NordPass", logo: "https://www.google.com/s2/favicons?domain=nordpass.com&sz=128", tier: "Security" },
+  { name: "Surfshark", logo: "https://www.google.com/s2/favicons?domain=surfshark.com&sz=128", tier: "VPN" },
+  { name: "24-7PressRelease", logo: "https://www.google.com/s2/favicons?domain=24-7pressrelease.com&sz=128", tier: "PR & Media" },
+  { name: "Corel", logo: "https://www.google.com/s2/favicons?domain=corel.com&sz=128", tier: "Software" },
+  { name: "Abelssoft", logo: "https://www.google.com/s2/favicons?domain=abelssoft.com&sz=128", tier: "Software" },
+  { name: "O&O Software", logo: "https://www.google.com/s2/favicons?domain=oo-software.com&sz=128", tier: "Software" },
+  { name: "Carta", logo: "https://www.google.com/s2/favicons?domain=carta.com&sz=128", tier: "Cap Table" },
+  { name: "Defense Innovation Unit (DIU)", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/diu-logo.png", tier: "Defense" },
+  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
