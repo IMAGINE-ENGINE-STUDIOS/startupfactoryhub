@@ -34,23 +34,25 @@ serve(async (req) => {
       .order("created_at", { ascending: false });
     if (error) return json({ error: error.message }, 500);
 
-    const documents = [];
-    for (const d of docs ?? []) {
-      let signedUrl: string | null = null;
-      if (d.file_path) {
-        const { data: s } = await service.storage.from("data-room").createSignedUrl(d.file_path, 3600);
-        signedUrl = s?.signedUrl ?? null;
+    // One batched signing call for every file (was one sequential call per
+    // document, which made the shared page wait seconds on "Loading...").
+    const paths = (docs ?? []).map((d) => d.file_path).filter(Boolean) as string[];
+    const signed = new Map<string, string>();
+    if (paths.length) {
+      const { data: arr } = await service.storage.from("data-room").createSignedUrls(paths, 3600);
+      for (const item of arr ?? []) {
+        if (item.path && item.signedUrl) signed.set(item.path, item.signedUrl);
       }
-      documents.push({
-        id: d.id,
-        category: d.category,
-        title: d.title,
-        description: d.description,
-        external_url: d.external_url,
-        signedUrl,
-        created_at: d.created_at,
-      });
     }
+    const documents = (docs ?? []).map((d) => ({
+      id: d.id,
+      category: d.category,
+      title: d.title,
+      description: d.description,
+      external_url: d.external_url,
+      signedUrl: d.file_path ? signed.get(d.file_path) ?? null : null,
+      created_at: d.created_at,
+    }));
     return json({ documents });
   } catch (e) {
     console.error("data-room-shared failed:", e);
