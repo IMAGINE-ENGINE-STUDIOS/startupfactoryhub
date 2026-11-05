@@ -1,15 +1,13 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Rocket, Users, GraduationCap, HandCoins, Zap, Building2, Server, Cloud,
-  Scale, ShieldCheck, Megaphone, Plane, Wallet, Timer, TrendingUp,
-  ArrowUpRight, ArrowRight, Cpu, CircleDollarSign, CalendarRange,
-  FileSpreadsheet, FileDown, Loader2, BrainCircuit, FlaskConical, Wrench,
-  PiggyBank, Umbrella, FileCheck2, Briefcase, Percent, Globe, Award,
+  Rocket, Users, Building2, Scale, ShieldCheck, Megaphone, Plane, Cpu,
+  TrendingUp, ArrowUpRight, ArrowRight, FileSpreadsheet, FileDown, Loader2,
+  Percent, Briefcase, HandCoins, GraduationCap, Zap, Award, Globe,
 } from "lucide-react";
 import {
-  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, AreaChart, Area,
+  ResponsiveContainer, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -19,98 +17,80 @@ import mockupDashboard from "@/assets/mockup-dashboard.png";
 import "./UseOfFunds.css";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   /uof — Use of Funds, unified with the Financial Projections from /deck.
-   Use-of-Funds figures: the founder-supplied Year-1 budget — $1.5M seed plus
-   the $122,440 founder revision of 2026-10-25, total plan $1,622,440.
+   /uof — Venture Builder Runway: Use of Funds, unified with the Financial
+   Projections from /deck.
+   Use-of-Funds figures: the founder's runway budget of 2026-11-04 — an
+   18-month plan requested at $1,695,048 that fits the $1.5M seed exact by
+   cutting Marketing by $195,048 (to $74,952). Both views are shown; the
+   toggle switches every figure on the page.
    Projections: taken verbatim from the Deck's "5-Year Financial Projections"
    slide (Year 1 $6.09M → Year 5 $60.9M) and its Business Model slide.
    ────────────────────────────────────────────────────────────────────────── */
 
-const SEED = 1_500_000;
-/* Founder revision 2026-10-25: salaries set to $138K for CEO/CTO/COO/CFO and
-   $100K for CCO (Team $652K), Legal raised to $92K (Operations $172,040), and
-   a new Expansion chapter — Chile · Venezuela · UK teams — at $70K.
-   Added over the seed: $122,440. Total plan: $1,622,440. */
-const ADDED = 122_440;
-const TOTAL = 1_622_440;
-
-/* Unified runway — one number everywhere (page, deck, raise): 18 months.
-   Average burn is the total plan spread over that runway: $1,622,440 / 18. */
 const RUNWAY_MONTHS = 18;
-const AVG_BURN = Math.round(TOTAL / RUNWAY_MONTHS); // $90,136/mo
+
+/* The ask, two ways: as requested, and adjusted to fit the $1.5M seed exact.
+   The whole $195,048 adjustment comes out of Marketing. */
+const REQUESTED_TOTAL = 1_695_048;
+const ADJUSTED_TOTAL = 1_500_000;
+const ADJUSTMENT = 195_048;
+const REQ_BURN = 94_169; // $1,695,048 / 18
+const ADJ_BURN = 83_333; // $1,500,000 / 18
 
 const fmt = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
-/* ------------------------------ Use of Funds ----------------------------- */
+type View = "requested" | "adjusted";
 
+/* ---------------------------------- Team --------------------------------- */
+
+/* 18-month totals per role: CEO/CTO/COO $207K, CFO/CCO $162K. */
 const TEAM = [
-  { role: "Chief Executive Officer", code: "CEO", annual: 138_000, tier: "$11.5K/MO" },
-  { role: "Chief Technology Officer", code: "CTO", annual: 138_000, tier: "$11.5K/MO" },
-  { role: "Chief Operating Officer", code: "COO", annual: 138_000, tier: "$11.5K/MO" },
-  { role: "Chief Financial Officer", code: "CFO", annual: 138_000, tier: "$11.5K/MO" },
-  { role: "Chief Commercial Officer", code: "CCO", annual: 100_000, tier: "$8,333/MO" },
+  { role: "Chief Executive Officer", code: "CEO", total18: 207_000 },
+  { role: "Chief Technology Officer", code: "CTO", total18: 207_000 },
+  { role: "Chief Operating Officer", code: "COO", total18: 207_000 },
+  { role: "Chief Financial Officer", code: "CFO", total18: 162_000 },
+  { role: "Chief Commercial Officer", code: "CCO", total18: 162_000 },
 ];
+const TEAM_TOTAL = 945_000;
 
-const OPS_ITEMS = [
-  { icon: Building2, label: "Office", detail: "$584 / person / mo × 5", monthly: 2_920, annual: 35_040 },
-  { icon: Server, label: "Hosting", detail: "Platform infrastructure", monthly: 1_500, annual: 18_000 },
-  { icon: Cloud, label: "Cloud", detail: "$250 / person / mo × 5", monthly: 1_250, annual: 15_000 },
-  { icon: Scale, label: "Legal", detail: "Corporate · IP · Venture", monthly: 7_667, annual: 92_000 },
-  { icon: ShieldCheck, label: "Insurance", detail: "GL · E&O · D&O · Cyber", monthly: 1_000, annual: 12_000 },
-];
-
-const GROWTH_ITEMS = [
-  { icon: Megaphone, label: "Marketing + CAC", detail: "$20,000 / mo", monthly: 20_000, annual: 240_000, pct: "14.8%" },
-  { icon: Users, label: "Events", detail: "$2,500 / mo", monthly: 2_500, annual: 30_000, pct: "1.8%" },
-  { icon: Plane, label: "Travel", detail: "$4,167 / mo", monthly: 4_167, annual: 50_000, pct: "3.1%" },
-];
-
-const EXPANSION_ITEMS = [
-  { icon: Globe, label: "Chile · Venezuela · UK", detail: "New chapter teams", monthly: 5_833, annual: 70_000, pct: "4.3%" },
-];
-
-const PRODUCT_DEV_ITEMS = [
-  { icon: BrainCircuit, label: "AI Platform Core", monthly: 10_000, annual: 120_000, pct: "41.6%" },
-  { icon: FlaskConical, label: "Venture Studio", monthly: 5_833, annual: 70_000, pct: "24.3%" },
-  { icon: Wrench, label: "Tech Stack", monthly: 3_333, annual: 40_000, pct: "13.9%" },
-  { icon: Rocket, label: "Venture Launch", monthly: 4_867, annual: 58_400, pct: "20.2%" },
-];
-
-const WC_ITEMS = [
-  { icon: PiggyBank, label: "Buffer", amount: 60_000, pct: "50.0%" },
-  { icon: Umbrella, label: "Contingency", amount: 40_000, pct: "33.3%" },
-  { icon: FileCheck2, label: "Compliance", amount: 20_000, pct: "16.7%" },
-];
-
-const TEAM_TOTAL = 652_000;
-const OPS_TOTAL = 172_040;
-const GROWTH_TOTAL = 320_000;
-const PRODUCT_DEV_TOTAL = 288_400;
-const WC_TOTAL = 120_000;
-const EXPANSION_TOTAL = 70_000;
+/* ------------------------------- Categories ------------------------------ */
 
 /* Category colours remapped to the platform / Deck palette (teal → cyan →
-   sky → violet → amber → emerald) instead of the draft's neon set. */
+   violet → slate → amber → pink → sky), as on the previous /uof. */
 const CATEGORIES = [
-  { name: "Team", annual: TEAM_TOTAL, pctOfBurn: "40.2%", color: "#2dd4bf", note: "5 people · $54,333/mo" },
-  { name: "Operations", annual: OPS_TOTAL, pctOfBurn: "10.6%", color: "#22d3ee", note: "$14,337/mo" },
-  { name: "Growth", annual: GROWTH_TOTAL, pctOfBurn: "19.7%", color: "#38bdf8", note: "$26,667/mo" },
-  { name: "Product Development", annual: PRODUCT_DEV_TOTAL, pctOfBurn: "17.8%", color: "#a78bfa", note: "$24,033/mo" },
-  { name: "Working Capital", annual: WC_TOTAL, pctOfBurn: "7.4%", color: "#fbbf24", note: "$10,000/mo" },
-  { name: "Expansion", annual: EXPANSION_TOTAL, pctOfBurn: "4.3%", color: "#34d399", note: "Chile · Venezuela · UK · $5,833/mo" },
+  { id: "team", name: "Team", icon: Users, color: "#2dd4bf", req: 945_000, adj: 945_000, pctReq: 55.7, pctAdj: 63.0, comp: "CEO $207k + CTO $207k + COO $207k + CFO $162k + CCO $162k" },
+  { id: "ops", name: "Operations", icon: Building2, color: "#22d3ee", req: 129_048, adj: 129_048, pctReq: 7.6, pctAdj: 8.6, comp: "Office $42,048 + Other $87,000 = $129,048" },
+  { id: "legal", name: "Legal", icon: Scale, color: "#a78bfa", req: 138_000, adj: 138_000, pctReq: 8.1, pctAdj: 9.2, comp: "$138,000 / 18m" },
+  { id: "ins", name: "Insurance", icon: ShieldCheck, color: "#94a3b8", req: 18_000, adj: 18_000, pctReq: 1.1, pctAdj: 1.2, comp: "$18,000 / 18m" },
+  { id: "mkt", name: "Marketing", icon: Megaphone, color: "#fbbf24", req: 270_000, adj: 74_952, pctReq: 15.9, pctAdj: 5.0, comp: "" },
+  { id: "travel", name: "Travel", icon: Plane, color: "#f472b6", req: 75_000, adj: 75_000, pctReq: 4.4, pctAdj: 5.0, comp: "$75,000 / 18m" },
+  { id: "ai", name: "A.I. Core", icon: Cpu, color: "#38bdf8", req: 120_000, adj: 120_000, pctReq: 7.1, pctAdj: 8.0, comp: "$120,000 / 18m" },
 ];
 
-const DONUT_DATA = CATEGORIES.map((c) => ({ name: c.name, value: c.annual, color: c.color }));
+const catAmount = (c: (typeof CATEGORIES)[number], view: View) => (view === "requested" ? c.req : c.adj);
+const catPct = (c: (typeof CATEGORIES)[number], view: View) => (view === "requested" ? c.pctReq : c.pctAdj);
+const catComp = (c: (typeof CATEGORIES)[number], view: View) =>
+  c.id === "mkt" ? (view === "requested" ? "$270,000 / 18m" : "$270,000 → $74,952 to fit $1.5M") : c.comp;
 
-const BAR_DATA = [
-  { name: "Team", annual: 652 },
-  { name: "Ops", annual: 172.04 },
-  { name: "Growth", annual: 320 },
-  { name: "Product Dev", annual: 288.4 },
-  { name: "Working Cap.", annual: 120 },
-  { name: "Expansion", annual: 70 },
+/* Operations, defined once: Office + Other. */
+const OPS_PARTS = [
+  { label: "Office", total18: 42_048, note: "part of Ops" },
+  { label: "Other Ops", total18: 87_000, note: "18m" },
 ];
+
+/* Product development, one consolidated budget — shown once.
+   $8,333/mo × 18 = $150,000. */
+const BUILD_SYSTEM = {
+  total: 150_000,
+  mo: 8_333,
+  parts: [
+    { label: "AI Engine", mo: 3_500, total18: 63_000, color: "#2dd4bf" },
+    { label: "Studio", mo: 2_000, total18: 36_000, color: "#22d3ee" },
+    { label: "Stack", mo: 1_333, total18: 23_994, color: "#a78bfa" },
+    { label: "Launch", mo: 1_500, total18: 27_000, color: "#fbbf24" },
+  ],
+};
 
 const ECOSYSTEM = [
   { icon: Rocket, title: "Startups", accent: "#2dd4bf" },
@@ -173,37 +153,31 @@ function SectionTag({ children }: { children: React.ReactNode }) {
 /* ----------------------------------- page ---------------------------------- */
 
 export default function UseOfFunds() {
-  const [period, setPeriod] = useState<"annual" | "monthly">("annual");
+  const [view, setView] = useState<View>("requested");
+  const [tab, setTab] = useState<"budget" | "allocation">("budget");
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const runwayPct = (RUNWAY_MONTHS / 24) * 100;
-  const val = (annual: number) => (period === "annual" ? fmt(annual) : fmt(Math.round(annual / 12)));
-  const per = period === "annual" ? "/ yr" : "/ mo";
+  const total = view === "requested" ? REQUESTED_TOTAL : ADJUSTED_TOTAL;
+  const burn = view === "requested" ? REQ_BURN : ADJ_BURN;
+  const nonTeam = total - TEAM_TOTAL;
 
   const exportCsv = () => {
     const rows: (string | number)[][] = [
-      ["Category", "Item", "Monthly USD", "Annual USD"],
-      ...TEAM.map((m) => ["Team", `${m.role} (${m.code})`, m.annual / 12, m.annual]),
-      ["Team", "Total Team", 54_333, TEAM_TOTAL],
-      ...OPS_ITEMS.map((i) => ["Operations", i.label, i.monthly, i.annual]),
-      ["Operations", "Total Operations", 14_337, OPS_TOTAL],
-      ...GROWTH_ITEMS.map((g) => ["Growth", g.label, g.monthly, g.annual]),
-      ["Growth", "Total Growth", 26_667, GROWTH_TOTAL],
-      ...PRODUCT_DEV_ITEMS.map((p) => ["Product Development", p.label, p.monthly, p.annual]),
-      ["Product Development", "Total Product Development", 24_033, PRODUCT_DEV_TOTAL],
-      ...WC_ITEMS.map((w) => ["Working Capital", w.label, Math.round(w.amount / 12), w.amount]),
-      ["Working Capital", "Total Working Capital", 10_000, WC_TOTAL],
-      ...EXPANSION_ITEMS.map((e) => ["Expansion", e.label, e.monthly, e.annual]),
-      ["Expansion", "Total Expansion", 5_833, EXPANSION_TOTAL],
-      ["Summary", "Total", 135_203, TOTAL],
-      ["Summary", "Seed Raise", "", SEED],
-      ["Summary", "Added (Expansion, Legal, salary adjustments)", "", ADDED],
-      ["Summary", "Runway — Unified", AVG_BURN, "18 months"],
-      ["Summary", "Deployment pacing — Base (Team + Operations)", 68_670, ""],
-      ["Summary", "Deployment pacing — Core + Growth", 95_337, ""],
-      ["Summary", "Deployment pacing — Full deployment peak", 135_203, ""],
+      ["Category", "Item", "Monthly USD", "18M USD"],
+      ...TEAM.map((m) => ["Team", `${m.role} (${m.code})`, m.total18 / 18, m.total18]),
+      ["Team", "Total Team", 52_500, TEAM_TOTAL],
+      ...CATEGORIES.filter((c) => c.id !== "team").map((c) => [c.name, c.name, Math.round(c.req / 18), c.req] as (string | number)[]),
+      ["Operations", "Office", 2_336, 42_048],
+      ["Operations", "Other Ops", 4_833, 87_000],
+      ["Summary", "Total Requested (18M)", REQ_BURN, REQUESTED_TOTAL],
+      ["Summary", "Adjustment — Marketing cut", "", -ADJUSTMENT],
+      ["Summary", "Marketing (Adjusted)", 4_164, 74_952],
+      ["Summary", "Total Adjusted — fits $1.5M seed exact (18M)", ADJ_BURN, ADJUSTED_TOTAL],
+      ["Summary", "Runway", "", "18 months"],
+      ...BUILD_SYSTEM.parts.map((p) => ["Product Build System", p.label, p.mo, p.total18] as (string | number)[]),
+      ["Product Build System", "Total Product Build System", BUILD_SYSTEM.mo, BUILD_SYSTEM.total],
       ["Projections (from /deck)", "Year 1 Revenue", "", 6_090_000],
       ["Projections (from /deck)", "Year 2 Revenue", "", 10_830_000],
       ["Projections (from /deck)", "Year 3 Revenue", "", 19_260_000],
@@ -277,6 +251,23 @@ export default function UseOfFunds() {
     </button>
   );
 
+  const viewToggle = (extra = "") => (
+    <div className={`uof-no-print inline-flex rounded-full border border-[var(--uof-line)] bg-[var(--uof-surface)] p-1 ${extra}`} role="group" aria-label="Toggle budget view">
+      <button
+        onClick={() => setView("requested")}
+        className={`uof-mono rounded-full px-4 py-2 text-[11px] tracking-[0.1em] transition ${view === "requested" ? "bg-[var(--uof-ink)] font-bold text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}
+      >
+        REQ $1.695M
+      </button>
+      <button
+        onClick={() => setView("adjusted")}
+        className={`uof-mono rounded-full px-4 py-2 text-[11px] tracking-[0.1em] transition ${view === "adjusted" ? "bg-[var(--uof-teal)] font-bold text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}
+      >
+        $1.5M EXACT
+      </button>
+    </div>
+  );
+
   return (
     <div className="uof-root min-h-screen overflow-x-clip">
       {/* ------------------------------- header ------------------------------- */}
@@ -286,13 +277,16 @@ export default function UseOfFunds() {
             <img src={sfhLogo} alt="Startup Factory Hub" className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-[rgba(45,212,191,0.35)]" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-bold tracking-wide">STARTUP FACTORY HUB</span>
-              <span className="uof-mono block text-[9px] tracking-[0.18em] text-[var(--uof-cyan)]">A.I. POWERED VENTURE BUILDER PLATFORM</span>
+              <span className="uof-mono block text-[9px] tracking-[0.18em] text-[var(--uof-cyan)]">A.I. POWERED VENTURE BUILDER</span>
             </span>
           </Link>
+          <div className="hidden items-center gap-2 uof-mono text-[10px] tracking-[0.12em] text-[var(--uof-ink-faint)] xl:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--uof-teal)] animate-pulse inline-block" />
+            {view === "requested" ? `18M • ${fmt(REQUESTED_TOTAL)} • $94,169/MO • +$195,048` : `${fmt(ADJUSTED_TOTAL)} EXACT • $83,333/MO`}
+          </div>
           <nav className="hidden items-center gap-6 uof-mono text-[11px] tracking-[0.16em] text-[var(--uof-ink-dim)] lg:flex">
-            <a href="#use-of-funds" className="hover:text-[var(--uof-teal)] transition-colors">ALLOCATION</a>
-            <a href="#breakdown" className="hover:text-[var(--uof-teal)] transition-colors">BREAKDOWN</a>
-            <a href="#runway" className="hover:text-[var(--uof-teal)] transition-colors">RUNWAY</a>
+            <a href="#budget" onClick={() => setTab("budget")} className="hover:text-[var(--uof-teal)] transition-colors">BUDGET</a>
+            <a href="#budget" onClick={() => setTab("allocation")} className="hover:text-[var(--uof-teal)] transition-colors">ALLOCATION</a>
             <a href="#projections" className="hover:text-[var(--uof-teal)] transition-colors">PROJECTIONS</a>
             <Link to="/deck" className="hover:text-[var(--uof-teal)] transition-colors">DECK</Link>
           </nav>
@@ -309,30 +303,31 @@ export default function UseOfFunds() {
 
           <div className="relative mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
-              <SectionTag>$1,622,440 PLAN · USE OF FUNDS + PROJECTIONS</SectionTag>
+              <SectionTag>18 MONTHS • INVESTOR READY • SINGLE SOURCE OF TRUTH</SectionTag>
               <p className="uof-mono mt-6 text-[11px] font-bold tracking-[0.28em] text-[var(--uof-cyan)]">STARTUP FACTORY HUB</p>
               <h1 className="mt-3 text-4xl font-bold leading-[1.04] tracking-tight sm:text-6xl">
-                Use of Funds — <span className="uof-gradient-text">where the money goes</span>, and the growth it funds
+                Venture Builder <span className="uof-gradient-text">Runway</span>
               </h1>
               <p className="mt-4 max-w-xl text-base text-[var(--uof-ink-dim)] sm:text-lg">
-                The Year-1 allocation, line by line: the $1.5M seed plus $122,440 added for the Expansion chapter (Chile, Venezuela, UK), Legal at $92K and the updated salary structure — $1,622,440 in total. Unified with the 5-year financial projections from the deck: $6.09M in Year 1 growing to $60.9M in Year 5.
+                Team $945k (CEO/CTO/COO $207k + CFO/CCO $162k) • Operations $129,048 = Office $42,048 + Other $87k • Legal $138k • Insurance $18k • Marketing $270k → $74,952 adj • Travel $75k • AI Core $120k. Total $1,695,048 ($94,169/mo) • Adjusted $1.5M exact ($83,333/mo).
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <a href="#use-of-funds" className="inline-flex items-center gap-2 rounded-full bg-[var(--uof-teal)] px-6 py-3 text-sm font-bold text-[#02110f] transition hover:brightness-110">
-                  ALLOCATION <ArrowUpRight className="h-4 w-4" />
+                <a href="#budget" onClick={() => setTab("budget")} className="inline-flex items-center gap-2 rounded-full bg-[var(--uof-teal)] px-6 py-3 text-sm font-bold text-[#02110f] transition hover:brightness-110">
+                  BUDGET <ArrowUpRight className="h-4 w-4" />
                 </a>
                 <a href="#projections" className="inline-flex items-center gap-2 rounded-full border border-[var(--uof-line-cyan)] px-6 py-3 text-sm font-semibold text-[var(--uof-cyan)] transition hover:bg-[rgba(34,211,238,0.08)]">
                   <TrendingUp className="h-4 w-4" /> PROJECTIONS
                 </a>
                 <span className="uof-no-print">{pdfButton("!px-6 !py-3 !text-sm")}</span>
+                {viewToggle()}
               </div>
 
               <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { k: "SEED", v: "$1,500,000" },
+                  { k: "TOTAL REQUESTED", v: "$1,695,048" },
+                  { k: "ADJUSTED · EXACT", v: "$1,500,000" },
                   { k: "RUNWAY", v: "18 months" },
                   { k: "YEAR 1 REVENUE", v: "$6.09M" },
-                  { k: "YEAR 5 REVENUE", v: "$60.9M" },
                 ].map((s) => (
                   <div key={s.k} className="rounded-2xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-4">
                     <dt className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">{s.k}</dt>
@@ -345,7 +340,7 @@ export default function UseOfFunds() {
             <div className="relative mx-auto w-full max-w-md lg:max-w-none">
               <div className="rounded-[2rem] border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6 sm:p-8">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="uof-mono text-[10px] tracking-[0.22em] text-[var(--uof-cyan)]">YEAR-1 ALLOCATION</p>
+                  <p className="uof-mono text-[10px] tracking-[0.22em] text-[var(--uof-cyan)]">18M ALLOCATION · {view === "requested" ? "REQUESTED" : "ADJUSTED"}</p>
                   <span className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-teal)]">100%</span>
                 </div>
                 <div className="mt-6 flex justify-center">
@@ -353,138 +348,55 @@ export default function UseOfFunds() {
                 </div>
                 <ul className="mt-6 space-y-2">
                   {CATEGORIES.map((c) => (
-                    <li key={c.name} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-2.5">
+                    <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-2.5">
                       <span className="flex items-center gap-2 text-sm">
                         <span className="h-2 w-2 rounded-sm" style={{ background: c.color }} />
                         {c.name}
                       </span>
                       <span className="uof-mono text-sm font-bold" style={{ color: c.color }}>
-                        {fmt(c.annual)} · {c.pctOfBurn}
+                        {fmt(catAmount(c, view))} · {catPct(c, view).toFixed(1)}%
                       </span>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--uof-line)] bg-[rgba(2,6,23,0.6)] px-4 py-3">
-                  <p className="uof-mono text-sm font-bold">TOTAL $1,622,440</p>
+                  <p className="uof-mono text-sm font-bold">TOTAL {fmt(total)}</p>
                   <Rocket className="h-5 w-5 shrink-0 text-[var(--uof-teal)]" />
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-        {/* ---------------------------- use of funds ---------------------------- */}
-        <section id="use-of-funds" className="relative border-t border-[var(--uof-line)] bg-[var(--uof-deep)]">
+        {/* ------------------------- budget / allocation ------------------------ */}
+        <section id="budget" className="relative border-t border-[var(--uof-line)] bg-[var(--uof-deep)]">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div>
-                <SectionTag>USE OF FUNDS</SectionTag>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">$1,622,440 — allocated</h2>
-              </div>
-              <div className="uof-no-print inline-flex rounded-full border border-[var(--uof-line)] bg-[var(--uof-surface)] p-1" role="group" aria-label="Toggle period">
-                {(["annual", "monthly"] as const).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPeriod(p)}
-                    className={`rounded-full px-4 py-2 uof-mono text-xs tracking-wider transition ${
-                      period === p ? "bg-[var(--uof-teal)] font-bold text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"
-                    }`}
-                  >
-                    {p.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-5 uof-glow">
-                <div className="flex items-center justify-between">
-                  <h3 className="uof-mono text-xs tracking-[0.2em] text-[var(--uof-ink-dim)]">ALLOCATION</h3>
-                  <CircleDollarSign className="h-5 w-5 text-[var(--uof-teal)]" />
-                </div>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={DONUT_DATA} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="88%" paddingAngle={2} strokeWidth={0}>
-                        {DONUT_DATA.map((d) => (
-                          <Cell key={d.name} fill={d.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: any, name: any) => [fmt(Number(value)), name]} contentStyle={CHART_TOOLTIP} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {DONUT_DATA.map((d) => (
-                    <li key={d.name} className="flex items-center gap-2 text-sm">
-                      <span className="h-2.5 w-2.5 rounded-sm" style={{ background: d.color }} />
-                      <span className="text-[var(--uof-ink-dim)]">{d.name}</span>
-                      <span className="uof-mono ml-auto font-semibold">{((d.value / TOTAL) * 100).toFixed(1)}%</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                {CATEGORIES.map((c) => {
-                  const pct = (c.annual / TOTAL) * 100;
-                  return (
-                    <article key={c.name} className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-5">
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <h3 className="text-lg font-semibold">{c.name}</h3>
-                        <p className="uof-mono text-xl font-bold" style={{ color: c.color }}>
-                          {val(c.annual)} <span className="text-xs font-medium text-[var(--uof-ink-faint)]">{per}</span>
-                        </p>
-                      </div>
-                      <div className="uof-bar-track mt-3 h-2.5 overflow-hidden rounded-full">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: c.color }} />
-                      </div>
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--uof-ink-dim)]">
-                        <span>{c.note}</span>
-                        <span className="uof-mono text-xs tracking-wider" style={{ color: c.color }}>{c.pctOfBurn}</span>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-5">
-              <div className="flex items-center justify-between">
-                <h3 className="uof-mono text-xs tracking-[0.2em] text-[var(--uof-ink-dim)]">ANNUAL SPEND · $K</h3>
-                <TrendingUp className="h-5 w-5 text-[var(--uof-cyan)]" />
-              </div>
-              <div className="mt-4 h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={BAR_DATA} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-                    <CartesianGrid stroke="rgba(45,212,191,0.08)" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={{ stroke: "rgba(45,212,191,0.2)" }} tickLine={false} interval={0} angle={-12} textAnchor="end" height={44} />
-                    <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <Tooltip formatter={(value: any) => [`$${value}k / year`, "Spend"]} contentStyle={CHART_TOOLTIP} />
-                    <Bar dataKey="annual" radius={[8, 8, 0, 0]}>
-                      {BAR_DATA.map((d, i) => (
-                        <Cell key={d.name} fill={CATEGORIES[i].color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ----------------------------- breakdown ------------------------------ */}
-        <section id="breakdown" className="relative border-t border-[var(--uof-line)]">
-          <div className="uof-dots absolute inset-0 opacity-40" aria-hidden />
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <SectionTag>BREAKDOWN</SectionTag>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Line by line</h2>
+                <SectionTag>USE OF FUNDS · 18 MONTHS</SectionTag>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                  {tab === "budget" ? "The budget, line by line" : "Allocation — the investor view"}
+                </h2>
+                <p className="mt-3 max-w-2xl text-[var(--uof-ink-dim)]">
+                  One plan, two readings: the full request at $1,695,048, and the same plan adjusted to fit the $1.5M seed exact — the entire $195,048 adjustment comes out of Marketing.
+                </p>
               </div>
               <div className="uof-no-print flex flex-col items-start gap-2 sm:items-end">
-                <div className="flex flex-wrap gap-2">
-                  {pdfButton()}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex rounded-full border border-[var(--uof-line)] bg-[var(--uof-surface)] p-1" role="group" aria-label="Budget or allocation view">
+                    <button
+                      onClick={() => setTab("budget")}
+                      className={`uof-mono rounded-full px-4 py-2 text-[11px] tracking-[0.1em] transition ${tab === "budget" ? "bg-[var(--uof-teal)] font-bold text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}
+                    >
+                      01 — BUDGET
+                    </button>
+                    <button
+                      onClick={() => setTab("allocation")}
+                      className={`uof-mono rounded-full px-4 py-2 text-[11px] tracking-[0.1em] transition ${tab === "allocation" ? "bg-[var(--uof-teal)] font-bold text-[#02110f]" : "text-[var(--uof-ink-dim)] hover:text-[var(--uof-ink)]"}`}
+                    >
+                      02 — ALLOCATION
+                    </button>
+                  </div>
+                  {viewToggle()}
                   <button
                     onClick={exportCsv}
                     className="inline-flex items-center gap-2 rounded-full border border-[var(--uof-line)] bg-[var(--uof-surface)] px-5 py-2.5 text-xs font-bold tracking-wide text-[var(--uof-teal)] transition hover:bg-[rgba(45,212,191,0.08)]"
@@ -496,224 +408,268 @@ export default function UseOfFunds() {
               </div>
             </div>
 
-            <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <article className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Users className="h-5 w-5 shrink-0 text-[var(--uof-teal)]" /> Team — 5</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(45,212,191,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-teal)]">40.2%</span>
-                </div>
-                <ul className="mt-5 divide-y divide-[rgba(45,212,191,0.08)]">
-                  {TEAM.map((m) => (
-                    <li key={m.code} className="flex items-center justify-between gap-3 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="uof-mono flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--uof-surface-2)] text-xs font-bold text-[var(--uof-cyan)]">{m.code}</span>
-                        <p className="truncate text-sm font-medium">{m.role}</p>
-                        <span className="uof-mono hidden shrink-0 rounded-full bg-[rgba(45,212,191,0.14)] px-2 py-0.5 text-[10px] font-bold tracking-wider text-[var(--uof-teal)] sm:inline">{m.tier}</span>
-                      </div>
-                      <span className="uof-mono shrink-0 text-sm font-semibold sm:text-base">{val(m.annual)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[var(--uof-teal)]">{val(TEAM_TOTAL)} {per}</span>
-                </div>
-              </article>
-
-              <article className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Cpu className="h-5 w-5 shrink-0 text-[var(--uof-cyan)]" /> Operations</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(34,211,238,0.12)] px-3 py-1 text-xs font-bold text-[var(--uof-cyan)]">10.6%</span>
-                </div>
-                <ul className="mt-5 divide-y divide-[rgba(34,211,238,0.08)]">
-                  {OPS_ITEMS.map((item) => (
-                    <li key={item.label} className="flex items-center justify-between gap-3 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <item.icon className="h-5 w-5 shrink-0 text-[var(--uof-cyan)]" />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{item.label}</p>
-                          <p className="truncate text-xs text-[var(--uof-ink-faint)]">{item.detail}</p>
-                        </div>
-                      </div>
-                      <span className="uof-mono shrink-0 font-semibold">{period === "annual" ? fmt(item.annual) : fmt(item.monthly)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[var(--uof-cyan)]">{val(OPS_TOTAL)} {per}</span>
-                </div>
-              </article>
-
-              <article className="rounded-3xl border border-[rgba(56,189,248,0.35)] bg-[var(--uof-surface)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Megaphone className="h-5 w-5 shrink-0 text-[#7dd3fc]" /> Growth</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(56,189,248,0.14)] px-3 py-1 text-xs font-bold text-[#7dd3fc]">19.7%</span>
-                </div>
-                <ul className="mt-5 divide-y divide-[rgba(56,189,248,0.10)]">
-                  {GROWTH_ITEMS.map((item) => (
-                    <li key={item.label} className="flex items-center justify-between gap-3 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <item.icon className="h-5 w-5 shrink-0 text-[#7dd3fc]" />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{item.label}</p>
-                          <p className="truncate text-xs text-[var(--uof-ink-faint)]">{item.detail}</p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <span className="uof-mono font-semibold">{period === "annual" ? fmt(item.annual) : fmt(item.monthly)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
-                        <p className="uof-mono text-[11px] text-[var(--uof-ink-faint)]">{item.pct}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[#7dd3fc]">{val(GROWTH_TOTAL)} {per}</span>
-                </div>
-              </article>
-
-              <article className="rounded-3xl border border-[rgba(167,139,250,0.35)] bg-[var(--uof-surface)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><BrainCircuit className="h-5 w-5 shrink-0 text-[#c4b5fd]" /> Product Development</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(167,139,250,0.16)] px-3 py-1 text-xs font-bold text-[#c4b5fd]">17.8%</span>
-                </div>
-                <ul className="mt-5 divide-y divide-[rgba(167,139,250,0.12)]">
-                  {PRODUCT_DEV_ITEMS.map((item) => (
-                    <li key={item.label} className="flex items-center justify-between gap-3 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <item.icon className="h-5 w-5 shrink-0 text-[#c4b5fd]" />
-                        <p className="truncate text-sm font-medium">{item.label}</p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <span className="uof-mono font-semibold">{period === "annual" ? fmt(item.annual) : fmt(item.monthly)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
-                        <p className="uof-mono text-[11px] text-[var(--uof-ink-faint)]">{item.pct}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[#c4b5fd]">{val(PRODUCT_DEV_TOTAL)} {per}</span>
-                </div>
-              </article>
-
-              <article className="rounded-3xl border border-[rgba(52,211,153,0.35)] bg-[var(--uof-surface)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Globe className="h-5 w-5 shrink-0 text-[#34d399]" /> Expansion — New Chapters</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(52,211,153,0.14)] px-3 py-1 text-xs font-bold text-[#34d399]">4.3%</span>
-                </div>
-                <ul className="mt-5 divide-y divide-[rgba(52,211,153,0.12)]">
-                  {EXPANSION_ITEMS.map((item) => (
-                    <li key={item.label} className="flex items-center justify-between gap-3 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <item.icon className="h-5 w-5 shrink-0 text-[#34d399]" />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{item.label}</p>
-                          <p className="truncate text-xs text-[var(--uof-ink-faint)]">{item.detail} · salaries</p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <span className="uof-mono font-semibold">{period === "annual" ? fmt(item.annual) : fmt(item.monthly)}<span className="text-[var(--uof-ink-faint)]"> {per}</span></span>
-                        <p className="uof-mono text-[11px] text-[var(--uof-ink-faint)]">{item.pct} of total</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[#34d399]">{val(EXPANSION_TOTAL)} {per}</span>
-                </div>
-              </article>
-
-              <article className="rounded-3xl border border-[rgba(251,191,36,0.3)] bg-[var(--uof-surface)] p-6 lg:col-span-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold"><Wallet className="h-5 w-5 shrink-0 text-[#fbbf24]" /> Working Capital</h3>
-                  <span className="uof-mono rounded-full bg-[rgba(251,191,36,0.14)] px-3 py-1 text-xs font-bold text-[#fbbf24]">7.4%</span>
-                </div>
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {WC_ITEMS.map((item) => (
-                    <div key={item.label} className="rounded-2xl bg-[var(--uof-surface-2)] p-4">
-                      <item.icon className="h-5 w-5 text-[#fbbf24]" />
-                      <p className="mt-3 text-sm font-medium">{item.label}</p>
-                      <p className="uof-mono mt-1 text-xl font-bold text-[#fbbf24]">{fmt(item.amount)}</p>
-                      <p className="uof-mono text-[11px] text-[var(--uof-ink-faint)]">{item.pct} of WC</p>
+            {tab === "budget" ? (
+              <>
+                {/* Total card + stacked allocation bar */}
+                <div className="mt-10 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6 sm:p-8">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="uof-mono text-[10px] tracking-[0.22em] text-[var(--uof-ink-faint)]">
+                        {view === "requested" ? "TOTAL REQUESTED • 18M" : "TOTAL ADJUSTED • 18M • EXACT"}
+                      </p>
+                      <p className="uof-mono mt-2 text-5xl font-bold leading-none sm:text-6xl">{fmt(total)}</p>
+                      <p className="uof-mono mt-2 text-sm text-[var(--uof-ink-dim)]">${burn.toLocaleString()}/mo • 18 months</p>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                  <span className="text-sm font-semibold">Total</span>
-                  <span className="uof-mono text-lg font-bold text-[#fbbf24]">{fmt(WC_TOTAL)} · $10,000/mo</span>
-                </div>
-              </article>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] px-5 py-4">
-              <p className="uof-mono text-center text-xs tracking-[0.14em] text-[var(--uof-ink-dim)] sm:text-sm">
-                $652,000 + $172,040 + $320,000 + $288,400 + $120,000 + $70,000 = <span className="font-bold text-[var(--uof-teal)]">$1,622,440</span>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ------------------------------- runway -------------------------------- */}
-        <section id="runway" className="relative border-t border-[var(--uof-line)] bg-[var(--uof-deep)] overflow-x-clip">
-          <div className="uof-grid absolute inset-0 opacity-60" aria-hidden />
-          <div className="absolute -top-24 left-1/3 h-80 w-80 rounded-full bg-[rgba(34,211,238,0.10)] blur-3xl" aria-hidden />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[rgba(45,212,191,0.10)] blur-3xl" aria-hidden />
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <SectionTag>RUNWAY · $1,622,440</SectionTag>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Runway — 18 months</h2>
-            <p className="mt-3 max-w-2xl text-[var(--uof-ink-dim)]">
-              One unified number across the raise, the deck and this page: the $1,622,440 plan funds 18 months, an average burn of $90,136/mo. Deployment is phased — the base run-rate starts lower and peaks at full deployment — averaging to the 18-month runway.
-            </p>
-
-            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
-                <Timer className="h-6 w-6 text-[var(--uof-teal)]" />
-                <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">AVERAGE MONTHLY BURN</p>
-                <p className="uof-mono mt-1 text-3xl font-bold">{fmt(AVG_BURN)}</p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">$1,622,440 spread over the 18-month runway, phased by deployment stage below.</p>
-              </div>
-              <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6 uof-glow">
-                <CalendarRange className="h-6 w-6 text-[var(--uof-teal)]" />
-                <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">RUNWAY</p>
-                <p className="uof-mono mt-1 text-4xl font-bold text-[var(--uof-teal)]">18 <span className="text-lg">months</span></p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">On the $1,622,440 plan — $1.5M seed + $122,440 added.</p>
-              </div>
-              <div className="rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
-                <Wallet className="h-6 w-6 text-[#fbbf24]" />
-                <p className="uof-mono mt-4 text-[10px] tracking-[0.2em] text-[var(--uof-ink-faint)]">WORKING CAPITAL</p>
-                <p className="uof-mono mt-1 text-3xl font-bold">$120,000</p>
-                <p className="mt-2 text-sm text-[var(--uof-ink-dim)]">7.4% · $10,000/mo</p>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-3xl border border-[var(--uof-line)] bg-[rgba(14,22,34,0.92)] p-6">
-              <div className="flex items-center justify-between uof-mono text-[11px] tracking-[0.16em] text-[var(--uof-ink-faint)]">
-                <span>MONTH 0</span>
-                <span className="hidden sm:inline">24-MONTH HORIZON</span>
-                <span>MONTH 24</span>
-              </div>
-              <div className="uof-bar-track relative mt-3 h-4 overflow-hidden rounded-full">
-                <div className="h-full rounded-full bg-gradient-to-r from-[var(--uof-teal)] to-[var(--uof-cyan)] transition-all duration-700" style={{ width: `${runwayPct}%` }} />
-              </div>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {[
-                  { t: "Base · $68,670/mo", d: "Team + Operations ($824,040/yr) — the starting run-rate." },
-                  { t: "Core + Growth · $95,337/mo", d: "Adds the Growth engine ($320,000/yr) as distribution ramps." },
-                  { t: "Full deployment · $135,203/mo", d: "Peak rate with Product Development and Expansion at full pace — phased in, not run for all 18 months." },
-                ].map((m) => (
-                  <div key={m.t} className="rounded-2xl bg-[var(--uof-surface-2)] p-4">
-                    <p className="uof-mono text-xs font-bold text-[var(--uof-cyan)]">{m.t}</p>
-                    <p className="mt-1 text-sm text-[var(--uof-ink-dim)]">{m.d}</p>
+                    <div className="flex flex-col items-end gap-2">
+                      {view === "requested" ? (
+                        <>
+                          <span className="uof-mono rounded-full border border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.08)] px-3 py-1 text-[10px] tracking-[0.14em] text-[#fbbf24]">+$195,048 OVER $1.5M</span>
+                          <span className="text-xs text-[var(--uof-ink-dim)]">Fits $1.5M by cutting Marketing $195,048</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="uof-mono rounded-full border border-[var(--uof-line)] bg-[rgba(45,212,191,0.08)] px-3 py-1 text-[10px] tracking-[0.14em] text-[var(--uof-teal)]">EXACT $1.5M</span>
+                          <span className="uof-mono rounded-full border border-[var(--uof-line)] bg-[rgba(45,212,191,0.08)] px-3 py-1 text-[10px] tracking-[0.14em] text-[var(--uof-teal)]">INVESTOR READY</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  <div className="mt-8 flex h-9 w-full overflow-hidden rounded-full" role="img" aria-label="Allocation by category">
+                    {CATEGORIES.map((c) => (
+                      <div key={c.id} style={{ width: `${catPct(c, view)}%`, background: c.color }} className="h-full" title={`${c.name} ${catPct(c, view).toFixed(1)}%`} />
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="uof-mono text-[11px] tracking-[0.1em] text-[var(--uof-ink-dim)]">
+                      {view === "requested" ? "Team $945k + Non-team $750,048 = $1,695,048" : "Team $945k + $555k non-team = $1.5M exact"}
+                    </p>
+                    <p className="uof-mono text-[11px] tracking-[0.08em] text-[var(--uof-ink-faint)]">
+                      {CATEGORIES.map((c) => `${c.name === "Operations" ? "Ops" : c.name === "Insurance" ? "Ins" : c.name === "Marketing" ? "Mkt" : c.name === "A.I. Core" ? "AI" : c.name} ${catPct(c, view).toFixed(1)}%`).join(" • ")} = 100%
+                    </p>
+                  </div>
+                  {view === "adjusted" && (
+                    <p className="uof-mono mt-4 rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3 text-[11px] leading-relaxed tracking-[0.06em] text-[var(--uof-teal)]">
+                      Team $945k + Ops $129,048 + Legal $138k + Ins $18k + Mkt $74,952 + Travel $75k + AI $120k = $1,500,000 exact
+                    </p>
+                  )}
+                </div>
+
+                {/* Team + non-team cards */}
+                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold">
+                        <Users className="h-5 w-5 shrink-0 text-[var(--uof-teal)]" /> Team — 5 roles
+                      </h3>
+                      <span className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">TEAM • 18M • 5 ROLES</span>
+                    </div>
+                    <ul className="mt-5 space-y-2">
+                      {TEAM.map((m) => (
+                        <li key={m.code} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-3">
+                          <span className="min-w-0">
+                            <span className="uof-mono text-xs font-bold text-[var(--uof-teal)]">{m.code}</span>
+                            <span className="block truncate text-sm text-[var(--uof-ink-dim)]">{m.role}</span>
+                          </span>
+                          <span className="uof-mono shrink-0 text-right">
+                            <span className="block text-sm font-bold">{fmt(m.total18)}</span>
+                            <span className="block text-[10px] text-[var(--uof-ink-faint)]">${(m.total18 / 18).toLocaleString()}/mo</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--uof-line)] bg-[rgba(2,6,23,0.6)] px-4 py-3">
+                      <span className="text-sm font-semibold">Total Team</span>
+                      <span className="uof-mono text-sm font-bold text-[var(--uof-teal)]">{fmt(TEAM_TOTAL)} · $52,500/mo</span>
+                    </div>
+                    <p className="uof-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--uof-ink-faint)]">CEO $207k + CTO $207k + COO $207k + CFO $162k + CCO $162k</p>
+                  </div>
+
+                  <div className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-semibold">Non-team — everything else</h3>
+                      <span className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">NON-TEAM • 18M • OPS ONCE</span>
+                    </div>
+                    <ul className="mt-5 space-y-2">
+                      {CATEGORIES.filter((c) => c.id !== "team").map((c) => (
+                        <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-3">
+                          <span className="flex min-w-0 items-center gap-2 text-sm">
+                            <c.icon className="h-4 w-4 shrink-0" style={{ color: c.color }} />
+                            <span className="truncate">{c.name}</span>
+                          </span>
+                          <span className="uof-mono shrink-0 text-right">
+                            <span className="block text-sm font-bold" style={{ color: c.color }}>{fmt(catAmount(c, view))}</span>
+                            <span className="block text-[10px] text-[var(--uof-ink-faint)]">${Math.round(catAmount(c, view) / 18).toLocaleString()}/mo · {catPct(c, view).toFixed(1)}%</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--uof-line)] bg-[rgba(2,6,23,0.6)] px-4 py-3">
+                      <span className="text-sm font-semibold">Total Non-team</span>
+                      <span className="uof-mono text-sm font-bold text-[var(--uof-cyan)]">{fmt(nonTeam)}</span>
+                    </div>
+                    <p className="uof-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--uof-ink-faint)]">Team $945k + Non-team {fmt(nonTeam)} = {fmt(total)}</p>
+                  </div>
+                </div>
+
+                {/* Budget table */}
+                <div className="mt-6 overflow-hidden rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)]">
+                  <div className="flex items-center justify-between gap-3 px-6 pt-6">
+                    <h3 className="uof-mono text-xs tracking-[0.2em] text-[var(--uof-ink-dim)]">BUDGET TABLE • 18 MONTHS • SINGLE VIEW</h3>
+                    <span className="uof-mono rounded-full border border-[var(--uof-line)] bg-[rgba(45,212,191,0.08)] px-3 py-1 text-[10px] tracking-[0.14em] text-[var(--uof-teal)]">INVESTOR READY</span>
+                  </div>
+                  <div className="overflow-x-auto px-2 pb-2 pt-4">
+                    <table className="w-full min-w-[640px] border-collapse text-left">
+                      <thead>
+                        <tr className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">
+                          <th className="px-4 py-2 font-medium">CATEGORY</th>
+                          <th className="px-4 py-2 font-medium">COMPOSITION • 18M</th>
+                          <th className="px-4 py-2 text-right font-medium">18M</th>
+                          <th className="px-4 py-2 text-right font-medium">/MO</th>
+                          <th className="px-4 py-2 text-right font-medium">%</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {CATEGORIES.map((c) => (
+                          <tr key={c.id} className="border-t border-[rgba(45,212,191,0.08)]">
+                            <td className="px-4 py-3">
+                              <span className="flex items-center gap-2 font-semibold">
+                                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: c.color }} />
+                                {c.name}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-[var(--uof-ink-dim)]">{catComp(c, view)}</td>
+                            <td className="uof-mono px-4 py-3 text-right font-bold">{fmt(catAmount(c, view))}</td>
+                            <td className="uof-mono px-4 py-3 text-right text-[var(--uof-ink-dim)]">${Math.round(catAmount(c, view) / 18).toLocaleString()}</td>
+                            <td className="uof-mono px-4 py-3 text-right" style={{ color: c.color }}>{catPct(c, view).toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                        <tr className="border-t border-[var(--uof-line)] bg-[rgba(2,6,23,0.5)]">
+                          <td className="px-4 py-3 font-bold" colSpan={2}>Total — {view === "requested" ? "Requested" : "Adjusted"}</td>
+                          <td className="uof-mono px-4 py-3 text-right font-bold text-[var(--uof-teal)]">{fmt(total)}</td>
+                          <td className="uof-mono px-4 py-3 text-right font-bold text-[var(--uof-teal)]">${burn.toLocaleString()}</td>
+                          <td className="uof-mono px-4 py-3 text-right font-bold text-[var(--uof-teal)]">100%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Operations detail + product development */}
+                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold">
+                        <Building2 className="h-5 w-5 shrink-0 text-[var(--uof-cyan)]" /> Operations
+                      </h3>
+                      <span className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">OPERATIONS • ONCE • $129,048 • 18M</span>
+                    </div>
+                    <p className="uof-mono mt-4 text-3xl font-bold">$129,048 <span className="text-sm font-medium text-[var(--uof-ink-dim)]">$7,169/mo</span></p>
+                    <ul className="mt-5 space-y-2">
+                      {OPS_PARTS.map((p) => (
+                        <li key={p.label} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--uof-surface-2)] px-4 py-3">
+                          <span className="text-sm font-semibold uppercase tracking-wide">{p.label} <span className="uof-mono ml-1 text-[10px] font-medium normal-case tracking-[0.08em] text-[var(--uof-ink-faint)]">• 18M</span></span>
+                          <span className="uof-mono shrink-0 text-right">
+                            <span className="block text-sm font-bold">{fmt(p.total18)}</span>
+                            <span className="block text-[10px] text-[var(--uof-ink-faint)]">${Math.round(p.total18 / 18).toLocaleString()}/mo • {p.note}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="uof-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--uof-ink-faint)]">= Office $42,048 + Other $87,000</p>
+                  </div>
+
+                  <div className="rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold">
+                        <Cpu className="h-5 w-5 shrink-0 text-[#38bdf8]" /> Product Development
+                      </h3>
+                      <span className="uof-mono text-[10px] tracking-[0.18em] text-[var(--uof-ink-faint)]">ONE BUDGET • $150K • 18M</span>
+                    </div>
+                    <p className="uof-mono mt-4 text-3xl font-bold">$150,000 <span className="text-sm font-medium text-[var(--uof-ink-dim)]">= $8,333/mo • 18m execution engine</span></p>
+                    <div className="mt-5 grid grid-cols-2 gap-2">
+                      {BUILD_SYSTEM.parts.map((p) => (
+                        <div key={p.label} className="rounded-xl bg-[var(--uof-surface-2)] p-3">
+                          <p className="flex items-center gap-1.5 text-sm font-semibold">
+                            <span className="h-2 w-2 rounded-sm" style={{ background: p.color }} /> {p.label}
+                          </p>
+                          <p className="uof-mono mt-1 text-[11px] text-[var(--uof-ink-dim)]">${p.mo.toLocaleString()}/mo • {fmt(p.total18)}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-4 text-sm leading-relaxed text-[var(--uof-ink-dim)]">
+                      Consolidated build budget: AI $3,500 + Studio $2,000 + Stack $1,333 + Launch $1,500 = $8,333/mo = $150,000 / 18m. Shown once.
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Allocation — single-line investor view */}
+                <div className="mt-10 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6 sm:p-8">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="uof-mono text-[10px] tracking-[0.22em] text-[var(--uof-ink-faint)]">SINGLE-LINE INVESTOR VIEW • 18M</p>
+                      <h3 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">18 Month Runway • Monthly Burn</h3>
+                    </div>
+                    <span className="uof-mono rounded-full border border-[var(--uof-line)] bg-[rgba(2,6,23,0.6)] px-4 py-2 text-[11px] tracking-[0.1em] text-[var(--uof-teal)]">
+                      {view === "requested" ? `${fmt(REQUESTED_TOTAL)} • 18M • $94,169/MO` : `${fmt(ADJUSTED_TOTAL)} EXACT • 18M • $83,333/MO`}
+                    </span>
+                  </div>
+                  <ul className="mt-6 space-y-2">
+                    {[
+                      { label: "Team $945k", detail: "$52,500/mo", color: "#2dd4bf" },
+                      { label: "Ops $129,048", detail: "Office $42,048 included", color: "#22d3ee" },
+                      { label: view === "requested" ? "Marketing $270k" : "Marketing $74,952", detail: view === "requested" ? "$15,000/mo" : "$4,164/mo • cut $195,048 to fit $1.5M", color: "#fbbf24" },
+                      { label: "Legal $138k • Ins $18k • Travel $75k • AI $120k", detail: "18m", color: "#a78bfa" },
+                    ].map((r) => (
+                      <li key={r.label} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--uof-surface-2)] px-4 py-3">
+                        <span className="flex items-center gap-2 font-semibold">
+                          <span className="h-2 w-2 rounded-sm" style={{ background: r.color }} /> {r.label}
+                        </span>
+                        <span className="uof-mono text-sm text-[var(--uof-ink-dim)]">{r.detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 flex h-4 w-full overflow-hidden rounded-full" role="img" aria-label="Allocation by category">
+                    {CATEGORIES.map((c) => (
+                      <div key={c.id} style={{ width: `${catPct(c, view)}%`, background: c.color }} className="h-full" title={`${c.name} ${catPct(c, view).toFixed(1)}%`} />
+                    ))}
+                  </div>
+                  <p className="uof-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--uof-ink-faint)]">
+                    {CATEGORIES.map((c) => `${c.name === "Operations" ? "Ops" : c.name === "Insurance" ? "Ins" : c.name === "Marketing" ? "Mkt" : c.name === "A.I. Core" ? "AI" : c.name} ${catPct(c, view).toFixed(1)}%`).join(" • ")} = 100%
+                  </p>
+                </div>
+
+                {/* Product build system — consolidated once */}
+                <div className="mt-6 rounded-3xl border border-[var(--uof-line)] bg-[var(--uof-surface)] p-6 sm:p-8">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="uof-mono text-[10px] tracking-[0.22em] text-[var(--uof-ink-faint)]">PRODUCT BUILD SYSTEM • $150K • 18M • CONSOLIDATED ONCE</p>
+                      <p className="uof-mono mt-2 text-3xl font-bold">$150,000 <span className="text-sm font-medium text-[var(--uof-ink-dim)]">ONE BUDGET = $8,333/mo • $150,000 / 18m</span></p>
+                    </div>
+                  </div>
+                  <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
+                    {BUILD_SYSTEM.parts.map((p) => (
+                      <div key={p.label} className="rounded-xl bg-[var(--uof-surface-2)] p-3">
+                        <p className="uof-mono text-[10px] tracking-[0.14em] text-[var(--uof-ink-faint)]">{p.label.toUpperCase()}</p>
+                        <p className="uof-mono mt-1 text-lg font-bold" style={{ color: p.color }}>${p.mo.toLocaleString()}<span className="text-[10px] font-medium text-[var(--uof-ink-faint)]">/mo</span></p>
+                        <p className="uof-mono text-[11px] text-[var(--uof-ink-dim)]">{fmt(p.total18)} / 18m</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-[var(--uof-ink-dim)]">
+                    $3,500 AI + $2,000 Studio + $1,333 Stack + $1,500 Launch = $8,333/mo. Execution engine for venture factory. Shown only here and in budget tab once.
+                  </p>
+                </div>
+
+                <p className="uof-mono mt-6 text-center text-[11px] tracking-[0.16em] text-[var(--uof-ink-faint)]">
+                  Ops defined once • Product dev once • No repeated tabs
+                </p>
+              </>
+            )}
           </div>
         </section>
-
         {/* ---------------------------- projections ----------------------------- */}
         {/* Unified from /deck — "5-Year Financial Projections" + "Business Model" slides */}
         <section id="projections" className="relative border-t border-[var(--uof-line)] overflow-x-clip">
@@ -841,7 +797,7 @@ export default function UseOfFunds() {
                 ))}
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                <span className="text-sm font-semibold">Raising $1.5M seed · $1,622,440 plan — allocated line by line above</span>
+                <span className="text-sm font-semibold">Raising $1.5M seed · $1,695,048 requested — fits $1.5M exact, allocated line by line above</span>
                 <a href="#use-of-funds" className="uof-mono inline-flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--uof-teal)] hover:text-[var(--uof-cyan)]">
                   USE OF FUNDS <ArrowUpRight className="h-3.5 w-3.5" />
                 </a>
@@ -896,11 +852,10 @@ export default function UseOfFunds() {
               </div>
               <div className="uof-mono mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-[11px] tracking-[0.18em] text-[var(--uof-ink-faint)]">
                 <span>SEED $1,500,000</span>
-                <span>TEAM 40.2%</span>
-                <span>GROWTH 19.7%</span>
-                <span>PRODUCT DEV 17.8%</span>
-                <span>WORKING CAPITAL 7.4%</span>
-                <span>EXPANSION 4.3%</span>
+                <span>REQUESTED $1,695,048</span>
+                <span>TEAM $945K</span>
+                <span>RUNWAY 18 MONTHS</span>
+                <span>BURN $83,333–$94,169/MO</span>
                 <span>YEAR 5 REVENUE $60.9M</span>
               </div>
               <p className="uof-mono mt-6 border-t border-[var(--uof-line)] pt-4 text-[11px] tracking-[0.14em] text-[var(--uof-ink-faint)]">Startup Factory Hub</p>
