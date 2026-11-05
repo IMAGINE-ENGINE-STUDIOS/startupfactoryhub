@@ -42,6 +42,7 @@ const StartupFactory = lazy(() => import("./pages/StartupFactory"));
 const InvestorOnePager = lazy(() => import("./pages/InvestorOnePager"));
 const LMSpace = lazy(() => import("./pages/LMSpace"));
 const InvestorDataRoom = lazy(() => import("./pages/InvestorDataRoom"));
+const SharedDataRoom = lazy(() => import("./pages/SharedDataRoom"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplication"));
@@ -198,6 +199,7 @@ const App = () => (
                     <Route path="/LMSapce" element={<LMSpace />} />
                     <Route path="/lmspace" element={<LMSpace />} />
                     <Route path="/data-room" element={<InvestorDataRoom />} />
+                    <Route path="/data-room/shared/:token" element={<SharedDataRoom />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/blog" element={<Navigate to="/" replace />} />
                     <Route path="/sponsorship" element={<Sponsorship />} />
