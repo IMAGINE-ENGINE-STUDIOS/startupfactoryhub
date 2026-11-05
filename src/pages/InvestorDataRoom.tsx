@@ -29,6 +29,9 @@ const CORE = [
   { title: "APEX partnership proposal", desc: "Accelerator-at-scale brochure", href: "/apex" },
   { title: "Use of Funds", desc: "Venture Builder Runway — 18-month plan & projections", href: "/uof" },
   { title: "Innovation Pipeline", desc: "Venture pipeline — IP to product to capital", href: "/lmspace" },
+  { title: "For Partners", desc: "Partnership brochure", href: "/forpartners" },
+  { title: "Memberships", desc: "Membership plans & pricing", href: "/memberships" },
+  { title: "For Sponsors", desc: "Sponsorship plans & packages", href: "/forsponsors" },
 ];
 
 interface Doc { id: string; category: string; title: string; description: string | null; file_path: string | null; external_url: string | null; created_at: string; }

@@ -278,6 +278,7 @@ const App = () => (
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
                      <Route path="/basic-plan" element={<BasicPlanBrochure />} />
                      <Route path="/membership" element={<BasicPlanBrochure />} />
+                    <Route path="/memberships" element={<BasicPlanBrochure />} />
                      <Route path="/members-club" element={<MembersClub />} />
                      <Route path="/messages" element={<Messages />} />
                      <Route path="/inbox" element={<Navigate to="/messages" replace />} />
