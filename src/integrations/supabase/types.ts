@@ -2603,6 +2603,30 @@ export type Database = {
         }
         Relationships: []
       }
+      data_room_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          label: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          label?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          label?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
       directory_investors: {
         Row: {
           accepting_investments: boolean | null
