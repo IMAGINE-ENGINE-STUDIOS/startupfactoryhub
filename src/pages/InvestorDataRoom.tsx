@@ -5,7 +5,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Lock, FileText, Upload, Trash2, UserPlus, Link2 } from "lucide-react";
+import { ArrowUpRight, Lock, FileText, Upload, Trash2, UserPlus, Link2, Copy, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePageSeo } from "@/hooks/usePageSeo";
@@ -49,6 +49,7 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [access, setAccess] = useState<{ email: string }[]>([]);
+  const [links, setLinks] = useState<{ token: string; label: string | null; created_at: string }[]>([]);
   const [form, setForm] = useState({ category: CATEGORIES[0], title: "", description: "", url: "" });
   const [file, setFile] = useState<File | null>(null);
   const [email, setEmail] = useState("");
@@ -69,6 +70,8 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
     if (admin) {
       const { data } = await db.from("data_room_access").select("email").order("granted_at", { ascending: false });
       setAccess(data ?? []);
+      const { data: linkRows } = await db.from("data_room_links").select("token, label, created_at").order("created_at", { ascending: false });
+      setLinks(linkRows ?? []);
     }
   }, [user]);
   useEffect(() => { void load(); }, [load]);
@@ -110,11 +113,34 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
   const grant = async () => {
     const e = email.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(e)) return setMsg("Enter a valid email.");
+    setBusy(true); setMsg("");
     const { error } = await db.from("data_room_access").upsert({ email: e });
-    if (error) return setMsg(error.message);
-    setEmail(""); setMsg(`${e} can now open the data room.`); void load();
+    if (error) { setBusy(false); return setMsg(error.message); }
+    const { error: mailError } = await supabase.functions.invoke("send-data-room-invite", { body: { email: e } });
+    setBusy(false);
+    setEmail("");
+    setMsg(mailError ? `${e} has access, but the invitation email could not be sent.` : `${e} has access — invitation email sent.`);
+    void load();
   };
   const revoke = async (e: string) => { await db.from("data_room_access").delete().eq("email", e); void load(); };
+
+  const shareUrl = (token: string) => `${window.location.origin}/data-room/shared/${token}`;
+  const createLink = async () => {
+    setBusy(true); setMsg("");
+    const token = crypto.randomUUID().replaceAll("-", "") + crypto.randomUUID().replaceAll("-", "").slice(0, 8);
+    const { error } = await db.from("data_room_links").insert({ token, label: `Shared ${new Date().toLocaleDateString()}`, created_by: user?.id });
+    setBusy(false);
+    if (error) return setMsg(error.message);
+    const url = shareUrl(token);
+    try { await navigator.clipboard.writeText(url); setMsg("External link created and copied to the clipboard."); }
+    catch { setMsg(`External link created: ${url}`); }
+    void load();
+  };
+  const copyLink = async (token: string) => {
+    try { await navigator.clipboard.writeText(shareUrl(token)); setMsg("Link copied to the clipboard."); }
+    catch { setMsg(shareUrl(token)); }
+  };
+  const revokeLink = async (token: string) => { await db.from("data_room_links").delete().eq("token", token); void load(); };
 
   const field = "w-full rounded-md border border-border bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
   return (
@@ -230,16 +256,40 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
                   <Eyebrow>Admin · Investor access</Eyebrow>
                   <div className="flex gap-2">
                     <input placeholder="investor@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
-                    <button onClick={grant} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">
-                      <UserPlus className="h-4 w-4" /> Grant
+                    <button onClick={grant} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+                      <UserPlus className="h-4 w-4" /> Grant &amp; email
                     </button>
                   </div>
+                  <p className="text-xs text-muted-foreground">Granting access emails the investor a sign-in link automatically.</p>
                   <div className="flex max-h-56 flex-col gap-1 overflow-y-auto">
                     {access.length === 0 && <div className="text-sm text-muted-foreground">No investors approved yet.</div>}
                     {access.map((a) => (
                       <div key={a.email} className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5">
                         <span className="text-sm text-foreground">{a.email}</span>
                         <button onClick={() => revoke(a.email)} className="text-xs font-medium text-destructive">Revoke</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="tech-card border-0 rounded-xl p-5 flex flex-col gap-2.5 lg:col-span-2">
+                  <Eyebrow>Admin · External share link</Eyebrow>
+                  <p className="text-xs text-muted-foreground">
+                    A read-only link anyone can open without an account — no sign-in required. Revoke it at any time.
+                  </p>
+                  <div>
+                    <button onClick={createLink} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+                      <Share2 className="h-4 w-4" /> Create external link
+                    </button>
+                  </div>
+                  <div className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+                    {links.length === 0 && <div className="text-sm text-muted-foreground">No external links yet.</div>}
+                    {links.map((l) => (
+                      <div key={l.token} className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5">
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{l.label || shareUrl(l.token)}</span>
+                        <button onClick={() => copyLink(l.token)} aria-label="Copy link" className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                          <Copy className="h-3.5 w-3.5" /> Copy
+                        </button>
+                        <button onClick={() => revokeLink(l.token)} className="text-xs font-medium text-destructive">Revoke</button>
                       </div>
                     ))}
                   </div>
