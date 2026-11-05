@@ -20,17 +20,17 @@ import "./UseOfFunds.css";
    /uof — Venture Builder Runway: Use of Funds, unified with the Financial
    Projections from /deck.
    Use-of-Funds figures: the founder's runway budget of 2026-11-04 — an
-   18-month plan requested at $1,695,048 that fits the $1.5M seed exact by
-   cutting Marketing by $195,048 (to $74,952). Both views are shown; the
-   toggle switches every figure on the page.
+   18-month plan in two views: requested at $1,695,048, and adjusted at
+   the $1.5M seed exact (Marketing $74,952). The toggle switches every
+   figure on the page.
    Projections: taken verbatim from the Deck's "5-Year Financial Projections"
    slide (Year 1 $6.09M → Year 5 $60.9M) and its Business Model slide.
    ────────────────────────────────────────────────────────────────────────── */
 
 const RUNWAY_MONTHS = 18;
 
-/* The ask, two ways: as requested, and adjusted to fit the $1.5M seed exact.
-   The whole $195,048 adjustment comes out of Marketing. */
+/* The ask, two ways: as requested, and adjusted to the $1.5M seed exact.
+   The $195,048 adjustment sits in Marketing. */
 const REQUESTED_TOTAL = 1_695_048;
 const ADJUSTED_TOTAL = 1_500_000;
 const ADJUSTMENT = 195_048;
@@ -71,7 +71,7 @@ const CATEGORIES = [
 const catAmount = (c: (typeof CATEGORIES)[number], view: View) => (view === "requested" ? c.req : c.adj);
 const catPct = (c: (typeof CATEGORIES)[number], view: View) => (view === "requested" ? c.pctReq : c.pctAdj);
 const catComp = (c: (typeof CATEGORIES)[number], view: View) =>
-  c.id === "mkt" ? (view === "requested" ? "$270,000 / 18m" : "$270,000 → $74,952 to fit $1.5M") : c.comp;
+  c.id === "mkt" ? (view === "requested" ? "$270,000 / 18m" : "$270,000 → $74,952") : c.comp;
 
 /* Operations, defined once: Office + Other. */
 const OPS_PARTS = [
@@ -172,9 +172,9 @@ export default function UseOfFunds() {
       ["Operations", "Office", 2_336, 42_048],
       ["Operations", "Other Ops", 4_833, 87_000],
       ["Summary", "Total Requested (18M)", REQ_BURN, REQUESTED_TOTAL],
-      ["Summary", "Adjustment — Marketing cut", "", -ADJUSTMENT],
+      ["Summary", "Adjustment — Marketing", "", -ADJUSTMENT],
       ["Summary", "Marketing (Adjusted)", 4_164, 74_952],
-      ["Summary", "Total Adjusted — fits $1.5M seed exact (18M)", ADJ_BURN, ADJUSTED_TOTAL],
+      ["Summary", "Total Adjusted — $1.5M seed exact (18M)", ADJ_BURN, ADJUSTED_TOTAL],
       ["Summary", "Runway", "", "18 months"],
       ...BUILD_SYSTEM.parts.map((p) => ["Product Build System", p.label, p.mo, p.total18] as (string | number)[]),
       ["Product Build System", "Total Product Build System", BUILD_SYSTEM.mo, BUILD_SYSTEM.total],
@@ -377,7 +377,7 @@ export default function UseOfFunds() {
                   {tab === "budget" ? "The budget, line by line" : "Allocation — the investor view"}
                 </h2>
                 <p className="mt-3 max-w-2xl text-[var(--uof-ink-dim)]">
-                  One plan, two readings: the full request at $1,695,048, and the same plan adjusted to fit the $1.5M seed exact — the entire $195,048 adjustment comes out of Marketing.
+                  One plan, two readings: the full request at $1,695,048, and the same plan adjusted to the $1.5M seed exact.
                 </p>
               </div>
               <div className="uof-no-print flex flex-col items-start gap-2 sm:items-end">
@@ -424,7 +424,6 @@ export default function UseOfFunds() {
                       {view === "requested" ? (
                         <>
                           <span className="uof-mono rounded-full border border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.08)] px-3 py-1 text-[10px] tracking-[0.14em] text-[#fbbf24]">+$195,048 OVER $1.5M</span>
-                          <span className="text-xs text-[var(--uof-ink-dim)]">Fits $1.5M by cutting Marketing $195,048</span>
                         </>
                       ) : (
                         <>
@@ -620,7 +619,7 @@ export default function UseOfFunds() {
                     {[
                       { label: "Team $945k", detail: "$52,500/mo", color: "#2dd4bf" },
                       { label: "Ops $129,048", detail: "Office $42,048 included", color: "#22d3ee" },
-                      { label: view === "requested" ? "Marketing $270k" : "Marketing $74,952", detail: view === "requested" ? "$15,000/mo" : "$4,164/mo • cut $195,048 to fit $1.5M", color: "#fbbf24" },
+                      { label: view === "requested" ? "Marketing $270k" : "Marketing $74,952", detail: view === "requested" ? "$15,000/mo" : "$4,164/mo", color: "#fbbf24" },
                       { label: "Legal $138k • Ins $18k • Travel $75k • AI $120k", detail: "18m", color: "#a78bfa" },
                     ].map((r) => (
                       <li key={r.label} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--uof-surface-2)] px-4 py-3">
@@ -797,7 +796,7 @@ export default function UseOfFunds() {
                 ))}
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--uof-surface-2)] px-4 py-3">
-                <span className="text-sm font-semibold">Raising $1.5M seed · $1,695,048 requested — fits $1.5M exact, allocated line by line above</span>
+                <span className="text-sm font-semibold">Raising $1.5M seed · $1,695,048 requested — allocated line by line above</span>
                 <a href="#use-of-funds" className="uof-mono inline-flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--uof-teal)] hover:text-[var(--uof-cyan)]">
                   USE OF FUNDS <ArrowUpRight className="h-3.5 w-3.5" />
                 </a>
