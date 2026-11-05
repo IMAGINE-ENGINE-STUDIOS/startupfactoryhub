@@ -5324,6 +5324,45 @@ export type Database = {
         }
         Relationships: []
       }
+      live_broadcasts: {
+        Row: {
+          created_at: string
+          egress_id: string | null
+          id: string
+          live_url: string | null
+          owner_id: string
+          platform: string
+          platform_live_id: string | null
+          room: string
+          status: string
+          stopped_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          egress_id?: string | null
+          id?: string
+          live_url?: string | null
+          owner_id: string
+          platform: string
+          platform_live_id?: string | null
+          room: string
+          status?: string
+          stopped_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          egress_id?: string | null
+          id?: string
+          live_url?: string | null
+          owner_id?: string
+          platform?: string
+          platform_live_id?: string | null
+          room?: string
+          status?: string
+          stopped_at?: string | null
+        }
+        Relationships: []
+      }
       live_guest_checkins: {
         Row: {
           created_at: string
@@ -5710,6 +5749,30 @@ export type Database = {
           title?: string | null
           transcript_text?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      member_update_sends_20261029: {
+        Row: {
+          email: string
+          provider: string | null
+          segment: string
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          email: string
+          provider?: string | null
+          segment: string
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          email?: string
+          provider?: string | null
+          segment?: string
+          sent_at?: string
+          status?: string
         }
         Relationships: []
       }
@@ -6748,6 +6811,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plan_credit_standard: {
+        Row: {
+          credit_usd: number
+          monthly_credits: number
+          plan: string
+          price_usd: number
+        }
+        Insert: {
+          credit_usd?: number
+          monthly_credits: number
+          plan: string
+          price_usd: number
+        }
+        Update: {
+          credit_usd?: number
+          monthly_credits?: number
+          plan?: string
+          price_usd?: number
+        }
+        Relationships: []
       }
       portfolio_companies: {
         Row: {
@@ -8349,6 +8433,597 @@ export type Database = {
           },
         ]
       }
+      socialite_ai_config: {
+        Row: {
+          base_url: string | null
+          enabled: boolean
+          id: number
+          image_model: string | null
+          key_cipher: string | null
+          key_hint: string | null
+          model: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          base_url?: string | null
+          enabled?: boolean
+          id?: number
+          image_model?: string | null
+          key_cipher?: string | null
+          key_hint?: string | null
+          model?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Update: {
+          base_url?: string | null
+          enabled?: boolean
+          id?: number
+          image_model?: string | null
+          key_cipher?: string | null
+          key_hint?: string | null
+          model?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          name: string
+          owner_id: string
+          prefix: string
+          revoked_at: string | null
+          scopes: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          name: string
+          owner_id: string
+          prefix: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          name?: string
+          owner_id?: string
+          prefix?: string
+          revoked_at?: string | null
+          scopes?: string[]
+        }
+        Relationships: []
+      }
+      socialite_api_requests: {
+        Row: {
+          created_at: string
+          id: number
+          ip_hash: string | null
+          key_id: string
+          method: string
+          owner_id: string
+          path: string
+          status: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ip_hash?: string | null
+          key_id: string
+          method: string
+          owner_id: string
+          path: string
+          status: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ip_hash?: string | null
+          key_id?: string
+          method?: string
+          owner_id?: string
+          path?: string
+          status?: number
+        }
+        Relationships: []
+      }
+      socialite_autopilot: {
+        Row: {
+          active: boolean
+          created_at: string
+          hashtag_sets: string[]
+          id: string
+          owner_id: string
+          platforms: string[]
+          state: Json
+          story_count: number
+          templates: string[]
+          times: string[]
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          hashtag_sets?: string[]
+          id?: string
+          owner_id: string
+          platforms?: string[]
+          state?: Json
+          story_count?: number
+          templates?: string[]
+          times?: string[]
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          hashtag_sets?: string[]
+          id?: string
+          owner_id?: string
+          platforms?: string[]
+          state?: Json
+          story_count?: number
+          templates?: string[]
+          times?: string[]
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_billing_config: {
+        Row: {
+          config: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_channel: string | null
+          last_sent_at: string | null
+          name: string
+          owner_id: string
+          phone: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_channel?: string | null
+          last_sent_at?: string | null
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_channel?: string | null
+          last_sent_at?: string | null
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_credentials: {
+        Row: {
+          account_id: string | null
+          extra_id: string | null
+          id: string
+          owner_id: string | null
+          platform: string
+          token_cipher: string
+          token_hint: string | null
+          updated_at: string
+          updated_by: string | null
+          verified_name: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          extra_id?: string | null
+          id?: string
+          owner_id?: string | null
+          platform: string
+          token_cipher: string
+          token_hint?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          verified_name?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          extra_id?: string | null
+          id?: string
+          owner_id?: string | null
+          platform?: string
+          token_cipher?: string
+          token_hint?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          verified_name?: string | null
+        }
+        Relationships: []
+      }
+      socialite_credit_ledger: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_usd?: number
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      socialite_knowledge: {
+        Row: {
+          active: boolean
+          content: string
+          created_at: string
+          id: string
+          image_path: string | null
+          kind: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          kind?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          kind?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_plans: {
+        Row: {
+          active: boolean
+          features: string[]
+          id: string
+          limits: Json
+          monthly_price: number
+          name: string
+          sort: number
+          updated_at: string
+          yearly_price: number
+        }
+        Insert: {
+          active?: boolean
+          features?: string[]
+          id: string
+          limits?: Json
+          monthly_price?: number
+          name: string
+          sort?: number
+          updated_at?: string
+          yearly_price?: number
+        }
+        Update: {
+          active?: boolean
+          features?: string[]
+          id?: string
+          limits?: Json
+          monthly_price?: number
+          name?: string
+          sort?: number
+          updated_at?: string
+          yearly_price?: number
+        }
+        Relationships: []
+      }
+      socialite_scheduled: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          payload: Json
+          result: Json | null
+          send_at: string
+          status: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          result?: Json | null
+          send_at: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          result?: Json | null
+          send_at?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_shield_events: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          level: string
+          message: string
+          owner_id: string
+          rule: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          level: string
+          message: string
+          owner_id: string
+          rule: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          owner_id?: string
+          rule?: string
+        }
+        Relationships: []
+      }
+      socialite_shield_flags: {
+        Row: {
+          block_count: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision: string | null
+          id: string
+          owner_id: string
+          reason: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          block_count?: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          id?: string
+          owner_id: string
+          reason: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          block_count?: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          id?: string
+          owner_id?: string
+          reason?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_shield_rules: {
+        Row: {
+          config: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_shield_status: {
+        Row: {
+          note: string | null
+          owner_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          note?: string | null
+          owner_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          note?: string | null
+          owner_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      socialite_state: {
+        Row: {
+          key: string
+          owner_id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          owner_id?: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          owner_id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      socialite_subscriptions: {
+        Row: {
+          ai_addon: boolean
+          ai_addon_subscription_id: string | null
+          current_period_end: string | null
+          plan_id: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_addon?: boolean
+          ai_addon_subscription_id?: string | null
+          current_period_end?: string | null
+          plan_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_addon?: boolean
+          ai_addon_subscription_id?: string | null
+          current_period_end?: string | null
+          plan_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      socialite_usage: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          kind: string
+          meta: Json
+          units: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          kind: string
+          meta?: Json
+          units?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          kind?: string
+          meta?: Json
+          units?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       soft_landing_requests: {
         Row: {
           additional_notes: string | null
@@ -9209,6 +9884,36 @@ export type Database = {
           },
         ]
       }
+      user_live_products: {
+        Row: {
+          created_at: string
+          id: string
+          image: string
+          name: string
+          price: number
+          tag: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image?: string
+          name: string
+          price?: number
+          tag?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image?: string
+          name?: string
+          price?: number
+          tag?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -9977,6 +10682,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      automation_edge_ping: {
+        Args: { _function_name: string }
+        Returns: undefined
+      }
       can_see_profile_contact: { Args: { _owner: string }; Returns: boolean }
       can_view_data_room: { Args: never; Returns: boolean }
       check_and_grant_official_status: {
@@ -10174,6 +10883,7 @@ export type Database = {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
+      is_main_admin: { Args: never; Returns: boolean }
       is_net_group_admin: {
         Args: { _group: string; _user: string }
         Returns: boolean
