@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, Plus, RotateCcw, ChevronDown, Trophy, Trash2, Building2, MapPin, Target } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, Plus, RotateCcw, ChevronDown, Trophy, Trash2, Building2, MapPin, Target, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +19,7 @@ import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
 import JourneyCompletionDialog from '@/components/JourneyCompletionDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { JourneyResourcesDialog } from '@/components/JourneyResourcesDialog';
+import { JOURNEY_LIBRARY } from '@/data/journeyLibrary';
 import { JourneyStep } from '@/hooks/useResources';
 
 interface RoadmapStep {
@@ -50,7 +51,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'idea',
     completed: false,
     locked: false,
-    resources: ['Business Model Canvas', 'Customer Interview Guide', 'Market Research Templates'],
+    resources: [],
     icon: Lightbulb,
     defaultChecklist: [
       { id: 'iv-1', text: 'Define problem statement', completed: false },
@@ -66,7 +67,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'research',
     completed: false,
     locked: true,
-    resources: ['Competitor Analysis Framework', 'Market Size Calculator', 'Industry Reports'],
+    resources: [],
     icon: FileText,
     defaultChecklist: [
       { id: 'mr-1', text: 'Analyze top 5 competitors', completed: false },
@@ -82,7 +83,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'mvp',
     completed: false,
     locked: true,
-    resources: ['MVP Planning Guide', 'Tech Stack Recommendations', 'Development Roadmap'],
+    resources: [],
     icon: Circle,
     defaultChecklist: [
       { id: 'mvp-1', text: 'Define core features', completed: false },
@@ -99,7 +100,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'validation',
     completed: false,
     locked: true,
-    resources: ['User Testing Scripts', 'Feedback Collection Tools', 'Analytics Setup'],
+    resources: [],
     icon: Users,
     defaultChecklist: [
       { id: 'uv-1', text: 'Recruit beta testers', completed: false },
@@ -115,7 +116,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'launch',
     completed: false,
     locked: true,
-    resources: ['Launch Checklist', 'Marketing Strategies', 'PR Templates'],
+    resources: [],
     icon: TrendingUp,
     defaultChecklist: [
       { id: 'pl-1', text: 'Finalize marketing materials', completed: false },
@@ -150,7 +151,7 @@ const roadmapSteps: RoadmapStep[] = [
     stage: 'growth',
     completed: false,
     locked: true,
-    resources: ['Pitch Deck Template', 'Investor Database', 'Cap Table Management'],
+    resources: [],
     icon: TrendingUp,
     defaultChecklist: [
       { id: 'gf-1', text: 'Create investor pitch deck', completed: false },
@@ -1098,19 +1099,42 @@ export default function StartupRoadmap() {
             />
           )}
 
-          {/* Resources */}
-          {activeStep.resources.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Resources</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {activeStep.resources.map((r, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs font-normal">
-                    {r}
-                  </Badge>
-                ))}
+          {/* Library — the step's real templates & guides (Drive folder) */}
+          {(() => {
+            const library = JOURNEY_LIBRARY[activeStep.id] ?? [];
+            if (library.length === 0 && activeStep.resources.length === 0) return null;
+            return (
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Library</h4>
+                {library.length > 0 ? (
+                  <div className={`flex flex-wrap gap-1.5 ${activeStep.locked ? 'pointer-events-none opacity-50' : ''}`}>
+                    {library.map((item) => (
+                      <a
+                        key={item.url}
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-secondary/50 px-2.5 py-1 text-xs transition-colors hover:bg-secondary"
+                      >
+                        <FileText className="h-3 w-3 shrink-0" />
+                        {item.title}
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{item.format}</span>
+                        <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeStep.resources.map((r, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs font-normal">
+                        {r}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Actions */}
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
