@@ -290,6 +290,12 @@ export default function EquityContractsManager() {
             documentTitle: title,
             shareToken: record.share_token,
             message: message.trim() || undefined,
+            // Blank-for-input path: the company completes its own terms from
+            // the link (the email copy follows the path).
+            blank:
+              !values.companyName.trim() ||
+              !values.equityPercent.trim() ||
+              !values.totalRaised.trim(),
           },
         });
         if (mailError) throw mailError;
@@ -313,12 +319,19 @@ export default function EquityContractsManager() {
       toast.error("This contract has no recipient email");
       return;
     }
+    const stored = extractValues(row.content_html);
     const { error } = await supabase.functions.invoke("send-equity-contract", {
       body: {
         to: row.recipient_email,
         recipientName: row.recipient_name || undefined,
+        companyName: stored?.companyName?.trim() || row.recipient_name || undefined,
         documentTitle: row.title,
         shareToken: row.share_token,
+        blank: stored
+          ? !stored.companyName.trim() ||
+            !stored.equityPercent.trim() ||
+            !stored.totalRaised.trim()
+          : undefined,
       },
     });
     if (error) toast.error("Could not resend the contract");

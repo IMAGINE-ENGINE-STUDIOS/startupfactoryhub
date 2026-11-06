@@ -130,13 +130,20 @@ const CompanyContractForm = ({ company }: { company: Company }) => {
     setValues((prev) => ({ ...prev, [k]: val }));
 
   const loadExisting = async () => {
-    const { data } = await supabase
+    // The company's contract library: every Accelerator contract for this
+    // company — draft, sent blank, sent pre-filled, completed, signed — is a
+    // sign_documents record; match it by the company's account OR by the
+    // owner email it was sent to, so no contract lives only in an email.
+    let query = supabase
       .from("sign_documents")
       .select("id, title, status, created_at")
       .eq("source_type", "equity_contract")
-      .eq("recipient_user_id", company.user_id)
       .order("created_at", { ascending: false })
       .limit(10);
+    query = company.owner_email
+      ? query.or(`recipient_user_id.eq.${company.user_id},recipient_email.eq.${company.owner_email}`)
+      : query.eq("recipient_user_id", company.user_id);
+    const { data } = await query;
     setExisting((data || []) as typeof existing);
   };
 
