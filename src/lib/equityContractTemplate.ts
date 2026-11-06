@@ -1,24 +1,37 @@
 /**
- * Startup Factory Hub — Strategic Accelerator and Venture Building Agreement
- * (REVISED, signable version — replaces the former equity + profit
- * participation template on 2026-11-02 at the founder's direction).
+ * Startup Factory Hub — Accelerator Program Participation Agreement
+ * (founder-approved final version, 2026-11-05 — converted from Jim Stuber's
+ * memo of the Nov 3 conversation; replaces the Strategic Accelerator and
+ * Venture Building Agreement in the Contracts tab).
  *
- * Key terms: 1% equity vesting monthly over a 3-month Active Period,
- * limited anti-dilution until the earlier of 18 months or a $1M+ Qualified
- * Financing, a 5% fundraising success fee payable only on Covered Investors
- * (written introductions acknowledged by the Company, 18-month tail, and
- * only to the extent lawful), 12 months of complimentary platform access,
- * alumni benefits while the Accelerator holds at least 0.5%, and optional
- * office space at $950/month under a separate addendum.
+ * Structure: admission at IES's sole discretion; an unconditional,
+ * irrevocable founder's-equity-equivalent right (default 2.0%, custom per
+ * company); Program Phases One/Two/Three + subsequent phases, each running
+ * until the company raises that phase's financing amount on top of prior
+ * raises (default $250,000 per phase); FLAT Phase Compensation (default
+ * $12,500 per phase) that accrues at phase commencement and is payable only
+ * at that phase's financing closing — the fee is a fixed amount and is never
+ * stated as a percentage of, or tied to, any amount raised; a flat
+ * Graduation Compensation (default $100,000) payable at the Graduation
+ * Financing Event (the first closing of a pre-seed, seed, or Series A round,
+ * whichever occurs first), when accrued phase compensation also comes due
+ * and participation terminates; and an optional Unlimited Office Access
+ * add-on at $950/month, billed monthly in advance, not contingent on
+ * financing milestones.
  *
- * Renders print-ready HTML used by the admin Equity Contracts section and by
- * the public signing page (`/sign/:token`). Underscore runs become signature
- * fields automatically (see `src/lib/signatureFields.ts`).
+ * Every per-company figure lives in Schedule A and is supplied per startup
+ * when the contract is created (Contracts tab form, or the company's room in
+ * Admin → Startups) — nothing per-company is hardcoded here beyond the
+ * program defaults in DEFAULT_EQUITY_CONTRACT.
  *
- * Note: `profitPercent` in EquityContractValues is retained for storage
- * compatibility with drafts saved under the former template; in this revised
- * agreement its value is used as the fundraising SUCCESS FEE percent.
- * There is no profit participation in this version.
+ * Renders print-ready HTML used by the admin Equity Contracts section, the
+ * company room's Contract tab, and the public signing page (`/sign/:token`).
+ * Underscore runs become signature fields automatically
+ * (see `src/lib/signatureFields.ts`).
+ *
+ * Storage compatibility: `profitPercent` and `termMonths` remain in
+ * EquityContractValues because drafts saved under earlier templates carry
+ * them; this agreement does not use them.
  */
 
 export interface EquityContractClause {
@@ -31,6 +44,8 @@ export interface EquityContractValues {
   companyName: string;
   jurisdiction: string;
   companyAddress: string;
+  /** Company notice email (Schedule A: "Company address / notice email"). */
+  companyNoticeEmail: string;
   equityPercent: string;
   profitPercent: string;
   termMonths: string;
@@ -38,6 +53,23 @@ export interface EquityContractValues {
   companySignerTitle: string;
   acceleratorSignerName: string;
   acceleratorSignerTitle: string;
+  /** Total the company had raised before admission — the Section 3 baseline
+   *  every phase financing amount is measured on top of. */
+  totalRaised: string;
+  phase1Financing: string;
+  phase1Compensation: string;
+  phase2Financing: string;
+  phase2Compensation: string;
+  phase3Financing: string;
+  phase3Compensation: string;
+  subsequentFinancing: string;
+  subsequentCompensation: string;
+  graduationCompensation: string;
+  paymentMethod: string;
+  customPaymentTerms: string;
+  /** "yes" when the company elects the Section 6 add-on, otherwise "no". */
+  officeAddonElected: string;
+  officeAddonStart: string;
   customClauses?: EquityContractClause[];
 }
 
@@ -46,23 +78,59 @@ export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
   companyName: "",
   jurisdiction: "",
   companyAddress: "",
-  equityPercent: "1",
+  companyNoticeEmail: "",
+  equityPercent: "2",
   profitPercent: "5",
   termMonths: "3",
   companySignerName: "",
   companySignerTitle: "",
   acceleratorSignerName: "Khalia Padilla",
   acceleratorSignerTitle: "Managing Partner",
+  totalRaised: "",
+  phase1Financing: "250000",
+  phase1Compensation: "12500",
+  phase2Financing: "250000",
+  phase2Compensation: "12500",
+  phase3Financing: "250000",
+  phase3Compensation: "12500",
+  subsequentFinancing: "250000",
+  subsequentCompensation: "12500",
+  graduationCompensation: "100000",
+  paymentMethod: "",
+  customPaymentTerms: "",
+  officeAddonElected: "no",
+  officeAddonStart: "",
   customClauses: [],
 };
 
 export const SFH_FOUNDERS = [
   { name: "Khalia Padilla", role: "Managing Partner & Founder" },
   { name: "Ricardo Font", role: "Managing Partner & Founder" },
-  
 ];
 
 export const PARTNERS_URL = "https://startupfactoryhub.com/forpartners";
+
+export const IES_NOTICE =
+  "Imagine Engine Studios Corp d/b/a Startup Factory Hub, 6900 Tavistock Lakes Blvd, Suite 400, Orlando, FL 32827 / info@startupfactoryhub.com";
+
+/** Marker used to embed the source values inside a saved contract's HTML so
+ *  drafts can be re-opened for editing. Shared by the Contracts tab and the
+ *  company room — keep the format identical everywhere. */
+export const CONTRACT_VALUES_MARKER = "SFH_CONTRACT_VALUES:";
+
+export const embedContractValues = (html: string, values: EquityContractValues) =>
+  `${html}\n<!--${CONTRACT_VALUES_MARKER}${encodeURIComponent(JSON.stringify(values))}-->`;
+
+export const extractContractValues = (html: string | null): EquityContractValues | null => {
+  if (!html) return null;
+  const m = html.match(new RegExp(`<!--${CONTRACT_VALUES_MARKER}([^>]*)-->`));
+  if (!m) return null;
+  try {
+    return { ...DEFAULT_EQUITY_CONTRACT, ...JSON.parse(decodeURIComponent(m[1])) };
+  } catch {
+    return null;
+  }
+};
 
 const esc = (s: string) =>
   (s || "")
@@ -77,221 +145,205 @@ const h = (n: string, t: string) =>
 
 const p = (html: string) => `<p style="margin:0 0 12px;line-height:1.75">${html}</p>`;
 
-const ul = (items: string[]) =>
-  `<ul style="margin:0 0 14px 20px;line-height:1.75">${items
-    .map((i) => `<li>${esc(i)}</li>`)
-    .join("")}</ul>`;
+/** "$250,000" from "250000" ($ and commas in the input are tolerated);
+ *  a non-numeric value is kept as typed; blank → underscores. */
+const money = (v: string, width = 14) => {
+  const t = (v || "").trim();
+  if (!t) return "_".repeat(width);
+  const plain = t.replace(/^\$/, "").replace(/,/g, "");
+  if (/^[0-9]+(\.[0-9]+)?$/.test(plain)) {
+    return "$" + Number(plain).toLocaleString("en-US", { maximumFractionDigits: 2 });
+  }
+  return esc(t);
+};
 
-const group = (title: string, items: string[]) =>
-  `<p style="margin:12px 0 4px;font-weight:600">${esc(title)}</p>${ul(items)}`;
+const ONES = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+  "seventeen", "eighteen", "nineteen",
+];
+const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+
+const intWords = (n: number): string => {
+  if (n < 20) return ONES[n];
+  if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? "-" + ONES[n % 10] : "");
+  if (n < 1000)
+    return ONES[Math.floor(n / 100)] + " hundred" + (n % 100 ? " " + intWords(n % 100) : "");
+  return String(n);
+};
+
+/** "two" from "2", "two point five" from "2.5" — for the Section 2 equity line. */
+export const percentWords = (v: string): string => {
+  const n = Number((v || "").trim());
+  if (!Number.isFinite(n)) return (v || "").trim();
+  const whole = Math.floor(n);
+  const frac = (v || "").trim().split(".")[1];
+  let out = intWords(whole);
+  if (frac && Number(frac) > 0) {
+    out += " point " + frac.split("").map((d) => ONES[Number(d)]).join(" ");
+  }
+  return out;
+};
+
+/** "2.0" from "2", "2.5" from "2.5" — the numeric form shown beside the words. */
+export const percentDisplay = (v: string): string => {
+  const n = Number((v || "").trim());
+  if (!Number.isFinite(n)) return (v || "").trim();
+  return Number.isInteger(n) ? `${n}.0` : String(n);
+};
 
 export function buildEquityContractHtml(v: EquityContractValues): string {
-  const equity = blank(v.equityPercent, 4);
-  const fee = blank(v.profitPercent, 4);
-  const term = v.termMonths?.trim() || "3";
-
-  const founders = SFH_FOUNDERS.map(
-    (f) =>
-      `<li><strong>${esc(f.name)}</strong> — ${esc(f.role)}</li>`
-  ).join("");
+  const eqWords = esc(percentWords(v.equityPercent || "2"));
+  const eqNum = esc(percentDisplay(v.equityPercent || "2"));
+  const addon = v.officeAddonElected === "yes";
+  const row = (label: string, value: string, bold = false) =>
+    `<tr><td style="padding:7px 10px;border:1px solid #d1d5db;${bold ? "font-weight:700" : ""}">${esc(
+      label
+    )}</td><td style="padding:7px 10px;border:1px solid #d1d5db;${bold ? "font-weight:700" : ""}">${value}</td></tr>`;
 
   return `
 <div style="font-family:Georgia,'Times New Roman',serif;color:#111827;font-size:14px">
-  <h2 style="text-align:center;font-size:20px;margin:0 0 4px">STRATEGIC ACCELERATOR AND VENTURE BUILDING AGREEMENT</h2>
+  <h2 style="text-align:center;font-size:20px;margin:0 0 4px">ACCELERATOR PROGRAM PARTICIPATION AGREEMENT</h2>
   <p style="text-align:center;font-size:12px;color:#6b7280;margin:0 0 24px">
-    Imagine Engine Studios Corp d/b/a Startup Factory Hub · Lake Nona Center, Orlando, Florida ·
+    Imagine Engine Studios Corp d/b/a Startup Factory Hub · Orlando, Florida ·
     <a href="${PARTNERS_URL}" style="color:#0ea270">Learn more about us</a>
   </p>
 
   ${p(
-    `This Strategic Accelerator and Venture Building Agreement ("Agreement") is entered into as of ${blank(
-      v.effectiveDate,
-      20
-    )} (the "Effective Date") by and between:`
-  )}
-  ${p(
-    `<strong>Imagine Engine Studios Corp</strong>, a Florida corporation, doing business as <strong>Startup Factory Hub</strong>, with its principal place of business at 6900 Tavistock Lakes Boulevard SE, Suite 400, Lake Nona Center, Orlando, Florida 32827, hereinafter referred to as "Imagine Engine", "Startup Factory Hub" or the "Service Provider",`
-  )}
-  ${p("and")}
-  ${p(
-    `<strong>${blank(v.companyName, 32)}</strong>, a company organized under the laws of ${blank(
-      v.jurisdiction,
-      24
-    )}, having its principal place of business at ${blank(
-      v.companyAddress,
-      36
-    )}, hereinafter referred to as the "Company."`
-  )}
-  ${p('Each a "Party" and collectively the "Parties."')}
-
-  ${h("1", "PURPOSE AND ENGAGEMENT")}
-  ${p(
-    `The Company engages the Service Provider as its strategic accelerator and venture-building partner for an initial period of ${esc(
-      term
-    )} (${esc(
-      term
-    )}) months from the Effective Date (the "Active Period"), on the equity-compensation track described in this Agreement. This Agreement is separate from the Service Provider's paid subscription and Accelerator-as-a-Service offerings; no cash program fee is due for the services in Section 2 except for the success fee in Section 4, expenses in Section 8, and any optional office arrangement in Section 7.`
-  )}
-  ${p(
-    "At or promptly after the Effective Date, the Parties will agree in writing (email sufficient) on a kickoff plan identifying the Company's lead contact, the lead advisor, priority objectives, and scheduled check-ins for the Active Period."
+    `This Accelerator Program Participation Agreement (this "<strong>Agreement</strong>") is entered into as of the date set forth in Schedule A (the "<strong>Effective Date</strong>"), by and between <strong>Imagine Engine Studios Corp</strong>, a Florida corporation, doing business as <strong>Startup Factory Hub</strong> ("<strong>IES</strong>" or "<strong>SFH</strong>"), and the company identified in Schedule A (the "<strong>Company</strong>"). IES and the Company are each a "Party" and collectively the "Parties."`
   )}
 
-  ${h("2", "SCOPE OF SERVICES")}
+  <h3 style="font-size:15px;margin:26px 0 10px;letter-spacing:.4px">Recitals</h3>
   ${p(
-    "During the Active Period, the Service Provider will provide the following services on a commercially reasonable efforts basis, subject to scheduling and availability. No service in this Section guarantees any business, product, or fundraising outcome."
-  )}
-  ${group("2.1 Advising and Mentorship", [
-    "Weekly or bi-weekly one-on-one mentorship with a lead advisor",
-    "Access to a network of founders, operators, executives, and investors, by introduction where appropriate",
-    "Office hours, strategic sessions, and accountability check-ins",
-    "Guidance on product-market fit, business development, scaling, and fundraising readiness",
-  ])}
-  ${group("2.2 Human Capital Support", [
-    "Access to a vetted talent network, including developers, designers, marketers, sales professionals, and other specialists",
-    "Assistance with recruiting, interviewing, and onboarding initial employees and interns",
-    "Advisory on team structure, organizational development, and workforce planning",
-  ])}
-  ${p("Recruitment fees, salaries, and third-party employment expenses are excluded unless separately agreed in writing.")}
-  ${group("2.3 MVP Development Support", [
-    "Product scoping, roadmap development, and sprint planning",
-    "Technical advisory and architecture review",
-    "Introductions to development agencies, technical partners, and internal development resources",
-    "Quality assurance and product launch-readiness review",
-  ])}
-  ${p("Software engineering, development labor, hosting, and third-party development expenses are excluded unless separately agreed in writing, including under a separate AI Credits or development agreement.")}
-  ${group("2.4 Fractional C-Suite Executive Support", [
-    "Access to shared, part-time executive advisory resources (which may include CTO, CMO, and CFO functions), each for up to five (5) hours of advisory support per month during the Active Period, subject to availability and scheduling",
-    "These services are advisory only and do not constitute full-time employment or dedicated executive placement",
-  ])}
-  ${group("2.5 Business Consulting and Venture Building", [
-    "Business planning: business plan preparation and review, market analysis, competitive and commercialization strategy",
-    "Revenue models: monetization and pricing strategy, unit economics, LTV and CAC analysis",
-    "Business strategy: go-to-market, growth, and market expansion strategy",
-    "Capitalization table: cap table modeling, financing scenario and dilution planning",
-    "Financial projections: three-to-five-year projections, including P&L, cash flow, and balance sheet projections, based on information and assumptions provided by the Company",
-    "Investor reporting: investor-ready reporting templates, KPI dashboard, and monthly investor update templates",
-    "Pitch deck: deck review and restructuring, investment narrative development, design guidance, and pitch coaching",
-  ])}
-  ${group("2.6 Investor Relations and Fundraising Support", [
-    "Fundraising strategy and capital planning",
-    "Investor identification and pipeline development",
-    "Introductions to investors in accordance with Section 4",
-    "Investor relationship coordination, meeting preparation, and follow-up support",
-    "Investment positioning and fundraising materials support",
-  ])}
-  ${p("All fundraising activities will be conducted in compliance with applicable securities laws, as provided in Section 4.4.")}
-  ${group("2.7 Company Obligations", [
-    "Designate one lead contact and ensure its founders or senior team attend scheduled sessions or give reasonable notice of rescheduling",
-    "Provide timely, accurate, and complete information reasonably requested by the Service Provider, and make decisions within agreed timeframes",
-    "Remain solely responsible for its business, product, legal, tax, accounting, and financing decisions",
-  ])}
-
-  ${h("3", "EQUITY COMPENSATION")}
-  ${p(
-    `In consideration of the services and strategic partnership under this Agreement, the Company will grant the Service Provider an equity interest equal to ${equity}% of the Company's fully diluted capitalization, as calculated immediately following the issuance (the "Equity").`
-  )}
-  ${p(
-    "<strong>3.1 Instrument and Issuance.</strong> The Equity will be issued as restricted common stock (or, if the Company does not have common stock, the closest equivalent ownership interest; or, if both Parties agree in writing, another instrument such as a SAFE that converts into or represents the percentage above). The Company will, within fifteen (15) business days after the Effective Date, complete all corporate approvals, issue the Equity, deliver the issuance documents and an updated capitalization table reflecting the Equity, and record the Service Provider in its ownership records. The issuance will be made in compliance with applicable securities laws under an available exemption from registration. The Service Provider represents that it is acquiring the Equity for investment purposes for its own account and understands the Equity is restricted and illiquid. The Company will provide issuance documents in sufficient time for the Service Provider to consider a timely Section 83(b) election, if applicable, and the Service Provider is solely responsible for its own tax decisions and filings."
-  )}
-  ${p(
-    "<strong>3.2 Vesting; Effect of Termination of Services.</strong> The Equity will vest in three (3) equal monthly installments over the Active Period, the first installment vesting at the end of the first full month after the Effective Date. Equity that has vested is permanent and will not be forfeited, cancelled, or repurchased by reason of expiration of the Active Period, termination of services, or any later change in the Parties' relationship. If the Company terminates the service engagement under Section 9 for the Service Provider's material breach that remains uncured after the notice-and-cure period in Section 9, any then-unvested Equity will be automatically forfeited (or, if already issued, repurchased by the Company at its original issue price or par value, as applicable) and will be cancelled. In all other cases of early termination, including termination by the Company without cause, the full Equity will vest as of the termination date."
-  )}
-  ${p(
-    "<strong>3.3 Limited Anti-Dilution Protection; Pro-Rata Right.</strong> Until the earlier of (a) eighteen (18) months after the Effective Date and (b) the closing of the Company's first priced equity financing raising at least US $1,000,000 in gross proceeds (a \"Qualified Financing\"), the Company will issue the Service Provider such additional equity as is necessary to maintain the Service Provider's ownership at the percentage in this Section 3, excluding issuances under a board-approved employee and advisor equity pool of up to fifteen percent (15%) and equity issued on conversion of SAFEs or convertible notes outstanding and disclosed to the Service Provider as of the Effective Date. After that period ends, the Service Provider's ownership will dilute in the ordinary course with other holders of the same class. Subject to the rights of the Company's major investors and applicable financing documents, the Service Provider will have a pro-rata right to participate in future equity financings up to its then-current ownership percentage, on the same terms as other investors in that financing."
-  )}
-  ${p(
-    "<strong>3.4 Rights of the Equity.</strong> The Equity will carry the same economic rights as the Company's common stock (or equivalent), and will be subject to the Company's charter, bylaws or operating agreement, and any generally applicable stockholder agreements in effect at issuance that are provided to the Service Provider. This Agreement does not grant the Service Provider board, observer, veto, or management rights."
+    `IES operates the Startup Factory Hub accelerator program (the "<strong>Program</strong>"), under which IES provides accelerator services to early-stage companies admitted to the Program. The Company wishes to participate in the Program, and IES has agreed to admit the Company to the Program, on the terms set forth in this Agreement.`
   )}
 
-  ${h("4", "FUNDRAISING SUCCESS FEE")}
+  ${h("1", "Admission to the Program")}
   ${p(
-    `<strong>4.1 Covered Investors and Fee.</strong> The Company will pay the Service Provider a success fee equal to ${fee}% of the gross cash proceeds actually received by the Company from a Covered Investor in a Covered Financing, subject to Section 4.4. A "Covered Investor" is an investor that (i) was first introduced to the Company in writing by the Service Provider, (ii) is recorded on a written Covered Investor list maintained by the Parties, and (iii) is acknowledged in writing (email sufficient) by the Company as a Covered Investor. A "Covered Financing" is the first equity, SAFE, or convertible note financing in which a Covered Investor invests and that closes during the Active Period or within eighteen (18) months after the date that Covered Investor was first introduced (the "Tail Period"), including later tranches of that same financing closing within six (6) months after its first closing.`
+    `<strong>1.1 Admission.</strong> Admission to the Program is in the sole discretion of IES, pursuant to procedures established by IES from time to time. The Company's participation in the Program commences on the Effective Date.`
   )}
   ${p(
-    "<strong>4.2 Exclusions.</strong> No success fee is due on: (a) investors with whom the Company or its founders had a substantive pre-existing relationship, documented before the introduction; (b) investors who contact the Company independently without the Service Provider's introduction or material involvement; (c) grants, bank or venture debt, revenue, or customer payments; or (d) financings closing after the applicable Tail Period, including later rounds led by a Covered Investor after its Covered Financing."
+    `<strong>1.2 Program Services.</strong> During the Company's participation in the Program, IES will provide the accelerator services made available under the Program, as the Program may be amended from time to time (collectively, the "<strong>Services</strong>"). The Services may include, as applicable to the Company's phase of participation: mentorship and advisory support, venture-building and product support, investor readiness and introductions, platform and community access, events and demo opportunities, and partner benefits made available through the Program.`
   )}
   ${p(
-    "<strong>4.3 Payment Terms.</strong> The fee is calculated on gross cash proceeds actually received and is due within five (5) business days after the Company receives those proceeds. For proceeds received in installments within a Covered Financing, the fee is payable proportionally as each installment is received. The Company will notify the Service Provider within five (5) business days after each closing with a Covered Investor, whether or not the Service Provider participated in that closing."
-  )}
-  ${p(
-    "<strong>4.4 Regulatory Compliance.</strong> The Parties acknowledge that transaction-based compensation for securities activities may be subject to broker-dealer registration and other regulatory requirements. No cash success fee will be payable under this Section 4 to the extent its payment would violate applicable law. If the Parties' counsel determines that a fee cannot lawfully be paid in cash as structured, the Parties will negotiate in good faith a lawful alternative arrangement of comparable value (which may include an advisory equity fee or a fee payable through a registered broker-dealer), and neither Party is required to agree to an arrangement its counsel advises is unlawful."
+    `<strong>1.3 No Guarantee of Financing.</strong> The Company acknowledges that IES does not guarantee that the Company will raise any financing, and that no provision of this Agreement is a commitment by IES or any third party to invest in or lend to the Company.`
   )}
 
-  ${h("5", "ALUMNI BENEFITS")}
+  ${h("2", "Initial Consideration — Equity")}
   ${p(
-    "After the Active Period, and for so long as the Service Provider holds at least 0.5% of the Company's fully diluted capitalization, the Company will be eligible for the following alumni benefits, in each case subject to availability, program capacity, and the Service Provider's then-current program terms. The Service Provider may modify or discontinue alumni benefits prospectively on ninety (90) days' written notice after the fifth anniversary of the Effective Date."
+    `<strong>2.1 Equity Right.</strong> As consideration for the Company's admission to the Program, the Company shall issue to IES an unconditional and irrevocable right to an equity interest in the Company equivalent to founder's equity, in a quantity resulting in a <strong>${eqWords} percent (${eqNum}%)</strong> ownership by IES of all the equity interests (or equivalent interests) of the Company outstanding post-issuance of the IES interest.`
   )}
-  ${ul([
-    "Business advisory: one quarterly strategic consultation of up to thirty (30) minutes; access to the Startup Factory Hub alumni community",
-    "Website and digital advisory: one website audit per year and website strategy advisory; access to preferred website development rates. Development, hosting, and third-party costs are excluded unless separately agreed",
-    "Partnership development and networking: introductions to strategic partners, vendors, potential customers, and commercial partners where appropriate; invitations to selected demo days, investor networking, and founder events, subject to event requirements",
-    "Technology and infrastructure: access to selected development templates and boilerplates, introductions to technology providers, and access to available SaaS credits and partner programs (including programs offered through third parties), subject to those providers' terms. No ownership of the Service Provider's proprietary intellectual property is transferred",
-    "Professional development: access to selected workshops, educational resources, and certification programs, subject to provider terms and costs",
-    "Corporate infrastructure support: guidance on corporate governance, introductions to legal, accounting, banking, and payroll providers, and access to selected corporate templates. The Service Provider does not provide legal, tax, or accounting advice",
-    "Fundraising advisory: ongoing fundraising strategy guidance, investor pipeline updates, strategic introductions subject to availability, term sheet commercial feedback, and future-round capital strategy. Any success fee remains governed solely by Section 4",
-  ])}
-
-  ${h("6", "STARTUP FACTORY HUB PLATFORM ACCESS")}
   ${p(
-    "The Company will receive twelve (12) months of complimentary access to the Startup Factory Hub digital platform, beginning on the Effective Date, at the standard founder platform tier then generally offered, subject to the platform's terms of use and privacy policy. The Service Provider may suspend access for material breach of those terms after notice and a reasonable opportunity to cure. After the complimentary period, continued access is subject to the subscription plans and pricing then offered, unless otherwise agreed in writing."
+    `<strong>2.2 Documentation.</strong> The Company shall execute and deliver such documents as IES reasonably requests to evidence and give effect to the right granted under Section 2.1, promptly upon admission and in any event within fifteen (15) days of IES's request.`
   )}
 
-  ${h("7", "OPTIONAL OFFICE SPACE")}
+  ${h("3", "Program Phases")}
   ${p(
-    "The Company may elect office space offered by the Service Provider at US $950 per month, subject to availability. No office occupancy will begin until the Parties sign a separate written office addendum identifying the location, space, included services, access, and facility rules; that addendum will state whether the arrangement is a license or a sublease. The office arrangement is month-to-month and either Party may cancel it on thirty (30) days' written notice. Cancellation or absence of office space does not affect the Company's accelerator participation, the Equity (subject to Section 3.2), alumni benefits, platform access (subject to Section 6), or any other rights under this Agreement."
+    `<strong>3.1 Phase One.</strong> Phase One commences upon the Company's admission to the Program and continues until such time as the Company has raised the Phase One Financing Amount set forth in Schedule A (the "<strong>Phase One Financing</strong>"), in equity, debt, or any other form, in addition to any financing raised by the Company prior to the date of the Company's admission to the Program.`
+  )}
+  ${p(
+    `<strong>3.2 Phase Two.</strong> Phase Two commences, and Phase One terminates, upon the closing of the Phase One Financing, and continues until such time as the Company has raised the Phase Two Financing Amount set forth in Schedule A (the "<strong>Phase Two Financing</strong>"), in equity, debt, or any other form, in addition to the Phase One Financing.`
+  )}
+  ${p(
+    `<strong>3.3 Phase Three.</strong> Phase Three commences, and Phase Two terminates, upon the closing of the Phase Two Financing, and continues until such time as the Company has raised the Phase Three Financing Amount set forth in Schedule A (the "<strong>Phase Three Financing</strong>"), in equity, debt, or any other form, in addition to the Phase Two Financing.`
+  )}
+  ${p(
+    `<strong>3.4 Subsequent Phases.</strong> The participation of the Company in the Program, the provision of Services by IES, and compensation for such Services by the Company, shall continue in subsequent phases on like terms — each subsequent phase commencing upon the closing of the prior phase's financing and continuing until the Company has raised the Subsequent Phase Financing Amount set forth in Schedule A in addition to all prior phase financings — until the earlier of (i) the initial closing of a pre-seed, seed, or Series A round of financing by the Company, whichever occurs first (the "<strong>Graduation Financing Event</strong>") or (ii) the termination of the Company's participation in the Program, in the sole discretion of IES.`
+  )}
+  ${p(
+    `<strong>3.5 Services by Phase.</strong> During each phase, IES will provide the Services applicable to that phase under the Program, as it may be amended from time to time (the Phase One Services, Phase Two Services and Phase Three Services, as applicable).`
   )}
 
-  ${h("8", "ADDITIONAL EXPENSES")}
+  ${h("4", "Compensation and Payment Terms")}
   ${p(
-    "Unless otherwise agreed in writing, the following are excluded and are the Company's responsibility: software development and engineering labor, advertising and paid marketing, employee and contractor compensation, legal and accounting fees, third-party software and licenses, government filing fees, and travel and extraordinary expenses. Any additional expenditure to be charged to the Company must be approved by the Company in writing before it is incurred."
+    `<strong>4.1 Phase Compensation.</strong> As consideration for the Services provided in each phase, the Company shall pay to IES the compensation for that phase set forth in Schedule A (each, the "<strong>Phase Compensation</strong>"):`
+  )}
+  ${p(
+    `(a) <strong>Phase One Compensation.</strong> As consideration for the provision of the Phase One Services by IES to the Company, the Company will pay to IES the Phase One Compensation set forth in Schedule A; provided, however, that the Phase One Compensation will accrue as an obligation on the books of the Company immediately upon the commencement of Phase One, but become payable only upon the closing of the Phase One Financing.`
+  )}
+  ${p(
+    `(b) <strong>Phase Two Compensation.</strong> As consideration for the provision of the Phase Two Services by IES to the Company, the Company will pay to IES the Phase Two Compensation set forth in Schedule A; provided, however, that the Phase Two Compensation will accrue as an obligation on the books of the Company immediately upon the commencement of Phase Two, but become payable only upon the closing of the Phase Two Financing.`
+  )}
+  ${p(
+    `(c) <strong>Phase Three and Subsequent Phase Compensation.</strong> As consideration for the provision of the Phase Three Services, and the services of each subsequent phase, by IES to the Company, the Company will pay to IES the compensation for that phase set forth in Schedule A; provided, however, that such compensation will accrue as an obligation on the books of the Company immediately upon the commencement of that phase, but become payable only upon the closing of that phase's financing.`
+  )}
+  ${p(
+    `<strong>4.2 Custom Payment Terms.</strong> The amounts, milestones and payment terms in Schedule A are set individually for each Company. Where Schedule A states custom payment terms for the Company (including installment arrangements, deferred amounts, or alternative milestones), those custom terms control over the defaults in this Section 4.`
+  )}
+  ${p(
+    `<strong>4.3 Manner of Payment.</strong> All amounts payable under this Agreement shall be paid in U.S. dollars by wire transfer or other method specified in Schedule A, without setoff or deduction, within ten (10) business days after the closing that makes the amount payable, unless Schedule A provides otherwise.`
+  )}
+  ${p(
+    `<strong>4.4 Taxes.</strong> Amounts payable under this Agreement are exclusive of any applicable taxes, which shall be borne by the Company except for taxes based on IES's net income.`
   )}
 
-  ${h("9", "TERM, PERFORMANCE, AND TERMINATION")}
+  ${h("5", "Graduation and Final Compensation")}
   ${p(
-    `The Active Period is ${esc(term)} (${esc(
-      term
-    )}) months from the Effective Date. The Service Provider will provide the services in a commercially reasonable and professional manner. If either Party materially breaches this Agreement, the other Party will give written notice identifying the breach, and the breaching Party will have fifteen (15) days to cure it. If it is not cured, the non-breaching Party may terminate the service engagement by written notice. Either Party may also terminate the service engagement without cause on thirty (30) days' written notice. The Parties may mutually agree in writing to modify or discontinue services.`
+    `<strong>5.1 Graduation Compensation.</strong> Upon the occurrence of the Graduation Financing Event, as additional consideration for all services provided by IES to the Company during the Company's participation in the Program, the Company shall pay to IES final compensation in the amount set forth in Schedule A (the "<strong>Graduation Compensation</strong>") and the Company's participation in the Program shall terminate.`
   )}
   ${p(
-    "On termination or expiration of the service engagement: (a) future accelerator services cease at the end of any applicable notice period; (b) vesting is governed by Section 3.2 and vested Equity is unaffected; (c) success fees for Covered Financings that close during the applicable Tail Period remain payable under Section 4, including where the Covered Investor was introduced before termination; (d) alumni benefits continue under Section 5; (e) platform access continues for the remainder of the twelve-month complimentary period, subject to Section 6; and (f) any office arrangement continues to be governed by Section 7 and its addendum."
+    `<strong>5.2 Accrued Amounts Survive.</strong> Any Phase Compensation that has accrued but not yet become payable as of the Graduation Financing Event becomes payable in full at the initial closing of the Graduation Financing Event, in addition to the Graduation Compensation.`
   )}
 
-  ${h("10", "CONFIDENTIALITY AND INTELLECTUAL PROPERTY")}
+  ${h("6", "Unlimited Office Access (Optional Add-On)")}
   ${p(
-    "Each Party will keep confidential all non-public business, financial, technical, and operational information of the other Party that is identified as confidential or that, by its nature, should reasonably be treated as confidential, and will use it only to perform or receive services under this Agreement. This obligation does not apply to information that is or becomes public without fault, was already known, is received from a third party without a confidentiality duty, or is independently developed. A Party may disclose confidential information as required by law after, where legally permitted, giving the other Party prompt notice. Confidentiality obligations survive for three (3) years after disclosure of the information concerned."
+    `<strong>6.1 Election.</strong> If the Company elects the Unlimited Office Access add-on in Schedule A, IES shall provide the Company with unlimited access to the office space made available through the Program for the duration of the Company's participation, subject to the reasonable rules of the applicable workspace.`
   )}
   ${p(
-    "Each Party retains ownership of its pre-existing intellectual property, technology, software, methodologies, and proprietary materials. Company-specific work product created specifically for the Company under this Agreement belongs to the Company, subject to third-party rights and any separate written intellectual property agreement. The Service Provider retains ownership of its accelerator methodologies, venture-building frameworks, software, platform, templates, and proprietary resources, and receives a non-exclusive, royalty-free license to use Company feedback and anonymized, aggregated program data to operate and improve its programs. Any other transfer or license of intellectual property requires a separate written agreement."
-  )}
-
-  ${h("11", "RELATIONSHIP; NON-EXCLUSIVITY; LIABILITY")}
-  ${p(
-    "The Service Provider is an independent contractor. Nothing in this Agreement creates an employment, partnership, joint venture, or agency relationship, and neither Party may bind the other without prior written authorization. This engagement is non-exclusive: the Service Provider may provide services to other companies, including companies in similar fields, subject to Section 10, and the Company may engage other advisors and accelerators."
+    `<strong>6.2 Add-On Fee.</strong> The fee for Unlimited Office Access is <strong>Nine Hundred Fifty Dollars ($950) per month</strong>, billed monthly in advance, commencing on the election date stated in Schedule A and continuing month to month until the earlier of (i) termination of the Company's participation in the Program or (ii) the Company's written cancellation of the add-on, effective at the end of the then-current monthly period.`
   )}
   ${p(
-    "To the maximum extent permitted by law, neither Party will be liable for indirect, incidental, special, consequential, or punitive damages, or lost profits, and each Party's total aggregate liability under this Agreement will not exceed US $50,000. These limitations do not apply to a Party's obligations to issue the Equity or pay a success fee lawfully due, breach of Section 10, infringement of intellectual property rights, or fraud or willful misconduct."
+    `<strong>6.3 Not Contingent on Financing.</strong> The add-on fee under this Section 6 is a monthly subscription fee and is <strong>not</strong> contingent on, and does not accrue pending, any financing milestone, unless Schedule A expressly provides otherwise for the Company.`
   )}
 
-  ${h("12", "GOVERNING LAW AND DISPUTES")}
+  ${h("7", "Term and Termination")}
   ${p(
-    "This Agreement is governed by the laws of the State of Florida, without regard to conflict-of-law principles. The Parties will first attempt to resolve any dispute through good-faith negotiations between senior representatives for fifteen (15) days. Any unresolved dispute will be submitted exclusively to the state or federal courts located in Orange County, Florida, and the Parties consent to personal jurisdiction and venue there."
+    `<strong>7.1 Term.</strong> This Agreement commences on the Effective Date and continues until the Company's participation in the Program terminates in accordance with this Agreement.`
+  )}
+  ${p(
+    `<strong>7.2 Termination by IES.</strong> IES may terminate the Company's participation in the Program at any time, in its sole discretion, upon written notice to the Company.`
+  )}
+  ${p(
+    `<strong>7.3 Effect of Termination.</strong> Upon termination for any reason: (a) the equity right granted under Section 2 is irrevocable and survives; (b) any Phase Compensation that has accrued on the books of the Company prior to termination remains an obligation of the Company and becomes payable upon the closing of the financing milestone for the phase in which it accrued, or upon a Graduation Financing Event, whichever occurs first; and (c) Sections 2, 4, 5 (as to amounts accrued), 8, 9 and 10 survive.`
   )}
 
-  ${h("13", "GENERAL PROVISIONS")}
-  ${ul([
-    "Entire Agreement. This Agreement, including its exhibits, is the entire agreement between the Parties on its subject matter and supersedes all prior discussions and understandings on that subject",
-    "Amendments. Any amendment must be in writing and signed by both Parties",
-    "Severability. If any provision is found unenforceable, it will be modified to the minimum extent necessary to make it enforceable, or if that is not possible, severed, and the remaining provisions will remain in full force and effect",
-    "Assignment. Neither Party may assign this Agreement or its obligations without the other Party's prior written consent, except that the Service Provider may assign it to a successor in connection with a sale of all or substantially all of its business or assets, on notice to the Company",
-    "Notices. Notices under this Agreement must be in writing (email with confirmation of receipt is sufficient) to the addresses or email addresses in the signature blocks or later updated in writing",
-    "Counterparts; Electronic Signatures. This Agreement may be executed electronically and in counterparts, each of which is an original",
-    "Survival. Sections 3 (as to vested Equity and any limited protection period then running), 4 (as to Covered Financings within the Tail Period), 5, 8, 10, 11, 12, and 13 survive expiration or termination as provided in those Sections",
-  ])}
+  ${h("8", "Confidentiality")}
+  ${p(
+    `Each Party agrees to hold in confidence the other Party's non-public information disclosed in connection with the Program and not to disclose it except to its representatives with a need to know, or as required by law. The Company acknowledges that IES may identify the Company as a Program participant in Program materials.`
+  )}
+
+  ${h("9", "Intellectual Property; No License")}
+  ${p(
+    `Each Party retains all right, title and interest in and to its own intellectual property. Nothing in this Agreement transfers ownership of any intellectual property of the Company to IES, other than the equity right granted under Section 2, or grants any license except as expressly stated.`
+  )}
+
+  ${h("10", "General Provisions")}
+  ${p(
+    `<strong>10.1 Independent Parties.</strong> The Parties are independent contractors. Nothing in this Agreement creates a partnership, joint venture, agency, or employment relationship between the Parties.`
+  )}
+  ${p(
+    `<strong>10.2 Governing Law.</strong> This Agreement is governed by the laws of the State of Florida, without regard to its conflict-of-laws principles.`
+  )}
+  ${p(
+    `<strong>10.3 Entire Agreement; Amendments.</strong> This Agreement (including Schedule A and any add-on election) is the entire agreement between the Parties regarding the Company's participation in the Program and supersedes all prior or contemporaneous understandings. It may be amended only in a writing signed by both Parties.`
+  )}
+  ${p(
+    `<strong>10.4 Severability; Waiver.</strong> If any provision of this Agreement is held unenforceable, the remaining provisions continue in full effect. No waiver of any provision is effective unless in writing, and no waiver waives any other provision or instance.`
+  )}
+  ${p(
+    `<strong>10.5 Assignment.</strong> The Company may not assign this Agreement or any of its rights or obligations under it without the prior written consent of IES. IES may assign this Agreement in connection with a sale of all or substantially all of its business.`
+  )}
+  ${p(
+    `<strong>10.6 Notices.</strong> Notices under this Agreement must be in writing and are deemed given when delivered by email (with confirmation of receipt) or three (3) business days after mailing, to the addresses set forth in Schedule A.`
+  )}
+  ${p(
+    `<strong>10.7 Counterparts; Electronic Signatures.</strong> This Agreement may be executed in counterparts, each of which is an original. Electronic and PDF signatures are binding to the same extent as handwritten signatures.`
+  )}
   ${(v.customClauses || [])
     .filter((c) => (c.title || "").trim() || (c.body || "").trim())
     .map(
       (c, i) =>
-        `${h(String(14 + i), (c.title || "ADDITIONAL TERMS").toUpperCase())}${(c.body || "")
+        `${h(String(11 + i), (c.title || "ADDITIONAL TERMS").toUpperCase())}${(c.body || "")
           .split(/\n{1,}/)
           .filter((line) => line.trim())
           .map((line) => p(esc(line.trim())))
@@ -299,8 +351,49 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     )
     .join("")}
 
-  <h3 style="font-size:15px;margin:32px 0 12px">SIGNATURES</h3>
+  <h3 style="font-size:15px;margin:32px 0 12px">SCHEDULE A — CUSTOM TERMS FOR THE COMPANY</h3>
+  <table style="border-collapse:collapse;width:100%;font-size:13.5px">
+    ${row("Company (legal name)", blank(v.companyName, 30))}
+    ${row(
+      "Company address / notice email",
+      `${blank(v.companyAddress, 30)}${v.companyNoticeEmail?.trim() ? ` / ${esc(v.companyNoticeEmail.trim())}` : ""}`
+    )}
+    ${row(
+      "Company signatory (name / title)",
+      `${blank(v.companySignerName, 20)}${v.companySignerTitle?.trim() ? ` / ${esc(v.companySignerTitle.trim())}` : ""}`
+    )}
+    ${row("IES notice address / email", esc(IES_NOTICE))}
+    ${row("Effective Date (admission date)", blank(v.effectiveDate, 20))}
+    ${row("Equity right (Section 2)", `${eqWords} percent (${eqNum}%) post-issuance founder's-equity-equivalent interest`)}
+    ${row("Total raised by the Company prior to admission", money(v.totalRaised))}
+    ${row("Phase One Financing Amount", money(v.phase1Financing))}
+    ${row("Phase One Compensation", money(v.phase1Compensation), true)}
+    ${row("Phase Two Financing Amount", money(v.phase2Financing))}
+    ${row("Phase Two Compensation", money(v.phase2Compensation), true)}
+    ${row("Phase Three Financing Amount", money(v.phase3Financing))}
+    ${row("Phase Three Compensation", money(v.phase3Compensation), true)}
+    ${row("Subsequent Phase Financing Amount (each)", money(v.subsequentFinancing))}
+    ${row("Subsequent Phase Compensation (each)", money(v.subsequentCompensation), true)}
+    ${row(
+      "Graduation Compensation (at the Graduation Financing Event — the first of a pre-seed, seed, or Series A closing)",
+      money(v.graduationCompensation),
+      true
+    )}
+    ${row("Payment method / wire instructions", blank(v.paymentMethod, 30))}
+    ${row(
+      "Custom payment terms for this Company",
+      v.customPaymentTerms?.trim() ? esc(v.customPaymentTerms.trim()) : "None — standard terms apply"
+    )}
+    ${row(
+      "Unlimited Office Access add-on (Section 6)",
+      addon
+        ? `☑ Elected — $950 per month, starting: ${blank(v.officeAddonStart, 14)} &nbsp; ☐ Not elected`
+        : `☐ Elected — $950 per month &nbsp; ☑ Not elected`,
+      true
+    )}
+  </table>
 
+  <h3 style="font-size:15px;margin:32px 0 12px">AGREED AND ACCEPTED:</h3>
 
   <p style="margin:0 0 6px;font-weight:600">Imagine Engine Studios Corp d/b/a Startup Factory Hub</p>
   ${p(`By: ______________________________`)}
@@ -308,20 +401,10 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
   ${p(`Title: ${blank(v.acceleratorSignerTitle, 22)}`)}
   ${p(`Date: ______________________________`)}
 
-  <p style="margin:24px 0 6px;font-weight:600">COMPANY</p>
-  ${p(`Company Name: ${blank(v.companyName, 26)}`)}
+  <p style="margin:24px 0 6px;font-weight:600">The Company: ${blank(v.companyName, 26)}</p>
   ${p(`By: ______________________________`)}
   ${p(`Name: ${blank(v.companySignerName, 22)}`)}
   ${p(`Title: ${blank(v.companySignerTitle, 22)}`)}
   ${p(`Date: ______________________________`)}
-
-  <div style="margin-top:34px;padding:18px 20px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb">
-    <p style="margin:0 0 8px;font-size:12px;letter-spacing:1px;color:#0ea270;font-weight:700">STARTUP FACTORY HUB FOUNDERS</p>
-    <ul style="margin:0 0 10px 18px;line-height:1.7;font-size:13px">${founders}</ul>
-    <p style="margin:0;font-size:13px">
-      Learn more about the Accelerator and our partner network at
-      <a href="${PARTNERS_URL}" style="color:#0ea270">${PARTNERS_URL}</a>
-    </p>
-  </div>
 </div>`.trim();
 }

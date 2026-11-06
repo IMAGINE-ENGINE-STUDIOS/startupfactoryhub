@@ -4,6 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  buildEquityContractHtml,
+  DEFAULT_EQUITY_CONTRACT,
+  embedContractValues,
+  EquityContractValues,
+} from '@/lib/equityContractTemplate';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -95,6 +102,177 @@ const JOURNEY_STEPS = [
   'Get Customers, Sell & Grow',
   'Funding'
 ];
+
+
+/**
+ * The company's room contract panel (founder order, 2026-11-05): the
+ * Accelerator Program Participation Agreement is created FROM the company,
+ * with its custom terms entered here — company name, equity %, and total
+ * raised come prefilled from the company record; every Schedule A figure is
+ * set per startup. Creates a draft in the Contracts tab (source
+ * "equity_contract"), ready to review and send from there.
+ */
+const CompanyContractForm = ({ company }: { company: Company }) => {
+  const { toast } = useToast();
+  const [values, setValues] = useState<EquityContractValues>(() => ({
+    ...DEFAULT_EQUITY_CONTRACT,
+    companyName: company.name || "",
+    companyAddress: company.location || "",
+    companyNoticeEmail: company.owner_email || "",
+    companySignerName: company.owner_name || "",
+    totalRaised: company.funding_amount ? String(company.funding_amount) : "",
+    effectiveDate: new Date().toISOString().slice(0, 10),
+  }));
+  const [existing, setExisting] = useState<{ id: string; title: string; status: string; created_at: string }[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const set = (k: keyof EquityContractValues) => (val: string) =>
+    setValues((prev) => ({ ...prev, [k]: val }));
+
+  const loadExisting = async () => {
+    const { data } = await supabase
+      .from("sign_documents")
+      .select("id, title, status, created_at")
+      .eq("source_type", "equity_contract")
+      .eq("recipient_user_id", company.user_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setExisting((data || []) as typeof existing);
+  };
+
+  useEffect(() => {
+    void loadExisting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company.id]);
+
+  const createDraft = async () => {
+    setSaving(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const title = `Accelerator Program Agreement — ${company.name}`;
+      const html = embedContractValues(buildEquityContractHtml(values), values);
+      const { error } = await supabase.from("sign_documents").insert({
+        title,
+        content_html: html,
+        signer_message: "Please review and sign the Startup Factory Hub Accelerator Program Participation Agreement.",
+        access_mode: "sign",
+        status: "draft",
+        recipient_name: company.owner_name || null,
+        recipient_email: company.owner_email || null,
+        recipient_user_id: company.user_id,
+        owner_id: auth.user?.id,
+        source_type: "equity_contract",
+      });
+      if (error) throw error;
+      toast({ title: "Contract draft created", description: "Review and send it from Admin → Contracts." });
+      void loadExisting();
+    } catch (e) {
+      toast({
+        title: "Could not create the contract",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const moneyField = (label: string, k: keyof EquityContractValues) => (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <Input className="bg-white/[0.03] border-white/10" inputMode="numeric" value={values[k] as string} onChange={(e) => set(k)(e.target.value)} />
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Accelerator Program Participation Agreement for this company. The custom terms below are
+        entered here in the company's room and render into the agreement and its Schedule A —
+        phase compensation is a flat fee per phase, payable only when that phase's financing closes.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Effective date (admission)</Label>
+          <Input className="bg-white/[0.03] border-white/10" type="date" value={values.effectiveDate} onChange={(e) => set("effectiveDate")(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Equity % (Section 2 right)</Label>
+          <Input className="bg-white/[0.03] border-white/10" value={values.equityPercent} onChange={(e) => set("equityPercent")(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Total raised to date ($)</Label>
+          <Input className="bg-white/[0.03] border-white/10" inputMode="numeric" value={values.totalRaised} onChange={(e) => set("totalRaised")(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Company notice email</Label>
+          <Input className="bg-white/[0.03] border-white/10" type="email" value={values.companyNoticeEmail} onChange={(e) => set("companyNoticeEmail")(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Signatory name</Label>
+          <Input className="bg-white/[0.03] border-white/10" value={values.companySignerName} onChange={(e) => set("companySignerName")(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Signatory title</Label>
+          <Input className="bg-white/[0.03] border-white/10" value={values.companySignerTitle} onChange={(e) => set("companySignerTitle")(e.target.value)} placeholder="CEO" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {moneyField("Phase One financing ($)", "phase1Financing")}
+        {moneyField("Phase One compensation ($)", "phase1Compensation")}
+        {moneyField("Phase Two financing ($)", "phase2Financing")}
+        {moneyField("Phase Two compensation ($)", "phase2Compensation")}
+        {moneyField("Phase Three financing ($)", "phase3Financing")}
+        {moneyField("Phase Three compensation ($)", "phase3Compensation")}
+        {moneyField("Subsequent phase financing, each ($)", "subsequentFinancing")}
+        {moneyField("Subsequent phase compensation, each ($)", "subsequentCompensation")}
+        {moneyField("Graduation compensation ($)", "graduationCompensation")}
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Payment method / wire instructions</Label>
+          <Input className="bg-white/[0.03] border-white/10" value={values.paymentMethod} onChange={(e) => set("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Custom payment terms (optional)</Label>
+          <Input className="bg-white/[0.03] border-white/10" value={values.customPaymentTerms} onChange={(e) => set("customPaymentTerms")(e.target.value)} />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-emerald-500"
+            checked={values.officeAddonElected === "yes"}
+            onChange={(e) => set("officeAddonElected")(e.target.checked ? "yes" : "no")}
+          />
+          Unlimited Office Access — $950/month
+        </label>
+        {values.officeAddonElected === "yes" && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Add-on start date</Label>
+            <Input className="bg-white/[0.03] border-white/10" type="date" value={values.officeAddonStart} onChange={(e) => set("officeAddonStart")(e.target.value)} />
+          </div>
+        )}
+      </div>
+      <Button onClick={() => void createDraft()} disabled={saving} className="w-full">
+        <FileText className="h-4 w-4 mr-2" />
+        {saving ? "Creating…" : "Create contract draft for this company"}
+      </Button>
+      {existing.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Contracts for this company</p>
+          {existing.map((c) => (
+            <div key={c.id} className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.02] px-3 py-2">
+              <span className="text-sm truncate">{c.title}</span>
+              <Badge variant="secondary">{c.status}</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const StartupsManagement = () => {
   const { toast } = useToast();
@@ -739,11 +917,12 @@ const StartupsManagement = () => {
 
           {selectedCompany && (
             <Tabs value={dialogTab} onValueChange={setDialogTab} className="mt-4">
-              <TabsList className="grid grid-cols-4 w-full">
+              <TabsList className="grid grid-cols-5 w-full">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="journey">Journey</TabsTrigger>
                 <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="contract">Contract</TabsTrigger>
               </TabsList>
 
               <ScrollArea className="h-[400px] mt-4">
@@ -871,6 +1050,9 @@ const StartupsManagement = () => {
 
                 <TabsContent value="posts" className="mt-0">
                   <ProfilePostsMosaic userId={selectedCompany.user_id} />
+                </TabsContent>
+                <TabsContent value="contract" className="mt-0">
+                  <CompanyContractForm key={selectedCompany.id} company={selectedCompany} />
                 </TabsContent>
               </ScrollArea>
             </Tabs>
