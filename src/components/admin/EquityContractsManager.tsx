@@ -465,47 +465,30 @@ export default function EquityContractsManager() {
             <div>
               <Label className="text-base">Schedule A — custom terms for this company</Label>
               <p className="text-xs text-muted-foreground mt-1">
-                Set per startup. Phase compensation is a flat fee per phase — it accrues at the
-                phase start and is payable only when that phase's financing closes. It is never a
-                percentage of the amount raised.
+                Set per startup. One milestone per agreement: enter the company's Phase 1
+                fundraising goal and the Phase One compensation appears automatically at the
+                standing ratio. The compensation is a flat fee — it accrues at the start of
+                Phase One and is payable only when the milestone financing closes; the
+                agreement never states it as a percentage of the amount raised.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
-              <Label>Phase One financing amount ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase1Financing} onChange={(e) => set("phase1Financing")(e.target.value)} />
+              <Label>Phase 1 fundraising goal ($)</Label>
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase1Financing} onChange={(e) => {
+                const goal = e.target.value;
+                const n = parseFloat(goal.replace(/[^0-9.]/g, ""));
+                setValues((prev) => ({
+                  ...prev,
+                  phase1Financing: goal,
+                  phase1Compensation:
+                    Number.isFinite(n) && n > 0 ? String(Math.round(n * 0.05)) : prev.phase1Compensation,
+                }));
+              }} />
             </div>
             <div className="space-y-2">
-              <Label>Phase One compensation ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase1Compensation} onChange={(e) => set("phase1Compensation")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phase Two financing amount ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase2Financing} onChange={(e) => set("phase2Financing")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phase Two compensation ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase2Compensation} onChange={(e) => set("phase2Compensation")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phase Three financing amount ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase3Financing} onChange={(e) => set("phase3Financing")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phase Three compensation ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase3Compensation} onChange={(e) => set("phase3Compensation")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Subsequent phase financing, each ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.subsequentFinancing} onChange={(e) => set("subsequentFinancing")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Subsequent phase compensation, each ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.subsequentCompensation} onChange={(e) => set("subsequentCompensation")(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Graduation compensation ($)</Label>
-              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.graduationCompensation} onChange={(e) => set("graduationCompensation")(e.target.value)} />
+              <Label>Phase One compensation ($) — automatic</Label>
+              <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.phase1Compensation} disabled readOnly />
             </div>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">

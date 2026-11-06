@@ -196,7 +196,8 @@ const CompanyContractForm = ({ company }: { company: Company }) => {
       <p className="text-xs text-muted-foreground">
         Accelerator Program Participation Agreement for this company. The custom terms below are
         entered here in the company's room and render into the agreement and its Schedule A —
-        phase compensation is a flat fee per phase, payable only when that phase's financing closes.
+        one milestone per agreement: the Phase One compensation appears automatically from the
+        Phase 1 fundraising goal and is a flat fee, payable only when the milestone financing closes.
       </p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
@@ -225,15 +226,28 @@ const CompanyContractForm = ({ company }: { company: Company }) => {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {moneyField("Phase One financing ($)", "phase1Financing")}
-        {moneyField("Phase One compensation ($)", "phase1Compensation")}
-        {moneyField("Phase Two financing ($)", "phase2Financing")}
-        {moneyField("Phase Two compensation ($)", "phase2Compensation")}
-        {moneyField("Phase Three financing ($)", "phase3Financing")}
-        {moneyField("Phase Three compensation ($)", "phase3Compensation")}
-        {moneyField("Subsequent phase financing, each ($)", "subsequentFinancing")}
-        {moneyField("Subsequent phase compensation, each ($)", "subsequentCompensation")}
-        {moneyField("Graduation compensation ($)", "graduationCompensation")}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Phase 1 fundraising goal ($)</Label>
+          <Input
+            className="bg-white/[0.03] border-white/10"
+            inputMode="numeric"
+            value={values.phase1Financing}
+            onChange={(e) => {
+              const goal = e.target.value;
+              const n = parseFloat(goal.replace(/[^0-9.]/g, ""));
+              setValues((prev) => ({
+                ...prev,
+                phase1Financing: goal,
+                phase1Compensation:
+                  Number.isFinite(n) && n > 0 ? String(Math.round(n * 0.05)) : prev.phase1Compensation,
+              }));
+            }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Phase One compensation ($) — automatic</Label>
+          <Input className="bg-white/[0.03] border-white/10" inputMode="numeric" value={values.phase1Compensation} disabled readOnly />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">

@@ -4,21 +4,23 @@
  * memo of the Nov 3 conversation; replaces the Strategic Accelerator and
  * Venture Building Agreement in the Contracts tab).
  *
- * Structure: admission at IES's sole discretion; an unconditional,
+ * Structure (simplified by the founder, 2026-11-06 — ONE MILESTONE PER
+ * AGREEMENT): admission at IES's sole discretion; an unconditional,
  * irrevocable founder's-equity-equivalent right at the IES Equity
  * Percentage set individually for each company in Schedule A — there is no
- * standard or default percentage; Program Phases One/Two/Three + subsequent phases, each running
- * until the company raises that phase's financing amount on top of prior
- * raises (default $250,000 per phase); FLAT Phase Compensation (default
- * $12,500 per phase) that accrues at phase commencement and is payable only
- * at that phase's financing closing — the fee is a fixed amount and is never
- * stated as a percentage of, or tied to, any amount raised; a flat
- * Graduation Compensation (default $100,000) payable at the Graduation
- * Financing Event (the first closing of a pre-seed, seed, or Series A round,
- * whichever occurs first), when accrued phase compensation also comes due
- * and participation terminates; and an optional Unlimited Office Access
+ * standard or default percentage; a single Phase One that runs until the
+ * company raises its Phase 1 Fundraising Goal on top of prior raises;
+ * a FLAT Phase One Compensation that accrues at commencement and is
+ * payable only at the closing of that milestone financing — the fee is a
+ * fixed amount and is never stated as a percentage of, or tied to, any
+ * amount raised (the Contracts forms compute it automatically at the
+ * standing ratio from the goal the company enters); any further raise is
+ * covered by a new agreement; and an optional Unlimited Office Access
  * add-on at $950/month, billed monthly in advance, not contingent on
- * financing milestones.
+ * financing milestones, starting on the Monday after the company signs.
+ * The phase2/phase3/subsequent/graduation value fields remain in
+ * EquityContractValues only so drafts saved under the earlier multi-phase
+ * template still parse — this agreement does not use them.
  *
  * Every per-company figure lives in Schedule A and is supplied per startup
  * when the contract is created (Contracts tab form, or the company's room in
@@ -223,7 +225,7 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     `<strong>1.1 Admission.</strong> Admission to the Program is in the sole discretion of IES, pursuant to procedures established by IES from time to time. The Company's participation in the Program commences on the Effective Date.`
   )}
   ${p(
-    `<strong>1.2 Program Services.</strong> During the Company's participation in the Program, IES will provide the accelerator services made available under the Program, as the Program may be amended from time to time (collectively, the "<strong>Services</strong>"). The Services may include, as applicable to the Company's phase of participation: mentorship and advisory support, venture-building and product support, investor readiness and introductions, platform and community access, events and demo opportunities, and partner benefits made available through the Program.`
+    `<strong>1.2 Program Services.</strong> During the Company's participation in the Program, IES will provide the accelerator services made available under the Program, as the Program may be amended from time to time (collectively, the "<strong>Services</strong>"). The Services include, as applicable to the Company: Technology Development; Test Customers; Customer Discovery; Mentors; Market Competition; Validation Decision; Commercialization; Validation and Attraction; and Go to Market — together with investor readiness and introductions, platform and community access, events and demo opportunities, and partner benefits made available through the Program.`
   )}
   ${p(
     `<strong>1.3 No Guarantee of Financing.</strong> The Company acknowledges that IES does not guarantee that the Company will raise any financing, and that no provision of this Agreement is a commitment by IES or any third party to invest in or lend to the Company.`
@@ -237,35 +239,20 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     `<strong>2.2 Documentation.</strong> The Company shall execute and deliver such documents as IES reasonably requests to evidence and give effect to the right granted under Section 2.1, promptly upon admission and in any event within fifteen (15) days of IES's request.`
   )}
 
-  ${h("3", "Program Phases")}
+  ${h("3", "Phase One — The Milestone")}
   ${p(
-    `<strong>3.1 Phase One.</strong> Phase One commences upon the Company's admission to the Program and continues until such time as the Company has raised the Phase One Financing Amount set forth in Schedule A (the "<strong>Phase One Financing</strong>"), in equity, debt, or any other form, in addition to any financing raised by the Company prior to the date of the Company's admission to the Program.`
+    `<strong>3.1 Phase One.</strong> Phase One commences upon the Company's admission to the Program and continues until such time as the Company has raised the Phase 1 Fundraising Goal set forth in Schedule A (the "<strong>Milestone Financing</strong>"), in equity, debt, or any other form, in addition to any financing raised by the Company prior to the date of the Company's admission to the Program.`
   )}
   ${p(
-    `<strong>3.2 Phase Two.</strong> Phase Two commences, and Phase One terminates, upon the closing of the Phase One Financing, and continues until such time as the Company has raised the Phase Two Financing Amount set forth in Schedule A (the "<strong>Phase Two Financing</strong>"), in equity, debt, or any other form, in addition to the Phase One Financing.`
+    `<strong>3.2 One Milestone Per Agreement.</strong> This Agreement covers Phase One only — a single financing milestone. The Company's participation in any further financing milestone after Phase One shall be under a new agreement between the Parties.`
   )}
   ${p(
-    `<strong>3.3 Phase Three.</strong> Phase Three commences, and Phase Two terminates, upon the closing of the Phase Two Financing, and continues until such time as the Company has raised the Phase Three Financing Amount set forth in Schedule A (the "<strong>Phase Three Financing</strong>"), in equity, debt, or any other form, in addition to the Phase Two Financing.`
-  )}
-  ${p(
-    `<strong>3.4 Subsequent Phases.</strong> The participation of the Company in the Program, the provision of Services by IES, and compensation for such Services by the Company, shall continue in subsequent phases on like terms — each subsequent phase commencing upon the closing of the prior phase's financing and continuing until the Company has raised the Subsequent Phase Financing Amount set forth in Schedule A in addition to all prior phase financings — until the earlier of (i) the initial closing of a pre-seed, seed, or Series A round of financing by the Company, whichever occurs first (the "<strong>Graduation Financing Event</strong>") or (ii) the termination of the Company's participation in the Program, in the sole discretion of IES.`
-  )}
-  ${p(
-    `<strong>3.5 Services by Phase.</strong> During each phase, IES will provide the Services applicable to that phase under the Program, as it may be amended from time to time (the Phase One Services, Phase Two Services and Phase Three Services, as applicable).`
+    `<strong>3.3 Services.</strong> During Phase One, IES will provide the Services under the Program, as it may be amended from time to time (the "<strong>Phase One Services</strong>").`
   )}
 
   ${h("4", "Compensation and Payment Terms")}
   ${p(
-    `<strong>4.1 Phase Compensation.</strong> As consideration for the Services provided in each phase, the Company shall pay to IES the compensation for that phase set forth in Schedule A (each, the "<strong>Phase Compensation</strong>"):`
-  )}
-  ${p(
-    `(a) <strong>Phase One Compensation.</strong> As consideration for the provision of the Phase One Services by IES to the Company, the Company will pay to IES the Phase One Compensation set forth in Schedule A; provided, however, that the Phase One Compensation will accrue as an obligation on the books of the Company immediately upon the commencement of Phase One, but become payable only upon the closing of the Phase One Financing.`
-  )}
-  ${p(
-    `(b) <strong>Phase Two Compensation.</strong> As consideration for the provision of the Phase Two Services by IES to the Company, the Company will pay to IES the Phase Two Compensation set forth in Schedule A; provided, however, that the Phase Two Compensation will accrue as an obligation on the books of the Company immediately upon the commencement of Phase Two, but become payable only upon the closing of the Phase Two Financing.`
-  )}
-  ${p(
-    `(c) <strong>Phase Three and Subsequent Phase Compensation.</strong> As consideration for the provision of the Phase Three Services, and the services of each subsequent phase, by IES to the Company, the Company will pay to IES the compensation for that phase set forth in Schedule A; provided, however, that such compensation will accrue as an obligation on the books of the Company immediately upon the commencement of that phase, but become payable only upon the closing of that phase's financing.`
+    `<strong>4.1 Phase One Compensation.</strong> As consideration for the provision of the Phase One Services by IES to the Company, the Company will pay to IES the Phase One Compensation set forth in Schedule A; provided, however, that the Phase One Compensation will accrue as an obligation on the books of the Company immediately upon the commencement of Phase One, but become payable only upon the closing of the Milestone Financing.`
   )}
   ${p(
     `<strong>4.2 Custom Payment Terms.</strong> The amounts, milestones and payment terms in Schedule A are set individually for each Company. Where Schedule A states custom payment terms for the Company (including installment arrangements, deferred amounts, or alternative milestones), those custom terms control over the defaults in this Section 4.`
@@ -277,12 +264,12 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     `<strong>4.4 Taxes.</strong> Amounts payable under this Agreement are exclusive of any applicable taxes, which shall be borne by the Company except for taxes based on IES's net income.`
   )}
 
-  ${h("5", "Graduation and Final Compensation")}
+  ${h("5", "Conclusion of Phase One")}
   ${p(
-    `<strong>5.1 Graduation Compensation.</strong> Upon the occurrence of the Graduation Financing Event, as additional consideration for all services provided by IES to the Company during the Company's participation in the Program, the Company shall pay to IES final compensation in the amount set forth in Schedule A (the "<strong>Graduation Compensation</strong>") and the Company's participation in the Program shall terminate.`
+    `<strong>5.1 Conclusion.</strong> Upon the closing of the Milestone Financing and the payment of the Phase One Compensation, the Services under this Agreement conclude and the Company's participation in the Program under this Agreement terminates. Termination of participation under this Section does not affect the equity right granted under Section 2, which is unconditional and irrevocable, or any amount accrued under this Agreement.`
   )}
   ${p(
-    `<strong>5.2 Accrued Amounts Survive.</strong> Any Phase Compensation that has accrued but not yet become payable as of the Graduation Financing Event becomes payable in full at the initial closing of the Graduation Financing Event, in addition to the Graduation Compensation.`
+    `<strong>5.2 Accrued Amounts Survive.</strong> Any Phase One Compensation that has accrued but not yet been paid remains an obligation of the Company, payable in accordance with Section 4.`
   )}
 
   ${h("6", "Unlimited Office Access (Optional Add-On)")}
@@ -290,7 +277,7 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     `<strong>6.1 Election.</strong> If the Company elects the Unlimited Office Access add-on in Schedule A, IES shall provide the Company with unlimited access to the office space made available through the Program for the duration of the Company's participation, subject to the reasonable rules of the applicable workspace.`
   )}
   ${p(
-    `<strong>6.2 Add-On Fee.</strong> The fee for Unlimited Office Access is <strong>Nine Hundred Fifty Dollars ($950) per month</strong>, billed monthly in advance, commencing on the election date stated in Schedule A and continuing month to month until the earlier of (i) termination of the Company's participation in the Program or (ii) the Company's written cancellation of the add-on, effective at the end of the then-current monthly period.`
+    `<strong>6.2 Add-On Fee.</strong> The fee for Unlimited Office Access is <strong>Nine Hundred Fifty Dollars ($950) per month</strong>, billed monthly in advance, commencing on the start date stated in Schedule A — the Monday following the date the Company signs this Agreement — and continuing month to month until the earlier of (i) termination of the Company's participation in the Program or (ii) the Company's written cancellation of the add-on, effective at the end of the then-current monthly period.`
   )}
   ${p(
     `<strong>6.3 Not Contingent on Financing.</strong> The add-on fee under this Section 6 is a monthly subscription fee and is <strong>not</strong> contingent on, and does not accrue pending, any financing milestone, unless Schedule A expressly provides otherwise for the Company.`
@@ -304,7 +291,7 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     `<strong>7.2 Termination by IES.</strong> IES may terminate the Company's participation in the Program at any time, in its sole discretion, upon written notice to the Company.`
   )}
   ${p(
-    `<strong>7.3 Effect of Termination.</strong> Upon termination for any reason: (a) the equity right granted under Section 2 is irrevocable and survives; (b) any Phase Compensation that has accrued on the books of the Company prior to termination remains an obligation of the Company and becomes payable upon the closing of the financing milestone for the phase in which it accrued, or upon a Graduation Financing Event, whichever occurs first; and (c) Sections 2, 4, 5 (as to amounts accrued), 8, 9 and 10 survive.`
+    `<strong>7.3 Effect of Termination.</strong> Upon termination for any reason: (a) the equity right granted under Section 2 is irrevocable and survives; (b) any Phase One Compensation that has accrued on the books of the Company prior to termination remains an obligation of the Company and becomes payable upon the closing of the Milestone Financing; and (c) Sections 2, 4, 5 (as to amounts accrued), 8, 9 and 10 survive.`
   )}
 
   ${h("8", "Confidentiality")}
@@ -369,19 +356,8 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
       `${v.equityPercent?.trim() ? `${eqNum}%` : "______%"} post-issuance founder's-equity-equivalent interest`
     )}
     ${row("Total raised by the Company prior to admission", money(v.totalRaised))}
-    ${row("Phase One Financing Amount", money(v.phase1Financing))}
+    ${row("Phase 1 Fundraising Goal (the Milestone Financing)", money(v.phase1Financing))}
     ${row("Phase One Compensation", money(v.phase1Compensation), true)}
-    ${row("Phase Two Financing Amount", money(v.phase2Financing))}
-    ${row("Phase Two Compensation", money(v.phase2Compensation), true)}
-    ${row("Phase Three Financing Amount", money(v.phase3Financing))}
-    ${row("Phase Three Compensation", money(v.phase3Compensation), true)}
-    ${row("Subsequent Phase Financing Amount (each)", money(v.subsequentFinancing))}
-    ${row("Subsequent Phase Compensation (each)", money(v.subsequentCompensation), true)}
-    ${row(
-      "Graduation Compensation (at the Graduation Financing Event — the first of a pre-seed, seed, or Series A closing)",
-      money(v.graduationCompensation),
-      true
-    )}
     ${row("Payment method / wire instructions", blank(v.paymentMethod, 30))}
     ${row(
       "Custom payment terms for this Company",
