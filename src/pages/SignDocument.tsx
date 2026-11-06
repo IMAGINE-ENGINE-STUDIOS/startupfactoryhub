@@ -674,9 +674,9 @@ export default function SignDocument() {
                 <Label className="text-xs">Total raised to date ($)</Label>
                 <Input type="text" value={contractForm.totalRaised} onChange={(e) => setContractField("totalRaised")(e.target.value)} placeholder="0 if none" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 min-w-0">
                 <Label className="text-xs">Effective date (admission)</Label>
-                <Input type="date" value={contractForm.effectiveDate} onChange={(e) => setContractField("effectiveDate")(e.target.value)} />
+                <Input type="date" className="w-full min-w-0 max-w-full appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:m-0" value={contractForm.effectiveDate} onChange={(e) => setContractField("effectiveDate")(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Company address</Label>
@@ -750,9 +750,9 @@ export default function SignDocument() {
                 Elect Unlimited Office Access — $950/month (Section 6)
               </label>
               {contractForm.officeAddonElected === "yes" && (
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-xs">Add-on start date</Label>
-                  <Input type="date" value={contractForm.officeAddonStart} onChange={(e) => setContractField("officeAddonStart")(e.target.value)} />
+                  <Input type="date" className="w-full min-w-0 max-w-full appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:m-0" value={contractForm.officeAddonStart} onChange={(e) => setContractField("officeAddonStart")(e.target.value)} />
                 </div>
               )}
             </div>
