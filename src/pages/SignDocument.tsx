@@ -469,7 +469,17 @@ export default function SignDocument() {
     await refresh(false);
     await broadcastChange(name.trim(), "sign");
     // Auto-download the signed PDF, DocuSign style
-    await generatePdf(true);
+    const signedPdf = await generatePdf(true);
+    // Founder rule (2026-11-06): every signed startup contract is uploaded
+    // to the Investor Data Room's "Startup Contracts" section. Fire and
+    // forget — publishing must never block or fail the signing itself.
+    if (signedPdf && doc?.source_type === "equity_contract" && token) {
+      void supabase.functions
+        .invoke("publish-signed-contract", {
+          body: { token, pdfBase64: pdfToBase64(signedPdf) },
+        })
+        .catch(() => undefined);
+    }
   };
 
   const generatePdf = async (download = false) => {
