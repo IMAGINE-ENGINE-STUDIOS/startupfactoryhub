@@ -204,6 +204,16 @@ export default function SignDocument() {
       year: "numeric",
     });
 
+  /** Founder rule (2026-11-06): the company enters only its Phase 1
+   *  fundraising goal; the Phase One compensation appears automatically at
+   *  the standing ratio (5% of the goal, e.g. $250,000 → $12,500,
+   *  $1,500,000 → $75,000) and is stored as the flat Schedule A amount —
+   *  the agreement text itself never states a percentage of the raise. */
+  const autoCompensation = (goal: string) => {
+    const n = parseFloat(String(goal).replace(/[^0-9.]/g, ""));
+    return Number.isFinite(n) && n > 0 ? String(Math.round(n * 0.05)) : "";
+  };
+
   const saveContractTerms = async () => {
     if (!token || !contractForm) return;
     if (!contractForm.companyName.trim())
@@ -219,10 +229,16 @@ export default function SignDocument() {
     setSavingTerms(true);
     // The office add-on start follows the signing date (next-Monday rule) —
     // stamp the current next Monday now; submit() restamps it at signing.
-    const formToSave =
-      contractForm.officeAddonElected === "yes"
-        ? { ...contractForm, officeAddonStart: nextMondayISO() }
-        : contractForm;
+    // The Phase One compensation is always the automatic figure from the
+    // Phase 1 fundraising goal — recompute at save so it can never drift.
+    const formToSave = {
+      ...contractForm,
+      phase1Compensation:
+        autoCompensation(contractForm.phase1Financing) || contractForm.phase1Compensation,
+      ...(contractForm.officeAddonElected === "yes"
+        ? { officeAddonStart: nextMondayISO() }
+        : {}),
+    };
     const completedHtml = embedContractValues(
       buildEquityContractHtml(formToSave),
       formToSave
@@ -751,40 +767,31 @@ export default function SignDocument() {
                 <Input type="text" value={contractForm.companySignerTitle} onChange={(e) => setContractField("companySignerTitle")(e.target.value)} placeholder="CEO" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Phase One financing amount ($)</Label>
-                <Input type="text" value={contractForm.phase1Financing} onChange={(e) => setContractField("phase1Financing")(e.target.value)} />
+                <Label className="text-xs">Phase 1 fundraising goal ($)</Label>
+                <Input
+                  type="text"
+                  value={contractForm.phase1Financing}
+                  onChange={(e) => {
+                    const goal = e.target.value;
+                    setContractForm((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            phase1Financing: goal,
+                            phase1Compensation: autoCompensation(goal),
+                          }
+                        : prev
+                    );
+                  }}
+                  placeholder="e.g. 250000"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Phase One compensation ($)</Label>
-                <Input type="text" value={contractForm.phase1Compensation} onChange={(e) => setContractField("phase1Compensation")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Phase Two financing amount ($)</Label>
-                <Input type="text" value={contractForm.phase2Financing} onChange={(e) => setContractField("phase2Financing")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Phase Two compensation ($)</Label>
-                <Input type="text" value={contractForm.phase2Compensation} onChange={(e) => setContractField("phase2Compensation")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Phase Three financing amount ($)</Label>
-                <Input type="text" value={contractForm.phase3Financing} onChange={(e) => setContractField("phase3Financing")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Phase Three compensation ($)</Label>
-                <Input type="text" value={contractForm.phase3Compensation} onChange={(e) => setContractField("phase3Compensation")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Subsequent phase financing, each ($)</Label>
-                <Input type="text" value={contractForm.subsequentFinancing} onChange={(e) => setContractField("subsequentFinancing")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Subsequent phase compensation, each ($)</Label>
-                <Input type="text" value={contractForm.subsequentCompensation} onChange={(e) => setContractField("subsequentCompensation")(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Graduation compensation ($)</Label>
-                <Input type="text" value={contractForm.graduationCompensation} onChange={(e) => setContractField("graduationCompensation")(e.target.value)} />
+                <Input type="text" value={contractForm.phase1Compensation} disabled readOnly />
+                <p className="text-[11px] text-muted-foreground">
+                  Automatic — calculated from your Phase 1 fundraising goal.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Payment method / wire instructions</Label>
