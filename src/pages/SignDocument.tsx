@@ -542,6 +542,19 @@ export default function SignDocument() {
         })
         .catch(() => undefined);
     }
+    // Founder rule (2026-11-06): a company that elected the Unlimited Office
+    // Access add-on receives a second email with the platform registration
+    // link for the $950 plan (Global Venture Partner, billed via Stripe).
+    // Fire and forget — it must never block or fail the signing itself.
+    if (
+      doc?.source_type === "equity_contract" &&
+      sentContractValues?.officeAddonElected === "yes" &&
+      token
+    ) {
+      void supabase.functions
+        .invoke("send-office-plan-email", { body: { token } })
+        .catch(() => undefined);
+    }
   };
 
   const generatePdf = async (download = false) => {
@@ -794,10 +807,6 @@ export default function SignDocument() {
                 </p>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Payment method / wire instructions</Label>
-                <Input type="text" value={contractForm.paymentMethod} onChange={(e) => setContractField("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
-              </div>
-              <div className="space-y-1.5">
                 <Label className="text-xs">Custom payment terms (if any)</Label>
                 <Input type="text" value={contractForm.customPaymentTerms} onChange={(e) => setContractField("customPaymentTerms")(e.target.value)} />
               </div>
@@ -831,6 +840,17 @@ export default function SignDocument() {
                 </p>
               )}
             </div>
+            {contractForm.officeAddonElected === "yes" && (
+              <div className="space-y-1.5 mt-4 max-w-md">
+                <Label className="text-xs">Payment method for the office plan</Label>
+                <Input type="text" value={contractForm.paymentMethod} onChange={(e) => setContractField("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
+                <p className="text-[11px] text-muted-foreground">
+                  The office plan is billed monthly via Stripe. After you sign, you will receive a
+                  second email with the registration link to activate the $950 plan on the platform.
+                  A payment method is collected only because you elected the office add-on.
+                </p>
+              </div>
+            )}
             <Button className="mt-5" onClick={() => void saveContractTerms()} disabled={savingTerms}>
               {savingTerms ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Save my terms and continue to signing

@@ -72,11 +72,19 @@ const CONTRACT_SOURCE = "equity_contract";
 const embedValues = embedContractValues;
 const extractValues = extractContractValues;
 
+/** Standard message carried by every contract email (founder, 2026-11-06):
+ *  the agreement goes only to companies accepted into the program, and the
+ *  email opens by congratulating them. Editable per send. */
+export const DEFAULT_CONTRACT_MESSAGE =
+  "Congratulations — your company has been accepted into the Startup Factory Hub accelerator program. Your Accelerator Program Participation Agreement is ready: please complete your company's terms from the link and sign. Welcome aboard.";
+
 export default function EquityContractsManager() {
   const [values, setValues] = useState<EquityContractValues>(DEFAULT_EQUITY_CONTRACT);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(DEFAULT_CONTRACT_MESSAGE);
   const [externalEmail, setExternalEmail] = useState("");
   const [externalName, setExternalName] = useState("");
+  const [secondName, setSecondName] = useState("");
+  const [secondEmail, setSecondEmail] = useState("");
   const [selectedMember, setSelectedMember] = useState<ProfileRow | null>(null);
   const [memberQuery, setMemberQuery] = useState("");
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
@@ -192,11 +200,13 @@ export default function EquityContractsManager() {
 
   const resetForm = () => {
     setValues(DEFAULT_EQUITY_CONTRACT);
-    setMessage("");
+    setMessage(DEFAULT_CONTRACT_MESSAGE);
     setSelectedMember(null);
     setMemberQuery("");
     setExternalEmail("");
     setExternalName("");
+    setSecondName("");
+    setSecondEmail("");
     setEditingId(null);
   };
 
@@ -212,6 +222,8 @@ export default function EquityContractsManager() {
     setMemberQuery("");
     setExternalName(row.recipient_name || "");
     setExternalEmail(row.recipient_email || "");
+    setSecondName("");
+    setSecondEmail("");
     setEditingId(row.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -247,6 +259,12 @@ export default function EquityContractsManager() {
       const title = `Accelerator Program Agreement — ${
         values.companyName.trim() || recipient.name || recipient.email || "New company"
       }`;
+      // One file for both recipients (founder, 2026-11-06): when a second
+      // recipient is given, the SAME contract record and signing link are
+      // emailed to both — never two separate files. The library row names
+      // both recipients.
+      const second = { name: secondName.trim(), email: secondEmail.trim().toLowerCase() };
+      const hasSecond = send && second.email.includes("@");
       const payload = {
         title,
         content_html: embedValues(html, values),
@@ -255,7 +273,9 @@ export default function EquityContractsManager() {
           "Please review and sign the Startup Factory Hub Accelerator Program Participation Agreement.",
         access_mode: "sign",
         status: send ? "sent" : "draft",
-        recipient_name: recipient.name || null,
+        recipient_name: hasSecond
+          ? `${recipient.name || "Recipient"} + ${second.name || second.email}`
+          : recipient.name || null,
         recipient_email: recipient.email || null,
         recipient_user_id: recipient.userId,
       };
@@ -282,24 +302,32 @@ export default function EquityContractsManager() {
       }
 
       if (send) {
+        const mailBody = {
+          recipientName: recipient.name,
+          companyName: values.companyName.trim() || recipient.name || undefined,
+          documentTitle: title,
+          shareToken: record.share_token,
+          message: message.trim() || undefined,
+          // Blank-for-input path: the company completes its own terms from
+          // the link (the email copy follows the path).
+          blank:
+            !values.companyName.trim() ||
+            !values.equityPercent.trim() ||
+            !values.totalRaised.trim(),
+        };
         const { error: mailError } = await supabase.functions.invoke("send-equity-contract", {
-          body: {
-            to: recipient.email,
-            recipientName: recipient.name,
-            companyName: values.companyName.trim() || recipient.name || undefined,
-            documentTitle: title,
-            shareToken: record.share_token,
-            message: message.trim() || undefined,
-            // Blank-for-input path: the company completes its own terms from
-            // the link (the email copy follows the path).
-            blank:
-              !values.companyName.trim() ||
-              !values.equityPercent.trim() ||
-              !values.totalRaised.trim(),
-          },
+          body: { ...mailBody, to: recipient.email },
         });
         if (mailError) throw mailError;
-        toast.success(`Contract sent to ${recipient.email}`);
+        if (hasSecond) {
+          const { error: secondError } = await supabase.functions.invoke("send-equity-contract", {
+            body: { ...mailBody, to: second.email, recipientName: second.name || recipient.name },
+          });
+          if (secondError) throw secondError;
+          toast.success(`Contract sent to ${recipient.email} and ${second.email}`);
+        } else {
+          toast.success(`Contract sent to ${recipient.email}`);
+        }
       } else {
         toast.success(editingId ? "Draft updated" : "Contract saved");
       }
@@ -492,10 +520,24 @@ export default function EquityContractsManager() {
             </div>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Payment method / wire instructions</Label>
-                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.paymentMethod} onChange={(e) => set("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
-              </div>
+              {values.officeAddonElected === "yes" ? (
+                <div className="space-y-2">
+                  <Label>Payment method for the office plan</Label>
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.paymentMethod} onChange={(e) => set("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
+                  <p className="text-xs text-muted-foreground">
+                    Collected only because the office add-on is elected — the $950 plan itself is
+                    billed monthly via Stripe when the company registers on the platform.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Payment method</Label>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    Not collected — a payment method is requested only when the company elects the
+                    Unlimited Office Access add-on.
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Custom payment terms (optional)</Label>
                 <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.customPaymentTerms} onChange={(e) => set("customPaymentTerms")(e.target.value)} placeholder="Installments, deferrals, alternative milestones" />
@@ -580,6 +622,29 @@ export default function EquityContractsManager() {
                   placeholder="name@company.com"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Mail className="h-4 w-4" /> Second recipient (optional)
+              </Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
+                  value={secondName}
+                  onChange={(e) => setSecondName(e.target.value)}
+                  placeholder="Full name"
+                />
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
+                  type="email"
+                  value={secondEmail}
+                  onChange={(e) => setSecondEmail(e.target.value)}
+                  placeholder="name@company.com"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Receives the same contract and signing link — one file for both recipients, one
+                entry in the contract library.
+              </p>
             </div>
           </div>
 

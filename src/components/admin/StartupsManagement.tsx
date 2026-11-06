@@ -250,10 +250,19 @@ const CompanyContractForm = ({ company }: { company: Company }) => {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Payment method / wire instructions</Label>
-          <Input className="bg-white/[0.03] border-white/10" value={values.paymentMethod} onChange={(e) => set("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
-        </div>
+        {values.officeAddonElected === "yes" ? (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Payment method for the office plan</Label>
+            <Input className="bg-white/[0.03] border-white/10" value={values.paymentMethod} onChange={(e) => set("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Payment method</Label>
+            <p className="text-[11px] text-muted-foreground pt-1.5">
+              Not collected — requested only when the office add-on is elected.
+            </p>
+          </div>
+        )}
         <div className="space-y-1.5">
           <Label className="text-xs">Custom payment terms (optional)</Label>
           <Input className="bg-white/[0.03] border-white/10" value={values.customPaymentTerms} onChange={(e) => set("customPaymentTerms")(e.target.value)} />
