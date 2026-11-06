@@ -186,6 +186,24 @@ export default function SignDocument() {
   const setContractField = (k: keyof EquityContractValues) => (val: string) =>
     setContractForm((prev) => (prev ? { ...prev, [k]: val } : prev));
 
+  /** Founder rule (2026-11-06): the Unlimited Office Access add-on starts
+   *  on the Monday after the contract is signed — if signing day is itself
+   *  a Monday, it starts that Monday. The date is set automatically from
+   *  the signing date; nobody picks it by hand. */
+  const nextMondayISO = (from = new Date()) => {
+    const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    d.setDate(d.getDate() + ((8 - d.getDay()) % 7));
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  };
+  const prettyDate = (iso: string) =>
+    new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
   const saveContractTerms = async () => {
     if (!token || !contractForm) return;
     if (!contractForm.companyName.trim())
@@ -199,9 +217,15 @@ export default function SignDocument() {
     if (editorName.length < 2)
       return toast.error("Enter the signatory name in the form");
     setSavingTerms(true);
+    // The office add-on start follows the signing date (next-Monday rule) —
+    // stamp the current next Monday now; submit() restamps it at signing.
+    const formToSave =
+      contractForm.officeAddonElected === "yes"
+        ? { ...contractForm, officeAddonStart: nextMondayISO() }
+        : contractForm;
     const completedHtml = embedContractValues(
-      buildEquityContractHtml(contractForm),
-      contractForm
+      buildEquityContractHtml(formToSave),
+      formToSave
     );
     const { error } = await supabase.rpc("complete_sign_contract_by_token", {
       _token: token,
@@ -437,6 +461,28 @@ export default function SignDocument() {
     if (name.trim().length < 2) return toast.error("Enter your full name");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast.error("Enter a valid email");
     if (!signature) return toast.error("Draw your signature");
+
+    // Founder rule (2026-11-06): the office add-on starts the Monday after
+    // signing — restamp that date into the agreement BEFORE the signature
+    // lands (the completion RPC only accepts edits while the document is
+    // unsigned). A failed restamp never blocks the signing itself.
+    if (doc?.source_type === "equity_contract" && sentContractValues?.officeAddonElected === "yes") {
+      const monday = nextMondayISO();
+      if (sentContractValues.officeAddonStart !== monday) {
+        try {
+          const restamped = { ...sentContractValues, officeAddonStart: monday };
+          const { error: restampError } = await supabase.rpc("complete_sign_contract_by_token", {
+            _token: token,
+            _content_html: embedContractValues(buildEquityContractHtml(restamped), restamped),
+            _editor_name: name.trim(),
+            _editor_email: email.trim() || null,
+          } as any);
+          if (!restampError) await refresh(false);
+        } catch {
+          /* signing proceeds regardless */
+        }
+      }
+    }
 
     setSubmitting(true);
     const signedFieldIndex = pendingFieldIndexRef.current;
@@ -755,15 +801,27 @@ export default function SignDocument() {
                   type="checkbox"
                   className="h-4 w-4 accent-emerald-500"
                   checked={contractForm.officeAddonElected === "yes"}
-                  onChange={(e) => setContractField("officeAddonElected")(e.target.checked ? "yes" : "no")}
+                  onChange={(e) =>
+                    setContractForm((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            officeAddonElected: e.target.checked ? "yes" : "no",
+                            officeAddonStart: e.target.checked
+                              ? nextMondayISO()
+                              : prev.officeAddonStart,
+                          }
+                        : prev
+                    )
+                  }
                 />
                 Elect Unlimited Office Access — $950/month (Section 6)
               </label>
               {contractForm.officeAddonElected === "yes" && (
-                <div className="space-y-1.5 min-w-0">
-                  <Label className="text-xs">Add-on start date</Label>
-                  <Input type="date" className="w-full min-w-0 max-w-full appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:m-0" value={contractForm.officeAddonStart} onChange={(e) => setContractField("officeAddonStart")(e.target.value)} />
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Starts <strong className="text-foreground">{prettyDate(nextMondayISO())}</strong>{" "}
+                  — set automatically: the office add-on begins on the Monday after you sign.
+                </p>
               )}
             </div>
             <Button className="mt-5" onClick={() => void saveContractTerms()} disabled={savingTerms}>
