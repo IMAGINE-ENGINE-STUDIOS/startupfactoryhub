@@ -13,6 +13,20 @@ interface SignaturePadProps {
 
 type Point = { x: number; y: number };
 type Stroke = Point[];
+
+/** crypto.randomUUID is not available in every browser context (older
+ *  browsers, some embedded/private contexts) — a saved-signature id must
+ *  never be able to throw and kill the signature itself. */
+const safeId = (): string => {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+  } catch {
+    /* fall through */
+  }
+  return `sig-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
 type SavedSignature = { id: string; dataUrl: string; createdAt: number; label: string };
 
 const LEGACY_SAVED_SIGNATURES_KEY = "sfh_saved_signatures_v1";
@@ -166,14 +180,20 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
     const canvas = canvasRef.current;
     if (!canvas || !hasInk) return;
     const dataUrl = cropSignatureCanvas(canvas);
-    const next: SavedSignature = {
-      id: crypto.randomUUID(),
-      dataUrl,
-      createdAt: Date.now(),
-      label: `Hand-drawn ${new Date().toLocaleString()}`,
-    };
-    persistSaved([next, ...saved].slice(0, 6));
+    // The signature itself comes FIRST — saving a copy for reuse must never
+    // be able to block or break producing it.
     onChange(dataUrl);
+    try {
+      const next: SavedSignature = {
+        id: safeId(),
+        dataUrl,
+        createdAt: Date.now(),
+        label: `Hand-drawn ${new Date().toLocaleString()}`,
+      };
+      persistSaved([next, ...saved].slice(0, 6));
+    } catch {
+      /* the signature is already delivered */
+    }
   };
 
   const insertSaved = (sig: SavedSignature) => {
@@ -187,14 +207,19 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
 
   const saveTyped = () => {
     if (!typedPreview) return;
-    const next: SavedSignature = {
-      id: crypto.randomUUID(),
-      dataUrl: typedPreview,
-      createdAt: Date.now(),
-      label: `Typed: ${typedName.trim()}`,
-    };
-    persistSaved([next, ...saved].slice(0, 6));
+    // Same rule as the drawn path: deliver the signature first, then save.
     onChange(typedPreview);
+    try {
+      const next: SavedSignature = {
+        id: safeId(),
+        dataUrl: typedPreview,
+        createdAt: Date.now(),
+        label: `Typed: ${typedName.trim()}`,
+      };
+      persistSaved([next, ...saved].slice(0, 6));
+    } catch {
+      /* the signature is already delivered */
+    }
   };
 
   useEffect(() => {
