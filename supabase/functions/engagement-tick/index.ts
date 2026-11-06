@@ -323,10 +323,317 @@ const EMAILS: Record<
   }),
 };
 
-/** Steps this tick sends. resource_report and the recurring steps
- *  (weekly_opportunities, weekly_grants, daily_top10) are handled by the
- *  engagement reports build — their rows stay pending until then. */
-const SENDABLE = new Set(Object.keys(EMAILS));
+/* ------------------------------------------------------------------ */
+/* Reports build (job 3): resource report, weekly opportunities,       */
+/* weekly grants and the daily Top 10 — personalized from the          */
+/* company's profile, the resources library and the events calendar.   */
+/* ------------------------------------------------------------------ */
+
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+const isoWeek = (d: Date) => {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = (t.getUTCDay() + 6) % 7;
+  t.setUTCDate(t.getUTCDate() - day + 3);
+  const firstThu = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+  const fd = (firstThu.getUTCDay() + 6) % 7;
+  firstThu.setUTCDate(firstThu.getUTCDate() - fd + 3);
+  const week = 1 + Math.round((t.getTime() - firstThu.getTime()) / (7 * 86400000));
+  return `${t.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+};
+
+/** Next occurrence of a weekday (Mon=1 … Sun=0) at hourUTC; today counts
+ *  only if that time is still ahead. */
+const nextWeekday = (weekday: number, hourUTC: number) => {
+  const now = new Date();
+  const d = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hourUTC, 0, 0)
+  );
+  let add = (weekday - d.getUTCDay() + 7) % 7;
+  if (add === 0 && d.getTime() <= now.getTime()) add = 7;
+  d.setUTCDate(d.getUTCDate() + add);
+  return d;
+};
+
+const itemLine = (title: string, meta: string, desc: string, url: string | null) =>
+  `<div style="margin-top:10px;">` +
+  `<div style="color:#e5e7eb;font-size:14px;font-weight:700;">${title}</div>` +
+  (meta ? `<div style="color:#22d3ee;font-size:11px;margin-top:2px;">${meta}</div>` : "") +
+  (desc ? `<div style="color:#94a3b8;font-size:12.5px;line-height:1.55;margin-top:3px;">${desc}</div>` : "") +
+  (url
+    ? `<div style="margin-top:3px;"><a href="${url}" style="color:#22d3ee;font-size:12.5px;text-decoration:none;">Open →</a></div>`
+    : "") +
+  `</div>`;
+
+const esc = (s: string | null | undefined) =>
+  String(s || "").replace(/</g, "&lt;").slice(0, 400);
+
+interface CompanyProfile {
+  name: string | null;
+  industry: string | null;
+  stage: string | null;
+  description: string | null;
+  tags: string[] | null;
+  pitch_deck_url: string | null;
+}
+
+interface ResourceRow {
+  title: string;
+  description: string | null;
+  resource_type: string;
+  website_url: string | null;
+  is_verified: boolean | null;
+  created_at: string;
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  government_grant: "GRANT / FUNDING",
+  investor_network: "INVESTORS",
+  accelerator_incubator: "ACCELERATOR",
+  lab: "LAB / R&D",
+  perk: "PERK",
+  university: "UNIVERSITY",
+  technology_transfer: "TECH TRANSFER",
+  coworking: "WORKSPACE",
+  community: "COMMUNITY",
+  event: "EVENT",
+  other: "RESOURCE",
+};
+
+const keywordsOf = (c: CompanyProfile | null): string[] => {
+  if (!c) return [];
+  const text = [c.industry || "", c.description || "", ...(c.tags || [])]
+    .join(" ")
+    .toLowerCase();
+  return Array.from(new Set(text.split(/[^a-z0-9]+/).filter((w) => w.length > 3))).slice(0, 40);
+};
+
+const scoreResource = (r: ResourceRow, keywords: string[]): number => {
+  const hay = `${r.title} ${r.description || ""} ${r.resource_type}`.toLowerCase();
+  let score = r.is_verified ? 2 : 0;
+  for (const k of keywords) if (hay.includes(k)) score += 3;
+  return score;
+};
+
+const fmtEventDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  }) + " ET";
+
+const ASYNC_EMAILS: Record<
+  string,
+  (
+    supabase: ReturnType<typeof createClient>,
+    row: QueueRow,
+    company: CompanyProfile | null
+  ) => Promise<{ subject: string; html: string }>
+> = {
+  resource_report: async (supabase, row, company) => {
+    const { data } = await supabase
+      .from("resources")
+      .select("title, description, resource_type, website_url, is_verified, created_at")
+      .order("is_verified", { ascending: false })
+      .limit(250);
+    const resources = (data || []) as ResourceRow[];
+    const keywords = keywordsOf(company);
+    const scored = resources
+      .map((r) => ({ r, s: scoreResource(r, keywords) }))
+      .sort((a, b) => b.s - a.s);
+    const top = scored.slice(0, 8).map((x) => x.r);
+    const funding = scored
+      .filter((x) => ["government_grant", "investor_network"].includes(x.r.resource_type))
+      .slice(0, 3)
+      .map((x) => x.r);
+    const render = (r: ResourceRow) =>
+      itemLine(
+        esc(r.title),
+        TYPE_LABELS[r.resource_type] || "RESOURCE",
+        esc(r.description),
+        r.website_url
+      );
+    return {
+      subject: "Your personalized startup resource report",
+      html: modernShell({
+        title: "Your personalized startup resource report",
+        preheader: `Resources matched to ${company?.industry || "your industry"} at the ${company?.stage || "your"} stage — from our library of 560+ verified resources.`,
+        kicker: "Accelerator Program &middot; Resource Report",
+        heading: "Your personalized resource report",
+        intro: `Built from your completed profile${company?.industry ? ` — ${esc(company.industry)}` : ""}${company?.stage ? `, ${esc(company.stage)} stage` : ""}. These are the resources our matching ranks highest for you right now.`,
+        body:
+          listCard("TOP MATCHES FOR YOU", top.map(render)) +
+          (funding.length
+            ? listCard("GRANTS & FUNDING TO LOOK AT FIRST", funding.map(render))
+            : "") +
+          paragraph(
+            "Your report refreshes as your profile and our library grow — new resources are added every week, and your weekly grants email and daily Top 10 keep you current between reports."
+          ) +
+          ctaBlock("Open your dashboard", `${BASE}/dashboard`) +
+          foundersBlock(),
+      }),
+    };
+  },
+
+  weekly_opportunities: async (supabase, row) => {
+    const until = new Date(Date.now() + 14 * 86400000).toISOString();
+    const { data } = await supabase
+      .from("events")
+      .select("id, title, start_date, is_virtual, description")
+      .gte("start_date", new Date().toISOString())
+      .lte("start_date", until)
+      .order("start_date", { ascending: true })
+      .limit(8);
+    const events = data || [];
+    const render = (e: {
+      id: string;
+      title: string;
+      start_date: string;
+      is_virtual: boolean | null;
+      description: string | null;
+    }) =>
+      itemLine(
+        esc(e.title),
+        `${fmtEventDate(e.start_date)} · ${e.is_virtual ? "Online" : "In person"}`,
+        esc(e.description),
+        `${BASE}/events/${e.id}/register`
+      );
+    return {
+      subject: "Your weekly opportunities — events, workshops and pitch nights",
+      html: modernShell({
+        title: "Your weekly opportunities",
+        preheader: "The next two weeks on the Startup Factory Hub calendar — networking, workshops, pitch events and founder activities.",
+        kicker: "Accelerator Program &middot; Weekly Opportunities",
+        heading: "Your weekly opportunities",
+        intro: "Showing up is half of fundraising. Here is what is on in the next two weeks.",
+        body:
+          (events.length
+            ? listCard("COMING UP", events.map(render))
+            : paragraph("No public events are scheduled in the next two weeks — new dates land on the calendar weekly.")) +
+          ctaBlock("See the full calendar", `${BASE}/events`) +
+          foundersBlock(),
+      }),
+    };
+  },
+
+  weekly_grants: async (supabase, row, company) => {
+    const { data } = await supabase
+      .from("resources")
+      .select("title, description, resource_type, website_url, is_verified, created_at")
+      .in("resource_type", ["government_grant", "investor_network"])
+      .order("created_at", { ascending: false })
+      .limit(60);
+    const resources = (data || []) as ResourceRow[];
+    const keywords = keywordsOf(company);
+    const picked = resources
+      .map((r) => ({ r, s: scoreResource(r, keywords) }))
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 8)
+      .map((x) => x.r);
+    const render = (r: ResourceRow) =>
+      itemLine(
+        esc(r.title),
+        TYPE_LABELS[r.resource_type] || "FUNDING",
+        esc(r.description),
+        r.website_url
+      );
+    return {
+      subject: "Grants and funding opportunities — this week",
+      html: modernShell({
+        title: "Grants and funding opportunities",
+        preheader: "Grants, accelerators, competitions and funding programs — refreshed weekly and matched to your profile.",
+        kicker: "Accelerator Program &middot; Funding Weekly",
+        heading: "Grants & funding — this week",
+        intro: `Fresh and matched for ${row.company_name || "your company"}: the funding programs our library ranks highest for your industry and stage.`,
+        body:
+          listCard("THIS WEEK'S SELECTION", picked.map(render)) +
+          paragraph(
+            "Deadlines move fast — if one fits, start the application this week and tell our team in your dashboard so we can support it."
+          ) +
+          ctaBlock("Open your dashboard", `${BASE}/dashboard`) +
+          foundersBlock(),
+      }),
+    };
+  },
+
+  daily_top10: async (supabase, row, company) => {
+    const keywords = keywordsOf(company);
+    const [{ data: resData }, { data: evData }] = await Promise.all([
+      supabase
+        .from("resources")
+        .select("title, description, resource_type, website_url, is_verified, created_at")
+        .order("is_verified", { ascending: false })
+        .limit(250),
+      supabase
+        .from("events")
+        .select("id, title, start_date, is_virtual, description")
+        .gte("start_date", new Date().toISOString())
+        .order("start_date", { ascending: true })
+        .limit(3),
+    ]);
+    const resources = (resData || []) as ResourceRow[];
+    const byScore = (list: ResourceRow[]) =>
+      list
+        .map((r) => ({ r, s: scoreResource(r, keywords) }))
+        .sort((a, b) => b.s - a.s)
+        .map((x) => x.r);
+    const funding = byScore(
+      resources.filter((r) => ["government_grant", "investor_network"].includes(r.resource_type))
+    ).slice(0, 3);
+    const growth = byScore(
+      resources.filter((r) =>
+        ["accelerator_incubator", "lab", "technology_transfer", "university"].includes(r.resource_type)
+      )
+    ).slice(0, 3);
+    const perks = byScore(resources.filter((r) => r.resource_type === "perk")).slice(0, 2);
+    const items: string[] = [];
+    let n = 0;
+    const push = (title: string, meta: string, desc: string, url: string | null) => {
+      n += 1;
+      items.push(itemLine(`${n}. ${title}`, meta, desc, url));
+    };
+    for (const r of funding)
+      push(esc(r.title), TYPE_LABELS[r.resource_type] || "FUNDING", esc(r.description), r.website_url);
+    for (const e of (evData || []) as Array<{
+      id: string;
+      title: string;
+      start_date: string;
+      is_virtual: boolean | null;
+      description: string | null;
+    }>)
+      push(
+        esc(e.title),
+        `EVENT · ${fmtEventDate(e.start_date)}`,
+        esc(e.description),
+        `${BASE}/events/${e.id}/register`
+      );
+    for (const r of growth)
+      push(esc(r.title), TYPE_LABELS[r.resource_type] || "RESOURCE", esc(r.description), r.website_url);
+    for (const r of perks)
+      push(esc(r.title), "PERK", esc(r.description), r.website_url);
+    return {
+      subject: "Your daily Top 10 opportunities",
+      html: modernShell({
+        title: "Your daily Top 10 opportunities",
+        preheader: `Ten opportunities ranked for ${company?.industry || "your industry"} at the ${company?.stage || "your"} stage — refreshed daily.`,
+        kicker: "Accelerator Program &middot; Daily Top 10",
+        heading: "Your daily Top 10",
+        intro: `Ranked for ${row.company_name || "your company"} from today's grants, events, programs and perks. Work the top of the list first.`,
+        body:
+          listCard("TODAY'S TOP 10", items.slice(0, 10)) +
+          ctaBlock("Open your dashboard", `${BASE}/dashboard`) +
+          foundersBlock(),
+      }),
+    };
+  },
+};
+
+/** Steps this tick sends: the one-time sequence plus the reports build. */
+const SENDABLE = new Set([...Object.keys(EMAILS), ...Object.keys(ASYNC_EMAILS)]);
+const RECURRING = new Set(["weekly_opportunities", "weekly_grants", "daily_top10"]);
 
 /**
  * Engagement journey tick (founder order, 2026-11-06). Invoked hourly by
@@ -344,6 +651,49 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Seed the recurring steps for every enrolled recipient (job 3): the
+    // unique (email, step, period) index makes re-seeding a no-op.
+    {
+      const { data: welcomed } = await supabase
+        .from("startup_engagement_queue")
+        .select("email, company_name, document_id")
+        .eq("step", "welcome")
+        .limit(500);
+      const seen = new Map<string, { company_name: string | null; document_id: string | null }>();
+      for (const w of welcomed || []) {
+        if (!seen.has(w.email as string)) {
+          seen.set(w.email as string, {
+            company_name: w.company_name as string | null,
+            document_id: w.document_id as string | null,
+          });
+        }
+      }
+      const now = new Date();
+      const monday = nextWeekday(1, 14);
+      const wednesday = nextWeekday(3, 14);
+      const todayDue = new Date(now);
+      if (todayDue.getUTCHours() >= 13) todayDue.setUTCHours(now.getUTCHours() + 1, 0, 0, 0);
+      else todayDue.setUTCHours(13, 0, 0, 0);
+      for (const [email, info] of seen) {
+        const seeds = [
+          { step: "daily_top10", period: isoDate(now), due_at: todayDue.toISOString() },
+          { step: "weekly_opportunities", period: isoWeek(monday), due_at: monday.toISOString() },
+          { step: "weekly_grants", period: isoWeek(wednesday), due_at: wednesday.toISOString() },
+        ];
+        for (const s of seeds) {
+          await supabase.from("startup_engagement_queue").insert({
+            document_id: info.document_id,
+            email,
+            company_name: info.company_name,
+            step: s.step,
+            period: s.period,
+            due_at: s.due_at,
+            status: "pending",
+          });
+        }
+      }
+    }
 
     const { data: due } = await supabase
       .from("startup_engagement_queue")
@@ -387,9 +737,40 @@ serve(async (req) => {
       return complete;
     };
 
+    // Full company profile per email (for the personalized reports).
+    const companyCache = new Map<string, CompanyProfile | null>();
+    const getCompany = async (email: string): Promise<CompanyProfile | null> => {
+      if (companyCache.has(email)) return companyCache.get(email)!;
+      let company: CompanyProfile | null = null;
+      try {
+        const { data: users } = await supabase.auth.admin.listUsers({ perPage: 200 });
+        const user = users?.users?.find(
+          (u) => (u.email || "").toLowerCase() === email.toLowerCase()
+        );
+        if (user) {
+          const { data: companies } = await supabase
+            .from("companies")
+            .select("name, industry, stage, description, tags, pitch_deck_url")
+            .eq("user_id", user.id)
+            .limit(1);
+          company = (companies?.[0] as CompanyProfile) || null;
+        }
+      } catch {
+        company = null;
+      }
+      companyCache.set(email, company);
+      return company;
+    };
+
     const results: Array<{ step: string; email: string; outcome: string }> = [];
 
     for (const row of rows) {
+      // The resource report exists only once the profile is complete —
+      // until then the row simply waits for a later tick.
+      if (row.step === "resource_report" && !(await profileComplete(row.email))) {
+        results.push({ step: row.step, email: row.email, outcome: "waiting-profile" });
+        continue;
+      }
       if (row.step === "profile" && (await profileComplete(row.email))) {
         await supabase
           .from("startup_engagement_queue")
@@ -409,7 +790,9 @@ serve(async (req) => {
         .maybeSingle();
       if (!claimed) continue;
 
-      const mail = EMAILS[row.step](row);
+      const mail = ASYNC_EMAILS[row.step]
+        ? await ASYNC_EMAILS[row.step](supabase, row, await getCompany(row.email))
+        : EMAILS[row.step](row);
       const { error } = await resend.emails.send({
         from: "Startup Factory Hub <info@startupfactoryhub.com>",
         to: [row.email],
