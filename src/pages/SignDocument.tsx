@@ -555,6 +555,14 @@ export default function SignDocument() {
         .invoke("send-office-plan-email", { body: { token } })
         .catch(() => undefined);
     }
+    // Founder order (2026-11-06): every startup that signs this contract is
+    // enrolled in the engagement journey — Welcome email now, then the
+    // scheduled accelerator sequence. Fire and forget, like the rest.
+    if (doc?.source_type === "equity_contract" && token) {
+      void supabase.functions
+        .invoke("start-startup-journey", { body: { token } })
+        .catch(() => undefined);
+    }
   };
 
   const generatePdf = async (download = false) => {
