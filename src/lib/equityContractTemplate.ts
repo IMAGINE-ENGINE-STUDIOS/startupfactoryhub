@@ -5,8 +5,9 @@
  * Venture Building Agreement in the Contracts tab).
  *
  * Structure: admission at IES's sole discretion; an unconditional,
- * irrevocable founder's-equity-equivalent right (default 2.0%, custom per
- * company); Program Phases One/Two/Three + subsequent phases, each running
+ * irrevocable founder's-equity-equivalent right at the IES Equity
+ * Percentage set individually for each company in Schedule A — there is no
+ * standard or default percentage; Program Phases One/Two/Three + subsequent phases, each running
  * until the company raises that phase's financing amount on top of prior
  * raises (default $250,000 per phase); FLAT Phase Compensation (default
  * $12,500 per phase) that accrues at phase commencement and is payable only
@@ -79,7 +80,7 @@ export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
   jurisdiction: "",
   companyAddress: "",
   companyNoticeEmail: "",
-  equityPercent: "2",
+  equityPercent: "",
   profitPercent: "5",
   termMonths: "3",
   companySignerName: "",
@@ -193,8 +194,7 @@ export const percentDisplay = (v: string): string => {
 };
 
 export function buildEquityContractHtml(v: EquityContractValues): string {
-  const eqWords = esc(percentWords(v.equityPercent || "2"));
-  const eqNum = esc(percentDisplay(v.equityPercent || "2"));
+  const eqNum = esc(percentDisplay(v.equityPercent || ""));
   const addon = v.officeAddonElected === "yes";
   const row = (label: string, value: string, bold = false) =>
     `<tr><td style="padding:7px 10px;border:1px solid #d1d5db;${bold ? "font-weight:700" : ""}">${esc(
@@ -231,7 +231,7 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
 
   ${h("2", "Initial Consideration — Equity")}
   ${p(
-    `<strong>2.1 Equity Right.</strong> As consideration for the Company's admission to the Program, the Company shall issue to IES an unconditional and irrevocable right to an equity interest in the Company equivalent to founder's equity, in a quantity resulting in a <strong>${eqWords} percent (${eqNum}%)</strong> ownership by IES of all the equity interests (or equivalent interests) of the Company outstanding post-issuance of the IES interest.`
+    `<strong>2.1 Equity Right.</strong> As consideration for the Company's admission to the Program, the Company shall issue to IES an unconditional and irrevocable right to an equity interest in the Company equivalent to founder's equity, in a quantity resulting in the percentage ownership by IES set forth in Schedule A (the "<strong>IES Equity Percentage</strong>") of all the equity interests (or equivalent interests) of the Company outstanding post-issuance of the IES interest. The IES Equity Percentage is set individually for each Company in Schedule A; there is no standard or default percentage.`
   )}
   ${p(
     `<strong>2.2 Documentation.</strong> The Company shall execute and deliver such documents as IES reasonably requests to evidence and give effect to the right granted under Section 2.1, promptly upon admission and in any event within fifteen (15) days of IES's request.`
@@ -364,7 +364,10 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
     )}
     ${row("IES notice address / email", esc(IES_NOTICE))}
     ${row("Effective Date (admission date)", blank(v.effectiveDate, 20))}
-    ${row("Equity right (Section 2)", `${eqWords} percent (${eqNum}%) post-issuance founder's-equity-equivalent interest`)}
+    ${row(
+      "Equity right (Section 2) — IES Equity Percentage (CUSTOM per Company, no default)",
+      `${v.equityPercent?.trim() ? `${eqNum}%` : "______%"} post-issuance founder's-equity-equivalent interest`
+    )}
     ${row("Total raised by the Company prior to admission", money(v.totalRaised))}
     ${row("Phase One Financing Amount", money(v.phase1Financing))}
     ${row("Phase One Compensation", money(v.phase1Compensation), true)}

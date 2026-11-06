@@ -40,6 +40,12 @@ import {
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
+import {
+  buildEquityContractHtml,
+  embedContractValues,
+  extractContractValues,
+  EquityContractValues,
+} from "@/lib/equityContractTemplate";
 import { useLiveSignDocument } from "@/hooks/useLiveSignDocument";
 import {
   AccessBadge,
@@ -147,6 +153,71 @@ export default function SignDocument() {
   const [emailNote, setEmailNote] = useState("");
   const [sending, setSending] = useState(false);
   const [pageCount, setPageCount] = useState(0);
+
+  // Accelerator Program Agreements sent blank (founder flow, 2026-11-05):
+  // the company completes its own custom terms (company name, IES Equity
+  // Percentage, total raised, and the rest of Schedule A) on this page, the
+  // completed agreement is saved back onto the document, and only then does
+  // the company sign. Agreements sent pre-filled never show the form.
+  const sentContractValues = useMemo(
+    () =>
+      doc?.source_type === "equity_contract"
+        ? extractContractValues(doc.content_html)
+        : null,
+    [doc?.source_type, doc?.content_html]
+  );
+  const contractNeedsInput =
+    !!sentContractValues &&
+    signatures.length === 0 &&
+    (!sentContractValues.companyName.trim() ||
+      !sentContractValues.equityPercent.trim() ||
+      !sentContractValues.totalRaised.trim());
+  const [contractForm, setContractForm] = useState<EquityContractValues | null>(null);
+  const [savingTerms, setSavingTerms] = useState(false);
+  useEffect(() => {
+    if (contractNeedsInput && sentContractValues) {
+      setContractForm((prev) => prev ?? sentContractValues);
+    } else if (!contractNeedsInput) {
+      setContractForm(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractNeedsInput, doc?.id]);
+
+  const setContractField = (k: keyof EquityContractValues) => (val: string) =>
+    setContractForm((prev) => (prev ? { ...prev, [k]: val } : prev));
+
+  const saveContractTerms = async () => {
+    if (!token || !contractForm) return;
+    if (!contractForm.companyName.trim())
+      return toast.error("Enter your company's legal name");
+    if (!contractForm.equityPercent.trim())
+      return toast.error("Enter the IES Equity Percentage for your company");
+    if (!contractForm.totalRaised.trim())
+      return toast.error("Enter the total your company has raised to date (0 if none)");
+    const editorName =
+      name.trim().length >= 2 ? name.trim() : contractForm.companySignerName.trim();
+    if (editorName.length < 2)
+      return toast.error("Enter the signatory name in the form");
+    setSavingTerms(true);
+    const completedHtml = embedContractValues(
+      buildEquityContractHtml(contractForm),
+      contractForm
+    );
+    const { error } = await supabase.rpc("complete_sign_contract_by_token", {
+      _token: token,
+      _content_html: completedHtml,
+      _editor_name: editorName,
+      _editor_email: email.trim() || contractForm.companyNoticeEmail.trim() || null,
+    } as any);
+    setSavingTerms(false);
+    if (error) {
+      toast.error("Could not save your terms — please try again");
+      return;
+    }
+    setContractForm(null);
+    toast.success("Your terms are saved into the agreement — review it below, then sign");
+    await refresh(false);
+  };
 
   /** Owners can erase any signature already collected on the document. */
   const deleteSignature = async (signatureId: string) => {
@@ -361,6 +432,8 @@ export default function SignDocument() {
 
   const submit = async () => {
     if (!token) return;
+    if (contractNeedsInput)
+      return toast.error("Complete your company's terms above first, then sign");
     if (name.trim().length < 2) return toast.error("Enter your full name");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast.error("Enter a valid email");
     if (!signature) return toast.error("Draw your signature");
@@ -576,6 +649,118 @@ export default function SignDocument() {
               Save changes
             </Button>
           </div>
+        )}
+
+        {contractNeedsInput && contractForm && (
+          <section className="tech-card border-0 rounded-2xl p-4 sm:p-6 mb-4">
+            <h2 className="text-lg font-semibold mb-1">Complete your company's terms</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Startup Factory Hub sent this Accelerator Program Participation Agreement with the
+              custom terms blank for your company to complete. What you save here is written into
+              the agreement and its Schedule A — then review the completed agreement below and sign.
+              The equity percentage is set individually for each company; there is no standard or
+              default percentage.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Company legal name</Label>
+                <Input type="text" value={contractForm.companyName} onChange={(e) => setContractField("companyName")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">IES Equity Percentage (%)</Label>
+                <Input type="text" value={contractForm.equityPercent} onChange={(e) => setContractField("equityPercent")(e.target.value)} placeholder="e.g. 2" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Total raised to date ($)</Label>
+                <Input type="text" value={contractForm.totalRaised} onChange={(e) => setContractField("totalRaised")(e.target.value)} placeholder="0 if none" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Effective date (admission)</Label>
+                <Input type="date" value={contractForm.effectiveDate} onChange={(e) => setContractField("effectiveDate")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Company address</Label>
+                <Input type="text" value={contractForm.companyAddress} onChange={(e) => setContractField("companyAddress")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Notice email</Label>
+                <Input type="email" value={contractForm.companyNoticeEmail} onChange={(e) => setContractField("companyNoticeEmail")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Signatory name</Label>
+                <Input type="text" value={contractForm.companySignerName} onChange={(e) => setContractField("companySignerName")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Signatory title</Label>
+                <Input type="text" value={contractForm.companySignerTitle} onChange={(e) => setContractField("companySignerTitle")(e.target.value)} placeholder="CEO" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase One financing amount ($)</Label>
+                <Input type="text" value={contractForm.phase1Financing} onChange={(e) => setContractField("phase1Financing")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase One compensation ($)</Label>
+                <Input type="text" value={contractForm.phase1Compensation} onChange={(e) => setContractField("phase1Compensation")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase Two financing amount ($)</Label>
+                <Input type="text" value={contractForm.phase2Financing} onChange={(e) => setContractField("phase2Financing")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase Two compensation ($)</Label>
+                <Input type="text" value={contractForm.phase2Compensation} onChange={(e) => setContractField("phase2Compensation")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase Three financing amount ($)</Label>
+                <Input type="text" value={contractForm.phase3Financing} onChange={(e) => setContractField("phase3Financing")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Phase Three compensation ($)</Label>
+                <Input type="text" value={contractForm.phase3Compensation} onChange={(e) => setContractField("phase3Compensation")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Subsequent phase financing, each ($)</Label>
+                <Input type="text" value={contractForm.subsequentFinancing} onChange={(e) => setContractField("subsequentFinancing")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Subsequent phase compensation, each ($)</Label>
+                <Input type="text" value={contractForm.subsequentCompensation} onChange={(e) => setContractField("subsequentCompensation")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Graduation compensation ($)</Label>
+                <Input type="text" value={contractForm.graduationCompensation} onChange={(e) => setContractField("graduationCompensation")(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Payment method / wire instructions</Label>
+                <Input type="text" value={contractForm.paymentMethod} onChange={(e) => setContractField("paymentMethod")(e.target.value)} placeholder="Wire transfer" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Custom payment terms (if any)</Label>
+                <Input type="text" value={contractForm.customPaymentTerms} onChange={(e) => setContractField("customPaymentTerms")(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-end gap-4 mt-4">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-emerald-500"
+                  checked={contractForm.officeAddonElected === "yes"}
+                  onChange={(e) => setContractField("officeAddonElected")(e.target.checked ? "yes" : "no")}
+                />
+                Elect Unlimited Office Access — $950/month (Section 6)
+              </label>
+              {contractForm.officeAddonElected === "yes" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Add-on start date</Label>
+                  <Input type="date" value={contractForm.officeAddonStart} onChange={(e) => setContractField("officeAddonStart")(e.target.value)} />
+                </div>
+              )}
+            </div>
+            <Button className="mt-5" onClick={() => void saveContractTerms()} disabled={savingTerms}>
+              {savingTerms ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Save my terms and continue to signing
+            </Button>
+          </section>
         )}
 
         <article className="tech-card border-0 rounded-2xl p-2 sm:p-4 overflow-hidden max-w-full">

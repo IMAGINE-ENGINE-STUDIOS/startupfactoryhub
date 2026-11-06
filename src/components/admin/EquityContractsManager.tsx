@@ -228,8 +228,12 @@ export default function EquityContractsManager() {
   };
 
   const createAndSend = async (send: boolean) => {
-    if (!values.companyName.trim()) {
-      toast.error("Add the company name first");
+    // Two send paths (founder flow, 2026-11-05): pre-filled from the room, or
+    // BLANK — the company completes its own terms from the emailed link. A
+    // blank send therefore does not require the company name here; it only
+    // needs a recipient. The title falls back to the recipient.
+    if (!values.companyName.trim() && !recipient.email && !recipient.name) {
+      toast.error("Add the company name, or choose who receives the contract");
       return;
     }
     if (send && !recipient.email) {
@@ -240,7 +244,9 @@ export default function EquityContractsManager() {
     setSaving(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
-      const title = `Accelerator Program Agreement — ${values.companyName.trim()}`;
+      const title = `Accelerator Program Agreement — ${
+        values.companyName.trim() || recipient.name || recipient.email || "New company"
+      }`;
       const payload = {
         title,
         content_html: embedValues(html, values),
@@ -280,7 +286,7 @@ export default function EquityContractsManager() {
           body: {
             to: recipient.email,
             recipientName: recipient.name,
-            companyName: values.companyName.trim(),
+            companyName: values.companyName.trim() || recipient.name || undefined,
             documentTitle: title,
             shareToken: record.share_token,
             message: message.trim() || undefined,
@@ -380,7 +386,7 @@ export default function EquityContractsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Company name</Label>
+              <Label>Company name (leave blank to let the company fill it in)</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companyName}
                 onChange={(e) => set("companyName")(e.target.value)}
