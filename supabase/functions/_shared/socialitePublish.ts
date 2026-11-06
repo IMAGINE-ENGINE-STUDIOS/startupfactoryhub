@@ -136,7 +136,12 @@ async function postOne(p: string, text: string, media: string[], owner: string, 
     if (media.length > 1) return igCarousel(ig.accountId, token, text, media);
     const c = await (await fetch(`${G}/${ig.accountId}/media`, { method: "POST", body: new URLSearchParams({ ...(isVideo(m) ? { media_type: "REELS", video_url: m } : { image_url: m }), caption: text, access_token: token }) })).json();
     if (!c.id) return c;
-    if (isVideo(m)) await new Promise((r) => setTimeout(r, 15000)); // let IG process the video
+    // The container must be FINISHED before media_publish — publishing early
+    // returns "Media ID is not available" (proven 2026-11-05/06: the single
+    // photo path skipped the wait that carousel/story paths already had, so
+    // IG posts failed intermittently and fell back to manual Graph posting).
+    const ready = await igWait(c.id, token, isVideo(m) ? 30 : 20, 3000);
+    if (!ready) return { error: "Instagram media was not ready in time — please retry the post" };
     return (await fetch(`${G}/${ig.accountId}/media_publish`, { method: "POST", body: new URLSearchParams({ creation_id: c.id, access_token: token }) })).json();
   }
   if (p === "threads") {
