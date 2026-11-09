@@ -1756,7 +1756,7 @@ export default function AcceleratorBrochure() {
                         {[
                           { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
-                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
+                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
                           { img: issSpaceStation, kicker: 'Space Agency', title: 'NASA · Kennedy Space Center', desc: 'Startups build on NASA technologies through the Technology Transfer Program at Kennedy Space Center.', accent: NEON.cyan, logo: nasaLogo, logoAlt: 'NASA logo' },
                         ].map((e, i) => (
                           <motion.div
@@ -1775,6 +1775,7 @@ export default function AcceleratorBrochure() {
                               </div>
                             )}
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
+                              <div className="absolute inset-x-0 bottom-0 top-[38%] -z-0 bg-white/80 backdrop-blur-[3px]" />
                               <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
                               <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
                               <h4
