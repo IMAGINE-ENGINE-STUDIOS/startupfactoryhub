@@ -12,7 +12,7 @@ export const PARTNERS: Partner[] = [
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
   { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
-  { name: "TradingView", logo: "https://www.tradingview.com/static/images/logo-tradingview.svg", tier: "Finance" },
+  { name: "TradingView", logo: "/partners/tradingview-logo.png", tier: "Finance" },
   { name: "IWG", logo: "/partners/iwg-logo.png", tier: "Workspace" },
   { name: "Startup Factory Hub", logo: "/partners/regus-logo.png", tier: "Workspace" },
   { name: "HQ", logo: "/partners/hq-logo.png", tier: "Workspace" },
@@ -58,7 +58,7 @@ export const PARTNERS: Partner[] = [
   { name: "O&O Software", logo: "https://www.google.com/s2/favicons?domain=oo-software.com&sz=128", tier: "Software" },
   { name: "Carta", logo: "https://www.google.com/s2/favicons?domain=carta.com&sz=128", tier: "Cap Table" },
   { name: "Defense Innovation Unit (DIU)", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/diu-logo.png", tier: "Defense" },
-  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },,
+  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },
   { name: "SpaceWERX", logo: "https://www.google.com/s2/favicons?domain=spacewerx.us&sz=128", tier: "Defense" },
   { name: "University of Central Florida", logo: "https://www.google.com/s2/favicons?domain=ucf.edu&sz=128", tier: "Academic" },
 ];

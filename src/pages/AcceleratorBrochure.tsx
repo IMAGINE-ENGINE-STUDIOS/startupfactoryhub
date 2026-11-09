@@ -1121,7 +1121,7 @@ export default function AcceleratorBrochure() {
   const { reportPage } = useBrochureLiveBridge(bookRef);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(14);
+  const [totalPages, setTotalPages] = useState(16);
   const compact = useCompactBrochure();
 
 
@@ -1752,24 +1752,23 @@ export default function AcceleratorBrochure() {
                       </motion.div>
 
                       {/* Grid of four — magazine plates */}
-                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-3 gap-4 mt-4">
+                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-4 mt-4">
                         {[
                           { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
                           { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
                           { img: issSpaceStation, kicker: 'Space Agency', title: 'NASA · Kennedy Space Center', desc: 'Startups build on NASA technologies through the Technology Transfer Program at Kennedy Space Center.', accent: NEON.cyan, logo: nasaLogo, logoAlt: 'NASA logo' },
-                          { img: spaceEventBg, kicker: 'Monthly · Deal Flow', title: 'Hot Deals in Space Industry', desc: 'Our monthly event where space-industry startups present live deals to investors and partners.', accent: NEON.magenta, wide: true },
                         ].map((e, i) => (
                           <motion.div
                             key={e.title}
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
-                            className={`relative overflow-hidden min-h-0 ${(e as any).wide ? 'col-span-2' : ''}`}
+                            className="relative overflow-hidden min-h-0"
                             style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
                             <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 34%, rgba(255,255,255,0.9) 62%, rgba(255,255,255,0.97) 100%)' }} />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.93) 56%, rgba(255,255,255,0.98) 100%)' }} />
                             {e.logo && (
                               <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
                                 <img loading="lazy" decoding="async" src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
@@ -1780,15 +1779,39 @@ export default function AcceleratorBrochure() {
                               <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
                               <h4
                                 className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
-                                style={{ fontSize: '18px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                                style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                               >
                                 {e.title}
                               </h4>
-                              <p className="text-[13px] leading-[1.45] text-slate-600 font-light mt-1">{e.desc}</p>
+                              <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
                             </div>
                           </motion.div>
                         ))}
                       </div>
+
+                      {/* Hot Deals — wide banner */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.45, ease: 'easeOut' }}
+                        className="shrink-0 mt-4 flex overflow-hidden bg-white"
+                        style={{ height: '118px', boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
+                      >
+                        <div className="relative shrink-0" style={{ width: '30%' }}>
+                          <img loading="lazy" decoding="async" src={spaceEventBg} alt="Hot Deals in Space Industry" className="absolute inset-0 w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col justify-center px-5">
+                          <div className="h-[3px] w-8 mb-1.5" style={{ background: NEON.magenta }} />
+                          <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: NEON.magenta }}>Monthly · Deal Flow</span>
+                          <h4
+                            className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-0.5"
+                            style={{ fontSize: '21px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                          >
+                            Hot Deals in Space Industry
+                          </h4>
+                          <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-0.5">Our monthly event where space-industry startups present live deals to investors and partners.</p>
+                        </div>
+                      </motion.div>
 
                       {/* Upcoming — editorial pull quote strip */}
                       <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.magenta }}>
@@ -2545,7 +2568,7 @@ export default function AcceleratorBrochure() {
                 flippingTime={spread ? 650 : 450}
                 maxShadowOpacity={spread ? 0.45 : 0.2}
                 usePortrait={!spread}
-                startPage={Math.min(currentPage, 14)}
+                startPage={Math.min(currentPage, 15)}
                 startZIndex={0}
                 autoSize={false}
                 clickEventForward={true}
@@ -2556,7 +2579,7 @@ export default function AcceleratorBrochure() {
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
                 onFlip={(e: any) => { setCurrentPage(e.data); reportPage(e.data); }}
-                onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+                onInit={(e: any) => { const n = (e as any)?.object?.getPageCount?.() ?? e.data?.pages; if (n) setTotalPages(n); }}
               >
                 {Children.toArray((pages as any).props.children)}
               </HTMLFlipBook>
