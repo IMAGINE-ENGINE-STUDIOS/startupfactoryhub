@@ -704,10 +704,12 @@ const useFlipEnv = () => {
       raf = requestAnimationFrame(() => {
         setEnv((prev) => {
           const next = readFlipEnv();
+          // Height-only changes are the phone browser bar sliding in/out
+          // while passing pages — ignore them entirely so page geometry
+          // (and the flipbook) stays frozen mid-read.
           return prev.supported === next.supported &&
             prev.spread === next.spread &&
-            Math.abs(prev.width - next.width) < 24 &&
-            Math.abs(prev.height - next.height) < 24
+            Math.abs(prev.width - next.width) < 24
             ? prev
             : next;
         });
