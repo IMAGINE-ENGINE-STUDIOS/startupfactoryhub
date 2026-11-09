@@ -302,8 +302,13 @@ export default function ApexBrochure() {
 
   useEffect(() => {
     document.title = 'APEX Accelerators × Startup Factory Hub';
+    let lastVw = -1;
     const calc = () => {
       const vw = window.innerWidth;
+      // Height-only changes are the phone browser bar sliding in/out while
+      // passing pages — keep the page geometry frozen mid-read.
+      if (vw === lastVw) return;
+      lastVw = vw;
       const vh = window.innerHeight - 72;
       const spread = vw >= 1100;
       const maxW = spread ? (vw - 140) / 2 : vw - 24;

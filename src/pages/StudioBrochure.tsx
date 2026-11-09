@@ -35,7 +35,14 @@ export default function StudioBrochure() {
     return () => window.removeEventListener('bs:doc', on);
   }, [key]);
   useEffect(() => {
-    const calc = () => setW(Math.max(300, Math.floor(Math.min(window.innerWidth >= 1100 ? (window.innerWidth - 80) / 2 : window.innerWidth - 24, (window.innerHeight - 120) / 1.414, 620))));
+    let lastVw = -1;
+    const calc = () => {
+      // Height-only changes are the phone browser bar sliding in/out while
+      // passing pages — keep the page geometry (and the flipbook) frozen.
+      if (window.innerWidth === lastVw) return;
+      lastVw = window.innerWidth;
+      setW(Math.max(300, Math.floor(Math.min(window.innerWidth >= 1100 ? (window.innerWidth - 80) / 2 : window.innerWidth - 24, (window.innerHeight - 120) / 1.414, 620))));
+    };
     calc(); window.addEventListener('resize', calc); return () => window.removeEventListener('resize', calc);
   }, []);
   const spread = typeof window !== 'undefined' && window.innerWidth >= 1100;
