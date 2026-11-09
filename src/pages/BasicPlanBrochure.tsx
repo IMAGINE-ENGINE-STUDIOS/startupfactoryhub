@@ -395,7 +395,7 @@ const JoinButton = ({
  * Imagine Engine Studios Corp.
  */
 
-type CheckoutTierKey = 'network' | 'resident' | 'partner';
+type CheckoutTierKey = 'network' | 'community' | 'resident' | 'partner';
 type CheckoutCycle = 'monthly' | 'yearly';
 
 const CheckoutPanel = ({
@@ -416,6 +416,13 @@ const CheckoutPanel = ({
     {
       key: 'network', name: 'Venture Network', color: '#67e8f9', extra: 'Full network access',
       monthly, yearly: formatCents(48000), priceId: null, yearlyPriceId: null,
+    },
+    {
+      key: 'community', name: 'Community', color: '#f59e0b', extra: 'Accelerator access · mentors · programs',
+      monthly: formatCents(MEMBERSHIP_TIERS.community.price * 100),
+      yearly: formatCents(MEMBERSHIP_TIERS.community.yearly_price * 100),
+      priceId: MEMBERSHIP_TIERS.community.price_id,
+      yearlyPriceId: MEMBERSHIP_TIERS.community.yearly_price_id,
     },
     {
       key: 'resident', name: 'Venture Resident', color: NEON.lime, extra: '+ Dedicated desk',
@@ -487,7 +494,7 @@ const CheckoutPanel = ({
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         {tiers.map((t) => (
           <button key={t.key} onClick={() => onTier(t.key)} className="rounded-xl px-2.5 py-2.5 text-left transition hover:scale-[1.02]" style={{
             background: t.key === tier ? `${t.color}2b` : 'rgba(255,255,255,0.06)',
