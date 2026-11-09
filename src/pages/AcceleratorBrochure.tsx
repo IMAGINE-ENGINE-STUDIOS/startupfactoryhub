@@ -54,8 +54,10 @@ import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
 import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
 import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
-import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
 import nasaLogo from '@/assets/nasa-logo.png';
+import issSpaceStation from '@/assets/iss-space-station.jpg';
+import spaceEventBg from '@/assets/space-event-bg.png';
+import { PARTNERS } from '@/config/partners';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
@@ -867,7 +869,7 @@ BatchRequestForm.displayName = 'BatchRequestForm';
 /** Shared with the APEX brochure. */
 export const PartnersNasdaqPage = () => (
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
+                  <PageFrame accent={NEON.lime} code="13" label="GLOBAL VISIBILITY" pageNum={13}>
                     <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} serif />
 
                     <motion.div
@@ -972,7 +974,7 @@ export const PartnersNasdaqPage = () => (
 
 export const PartnersARPage = () => (
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
+                  <PageFrame accent={NEON.magenta} code="12" label="AR · IMMERSIVE" pageNum={12}>
                     <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} serif />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -1750,19 +1752,20 @@ export default function AcceleratorBrochure() {
                       </motion.div>
 
                       {/* Grid of four — magazine plates */}
-                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-4 mt-4">
+                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-3 gap-4 mt-4">
                         {[
                           { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
                           { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
-                          { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
+                          { img: issSpaceStation, kicker: 'Space Agency', title: 'NASA · Kennedy Space Center', desc: 'Startups build on NASA technologies through the Technology Transfer Program at Kennedy Space Center.', accent: NEON.cyan, logo: nasaLogo, logoAlt: 'NASA logo' },
+                          { img: spaceEventBg, kicker: 'Monthly · Deal Flow', title: 'Hot Deals in Space Industry', desc: 'Our monthly event where space-industry startups present live deals to investors and partners.', accent: NEON.magenta, wide: true },
                         ].map((e, i) => (
                           <motion.div
                             key={e.title}
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
-                            className="relative overflow-hidden min-h-0"
+                            className={`relative overflow-hidden min-h-0 ${(e as any).wide ? 'col-span-2' : ''}`}
                             style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
                             <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -1808,11 +1811,60 @@ export default function AcceleratorBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 4 — THE OPPORTUNITY
+                   PAGE 4 — PARTNERS & COLLABORATORS (all logos)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="04" label="OPPORTUNITY" pageNum={4}>
+                  <PageFrame accent={NEON.cyan} code="04" label="PARTNERS & COLLABORATORS" pageNum={4}>
+                    <div className="flex-1 min-h-0 flex flex-col">
+                      <div className="shrink-0">
+                        <span className="text-[13px] font-bold tracking-[0.32em] uppercase" style={{ color: NEON.cyan }}>
+                          The Network
+                        </span>
+                        <h3
+                          className="font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
+                          style={{ fontSize: '30px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                        >
+                          Partners & Collaborators
+                        </h3>
+                        <p className="text-[15px] leading-[1.5] text-slate-600 font-light mt-2">
+                          {PARTNERS.length} organizations stand behind the accelerator — space agencies, investors,
+                          universities, corporates and platforms our startups plug into from day one.
+                        </p>
+                      </div>
+                      <div className="flex-1 min-h-0 grid grid-cols-4 gap-2.5 mt-5" style={{ gridAutoRows: '1fr' }}>
+                        {PARTNERS.map((partner) => (
+                          <div
+                            key={partner.name}
+                            className="min-h-0 overflow-hidden bg-white border border-slate-200 flex flex-col items-center justify-center px-2 py-1.5"
+                          >
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              src={partner.logo}
+                              alt={partner.name}
+                              className="max-h-8 w-auto max-w-full object-contain"
+                            />
+                            <span className="text-[9.5px] font-semibold text-slate-700 text-center leading-tight mt-1 line-clamp-2">
+                              {partner.name}
+                            </span>
+                            <span className="text-[8px] uppercase tracking-[0.14em] text-slate-400 text-center">
+                              {partner.tier}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 5 — THE OPPORTUNITY
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.magenta} code="05" label="OPPORTUNITY" pageNum={5}>
                     {/* ================= EDITORIAL FUTURISTA ================= */}
                     <div
                       className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
@@ -1955,7 +2007,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="COMMERCIAL MODEL" pageNum={5}>
+                  <PageFrame accent={NEON.cyan} code="06" label="COMMERCIAL MODEL" pageNum={6}>
                     <PageTitle kicker="05 · Commercial Model" title={<>You drive the vision. We <span style={{ color: NEON.cyan }}>accelerate the impact</span>.</>} />
 
                     {/* ---------- FACTURA DE BATCH ---------- */}
@@ -2086,7 +2138,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
+                  <PageFrame accent={NEON.cyan} code="07" label="SFH CAPABILITIES" pageNum={7}>
                     <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
 
 
@@ -2168,7 +2220,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
+                  <PageFrame accent={NEON.magenta} code="08" label="SFH CONTRIBUTION" pageNum={8}>
                     <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
@@ -2248,7 +2300,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="08" label="CAPABILITY MATRIX" pageNum={8}>
+                  <PageFrame accent={NEON.lime} code="09" label="CAPABILITY MATRIX" pageNum={9}>
                     <PageTitle kicker="08 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
@@ -2261,7 +2313,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.emerald} code="09" label="ORGANIZATIONAL GROWTH" pageNum={9}>
+                  <PageFrame accent={NEON.emerald} code="10" label="ORGANIZATIONAL GROWTH" pageNum={10}>
                     <PageTitle
                       kicker="09 · Benefits to Your Organization"
                       title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
@@ -2280,7 +2332,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="10" label="DIGITAL PLATFORM" pageNum={10}>
+                  <PageFrame accent={NEON.cyan} code="11" label="DIGITAL PLATFORM" pageNum={11}>
                     <PageTitle kicker="10 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
 
                     <DigitalPlatformDemo />
@@ -2307,7 +2359,7 @@ export default function AcceleratorBrochure() {
               {/* WHITE-LABEL · PARTNER EDITION (silver) */}
               <BookPage>
                 <A4Wrapper>
-                  <WhiteLabelPartnerPage pageNum={13} />
+                  <WhiteLabelPartnerPage pageNum={14} />
                 </A4Wrapper>
               </BookPage>
 
@@ -2317,7 +2369,7 @@ export default function AcceleratorBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="13" label="ENGAGE THE PROGRAM" pageNum={13}>
+                  <PageFrame accent={NEON.cyan} code="14" label="ENGAGE THE PROGRAM" pageNum={14}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
