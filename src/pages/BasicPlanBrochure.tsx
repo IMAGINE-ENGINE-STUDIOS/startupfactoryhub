@@ -1682,7 +1682,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
                   { n: '01', name: 'YOUR PROFILE', essence: 'A complete startup profile: what you build, your market, your stage, your traction — and exactly what you are raising.', right: 'Investors find you in search', accent: NEON.cyan },
                   { n: '02', name: 'YOUR DECK', essence: 'Your pitch deck uploaded and ready to open in one click, your story straight and your numbers in order.', right: 'Deck + data room ready', accent: '#34d399' },
                   { n: '03', name: 'YOUR NUMBERS', essence: 'Revenue, users, growth and runway kept current on your growth dashboards, so your metrics are always pitch-current.', right: 'Metrics investors can trust', accent: '#e8c987' },
-                  { n: '04', name: 'THE ROOM', essence: 'Book pitches, answer investor Q&A, present at demo days and get direct introductions across the investor network.', right: 'In front of investors', accent: NEON.magenta },
+                  { n: '04', name: 'THE ROOM', essence: 'Book pitches, answer investor Q&A, present at demo days and get direct introductions — across the investor network in the platform and the 80+ early and seed stage funds we have sought out beyond it.', right: 'In front of investors', accent: NEON.magenta },
                 ].map((s) => (
                   <motion.div key={s.n} whileHover={{ scale: 1.012 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }}
                     className="relative flex items-center gap-5 rounded-2xl px-6 py-3 overflow-hidden flex-1"
