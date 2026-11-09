@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children, memo } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback, forwardRef, Children, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
@@ -700,10 +700,12 @@ const useFlipEnv = () => {
       raf = requestAnimationFrame(() => {
         setEnv((prev) => {
           const next = readFlipEnv();
+          // Height-only changes are the phone browser bar sliding in/out
+          // while passing pages — ignore them entirely so page geometry
+          // (and the flipbook) stays frozen mid-read.
           return prev.supported === next.supported &&
             prev.spread === next.spread &&
-            Math.abs(prev.width - next.width) < 24 &&
-            Math.abs(prev.height - next.height) < 24
+            Math.abs(prev.width - next.width) < 24
             ? prev
             : next;
         });
@@ -745,10 +747,18 @@ const BASE_H = 1190;
 const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  useEffect(() => {
+  const lastW = useRef(0);
+  useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / BASE_W));
+    const apply = (w: number) => {
+      if (!w || w < 100) return; // a bad/zero sample must never shrink a page
+      if (Math.abs(w - lastW.current) < 2) return; // dedupe near-identical samples
+      lastW.current = w;
+      setScale(w / BASE_W);
+    };
+    apply(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver(([entry]) => apply(entry.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -966,7 +976,7 @@ export const PartnersARPage = () => (
                     <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} serif />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
-                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
+                      <img loading="lazy" decoding="async" src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
 
@@ -1016,9 +1026,7 @@ export const PartnersARPage = () => (
                               xr-environment
                               camera-controls
                               interaction-prompt="none"
-                              auto-rotate
-                              auto-rotate-delay="0"
-                              rotation-per-second="20deg"
+                              loading="lazy"
                               touch-action="none"
                               exposure="1"
                               shadow-intensity="1"
@@ -1224,7 +1232,7 @@ export default function AcceleratorBrochure() {
 
 
       {/* Background audio element (no autoplay) */}
-      <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" autoPlay />
+      <audio ref={audioRef} src={luminousAudio.url} loop preload="none" />
 
       {/* Floating audio control */}
       <div
@@ -1539,7 +1547,7 @@ export default function AcceleratorBrochure() {
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
                             {/* City / hub imagery */}
-                            <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
+                            <img loading="lazy" decoding="async" src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
 
                             {/* Tint overlay */}
                             <div
@@ -1717,7 +1725,7 @@ export default function AcceleratorBrochure() {
                         className="relative overflow-hidden shrink-0"
                         style={{ height: '33%', boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}
                       >
-                        <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
+                        <img loading="lazy" decoding="async" src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.72) 42%, rgba(255,255,255,0.05) 74%, transparent 100%)' }} />
                         <div className="relative z-10 h-full flex gap-6 items-center px-6 max-w-[68%]">
                           <div className="shrink-0 self-stretch py-4">
@@ -1757,11 +1765,11 @@ export default function AcceleratorBrochure() {
                             className="relative overflow-hidden min-h-0"
                             style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
-                            <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
+                            <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
                             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 34%, rgba(255,255,255,0.9) 62%, rgba(255,255,255,0.97) 100%)' }} />
                             {e.logo && (
                               <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
-                                <img src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
+                                <img loading="lazy" decoding="async" src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
                               </div>
                             )}
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
@@ -1847,7 +1855,7 @@ export default function AcceleratorBrochure() {
                             </div>
                             <span className="font-mono text-lg" style={{ color: `${NEON.cyan}90` }}>×</span>
                             <div className="flex items-center justify-center w-[62px] h-[62px] rounded-full border-2 backdrop-blur-md p-1.5" style={{ borderColor: `${NEON.lime}90`, background: `${NEON.lime}18`, boxShadow: `0 0 22px ${NEON.lime}70` }}>
-                              <img src={sfhLogo} alt="Startup Factory Hub" className="w-full h-full object-contain" />
+                              <img loading="lazy" decoding="async" src={sfhLogo} alt="Startup Factory Hub" className="w-full h-full object-contain" />
                             </div>
                           </div>
                         </div>
@@ -2459,18 +2467,18 @@ export default function AcceleratorBrochure() {
 
           if (!flipbookSupported) {
             return (
-              <div className="w-full max-w-[560px] md:max-w-[780px] mx-auto flex flex-col gap-4 sm:gap-6">
+              <div className="brochure-calm w-full max-w-[560px] md:max-w-[780px] mx-auto flex flex-col gap-4 sm:gap-6">
                 {pages}
               </div>
             );
           }
           return (
             <div
-              className="mx-auto"
+              className={spread ? 'mx-auto' : 'mx-auto brochure-calm'}
               style={{ width: spread ? pageW * 2 : pageW, maxWidth: '100%', touchAction: 'pan-y' }}
             >
               <HTMLFlipBook
-                key={`${spread ? 'spread' : 'single'}-${pageW}x${pageH}`}
+                key={spread ? 'spread' : 'single'}
                 ref={bookRef}
                 width={pageW}
                 height={pageH}
