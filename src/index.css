@@ -746,23 +746,14 @@ html:not(.dark) .matrix-admin input, html:not(.dark) .matrix-admin textarea, htm
    Inside .brochure-calm (the stacked container only; the desktop
    flipbook is untouched) decorative animation is switched off so the
    pages read as a calm, static document. */
-.brochure-calm *,
-.brochure-calm *::before,
-.brochure-calm *::after {
-  animation: none !important;
-}
-
-/* Partner logo ticker — exempt from calm mode (founder order 2026-11-09):
-   the scrolling partner strip at the foot of brochure page 2 is content,
-   not decoration, and must keep scrolling on phones. The keyframes live
-   here so the animation exists even if a page's own <style> copy is not
-   mounted in the stacked view. */
+/* Brochure dynamics stay ON everywhere (founder order 2026-11-09): the
+   brochures keep their animated, dynamic elements on desktop AND mobile.
+   The 2026-10-28 "calm mode" rule that switched off every CSS animation
+   inside .brochure-calm is removed — it also froze the partner logo
+   ticker. .brochure-calm remains only as the stacked-layout class. */
 @keyframes partners-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-.brochure-calm [style*="partners-scroll"] {
-  animation: partners-scroll 60s linear infinite !important;
 }
 
 /* Social feed windowing (2026-10-29): off-screen post cards skip layout
