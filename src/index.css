@@ -756,6 +756,15 @@ html:not(.dark) .matrix-admin input, html:not(.dark) .matrix-admin textarea, htm
   to { transform: translateX(-50%); }
 }
 
+/* Stacked brochure pages (phones): skip the rendering work for pages far
+   off-screen so having every page mounted at once doesn't lag or exhaust
+   the phone. Each page renders — and animates — fully as it approaches
+   the viewport; no dynamic element is removed. */
+.brochure-calm > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
 /* Social feed windowing (2026-10-29): off-screen post cards skip layout
    and paint, and the browser may release their decoded banner/image
    memory. Without this, paging through the feed mounted dozens of
