@@ -177,10 +177,15 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const { width } = entry.contentRect;
+    let lastW = 0;
+    const apply = (width: number) => {
+      if (!width || width < 100) return; // a bad/zero sample must never shrink a page
+      if (Math.abs(width - lastW) < 2) return; // dedupe near-identical samples
+      lastW = width;
       setScale(width / BASE_W);
-    });
+    };
+    apply(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver(([entry]) => apply(entry.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
