@@ -87,7 +87,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
-const TOTAL = 10;
+const TOTAL = 11;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
@@ -1636,7 +1636,91 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
 
 
 
-      {/* ---------------- 10 · JOIN ---------------- */}
+      {/* ---------------- 10 · GET INVESTMENT READY ---------------- */}
+      {/* New page (founder order, 2026-11-08): Funding is the biggest need the
+          startups in the platform mark, so the membership brochure gains a
+          "Get Investment Ready" page in the deep-field design language of the
+          sponsor-plan pages in the Sponsors brochure (/forsponsors):
+          dark field, glowing accent rows, big futuristic title, content
+          filling the whole page. */}
+      <BookPage>
+        <A4Wrapper>
+          <section className="absolute inset-0 overflow-hidden" style={{ background: '#050a14' }}>
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: `radial-gradient(ellipse at 15% 0%, ${NEON.cyan}30 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, ${NEON.emerald}26 0%, transparent 55%), radial-gradient(ellipse at 70% 15%, rgba(232,201,135,0.14) 0%, transparent 45%)`,
+            }} />
+            <div className="absolute inset-0 pointer-events-none opacity-[0.5]" style={{
+              backgroundImage: 'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1.4px), radial-gradient(rgba(255,255,255,0.30) 1px, transparent 1.2px)',
+              backgroundSize: '110px 110px, 64px 64px',
+              backgroundPosition: '0 0, 28px 40px',
+            }} />
+            <AmbientField />
+            <Frame />
+            <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[13px] tracking-[0.32em] uppercase pointer-events-none z-20">
+              <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                <span>SEC // 10</span>
+              </div>
+              <div className="text-white/40">Funding · Deep Field</div>
+              <div style={{ color: NEON.cyan }}>P/10 · {TOTAL}</div>
+            </div>
+
+            <div className="absolute inset-0 z-10 flex flex-col px-11 pt-16 pb-10">
+              <div className="font-mono text-[13px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>
+                Funding · The biggest need on the platform
+              </div>
+              <h2 className="mt-3 font-black leading-[0.9] tracking-tight text-white" style={{ fontSize: '68px', textShadow: `0 0 54px ${NEON.cyan}55` }}>
+                GET INVESTMENT<br />
+                <span style={{ backgroundImage: `linear-gradient(92deg, ${NEON.cyan} 0%, #34d399 45%, #e8c987 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: `drop-shadow(0 0 26px ${NEON.cyan}66)` }}>READY</span>
+              </h2>
+              <p className="mt-4 max-w-[560px] text-[17px] leading-snug text-white/70">
+                Funding is the number one thing startups in Startup Factory Hub mark that they need. Membership walks you through the four things investors check first — inside the platform, step by step.
+              </p>
+
+              <div className="mt-6 flex flex-col gap-2.5 flex-1">
+                {[
+                  { n: '01', name: 'YOUR PROFILE', essence: 'A complete startup profile: what you build, your market, your stage, your traction — and exactly what you are raising.', right: 'Investors find you in search', accent: NEON.cyan },
+                  { n: '02', name: 'YOUR DECK', essence: 'Your pitch deck uploaded and ready to open in one click, your story straight and your numbers in order.', right: 'Deck + data room ready', accent: '#34d399' },
+                  { n: '03', name: 'YOUR NUMBERS', essence: 'Revenue, users, growth and runway kept current on your growth dashboards, so your metrics are always pitch-current.', right: 'Metrics investors can trust', accent: '#e8c987' },
+                  { n: '04', name: 'THE ROOM', essence: 'Book pitches, answer investor Q&A, present at demo days and get direct introductions across the investor network.', right: 'In front of investors', accent: NEON.magenta },
+                ].map((s) => (
+                  <motion.div key={s.n} whileHover={{ scale: 1.012 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+                    className="relative flex items-center gap-5 rounded-2xl px-6 py-3 overflow-hidden flex-1"
+                    style={{ background: 'rgba(255,255,255,0.045)', border: `1px solid ${s.accent}66`, backdropFilter: 'blur(6px)', boxShadow: `0 0 34px -8px ${s.accent}55, inset 0 0 24px rgba(255,255,255,0.02)` }}>
+                    <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: `linear-gradient(180deg, ${s.accent}, transparent)`, boxShadow: `0 0 18px ${s.accent}` }} />
+                    <span aria-hidden className="font-black text-[44px] leading-none text-white/[0.13] w-[74px] shrink-0">{s.n}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-mono text-[12.5px] tracking-[0.32em] uppercase" style={{ color: s.accent }}>{s.name}</div>
+                      <div className="text-[15.5px] text-white/75 leading-snug mt-1">{s.essence}</div>
+                    </div>
+                    <div className="text-right shrink-0 max-w-[170px]">
+                      <div className="font-mono text-[11px] tracking-[0.2em] uppercase leading-relaxed" style={{ color: s.accent }}>{s.right}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-2xl px-6 py-4" style={{ background: 'linear-gradient(120deg, rgba(232,201,135,0.13), rgba(103,232,249,0.07))', border: '1px solid rgba(232,201,135,0.45)', boxShadow: '0 0 44px -10px rgba(232,201,135,0.5)' }}>
+                <div className="font-mono text-[11.5px] tracking-[0.28em] uppercase text-[#e8c987]">Before you pitch · the readiness check</div>
+                <div className="mt-2 text-[15.5px] leading-snug text-white/85">
+                  Profile complete · Deck uploaded · Ask stated · Metrics current · Investor Q&amp;A answered
+                </div>
+                <div className="mt-2 text-[14px] leading-snug text-white/55">
+                  Built into every membership. Global Venture Partner adds priority investor access; Venture Resident adds priority eligibility for cohort funding.
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                <span className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-white/40">Startup Factory Hub · Venture Network</span>
+                <span className="font-mono text-[11.5px] uppercase tracking-[0.24em]" style={{ color: NEON.cyan }}>Membership · Monthly</span>
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+      </BookPage>
+
+
+      {/* ---------------- 11 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
