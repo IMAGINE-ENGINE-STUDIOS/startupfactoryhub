@@ -752,6 +752,19 @@ html:not(.dark) .matrix-admin input, html:not(.dark) .matrix-admin textarea, htm
   animation: none !important;
 }
 
+/* Partner logo ticker — exempt from calm mode (founder order 2026-11-09):
+   the scrolling partner strip at the foot of brochure page 2 is content,
+   not decoration, and must keep scrolling on phones. The keyframes live
+   here so the animation exists even if a page's own <style> copy is not
+   mounted in the stacked view. */
+@keyframes partners-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.brochure-calm [style*="partners-scroll"] {
+  animation: partners-scroll 60s linear infinite !important;
+}
+
 /* Social feed windowing (2026-10-29): off-screen post cards skip layout
    and paint, and the browser may release their decoded banner/image
    memory. Without this, paging through the feed mounted dozens of
