@@ -1764,10 +1764,10 @@ export default function AcceleratorBrochure() {
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
-                            className="relative overflow-hidden min-h-0 flex flex-col bg-white"
+                            className="relative overflow-hidden min-h-0 flex bg-white"
                             style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
-                            <div className="relative flex-1 min-h-0">
+                            <div className="relative shrink-0" style={{ width: '38%' }}>
                               <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
                               {e.logo && (
                                 <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
@@ -1775,16 +1775,16 @@ export default function AcceleratorBrochure() {
                                 </div>
                               )}
                             </div>
-                            <div className="shrink-0 px-4 pt-3 pb-4">
+                            <div className="flex-1 min-w-0 flex flex-col justify-center px-4 py-3">
                               <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
                               <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
                               <h4
                                 className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
-                                style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                                style={{ fontSize: '18px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                               >
                                 {e.title}
                               </h4>
-                              <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
+                              <p className="text-[13px] leading-[1.4] text-slate-700 font-light mt-1">{e.desc}</p>
                             </div>
                           </motion.div>
                         ))}
