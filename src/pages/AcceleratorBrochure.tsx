@@ -1775,16 +1775,17 @@ export default function AcceleratorBrochure() {
                               </div>
                             )}
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
-                              <div className="absolute inset-x-0 bottom-0 top-[38%] -z-0 bg-white/80 backdrop-blur-[3px]" />
-                              <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
-                              <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
-                              <h4
-                                className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
-                                style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-                              >
-                                {e.title}
-                              </h4>
-                              <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
+                              <div className="bg-white/85 backdrop-blur-[2px] px-3 py-2.5 -mx-1">
+                                <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
+                                <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                                <h4
+                                  className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
+                                  style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                                >
+                                  {e.title}
+                                </h4>
+                                <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
+                              </div>
                             </div>
                           </motion.div>
                         ))}
