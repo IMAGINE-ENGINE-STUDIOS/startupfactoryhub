@@ -1764,28 +1764,27 @@ export default function AcceleratorBrochure() {
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
-                            className="relative overflow-hidden min-h-0"
+                            className="relative overflow-hidden min-h-0 flex flex-col bg-white"
                             style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
-                            <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.93) 56%, rgba(255,255,255,0.98) 100%)' }} />
-                            {e.logo && (
-                              <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
-                                <img loading="lazy" decoding="async" src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
-                              </div>
-                            )}
-                            <div className="relative z-10 h-full flex flex-col justify-end p-4">
-                              <div className="bg-white/85 backdrop-blur-[2px] px-3 py-2.5 -mx-1">
-                                <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
-                                <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
-                                <h4
-                                  className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
-                                  style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-                                >
-                                  {e.title}
-                                </h4>
-                                <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
-                              </div>
+                            <div className="relative flex-1 min-h-0">
+                              <img loading="lazy" decoding="async" src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
+                              {e.logo && (
+                                <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
+                                  <img loading="lazy" decoding="async" src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="shrink-0 px-4 pt-3 pb-4">
+                              <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
+                              <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h4
+                                className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
+                                style={{ fontSize: '19px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                              >
+                                {e.title}
+                              </h4>
+                              <p className="text-[14px] leading-[1.45] text-slate-700 font-light mt-1">{e.desc}</p>
                             </div>
                           </motion.div>
                         ))}
