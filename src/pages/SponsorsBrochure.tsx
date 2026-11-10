@@ -218,7 +218,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 16</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 20</div>
     </div>
 
     {/* bottom hud bar */}
@@ -1000,7 +1000,7 @@ const SpaceHud = ({ code, label, page, accent }: { code: string; label: string; 
         SP // {code}
       </span>
       <span className="text-white/45">{label}</span>
-      <span style={{ color: accent }}>P/{page} · 16</span>
+      <span style={{ color: accent }}>P/{page} · 20</span>
     </div>
     <div className="absolute bottom-6 left-10 right-10 z-30 flex items-center justify-between font-mono text-[11px] tracking-[0.28em] uppercase">
       <span className="text-white/40">Startup Factory Hub · Sponsorship</span>
@@ -1229,8 +1229,8 @@ const SponsorValuePage = () => (
 /** Shared with the APEX brochure. */
 export const PartnersNasdaqPage = () => (
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} serif />
+                  <PageFrame accent={NEON.lime} code="15" label="GLOBAL VISIBILITY" pageNum={15}>
+                    <PageTitle kicker="15 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} serif />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -1334,8 +1334,8 @@ export const PartnersNasdaqPage = () => (
 
 export const PartnersARPage = () => (
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
-                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} serif />
+                  <PageFrame accent={NEON.magenta} code="14" label="AR · IMMERSIVE" pageNum={14}>
+                    <PageTitle kicker="14 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} serif />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1798,7 +1798,7 @@ export default function SponsorsBrochure() {
                         <span>SEC // 01 · EDITION 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 14</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 20</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -2171,11 +2171,353 @@ export default function SponsorsBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 4 — THE OPPORTUNITY
+                   PAGE 4 — THE EVENTS WE RUN · THE STAGE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="04" label="OPPORTUNITY" pageNum={4}>
+                  <PageFrame accent={NEON.cyan} code="04" label="THE EVENTS WE RUN" pageNum={4}>
+                    <div
+                      className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+                      style={{
+                        top: '-8%',
+                        left: '-6%',
+                        fontSize: '780px',
+                        color: 'rgba(15,23,42,0.035)',
+                        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                      }}
+                    >
+                      04
+                    </div>
+
+                    <div className="relative z-10 flex-1 min-h-0 flex flex-col">
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-start justify-between mb-5"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-px w-16" style={{ background: NEON.cyan }} />
+                          <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                            The Events We Run · The Stage
+                          </span>
+                        </div>
+                        <span
+                          className="text-[44px] font-light tracking-tighter italic"
+                          style={{
+                            fontFamily: "'Orbitron', sans-serif",
+                            color: 'rgba(15,23,42,0.18)',
+                            textDecoration: 'underline',
+                            textDecorationColor: NEON.cyan,
+                            textUnderlineOffset: '8px',
+                          }}
+                        >
+                          P/04
+                        </span>
+                      </motion.div>
+
+                      <motion.h1
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 }}
+                        className="font-futuristic font-extrabold tracking-tight text-slate-900 mb-5"
+                        style={{ fontSize: '46px', lineHeight: 1.04 }}
+                      >
+                        Founders pitch.{' '}
+                        <span
+                          className="font-extrabold"
+                          style={{
+                            background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 60%, ${NEON.lime} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          Investors pitch back.
+                        </span>
+                      </motion.h1>
+
+                      <div className="flex-1 min-h-0 grid grid-rows-2 gap-4">
+                        {[
+                          { kicker: 'Pitch Events · Twice a Month', title: 'Startup Factory Hub Pitch Events', desc: 'Founders from the Startup Factory Hub community pitch live to investors, advisors and fellow builders. Pre-seed and seed startups in AI, software and SaaS present, take questions and meet the room. Two editions every month make this the community\u2019s front door, and the fastest way to see what is being built right now.', meta: ['Thu 5:00–7:00 PM ET', 'Virtual · Inside Startup Factory Hub'], stat: '24', statLabel: 'editions a year', accent: NEON.cyan },
+                          { kicker: 'Reverse Pitch · Monthly', title: 'Decahedron Ventures Reverse Pitch', desc: 'The investors pitch, the founders ask the questions. Decahedron Ventures and guest investors present their mandate, what they are actively looking for and how they work with founders, then take questions live. Early stage founders hear it straight from the capital side, once a month.', meta: ['Tue 4:00–5:30 PM ET', 'Virtual · Inside Startup Factory Hub'], stat: '12', statLabel: 'editions a year', accent: NEON.magenta },
+                        ].map((e, i) => (
+                          <motion.div
+                            key={e.title}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 + i * 0.1, ease: 'easeOut' }}
+                            className="relative overflow-hidden min-h-0 bg-white flex"
+                            style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.35)' }}
+                          >
+                            <div className="w-[6px] shrink-0" style={{ background: `linear-gradient(180deg, ${e.accent}, ${NEON.cyan})` }} />
+                            <div className="flex-1 min-w-0 flex flex-col justify-center p-6">
+                              <span className="text-[12px] font-bold tracking-[0.3em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h3 className="font-futuristic font-extrabold tracking-tight text-slate-900 leading-[1.08] mt-2" style={{ fontSize: '29px' }}>
+                                {e.title}
+                              </h3>
+                              <p className="text-[16px] leading-[1.55] text-slate-600 font-light mt-2">{e.desc}</p>
+                              <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 font-mono text-[11px] tracking-[0.18em] uppercase text-slate-500">
+                                {e.meta.map((m) => (
+                                  <span key={m}>{m}</span>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="shrink-0 self-center pr-7 pl-2 text-right">
+                              <div className="font-futuristic font-extrabold text-slate-900" style={{ fontSize: '36px', lineHeight: 1 }}>{e.stat}</div>
+                              <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-400 mt-1">{e.statLabel}</div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.cyan }}>
+                        <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.cyan }}>
+                          For Sponsors
+                        </span>
+                        <p className="text-slate-900 italic font-medium leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}>
+                          "Your brand in the room at every edition, in the recap and in the follow-up."
+                        </p>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 5 — THE EVENTS WE RUN · THE COMMUNITY
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.magenta} code="05" label="THE EVENTS WE RUN" pageNum={5}>
+                    <div
+                      className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+                      style={{
+                        top: '-8%',
+                        left: '-6%',
+                        fontSize: '780px',
+                        color: 'rgba(15,23,42,0.035)',
+                        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                      }}
+                    >
+                      05
+                    </div>
+
+                    <div className="relative z-10 flex-1 min-h-0 flex flex-col">
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-start justify-between mb-5"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-px w-16" style={{ background: NEON.magenta }} />
+                          <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                            The Events We Run · The Community
+                          </span>
+                        </div>
+                        <span
+                          className="text-[44px] font-light tracking-tighter italic"
+                          style={{
+                            fontFamily: "'Orbitron', sans-serif",
+                            color: 'rgba(15,23,42,0.18)',
+                            textDecoration: 'underline',
+                            textDecorationColor: NEON.magenta,
+                            textUnderlineOffset: '8px',
+                          }}
+                        >
+                          P/05
+                        </span>
+                      </motion.div>
+
+                      <motion.h1
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 }}
+                        className="font-futuristic font-extrabold tracking-tight text-slate-900 mb-5"
+                        style={{ fontSize: '46px', lineHeight: 1.04 }}
+                      >
+                        Where operators{' '}
+                        <span
+                          className="font-extrabold"
+                          style={{
+                            background: `linear-gradient(135deg, ${NEON.magenta} 0%, ${NEON.cyan} 60%, ${NEON.lime} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          and neighbors meet.
+                        </span>
+                      </motion.h1>
+
+                      <div className="flex-1 min-h-0 grid grid-rows-2 gap-4">
+                        {[
+                          { kicker: 'Accelerators Networking · Monthly', title: 'Accelerators Networking', desc: 'A working session for accelerator operators, program managers and the ecosystems that support them. Peers running cohorts share what is working, compare notes and find partners for the next program. One room for the people who run the rooms.', meta: ['Fri 12:00–1:30 PM ET', 'Virtual · Inside Startup Factory Hub'], stat: '12', statLabel: 'editions a year', accent: NEON.cyan },
+                          { kicker: 'Innovation Coffee Table · Monthly · Orlando', title: 'Innovation Coffee Table', desc: 'A small, in person coffee table for founders, builders and operators in Orlando. One table, real conversation about what you are building, what is stuck and what comes next. Deliberately the size of a coffee table, at Foxtail Coffee in Belle Isle, on the last Monday of every month.', meta: ['Last Monday 9:00–10:30 AM ET', 'In person · Foxtail Coffee · Orlando'], stat: '12', statLabel: 'editions a year', accent: NEON.lime },
+                        ].map((e, i) => (
+                          <motion.div
+                            key={e.title}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 + i * 0.1, ease: 'easeOut' }}
+                            className="relative overflow-hidden min-h-0 bg-white flex"
+                            style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.35)' }}
+                          >
+                            <div className="w-[6px] shrink-0" style={{ background: `linear-gradient(180deg, ${e.accent}, ${NEON.magenta})` }} />
+                            <div className="flex-1 min-w-0 flex flex-col justify-center p-6">
+                              <span className="text-[12px] font-bold tracking-[0.3em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h3 className="font-futuristic font-extrabold tracking-tight text-slate-900 leading-[1.08] mt-2" style={{ fontSize: '29px' }}>
+                                {e.title}
+                              </h3>
+                              <p className="text-[16px] leading-[1.55] text-slate-600 font-light mt-2">{e.desc}</p>
+                              <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 font-mono text-[11px] tracking-[0.18em] uppercase text-slate-500">
+                                {e.meta.map((m) => (
+                                  <span key={m}>{m}</span>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="shrink-0 self-center pr-7 pl-2 text-right">
+                              <div className="font-futuristic font-extrabold text-slate-900" style={{ fontSize: '36px', lineHeight: 1 }}>{e.stat}</div>
+                              <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-400 mt-1">{e.statLabel}</div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.magenta }}>
+                        <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.magenta }}>
+                          For Sponsors
+                        </span>
+                        <p className="text-slate-900 italic font-medium leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}>
+                          "Your brand in the room at every edition, in the recap and in the follow-up."
+                        </p>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 6 — THE EVENTS WE RUN · THE FRONTIER
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="06" label="THE EVENTS WE RUN" pageNum={6}>
+                    <div
+                      className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+                      style={{
+                        top: '-8%',
+                        left: '-6%',
+                        fontSize: '780px',
+                        color: 'rgba(15,23,42,0.035)',
+                        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                      }}
+                    >
+                      06
+                    </div>
+
+                    <div className="relative z-10 flex-1 min-h-0 flex flex-col">
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-start justify-between mb-5"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-px w-16" style={{ background: NEON.lime }} />
+                          <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                            The Events We Run · The Frontier
+                          </span>
+                        </div>
+                        <span
+                          className="text-[44px] font-light tracking-tighter italic"
+                          style={{
+                            fontFamily: "'Orbitron', sans-serif",
+                            color: 'rgba(15,23,42,0.18)',
+                            textDecoration: 'underline',
+                            textDecorationColor: NEON.lime,
+                            textUnderlineOffset: '8px',
+                          }}
+                        >
+                          P/06
+                        </span>
+                      </motion.div>
+
+                      <motion.h1
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 }}
+                        className="font-futuristic font-extrabold tracking-tight text-slate-900 mb-5"
+                        style={{ fontSize: '46px', lineHeight: 1.04 }}
+                      >
+                        Deals and discoveries{' '}
+                        <span
+                          className="font-extrabold"
+                          style={{
+                            background: `linear-gradient(135deg, ${NEON.lime} 0%, ${NEON.cyan} 60%, ${NEON.magenta} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          from the frontier.
+                        </span>
+                      </motion.h1>
+
+                      <div className="flex-1 min-h-0 grid grid-rows-2 gap-4">
+                        {[
+                          { kicker: 'Hot Deals in Space Industry · Every Two Months', title: 'Hot Deals in Space Industry', desc: 'A look at the deals moving the space industry: companies raising, partnerships forming and where the momentum is. Presented by Startup Factory Hub with Decahedron Ventures for founders, investors and operators tracking the space economy, every two months.', meta: ['Thu 5:00–6:30 PM ET', 'Virtual · Inside Startup Factory Hub'], stat: '6', statLabel: 'editions a year', accent: NEON.cyan },
+                          { kicker: 'New Series · Research & Development', title: 'Accelerated Research and Technology Development', desc: 'The newest room in the program. Research teams and technology developers present work moving from the lab toward the market: what is proven, what is being built next and what it needs to move faster. Built to connect researchers with the founders, investors and industry partners who carry technology into development.', meta: ['New series', 'Inside Startup Factory Hub'], stat: 'NEW', statLabel: 'series · 2027', accent: NEON.lime },
+                        ].map((e, i) => (
+                          <motion.div
+                            key={e.title}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 + i * 0.1, ease: 'easeOut' }}
+                            className="relative overflow-hidden min-h-0 bg-white flex"
+                            style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.35)' }}
+                          >
+                            <div className="w-[6px] shrink-0" style={{ background: `linear-gradient(180deg, ${e.accent}, ${NEON.lime})` }} />
+                            <div className="flex-1 min-w-0 flex flex-col justify-center p-6">
+                              <span className="text-[12px] font-bold tracking-[0.3em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h3 className="font-futuristic font-extrabold tracking-tight text-slate-900 leading-[1.08] mt-2" style={{ fontSize: '29px' }}>
+                                {e.title}
+                              </h3>
+                              <p className="text-[16px] leading-[1.55] text-slate-600 font-light mt-2">{e.desc}</p>
+                              <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 font-mono text-[11px] tracking-[0.18em] uppercase text-slate-500">
+                                {e.meta.map((m) => (
+                                  <span key={m}>{m}</span>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="shrink-0 self-center pr-7 pl-2 text-right">
+                              <div className="font-futuristic font-extrabold text-slate-900" style={{ fontSize: '36px', lineHeight: 1 }}>{e.stat}</div>
+                              <div className="text-[11px] font-bold tracking-[0.22em] uppercase text-slate-400 mt-1">{e.statLabel}</div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.lime }}>
+                        <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.lime }}>
+                          For Sponsors
+                        </span>
+                        <p className="text-slate-900 italic font-medium leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}>
+                          "Your brand in the room at every edition, in the recap and in the follow-up."
+                        </p>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 7 — THE OPPORTUNITY
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.magenta} code="07" label="OPPORTUNITY" pageNum={7}>
                     {/* ================= EDITORIAL FUTURISTA ================= */}
                     <div
                       className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
@@ -2202,7 +2544,7 @@ export default function SponsorsBrochure() {
                         {/* ---- HEADLINE ROW ---- */}
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
-                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>07 · The Opportunity · Global</div>
                             <h2 className="font-futuristic font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
                               Built Ventures Worldwide.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
@@ -2320,8 +2662,8 @@ export default function SponsorsBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
-                    <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="09" label="SFH CAPABILITIES" pageNum={9}>
+                    <PageTitle kicker="09 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
 
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -2402,8 +2744,8 @@ export default function SponsorsBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="10" label="SFH CONTRIBUTION" pageNum={10}>
+                    <PageTitle kicker="10 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -2482,8 +2824,8 @@ export default function SponsorsBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="08" label="CAPABILITY MATRIX" pageNum={8}>
-                    <PageTitle kicker="08 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="11" label="CAPABILITY MATRIX" pageNum={11}>
+                    <PageTitle kicker="11 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
                   </PageFrame>
@@ -2495,9 +2837,9 @@ export default function SponsorsBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.emerald} code="09" label="ORGANIZATIONAL GROWTH" pageNum={9}>
+                  <PageFrame accent={NEON.emerald} code="12" label="ORGANIZATIONAL GROWTH" pageNum={12}>
                     <PageTitle
-                      kicker="09 · Benefits to Your Organization"
+                      kicker="12 · Benefits to Your Organization"
                       title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
                       accent={NEON.emerald}
                     />
@@ -2514,8 +2856,8 @@ export default function SponsorsBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="10" label="DIGITAL PLATFORM" pageNum={10}>
-                    <PageTitle kicker="10 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
+                  <PageFrame accent={NEON.cyan} code="13" label="DIGITAL PLATFORM" pageNum={13}>
+                    <PageTitle kicker="13 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
 
                     <DigitalPlatformDemo />
 
@@ -2562,7 +2904,7 @@ export default function SponsorsBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="SP-05" label="BECOME A SPONSOR" pageNum={13}>
+                  <PageFrame accent={NEON.cyan} code="SP-05" label="BECOME A SPONSOR" pageNum={16}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
