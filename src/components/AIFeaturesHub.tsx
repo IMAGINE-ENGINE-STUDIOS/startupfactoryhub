@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { PERKS, type Perk } from "@/config/perks";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { Button } from "@/components/ui/button";
@@ -9,18 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import AISummaryCard from "./AISummaryCard";
-import AITranslator from "./AITranslator";
-import TaskAutomation from "./TaskAutomation";
 import SFHImageCreator from "./SFHImageCreator";
-import SentimentAnalyzer from "./SentimentAnalyzer";
-import DocumentAnalyzer from "./DocumentAnalyzer";
 import CRMBoard from "./CRMBoard";
-import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
-import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
-import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import {
   FileText,
   TrendingUp,
@@ -39,6 +30,7 @@ import {
   ChevronDown,
   Pin,
   RotateCcw,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,14 +93,9 @@ function useExpanded(storageKey: string) {
 }
 
 type ToolId =
-  | "lightpaper"
-  | "crm"
   | "image-creator"
-  | "summary"
-  | "sentiment"
-  | "translate"
-  | "document"
-  | "automation";
+  | "brochure-studio"
+  | "crm";
 
 interface DeskTool {
   id: ToolId;
@@ -123,21 +110,6 @@ interface DeskTool {
 }
 
 const TOOLS: DeskTool[] = [
-  {
-    id: "lightpaper",
-    title: "LightPaper Workspace",
-    tagline: "Docs · Sheets · Slides — one elegant surface.",
-    capabilities: [
-      "Write structured documents",
-      "Crunch numbers in spreadsheets",
-      "Build presentation decks",
-    ],
-    icon: FileText,
-    accent: "from-primary via-emerald-400 to-teal-500",
-    glow: "hsl(var(--primary))",
-    badge: "Productivity",
-    size: "lg",
-  },
   {
     id: "crm",
     title: "CRM Board",
@@ -169,62 +141,25 @@ const TOOLS: DeskTool[] = [
     size: "md",
   },
   {
-    id: "summary",
-    title: "Smart Summary",
-    tagline: "Long content → sharp takeaways in seconds.",
-    capabilities: ["Article condensing", "Meeting notes", "Insight extraction"],
-    icon: FileText,
-    accent: "from-violet-500 to-indigo-600",
-    glow: "hsl(260 80% 65%)",
-    size: "sm",
-  },
-  {
-    id: "sentiment",
-    title: "Sentiment Analysis",
-    tagline: "Read the room across reviews and feedback.",
-    capabilities: ["Emotion scoring", "Trend signals", "Bulk analysis"],
-    icon: TrendingUp,
-    accent: "from-emerald-500 to-teal-600",
-    glow: "hsl(160 80% 45%)",
-    size: "sm",
-  },
-  {
-    id: "translate",
-    title: "AI Translator",
-    tagline: "Speak to the world in 50+ languages.",
-    capabilities: ["Context-aware translation", "Tone preservation", "Bulk text"],
-    icon: Languages,
-    accent: "from-orange-500 to-amber-600",
-    glow: "hsl(30 90% 55%)",
-    size: "sm",
-  },
-  {
-    id: "document",
-    title: "Document Analysis",
-    tagline: "Pull insights out of any PDF or image.",
-    capabilities: ["OCR & extraction", "Smart Q&A", "Key data points"],
-    icon: ImageIcon,
-    accent: "from-pink-500 to-rose-600",
-    glow: "hsl(340 82% 60%)",
-    size: "sm",
-  },
-  {
-    id: "automation",
-    title: "Task Automation",
-    tagline: "Wire up repetitive work into flows.",
-    capabilities: ["Trigger → action chains", "No-code editor", "Scheduled runs"],
-    icon: Workflow,
-    accent: "from-cyan-500 to-blue-600",
-    glow: "hsl(200 85% 55%)",
-    size: "sm",
+    id: "brochure-studio",
+    title: "Brochure Studio",
+    tagline: "Design brochures & decks that sell.",
+    capabilities: [
+      "Start from the SFH brochure templates",
+      "Edit pages live — text, images, layouts",
+      "Publish & share your brochure anywhere",
+    ],
+    icon: BookOpen,
+    accent: "from-amber-500 via-orange-500 to-red-500",
+    glow: "hsl(25 90% 55%)",
+    badge: "Marketing",
+    size: "lg",
   },
 ];
 
 export default function AIFeaturesHub() {
+  const navigate = useNavigate();
   const [openTool, setOpenTool] = useState<ToolId | null>(null);
-  const [lightPaperTab, setLightPaperTab] = useState("document");
-  const [summaryText, setSummaryText] = useState("");
-  const [translationText, setTranslationText] = useState("");
 
   // Persistent ordering / expansion
   const toolsOrderHook = useOrderedList<ToolId>(
@@ -311,7 +246,7 @@ export default function AIFeaturesHub() {
             tool={tool}
             expanded={toolsExpand.expanded.has(tool.id)}
             isDragging={dragTool === tool.id}
-            onOpen={() => setOpenTool(tool.id)}
+            onOpen={() => (tool.id === "brochure-studio" ? navigate("/forpartners") : setOpenTool(tool.id))}
             onToggleExpand={() => toolsExpand.toggle(tool.id)}
             onPinTop={() => toolsOrderHook.pinTop(tool.id)}
             onDragStart={() => setDragTool(tool.id)}
@@ -321,58 +256,6 @@ export default function AIFeaturesHub() {
         ))}
       </div>
 
-
-      {/* ── LightPaper fullscreen ─────────────────────────────── */}
-      <Dialog open={openTool === "lightpaper"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <DialogTitle className="text-lg sm:text-xl">LightPaper Workspace</DialogTitle>
-                  <DialogDescription className="text-sm">
-                    Documents, spreadsheets, and presentations
-                  </DialogDescription>
-                </div>
-              </div>
-              <div className="flex border rounded-lg p-1 bg-muted/30">
-                {([
-                  ["document", FileText, "Document"],
-                  ["spreadsheet", Table, "Spreadsheet"],
-                  ["presentation", Presentation, "Presentation"],
-                ] as const).map(([key, Icon, title]) => (
-                  <Button
-                    key={key}
-                    variant={lightPaperTab === key ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setLightPaperTab(key)}
-                    title={title}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </DialogHeader>
-          <div className="flex-1 overflow-auto">
-            <Tabs value={lightPaperTab} onValueChange={setLightPaperTab} className="w-full h-full">
-              <TabsContent value="document" className="mt-0 h-full">
-                <LightPaperDocument selectedProject={null} />
-              </TabsContent>
-              <TabsContent value="spreadsheet" className="mt-0 h-full">
-                <LightPaperSpreadsheet />
-              </TabsContent>
-              <TabsContent value="presentation" className="mt-0 h-full">
-                <LightPaperPresentation />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* ── CRM fullscreen ─────────────────────────────────────── */}
       <Dialog open={openTool === "crm"} onOpenChange={(o) => !o && close()}>
@@ -411,98 +294,6 @@ export default function AIFeaturesHub() {
           <div className="flex-1 min-h-0 overflow-hidden">
             <SFHImageCreator />
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Summary ─────────────────────────────────────────── */}
-      <Dialog open={openTool === "summary"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-violet-400" /> Smart Summaries
-            </DialogTitle>
-            <DialogDescription>Condense long content into key takeaways</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Text to summarize</label>
-            <Textarea
-              placeholder="Paste a long article or transcript…"
-              value={summaryText}
-              onChange={(e) => setSummaryText(e.target.value)}
-              rows={8}
-              className="resize-none"
-            />
-            {summaryText && (
-              <AISummaryCard
-                text={summaryText}
-                sourceType="demo"
-                sourceId={crypto.randomUUID()}
-                title="Summary"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Sentiment ───────────────────────────────────────── */}
-      <Dialog open={openTool === "sentiment"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-emerald-400" /> Sentiment Analysis
-            </DialogTitle>
-            <DialogDescription>Understand feedback at scale</DialogDescription>
-          </DialogHeader>
-          <SentimentAnalyzer />
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Translator ─────────────────────────────────────── */}
-      <Dialog open={openTool === "translate"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Languages className="h-5 w-5 text-orange-400" /> AI Translator
-            </DialogTitle>
-            <DialogDescription>Communicate globally with instant translations</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <label className="text-sm font-medium">Text to translate</label>
-            <Textarea
-              placeholder="Enter text in any language…"
-              value={translationText}
-              onChange={(e) => setTranslationText(e.target.value)}
-              rows={8}
-              className="resize-none"
-            />
-            {translationText && <AITranslator text={translationText} />}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Document ───────────────────────────────────────── */}
-      <Dialog open={openTool === "document"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-pink-400" /> Document Analysis
-            </DialogTitle>
-            <DialogDescription>Extract insights from images and documents</DialogDescription>
-          </DialogHeader>
-          <DocumentAnalyzer />
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Automation ────────────────────────────────────── */}
-      <Dialog open={openTool === "automation"} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Workflow className="h-5 w-5 text-cyan-400" /> Task Automation
-            </DialogTitle>
-            <DialogDescription>Automate workflows and repetitive tasks</DialogDescription>
-          </DialogHeader>
-          <TaskAutomation />
         </DialogContent>
       </Dialog>
 
