@@ -11,7 +11,7 @@ import { useBrochureLiveBridge } from '@/lib/brochureLive';
 import type { BrochureDoc, PageRef } from '@/components/brochure-studio/types';
 
 const Page = forwardRef<HTMLDivElement, { n: number; src?: string }>(({ n, src }, ref) => (
-  <div ref={ref} className="overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.25), transparent 60%), linear-gradient(180deg,#0b1220,#111a2e)' }}>
+  <div ref={ref} className="overflow-hidden" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.38), transparent 62%), linear-gradient(180deg,#16233f,#101a30)', boxShadow: '0 24px 70px rgba(0,0,0,0.65), 0 0 0 1.5px rgba(165,180,205,0.55), inset 0 0 0 1px rgba(255,255,255,0.05)' }}>
     <div data-bp-root={n} className="relative w-full h-full">
       {src && <iframe title={`Page ${n + 1}`} src={src} className="absolute inset-0 w-full h-full border-0" />}
       <div className="absolute bottom-4 right-5 font-mono text-[11px] tracking-[0.2em]" style={{ color: '#64748b' }}>P/{String(n + 1).padStart(2, '0')}</div>
@@ -50,7 +50,7 @@ export default function StudioBrochure() {
   const { reportPage } = useBrochureLiveBridge(bookRef);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center py-6" style={{ background: 'linear-gradient(180deg,#060a14,#0b1220)' }}>
+    <div className="min-h-screen w-full flex items-center justify-center py-6" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 42%, #131f38 0%, #060a14 72%)' }}>
       {/* @ts-expect-error react-pageflip typing requires every prop */}
       <HTMLFlipBook ref={bookRef} onFlip={(e: any) => reportPage(e.data)} key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
         {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
