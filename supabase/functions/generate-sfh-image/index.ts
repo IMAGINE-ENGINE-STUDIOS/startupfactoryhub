@@ -8,8 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FREE_LIMIT = 10;
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,47 +33,39 @@ serve(async (req) => {
       throw new Error("Prompt is required");
     }
 
-    // Check usage count
-    const { count, error: countError } = await supabaseAdmin
+    // Global Credit: every AI action on the platform draws from the same
+    // wallet — 1 Credit per generation, admins 0. image_generation_usage
+    // remains as the internal usage ledger only.
+    const { count } = await supabaseAdmin
       .from("image_generation_usage")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id);
-
-    if (countError) throw new Error("Failed to check usage: " + countError.message);
     const usageCount = count ?? 0;
 
-    // If over free limit, check membership
-    if (usageCount >= FREE_LIMIT) {
-      // Platform owner bypass
-      const PLATFORM_OWNER_EMAILS = ["ceo@imagineengine.space"];
-      const isOwner = PLATFORM_OWNER_EMAILS.includes(user.email?.toLowerCase() ?? "");
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles").select("role")
+      .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    const isAdmin = !!roleRow;
 
-      if (!isOwner) {
-        // Check membership via internal call
-        const membershipResp = await fetch(
-          `${Deno.env.get("SUPABASE_URL")}/functions/v1/check-membership`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: authHeader,
-              "Content-Type": "application/json",
-              apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-            },
-          }
+    const { data: bal } = await supabaseAdmin.rpc("ai_credits_sync", { _user_id: user.id });
+    let creditBalance = Number(bal ?? 0);
+    if (!isAdmin) {
+      const { data: nb, error: consumeError } = await supabaseAdmin.rpc("ai_credits_consume", {
+        _user_id: user.id, _amount: 1, _reason: "image:generate",
+      });
+      if (consumeError) throw new Error("Credit check failed: " + consumeError.message);
+      if (Number(nb) < 0) {
+        return new Response(
+          JSON.stringify({
+            error: "limit_reached",
+            message: "You're out of Global Credits. Top up or upgrade your plan to keep creating.",
+            usageCount,
+            credits: 0,
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
-        const membershipData = await membershipResp.json();
-        if (!membershipData.subscribed) {
-          return new Response(
-            JSON.stringify({
-              error: "limit_reached",
-              message: "Free image limit reached. Subscribe to continue generating images.",
-              usageCount,
-              limit: FREE_LIMIT,
-            }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
       }
+      creditBalance = Number(nb);
     }
 
     // Build the full prompt with style
@@ -184,7 +174,7 @@ serve(async (req) => {
       JSON.stringify({
         imageUrl,
         usageCount: usageCount + 1,
-        limit: FREE_LIMIT,
+        credits: creditBalance,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

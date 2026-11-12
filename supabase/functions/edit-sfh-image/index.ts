@@ -32,6 +32,32 @@ serve(async (req) => {
       throw new Error("Edit prompt and image URL are required");
     }
 
+    // Global Credit: same wallet as every AI action — 1 Credit per edit,
+    // admins 0 (matches generate-sfh-image and imagine-ai).
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles").select("role")
+      .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    const isAdmin = !!roleRow;
+    const { data: bal } = await supabaseAdmin.rpc("ai_credits_sync", { _user_id: user.id });
+    let creditBalance = Number(bal ?? 0);
+    if (!isAdmin) {
+      const { data: nb, error: consumeError } = await supabaseAdmin.rpc("ai_credits_consume", {
+        _user_id: user.id, _amount: 1, _reason: "image:edit",
+      });
+      if (consumeError) throw new Error("Credit check failed: " + consumeError.message);
+      if (Number(nb) < 0) {
+        return new Response(
+          JSON.stringify({
+            error: "limit_reached",
+            message: "You're out of Global Credits. Top up or upgrade your plan to keep creating.",
+            credits: 0,
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      creditBalance = Number(nb);
+    }
+
     const AI_KEYS = aiKeysConfigured();
     if (!AI_KEYS) throw new Error("AI provider keys are not configured");
 
@@ -114,7 +140,7 @@ serve(async (req) => {
     });
 
     return new Response(
-      JSON.stringify({ imageUrl: editedImageUrl }),
+      JSON.stringify({ imageUrl: editedImageUrl, credits: creditBalance }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

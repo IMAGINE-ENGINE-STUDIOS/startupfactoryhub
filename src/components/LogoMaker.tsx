@@ -208,11 +208,11 @@ export default function LogoMaker() {
           {limitHit && (
             <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm flex gap-2">
               <Crown className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <span>You've reached the image generation limit on your current plan. <a href="/memberships" className="underline font-medium">Upgrade for more generations</a>.</span>
+              <span>You're out of Global Credits — each concept costs 1 Credit, like every AI action on the platform. <a href="/memberships" className="underline font-medium">Top up or upgrade</a>.</span>
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Concepts are generated with the Imaginaly engine. Download your favorite, or refine it with a plain-language instruction.
+            Concepts are generated with the Imaginaly engine at 1 Global Credit each. Download your favorite, or refine it with a plain-language instruction.
           </p>
         </div>
 

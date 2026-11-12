@@ -13,8 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 
-const FREE_LIMIT = 10;
-
 const STYLE_PRESETS = [
   { id: "none", label: "Auto", emoji: "✨" },
   { id: "photorealistic", label: "Photo", emoji: "📷" },
@@ -62,23 +60,11 @@ const SFHImageCreator = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [history, setHistory] = useState<GeneratedImage[]>([]);
-  const [usageCount, setUsageCount] = useState<number | null>(null);
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [editPrompt, setEditPrompt] = useState("");
   const [showEditPanel, setShowEditPanel] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    const fetchUsage = async () => {
-      const { count } = await supabase
-        .from("image_generation_usage" as any)
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
-      setUsageCount(count ?? 0);
-    };
-    fetchUsage();
-  }, [user]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -116,7 +102,7 @@ const SFHImageCreator = () => {
       if (data?.error) throw new Error(data.error);
 
       setGeneratedImage(data.imageUrl);
-      setUsageCount(data.usageCount);
+      if (typeof data.credits === "number") setCreditBalance(data.credits);
       setHistory((prev) => [
         { url: data.imageUrl, prompt: prompt.trim(), style: stylePreset, timestamp: Date.now() },
         ...prev,
@@ -149,7 +135,12 @@ const SFHImageCreator = () => {
       });
 
       if (error) throw new Error(typeof error === "object" && error.message ? error.message : String(error));
+      if (data?.error === "limit_reached") {
+        setShowUpgradeModal(true);
+        return;
+      }
       if (data?.error) throw new Error(data.error);
+      if (typeof data.credits === "number") setCreditBalance(data.credits);
 
       setGeneratedImage(data.imageUrl);
       setHistory((prev) => [
@@ -207,11 +198,7 @@ const SFHImageCreator = () => {
     reader.readAsDataURL(file);
   };
 
-  const usageLabel = isSubscribed
-    ? "Unlimited"
-    : usageCount !== null
-      ? `${usageCount}/${FREE_LIMIT} free`
-      : "...";
+  const usageLabel = creditBalance !== null ? `${creditBalance} Credits` : "1 Credit / image";
 
   const activeImage = generatedImage || uploadedImage;
 
@@ -446,16 +433,16 @@ const SFHImageCreator = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-primary" />
-              Free Limit Reached
+              You're out of Credits
             </DialogTitle>
             <DialogDescription>
-              You've used all {FREE_LIMIT} free image generations. Subscribe to the Community plan ($350/mo) or higher for unlimited access.
+              Every AI action on the platform costs 1 Global Credit — images included. Your plan refills Credits every month, or you can buy more whenever you need them.
             </DialogDescription>
           </DialogHeader>
           <Button
             onClick={() => {
               setShowUpgradeModal(false);
-              window.location.href = "/membership";
+              window.location.href = "/memberships";
             }}
             className="w-full mt-2"
           >
