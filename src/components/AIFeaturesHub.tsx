@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import SFHImageCreator from "./SFHImageCreator";
 import CRMBoard from "./CRMBoard";
+import LogoMaker from "./LogoMaker";
 import {
   FileText,
   TrendingUp,
@@ -31,6 +32,7 @@ import {
   Pin,
   RotateCcw,
   BookOpen,
+  PenTool,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -95,6 +97,7 @@ function useExpanded(storageKey: string) {
 type ToolId =
   | "image-creator"
   | "brochure-studio"
+  | "logo-maker"
   | "crm";
 
 interface DeskTool {
@@ -110,6 +113,21 @@ interface DeskTool {
 }
 
 const TOOLS: DeskTool[] = [
+  {
+    id: "logo-maker",
+    title: "Logo Maker",
+    tagline: "A real logo for your startup in minutes.",
+    capabilities: [
+      "Four concepts from a short brief",
+      "Styles & palettes for your brand",
+      "Refine in plain language, download instantly",
+    ],
+    icon: PenTool,
+    accent: "from-violet-500 via-purple-500 to-fuchsia-500",
+    glow: "hsl(275 80% 60%)",
+    badge: "Branding",
+    size: "lg",
+  },
   {
     id: "crm",
     title: "CRM Board",
@@ -256,6 +274,24 @@ export default function AIFeaturesHub() {
         ))}
       </div>
 
+
+      {/* ── Logo Maker fullscreen ──────────────────────────── */}
+      <Dialog open={openTool === "logo-maker"} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <PenTool className="h-5 w-5 text-violet-400" />
+              Logo Maker
+            </DialogTitle>
+            <DialogDescription>
+              Describe your business — get four logo concepts, refine the best one, download it.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <LogoMaker />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ── CRM fullscreen ─────────────────────────────────────── */}
       <Dialog open={openTool === "crm"} onOpenChange={(o) => !o && close()}>
