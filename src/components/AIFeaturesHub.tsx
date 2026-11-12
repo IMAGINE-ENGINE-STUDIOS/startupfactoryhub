@@ -13,6 +13,7 @@ import {
 import SFHImageCreator from "./SFHImageCreator";
 import CRMBoard from "./CRMBoard";
 import LogoMaker from "./LogoMaker";
+import VideoMaker from "./VideoMaker";
 import {
   FileText,
   TrendingUp,
@@ -33,6 +34,7 @@ import {
   RotateCcw,
   BookOpen,
   PenTool,
+  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -98,6 +100,7 @@ type ToolId =
   | "image-creator"
   | "brochure-studio"
   | "logo-maker"
+  | "video-maker"
   | "crm";
 
 interface DeskTool {
@@ -126,6 +129,21 @@ const TOOLS: DeskTool[] = [
     accent: "from-violet-500 via-purple-500 to-fuchsia-500",
     glow: "hsl(275 80% 60%)",
     badge: "Branding",
+    size: "lg",
+  },
+  {
+    id: "video-maker",
+    title: "Video Maker",
+    tagline: "A polished promo video in nine seconds flat.",
+    capabilities: [
+      "Animated brand reveal, headline & call to action",
+      "Your logo, colors and backdrop image",
+      "Square, landscape or vertical — rendered in-browser",
+    ],
+    icon: Clapperboard,
+    accent: "from-rose-500 via-red-500 to-orange-500",
+    glow: "hsl(10 85% 58%)",
+    badge: "Marketing",
     size: "lg",
   },
   {
@@ -289,6 +307,24 @@ export default function AIFeaturesHub() {
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
             <LogoMaker />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Video Maker fullscreen ─────────────────────────── */}
+      <Dialog open={openTool === "video-maker"} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Clapperboard className="h-5 w-5 text-rose-400" />
+              Video Maker
+            </DialogTitle>
+            <DialogDescription>
+              Script a 9-second promo — brand reveal, headline, call to action — and render it right here.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <VideoMaker />
           </div>
         </DialogContent>
       </Dialog>
