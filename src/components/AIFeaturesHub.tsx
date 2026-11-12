@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { PERKS, type Perk } from "@/config/perks";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import SFHImageCreator from "./SFHImageCreator";
 import CRMBoard from "./CRMBoard";
 import LogoMaker from "./LogoMaker";
 import VideoMaker from "./VideoMaker";
+import BrochureCreator from "./BrochureCreator";
 import {
   FileText,
   TrendingUp,
@@ -194,7 +194,6 @@ const TOOLS: DeskTool[] = [
 ];
 
 export default function AIFeaturesHub() {
-  const navigate = useNavigate();
   const [openTool, setOpenTool] = useState<ToolId | null>(null);
 
   // Persistent ordering / expansion
@@ -282,7 +281,7 @@ export default function AIFeaturesHub() {
             tool={tool}
             expanded={toolsExpand.expanded.has(tool.id)}
             isDragging={dragTool === tool.id}
-            onOpen={() => (tool.id === "brochure-studio" ? navigate("/forpartners") : setOpenTool(tool.id))}
+            onOpen={() => setOpenTool(tool.id)}
             onToggleExpand={() => toolsExpand.toggle(tool.id)}
             onPinTop={() => toolsOrderHook.pinTop(tool.id)}
             onDragStart={() => setDragTool(tool.id)}
@@ -292,6 +291,24 @@ export default function AIFeaturesHub() {
         ))}
       </div>
 
+
+      {/* ── Brochure Studio (creator) ──────────────────────── */}
+      <Dialog open={openTool === "brochure-studio"} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-amber-400" />
+              Brochure Studio
+            </DialogTitle>
+            <DialogDescription>
+              Create your own brochure — design it in the Studio, publish it, share the link.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <BrochureCreator />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Logo Maker fullscreen ──────────────────────────── */}
       <Dialog open={openTool === "logo-maker"} onOpenChange={(o) => !o && close()}>

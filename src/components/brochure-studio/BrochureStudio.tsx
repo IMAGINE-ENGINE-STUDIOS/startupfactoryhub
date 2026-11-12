@@ -101,6 +101,15 @@ function StudioEditor() {
   const slug = useMemo(() => slugFromPath(pathname), [pathname]);
   const { role } = useUserRole();
   const isAdmin = role === 'admin';
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    let off = false;
+    supabase.auth.getUser().then(({ data }) => { if (!off) setUserId(data.user?.id ?? null); });
+    return () => { off = true; };
+  }, []);
+  // Admins edit every brochure; signed-in owners edit their own Studio
+  // brochures (/b/:slug) — the publish function enforces ownership.
+  const canEdit = isAdmin || (!!userId && slug.startsWith('b-'));
 
   const [roots, setRoots] = useState<HTMLElement[]>([]);
   const [doc, setDoc] = useState<BrochureDoc>(EMPTY_DOC);
@@ -143,11 +152,11 @@ function StudioEditor() {
     fetchPublished(slug).then((pub) => {
       if (off) return;
       let d = pub;
-      if (isAdmin) { try { const s = localStorage.getItem(draftKey(slug)); if (s) d = normalizeDoc(JSON.parse(s)); } catch { /* ignore */ } }
+      if (canEdit) { try { const s = localStorage.getItem(draftKey(slug)); if (s) d = normalizeDoc(JSON.parse(s)); } catch { /* ignore */ } }
       setDoc(d);
     });
     return () => { off = true; };
-  }, [slug, isAdmin]);
+  }, [slug, canEdit]);
 
   useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
   useEffect(() => { if (active) { const t = setTimeout(() => { applyEdits(doc); applyFills(doc); }, 30); return () => clearTimeout(t); } }, [doc, roots, active]);
@@ -389,7 +398,7 @@ function StudioEditor() {
     const pg = pageOf(root, roots);
     const bg = doc.bgs[String(pg)] || doc.bgs.all;
     const items = doc.items.filter((i) => i.page === pg);
-    const plus = editing && isAdmin && isCustomSlug;
+    const plus = editing && canEdit && isCustomSlug;
     if (!bg && !items.length && !plus) return null;
     return createPortal(
       <>
@@ -408,7 +417,7 @@ function StudioEditor() {
   }) : null;
 
   if (!active) return null;
-  if (!isAdmin) return <>{portals}<ReaderBar roots={roots} /></>;
+  if (!canEdit) return <>{portals}<ReaderBar roots={roots} /></>;
 
   /* ---- inspector data ---- */
   const selEl = (() => {

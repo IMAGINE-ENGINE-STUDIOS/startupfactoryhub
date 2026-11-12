@@ -1,4 +1,6 @@
-// Brochure publishing (admin only). Credits: Imagine Engine Studios Corp.
+// Brochure publishing. Admins publish anything; signed-in owners publish
+// their own Studio brochures (b-* slugs, ownership recorded in the doc).
+// Credits: Imagine Engine Studios Corp.
 // action "asset": signed upload URL for an image; default: write brochures/<slug>.json (public).
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -16,9 +18,26 @@ Deno.serve(async (req) => {
     const user = u?.user;
     if (!user) return json({ error: "Sign in first" }, 401);
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    if (!isAdmin) return json({ error: "Only admins can edit brochures" }, 403);
 
     const body = await req.json().catch(() => ({}));
+
+    if (!isAdmin) {
+      // Owners may publish only their own Studio brochures (slugs b-*):
+      // a published doc records its owner in `by`, and only that owner
+      // (or an admin) may overwrite it or add assets under it.
+      const action = String(body.action || "");
+      const slugRaw = String(body.slug || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 60);
+      if (action === "list" || action === "models" || !/^b-[a-z0-9_-]+$/.test(slugRaw)) {
+        return json({ error: "Only admins can edit brochures" }, 403);
+      }
+      const { data: existing } = await admin.storage.from(BUCKET).download(`brochures/${slugRaw}.json`);
+      if (existing) {
+        try {
+          const prev = JSON.parse(await existing.text());
+          if (prev?.by && prev.by !== user.id) return json({ error: "That brochure belongs to another account" }, 403);
+        } catch { /* unreadable doc: treat as unowned */ }
+      }
+    }
 
     // Every published brochure in the studio bucket (admin picker feed for
     // the live rooms). Runs before the slug check: listing needs no slug.
