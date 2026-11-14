@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // Credits: Imagine Engine Studios Corp.
-import { readCompletion, continuation, buildComplete, resumeMessages } from "./stream.ts";
+import { readCompletion, continuation, buildComplete, resumeMessages, missingParts, missingMessages } from "./stream.ts";
 import { costUsd, type Tier } from "../_shared/ai.ts";
 import { configuredChat, PROVIDERS, validCustom, validateSelection, type CustomProvider } from "./providers.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.118.0/cors";
@@ -337,15 +337,29 @@ No invented production records: use empty states unless the user supplied data. 
     const BUILD_MAX_PARTS = 24;
     const isBuild = body.mode !== "chat" && !light;
     const MAX_PARTS = isBuild ? BUILD_MAX_PARTS : 4;
+    // Completeness gate (2026-11-14): a structurally whole build that
+    // still owes a NEW folder app its root file — or a module one of its
+    // files imports — is not finished. The loop continues for exactly the
+    // missing files (missingParts/missingMessages in stream.ts), inside
+    // the same BUILD_MAX_PARTS / BUILD_OUTPUT_BUDGET bounds, so a build
+    // that never completes still ends in the honest errors below.
+    // knownPaths = names only from the file context the client sent.
+    const knownPaths = (body.context?.files || []).map((f: any) => f.name).filter((n: any) => typeof n === "string");
+    let pendingMissing: string[] = [];
     for (let part = 0; part < MAX_PARTS; part++) {
-      emit({ type: "status", message: part ? "Continuing the remaining files..." : "Working on your project..." });
-      routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
+      emit({ type: "status", message: part ? (pendingMissing.length ? "Adding the missing files..." : "Continuing the remaining files...") : "Working on your project..." });
+      routed = await configuredChat(tier, { messages: part ? (pendingMissing.length ? missingMessages(baseMessages, text, pendingMissing) : resumeMessages(baseMessages, text)) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
       if (!routed.resp.ok) throw new Error(routed.resp.status === 429 ? "Genius is at capacity right now; please try again shortly" : "Something went wrong while building; please try again");
       const completion = await readCompletion(routed.resp, (delta) => { text += delta; emit({ type: "delta", text: delta }); });
       inTok += completion.input; outTok += completion.output;
       accumulatedCost += costUsd(routed.model, completion.input, completion.output);
-      if (isBuild ? buildComplete(text, completion.finish) : !continuation(text, completion.finish)) break;
-      if (isBuild && outTok >= BUILD_OUTPUT_BUDGET) throw new Error("The build hit its size budget before finishing; completed files were kept and unfinished files were not saved. Continue with a smaller next phase");
+      if (!isBuild) { if (!continuation(text, completion.finish)) break; }
+      else {
+        const whole = buildComplete(text, completion.finish);
+        pendingMissing = whole ? missingParts(text, knownPaths) : [];
+        if (whole && pendingMissing.length === 0) break;
+        if (outTok >= BUILD_OUTPUT_BUDGET) throw new Error("The build hit its size budget before finishing; completed files were kept and unfinished files were not saved. Continue with a smaller next phase");
+      }
       if (part === MAX_PARTS - 1) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
     }
     if (!routed || !text.trim()) throw new Error("The AI produced no result");

@@ -21,6 +21,8 @@ done
 echo "== 2/3 build protocol tests =="
 if node --test public/imagine-engine/build-protocol.test.cjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"; then :; else echo "  FAIL protocol tests"; fail=1; fi
 node --test public/imagine-engine/build-protocol.test.cjs >/dev/null 2>&1 || fail=1
+if node --test supabase/functions/imagine-ai/stream.test.cjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"; then :; else echo "  FAIL stream tests"; fail=1; fi
+node --test supabase/functions/imagine-ai/stream.test.cjs >/dev/null 2>&1 || fail=1
 
 echo "== 3/3 edge function parse (esbuild) =="
 for f in supabase/functions/imagine-ai/index.ts supabase/functions/imagine-ai/providers.ts supabase/functions/imagine-ai/stream.ts supabase/functions/_shared/ai.ts supabase/functions/call-agents/index.ts; do
