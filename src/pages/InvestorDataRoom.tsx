@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Lock, FileText, Upload, Trash2, UserPlus, Link2, Copy, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMembershipAccess } from "@/features/basic-plan/hooks/useMembershipAccess";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { WEBSITE_PARTNERS } from "@/config/partners";
 import sfhLogo from "@/assets/sfh-main-logo.png.asset.json";
@@ -48,6 +49,9 @@ export default function InvestorDataRoom() {
 /** Data room body; `embedded` renders it inside a profile tab. Credits: Imagine Engine Studios Corp. */
 export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
   const { user } = useAuth();
+  // External share links are for paying members only (founder rule,
+  // 2026-11-14: Members Club $50/mo and up). Admins pass this check.
+  const { isMember } = useMembershipAccess();
   const [isAdmin, setIsAdmin] = useState(false);
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -141,6 +145,7 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
 
   const shareUrl = (token: string) => `${window.location.origin}/data-room/shared/${token}`;
   const createLink = async () => {
+    if (!isMember) return setMsg("External share links are for paying members only (Members Club $50/mo and up).");
     setBusy(true); setMsg("");
     const token = crypto.randomUUID().replaceAll("-", "") + crypto.randomUUID().replaceAll("-", "").slice(0, 8);
     const { error } = await db.from("data_room_links").insert({ token, label: `Shared ${new Date().toLocaleDateString()}`, created_by: user?.id });
@@ -152,6 +157,7 @@ export function DataRoomContent({ embedded = false }: { embedded?: boolean }) {
     void load();
   };
   const copyLink = async (token: string) => {
+    if (!isMember) return setMsg("External share links are for paying members only (Members Club $50/mo and up).");
     try { await navigator.clipboard.writeText(shareUrl(token)); setMsg("Link copied to the clipboard."); }
     catch { setMsg(shareUrl(token)); }
   };

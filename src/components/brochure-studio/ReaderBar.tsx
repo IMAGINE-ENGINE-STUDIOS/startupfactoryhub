@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { Volume2, Pause, Share2, Maximize2, Minimize2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMembershipAccess } from '@/features/basic-plan/hooks/useMembershipAccess';
 
 /** The page that takes up most of the screen right now. */
 const visiblePage = (roots: HTMLElement[]) => {
@@ -22,6 +23,9 @@ const visiblePage = (roots: HTMLElement[]) => {
 export function ReaderBar({ roots }: { roots: HTMLElement[] }) {
   const [speaking, setSpeaking] = useState(false);
   const [full, setFull] = useState(false);
+  // A brochure's share link is for paying members only (founder rule,
+  // 2026-11-14: Members Club $50/mo and up; free accounts don't get one).
+  const { isMember } = useMembershipAccess();
   useEffect(() => {
     const f = () => setFull(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', f);
@@ -47,6 +51,7 @@ export function ReaderBar({ roots }: { roots: HTMLElement[] }) {
     toast.success('Reading this page aloud…');
   };
   const share = async () => {
+    if (!isMember) return toast.error('Share links are for paying members only (Members Club $50/mo and up).');
     const url = location.origin + location.pathname;
     try {
       if (navigator.share) await navigator.share({ title: document.title, url });
