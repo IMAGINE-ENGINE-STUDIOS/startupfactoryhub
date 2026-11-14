@@ -13,9 +13,11 @@
   }
   function appOf(name) {
     if (/^apps\/[^/]+\.(tsx|jsx|html)$/.test(name || "")) return name;
+    if (/^apps\/[^/]+\/(App|index)\.(tsx|jsx|html)$/i.test(name || "")) return name;
     var m = /^apps\/([^/]+)\//.exec(name || ""), f = files();
-    if (m) { var root = f.filter(function (x) { return new RegExp("^apps/" + m[1] + "\\.(tsx|jsx|html)$", "i").test(x.name); })[0]; if (root) return root.name; }
-    return lastApp || (f.filter(function (x) { return /^apps\/[^/]+\.(tsx|jsx|html)$/.test(x.name); })[0] || {}).name || null;
+    if (m) { var root = f.filter(function (x) { return new RegExp("^apps/" + m[1] + "\\.(tsx|jsx|html)$", "i").test(x.name); })[0]; if (root) return root.name;
+      var froot = f.filter(function (x) { return new RegExp("^apps/" + m[1] + "/(App|index)\\.(tsx|jsx|html)$", "i").test(x.name); })[0]; if (froot) return froot.name; }
+    return lastApp || (f.filter(function (x) { return /^apps\/[^/]+\.(tsx|jsx|html)$/.test(x.name); })[0] || f.filter(function (x) { return /^apps\/[^/]+\/(App|index)\.(tsx|jsx|html)$/i.test(x.name); })[0] || {}).name || null;
   }
   function activeName() { var x = ie(), id = x && x.activeFile, f = files().filter(function (y) { return y.id === id; })[0]; return f && f.name; }
   function focusApp() {

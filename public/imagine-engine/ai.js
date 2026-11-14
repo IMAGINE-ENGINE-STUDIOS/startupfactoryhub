@@ -174,7 +174,7 @@
         else if (/^(addToCart|openCart|checkout|clearCart|setCartConfig|addPage|goPage)$/.test(a.type) && window.__IEX) { window.__IEX[a.type](a); done.push(a.type === "addPage" ? "Page " + a.name : "Cart updated"); }
         else if (a.type === "applyTemplate" && window.__IEBlocks) { var tn = window.__IEBlocks.apply(a.template || a.id); if (tn) done.push("Template " + tn); }
         else if (a.type === "loadLibrary" && window.__IELoad && a.name) { window.__IELoad(a.name).catch(function () {}); done.push("Loaded " + a.name); }
-        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEBuild.validateSource(a.name, nc); window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
+        else if ((a.type === "addFile" || a.type === "updateFile") && a.name && window.__IEFiles) { var nc = a.content || a.code || ""; window.__IEBuild.validateSource(a.name, nc); window.__IEFiles.put(a.name, nc, a.lang); try { if (/^apps\//.test(a.name)) localStorage.setItem("ie-live:" + a.name, nc); } catch (e) {} if (window.__IEFiles.mountApp && /^apps\/[^/]+\/(App|index)\.(tsx|jsx|html)$/.test(a.name)) window.__IEFiles.mountApp(a.name, /\.html$/.test(a.name) ? "html" : /<a-scene/i.test(nc) ? "aframe" : "react"); done.push((a.type === "updateFile" ? "Updated " : "File ") + a.name); }
         else if (a.type === "patchFile" && a.name && window.__IEFiles && Array.isArray(a.edits)) {
           // Resolve the target across BOTH stores and the App.tsx naming
           // collision: the canvas-generated Dev file is "App.tsx" while the
@@ -1096,14 +1096,25 @@
     put(file, code, kind === "react" ? "tsx" : "html");
     try { localStorage.setItem("ie-live:" + file, code); } catch (e) {}
     if (exists) return file; /* already on the canvas: updating the file hot-reloads it, no duplicate section */
-    var s = Date.now().toString(36);
+    return mountApp(file, kind);
+  }
+  /* Mount an app file on the canvas as a live app section. liveApp uses it
+     for root files (apps/<Name>.tsx); runActions uses it for folder roots
+     (apps/<Name>/App.tsx), which the records protocol delivers as plain
+     files - without a section they never become a live app: no canvas or
+     Play presence, and the rehydration gate below cannot see them after a
+     reload. No-op when a frame for the file is already on the canvas. */
+  function mountApp(file, kind) {
+    var ie = window.__IE; if (!ie || !ie.addSection) return null;
+    if (document.querySelector('iframe[src*="' + encodeURIComponent(file) + '"]')) return file;
+    var s = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     ie.addSection({ id: "sec_live_" + s, type: "section", style: { backgroundColor: "transparent", borderColor: "#27272a", borderWidth: "1px", borderStyle: "solid", borderRadius: "20px", padding: "0px", overflow: "hidden" },
       children: [{ id: "emb_live_" + s, type: "embed", content: "/imagine-engine/blocks/liveapp.html?b=1&kind=" + kind + "&file=" + encodeURIComponent(file), style: {} }] });
     return file;
   }
   /* live apps read their source from the Dev tab, so edits there re-render the canvas */
   function get(name) { var f = ((window.__IE && window.__IE.raw && window.__IE.raw.files) || []).filter(function (x) { return x.name === name; })[0]; if (f) return f.content; try { return localStorage.getItem("ie-live:" + pid() + ":" + name) || localStorage.getItem("ie-live:" + name); } catch (e) { return null; } }
-  window.__IEFiles = { put: put, liveApp: liveApp, get: get };
+  window.__IEFiles = { put: put, liveApp: liveApp, get: get, mountApp: mountApp };
   // Rehydrate: if the bundle restored a project without some runtime-added
   // app files, put back the stored modules of every app that is still alive
   // (referenced by a project file or by a live app frame on the canvas), so
@@ -1116,7 +1127,19 @@
     var have = {}; (ie.raw.files || []).forEach(function (f) { have[f.name] = 1; });
     var alive = {};
     Object.keys(have).forEach(function (n) { var m = /^apps\/([^/]+)/.exec(n); if (m) alive[m[1].replace(/\.(tsx|html)$/, "")] = 1; });
-    document.querySelectorAll('iframe[src*="liveapp.html"]').forEach(function (fr) { var m = /file=apps%2F([^%&]+)/.exec(fr.getAttribute("src") || ""); if (m) alive[decodeURIComponent(m[1]).replace(/\.(tsx|html)$/, "")] = 1; });
+    document.querySelectorAll('iframe[src*="liveapp.html"]').forEach(function (fr) { var m = /file=apps%2F([^%&]+)/.exec(fr.getAttribute("src") || ""); if (m) alive[decodeURIComponent(m[1]).split("/")[0].replace(/\.(tsx|html)$/, "")] = 1; });
+    // The persisted registry of live apps is the project's saved sections
+    // (ie-projects via raw.projects): a mounted section's embed is proof the
+    // app is alive even before its iframe renders - e.g. after a reload
+    // straight into the Dev tab, or on another page of the project. The
+    // iframe scan above misses both, and its stem for folder apps
+    // (apps/<Name>/App.tsx) was the whole path tail, never the folder name,
+    // so folder-style builds were never rehydrated.
+    try {
+      var proj = (ie.raw.projects || []).filter(function (p) { return p.id === ie.raw.pid; })[0];
+      var walk = function (nodes) { (nodes || []).forEach(function (nd) { if (!nd) return; if (typeof nd.content === "string") { var mm = /liveapp\.html[^"]*?[?&]file=([^&"]+)/.exec(nd.content); if (mm) { try { alive[decodeURIComponent(mm[1]).replace(/^apps\//, "").split("/")[0].replace(/\.(tsx|html)$/, "")] = 1; } catch (e) {} } } if (nd.children) walk(nd.children); }); };
+      if (proj) (proj.pages || []).forEach(function (pg) { walk(pg.sections); });
+    } catch (e) {}
     stored.forEach(function (n) {
       if (have[n]) return;
       var m = /^apps\/([^/]+)/.exec(n); if (!m || !alive[m[1].replace(/\.(tsx|html)$/, "")]) return;
