@@ -8,17 +8,32 @@ import HTMLFlipBook from 'react-pageflip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { fetchPublished, slugFromPath } from '@/components/brochure-studio/BrochureStudio';
+import { ItemView } from '@/components/brochure-studio/ItemView';
+import { PageBackground } from '@/components/brochure-studio/Backgrounds';
 import { useBrochureLiveBridge } from '@/lib/brochureLive';
-import type { BrochureDoc, PageRef } from '@/components/brochure-studio/types';
+import type { BrochureDoc, Item, PageBg, PageRef } from '@/components/brochure-studio/types';
 
-const Page = forwardRef<HTMLDivElement, { n: number; src?: string }>(({ n, src }, ref) => (
+const Page = forwardRef<HTMLDivElement, { n: number; src?: string; items: Item[]; bg?: PageBg; editing: boolean }>(({ n, src, items, bg, editing }, ref) => (
   // The flipbook library rewrites the page root's inline style on every
   // draw (position/size only), wiping any background put there — so the
   // visible page surface lives on this inner element instead.
   <div ref={ref} className="overflow-hidden">
-    <div data-bp-root={n} className="relative w-full h-full" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.38), transparent 62%), linear-gradient(180deg,#16233f,#101a30)', boxShadow: 'inset 0 0 0 1.5px rgba(165,180,205,0.6), inset 0 0 60px rgba(0,0,0,0.35)' }}>
+    <div data-bp-root={n} data-bs-intree="1" className="relative w-full h-full" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.38), transparent 62%), linear-gradient(180deg,#16233f,#101a30)', boxShadow: 'inset 0 0 0 1.5px rgba(165,180,205,0.6), inset 0 0 60px rgba(0,0,0,0.35)' }}>
       {src && <iframe title={`Page ${n + 1}`} src={src} className="absolute inset-0 w-full h-full border-0" />}
       <div className="absolute bottom-4 right-5 font-mono text-[11px] tracking-[0.2em]" style={{ color: '#64748b' }}>P/{String(n + 1).padStart(2, '0')}</div>
+      {/* Saved items + page background render INSIDE the page itself.
+          They used to be painted by the editor through DOM portals into
+          the flipbook's live nodes; whenever the flipbook rebuilt a page
+          the portal layer died with it, so published content flickered
+          or never showed after a reload even though the saved file was
+          correct. In-tree, the items are ordinary page content: the
+          flipbook clones and carries them like everything else. */}
+      {(bg || items.length > 0) && (
+        <div data-bs-layer="" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 30, overflow: 'hidden' }}>
+          {bg && <PageBackground bg={bg} />}
+          {items.map((it) => <ItemView key={it.id} it={it} editing={editing} selected={false} />)}
+        </div>
+      )}
     </div>
   </div>
 ));
@@ -36,8 +51,21 @@ export default function StudioBrochure() {
   // must not stomp the editor's pages back to the published page list —
   // that race silently "lost" added pages and template pages on reload.
   const editorSeen = useRef(false);
+  // The full document (items + backgrounds) lives here too, so the pages
+  // can render their own content in-tree (see Page above). Guarded by a
+  // JSON fingerprint so identical docs don't re-render the book.
+  const [doc, setDocState] = useState<BrochureDoc | null>(null);
+  const docFp = useRef('');
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    const on = (e: Event) => setEditing(!!(e as CustomEvent<{ editing?: boolean }>).detail?.editing);
+    window.addEventListener('bs:editing', on);
+    return () => window.removeEventListener('bs:editing', on);
+  }, []);
   const apply = (d: BrochureDoc, fromEditor = false) => {
     if (fromEditor && (d.pages?.length || d.pageCount)) editorSeen.current = true;
+    const fp = JSON.stringify([d.items, d.bgs]);
+    if (fp !== docFp.current) { docFp.current = fp; setDocState(d); }
     const next = d.pages?.length ? d.pages : d.pageCount ? Array.from({ length: d.pageCount }, () => ({})) : null;
     if (!next) return;
     const cur = pagesRef.current;
@@ -49,6 +77,7 @@ export default function StudioBrochure() {
     setPages(next);
   };
   const sig = pages.map((p) => p.src || '-').join('|');
+  const docSig = doc ? JSON.stringify([doc.items, doc.bgs]) : '';
 
   useEffect(() => { fetchPublished(key).then((d) => { if (!editorSeen.current) apply(d); }); document.title = `${slug} · Startup Factory Hub`; }, [key, slug]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -111,9 +140,9 @@ export default function StudioBrochure() {
   const book = useMemo(() => (
     // @ts-expect-error react-pageflip typing requires every prop
     <HTMLFlipBook ref={bookRef} onFlip={(e: any) => onFlipRef.current(e)} key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
-      {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
+      {pages.map((p, i) => <Page key={i} n={i} src={p.src} items={doc?.items.filter((x) => x.page === i) ?? []} bg={doc?.bgs[String(i)] || doc?.bgs.all} editing={editing} />)}
     </HTMLFlipBook>
-  ), [sig, w, spread]); // eslint-disable-line react-hooks/exhaustive-deps
+  ), [sig, w, spread, docSig, editing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center py-6" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 42%, #131f38 0%, #060a14 72%)' }}>

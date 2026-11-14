@@ -182,6 +182,9 @@ function StudioEditor() {
   }, [slug, canEdit]);
 
   useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
+  // StudioBrochure renders its items in-tree; it needs to know when
+  // editing is on so the items become draggable targets.
+  useEffect(() => { window.dispatchEvent(new CustomEvent('bs:editing', { detail: { editing } })); }, [editing]);
   useEffect(() => { if (active) { const t = setTimeout(() => { applyEdits(doc); applyFills(doc); }, 30); return () => clearTimeout(t); } }, [doc, roots, active]);
 
   /* Draft saves are debounced: writing the whole document to localStorage
@@ -463,6 +466,31 @@ function StudioEditor() {
     const bg = doc.bgs[String(pg)] || doc.bgs.all;
     const items = doc.items.filter((i) => i.page === pg);
     const plus = editing && canEdit && isCustomSlug;
+    // StudioBrochure pages render their own items + background in-tree
+    // (data-bs-intree). Painting them again here would double every item,
+    // so for those pages the portal carries only the editing affordances:
+    // the insert-page button and the selected item's resize handle.
+    if (root.dataset.bsIntree !== undefined) {
+      const selIt = editing && sel?.kind === 'item' ? doc.items.find((i) => i.id === sel.id && i.page === pg) : undefined;
+      if (!plus && !selIt) return null;
+      return createPortal(
+        <>
+          {selIt && (
+            <div style={{ position: 'absolute', left: `${selIt.x + selIt.w}%`, top: `${selIt.y}%`, width: 0, height: 0, zIndex: 60, pointerEvents: 'none' }}>
+              <div data-bs-handle={selIt.id} style={{ position: 'absolute', left: -7, top: -7, width: 14, height: 14, borderRadius: 4, background: '#a855f7', border: '2px solid #fff', cursor: 'nwse-resize', pointerEvents: 'auto' }} />
+            </div>
+          )}
+          {plus && (
+            <button data-bs-ui aria-label="Insert page after this one" title="Insert a page here" onClick={() => setLibAt(pg + 1)}
+              style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 40, height: 40, borderRadius: 999, pointerEvents: 'auto', zIndex: 999,
+                display: 'grid', placeItems: 'center', color: '#fff', background: 'linear-gradient(135deg,#06b6d4,#1d4ed8)', boxShadow: '0 0 20px rgba(34,211,238,0.5)', border: '2px solid rgba(255,255,255,0.7)' }}>
+              <Plus className="h-5 w-5" />
+            </button>
+          )}
+        </>,
+        layerHost(root), `bs-${pg}`,
+      );
+    }
     if (!bg && !items.length && !plus) return null;
     return createPortal(
       <>
