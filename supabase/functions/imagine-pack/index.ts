@@ -98,7 +98,9 @@ Deno.serve(async (req) => {
       const path = `apps/${user.id}/${slug}.js`;
       const { data: buckets } = await admin.storage.listBuckets();
       if (!buckets?.some((x) => x.name === BUCKET)) await admin.storage.createBucket(BUCKET, { public: true });
-      const payload = JSON.stringify({ name: slug, js, css, packedAt: new Date().toISOString() });
+      const appName = String(body.name || "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 120);
+      const appDesc = String(body.description || "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 300);
+      const payload = JSON.stringify({ name: appName || slug, ...(appDesc ? { description: appDesc } : {}), js, css, packedAt: new Date().toISOString() });
       const { error } = await admin.storage.from(BUCKET).upload(path.replace(/\.js$/, ".json"), new Blob([payload], { type: "application/json" }), { upsert: true, contentType: "application/json", cacheControl: "60" });
       if (error) return json({ error: error.message }, 500);
       res.hostedSrc = admin.storage.from(BUCKET).getPublicUrl(path.replace(/\.js$/, ".json")).data.publicUrl;
