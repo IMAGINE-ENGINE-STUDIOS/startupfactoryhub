@@ -243,6 +243,22 @@ function StudioEditor() {
       return commit(fn(d));
     });
   }, [commit]);
+  /* TEMP DIAGNOSTIC (2026-11-14): shows what is ACTUALLY in localStorage
+     for this brochure's draft — item count + byte size, or 'none' /
+     'unparseable' — refreshed on mount and after every doc/save change,
+     so a live test can see at which stage a saved item disappears. */
+  const [storedInfo, setStoredInfo] = useState('…');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const s = localStorage.getItem(draftKey(slug));
+        if (!s) { setStoredInfo('none'); return; }
+        const d = JSON.parse(s);
+        setStoredInfo(`${(d.items || []).length} items · ${s.length}b`);
+      } catch { setStoredInfo('unparseable'); }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [slug, doc, saveState]);
   const undo = () => { const p = past.current.pop(); if (!p) return; future.current.push(docRef.current); setDoc(commit(p)); };
   const redo = () => { const f = future.current.pop(); if (!f) return; past.current.push(docRef.current); setDoc(commit(f)); };
 
@@ -575,6 +591,7 @@ function StudioEditor() {
             {saveState === 'saving' ? 'Saving draft…' : `Draft saved${savedAt ? ` ${new Date(savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}`}
           </span>
         )}
+        {editing && <span className="text-[10px] font-mono px-1 whitespace-nowrap" style={{ color: '#f472b6' }}>stored: {storedInfo}</span>}
         {editing && (
           <>
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
