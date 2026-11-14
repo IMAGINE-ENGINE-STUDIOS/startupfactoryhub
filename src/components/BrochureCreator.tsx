@@ -38,6 +38,7 @@ export default function BrochureCreator() {
   const [name, setName] = useState("");
   const [mine, setMine] = useState<Mine[]>([]);
   const [checking, setChecking] = useState(false);
+  const [listLoading, setListLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function BrochureCreator() {
     // The real list lives on the server (published docs carry their owner),
     // so your brochures show on every device — localStorage is only a cache.
     supabase.functions.invoke("brochure-publish", { body: { action: "mine" } }).then(({ data, error }) => {
+      setListLoading(false);
       if (error || !data?.brochures) return;
       const server: Mine[] = (data.brochures as { slug: string; title: string | null; publishedAt: string | null }[])
         .filter((b) => b.slug.startsWith("b-"))
@@ -59,7 +61,7 @@ export default function BrochureCreator() {
         try { localStorage.setItem(STORE_KEY, JSON.stringify(merged)); } catch { /* ignore */ }
         return merged;
       });
-    }).catch(() => { /* offline: the cached list stays */ });
+    }).catch(() => { setListLoading(false); /* offline: the cached list stays */ });
   }, []);
 
   const create = async () => {
@@ -132,7 +134,11 @@ export default function BrochureCreator() {
         <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">
           Your brochures
         </h3>
-        {mine.length === 0 ? (
+        {mine.length === 0 && listLoading ? (
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading your brochures…
+          </p>
+        ) : mine.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             None yet — your first brochure is one name away. Pitch decks, product brochures,
             event flyers: if it flips like a book, build it here.
