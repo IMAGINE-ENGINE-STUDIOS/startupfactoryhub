@@ -175,7 +175,7 @@ export default function PrototypeStudio() {
           <Input
             value={current.name}
             onChange={(e) => setCurrent({ ...current, name: e.target.value })}
-            className="h-9 w-44 sm:max-w-xs font-medium"
+            className="h-9 flex-1 min-w-[9rem] max-w-md font-medium"
             aria-label="Project name"
           />
           {current.design.components.length > 0 && (
@@ -228,7 +228,7 @@ export default function PrototypeStudio() {
             />
           ) : (
             <div className="h-full overflow-y-auto pr-1">
-              <div className="max-w-3xl mx-auto space-y-5 py-2">
+              <div className="max-w-5xl mx-auto space-y-5 py-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base font-semibold">Design package</h3>
                   <span className={`text-[11px] rounded-full border px-2 py-0.5 ${validity.valid ? "border-emerald-500/50 text-emerald-500" : "border-amber-500/50 text-amber-500"}`}>

@@ -271,7 +271,7 @@ export default function Canvas({ design, onChange }: Props) {
             </button>
           ))}
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 pr-20">
           {palette.map((spec) => (
             <div
               key={spec.id}

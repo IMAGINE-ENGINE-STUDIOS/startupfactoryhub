@@ -106,7 +106,7 @@ export default function QuotePanel({ projectId, projectName, design, valid }: Pr
 
   return (
     <div className="h-full overflow-y-auto pr-1">
-      <div className="max-w-3xl mx-auto space-y-5 py-2">
+      <div className="max-w-5xl mx-auto space-y-5 py-2">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Factory className="h-5 w-5 text-indigo-400" /> Take it to manufacture

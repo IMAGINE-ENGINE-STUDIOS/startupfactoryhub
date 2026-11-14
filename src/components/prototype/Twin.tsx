@@ -147,7 +147,7 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 shrink-0 pr-20">
         {/* ── Simulated world controls ─────────────────────── */}
         <div className="rounded-xl border border-border bg-card p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Simulated world — play with the inputs</p>
