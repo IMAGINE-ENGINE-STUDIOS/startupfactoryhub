@@ -31,12 +31,13 @@ export const APEX_PAGES = ['Cover', 'About Startup Factory Hub', 'Where the ecos
   'Global Soft-Landing', 'Impact Reporting', 'White-Label Branding', 'How it works', 'Expected outcomes', 'Implementation', 'Next steps', 'Our team', 'Conclusion'];
 export const pageKit = (route: string, i: number, label: string): Kit =>
   ({ id: `kit-page:${route}:${i}`, name: label, note: '1 page · design only', pages: [{ label, src: templateEmbedUrl(route, i) }] });
-export const APEX_KIT: Kit = { id: 'kit-apex', name: 'APEX proposal', note: `${APEX_PAGES.length} pages: cover, ecosystem, 13 capabilities, plan and team · design only`,
-  pages: APEX_PAGES.map((label, i) => ({ label: `APEX · ${label}`, src: templateEmbedUrl('/apex', i) })) };
+/** Listed under a generic name like every library entry — never "APEX". */
+export const APEX_KIT: Kit = { id: 'kit-apex', name: 'Template Book 2', note: `${APEX_PAGES.length} pages · design only`,
+  pages: APEX_PAGES.map((_, i) => ({ label: `Template Book 2 · Page ${i + 1}`, src: templateEmbedUrl('/apex', i) })) };
 export const findSavedKit = (id: string): Kit | undefined => {
   if (id === APEX_KIT.id) return APEX_KIT;
   const m = id.match(/^kit-page:(.+):(\d+)$/); if (!m) return undefined;
-  const i = +m[2]; return pageKit(m[1], i, m[1] === '/apex' ? `APEX · ${APEX_PAGES[i] ?? `P/${i + 1}`}` : `P/${i + 1}`);
+  const i = +m[2]; return pageKit(m[1], i, m[1] === '/apex' ? `Template Book 2 · Page ${i + 1}` : `P/${i + 1}`);
 };
 
 /** A whole existing brochure as a template (needs its page count).

@@ -5,18 +5,22 @@
  * replaced with lorem ipsum and logos are removed.
  * Credits: Imagine Engine Studios Corp.
  */
+/** Library names are GENERIC on purpose (founder, 2026-11-14): users must
+ *  not be able to tell whose real brochure a template design came from,
+ *  so the library never shows the real book names — Template Book N only.
+ *  The real brochures keep their real names at their own routes. */
 export const BROCHURES: { route: string; name: string }[] = [
-  { route: '/forpartners', name: 'Partners' },
-  { route: '/apex', name: 'APEX' },
-  { route: '/forstartups', name: 'Startups (MVP)' },
-  { route: '/wtcbrochure', name: 'World Trade Center' },
-  { route: '/bdvbrochure', name: 'BDV' },
-  { route: '/brochure', name: 'Startup Factory Hub' },
-  { route: '/brochurees', name: 'Startup Factory Hub (ES)' },
-  { route: '/brochure-academia', name: 'Academia' },
-  { route: '/basic-plan', name: 'Membership' },
-  { route: '/investor-plan', name: 'Investor plan' },
-  { route: '/parasocios', name: 'Socios' },
+  { route: '/forpartners', name: 'Template Book 1' },
+  { route: '/apex', name: 'Template Book 2' },
+  { route: '/forstartups', name: 'Template Book 3' },
+  { route: '/wtcbrochure', name: 'Template Book 4' },
+  { route: '/bdvbrochure', name: 'Template Book 5' },
+  { route: '/brochure', name: 'Template Book 6' },
+  { route: '/brochurees', name: 'Template Book 7' },
+  { route: '/brochure-academia', name: 'Template Book 8' },
+  { route: '/basic-plan', name: 'Template Book 9' },
+  { route: '/investor-plan', name: 'Template Book 10' },
+  { route: '/parasocios', name: 'Template Book 11' },
 ];
 
 export const embedUrl = (route: string, page: number) => `${route}?bsEmbed=${page}`;
