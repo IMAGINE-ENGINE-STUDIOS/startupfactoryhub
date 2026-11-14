@@ -29,6 +29,7 @@ const DashboardRouter = lazy(() => import("./components/DashboardRouter"));
 
 // Code-split heavy pages
 const Tools = lazy(() => import("./pages/Tools"));
+const PrototypeStudioPage = lazy(() => import("./pages/PrototypeStudioPage"));
 const LightPaper = lazy(() => import("./pages/LightPaper"));
 const Guidelines = lazy(() => import("./pages/Guidelines"));
 const PublicInternshipApplication = lazy(() => import("./pages/PublicInternshipApplication"));
@@ -273,6 +274,8 @@ const App = () => (
                     <Route path="/APEX" element={<ApexBrochure />} />
                     <Route path="/ecosystempartners" element={<EcosystemPartnersBrochure />} />
                     <Route path="/b/:slug" element={<StudioBrochure />} />
+                    {/* Prototype Studio — in build, direct URL only; do not link publicly until the founder releases it to the Tools desk */}
+                    <Route path="/prototype-studio" element={<PrototypeStudioPage />} />
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
                      <Route path="/forstartups" element={<MVPBrochure />} />
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
