@@ -14,8 +14,31 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
   const ndjson = (resp.headers.get("content-type") || "").includes("ndjson");
   let buffer = "", ended = false;
   function consume(raw: string) {
-    if (raw === "[DONE]") { ended = true; return; }
-    const data = JSON.parse(raw);
+    // The provider's end-of-stream sentinel is not valid JSON and reaches
+    // this parser in several real shapes: alone, padded with whitespace,
+    // joined into the same frame as a final JSON chunk ("{...}\n[DONE]"),
+    // or sitting in the leftover buffer with no trailing frame delimiter.
+    // Feeding any of those to JSON.parse throws 'Unexpected token \'D\',
+    // "[DONE]" is not valid JSON' and kills otherwise-complete builds at
+    // the last frame, so every sentinel shape is end-of-stream: process a
+    // JSON prefix first (its delta/finish must not be lost), then end.
+    const at = raw.indexOf("[DONE]");
+    if (at >= 0) {
+      const prefix = raw.slice(0, at).trim();
+      if (prefix) applyJson(prefix);
+      ended = true;
+      return;
+    }
+    applyJson(raw);
+  }
+  function applyJson(raw: string) {
+    let data: any;
+    try { data = JSON.parse(raw); } catch (e) {
+      // A parse failure on text that still carries the sentinel is an
+      // end-of-stream, not corruption; genuine corruption throws as before.
+      if (raw.includes("[DONE]")) { ended = true; return; }
+      throw e;
+    }
     if (data.error || data.type === "error") throw new Error("The build was interrupted; please try again");
     const delta = data.choices?.[0]?.delta?.content || data.delta?.text || data.message?.content || "";
     if (delta) { result.text += delta; if (result.text.length > 300000) throw new Error("Build output exceeded the safety limit"); onDelta(delta); }
@@ -40,7 +63,13 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
       }
       if (chunk.done) break;
     }
-    if (ndjson && buffer.trim()) consume(buffer.trim());
+    // A final frame can arrive without its trailing delimiter (the
+    // sentinel commonly does); the framed loop above never sees it.
+    // Extract its payload the same way and consume it before giving up.
+    if (buffer.trim()) {
+      const raw = ndjson ? buffer.trim() : buffer.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trimStart()).join("\n");
+      if (raw) consume(raw);
+    }
     if (!ended) throw new Error("AI response ended unexpectedly");
     return result;
   } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
