@@ -62,8 +62,20 @@ export default function StudioBrochure() {
     window.addEventListener('bs:editing', on);
     return () => window.removeEventListener('bs:editing', on);
   }, []);
+  const hasContent = useRef(false);
   const apply = (d: BrochureDoc, fromEditor = false) => {
     if (fromEditor && (d.pages?.length || d.pageCount)) editorSeen.current = true;
+    // An all-empty doc from the editor (no pages, no pageCount, no items)
+    // means "not loaded yet" — its initial state, or a published fetch
+    // that failed (fetchPublished resolves to an empty doc on error).
+    // Such a doc must NEVER wipe content that is already rendered: the
+    // editor's load and this page's own fetch race on every load, and
+    // when the empty one landed last the page went blank and flickered
+    // across reloads. A real "user deleted everything" doc still carries
+    // its pages/pageCount, so legitimate emptying still applies.
+    const isUnloaded = !d.pages?.length && !d.pageCount && (d.items?.length ?? 0) === 0;
+    if (fromEditor && isUnloaded && hasContent.current) return;
+    if (!isUnloaded) hasContent.current = true;
     const fp = JSON.stringify([d.items, d.bgs]);
     if (fp !== docFp.current) { docFp.current = fp; setDocState(d); }
     const next = d.pages?.length ? d.pages : d.pageCount ? Array.from({ length: d.pageCount }, () => ({})) : null;
