@@ -138,7 +138,7 @@ function StudioEditor() {
       const r = findRoots();
       setRoots((prev) => (prev.length === r.length && prev.every((p, i) => p === r[i]) ? prev : r));
     };
-    const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(scan, 150); });
+    const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(scan, 300); });
     mo.observe(document.body, { childList: true, subtree: true });
     scan();
     return () => { mo.disconnect(); clearTimeout(t); };
@@ -153,6 +153,9 @@ function StudioEditor() {
       if (off) return;
       let d = pub;
       if (canEdit) { try { const s = localStorage.getItem(draftKey(slug)); if (s) d = normalizeDoc(JSON.parse(s)); } catch { /* ignore */ } }
+      // Never let a slow load wipe edits made while it was in flight —
+      // the in-memory pending draft is newer than anything on disk.
+      if (pendingDraft.current) d = pendingDraft.current;
       setDoc(d);
     });
     return () => { off = true; };
@@ -161,10 +164,35 @@ function StudioEditor() {
   useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
   useEffect(() => { if (active) { const t = setTimeout(() => { applyEdits(doc); applyFills(doc); }, 30); return () => clearTimeout(t); } }, [doc, roots, active]);
 
-  const commit = useCallback((n: BrochureDoc) => {
-    try { localStorage.setItem(draftKey(slug), JSON.stringify(n)); } catch { /* ignore */ }
-    return n;
+  /* Draft saves are debounced: writing the whole document to localStorage
+     on every keystroke and pointer move was the editor's main lag source.
+     The newest doc is held in memory and flushed at most every 400ms, on
+     publish/discard, on unmount and before the tab closes. */
+  const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingDraft = useRef<BrochureDoc | null>(null);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const flushDraft = useCallback(() => {
+    if (draftTimer.current) { clearTimeout(draftTimer.current); draftTimer.current = null; }
+    const d = pendingDraft.current; pendingDraft.current = null;
+    if (!d) return;
+    try { localStorage.setItem(draftKey(slug), JSON.stringify(d)); setSavedAt(Date.now()); setSaveState('saved'); }
+    catch { setSaveState('saving'); }
   }, [slug]);
+  const cancelDraft = useCallback(() => {
+    if (draftTimer.current) { clearTimeout(draftTimer.current); draftTimer.current = null; }
+    pendingDraft.current = null;
+  }, []);
+  const commit = useCallback((n: BrochureDoc) => {
+    pendingDraft.current = n;
+    setSaveState('saving');
+    if (!draftTimer.current) draftTimer.current = setTimeout(flushDraft, 400);
+    return n;
+  }, [flushDraft]);
+  useEffect(() => {
+    window.addEventListener('beforeunload', flushDraft);
+    return () => { window.removeEventListener('beforeunload', flushDraft); flushDraft(); };
+  }, [flushDraft]);
   const update = useCallback((fn: (d: BrochureDoc) => BrochureDoc, record = true) => {
     setDoc((d) => {
       if (record) { past.current = [...past.current.slice(-60), d]; future.current = []; }
@@ -293,11 +321,11 @@ function StudioEditor() {
 
   const publish = async () => {
     setBusy(true);
-    try { await call({ doc }); localStorage.removeItem(draftKey(slug)); toast.success('Published — everyone now sees this version'); }
+    try { await call({ doc }); cancelDraft(); localStorage.removeItem(draftKey(slug)); setSaveState('idle'); toast.success('Published — everyone now sees this version'); }
     catch (e) { toast.error(`Publish failed: ${(e as Error).message}`); }
     setBusy(false);
   };
-  const discard = () => { localStorage.removeItem(draftKey(slug)); window.location.reload(); };
+  const discard = () => { cancelDraft(); localStorage.removeItem(draftKey(slug)); window.location.reload(); };
   const newBrochure = () => {
     const name = window.prompt('Name for the new brochure (letters, numbers, dashes)');
     const s = (name || '').toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
@@ -457,6 +485,11 @@ function StudioEditor() {
         <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }}>
           <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
         </button>
+        {editing && saveState !== 'idle' && (
+          <span className="text-[11px] font-medium px-1 whitespace-nowrap" style={{ color: saveState === 'saving' ? '#fbbf24' : '#34d399' }}>
+            {saveState === 'saving' ? 'Saving draft…' : `Draft saved${savedAt ? ` ${new Date(savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}`}
+          </span>
+        )}
         {editing && (
           <>
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />

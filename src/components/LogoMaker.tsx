@@ -76,24 +76,30 @@ export default function LogoMaker() {
     setLimitHit(false);
     setVariants([]);
     setProgress(0);
-    const made: LogoVariant[] = [];
+    let made = 0;
+    let limitSeen = false;
+    let firstError: string | null = null;
     try {
-      for (let i = 0; i < COMPOSITIONS.length; i++) {
+      // All four concepts generate in parallel — one wait, not four.
+      await Promise.all(COMPOSITIONS.map(async (composition, i) => {
         const { data, error } = await supabase.functions.invoke("generate-sfh-image", {
-          body: { prompt: buildPrompt(COMPOSITIONS[i]), stylePreset: "digital_art" },
+          body: { prompt: buildPrompt(composition), stylePreset: "digital_art" },
         });
-        if (error || data?.error === "limit_reached" || (typeof error === "object" && error?.message?.includes("402"))) {
-          if (made.length === 0) { setLimitHit(true); return; }
-          break;
-        }
-        if (data?.error) throw new Error(data.error);
+        if (error || data?.error === "limit_reached") { limitSeen = true; return; }
+        if (data?.error) { firstError = firstError || data.error; return; }
         if (data?.imageUrl) {
-          made.push({ url: data.imageUrl, composition: COMPOSITIONS[i] });
-          setVariants([...made]);
+          made++;
+          setProgress(made);
+          setVariants((prev) => {
+            const next = [...prev];
+            next[i] = { url: data.imageUrl, composition };
+            return next;
+          });
         }
-        setProgress(i + 1);
-      }
-      if (made.length) toast({ title: "Logos ready", description: `${made.length} concepts generated — download the ones you like or refine one.` });
+      }));
+      if (limitSeen && made < COMPOSITIONS.length) setLimitHit(true);
+      if (made) toast({ title: "Logos ready", description: `${made} concepts generated — download the ones you like or refine one.` });
+      else if (!limitSeen && firstError) throw new Error(firstError);
     } catch (err: any) {
       toast({ title: "Generation failed", description: err.message || "Something went wrong. Try again.", variant: "destructive" });
     } finally {

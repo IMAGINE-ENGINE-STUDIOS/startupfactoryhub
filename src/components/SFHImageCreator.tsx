@@ -26,12 +26,12 @@ const STYLE_PRESETS = [
 ];
 
 const IMAGE_SIZES = [
-  { id: "1024x1024", label: "Square (1024×1024)" },
-  { id: "1920x1080", label: "Landscape (1920×1080)" },
-  { id: "1080x1920", label: "Portrait (1080×1920)" },
-  { id: "1280x720", label: "HD (1280×720)" },
-  { id: "768x1024", label: "Tall (768×1024)" },
-  { id: "512x512", label: "Small (512×512)" },
+  { id: "1024x1024", label: "Square (1:1)" },
+  { id: "1920x1080", label: "Landscape (16:9)" },
+  { id: "1080x1920", label: "Portrait (9:16)" },
+  { id: "1280x720", label: "Wide (16:9)" },
+  { id: "768x1024", label: "Tall (3:4)" },
+  { id: "512x512", label: "Square small (1:1)" },
 ];
 
 const PROMPT_SUGGESTIONS = [
@@ -65,6 +65,37 @@ const SFHImageCreator = () => {
   const [editPrompt, setEditPrompt] = useState("");
   const [showEditPanel, setShowEditPanel] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  // Your gallery lives on the server: every generation is recorded, so
+  // your images are still here after a refresh or on another device —
+  // not just in this tab's memory.
+  useEffect(() => {
+    if (!user) return;
+    let off = false;
+    supabase
+      .from("image_generation_usage")
+      .select("image_url, prompt, style_preset, created_at")
+      .eq("user_id", user.id)
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(24)
+      .then(({ data, error }) => {
+        if (off || error || !data) return;
+        const saved: GeneratedImage[] = data
+          .filter((r) => r.image_url)
+          .map((r) => ({
+            url: r.image_url as string,
+            prompt: r.prompt,
+            style: r.style_preset || "none",
+            timestamp: new Date(r.created_at).getTime(),
+          }));
+        setHistory((prev) => {
+          const seen = new Set(prev.map((p) => p.url));
+          return [...prev, ...saved.filter((s) => !seen.has(s.url))].slice(0, 24);
+        });
+      });
+    return () => { off = true; };
+  }, [user]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -401,12 +432,12 @@ const SFHImageCreator = () => {
             </div>
           )}
 
-          {/* History */}
+          {/* History — persisted on the server, not just this session */}
           {history.length > 0 && (
             <div className="space-y-2 flex-shrink-0">
-              <label className="text-xs font-medium text-muted-foreground">Recent</label>
+              <label className="text-xs font-medium text-muted-foreground">Your gallery — saved on the platform</label>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                {history.slice(0, 12).map((img, i) => (
+                {history.slice(0, 24).map((img, i) => (
                   <div
                     key={i}
                     className="relative group cursor-pointer rounded-lg overflow-hidden aspect-square"

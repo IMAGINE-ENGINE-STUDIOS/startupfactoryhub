@@ -43,6 +43,23 @@ export default function BrochureCreator() {
   useEffect(() => {
     setMine(loadMine());
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    // The real list lives on the server (published docs carry their owner),
+    // so your brochures show on every device — localStorage is only a cache.
+    supabase.functions.invoke("brochure-publish", { body: { action: "mine" } }).then(({ data, error }) => {
+      if (error || !data?.brochures) return;
+      const server: Mine[] = (data.brochures as { slug: string; title: string | null; publishedAt: string | null }[])
+        .filter((b) => b.slug.startsWith("b-"))
+        .map((b) => ({
+          slug: b.slug.slice(2),
+          name: b.title || b.slug.slice(2).replace(/-/g, " "),
+          createdAt: b.publishedAt ? Date.parse(b.publishedAt) || Date.now() : Date.now(),
+        }));
+      setMine((local) => {
+        const merged = [...server, ...local.filter((m) => !server.some((s) => s.slug === m.slug))];
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(merged)); } catch { /* ignore */ }
+        return merged;
+      });
+    }).catch(() => { /* offline: the cached list stays */ });
   }, []);
 
   const create = async () => {
@@ -62,13 +79,20 @@ export default function BrochureCreator() {
           return;
         }
       }
+      // Creating saves the brochure on the server right away — an empty
+      // 4-page document owned by this account — so it exists (and is
+      // listed) on every device before a single edit is made.
+      const { data, error } = await supabase.functions.invoke("brochure-publish", {
+        body: { slug: `b-${slug}`, doc: { edits: {}, items: [], bgs: {}, pageCount: 4, title: name.trim() } },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "save failed");
       const entry: Mine = { slug, name: name.trim(), createdAt: Date.now() };
       const next = [entry, ...loadMine().filter((m) => m.slug !== slug)];
       try { localStorage.setItem(STORE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       setMine(next);
       navigate(`/b/${slug}`);
     } catch {
-      toast({ title: "Couldn't check that name", description: "Check your connection and try again.", variant: "destructive" });
+      toast({ title: "Couldn't save your new brochure", description: "Nothing was created — check your connection and try again.", variant: "destructive" });
     } finally {
       setChecking(false);
     }
