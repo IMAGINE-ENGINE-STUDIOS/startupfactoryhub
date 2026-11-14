@@ -159,25 +159,46 @@ function StudioEditor() {
   useEffect(() => {
     let off = false;
     past.current = []; future.current = [];
-    // The local draft loads FIRST, synchronously. It used to be read only
-    // inside the published fetch's success callback, so any network hiccup
-    // on that fetch left the brochure blank and the owner's saved edits
-    // looking lost — even though they were sitting in localStorage.
-    let hasDraft = false;
+    let draft: BrochureDoc | null = null;
     if (canEdit) {
       try {
         const s = localStorage.getItem(draftKey(slug));
-        if (s) { setDoc(normalizeDoc(JSON.parse(s))); hasDraft = true; }
+        if (s) draft = normalizeDoc(JSON.parse(s));
       } catch { /* ignore */ }
     }
+    // A draft that carries the brochure's pages can paint immediately. A
+    // PAGELESS draft was built on an empty base (an early failed load
+    // resolved to an empty doc and every later session kept editing that
+    // base, so the published items never entered it) — it must wait for
+    // the merge below instead of replacing the published content.
+    if (draft && (draft.pages?.length || draft.pageCount)) setDoc(draft);
     fetchPublished(slug).then((pub) => {
       if (off) return;
       // Never let a slow load wipe edits made while it was in flight —
       // the in-memory pending draft is newer than anything on disk.
       if (pendingDraft.current) { setDoc(pendingDraft.current); return; }
-      if (hasDraft) return; // the draft on screen is the owner's newest copy
-      setDoc(pub);
-    }).catch(() => { /* keep whatever is on screen (draft or empty) */ });
+      const pubEmpty = !pub.pages?.length && !pub.pageCount && pub.items.length === 0;
+      if (!draft) { setDoc({ ...pub, baseFp: JSON.stringify([pub.items, pub.bgs]) }); return; }
+      if (pubEmpty) { setDoc(draft); return; } // fetch failed: draft is all we have
+      const pubFp = JSON.stringify([pub.items, pub.bgs]);
+      if (draft.baseFp === pubFp) { setDoc(draft); return; } // healthy draft, based on this published doc
+      // Stale-base draft: union-merge so nothing from either copy is
+      // lost (draft items first, published items the draft never saw
+      // appended), then heal the stored draft so the next load starts
+      // from the merged document.
+      const seen = new Set(draft.items.map((i) => i.id));
+      const merged: BrochureDoc = {
+        ...pub, ...draft,
+        items: [...draft.items, ...pub.items.filter((i) => !seen.has(i.id))],
+        bgs: { ...pub.bgs, ...draft.bgs },
+        pages: draft.pages?.length ? draft.pages : pub.pages,
+        pageCount: draft.pageCount ?? pub.pageCount,
+        title: draft.title ?? pub.title,
+        baseFp: pubFp,
+      };
+      setDoc(merged);
+      try { localStorage.setItem(draftKey(slug), JSON.stringify(merged)); } catch { /* ignore */ }
+    }).catch(() => { if (draft) setDoc(draft); });
     return () => { off = true; };
   }, [slug, canEdit]);
 

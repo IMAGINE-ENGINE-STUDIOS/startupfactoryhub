@@ -64,7 +64,7 @@ export default function StudioBrochure() {
   }, []);
   const hasContent = useRef(false);
   const apply = (d: BrochureDoc, fromEditor = false) => {
-    if (fromEditor && (d.pages?.length || d.pageCount)) editorSeen.current = true;
+    if (fromEditor && (d.pages?.length || d.pageCount || (d.items?.length ?? 0) > 0)) editorSeen.current = true;
     // An all-empty doc from the editor (no pages, no pageCount, no items)
     // means "not loaded yet" — its initial state, or a published fetch
     // that failed (fetchPublished resolves to an empty doc on error).

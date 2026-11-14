@@ -41,6 +41,11 @@ export type BrochureDoc = {
   pageCount?: number; // only for brochures created in the Studio
   pages?: PageRef[]; // ordered pages of a Studio-made brochure
   title?: string;
+  /** Fingerprint of the published doc this draft was based on. A draft
+   *  whose baseFp no longer matches the published doc was built on a
+   *  stale/empty base (its items never included the published ones) and
+   *  must be merged with the published doc on load, not trusted as-is. */
+  baseFp?: string;
 };
 
 export const EMPTY_DOC: BrochureDoc = { edits: {}, items: [], bgs: {} };
@@ -58,5 +63,6 @@ export function normalizeDoc(d: any): BrochureDoc {
     pageCount: d.pageCount,
     pages: Array.isArray(d.pages) ? d.pages : undefined,
     title: d.title,
+    baseFp: typeof d.baseFp === 'string' ? d.baseFp : undefined,
   };
 }
