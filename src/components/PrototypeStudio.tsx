@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +77,7 @@ export default function PrototypeStudio() {
 
   const load = useCallback(async () => {
     if (!user) { setLoading(false); return; }
+    setLoading(true);
     const { data, error } = await projectsTable()
       .select("id, name, design, created_at, updated_at")
       .eq("user_id", user.id)
@@ -91,27 +92,49 @@ export default function PrototypeStudio() {
 
   useEffect(() => { load(); }, [load]);
 
+  // The id of a project whose background insert is still in flight;
+  // save() waits for it so an update can never beat the insert.
+  const pendingCreateRef = useRef<string | null>(null);
+
   const create = async () => {
     const name = newName.trim();
     if (!name || !user) return;
+    // Open the workspace immediately with a client-made id; the row is
+    // written in the background. A slow connection must never leave
+    // the founder staring at a spinning button with no feedback.
     setCreating(true);
-    const { data, error } = await projectsTable()
-      .insert({ user_id: user.id, name, design: EMPTY_DESIGN })
-      .select("id, name, design, created_at, updated_at")
-      .single();
-    setCreating(false);
-    if (error || !data) {
-      toast({ title: "Couldn't create the project", description: error?.message || "Try again.", variant: "destructive" });
-      return;
-    }
+    const now = new Date().toISOString();
+    const project: ProtoProject = {
+      id: crypto.randomUUID(),
+      name,
+      design: { ...EMPTY_DESIGN },
+      created_at: now,
+      updated_at: now,
+    } as ProtoProject;
     setNewName("");
-    setProjects((prev) => [data as ProtoProject, ...prev]);
-    setCurrent(data as ProtoProject);
+    setProjects((prev) => [project, ...prev]);
+    setCurrent(project);
     setSavedAt(null);
+    setCreating(false);
+    pendingCreateRef.current = project.id;
+    const { error } = await projectsTable()
+      .insert({ id: project.id, user_id: user.id, name, design: EMPTY_DESIGN });
+    if (pendingCreateRef.current === project.id) pendingCreateRef.current = null;
+    if (error) {
+      toast({ title: "Couldn't create the project", description: error.message || "It isn't saved — try again.", variant: "destructive" });
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+      setCurrent((cur) => (cur?.id === project.id ? null : cur));
+    }
   };
 
   const save = async () => {
     if (!current) return;
+    // If this project was just created optimistically, let its insert
+    // land first so the update can't arrive before the row exists.
+    let guard = 0;
+    while (pendingCreateRef.current === current.id && guard++ < 60) {
+      await new Promise((r) => setTimeout(r, 150));
+    }
     setSaving(true);
     const { error } = await projectsTable()
       .update({ name: current.name, design: current.design, updated_at: new Date().toISOString() })
