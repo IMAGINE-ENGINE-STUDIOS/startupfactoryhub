@@ -114,7 +114,7 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0 gap-2">
+    <div className="flex flex-col h-full min-h-0 gap-2 overflow-y-auto">
       {/* ── Twin stage ─────────────────────────────────────── */}
       <div
         ref={stageRef}
@@ -163,7 +163,48 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
             </div>
           );
         })}
+        {fired.length > 0 && (
+          <div className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)] rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 text-[11px] px-2.5 py-1.5 inline-flex items-center gap-1.5">
+            <Zap className="h-3 w-3 shrink-0" />
+            <span className="truncate">{fired[fired.length - 1]}</span>
+          </div>
+        )}
       </div>
+
+      {rules.length === 0 && (
+        <div className="shrink-0 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 pr-20">
+          <p className="text-xs font-medium">The twin reacts through behaviour rules — a rule connects a sensor to an output.</p>
+          {sensors.length > 0 && outputs.length > 0 ? (
+            <Button
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                const s = sensors[0];
+                const o = outputs[0];
+                const trait = SENSOR_TRAITS[s.specId];
+                const kind = OUTPUT_KINDS[o.specId];
+                onRulesChange([
+                  ...rules,
+                  {
+                    id: rid(),
+                    whenUid: s.uid,
+                    condition: trait.kind === "motion" ? "detected" : "above",
+                    threshold: Math.round(((trait.def + trait.max) / 2) * 10) / 10,
+                    thenUid: o.uid,
+                    action: kind === "servo" ? "angle" : "on",
+                    value: 90,
+                  },
+                ]);
+              }}
+            >
+              <Zap className="h-3.5 w-3.5 mr-1.5" />
+              Add a starter rule — {nameOf(sensors[0].uid)} → {nameOf(outputs[0].uid)}
+            </Button>
+          ) : (
+            <p className="text-[11px] text-muted-foreground mt-1">Add a sensor and an output part in Design first, then the twin can react to them.</p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 shrink-0 pr-20">
         {/* ── Simulated world controls ─────────────────────── */}
