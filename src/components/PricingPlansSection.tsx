@@ -61,6 +61,7 @@ const startupMemberships: {
       "All Venture Network benefits included",
       "In-residence workspace & dedicated hub desks at all SFH locations",
       "Venture studio acceleration: sprints, pitch advisory & roadmap reviews",
+      "Complimentary Delaware C corporation registration through our Every.io benefit",
       "Strategic Business Intelligence suite",
       "Priority eligibility for the Accelerated Tier and cohort funding",
     ],
@@ -88,6 +89,7 @@ const startupMemberships: {
     features: [
       "Multi-seat team management dashboard",
       "Enterprise soft landing package ($5,000 credit) for global market entry",
+      "Complimentary Delaware C corporation registration through our Every.io benefit",
       "Global executive workspace & facility deployment",
       "Strategic Business Intelligence & live security monitoring on the global map",
     ],
@@ -141,6 +143,7 @@ const acceleratorMemberships: {
     features: [
       "Full accelerator infrastructure",
       "Dedicated partnership manager",
+      "Complimentary Delaware C corporation registration through our Every.io benefit",
       "Strategic Business Intelligence suite access",
       "Global office & coworking network access",
     ],
