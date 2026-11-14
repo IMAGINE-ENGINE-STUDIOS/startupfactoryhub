@@ -17,7 +17,7 @@ export const setPreferredRole = (userId: string, role: AppRole) => {
 
 async function fetchRoles(userId: string): Promise<{ primary: AppRole | null; all: AppRole[] }> {
   const rpc = supabase.rpc('get_user_role', { _user_id: userId });
-  const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Role lookup timed out')), 7000));
+  const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Role lookup timed out')), 15000));
   const { data, error } = (await Promise.race([rpc, timeout])) as { data: unknown; error: unknown };
   if (error) throw error;
   const primary = (data as AppRole) ?? null;
@@ -36,8 +36,8 @@ export const useUserRole = () => {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
-    retry: 2,
-    retryDelay: (a) => Math.pow(2, a) * 500,
+    retry: 4,
+    retryDelay: (a) => Math.min(Math.pow(2, a) * 750, 8000),
   });
   const preferred = user ? getPreferredRole(user.id) : null;
   const all = q.data?.all ?? [];

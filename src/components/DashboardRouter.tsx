@@ -20,6 +20,19 @@ const DashboardRouter = () => {
   const navigate = useNavigate();
   const [hasCheckedRole, setHasCheckedRole] = useState(false);
   const [watchdogExpired, setWatchdogExpired] = useState(false);
+  const [autoRetries, setAutoRetries] = useState(0);
+
+  // A transient role-lookup failure (cold start, slow network) must not strand
+  // a signed-in user on the error screen — retry quietly a few times first.
+  useEffect(() => {
+    if (error && !role && autoRetries < 4) {
+      const t = setTimeout(() => {
+        setAutoRetries((n) => n + 1);
+        refetch();
+      }, 1500 * (autoRetries + 1));
+      return () => clearTimeout(t);
+    }
+  }, [error, role, autoRetries, refetch]);
 
   // Hard watchdog: the loading screen can never stay on screen forever
   useEffect(() => {
@@ -62,8 +75,21 @@ const DashboardRouter = () => {
     return <Navigate to="/auth" replace />;
   }
 
+  // Role lookup failed but automatic retries are still running — keep loading
+  if (error && !role && autoRetries < 4) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   // If there was an error fetching the role, show error state with retry option
-  if (error && !role) {
+  // (only after the automatic retries above are exhausted)
+  if (error && !role && autoRetries >= 4) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
