@@ -6,19 +6,22 @@
  */
 import React, { useEffect, useState } from 'react';
 import { X, Plus, FilePlus2, Library, BookCopy, GripVertical } from 'lucide-react';
-import { BROCHURES, countUrl, embedUrl } from './library';
+import { BROCHURES, countUrl, templateEmbedUrl } from './library';
 import { LAYOUTS, type Layout } from './layouts';
 import { Thumb } from './LayoutGallery';
 import { STARTER_KITS, APEX_KIT, brochureKit, readCounts, saveCounts, KIT_MIME, type Kit } from './kits';
 
 const ACCENT = 'linear-gradient(135deg,#06b6d4,#1d4ed8)';
 const ACTIVE = 'linear-gradient(135deg,#0e7490,#1d4ed8)';
-const PARALLEL = 3; // live page previews loading at the same time
+const PARALLEL = 2; // live page previews loading at the same time
 
-/** One live page preview that only starts loading when its turn comes. */
+/** One live page preview that only starts loading when its turn comes.
+ *  Each preview is a full app inside an iframe, so the queue may only
+ *  advance when a preview has REALLY loaded — an earlier version also
+ *  advanced on a 6-second timer, which kept mounting heavy iframes until
+ *  the whole tab hung. */
 function LivePage({ src, title, go, onDone }: { src: string; title: string; go: boolean; onDone: () => void }) {
   const [ready, setReady] = useState(false);
-  useEffect(() => { if (!go || ready) return; const t = setTimeout(() => { setReady(true); onDone(); }, 6000); return () => clearTimeout(t); }, [go, ready]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!go) return <div className="w-full h-full grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Waiting…</div>;
   return <>
     {!ready && <div className="absolute inset-0 grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Loading…</div>}
@@ -46,8 +49,11 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
     return () => window.removeEventListener('message', on);
   }, []);
 
-  // Count missing brochures one at a time in the background (the open one first).
-  const missing = [route, ...BROCHURES.map((b) => b.route)].find((r) => BROCHURES.some((b) => b.route === r) && counts[r] === undefined);
+  // Count missing brochures one at a time in the background (the open one
+  // first) — but only while a brochure tab is open: counting loads a full
+  // app per brochure, and it used to run even on the templates tabs.
+  const missing = route === 'kits' || route === 'layouts' ? undefined
+    : [route, ...BROCHURES.map((b) => b.route)].find((r) => BROCHURES.some((b) => b.route === r) && counts[r] === undefined);
 
   const n = counts[route];
   const isLay = route === 'layouts', isKits = route === 'kits';
@@ -124,10 +130,10 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
               <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))' }}>
                 {Array.from({ length: n }, (_, i) => (
                   <div key={i} className="group relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.12)', aspectRatio: '1 / 1.414', background: '#0b1220' }}>
-                    <LivePage src={embedUrl(route, i)} title={`${name} page ${i + 1}`} go={i < done + PARALLEL} onDone={() => setDone((d) => d + 1)} />
+                    <LivePage src={templateEmbedUrl(route, i)} title={`${name} page ${i + 1}`} go={i < done + PARALLEL} onDone={() => setDone((d) => d + 1)} />
                     <span className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 font-mono text-[10px]" style={{ background: 'rgba(15,23,42,0.85)' }}>P/{String(i + 1).padStart(2, '0')}</span>
                     <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(8,47,73,0.45)' }}
-                      onClick={() => onPick(embedUrl(route, i), `${name} P/${i + 1}`)}>
+                      onClick={() => onPick(templateEmbedUrl(route, i), `${name} P/${i + 1}`)}>
                       <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold" style={{ background: ACCENT }}><Plus className="h-4 w-4" />Insert</span>
                     </button>
                   </div>

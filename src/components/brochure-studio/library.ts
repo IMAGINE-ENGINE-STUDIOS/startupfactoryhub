@@ -1,7 +1,8 @@
 /**
  * Page library: every brochure whose pages can be reused as templates.
- * A page is reused live through its embed link (?bsEmbed=<page>), so it keeps
- * its design, animations, 3D and published edits.
+ * Template copies go through the design-only embed (?bsTemplate=1): the
+ * layout, colors, animations and 3D carry over, but the real words are
+ * replaced with lorem ipsum and logos are removed.
  * Credits: Imagine Engine Studios Corp.
  */
 export const BROCHURES: { route: string; name: string }[] = [
@@ -19,5 +20,9 @@ export const BROCHURES: { route: string; name: string }[] = [
 ];
 
 export const embedUrl = (route: string, page: number) => `${route}?bsEmbed=${page}`;
+/** Design-only template copy of a page: same layout, colors and shapes,
+ *  but the real words are replaced with lorem ipsum and logos removed —
+ *  members can reuse the design without taking the brochure's content. */
+export const templateEmbedUrl = (route: string, page: number) => `${route}?bsEmbed=${page}&bsTemplate=1`;
 export const countUrl = (route: string) => `${route}?bsCount=1`;
 export const isEmbed = () => typeof window !== 'undefined' && /[?&]bs(Embed|Count)=/.test(window.location.search);

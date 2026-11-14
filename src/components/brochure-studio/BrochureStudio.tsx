@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BookCopy,
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
-  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle, LayoutTemplate,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Shuffle, LayoutTemplate,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -127,7 +127,13 @@ function StudioEditor() {
   const [models, setModels] = useState<LibModel[]>([]);
   useEffect(() => { if (modelsOpen) fetchModels().then(setModels); }, [modelsOpen]);
   const lastPage = useRef<number | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  // The /b flipbook reports every page turn here, so tools always act on
+  // the page the user is actually looking at (also after drag flips).
+  useEffect(() => {
+    const on = (e: Event) => { const p = (e as CustomEvent<{ page?: number }>).detail?.page; if (typeof p === 'number') lastPage.current = p; };
+    window.addEventListener('bs:page', on);
+    return () => window.removeEventListener('bs:page', on);
+  }, []);
   const uploadTarget = useRef<{ mode: 'new-image' | 'new-model' | 'replace' | 'ios'; id?: string }>({ mode: 'new-image' });
 
   /* ---- find pages on screen ---- */
@@ -310,7 +316,17 @@ function StudioEditor() {
   };
   const pick = (mode: 'new-image' | 'new-model' | 'replace' | 'ios', accept: string, id?: string) => {
     uploadTarget.current = { mode, id };
-    if (fileRef.current) { fileRef.current.accept = accept; fileRef.current.click(); }
+    // A fresh, attached file input per pick: reusing one display:none input
+    // and calling .click() on it silently never opened the picker on
+    // iPhone Safari (and in some desktop browsers), which made Picture,
+    // 3D/AR upload and Replace picture look completely dead.
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+    input.addEventListener('change', () => { const f = input.files?.[0]; if (f) onFile(f); setTimeout(() => input.remove(), 0); });
+    document.body.appendChild(input);
+    input.click();
   };
 
   const addItem = (p: Partial<Item>) => {
@@ -481,7 +497,7 @@ function StudioEditor() {
       <style>{STUDIO_CSS}</style>
       {portals}
       {!editing && <ReaderBar roots={roots} />}
-      <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] overflow-x-auto rounded-xl px-2 py-1.5 flex items-center gap-1.5" style={glass}>
+      <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] rounded-xl px-2 py-1.5 flex flex-wrap justify-center items-center gap-1.5" style={glass}>
         <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }}>
           <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
         </button>
@@ -505,6 +521,10 @@ function StudioEditor() {
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
             <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
+            {isCustom && <>
+              <button className={btn} style={soft} aria-label="Previous page" title="Previous page" onClick={() => window.dispatchEvent(new CustomEvent('bs:flip', { detail: { dir: 'prev' } }))}><ChevronLeft className="h-4 w-4" /></button>
+              <button className={btn} style={soft} aria-label="Next page" title="Next page" onClick={() => window.dispatchEvent(new CustomEvent('bs:flip', { detail: { dir: 'next' } }))}><ChevronRight className="h-4 w-4" /></button>
+            </>}
             <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
             <button className={btn} style={layoutsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setLayoutsOpen((o) => !o); setModelsOpen(false); }}><LayoutTemplate className="h-4 w-4" />Layouts</button>
             <button className={btn} style={soft} onClick={() => setLibAt(-1)}><BookCopy className="h-4 w-4" />Brochure templates</button>
@@ -514,7 +534,6 @@ function StudioEditor() {
             <button className={btn} disabled={busy} onClick={publish} style={{ background: 'linear-gradient(135deg,#06b6d4,#1d4ed8)' }}><Upload className="h-4 w-4" />Publish</button>
           </>
         )}
-        <input ref={fileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }} />
       </div>
 
       {editing && bgOpen && (

@@ -14,10 +14,37 @@ html.bs-embed .bs-embed-target, html.bs-embed .bs-embed-target *{visibility:visi
 html.bs-embed .bs-embed-target{display:block!important;position:fixed!important;z-index:2147483000!important;transform-origin:0 0!important;opacity:1!important;clip-path:none!important}
 `;
 
+const LOREM = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+
+/** Design-only template mode (?bsTemplate=1): keep the page's layout,
+ *  colors and shapes, but replace every real word with lorem ipsum and
+ *  remove logo images, so the design can be reused without its content. */
+function scrubTemplate(target: HTMLElement) {
+  let n = 0;
+  target.querySelectorAll('*').forEach((el) => {
+    const h = el as HTMLElement;
+    if (h.tagName === 'IMG') {
+      const im = h as HTMLImageElement;
+      if (/logo|apex/i.test(im.src) || /logo|apex/i.test(im.alt || '')) h.style.display = 'none';
+      return;
+    }
+    if (h.childElementCount > 0 || h.dataset.bsLorem !== undefined) return;
+    const text = (h.textContent || '').trim();
+    if (!text) return;
+    h.dataset.bsLorem = '';
+    const words = Math.max(1, Math.round(text.length / 6));
+    let out = '';
+    for (let i = 0; i < words; i++) out += (i ? ' ' : '') + LOREM[(n + i) % LOREM.length];
+    n += words;
+    h.textContent = text.length <= 3 ? out : out.charAt(0).toUpperCase() + out.slice(1);
+  });
+}
+
 export default function EmbedPage() {
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const count = q.has('bsCount');
+    const template = q.has('bsTemplate');
     const want = Number(q.get('bsEmbed') || 0);
     const style = document.createElement('style'); style.textContent = CSS;
     if (!count) { document.head.appendChild(style); document.documentElement.classList.add('bs-embed'); }
@@ -56,6 +83,7 @@ export default function EmbedPage() {
         target?.classList.remove('bs-embed-target');
         target = t; t.classList.add('bs-embed-target');
       }
+      if (template && target) scrubTemplate(target);
       fit();
     };
     const iv = setInterval(tick, 400); tick();
