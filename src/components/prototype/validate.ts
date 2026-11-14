@@ -53,10 +53,14 @@ export function canConnect(
       return { ok: false, reason: "Power flows from a supply's OUT to a component's power IN." };
     }
     const v = a.voltage ?? 0;
-    if (v < specB.voltageMin - 0.01 || v > specB.voltageMax + 0.01) {
+    // A board's power pin can accept a range wider than its chip's
+    // (onboard regulator) — the port's own acceptance wins when set.
+    const lo = b.acceptsMin ?? specB.voltageMin;
+    const hi = b.acceptsMax ?? specB.voltageMax;
+    if (v < lo - 0.01 || v > hi + 0.01) {
       return {
         ok: false,
-        reason: `${specB.name} needs ${specB.voltageMin}–${specB.voltageMax} V — this supply gives ${v} V.`,
+        reason: `${specB.name} needs ${lo}–${hi} V on that pin — this supply gives ${v} V.`,
       };
     }
   } else {

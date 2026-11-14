@@ -132,7 +132,7 @@ export default function Canvas({ design, onChange }: Props) {
       {/* ── Stage ─────────────────────────────────────────── */}
       <div
         ref={stageRef}
-        className="flex-1 min-h-0 relative rounded-2xl border border-border overflow-hidden touch-none"
+        className="flex-1 min-h-[320px] relative rounded-2xl border border-border overflow-hidden touch-none"
         style={{
           backgroundImage:
             "linear-gradient(to right, rgba(148,163,184,0.09) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.09) 1px, transparent 1px)",

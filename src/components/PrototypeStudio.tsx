@@ -137,7 +137,7 @@ export default function PrototypeStudio() {
   if (current) {
     const validity = validateDesign(current.design);
     return (
-      <div className="h-full flex flex-col gap-3">
+      <div className="flex-1 min-h-0 w-full flex flex-col gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => { setCurrent(null); load(); }}>
             <ArrowLeft className="h-4 w-4" /> Projects

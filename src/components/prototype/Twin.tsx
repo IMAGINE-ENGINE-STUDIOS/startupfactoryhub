@@ -100,7 +100,7 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
     <div className="flex flex-col h-full min-h-0 gap-2">
       {/* ── Twin stage ─────────────────────────────────────── */}
       <div
-        className="flex-1 min-h-0 relative rounded-2xl border border-border overflow-hidden"
+        className="flex-1 min-h-[320px] relative rounded-2xl border border-border overflow-hidden"
         style={{
           backgroundImage:
             "linear-gradient(to right, rgba(52,211,153,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(52,211,153,0.07) 1px, transparent 1px)",

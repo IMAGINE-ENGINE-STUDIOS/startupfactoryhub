@@ -30,6 +30,13 @@ export interface ProtoPort {
   /** For signal inputs: minimum input-high voltage, if the datasheet
    *  sets one above a typical logic level (drives a warning). */
   minVoltage?: number;
+  /** For power-in ports on boards with an onboard regulator: the
+   *  voltage range THIS PIN accepts, which can be wider than the
+   *  chip's own range (e.g. an ESP32 dev board's 5V IN pin feeds a
+   *  3.3 V regulator). Overrides the component range for power
+   *  checks on this port. */
+  acceptsMin?: number;
+  acceptsMax?: number;
 }
 
 export interface ComponentSpec {
@@ -84,9 +91,9 @@ export const COMPONENTS: ComponentSpec[] = [
     name: "ESP32 Dev Board",
     category: "controller",
     summary: "Dual-core 240 MHz controller with Wi-Fi and Bluetooth LE built in — the default brain for connected prototypes.",
-    voltageMin: 3.0, voltageMax: 3.6, logicVoltage: 3.3, currentMa: 160,
+    voltageMin: 5, voltageMax: 5, logicVoltage: 3.3, currentMa: 160,
     ports: [
-      { id: "vin", label: "5V IN", kind: "power-in" },
+      { id: "vin", label: "5V IN", kind: "power-in", acceptsMin: 5, acceptsMax: 5 },
       ...gpio(["d13", "d12", "d14", "d27", "d26", "d25"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" },
       { id: "pwm1", label: "PWM1", kind: "pwm" }, { id: "pwm2", label: "PWM2", kind: "pwm" },
@@ -100,9 +107,9 @@ export const COMPONENTS: ComponentSpec[] = [
     name: "Arduino Uno R3",
     category: "controller",
     summary: "The classic 5 V teaching board (ATmega328P) — huge shield ecosystem, forgiving for first builds.",
-    voltageMin: 5, voltageMax: 5, logicVoltage: 5, currentMa: 45,
+    voltageMin: 7, voltageMax: 12, logicVoltage: 5, currentMa: 45,
     ports: [
-      { id: "vin", label: "VIN 7–12V", kind: "power-in" },
+      { id: "vin", label: "VIN 7–12V", kind: "power-in", acceptsMin: 7, acceptsMax: 12 },
       ...gpio(["d2", "d4", "d7", "d8"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" }, { id: "a2", label: "A2", kind: "analog" },
       { id: "pwm1", label: "PWM ~9", kind: "pwm" }, { id: "pwm2", label: "PWM ~10", kind: "pwm" },
@@ -116,9 +123,9 @@ export const COMPONENTS: ComponentSpec[] = [
     name: "Raspberry Pi Pico",
     category: "controller",
     summary: "RP2040 dual-core board — low power, precise timing (PIO), 3.3 V logic.",
-    voltageMin: 3.0, voltageMax: 3.6, logicVoltage: 3.3, currentMa: 25,
+    voltageMin: 1.8, voltageMax: 5.5, logicVoltage: 3.3, currentMa: 25,
     ports: [
-      { id: "vin", label: "VSYS IN", kind: "power-in" },
+      { id: "vin", label: "VSYS IN", kind: "power-in", acceptsMin: 1.8, acceptsMax: 5.5 },
       ...gpio(["gp2", "gp3", "gp4", "gp5"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" },
       { id: "pwm1", label: "PWM1", kind: "pwm" },
