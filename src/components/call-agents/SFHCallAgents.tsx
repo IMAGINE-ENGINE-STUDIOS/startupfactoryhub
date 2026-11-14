@@ -398,6 +398,7 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
 
   const [shareImportInput, setShareImportInput] = useState("");
   const [importingShare, setImportingShare] = useState(false);
+  const [shareLink, setShareLink] = useState<{ agentName: string; link: string } | null>(null);
 
   const [vaultConfigured, setVaultConfigured] = useState<boolean | null>(null);
   const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
@@ -597,6 +598,9 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
     try {
       const data = await callAgentsApi({ action: "share_agent", agent_id: agent.id });
       const link = `${window.location.origin}/dashboard?agent_share=${data.token}`;
+      // Show the link on screen too — clipboard-only left users with nothing
+      // they could see, check, or paste into the Import box to verify.
+      setShareLink({ agentName: agent.name, link });
       try {
         await navigator.clipboard.writeText(link);
       } catch {
@@ -1047,6 +1051,38 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
         {notice && (
           <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3.5 text-sm text-emerald-700 backdrop-blur dark:text-emerald-300">
             {notice}
+          </div>
+        )}
+        {shareLink && (
+          <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3.5 backdrop-blur">
+            <p className="text-sm text-emerald-700 dark:text-emerald-300">
+              Share link for "{shareLink.agentName}" — anyone with it can import a copy of this agent:
+            </p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <Input
+                readOnly
+                value={shareLink.link}
+                onFocus={(e) => e.target.select()}
+                className={GLASS_INPUT}
+                aria-label="Agent share link"
+              />
+              <Button
+                onClick={() => {
+                  void navigator.clipboard.writeText(shareLink.link).catch(() => {});
+                  toast.success("Share link copied");
+                }}
+                className="shrink-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 text-white shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600"
+              >
+                Copy link
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShareLink(null)}
+                className="shrink-0 rounded-full px-4"
+              >
+                Dismiss
+              </Button>
+            </div>
           </div>
         )}
 
