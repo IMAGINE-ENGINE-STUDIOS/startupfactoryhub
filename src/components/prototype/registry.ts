@@ -30,6 +30,10 @@ export interface ProtoPort {
   /** For signal inputs: minimum input-high voltage, if the datasheet
    *  sets one above a typical logic level (drives a warning). */
   minVoltage?: number;
+  /** For power-out ports on boards (their 3.3 V rail pin): how much
+   *  current that pin can source — the budget checks against this
+   *  instead of the component's own draw when set. */
+  capacityMa?: number;
   /** For power-in ports on boards with an onboard regulator: the
    *  voltage range THIS PIN accepts, which can be wider than the
    *  chip's own range (e.g. an ESP32 dev board's 5V IN pin feeds a
@@ -94,6 +98,7 @@ export const COMPONENTS: ComponentSpec[] = [
     voltageMin: 5, voltageMax: 5, logicVoltage: 3.3, currentMa: 160,
     ports: [
       { id: "vin", label: "5V IN", kind: "power-in", acceptsMin: 5, acceptsMax: 5 },
+      { id: "v33", label: "3V3 OUT", kind: "power-out", voltage: 3.3, capacityMa: 500 },
       ...gpio(["d13", "d12", "d14", "d27", "d26", "d25"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" },
       { id: "pwm1", label: "PWM1", kind: "pwm" }, { id: "pwm2", label: "PWM2", kind: "pwm" },
@@ -110,6 +115,7 @@ export const COMPONENTS: ComponentSpec[] = [
     voltageMin: 7, voltageMax: 12, logicVoltage: 5, currentMa: 45,
     ports: [
       { id: "vin", label: "VIN 7–12V", kind: "power-in", acceptsMin: 7, acceptsMax: 12 },
+      { id: "v33", label: "3.3V OUT", kind: "power-out", voltage: 3.3, capacityMa: 50 },
       ...gpio(["d2", "d4", "d7", "d8"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" }, { id: "a2", label: "A2", kind: "analog" },
       { id: "pwm1", label: "PWM ~9", kind: "pwm" }, { id: "pwm2", label: "PWM ~10", kind: "pwm" },
@@ -126,6 +132,7 @@ export const COMPONENTS: ComponentSpec[] = [
     voltageMin: 1.8, voltageMax: 5.5, logicVoltage: 3.3, currentMa: 25,
     ports: [
       { id: "vin", label: "VSYS IN", kind: "power-in", acceptsMin: 1.8, acceptsMax: 5.5 },
+      { id: "v33", label: "3V3 OUT", kind: "power-out", voltage: 3.3, capacityMa: 300 },
       ...gpio(["gp2", "gp3", "gp4", "gp5"]),
       { id: "a0", label: "A0", kind: "analog" }, { id: "a1", label: "A1", kind: "analog" },
       { id: "pwm1", label: "PWM1", kind: "pwm" },
@@ -303,6 +310,22 @@ export const COMPONENTS: ComponentSpec[] = [
       { id: "spi", label: "SPI", kind: "spi" },
     ],
     source: "Semtech SX1278 datasheet / Ai-Thinker Ra-02",
+  },
+  {
+    id: "levelshifter",
+    name: "Logic Level Converter 2-Ch (BSS138)",
+    category: "comms",
+    summary: "Bidirectional level shifter: connects 5 V signals to 3.3 V logic safely (e.g. an HC-SR04 Echo into an ESP32). Needs BOTH rails connected — HV to 5 V, LV to 3.3 V.",
+    voltageMin: 3.3, voltageMax: 5, logicVoltage: 5, currentMa: 10,
+    ports: [
+      { id: "hv", label: "HV 5V", kind: "power-in", acceptsMin: 4.5, acceptsMax: 5.5 },
+      { id: "lv", label: "LV 3.3V", kind: "power-in", acceptsMin: 2.8, acceptsMax: 3.6 },
+      { id: "hv1", label: "HV1", kind: "gpio", voltage: 5 },
+      { id: "lv1", label: "LV1", kind: "gpio", voltage: 3.3 },
+      { id: "hv2", label: "HV2", kind: "gpio", voltage: 5 },
+      { id: "lv2", label: "LV2", kind: "gpio", voltage: 3.3 },
+    ],
+    source: "BSS138 level-shifter module class (SparkFun BOB-12009 family)",
   },
 ];
 

@@ -121,37 +121,41 @@ export function validateDesign(d: DesignDoc): { valid: boolean; errors: Issue[];
   for (const comp of d.components) {
     const spec = specs.get(comp.uid);
     if (!spec || spec.category === "power") continue;
-    const inPort = spec.ports.find((p) => p.kind === "power-in");
-    if (!inPort) continue;
-    const feed = d.connections.find(
-      (c) => (c.toUid === comp.uid && c.toPort === inPort.id) || (c.fromUid === comp.uid && c.fromPort === inPort.id)
-    );
-    if (!feed) {
-      errors.push({ level: "error", uid: comp.uid, message: `${spec.name} has no power — connect its ${inPort.label} to a supply.` });
+    // Every power-in port must be fed — a dual-rail part (the level
+    // shifter) needs both its 5 V and its 3.3 V side connected.
+    for (const inPort of spec.ports.filter((p) => p.kind === "power-in")) {
+      const feed = d.connections.find(
+        (c) => (c.toUid === comp.uid && c.toPort === inPort.id) || (c.fromUid === comp.uid && c.fromPort === inPort.id)
+      );
+      if (!feed) {
+        errors.push({ level: "error", uid: comp.uid, message: `${spec.name} has no power — connect its ${inPort.label} to a supply.` });
+      }
     }
   }
 
-  // Power budget per supply.
+  // Power budget per source: dedicated supplies, and board rail pins
+  // (a controller's 3V3 OUT), which carry their own capacity.
   for (const comp of d.components) {
     const spec = specs.get(comp.uid);
-    if (!spec || spec.category !== "power") continue;
+    if (!spec) continue;
     const outPort = spec.ports.find((p) => p.kind === "power-out");
     if (!outPort) continue;
+    const capacity = outPort.capacityMa ?? spec.currentMa;
     let load = 0;
     for (const c of d.connections) {
       const otherUid = c.fromUid === comp.uid && c.fromPort === outPort.id ? c.toUid
         : c.toUid === comp.uid && c.toPort === outPort.id ? c.fromUid : null;
       if (otherUid) load += specs.get(otherUid)?.currentMa ?? 0;
     }
-    if (load > spec.currentMa) {
+    if (load > capacity) {
       errors.push({
         level: "error", uid: comp.uid,
-        message: `${spec.name} is overloaded: the design draws ~${load} mA but it supplies ${spec.currentMa} mA. Add a stronger or second supply.`,
+        message: `${spec.name} is overloaded: the design draws ~${load} mA but it supplies ${capacity} mA. Add a stronger or second supply.`,
       });
-    } else if (load > spec.currentMa * 0.8) {
+    } else if (load > capacity * 0.8) {
       warnings.push({
         level: "warning", uid: comp.uid,
-        message: `${spec.name} runs at ${Math.round((load / spec.currentMa) * 100)}% of its capacity — close to the edge.`,
+        message: `${spec.name} runs at ${Math.round((load / capacity) * 100)}% of its capacity — close to the edge.`,
       });
     }
   }
