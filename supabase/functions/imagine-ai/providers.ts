@@ -81,7 +81,31 @@ export async function configuredChat(tier: Tier, body: Record<string, unknown>, 
     delete payload.max_tokens; delete payload.stream_options; delete payload.response_format;
     payload.options = { num_predict: body.max_tokens };
   }
-  const resp = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload), redirect: "error", signal: AbortSignal.timeout(120000) });
+  const send = () => fetch(url, { method: "POST", headers, body: JSON.stringify(payload), redirect: "error", signal: AbortSignal.timeout(120000) });
+  // Jobs 4+5 remainder: this direct path (brain / xai / anthropic / custom
+  // pins) used to be a single shot — one outage or 429 on the pinned model
+  // killed the build. Give it the same policy routeChat has: on a retryable
+  // failure (429, 5xx, network error) retry the pin once, honoring
+  // retry-after (capped 6s); if it still fails, fall through to the tier's
+  // normal chain instead of surfacing the failure. The pin takes over again
+  // automatically when it serves. Non-retryable failures (e.g. 400/401) keep
+  // the old behavior and are returned as-is; success is untouched.
+  const retryable = (s: number) => s === 429 || s >= 500;
+  let resp: Response | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try { resp = await send(); } catch { resp = null; }
+    if (resp?.ok) break;
+    if (resp && !retryable(resp.status)) break;
+    if (attempt === 1) break;
+    const wait = Math.min((resp ? Number(resp.headers.get("retry-after")) : NaN) || 2, 6);
+    console.warn(`[imagine-ai] pinned ${settings.provider}/${settings.model} ${resp ? resp.status : "network error"}, retrying in ${wait}s`);
+    if (resp) { try { await resp.body?.cancel(); } catch { /* best effort */ } }
+    await new Promise((r) => setTimeout(r, wait * 1000));
+  }
+  if (!resp || (!resp.ok && retryable(resp.status))) {
+    console.warn(`[imagine-ai] pinned ${settings.provider}/${settings.model} unavailable, falling through to the ${tier} chain`);
+    return routeChat(tier, body, overrides);
+  }
   if (!resp.ok || kind === "openai" || body.stream) return { resp, provider: settings.provider, model: settings.model };
   const data = await resp.json();
   const content = kind === "ollama" ? data.message?.content : (data.content || []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("");
