@@ -322,7 +322,20 @@ No invented production records: use empty states unless the user supplied data. 
     }
     let text = "", inTok = 0, outTok = 0, routed: Awaited<ReturnType<typeof configuredChat>> | null = null;
     let accumulatedCost = 0;
-    const MAX_PARTS = body.mode === "chat" || light ? 4 : 8;
+    // Job 6 (finish plan): builds no longer stop at a fixed pass count.
+    // A build keeps continuing while the model is being cut off mid-output
+    // (continuation() in stream.ts) until it finishes on its own — the root
+    // file and done record emitted — bounded by a total per-build
+    // output-token budget instead of the old 8 passes x 8000 = 64k ceiling,
+    // plus an absolute pass sanity cap so a pathological loop still
+    // terminates with the honest error below. Credits are unaffected:
+    // the flat 1-Credit reservation already covers the whole action and
+    // per-pass usage still accumulates into the ledger tag. Chat and
+    // light requests keep the old fixed cap of 4.
+    const BUILD_OUTPUT_BUDGET = 160_000;
+    const BUILD_MAX_PARTS = 24;
+    const isBuild = body.mode !== "chat" && !light;
+    const MAX_PARTS = isBuild ? BUILD_MAX_PARTS : 4;
     for (let part = 0; part < MAX_PARTS; part++) {
       emit({ type: "status", message: part ? "Continuing the remaining files..." : "Working on your project..." });
       routed = await configuredChat(tier, { messages: part ? resumeMessages(baseMessages, text) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
@@ -331,6 +344,7 @@ No invented production records: use empty states unless the user supplied data. 
       inTok += completion.input; outTok += completion.output;
       accumulatedCost += costUsd(routed.model, completion.input, completion.output);
       if (!continuation(text, completion.finish)) break;
+      if (isBuild && outTok >= BUILD_OUTPUT_BUDGET) throw new Error("The build hit its size budget before finishing; completed files were kept and unfinished files were not saved. Continue with a smaller next phase");
       if (part === MAX_PARTS - 1) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
     }
     if (!routed || !text.trim()) throw new Error("The AI produced no result");
