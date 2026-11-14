@@ -1,0 +1,42 @@
+name: Imagine Engine gate
+
+# Regression gate for the Imagine Engine runtime and the imagine-ai brain.
+# A red run means a broken engine patch (unparseable runtime file, failing
+# build-protocol test, or an edge function that no longer compiles) — do
+# not merge/push past it. Runs the same scripts/ie-gate.sh as `npm run gate:ie`.
+
+on:
+  push:
+    paths:
+      - "public/imagine-engine/**"
+      - "supabase/functions/imagine-ai/**"
+      - "supabase/functions/_shared/**"
+      - "scripts/ie-gate.sh"
+      - ".github/workflows/imagine-engine-gate.yml"
+  pull_request:
+    paths:
+      - "public/imagine-engine/**"
+      - "supabase/functions/imagine-ai/**"
+      - "supabase/functions/_shared/**"
+      - "scripts/ie-gate.sh"
+      - ".github/workflows/imagine-engine-gate.yml"
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The repo installs with bun + the frozen lockfile (same as the
+      # Cloudflare Pages build); the gate needs node_modules/.bin/esbuild.
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Run the Imagine Engine gate
+        run: bash scripts/ie-gate.sh
