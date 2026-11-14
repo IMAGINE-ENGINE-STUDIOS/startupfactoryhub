@@ -382,6 +382,7 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
   const [notice, setNotice] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<AgentForm>(EMPTY_FORM);
 
   const [runMode, setRunMode] = useState<"solo" | "pipeline">("solo");
@@ -567,7 +568,14 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
   };
 
   const handleDelete = async (agent: CallAgent) => {
-    if (!window.confirm(`Delete agent "${agent.name}"? This cannot be undone.`)) return;
+    // In-app two-step confirm: window.confirm() never surfaced in the live
+    // app (scan 2026-11-14 — Delete clicked dead), so the first click arms
+    // the button and only the second click actually deletes.
+    if (confirmDeleteId !== agent.id) {
+      setConfirmDeleteId(agent.id);
+      return;
+    }
+    setConfirmDeleteId(null);
     setError(null);
     try {
       await callAgentsApi({ action: "delete", id: agent.id });
@@ -577,8 +585,10 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
       }
       setPipelineIds((prev) => prev.filter((id) => id !== agent.id));
       await load();
+      toast.success(`Agent "${agent.name}" deleted.`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not delete the agent.");
+      toast.error(e instanceof Error ? e.message : "Could not delete the agent.");
     }
   };
 
@@ -1201,10 +1211,15 @@ export default function SFHCallAgents({ botLink }: { botLink?: { botName: string
                       <Button
                         size="sm"
                         variant="outline"
-                        className="rounded-full border-destructive/30 bg-background/60 text-destructive backdrop-blur hover:bg-destructive/10 hover:text-destructive"
+                        className={`rounded-full backdrop-blur ${
+                          confirmDeleteId === agent.id
+                            ? "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground"
+                            : "border-destructive/30 bg-background/60 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        }`}
                         onClick={() => handleDelete(agent)}
                       >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />{" "}
+                        {confirmDeleteId === agent.id ? "Confirm delete" : "Delete"}
                       </Button>
                     </div>
                   </article>
