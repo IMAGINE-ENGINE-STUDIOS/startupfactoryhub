@@ -48,6 +48,15 @@ export const slugFromPath = (path: string) => {
 export const fetchPublished = (slug: string) =>
   fetch(`${publishedUrl(slug)}?t=${Date.now()}`).then((r) => (r.ok ? r.json() : null)).then(normalizeDoc).catch(() => normalizeDoc(null));
 
+/* Drafts also live on the server (same bucket + publish function as the
+ * published docs, under a per-user draft slug): localStorage alone lost
+ * saved drafts across reloads in testing and never follows the owner
+ * across devices. The server copy is the durable one; localStorage is
+ * the fast mirror / offline fallback. */
+const draftSlugFor = (slug: string, uid: string) => `${slug}-d-${uid.replace(/[^a-z0-9]/gi, '').slice(0, 8)}`.slice(0, 60);
+const fetchServerDraft = (dslug: string): Promise<BrochureDoc | null> =>
+  fetch(`${publishedUrl(dslug)}?t=${Date.now()}`).then((r) => (r.ok ? r.json() : null)).then((d) => (d ? normalizeDoc(d) : null)).catch(() => null);
+
 const HOVERS: { v: Hover; l: string }[] = [{ v: '', l: 'None' }, { v: 'lift', l: 'Lift' }, { v: 'grow', l: 'Grow' }, { v: 'glow', l: 'Glow' }, { v: 'tilt', l: 'Tilt' }];
 const ANIMS: { v: Anim; l: string }[] = [
   { v: '', l: 'None' }, { v: 'fade', l: 'Fade in' }, { v: 'up', l: 'Slide up' }, { v: 'reveal', l: 'Cyber reveal' },
@@ -102,9 +111,10 @@ function StudioEditor() {
   const { role } = useUserRole();
   const isAdmin = role === 'admin';
   const [userId, setUserId] = useState<string | null>(null);
+  const userIdRef = useRef<string | null>(null);
   useEffect(() => {
     let off = false;
-    supabase.auth.getUser().then(({ data }) => { if (!off) setUserId(data.user?.id ?? null); });
+    supabase.auth.getUser().then(({ data }) => { if (!off) { userIdRef.current = data.user?.id ?? null; setUserId(data.user?.id ?? null); } });
     return () => { off = true; };
   }, []);
   // Admins edit every brochure; signed-in owners edit their own Studio
@@ -155,28 +165,33 @@ function StudioEditor() {
   }, [pathname]);
   const active = roots.length > 0;
 
-  /* ---- load published + admin draft ---- */
+  /* ---- load published + draft (local mirror + durable server copy) ---- */
   useEffect(() => {
     let off = false;
     past.current = []; future.current = [];
-    let draft: BrochureDoc | null = null;
+    let local: BrochureDoc | null = null;
     if (canEdit) {
       try {
         const s = localStorage.getItem(draftKey(slug));
-        if (s) draft = normalizeDoc(JSON.parse(s));
+        if (s) local = normalizeDoc(JSON.parse(s));
       } catch { /* ignore */ }
     }
-    // A draft that carries the brochure's pages can paint immediately. A
-    // PAGELESS draft was built on an empty base (an early failed load
-    // resolved to an empty doc and every later session kept editing that
-    // base, so the published items never entered it) — it must wait for
-    // the merge below instead of replacing the published content.
-    if (draft && (draft.pages?.length || draft.pageCount)) setDoc(draft);
-    fetchPublished(slug).then((pub) => {
+    // A local draft that carries the brochure's pages can paint
+    // immediately. A PAGELESS draft was built on an empty base (an early
+    // failed load resolved to an empty doc and every later session kept
+    // editing that base, so the published items never entered it) — it
+    // must wait for the merge below instead of replacing the content.
+    if (local && (local.pages?.length || local.pageCount)) setDoc(local);
+    const dslug = userId ? draftSlugFor(slug, userId) : null;
+    Promise.all([fetchPublished(slug), dslug ? fetchServerDraft(dslug) : Promise.resolve(null)]).then(([pub, server]) => {
       if (off) return;
       // Never let a slow load wipe edits made while it was in flight —
       // the in-memory pending draft is newer than anything on disk.
       if (pendingDraft.current) { setDoc(pendingDraft.current); return; }
+      // The working draft is whichever copy was saved most recently;
+      // the server copy is durable, the local one is only a mirror.
+      let draft = local;
+      if (server && (!draft || (server.savedAt ?? 0) >= (draft.savedAt ?? 0))) draft = server;
       const pubEmpty = !pub.pages?.length && !pub.pageCount && pub.items.length === 0;
       if (!draft) { setDoc({ ...pub, baseFp: JSON.stringify([pub.items, pub.bgs]) }); return; }
       if (pubEmpty) { setDoc(draft); return; } // fetch failed: draft is all we have
@@ -184,7 +199,7 @@ function StudioEditor() {
       if (draft.baseFp === pubFp) { setDoc(draft); return; } // healthy draft, based on this published doc
       // Stale-base draft: union-merge so nothing from either copy is
       // lost (draft items first, published items the draft never saw
-      // appended), then heal the stored draft so the next load starts
+      // appended), then heal both stored copies so the next load starts
       // from the merged document.
       const seen = new Set(draft.items.map((i) => i.id));
       const merged: BrochureDoc = {
@@ -198,9 +213,11 @@ function StudioEditor() {
       };
       setDoc(merged);
       try { localStorage.setItem(draftKey(slug), JSON.stringify(merged)); } catch { /* ignore */ }
-    }).catch(() => { if (draft) setDoc(draft); });
+      const uid = userIdRef.current;
+      if (uid) void supabase.functions.invoke('brochure-publish', { body: { slug: draftSlugFor(slug, uid), doc: merged } }).catch(() => { /* healed again on next save */ });
+    }).catch(() => { if (local) setDoc(local); });
     return () => { off = true; };
-  }, [slug, canEdit]);
+  }, [slug, canEdit, userId]);
 
   useEffect(() => { window.dispatchEvent(new CustomEvent('bs:doc', { detail: { slug, doc } })); }, [doc, slug]);
   // StudioBrochure renders its items in-tree; it needs to know when
@@ -216,13 +233,29 @@ function StudioEditor() {
   const pendingDraft = useRef<BrochureDoc | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const serverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastServerFp = useRef('');
+  const saveServerDraft = useCallback((d: BrochureDoc) => {
+    const uid = userIdRef.current; if (!uid) return;
+    const fp = JSON.stringify([d.items, d.bgs, d.pages, d.pageCount, d.edits]);
+    if (fp === lastServerFp.current) return;
+    lastServerFp.current = fp;
+    void supabase.functions.invoke('brochure-publish', { body: { slug: draftSlugFor(slug, uid), doc: d } })
+      .then(({ error }) => { if (error) lastServerFp.current = ''; })
+      .catch(() => { lastServerFp.current = ''; });
+  }, [slug]);
   const flushDraft = useCallback(() => {
     if (draftTimer.current) { clearTimeout(draftTimer.current); draftTimer.current = null; }
     const d = pendingDraft.current; pendingDraft.current = null;
     if (!d) return;
-    try { localStorage.setItem(draftKey(slug), JSON.stringify(d)); setSavedAt(Date.now()); setSaveState('saved'); }
+    const stamped: BrochureDoc = { ...d, savedAt: Date.now() };
+    try { localStorage.setItem(draftKey(slug), JSON.stringify(stamped)); setSavedAt(Date.now()); setSaveState('saved'); }
     catch { setSaveState('saving'); }
-  }, [slug]);
+    // The durable copy follows ~1s later (debounced so drags and typing
+    // don't spam the function); localStorage alone proved lossy.
+    if (serverTimer.current) clearTimeout(serverTimer.current);
+    serverTimer.current = setTimeout(() => saveServerDraft(stamped), 1000);
+  }, [slug, saveServerDraft]);
   const cancelDraft = useCallback(() => {
     if (draftTimer.current) { clearTimeout(draftTimer.current); draftTimer.current = null; }
     pendingDraft.current = null;
@@ -249,15 +282,21 @@ function StudioEditor() {
      so a live test can see at which stage a saved item disappears. */
   const [storedInfo, setStoredInfo] = useState('…');
   useEffect(() => {
+    let off = false;
     const t = setTimeout(() => {
+      let localTxt = 'none';
       try {
         const s = localStorage.getItem(draftKey(slug));
-        if (!s) { setStoredInfo('none'); return; }
-        const d = JSON.parse(s);
-        setStoredInfo(`${(d.items || []).length} items · ${s.length}b`);
-      } catch { setStoredInfo('unparseable'); }
+        if (s) { const d = JSON.parse(s); localTxt = `${(d.items || []).length} items`; }
+      } catch { localTxt = 'unparseable'; }
+      if (!off) setStoredInfo(`local ${localTxt} · server …`);
+      const uid = userIdRef.current;
+      if (!uid) { if (!off) setStoredInfo(`local ${localTxt} · server n/a`); return; }
+      fetchServerDraft(draftSlugFor(slug, uid)).then((sd) => {
+        if (!off) setStoredInfo(`local ${localTxt} · server ${sd ? `${sd.items.length} items` : 'none'}`);
+      });
     }, 600);
-    return () => clearTimeout(t);
+    return () => { off = true; clearTimeout(t); };
   }, [slug, doc, saveState]);
   const undo = () => { const p = past.current.pop(); if (!p) return; future.current.push(docRef.current); setDoc(commit(p)); };
   const redo = () => { const f = future.current.pop(); if (!f) return; past.current.push(docRef.current); setDoc(commit(f)); };
@@ -394,11 +433,30 @@ function StudioEditor() {
 
   const publish = async () => {
     setBusy(true);
-    try { await call({ doc }); cancelDraft(); localStorage.removeItem(draftKey(slug)); setSaveState('idle'); toast.success('Published — everyone now sees this version'); }
+    try {
+      await call({ doc }); cancelDraft(); localStorage.removeItem(draftKey(slug)); setSaveState('idle');
+      // The server draft must not lag behind what was just published —
+      // force it to the published doc so nothing old can resurface.
+      lastServerFp.current = ''; saveServerDraft(doc);
+      toast.success('Published — everyone now sees this version');
+    }
     catch (e) { toast.error(`Publish failed: ${(e as Error).message}`); }
     setBusy(false);
   };
-  const discard = () => { cancelDraft(); localStorage.removeItem(draftKey(slug)); window.location.reload(); };
+  const discard = () => {
+    cancelDraft();
+    try { localStorage.removeItem(draftKey(slug)); } catch { /* ignore */ }
+    const uid = userIdRef.current;
+    if (!uid) { window.location.reload(); return; }
+    // Discard must also clear the durable draft: overwrite it with the
+    // published doc (== no edits pending), then reload either way.
+    const done = () => window.location.reload();
+    const t = setTimeout(done, 1500);
+    fetchPublished(slug)
+      .then((pub) => supabase.functions.invoke('brochure-publish', { body: { slug: draftSlugFor(slug, uid), doc: { ...pub, baseFp: JSON.stringify([pub.items, pub.bgs]), savedAt: Date.now() } } }))
+      .catch(() => { /* reload regardless */ })
+      .finally(() => { clearTimeout(t); done(); });
+  };
   const newBrochure = () => { setNameVal(''); setNameAsk({}); };
   const submitNameAsk = () => {
     const s = nameVal.toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);

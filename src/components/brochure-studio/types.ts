@@ -46,6 +46,9 @@ export type BrochureDoc = {
    *  stale/empty base (its items never included the published ones) and
    *  must be merged with the published doc on load, not trusted as-is. */
   baseFp?: string;
+  /** Epoch ms of the last draft save (local or server). Decides which
+   *  draft copy is newest when both exist. */
+  savedAt?: number;
 };
 
 export const EMPTY_DOC: BrochureDoc = { edits: {}, items: [], bgs: {} };
@@ -64,5 +67,6 @@ export function normalizeDoc(d: any): BrochureDoc {
     pages: Array.isArray(d.pages) ? d.pages : undefined,
     title: d.title,
     baseFp: typeof d.baseFp === 'string' ? d.baseFp : undefined,
+    savedAt: typeof d.savedAt === 'number' ? d.savedAt : undefined,
   };
 }
