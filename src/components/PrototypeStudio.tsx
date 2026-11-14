@@ -9,14 +9,17 @@ import {
   ArrowLeft,
   CheckCircle2,
   CircuitBoard,
+  Download,
   FolderOpen,
   Loader2,
   Plus,
+  Printer,
   Save,
   Trash2,
 } from "lucide-react";
 import Canvas from "./prototype/Canvas";
 import Twin from "./prototype/Twin";
+import QuotePanel from "./prototype/QuotePanel";
 import {
   behaviourSummary,
   buildBom,
@@ -67,7 +70,7 @@ export default function PrototypeStudio() {
   const [current, setCurrent] = useState<ProtoProject | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [tab, setTab] = useState<"design" | "twin" | "package">("design");
+  const [tab, setTab] = useState<"design" | "twin" | "package" | "manufacture">("design");
 
   const load = useCallback(async () => {
     if (!user) { setLoading(false); return; }
@@ -172,7 +175,7 @@ export default function PrototypeStudio() {
 
         {/* Design / Twin / Package — all read the same document. */}
         <div className="flex gap-1.5">
-          {([["design", "Design"], ["twin", "Digital Twin"], ["package", "Package & BOM"]] as const).map(([id, label]) => (
+          {([["design", "Design"], ["twin", "Digital Twin"], ["package", "Package & BOM"], ["manufacture", "Manufacture"]] as const).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setTab(id)}
