@@ -1,5 +1,8 @@
-// SFH Call Agents — user-configured AI agents that run on Groq-hosted Meta
-// models and are billed through the existing AI credits system.
+// SFH Call Agents — user-configured AI agents that run on open-source
+// Meta Llama models (founder rule, 2026-11-14: Llama-only routing for
+// runs — Genius Brain Workers AI Llama first, then Ollama, then
+// Groq-hosted Llama; a run is never silently served by a non-Llama
+// model) and are billed through the existing AI credits system.
 // Actions (JSON body): list | save | delete | run.
 // Auth + CORS conventions follow genius-agent; credit reserve/settle
 // semantics follow imagine-ai (reserve up front, settle the difference,
@@ -752,30 +755,30 @@ serve(async (req) => {
           }
           chatMessages.push({ role: "user", content: stepInput });
 
-          // Route through the shared AI router (the Genius path): try the
-          // agent's chosen model first, then the tier chain, then the widest
-          // "standard" chain — a model this key can't serve (e.g. a Groq
-          // 404) falls back instead of hard-failing the run.
+          // Founder rule (2026-11-14): agents run on open-source Llama
+          // models only, and a run is never reported as Llama unless
+          // Llama actually served it. The llama-only chain tries the
+          // founder's Genius Brain (Workers AI Llama 3.3 70B) first,
+          // then self-hosted Ollama, then Groq-hosted Llama — and stops
+          // there. If no Llama hop serves, the run fails cleanly and is
+          // refunded instead of a non-Llama model silently taking over.
           const chatBody = {
             model: String(agent.model),
             messages: chatMessages,
             temperature: clampTemp(agent.temperature),
             max_tokens: clampTokens(agent.max_tokens),
           };
-          const tier: "llama" | "standard" = /llama/i.test(String(agent.model)) ? "llama" : "standard";
-          let routed = await routeChat(tier, chatBody, {}, { provider: "groq", model: String(agent.model) });
-          if (!routed.resp.ok) routed = await routeChat(tier, chatBody);
-          if (!routed.resp.ok && tier !== "standard") routed = await routeChat("standard", chatBody);
+          const routed = await routeChat("llama", chatBody, {}, undefined, { llamaOnly: true });
           const resp = routed.resp;
-          const servedModel = routed.model || String(agent.model);
-          if (!resp.ok) {
+          const servedModel = routed.model || "";
+          if (!resp.ok || !/llama/i.test(servedModel)) {
             let t = "";
             try {
               t = await resp.clone().text();
             } catch {
               /* response body already consumed */
             }
-            console.error("call-agents provider error:", resp.status, t);
+            console.error("call-agents provider error:", resp.status, servedModel, t);
             await admin.from("call_agent_runs").insert({
               agent_id: agent.id,
               user_id: user.id,
@@ -787,7 +790,7 @@ serve(async (req) => {
               status: "error",
             });
             throw new Error(
-              `The model provider returned an error (${resp.status}).${t ? ` ${t.slice(0, 200)}` : ""}`
+              "The agent could not run — its Llama model is unavailable right now. You have not been charged."
             );
           }
           const data = await resp.json();
@@ -1367,8 +1370,8 @@ serve(async (req) => {
         if (!isAdmin) await grant(RESERVE, "call-agents:refund");
       };
 
-      // Same router ladder as the run action: the chosen model first, then
-      // its tier chain, then the widest "standard" chain.
+      // Same Llama-only routing as the run action (see the founder rule
+      // note there).
       const chatBody = {
         model: DEFAULT_MODEL,
         messages: [
@@ -1378,19 +1381,19 @@ serve(async (req) => {
         temperature: 0.6,
         max_tokens: 1800,
       };
-      let routed = await routeChat("llama", chatBody, {}, { provider: "groq", model: DEFAULT_MODEL });
-      if (!routed.resp.ok) routed = await routeChat("llama", chatBody);
-      if (!routed.resp.ok) routed = await routeChat("standard", chatBody);
+      // Same founder rule as the run action: Llama-only routing, and a
+      // clean platform message (never a raw provider error) on failure.
+      const routed = await routeChat("llama", chatBody, {}, undefined, { llamaOnly: true });
       const resp = routed.resp;
-      const servedModel = routed.model || DEFAULT_MODEL;
-      if (!resp.ok) {
+      const servedModel = routed.model || "";
+      if (!resp.ok || !/llama/i.test(servedModel)) {
         let t = "";
         try {
           t = await resp.clone().text();
         } catch {
           /* response body already consumed */
         }
-        console.error("call-agents fundraiser provider error:", resp.status, t);
+        console.error("call-agents fundraiser provider error:", resp.status, servedModel, t);
         await admin.from("call_agent_runs").insert({
           agent_id: null,
           user_id: user.id,
@@ -1403,7 +1406,7 @@ serve(async (req) => {
         });
         await refundReserve();
         return json(
-          { error: `The model provider returned an error (${resp.status}).${t ? ` ${t.slice(0, 200)}` : ""}` },
+          { error: "The Fundraiser could not run — its Llama model is unavailable right now. You have not been charged." },
           502
         );
       }

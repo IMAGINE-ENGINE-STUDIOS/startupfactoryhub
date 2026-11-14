@@ -86,16 +86,22 @@ const RETRY = new Set([400, 401, 403, 404, 408, 413, 429, 500, 502, 503, 504]);
 export interface RouteResult { resp: Response; provider: Provider | null; model: string }
 
 /** Calls the tier's provider chain, falling back on missing keys / 413 / 429 / 5xx. */
-export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOverrides: Partial<Record<Provider, string>> = {}, selected?: { provider: Provider; model: string }): Promise<RouteResult> {
+export async function routeChat(tier: Tier, body: Record<string, unknown>, keyOverrides: Partial<Record<Provider, string>> = {}, selected?: { provider: Provider; model: string }, opts?: { llamaOnly?: boolean }): Promise<RouteResult> {
   const clean: Record<string, unknown> = { ...body };
   delete clean.modalities; delete clean.reasoning_effort; delete clean.reasoning; delete clean.provider;
   let last: RouteResult | null = null;
-  // The llama tier is Llama-only by design, but if every Llama hop fails
+  // The llama tier is Llama-first by design, but if every Llama hop fails
   // (e.g. the Groq key loses Llama access) the whole platform must not go
   // dark: fall through to the standard chain. Llama stays first, so it
   // takes over again automatically when it serves.
+  // opts.llamaOnly (founder rule, 2026-11-14 — open-source models only,
+  // never report a run as Llama unless Llama served it): the chain stops
+  // at the Llama hops. If none serve, the caller gets the failure and
+  // handles it honestly instead of a non-Llama model silently serving.
   const tierChain: [Provider, string][] = tier === "llama"
-    ? [...CHAINS.llama, ...CHAINS.standard.filter(([p, m]) => !CHAINS.llama.some(([lp, lm]) => lp === p && lm === m))]
+    ? opts?.llamaOnly
+      ? [...CHAINS.llama]
+      : [...CHAINS.llama, ...CHAINS.standard.filter(([p, m]) => !CHAINS.llama.some(([lp, lm]) => lp === p && lm === m))]
     : CHAINS[tier];
   // A pinned provider/model is tried FIRST, but a failure there (a model the
   // key cannot serve, an outage, a rate limit) must not kill the request:
