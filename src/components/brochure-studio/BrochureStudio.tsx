@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BookCopy,
   Pencil, Trash2, ImagePlus, Upload, RotateCcw, X, Eye, EyeOff, Type, Shapes, Box, Square, Wallpaper,
-  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Shuffle, LayoutTemplate,
+  Undo2, Redo2, FilePlus2, Minus, Plus, Copy, BookPlus, FileMinus2, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Shuffle, LayoutTemplate,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -497,7 +497,7 @@ function StudioEditor() {
       <style>{STUDIO_CSS}</style>
       {portals}
       {!editing && <ReaderBar roots={roots} />}
-      <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] rounded-xl px-2 py-1.5 flex flex-wrap justify-center items-center gap-1.5" style={glass}>
+      <div className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[70] max-w-[calc(100vw-16px)] overflow-x-auto rounded-xl px-2 py-1.5 flex items-center gap-1.5" style={glass}>
         <button className={btn} onClick={() => { setEditing(!editing); setSel(null); setBgOpen(false); }} style={{ background: editing ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }}>
           <Pencil className="h-4 w-4" />{editing ? 'Editing' : 'Brochure Studio'}
         </button>
@@ -521,10 +521,6 @@ function StudioEditor() {
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
             <button className={btn} style={soft} aria-label="Undo" onClick={undo}><Undo2 className="h-4 w-4" /></button>
             <button className={btn} style={soft} aria-label="Redo" onClick={redo}><Redo2 className="h-4 w-4" /></button>
-            {isCustom && <>
-              <button className={btn} style={soft} aria-label="Previous page" title="Previous page" onClick={() => window.dispatchEvent(new CustomEvent('bs:flip', { detail: { dir: 'prev' } }))}><ChevronLeft className="h-4 w-4" /></button>
-              <button className={btn} style={soft} aria-label="Next page" title="Next page" onClick={() => window.dispatchEvent(new CustomEvent('bs:flip', { detail: { dir: 'next' } }))}><ChevronRight className="h-4 w-4" /></button>
-            </>}
             <button className={btn} style={soft} onClick={() => setLibAt(isCustom ? curPage() + 1 : curPage())}><FilePlus2 className="h-4 w-4" />Page library</button>
             <button className={btn} style={layoutsOpen ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => { setLayoutsOpen((o) => !o); setModelsOpen(false); }}><LayoutTemplate className="h-4 w-4" />Layouts</button>
             <button className={btn} style={soft} onClick={() => setLibAt(-1)}><BookCopy className="h-4 w-4" />Brochure templates</button>
