@@ -17,6 +17,13 @@ import {
 } from "lucide-react";
 import Canvas from "./prototype/Canvas";
 import Twin from "./prototype/Twin";
+import {
+  behaviourSummary,
+  buildBom,
+  downloadCsv,
+  openPackagePrintView,
+  wiringSummary,
+} from "./prototype/bom";
 import type { DesignDoc } from "./prototype/registry";
 import type { BehaviorRule } from "./prototype/rules";
 import { validateDesign } from "./prototype/validate";
@@ -60,7 +67,7 @@ export default function PrototypeStudio() {
   const [current, setCurrent] = useState<ProtoProject | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [tab, setTab] = useState<"design" | "twin">("design");
+  const [tab, setTab] = useState<"design" | "twin" | "package">("design");
 
   const load = useCallback(async () => {
     if (!user) { setLoading(false); return; }
@@ -163,9 +170,9 @@ export default function PrototypeStudio() {
           </div>
         )}
 
-        {/* Design / Twin — the twin reads the same document. */}
+        {/* Design / Twin / Package — all read the same document. */}
         <div className="flex gap-1.5">
-          {([["design", "Design"], ["twin", "Digital Twin"]] as const).map(([id, label]) => (
+          {([["design", "Design"], ["twin", "Digital Twin"], ["package", "Package & BOM"]] as const).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setTab(id)}
@@ -184,12 +191,76 @@ export default function PrototypeStudio() {
               design={current.design}
               onChange={(d) => { setCurrent({ ...current, design: { ...d, rules: current.design.rules ?? [] } }); setSavedAt(null); }}
             />
-          ) : (
+          ) : tab === "twin" ? (
             <Twin
               design={current.design}
               rules={current.design.rules ?? []}
               onRulesChange={(rules) => { setCurrent({ ...current, design: { ...current.design, rules } }); setSavedAt(null); }}
             />
+          ) : (
+            <div className="h-full overflow-y-auto pr-1">
+              <div className="max-w-3xl mx-auto space-y-5 py-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-semibold">Design package</h3>
+                  <span className={`text-[11px] rounded-full border px-2 py-0.5 ${validity.valid ? "border-emerald-500/50 text-emerald-500" : "border-amber-500/50 text-amber-500"}`}>
+                    {validity.valid ? "Valid design" : "Draft — not valid yet"}
+                  </span>
+                  <div className="ml-auto flex gap-2">
+                    <Button size="sm" variant="outline" className="gap-1.5" disabled={current.design.components.length === 0}
+                      onClick={() => downloadCsv(current.name, current.design)}>
+                      <Download className="h-3.5 w-3.5" /> CSV
+                    </Button>
+                    <Button size="sm" className="gap-1.5" disabled={current.design.components.length === 0}
+                      onClick={() => openPackagePrintView(current.name, current.design)}>
+                      <Printer className="h-3.5 w-3.5" /> Print / PDF package
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Generated from the design itself — the parts, wiring and behaviours below are exactly
+                  what's on your canvas. Prices aren't listed: every part carries its datasheet source so a
+                  manufacturer quotes it exactly (a sourced price list is a named gap, never invented).
+                </p>
+                <div className="rounded-2xl border border-border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                        <th className="px-3 py-2">Part</th><th className="px-3 py-2">Qty</th>
+                        <th className="px-3 py-2">Supply</th><th className="px-3 py-2">Draw</th><th className="px-3 py-2">Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {buildBom(current.design).map((r, i) => (
+                        <tr key={i} className="border-t border-border">
+                          <td className="px-3 py-2 font-medium">{r.name}</td>
+                          <td className="px-3 py-2">{r.qty}</td>
+                          <td className="px-3 py-2">{r.supply}</td>
+                          <td className="px-3 py-2">{r.drawMa} mA</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{r.source}</td>
+                        </tr>
+                      ))}
+                      {current.design.components.length === 0 && (
+                        <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground text-sm">No parts yet — build the design first.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-border p-4">
+                    <p className="text-sm font-medium mb-2">Wiring</p>
+                    {wiringSummary(current.design).length === 0
+                      ? <p className="text-xs text-muted-foreground">No connections yet.</p>
+                      : wiringSummary(current.design).map((w, i) => <p key={i} className="text-xs text-muted-foreground">• {w}</p>)}
+                  </div>
+                  <div className="rounded-2xl border border-border p-4">
+                    <p className="text-sm font-medium mb-2">Behaviours</p>
+                    {behaviourSummary(current.design).length === 0
+                      ? <p className="text-xs text-muted-foreground">No behaviour rules yet.</p>
+                      : behaviourSummary(current.design).map((b, i) => <p key={i} className="text-xs text-muted-foreground">• {b}</p>)}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
