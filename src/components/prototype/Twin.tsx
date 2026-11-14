@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Play, Plus, Trash2, Zap } from "lucide-react";
@@ -27,6 +27,23 @@ interface Props {
 }
 
 export default function Twin({ design, rules, onRulesChange }: Props) {
+  // Same fit rule as the design canvas: cards are drawn inside the
+  // stage on screen, whatever size it is — nothing spills off a phone.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const measure = () => setStageSize({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const disp = (x: number, y: number) => ({
+    x: stageSize.w ? Math.max(0, Math.min(x, Math.max(0, stageSize.w - CARD_W - 4))) : x,
+    y: stageSize.h ? Math.max(0, Math.min(y, Math.max(0, stageSize.h - 64))) : y,
+  });
   const sensors = design.components.filter((c) => SENSOR_TRAITS[c.specId]);
   const outputs = design.components.filter((c) => OUTPUT_KINDS[c.specId]);
   const nameOf = (uid: string) =>
@@ -100,6 +117,7 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
     <div className="flex flex-col h-full min-h-0 gap-2">
       {/* ── Twin stage ─────────────────────────────────────── */}
       <div
+        ref={stageRef}
         className="flex-1 min-h-[320px] relative rounded-2xl border border-border overflow-hidden"
         style={{
           backgroundImage:
@@ -121,7 +139,7 @@ export default function Twin({ design, rules, onRulesChange }: Props) {
               key={comp.uid}
               className="absolute rounded-xl border bg-card shadow-md px-2.5 py-2"
               style={{
-                left: comp.x, top: comp.y, width: CARD_W,
+                left: disp(comp.x, comp.y).x, top: disp(comp.x, comp.y).y, width: CARD_W,
                 borderColor: st?.on ? "rgba(52,211,153,0.8)" : undefined,
                 boxShadow: st?.on && kind === "light" ? "0 0 26px rgba(250,204,21,0.55)" : undefined,
               }}

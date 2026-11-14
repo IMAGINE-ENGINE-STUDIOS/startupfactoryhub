@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { MousePointer2, Plus, Trash2, X } from "lucide-react";
@@ -32,6 +32,24 @@ interface Props {
 export default function Canvas({ design, onChange }: Props) {
   const { toast } = useToast();
   const stageRef = useRef<HTMLDivElement>(null);
+  // Cards keep their saved positions, but they are always DRAWN inside
+  // the stage that's actually on screen — a design laid out on a wide
+  // monitor must never spill off a phone. Dragging a clamped card
+  // re-saves it at the position where it was shown.
+  const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const measure = () => setStageSize({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const disp = (c: PlacedComponent) => ({
+    x: stageSize.w ? Math.max(0, Math.min(c.x, Math.max(0, stageSize.w - CARD_W - 4))) : c.x,
+    y: stageSize.h ? Math.max(0, Math.min(c.y, Math.max(0, stageSize.h - 64))) : c.y,
+  });
   const [category, setCategory] = useState<ProtoCategory | "all">("all");
   const [selected, setSelected] = useState<string | null>(null);
   const [pending, setPending] = useState<{ uid: string; port: string } | null>(null);
@@ -106,7 +124,8 @@ export default function Canvas({ design, onChange }: Props) {
     if ((e.target as HTMLElement).closest("[data-port]")) return;
     const rect = stageRef.current?.getBoundingClientRect();
     if (!rect) return;
-    dragRef.current = { uid: comp.uid, dx: e.clientX - rect.left - comp.x, dy: e.clientY - rect.top - comp.y };
+    const dp = disp(comp);
+    dragRef.current = { uid: comp.uid, dx: e.clientX - rect.left - dp.x, dy: e.clientY - rect.top - dp.y };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
@@ -124,7 +143,9 @@ export default function Canvas({ design, onChange }: Props) {
 
   const center = (id: string) => {
     const c = design.components.find((x) => x.uid === id);
-    return c ? { x: c.x + CARD_W / 2, y: c.y + 30 } : { x: 0, y: 0 };
+    if (!c) return { x: 0, y: 0 };
+    const dp = disp(c);
+    return { x: dp.x + CARD_W / 2, y: dp.y + 30 };
   };
   const wireColor = (kind: string) =>
     kind.startsWith("power") ? "#f59e0b" : kind === "i2c" || kind === "spi" || kind === "uart" ? "#38bdf8" : "#a78bfa";
@@ -169,11 +190,12 @@ export default function Canvas({ design, onChange }: Props) {
           const spec = specById(comp.specId);
           if (!spec) return null;
           const isSel = selected === comp.uid;
+          const dp = disp(comp);
           return (
             <div
               key={comp.uid}
               className={`absolute rounded-xl border bg-card shadow-md select-none ${isSel ? "border-sky-400 ring-1 ring-sky-400/50" : "border-border"}`}
-              style={{ left: comp.x, top: comp.y, width: CARD_W }}
+              style={{ left: dp.x, top: dp.y, width: CARD_W }}
               onPointerDown={(e) => { startMove(e, comp); setSelected(comp.uid); e.stopPropagation(); }}
               onClick={(e) => e.stopPropagation()}
             >

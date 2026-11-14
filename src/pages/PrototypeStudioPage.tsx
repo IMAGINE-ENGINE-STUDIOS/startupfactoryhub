@@ -10,7 +10,7 @@ import PrototypeStudio from "@/components/PrototypeStudio";
  */
 export default function PrototypeStudioPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden">
       <header className="border-b border-border px-4 py-3 flex items-center gap-3">
         <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Back to dashboard">
           <ArrowLeft className="h-5 w-5" />
@@ -20,7 +20,7 @@ export default function PrototypeStudioPage() {
         </h1>
         <span className="text-[11px] rounded-full border border-amber-500/50 text-amber-500 px-2 py-0.5">In build — not yet public</span>
       </header>
-      <main className="flex-1 min-h-0 p-2 sm:p-3 w-full flex flex-col">
+      <main className="flex-1 min-h-0 min-w-0 p-2 sm:p-3 w-full flex flex-col">
         <PrototypeStudio />
       </main>
     </div>
