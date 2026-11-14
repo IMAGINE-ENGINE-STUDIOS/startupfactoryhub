@@ -49,7 +49,7 @@ export default function EmbedPage() {
     const style = document.createElement('style'); style.textContent = CSS;
     if (!count) { document.head.appendChild(style); document.documentElement.classList.add('bs-embed'); }
     let target: HTMLElement | null = null;
-    let sent = false;
+    let sentN = -1;
     // The flipbook rewrites page inline styles, so placement lives in a stylesheet rule.
     const place = document.createElement('style');
     if (!count) document.head.appendChild(place);
@@ -69,12 +69,18 @@ export default function EmbedPage() {
     const hush = () => document.querySelectorAll('audio, video').forEach((m) => { const el = m as HTMLMediaElement; el.muted = true; if (el.tagName === 'AUDIO' && !el.paused) el.pause(); });
     const play = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) { this.muted = true; if (this.tagName === 'AUDIO') return Promise.resolve(); return play.call(this); };
+    let lastN = -1, stableTicks = 0;
     const tick = () => {
       hush();
       const roots = findRoots();
       if (!roots.length) return;
       if (count) {
-        if (!sent) { sent = true; window.parent.postMessage({ bsCount: roots.length, path: window.location.pathname }, window.location.origin); }
+        // Report only a STABLE count: flipbooks mount their pages
+        // progressively, and latching the first partial number (the old
+        // behaviour) cached wrong page counts. Re-report if the count
+        // later grows; the parent keeps the latest.
+        if (roots.length === lastN) stableTicks++; else { lastN = roots.length; stableTicks = 0; }
+        if (stableTicks >= 1 && lastN !== sentN) { sentN = lastN; window.parent.postMessage({ bsCount: lastN, path: window.location.pathname }, window.location.origin); }
         return;
       }
       const root = roots.find((r) => pageOf(r, roots) === want);

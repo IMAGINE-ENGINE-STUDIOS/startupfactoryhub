@@ -33,12 +33,24 @@ function LivePage({ src, title, go, onDone }: { src: string; title: string; go: 
     const t = setTimeout(free, 20000);
     return () => clearTimeout(t);
   }, [go]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The brochures refuse to render their flipbook in a window narrower
+  // than 360px (their readFlipEnv support gate), so a card-sized iframe
+  // (~200px) only ever shows their fallback layout — no page to preview.
+  // The iframe therefore gets a real 480px-wide viewport and is scaled
+  // down to the card; inside, the embed fit lays the page out at 480px.
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.35);
+  useEffect(() => {
+    const el = wrapRef.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / 480));
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
   if (!go) return <div className="w-full h-full grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Waiting…</div>;
-  return <>
+  return <div ref={wrapRef} className="absolute inset-0 overflow-hidden">
     {!ready && <div className="absolute inset-0 grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Loading…</div>}
-    <iframe title={title} src={src} className="w-full h-full pointer-events-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity .3s' }}
+    <iframe title={title} src={src} className="pointer-events-none" style={{ width: 480, height: 679, transform: `scale(${scale})`, transformOrigin: '0 0', opacity: ready ? 1 : 0, transition: 'opacity .3s', border: 0 }}
       onLoad={() => setTimeout(() => { setReady(true); free(); }, 700)} />
-  </>;
+  </div>;
 }
 
 export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
@@ -68,6 +80,16 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
   const gridLoading = route !== 'kits' && route !== 'layouts' && counts[route] !== undefined && done < (counts[route] || 0);
   const missing = route === 'kits' || route === 'layouts' || gridLoading ? undefined
     : [route, ...BROCHURES.map((b) => b.route)].find((r) => BROCHURES.some((b) => b.route === r) && counts[r] === undefined);
+  // If a count never arrives (a brochure that boots slowly or a stalled
+  // iframe), remount the counting iframe and try again — up to 2 retries,
+  // then leave it for the next library open instead of spinning forever.
+  const [countTry, setCountTry] = useState(0);
+  useEffect(() => { setCountTry(0); }, [missing]);
+  useEffect(() => {
+    if (!missing || countTry >= 2) return;
+    const t = setTimeout(() => setCountTry((x) => x + 1), 25000);
+    return () => clearTimeout(t);
+  }, [missing, countTry]);
 
   const n = counts[route];
   const isLay = route === 'layouts', isKits = route === 'kits';
@@ -78,7 +100,13 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
 
   return (
     <div data-bs-ui className="fixed inset-0 z-[80] flex items-center justify-center p-4" style={{ background: drag ? 'transparent' : 'rgba(2,6,23,0.7)', pointerEvents: drag ? 'none' : 'auto', opacity: drag ? 0.12 : 1 }} onClick={onClose}>
-      {missing && <iframe key={missing} title="count" src={countUrl(missing)} className="fixed w-px h-px opacity-0 pointer-events-none" style={{ left: -10, top: -10 }} />}
+      {/* The counting iframe needs a REAL desktop viewport: the brochures
+          refuse to render their flipbook below 360px wide (their support
+          gate), so the old 1px iframe never produced any pages to count
+          and uncached books stuck on "Loading pages…" forever. It sits
+          invisible on screen (opacity 0, no pointer events, behind
+          everything) so the browser still runs it at full speed. */}
+      {missing && <iframe key={`${missing}:${countTry}`} title="count" src={countUrl(missing)} className="fixed opacity-0 pointer-events-none" style={{ left: 0, top: 0, width: 1280, height: 900, zIndex: -1, border: 0 }} />}
       <div className="w-full max-w-5xl h-[82vh] rounded-2xl flex overflow-hidden" style={glass} onClick={(e) => e.stopPropagation()}>
         <aside className="w-56 shrink-0 p-3 flex flex-col gap-1 overflow-y-auto" style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[11px] tracking-[0.2em]" style={{ color: '#67e8f9' }}><Library className="h-4 w-4" />PAGE LIBRARY</div>
