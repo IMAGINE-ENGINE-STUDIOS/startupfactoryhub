@@ -173,13 +173,13 @@ export default function PrototypeStudio() {
           </div>
         )}
 
-        {/* Design / Twin / Package — all read the same document. */}
-        <div className="flex gap-1.5">
+        {/* Design / Twin / Package / Manufacture — all read the same document. */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
           {([["design", "Design"], ["twin", "Digital Twin"], ["package", "Package & BOM"], ["manufacture", "Manufacture"]] as const).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition whitespace-nowrap shrink-0 ${
                 tab === id ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"
               }`}
             >
@@ -199,6 +199,13 @@ export default function PrototypeStudio() {
               design={current.design}
               rules={current.design.rules ?? []}
               onRulesChange={(rules) => { setCurrent({ ...current, design: { ...current.design, rules } }); setSavedAt(null); }}
+            />
+          ) : tab === "manufacture" ? (
+            <QuotePanel
+              projectId={current.id}
+              projectName={current.name}
+              design={current.design}
+              valid={validity.valid}
             />
           ) : (
             <div className="h-full overflow-y-auto pr-1">
@@ -224,8 +231,8 @@ export default function PrototypeStudio() {
                   what's on your canvas. Prices aren't listed: every part carries its datasheet source so a
                   manufacturer quotes it exactly (a sourced price list is a named gap, never invented).
                 </p>
-                <div className="rounded-2xl border border-border overflow-hidden">
-                  <table className="w-full text-sm">
+                <div className="rounded-2xl border border-border overflow-x-auto">
+                  <table className="w-full text-sm min-w-[520px]">
                     <thead>
                       <tr className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                         <th className="px-3 py-2">Part</th><th className="px-3 py-2">Qty</th>
