@@ -221,11 +221,19 @@ serve(async (req) => {
       }
 
       const job: Job = { id, userId: user.id, tier, charged, status: "queued", imageUrl, createdAt: Date.now() };
-      await store.write(jobPath(id), job);
-      await admin.from("api_usage_logs").insert({
-        user_id: user.id, service_name: "sfh-3d-modeler", endpoint: "generate-3d-model",
-        request_count: 1, metadata: { tier, jobId: id },
-      }).catch(() => {});
+      try {
+        await store.write(jobPath(id), job);
+      } catch (e) {
+        // Charged but the job never landed — give the Credits straight back.
+        await refund(admin, job);
+        throw e;
+      }
+      try {
+        await admin.from("api_usage_logs").insert({
+          user_id: user.id, service_name: "sfh-3d-modeler", endpoint: "generate-3d-model",
+          request_count: 1, metadata: { tier, jobId: id },
+        });
+      } catch { /* usage log is best-effort */ }
       return json({ jobId: id, status: "queued", credits: balance });
     }
 
@@ -250,10 +258,12 @@ serve(async (req) => {
 /** Give the job's Credits back exactly once (the ledger ref is the job). */
 async function refund(admin: ReturnType<typeof createClient>, job: Job) {
   if (!job.charged || job.charged <= 0) return;
-  await admin.rpc("ai_credits_grant", {
-    _user_id: job.userId,
-    _amount: job.charged,
-    _reason: "model3d:refund",
-    _ref: `model3d:refund:${job.id}`,
-  }).catch(() => {});
+  try {
+    await admin.rpc("ai_credits_grant", {
+      _user_id: job.userId,
+      _amount: job.charged,
+      _reason: "model3d:refund",
+      _ref: `model3d:refund:${job.id}`,
+    });
+  } catch { /* the deterministic ref keeps a retry safe */ }
 }

@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import SFHImageCreator from "./SFHImageCreator";
+import Modeler3D from "./Modeler3D";
 import CRMBoard from "./CRMBoard";
 import LogoMaker from "./LogoMaker";
 import VideoMaker from "./VideoMaker";
@@ -35,6 +36,7 @@ import {
   BookOpen,
   PenTool,
   Clapperboard,
+  Box,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +103,7 @@ type ToolId =
   | "brochure-studio"
   | "logo-maker"
   | "video-maker"
+  | "modeler-3d"
   | "crm";
 
 interface DeskTool {
@@ -190,6 +193,21 @@ const TOOLS: DeskTool[] = [
     glow: "hsl(25 90% 55%)",
     badge: "Marketing",
     size: "lg",
+  },
+  {
+    id: "modeler-3d",
+    title: "3D Modeler",
+    tagline: "Turn one photo into a real 3D model.",
+    capabilities: [
+      "Photo → downloadable 3D model (GLB)",
+      "Open-source TRELLIS 2 engine",
+      "View in 3D & AR right here",
+    ],
+    icon: Box,
+    accent: "from-sky-500 via-blue-500 to-indigo-500",
+    glow: "hsl(210 85% 55%)",
+    badge: "Create",
+    size: "md",
   },
 ];
 
@@ -382,6 +400,24 @@ export default function AIFeaturesHub() {
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
             <SFHImageCreator />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 3D Modeler fullscreen ───────────────────────────── */}
+      <Dialog open={openTool === "modeler-3d"} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Box className="h-5 w-5" />
+              3D Modeler
+            </DialogTitle>
+            <DialogDescription>
+              One photo in — a real 3D model out, made by the open-source TRELLIS 2 engine
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <Modeler3D />
           </div>
         </DialogContent>
       </Dialog>
