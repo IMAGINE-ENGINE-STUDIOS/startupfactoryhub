@@ -5,7 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
+  AlertTriangle,
   ArrowLeft,
+  CheckCircle2,
   CircuitBoard,
   FolderOpen,
   Loader2,
@@ -13,6 +15,9 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
+import Canvas from "./prototype/Canvas";
+import type { DesignDoc } from "./prototype/registry";
+import { validateDesign } from "./prototype/validate";
 
 /*
  * Prototype Studio — SFH's connected-device prototyping tool.
@@ -26,10 +31,7 @@ import {
  * twin plug into this same document in the following jobs.
  */
 
-export interface ProtoDesign {
-  components: unknown[];
-  connections: unknown[];
-}
+export type ProtoDesign = DesignDoc;
 
 interface ProtoProject {
   id: string;
@@ -120,6 +122,7 @@ export default function PrototypeStudio() {
 
   /* ── Workspace (an open project) ─────────────────────────── */
   if (current) {
+    const validity = validateDesign(current.design);
     return (
       <div className="h-full flex flex-col gap-3">
         <div className="flex items-center gap-2 flex-wrap">
@@ -134,7 +137,7 @@ export default function PrototypeStudio() {
           />
           <Button size="sm" className="gap-1.5" onClick={save} disabled={saving}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save
+            {validity.valid ? "Save design" : "Save draft"}
           </Button>
           {savedAt && <span className="text-xs text-emerald-500">Saved {savedAt} — in your account</span>}
           <span className="text-xs text-muted-foreground ml-auto">
@@ -142,26 +145,26 @@ export default function PrototypeStudio() {
           </span>
         </div>
 
-        {/* The design canvas. Components and wiring land here. */}
-        <div
-          className="flex-1 min-h-0 rounded-2xl border border-border relative overflow-hidden"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(148,163,184,0.09) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.09) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        >
-          <div className="absolute inset-0 flex items-center justify-center p-8">
-            <div className="text-center max-w-sm">
-              <CircuitBoard className="h-10 w-10 mx-auto text-sky-400/70" />
-              <p className="mt-3 font-medium">Your design canvas</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                This is where your prototype takes shape. The component library — controllers,
-                sensors, power and radios — plugs in here, and every design is checked live so
-                only buildable prototypes move forward.
-              </p>
-            </div>
+        {/* Validity — an invalid design saves as a draft, never as valid. */}
+        {current.design.components.length > 0 && (
+          <div className={`rounded-xl border px-3 py-2 text-xs flex flex-col gap-1 ${
+            validity.valid ? "border-emerald-500/40 bg-emerald-500/10" : "border-amber-500/40 bg-amber-500/10"
+          }`}>
+            <p className="flex items-center gap-1.5 font-medium">
+              {validity.valid
+                ? <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Valid design — safe to build, ready for the twin and the parts list.</>
+                : <><AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> Draft — {validity.errors.length} thing{validity.errors.length === 1 ? "" : "s"} to fix before this design counts as valid:</>}
+            </p>
+            {validity.errors.slice(0, 3).map((e, i) => <p key={i} className="text-muted-foreground">• {e.message}</p>)}
+            {validity.warnings.slice(0, 2).map((w, i) => <p key={`w${i}`} className="text-amber-500/90">• {w.message}</p>)}
           </div>
+        )}
+
+        <div className="flex-1 min-h-0">
+          <Canvas
+            design={current.design}
+            onChange={(d) => { setCurrent({ ...current, design: d }); setSavedAt(null); }}
+          />
         </div>
       </div>
     );
