@@ -86,13 +86,22 @@ export default function LogoMaker() {
         const { data, error } = await supabase.functions.invoke("generate-logo-image", {
           body: { prompt: buildPrompt(composition) },
         });
-        // Only a real credit refusal shows the credits banner — every
-        // other failure surfaces its own message, never a fake one.
+        // Only a real credit refusal shows the credits banner.
+        // Every other failure shows the function's clean platform
+        // message (founder policy, 2026-11-14) — never a raw
+        // transport error like "Edge Function returned a non-2xx".
         if (data?.error === "limit_reached") { limitSeen = true; return; }
         if (error || data?.error) {
-          firstError = firstError || data?.message
-            || (typeof error === "object" && error?.message ? String(error.message) : null)
-            || data?.error || "Generation failed";
+          let msg: string | null = data?.message ?? null;
+          if (!msg && error) {
+            try {
+              const body = await (error as any)?.context?.json?.();
+              if (body?.error === "limit_reached") { limitSeen = true; return; }
+              if (typeof body?.message === "string" && body.message) msg = body.message;
+            } catch { /* no readable body — clean fallback below */ }
+          }
+          firstError = firstError || msg
+            || "Logo generation couldn't complete right now. You were not charged — please try again in a moment.";
           return;
         }
         if (data?.modelLabel) setEngineLabel(data.modelLabel);
@@ -134,8 +143,16 @@ export default function LogoMaker() {
         },
       });
       if (data?.error === "limit_reached") throw new Error("You're out of Global Credits — top up or upgrade to keep creating.");
-      if (error) throw new Error(typeof error === "object" && error.message ? error.message : String(error));
-      if (data?.error) throw new Error(data.message || data.error);
+      if (error) {
+        let msg: string | null = null;
+        try {
+          const body = await (error as any)?.context?.json?.();
+          if (body?.error === "limit_reached") throw new Error("You're out of Global Credits — top up or upgrade to keep creating.");
+          if (typeof body?.message === "string" && body.message) msg = body.message;
+        } catch (e) { if (e instanceof Error && e.message.startsWith("You're out of")) throw e; }
+        throw new Error(msg || "Logo generation couldn't complete right now. You were not charged — please try again in a moment.");
+      }
+      if (data?.error) throw new Error(data.message || "Logo generation couldn't complete right now. You were not charged — please try again in a moment.");
       if (data?.modelLabel) setEngineLabel(data.modelLabel);
       setVariants((prev) => prev.map((v, i) => (i === idx ? { ...v, url: data.imageUrl } : v)));
       setRefineTexts((prev) => ({ ...prev, [idx]: "" }));

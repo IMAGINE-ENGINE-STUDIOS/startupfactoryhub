@@ -13,6 +13,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 
+// Founder policy (2026-11-14): a user never sees a raw provider or
+// transport error. platformMessage reads the function's own clean
+// platform message out of the error response body when one exists
+// and falls back to a clean platform sentence otherwise.
+const CLEAN_IMAGE_FAIL = "Image generation couldn't complete right now. You were not charged — please try again in a moment.";
+const CLEAN_EDIT_FAIL = "Image editing couldn't complete right now. You were not charged — please try again in a moment.";
+async function platformMessage(error: unknown, fallback: string): Promise<string> {
+  try {
+    const ctx = (error as { context?: { json?: () => Promise<any> } })?.context;
+    if (ctx && typeof ctx.json === "function") {
+      const body = await ctx.json();
+      if (body?.error === "limit_reached") return "__LIMIT__";
+      if (typeof body?.message === "string" && body.message) return body.message;
+    }
+  } catch { /* no readable body — use the clean fallback */ }
+  return fallback;
+}
+
 const STYLE_PRESETS = [
   { id: "none", label: "Auto", emoji: "✨" },
   { id: "photorealistic", label: "Photo", emoji: "📷" },
@@ -117,12 +135,14 @@ const SFHImageCreator = () => {
       });
 
       if (error) {
-        const errorBody = typeof error === "object" && error.message ? error.message : String(error);
-        if (errorBody.includes("402") || errorBody.includes("limit_reached")) {
-          setShowUpgradeModal(true);
-          return;
-        }
-        throw new Error(errorBody);
+        // Founder policy (2026-11-14): users never see a raw
+        // transport/provider error ("Edge Function returned a
+        // non-2xx status code" and friends). Read the function's
+        // own platform message from the response body when there is
+        // one; otherwise show the clean platform message.
+        const msg = await platformMessage(error, CLEAN_IMAGE_FAIL);
+        if (msg === "__LIMIT__") { setShowUpgradeModal(true); return; }
+        throw new Error(msg);
       }
 
       if (data?.error === "limit_reached") {
@@ -130,7 +150,7 @@ const SFHImageCreator = () => {
         return;
       }
 
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.message || CLEAN_IMAGE_FAIL);
 
       setGeneratedImage(data.imageUrl);
       if (typeof data.credits === "number") setCreditBalance(data.credits);
@@ -165,12 +185,16 @@ const SFHImageCreator = () => {
         body: { editPrompt: editPrompt.trim(), imageUrl: imageToEdit },
       });
 
-      if (error) throw new Error(typeof error === "object" && error.message ? error.message : String(error));
+      if (error) {
+        const msg = await platformMessage(error, CLEAN_EDIT_FAIL);
+        if (msg === "__LIMIT__") { setShowUpgradeModal(true); return; }
+        throw new Error(msg);
+      }
       if (data?.error === "limit_reached") {
         setShowUpgradeModal(true);
         return;
       }
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.message || CLEAN_EDIT_FAIL);
       if (typeof data.credits === "number") setCreditBalance(data.credits);
 
       setGeneratedImage(data.imageUrl);
