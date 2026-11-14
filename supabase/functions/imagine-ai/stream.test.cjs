@@ -24,7 +24,7 @@ function loadStream() {
     dir = parent;
   }
 }
-const { buildComplete, continuation, missingParts, missingMessages } = loadStream();
+const { buildComplete, continuation, missingParts, missingMessages, readCompletion, STREAM_IDLE_MS } = loadStream();
 
 const file = (p, content) => JSON.stringify({ type: "file", path: p, content });
 const action = (a) => JSON.stringify({ type: "action", action: a });
@@ -149,6 +149,48 @@ test("gate stays bounded: structural gate unchanged, missing list empties once f
   const completed = partial + "\n" + file("apps/InvoicePro/App.tsx", 'import { store } from "./store";\nexport default function App() { return null; }') + "\n" + DONE;
   assert.deepEqual(missingParts(completed, []), []);
   assert.equal(buildComplete(completed, "stop"), true);
+});
+
+// ---- readCompletion: idle timeout + unchanged healthy behavior ----
+// Fake SSE response: enqueues the given chunks immediately; closes the
+// stream unless close:false (the stalled-provider shape).
+function sseResponse(chunks, { close = true } = {}) {
+  const enc = new TextEncoder();
+  const body = new ReadableStream({
+    start(controller) {
+      for (const c of chunks) controller.enqueue(enc.encode(c));
+      if (close) controller.close();
+    },
+  });
+  return new Response(body, { headers: { "content-type": "text/event-stream" } });
+}
+const sseFrame = (obj) => `data: ${JSON.stringify(obj)}\n\n`;
+
+test("readCompletion: healthy stream returns text/finish/usage exactly as before", async () => {
+  const deltas = [];
+  const resp = sseResponse([
+    sseFrame({ choices: [{ delta: { content: "Hello " }, finish_reason: null }], usage: { prompt_tokens: 10, completion_tokens: 3 } }),
+    sseFrame({ choices: [{ delta: { content: "world" }, finish_reason: "stop" }], usage: { prompt_tokens: 10, completion_tokens: 5 } }),
+    "data: [DONE]\n\n",
+  ]);
+  const out = await readCompletion(resp, (d) => deltas.push(d));
+  assert.equal(out.text, "Hello world");
+  assert.equal(out.finish, "stop");
+  assert.equal(out.input, 10);
+  assert.equal(out.output, 5);
+  assert.deepEqual(deltas, ["Hello ", "world"]);
+});
+
+test("readCompletion: a stream that goes silent mid-pass rejects as stalled", async () => {
+  assert.equal(STREAM_IDLE_MS, 90000);
+  const deltas = [];
+  // One real delta (the file record reaches the client), then silence
+  // forever — the exact 2026-11-14 hang shape.
+  const resp = sseResponse([
+    sseFrame({ choices: [{ delta: { content: "{\"type\":\"file\"}" }, finish_reason: null }] }),
+  ], { close: false });
+  await assert.rejects(readCompletion(resp, (d) => deltas.push(d), 60), /stalled/);
+  assert.deepEqual(deltas, ["{\"type\":\"file\"}"]);
 });
 
 test("missingMessages names the exact missing files and asks for only those", () => {

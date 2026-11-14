@@ -1,6 +1,13 @@
 // Credits: Imagine Engine Studios Corp. Direct-provider streaming normalization.
 export type Completion = { text: string; input: number; output: number; finish: string };
-export async function readCompletion(resp: Response, onDelta: (text: string) => void): Promise<Completion> {
+// Anti-hang guard: a provider stream that goes silent mid-pass must fail
+// loudly, not hang the turn forever. Live failure shape (2026-11-14): a
+// build delivered every file via live deltas, then the provider stream
+// stalled after the last record — no completion, no error, 18 minutes —
+// because nothing bounded the wait between chunks. If no chunk arrives
+// for STREAM_IDLE_MS the read aborts with a "stalled" error instead.
+export const STREAM_IDLE_MS = 90000;
+export async function readCompletion(resp: Response, onDelta: (text: string) => void, idleMs: number = STREAM_IDLE_MS): Promise<Completion> {
   const result: Completion = { text: "", input: 0, output: 0, finish: "" };
   if (!resp.body) throw new Error("Provider returned no stream");
   if (!(resp.headers.get("content-type") || "").includes("text/event-stream") && !(resp.headers.get("content-type") || "").includes("ndjson")) {
@@ -50,9 +57,19 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
     if (finish) { result.finish = finish; ended = true; }
     if (data.type === "message_stop" || data.done) { ended = true; result.finish ||= data.done_reason || "stop"; }
   }
+  // Race every read against the idle timer: a chunk resets the clock, a
+  // silent stream rejects. On timeout the finally block below cancels the
+  // reader, tearing down the stalled provider connection.
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  const readChunk = () => new Promise<Awaited<ReturnType<typeof reader.read>>>((resolve, reject) => {
+    idleTimer = setTimeout(() => reject(new Error(`Provider stream stalled: no data received for ${Math.round(idleMs / 1000)}s`)), idleMs);
+    reader.read().then(resolve, reject);
+  });
   try {
     while (true) {
-      const chunk = await reader.read(); buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
+      const chunk = await readChunk();
+      if (idleTimer) { clearTimeout(idleTimer); idleTimer = undefined; }
+      buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
       buffer = buffer.replace(/\r\n/g, "\n");
       const delimiter = ndjson ? "\n" : "\n\n";
       let at;
@@ -72,7 +89,7 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
     }
     if (!ended) throw new Error("AI response ended unexpectedly");
     return result;
-  } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+  } finally { if (idleTimer) clearTimeout(idleTimer); await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
 // Providers disagree on finish strings: OpenAI says "length"/"stop",
 // Gemini's layer can emit "MAX_TOKENS"/"STOP", Anthropic "max_tokens"/

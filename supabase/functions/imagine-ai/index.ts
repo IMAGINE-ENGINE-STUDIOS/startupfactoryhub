@@ -55,6 +55,16 @@ async function writeJson(admin: any, path: string, v: unknown) {
 }
 const monthKey = () => `usage/${new Date().toISOString().slice(0, 7)}.json`;
 const dayKey = () => new Date().toISOString().slice(0, 10);
+// Per-turn diagnostics ring (2026-11-14): the last 3 turns' per-pass
+// records ride inside the user's monthly usage record (u.lastTurns) so a
+// build that hangs or loops leaves evidence — which provider/model served
+// each pass, how it finished, and what the completeness gate saw —
+// instead of vanishing without a trace.
+function attachTurn(u: any, turn: any) {
+  const ring = Array.isArray(u.lastTurns) ? u.lastTurns : [];
+  ring.push(turn);
+  u.lastTurns = ring.slice(-3);
+}
 
 
 function systemPrompt(tab: string, ctx: any, extra: string) {
@@ -178,6 +188,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
   let failRefund: null | (() => Promise<void>) = null;
+  // Diagnostics state for this turn: run() fills turnDiag pass by pass and
+  // flushDiag persists it on the error paths (the success path writes it
+  // with the rest of the usage record). Assigned once admin/user exist;
+  // a no-op until then. flushDiag never throws.
+  let turnDiag: any = null;
+  let flushDiag: () => Promise<void> = async () => {};
   try {
     const url = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -305,6 +321,17 @@ No invented production records: use empty states unless the user supplied data. 
     const clean = messages.map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 12000) }));
 
     const storedKeys: any = (await readJson(admin, "keys.json").catch(() => null)) || {};
+    flushDiag = async () => {
+      if (!turnDiag) return;
+      const diag = turnDiag; turnDiag = null;
+      try {
+        const fresh: any = (await readJson(admin, monthKey())) || { users: {} };
+        const u = fresh.users[user.id] || { requests: 0, input: 0, output: 0, cost: 0, charge: 0, days: {} };
+        attachTurn(u, diag);
+        fresh.users[user.id] = u;
+        await writeJson(admin, monthKey(), fresh);
+      } catch (_) { /* diagnostics must never mask the original error */ }
+    };
     const run = async (emit: (event: unknown) => void) => {
     const baseMessages = [{ role: "system", content: sys }, ...clean];
     // THE ASSEMBLY (founder law, 2026-11-04): a build is a mix of models,
@@ -346,6 +373,17 @@ No invented production records: use empty states unless the user supplied data. 
     // knownPaths = names only from the file context the client sent.
     const knownPaths = (body.context?.files || []).map((f: any) => f.name).filter((n: any) => typeof n === "string");
     let pendingMissing: string[] = [];
+    // The completeness gate gets at most GATE_MAX_CONTINUES continuations
+    // per turn. Structural continuations (resumeMessages, model cut off
+    // mid-output) do not count against it. Past the cap the build is
+    // accepted as-is: a gate that holds a turn open forever is worse than
+    // the missing file it was chasing (live hang, 2026-11-14).
+    const GATE_MAX_CONTINUES = 3;
+    let gateContinues = 0;
+    // Per-pass diagnostics for this turn, persisted into the usage
+    // record's lastTurns ring on both the success and error paths.
+    const passes: any[] = [];
+    turnDiag = { at: new Date().toISOString(), mode: String(body.mode || (isBuild ? "build" : "chat")), passes };
     for (let part = 0; part < MAX_PARTS; part++) {
       emit({ type: "status", message: part ? (pendingMissing.length ? "Adding the missing files..." : "Continuing the remaining files...") : "Working on your project..." });
       routed = await configuredChat(tier, { messages: part ? (pendingMissing.length ? missingMessages(baseMessages, text, pendingMissing) : resumeMessages(baseMessages, text)) : baseMessages, stream: !!body.stream, max_tokens: tier === "fast" ? 2048 : 8000 }, settings, storedKeys);
@@ -353,11 +391,23 @@ No invented production records: use empty states unless the user supplied data. 
       const completion = await readCompletion(routed.resp, (delta) => { text += delta; emit({ type: "delta", text: delta }); });
       inTok += completion.input; outTok += completion.output;
       accumulatedCost += costUsd(routed.model, completion.input, completion.output);
-      if (!isBuild) { if (!continuation(text, completion.finish)) break; }
+      if (!isBuild) {
+        passes.push({ part, model: `${routed.provider}/${routed.model}`, finish: completion.finish, outTok: completion.output });
+        if (!continuation(text, completion.finish)) break;
+      }
       else {
         const whole = buildComplete(text, completion.finish);
         pendingMissing = whole ? missingParts(text, knownPaths) : [];
+        passes.push({ part, model: `${routed.provider}/${routed.model}`, finish: completion.finish, whole, missing: pendingMissing.slice(0, 10), outTok: completion.output });
         if (whole && pendingMissing.length === 0) break;
+        if (whole && pendingMissing.length > 0) {
+          if (gateContinues >= GATE_MAX_CONTINUES) {
+            emit({ type: "status", message: "Some files are still missing; finishing with what was built" });
+            pendingMissing = [];
+            break;
+          }
+          gateContinues++;
+        }
         if (outTok >= BUILD_OUTPUT_BUDGET) throw new Error("The build hit its size budget before finishing; completed files were kept and unfinished files were not saved. Continue with a smaller next phase");
       }
       if (part === MAX_PARTS - 1) throw new Error("The build needs a smaller next phase; completed files were kept and unfinished files were not saved");
@@ -392,6 +442,7 @@ No invented production records: use empty states unless the user supplied data. 
         const cleaned = body.clientErrors.slice(0, 20).map((e: any) => ({ at: String(e?.at || ""), kind: String(e?.kind || "build").slice(0, 24), msg: String(e?.msg || "").slice(0, 300) }));
         u.clientErrors = [...(Array.isArray(u.clientErrors) ? u.clientErrors : []), ...cleaned].slice(-50);
       }
+      if (turnDiag) attachTurn(u, turnDiag);
       fresh.users[user.id] = u;
       await writeJson(admin, monthKey(), fresh);
     } catch (err) { console.error("usage write failed", err); }
@@ -406,6 +457,7 @@ No invented production records: use empty states unless the user supplied data. 
         const heartbeat = setInterval(() => { if (!cancelled) controller.enqueue(encoder.encode(": keepalive\n\n")); }, 15000);
         run(emit).then((result) => emit({ type: "complete", result })).catch(async (error) => {
           if (failRefund) { try { await failRefund(); } catch (_) {} failRefund = null; }
+          try { await flushDiag(); } catch (_) {}
           emit({ type: "error", error: error instanceof Error ? error.message : "Build interrupted" });
         }).finally(() => { clearInterval(heartbeat); if (!cancelled) controller.close(); });
       },
@@ -415,6 +467,7 @@ No invented production records: use empty states unless the user supplied data. 
   } catch (e) {
     console.error("imagine-ai error", e);
     if (failRefund) { try { await failRefund(); } catch (_) {} }
+    try { await flushDiag(); } catch (_) {}
     return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
