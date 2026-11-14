@@ -49,8 +49,10 @@ export default function Canvas({ design, onChange }: Props) {
     const placed: PlacedComponent = {
       uid: uid(),
       specId: spec.id,
-      x: x ?? 24 + (n % 4) * 48,
-      y: y ?? 24 + (n % 4) * 40,
+      // Cascade in a real grid (cards are 176 wide) so new parts never
+      // spawn stacked on top of each other.
+      x: x ?? 24 + (n % 3) * 196,
+      y: y ?? 24 + Math.floor(n / 3) * 150,
     };
     onChange({ ...design, components: [...design.components, placed] });
     setSelected(placed.uid);
