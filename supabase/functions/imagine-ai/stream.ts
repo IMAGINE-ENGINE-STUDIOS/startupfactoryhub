@@ -45,8 +45,45 @@ export async function readCompletion(resp: Response, onDelta: (text: string) => 
     return result;
   } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
+// Providers disagree on finish strings: OpenAI says "length"/"stop",
+// Gemini's layer can emit "MAX_TOKENS"/"STOP", Anthropic "max_tokens"/
+// "end_turn", and a stream that ends via [DONE] may carry no finish at
+// all (""). Normalise before comparing so case/variant never decides
+// whether a build continues.
+export function normalizeFinish(finish: string): string {
+  return (finish || "").trim().toLowerCase();
+}
+const TRUNCATION_FINISHES = new Set(["length", "max_tokens", "max_output_tokens"]);
+const TERMINAL_FINISHES = new Set(["stop", "end_turn", "complete", "eos", "stop_sequence"]);
 export function continuation(text: string, finish: string): boolean {
-  return finish === "length" || finish === "max_tokens" || finish === "max_output_tokens";
+  return TRUNCATION_FINISHES.has(normalizeFinish(finish));
+}
+// Structural completeness gate for builds: a pass is finished only when
+// the accumulated text is provably whole, not merely when the provider
+// claims it stopped. An unrecognised/absent finish with truncated text
+// must continue the build (bounded by the caller's pass/budget caps)
+// instead of returning the partial output as a successful completion.
+export function buildComplete(text: string, finish: string): boolean {
+  const f = normalizeFinish(finish);
+  if (TRUNCATION_FINISHES.has(f)) return false;
+  // Fence state, using the client parser's rule: a line of 3+ backticks
+  // (with optional info string) opens a fence; a bare backtick line closes.
+  let inFence = false;
+  const lines = text.split("\n");
+  for (const line of lines) {
+    if (!inFence) { if (/^\s*`{3,}/.test(line)) inFence = true; }
+    else if (/^\s*`{3,}\s*$/.test(line)) inFence = false;
+  }
+  if (inFence) return false;
+  // A trailing line that opens a JSON record but does not parse is a cut record.
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const last = lines[i].trim();
+    if (!last) continue;
+    if (last.startsWith("{")) { try { JSON.parse(last); } catch { return false; } }
+    break;
+  }
+  if (/"type"\s*:\s*"done"/.test(text.slice(-4000))) return true;
+  return TERMINAL_FINISHES.has(f);
 }
 export function resumeMessages(messages: { role: string; content: string }[], text: string) {
   // Keep the partial record verbatim: the next output is concatenated, never written alone.
