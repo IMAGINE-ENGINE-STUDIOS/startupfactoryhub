@@ -5,6 +5,14 @@
   var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI";
   function sess() { try { var t = JSON.parse(localStorage.getItem("sb-zqiihhmdsdgwdcwmryym-auth-token") || "null"); return t && t.access_token; } catch (e) { return null; } }
   function files() { var x = window.__IE; return (x && x.raw && x.raw.files) || []; }
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+  function appMeta(entry) {
+    var stem = String(entry || "").split("/").pop().replace(/\.\w+$/, "");
+    var proj = null;
+    try { var x = window.__IE; if (x && x.raw && x.raw.projects) proj = x.raw.projects.find(function (p) { return p.id === x.raw.pid; }); } catch (e) {}
+    var name = stem || (proj && typeof proj.name === "string" && proj.name.trim()) || "App";
+    return { name: name, desc: name + " — an app built with Imagine Engine." };
+  }
   var pinsP = null, uiP = null;
   function pins() {
     return pinsP || (pinsP = fetch("/imagine-engine/blocks/liveapp.html").then(function (r) { return r.text(); }).then(function (t) {
@@ -22,12 +30,15 @@
     if (!sess()) return Promise.reject(new Error("Sign in to pack your app."));
     var map = {}; files().forEach(function (f) { if (f && f.name && typeof f.content === "string" && !/^custom-scripts\//.test(f.name)) map[f.name] = f.content; });
     return Promise.all([pins(), ui()]).then(function (r) {
-      return fetch(FN, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + sess(), "Content-Type": "application/json" }, body: JSON.stringify({ entry: entry, files: map, pins: r[0], ui: r[1], host: !!host }) });
+      var meta = appMeta(entry);
+      return fetch(FN, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + sess(), "Content-Type": "application/json" }, body: JSON.stringify({ entry: entry, files: map, pins: r[0], ui: r[1], host: !!host, name: meta.name, description: meta.desc }) });
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.error) throw new Error(j.error || "Pack failed (" + r.status + ")"); return j; }); });
   }
   function html(name, j) {
     var o = location.origin, js = String(j.js).replace(/<\/script/gi, "<\\/script");
-    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + name + '</title>'
+    var t = esc(name), d = esc(name + " — an app built with Imagine Engine.");
+    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + t + '</title>'
+      + '<meta name="description" content="' + d + '"><meta property="og:title" content="' + t + '"><meta property="og:description" content="' + d + '"><meta property="og:type" content="website">'
       + '<script type="importmap">{"imports":{"react":"https://esm.sh/react@19.1.0","react/jsx-runtime":"https://esm.sh/react@19.1.0/jsx-runtime","react-dom":"https://esm.sh/react-dom@19.1.0?external=react","react-dom/client":"https://esm.sh/react-dom@19.1.0/client?external=react"}}</script>'
       + '<script src="https://cdn.tailwindcss.com"></script><script src="' + o + '/imagine-engine/blocks/ie-sdk.js"></script>'
       + '<style>html,body{margin:0;min-height:100%;background:#0b0b0c;color:#fafafa;font-family:system-ui,sans-serif}' + String(j.css || "").replace(/<\/style/gi, "<\\/style") + '</style>'
