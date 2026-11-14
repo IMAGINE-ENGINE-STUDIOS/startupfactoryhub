@@ -6,15 +6,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   CircuitBoard,
   Download,
+  Factory,
   FolderOpen,
   Loader2,
+  Package,
+  Play,
   Plus,
   Printer,
   Save,
+  Shapes,
   Trash2,
 } from "lucide-react";
 import Canvas from "./prototype/Canvas";
@@ -136,22 +139,53 @@ export default function PrototypeStudio() {
   /* ── Workspace (an open project) ─────────────────────────── */
   if (current) {
     const validity = validateDesign(current.design);
+    const railBtn = (active: boolean) =>
+      `flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2.5 transition ${
+        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      }`;
     return (
-      <div className="flex-1 min-h-0 w-full flex flex-col gap-3">
+      <div className="flex-1 min-h-0 w-full flex gap-2">
+        {/* ── Edge rail — the designer toolbar ─────────────────── */}
+        <div className="w-[62px] shrink-0 flex flex-col gap-1.5 rounded-2xl border border-border bg-card/60 p-1.5">
+          {([
+            ["design", "Design", Shapes],
+            ["twin", "Twin", Play],
+            ["package", "Package", Package],
+            ["manufacture", "Build", Factory],
+          ] as const).map(([id, label, Icon]) => (
+            <button key={id} onClick={() => setTab(id)} className={railBtn(tab === id)} aria-label={label}>
+              <Icon className="h-5 w-5" />
+              <span className="text-[9px] font-medium leading-none">{label}</span>
+            </button>
+          ))}
+          <div className="h-px bg-border my-1" />
+          <button onClick={save} disabled={saving} className={railBtn(false)} aria-label="Save">
+            {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+            <span className="text-[9px] font-medium leading-none">{validity.valid ? "Save" : "Draft"}</span>
+          </button>
+          <button onClick={() => { setCurrent(null); load(); }} className={`${railBtn(false)} mt-auto`} aria-label="Projects">
+            <FolderOpen className="h-5 w-5" />
+            <span className="text-[9px] font-medium leading-none">Projects</span>
+          </button>
+        </div>
+
+        {/* ── Main column: slim top bar + validity + the stage ── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => { setCurrent(null); load(); }}>
-            <ArrowLeft className="h-4 w-4" /> Projects
-          </Button>
           <Input
             value={current.name}
             onChange={(e) => setCurrent({ ...current, name: e.target.value })}
-            className="h-9 max-w-xs font-medium"
+            className="h-9 w-44 sm:max-w-xs font-medium"
             aria-label="Project name"
           />
-          <Button size="sm" className="gap-1.5" onClick={save} disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            {validity.valid ? "Save design" : "Save draft"}
-          </Button>
+          {current.design.components.length > 0 && (
+            <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-medium ${
+              validity.valid ? "border-emerald-500/50 text-emerald-500" : "border-amber-500/50 text-amber-500"
+            }`}>
+              {validity.valid ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+              {validity.valid ? "Valid design" : `${validity.errors.length} to fix`}
+            </span>
+          )}
           {savedAt && <span className="text-xs text-emerald-500">Saved {savedAt} — in your account</span>}
           <span className="text-xs text-muted-foreground ml-auto">
             {current.design.components.length} components · {current.design.connections.length} connections
@@ -172,21 +206,6 @@ export default function PrototypeStudio() {
             {validity.warnings.slice(0, 2).map((w, i) => <p key={`w${i}`} className="text-amber-500/90">• {w.message}</p>)}
           </div>
         )}
-
-        {/* Design / Twin / Package / Manufacture — all read the same document. */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-          {([["design", "Design"], ["twin", "Digital Twin"], ["package", "Package & BOM"], ["manufacture", "Manufacture"]] as const).map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition whitespace-nowrap shrink-0 ${
-                tab === id ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
 
         <div className="flex-1 min-h-0">
           {tab === "design" ? (
@@ -272,6 +291,7 @@ export default function PrototypeStudio() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
     );

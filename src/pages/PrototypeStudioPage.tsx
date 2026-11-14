@@ -20,7 +20,7 @@ export default function PrototypeStudioPage() {
         </h1>
         <span className="text-[11px] rounded-full border border-amber-500/50 text-amber-500 px-2 py-0.5">In build — not yet public</span>
       </header>
-      <main className="flex-1 min-h-0 p-4 max-w-[1400px] w-full mx-auto flex flex-col">
+      <main className="flex-1 min-h-0 p-2 sm:p-3 w-full flex flex-col">
         <PrototypeStudio />
       </main>
     </div>

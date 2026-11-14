@@ -130,7 +130,7 @@ export default function Canvas({ design, onChange }: Props) {
     kind.startsWith("power") ? "#f59e0b" : kind === "i2c" || kind === "spi" || kind === "uart" ? "#38bdf8" : "#a78bfa";
 
   return (
-    <div className="flex flex-col h-full min-h-0 gap-2">
+    <div className="relative flex flex-col h-full min-h-0 gap-2">
       {/* ── Stage ─────────────────────────────────────────── */}
       <div
         ref={stageRef}
@@ -218,7 +218,11 @@ export default function Canvas({ design, onChange }: Props) {
 
       {/* ── Inspector ─────────────────────────────────────── */}
       {selectedSpec && selectedPlaced && (
-        <div className="rounded-xl border border-border bg-card px-3 py-2 flex items-start gap-3">
+        <div
+          className="absolute right-2 top-2 z-10 w-[290px] max-w-[calc(100%-1rem)] max-h-[calc(100%-5rem)] overflow-y-auto rounded-xl border border-border bg-card/95 backdrop-blur px-3 py-2 flex items-start gap-3 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">{selectedSpec.name}</p>
             <p className="text-xs text-muted-foreground leading-snug">{selectedSpec.summary}</p>
