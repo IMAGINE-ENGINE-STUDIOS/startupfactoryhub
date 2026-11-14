@@ -13,44 +13,20 @@ import { STARTER_KITS, APEX_KIT, brochureKit, readCounts, saveCounts, KIT_MIME, 
 
 const ACCENT = 'linear-gradient(135deg,#06b6d4,#1d4ed8)';
 const ACTIVE = 'linear-gradient(135deg,#0e7490,#1d4ed8)';
-const PARALLEL = 2; // live page previews loading at the same time
 
-/** One live page preview that only starts loading when its turn comes.
- *  Each preview is a full app inside an iframe, so the queue may only
- *  advance when a preview has REALLY loaded — an earlier version also
- *  advanced on a 6-second timer, which kept mounting heavy iframes until
- *  the whole tab hung. */
-function LivePage({ src, title, go, onDone }: { src: string; title: string; go: boolean; onDone: () => void }) {
-  const [ready, setReady] = useState(false);
-  const freed = React.useRef(false);
-  const free = () => { if (!freed.current) { freed.current = true; onDone(); } };
-  // Stall-breaker: a preview is a full flipbook app in an iframe; if it has
-  // not loaded in 20s the queue must still move on, or one heavy page
-  // wedges the whole library (and the tab) behind it. The iframe stays
-  // mounted and appears whenever it finishes.
-  useEffect(() => {
-    if (!go) return;
-    const t = setTimeout(free, 20000);
-    return () => clearTimeout(t);
-  }, [go]); // eslint-disable-line react-hooks/exhaustive-deps
-  // The brochures refuse to render their flipbook in a window narrower
-  // than 360px (their readFlipEnv support gate), so a card-sized iframe
-  // (~200px) only ever shows their fallback layout — no page to preview.
-  // The iframe therefore gets a real 480px-wide viewport and is scaled
-  // down to the card; inside, the embed fit lays the page out at 480px.
-  const wrapRef = React.useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.35);
-  useEffect(() => {
-    const el = wrapRef.current; if (!el) return;
-    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / 480));
-    ro.observe(el); return () => ro.disconnect();
-  }, []);
-  if (!go) return <div className="w-full h-full grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Waiting…</div>;
-  return <div ref={wrapRef} className="absolute inset-0 overflow-hidden">
-    {!ready && <div className="absolute inset-0 grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Loading…</div>}
-    <iframe title={title} src={src} className="pointer-events-none" style={{ width: 480, height: 679, transform: `scale(${scale})`, transformOrigin: '0 0', opacity: ready ? 1 : 0, transition: 'opacity .3s', border: 0 }}
-      onLoad={() => setTimeout(() => { setReady(true); free(); }, 700)} />
-  </div>;
+/** Static design card for one library page. Page previews used to be LIVE
+ *  iframes — a full copy of the whole app per page — and a grid of 16–39
+ *  of them froze and crashed tabs outright (six tabs lost in one test
+ *  run), on top of the brochures refusing to render their flipbook under
+ *  360px wide. The library therefore shows a designed card per page; the
+ *  real page renders when it is inserted into the user's brochure. */
+function PageCard({ label, sub }: { label: string; sub: string }) {
+  return (
+    <div className="absolute inset-0 flex flex-col justify-between p-2" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.30), transparent 62%), linear-gradient(180deg,#0b1220,#111a2e)' }}>
+      <span className="font-mono text-[9px] tracking-[0.2em]" style={{ color: '#67e8f9' }}>{label}</span>
+      <span className="text-[10px] leading-snug" style={{ color: '#94a3b8' }}>{sub}</span>
+    </div>
+  );
 }
 
 export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
@@ -58,9 +34,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
 }) {
   const [route, setRoute] = useState(onKit ? 'kits' : onLayout ? 'layouts' : BROCHURES[0].route);
   const [counts, setCounts] = useState<Record<string, number>>(readCounts);
-  const [done, setDone] = useState(0);
   const [drag, setDrag] = useState(false);
-  useEffect(() => setDone(0), [route]);
 
   useEffect(() => {
     const on = (e: MessageEvent) => {
@@ -72,14 +46,11 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
     return () => window.removeEventListener('message', on);
   }, []);
 
-  // Count missing brochures one at a time in the background (the open one
-  // first) — but only while a brochure tab is open, and never while that
-  // tab's own previews are still loading: a counting iframe is another
-  // full app, and previews + counter together froze the tab solid on the
-  // 39-page APEX book.
-  const gridLoading = route !== 'kits' && route !== 'layouts' && counts[route] !== undefined && done < (counts[route] || 0);
-  const missing = route === 'kits' || route === 'layouts' || gridLoading ? undefined
-    : [route, ...BROCHURES.map((b) => b.route)].find((r) => BROCHURES.some((b) => b.route === r) && counts[r] === undefined);
+  // Count ONLY the book the user has open: a counting iframe is a full
+  // app, and chaining through every uncounted book in the background (the
+  // old behaviour) booted one heavy app after another behind the panel
+  // and helped kill the tab. Books pick up their count when visited.
+  const missing = route === 'kits' || route === 'layouts' || counts[route] !== undefined ? undefined : route;
   // If a count never arrives (a brochure that boots slowly or a stalled
   // iframe), remount the counting iframe and try again — up to 2 retries,
   // then leave it for the next library open instead of spinning forever.
@@ -140,7 +111,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
                       <div className="flex gap-1.5 overflow-hidden">
                         {k.pages.slice(0, k.pages[0]?.layout ? 3 : 1).map((p, i) => (
                           <div key={i} className="w-1/3 shrink-0 relative rounded-md overflow-hidden" style={{ aspectRatio: '1 / 1.414', background: '#0b1220', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            {p.layout ? <Thumb l={p.layout} /> : <LivePage src={p.src!} title={p.label} go={kits.indexOf(k) - STARTER_KITS.length < done + PARALLEL} onDone={() => setDone((d) => d + 1)} />}
+                            {p.layout ? <Thumb l={p.layout} /> : <PageCard label={p.label} sub="Design only — the real page renders when inserted" />}
                           </div>
                         ))}
                       </div>
@@ -152,7 +123,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
                     </div>
                   ))}
                 </div>
-                {missing && <p className="pt-3 text-[11px]" style={{ color: '#64748b' }}>Adding more brochures as templates…</p>}
+                <p className="pt-3 text-[11px]" style={{ color: '#64748b' }}>More books join the list as you open them in the brochures list.</p>
               </>
             ) : isLay && onLayout ? (
               <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))' }}>
@@ -167,12 +138,12 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
                 ))}
               </div>
             ) : n === undefined ? (
-              <div className="text-[13px]" style={{ color: '#94a3b8' }}>Loading pages…</div>
+              <div className="text-[13px]" style={{ color: '#94a3b8' }}>Loading pages… counting this book's pages (it opens once, then stays counted).</div>
             ) : (
               <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))' }}>
                 {Array.from({ length: n }, (_, i) => (
                   <div key={i} className="group relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.12)', aspectRatio: '1 / 1.414', background: '#0b1220' }}>
-                    <LivePage src={templateEmbedUrl(route, i)} title={`${name} page ${i + 1}`} go={i < done + (route === '/apex' ? 1 : PARALLEL)} onDone={() => setDone((d) => d + 1)} />
+                    <PageCard label={`${name.toUpperCase()} // ${String(i + 1).padStart(2, '0')}`} sub="Design only — the real page renders when inserted" />
                     <span className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 font-mono text-[10px]" style={{ background: 'rgba(15,23,42,0.85)' }}>P/{String(i + 1).padStart(2, '0')}</span>
                     <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(8,47,73,0.45)' }}
                       onClick={() => onPick(templateEmbedUrl(route, i), `${name} P/${i + 1}`)}>

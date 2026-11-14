@@ -36,8 +36,15 @@ export function ReaderBar({ roots }: { roots: HTMLElement[] }) {
     if (!text) return toast.error('Nothing to read on this page.');
     const u = new SpeechSynthesisUtterance(text.slice(0, 4000));
     u.lang = document.documentElement.lang || 'en-US';
-    u.onend = u.onerror = () => setSpeaking(false);
+    // Pick an explicit voice when the browser has loaded any — with no
+    // voice chosen, some browsers queue the utterance silently forever.
+    const voices = synth.getVoices();
+    const v = voices.find((x) => x.lang?.toLowerCase().startsWith(u.lang.slice(0, 2).toLowerCase())) || voices[0];
+    if (v) u.voice = v;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => { setSpeaking(false); toast.error('Reading aloud failed in this browser.'); };
     synth.cancel(); synth.speak(u); setSpeaking(true);
+    toast.success('Reading this page aloud…');
   };
   const share = async () => {
     const url = location.origin + location.pathname;
