@@ -16,7 +16,9 @@ import {
   Trash2,
 } from "lucide-react";
 import Canvas from "./prototype/Canvas";
+import Twin from "./prototype/Twin";
 import type { DesignDoc } from "./prototype/registry";
+import type { BehaviorRule } from "./prototype/rules";
 import { validateDesign } from "./prototype/validate";
 
 /*
@@ -31,7 +33,7 @@ import { validateDesign } from "./prototype/validate";
  * twin plug into this same document in the following jobs.
  */
 
-export type ProtoDesign = DesignDoc;
+export type ProtoDesign = DesignDoc & { rules?: BehaviorRule[] };
 
 interface ProtoProject {
   id: string;
@@ -41,7 +43,7 @@ interface ProtoProject {
   updated_at: string;
 }
 
-const EMPTY_DESIGN: ProtoDesign = { components: [], connections: [] };
+const EMPTY_DESIGN: ProtoDesign = { components: [], connections: [], rules: [] };
 
 // prototype_projects is newer than the generated types; query it
 // through a narrow cast until the types are regenerated.
@@ -58,6 +60,7 @@ export default function PrototypeStudio() {
   const [current, setCurrent] = useState<ProtoProject | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [tab, setTab] = useState<"design" | "twin">("design");
 
   const load = useCallback(async () => {
     if (!user) { setLoading(false); return; }
@@ -160,11 +163,34 @@ export default function PrototypeStudio() {
           </div>
         )}
 
+        {/* Design / Twin — the twin reads the same document. */}
+        <div className="flex gap-1.5">
+          {([["design", "Design"], ["twin", "Digital Twin"]] as const).map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                tab === id ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex-1 min-h-0">
-          <Canvas
-            design={current.design}
-            onChange={(d) => { setCurrent({ ...current, design: d }); setSavedAt(null); }}
-          />
+          {tab === "design" ? (
+            <Canvas
+              design={current.design}
+              onChange={(d) => { setCurrent({ ...current, design: { ...d, rules: current.design.rules ?? [] } }); setSavedAt(null); }}
+            />
+          ) : (
+            <Twin
+              design={current.design}
+              rules={current.design.rules ?? []}
+              onRulesChange={(rules) => { setCurrent({ ...current, design: { ...current.design, rules } }); setSavedAt(null); }}
+            />
+          )}
         </div>
       </div>
     );
