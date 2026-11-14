@@ -3,7 +3,7 @@
  * Pages, content and backgrounds come from the published Studio document.
  * Credits: Imagine Engine Studios Corp.
  */
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams } from 'react-router-dom';
@@ -98,6 +98,23 @@ export default function StudioBrochure() {
   };
   const arrowBtn: React.CSSProperties = { background: 'rgba(15,23,42,0.85)', border: '1px solid rgba(34,211,238,0.4)', color: '#e2e8f0', backdropFilter: 'blur(10px)' };
 
+  // Keep the counter honest when pages are removed under it.
+  useEffect(() => { setCur((c) => Math.min(c, Math.max(0, pages.length - 1))); }, [pages.length]);
+
+  const onFlipRef = useRef<(e: any) => void>(() => {});
+  onFlipRef.current = (e: any) => { reportPage(e.data); setCur(e.data); window.dispatchEvent(new CustomEvent('bs:page', { detail: { page: e.data } })); };
+  // The flipbook element is memoized: react-pageflip rebuilds the whole
+  // book from the live DOM whenever it receives fresh children, so handing
+  // it a new element on every render (page counter, live bridge updates)
+  // made the pages — and everything the editor portals into them — flicker
+  // in and out. It only gets a new element when the pages or size change.
+  const book = useMemo(() => (
+    // @ts-expect-error react-pageflip typing requires every prop
+    <HTMLFlipBook ref={bookRef} onFlip={(e: any) => onFlipRef.current(e)} key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
+      {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
+    </HTMLFlipBook>
+  ), [sig, w, spread]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center py-6" style={{ background: 'radial-gradient(ellipse 90% 70% at 50% 42%, #131f38 0%, #060a14 72%)' }}>
       {/* Flip arrows at the top of the brochure — pages can always be
@@ -114,10 +131,7 @@ export default function StudioBrochure() {
         </button>
       </div>
       <div className="rounded-[10px] p-2 sm:p-2.5" style={{ background: 'linear-gradient(180deg,#0c1425,#080d18)', boxShadow: '0 30px 80px rgba(0,0,0,0.65), 0 0 0 1.5px rgba(165,180,205,0.4)' }}>
-        {/* @ts-expect-error react-pageflip typing requires every prop */}
-        <HTMLFlipBook ref={bookRef} onFlip={(e: any) => { reportPage(e.data); setCur(e.data); window.dispatchEvent(new CustomEvent('bs:page', { detail: { page: e.data } })); }} key={`${sig}-${w}`} width={w} height={Math.floor(w * 1.414)} size="fixed" showCover usePortrait={!spread} drawShadow={spread} flippingTime={550} disableFlipByClick mobileScrollSupport>
-          {pages.map((p, i) => <Page key={i} n={i} src={p.src} />)}
-        </HTMLFlipBook>
+        {book}
       </div>
     </div>
   );

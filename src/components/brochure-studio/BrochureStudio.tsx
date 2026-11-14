@@ -124,6 +124,10 @@ function StudioEditor() {
   const [libAt, setLibAt] = useState<number | null>(null);
   const [layoutsOpen, setLayoutsOpen] = useState(false);
   const [modelsOpen, setModelsOpen] = useState(false);
+  // In-app name prompt (window.prompt is silently swallowed by some
+  // browsers/webviews, which made "New brochure" look dead).
+  const [nameAsk, setNameAsk] = useState<{ kit?: Kit } | null>(null);
+  const [nameVal, setNameVal] = useState('');
   const [models, setModels] = useState<LibModel[]>([]);
   useEffect(() => { if (modelsOpen) fetchModels().then(setModels); }, [modelsOpen]);
   const lastPage = useRef<number | null>(null);
@@ -155,15 +159,25 @@ function StudioEditor() {
   useEffect(() => {
     let off = false;
     past.current = []; future.current = [];
+    // The local draft loads FIRST, synchronously. It used to be read only
+    // inside the published fetch's success callback, so any network hiccup
+    // on that fetch left the brochure blank and the owner's saved edits
+    // looking lost — even though they were sitting in localStorage.
+    let hasDraft = false;
+    if (canEdit) {
+      try {
+        const s = localStorage.getItem(draftKey(slug));
+        if (s) { setDoc(normalizeDoc(JSON.parse(s))); hasDraft = true; }
+      } catch { /* ignore */ }
+    }
     fetchPublished(slug).then((pub) => {
       if (off) return;
-      let d = pub;
-      if (canEdit) { try { const s = localStorage.getItem(draftKey(slug)); if (s) d = normalizeDoc(JSON.parse(s)); } catch { /* ignore */ } }
       // Never let a slow load wipe edits made while it was in flight —
       // the in-memory pending draft is newer than anything on disk.
-      if (pendingDraft.current) d = pendingDraft.current;
-      setDoc(d);
-    });
+      if (pendingDraft.current) { setDoc(pendingDraft.current); return; }
+      if (hasDraft) return; // the draft on screen is the owner's newest copy
+      setDoc(pub);
+    }).catch(() => { /* keep whatever is on screen (draft or empty) */ });
     return () => { off = true; };
   }, [slug, canEdit]);
 
@@ -314,20 +328,23 @@ function StudioEditor() {
     } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
     setBusy(false);
   };
-  const pick = (mode: 'new-image' | 'new-model' | 'replace' | 'ios', accept: string, id?: string) => {
-    uploadTarget.current = { mode, id };
-    // A fresh, attached file input per pick: reusing one display:none input
-    // and calling .click() on it silently never opened the picker on
-    // iPhone Safari (and in some desktop browsers), which made Picture,
-    // 3D/AR upload and Replace picture look completely dead.
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = accept;
-    input.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
-    input.addEventListener('change', () => { const f = input.files?.[0]; if (f) onFile(f); setTimeout(() => input.remove(), 0); });
-    document.body.appendChild(input);
-    input.click();
-  };
+  /* Direct-tap file button: the file input sits ON TOP of the button, so
+     the user's own tap lands on the input itself. Programmatic .click()
+     calls on detached or hidden inputs silently open nothing on iPhone
+     Safari and in several embedded browsers — that is what made Picture,
+     3D/AR upload and Replace picture look completely dead. */
+  const FileBtn = ({ accept, mode, id, label, icon }: {
+    accept: string; mode: 'new-image' | 'new-model' | 'replace' | 'ios'; id?: string;
+    label: React.ReactNode; icon: React.ReactNode;
+  }) => (
+    <button type="button" className={btn} style={{ ...soft, position: 'relative', overflow: 'hidden' }} disabled={busy}>
+      {icon}{label}
+      <input type="file" accept={accept} aria-label="Upload file"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+        onClick={() => { uploadTarget.current = { mode, id }; }}
+        onChange={(e) => { uploadTarget.current = { mode, id }; const f = e.target.files?.[0]; e.target.value = ''; if (f) onFile(f); }} />
+    </button>
+  );
 
   const addItem = (p: Partial<Item>) => {
     const id = crypto.randomUUID();
@@ -342,10 +359,17 @@ function StudioEditor() {
     setBusy(false);
   };
   const discard = () => { cancelDraft(); localStorage.removeItem(draftKey(slug)); window.location.reload(); };
-  const newBrochure = () => {
-    const name = window.prompt('Name for the new brochure (letters, numbers, dashes)');
-    const s = (name || '').toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-    if (s) navigate(`/b/${s}`);
+  const newBrochure = () => { setNameVal(''); setNameAsk({}); };
+  const submitNameAsk = () => {
+    const s = nameVal.toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    if (!s) return;
+    const kit = nameAsk?.kit;
+    setNameAsk(null);
+    if (kit) {
+      const fresh = kitDoc({ edits: {}, items: [], bgs: {}, pages: [] }, kit, 0);
+      try { localStorage.setItem(draftKey(slugFromPath(`/b/${s}`)), JSON.stringify(fresh)); } catch { /* ignore */ }
+    }
+    navigate(`/b/${s}`);
   };
 
   /* ---- page library: insert pages from any brochure ---- */
@@ -395,12 +419,8 @@ function StudioEditor() {
       toast.success(`${k.name} added: ${k.pages.length} pages from page ${at + 1}`);
       return;
     }
-    const name = window.prompt(`Name for the new brochure made from "${k.name}"`);
-    const s = (name || '').toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-    if (!s) return;
-    const fresh = kitDoc({ edits: {}, items: [], bgs: {}, pages: [] }, k, 0);
-    try { localStorage.setItem(draftKey(slugFromPath(`/b/${s}`)), JSON.stringify(fresh)); } catch { /* ignore */ }
-    navigate(`/b/${s}`);
+    setNameVal('');
+    setNameAsk({ kit: k });
   };
   const findKit = (id: string) => STARTER_KITS.find((k) => k.id === id) || findSavedKit(id) || (id.startsWith('kit-copy:') ? (() => { const r = id.slice(9); const c = readCounts()[r]; return c ? brochureKit(r, c) : undefined; })() : undefined);
   const placeModel = (m: LibModel, page: number) => {
@@ -511,8 +531,8 @@ function StudioEditor() {
             <span className="w-px h-6" style={{ background: 'rgba(255,255,255,0.15)' }} />
             <button className={btn} style={soft} onClick={() => addItem({ type: 'text', text: 'New headline', size: 28, w: 60, metal: true })}><Type className="h-4 w-4" />Text</button>
             <button className={btn} style={soft} onClick={() => addItem({ type: 'icon', icon: 'Rocket', w: 14 })}><Shapes className="h-4 w-4" />Icon</button>
-            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-image', 'image/*')}><ImagePlus className="h-4 w-4" />Picture</button>
-            <button className={btn} style={soft} disabled={busy} onClick={() => pick('new-model', '.glb,model/gltf-binary')}><Box className="h-4 w-4" />3D / AR</button>
+            <FileBtn accept="image/*" mode="new-image" label="Picture" icon={<ImagePlus className="h-4 w-4" />} />
+            <FileBtn accept=".glb,model/gltf-binary" mode="new-model" label="3D / AR" icon={<Box className="h-4 w-4" />} />
             <button className={btn} style={soft} onClick={() => addItem({ type: 'shape', w: 50 })}><Square className="h-4 w-4" />Card</button>
             <button className={btn} style={{ background: bgOpen ? 'linear-gradient(135deg,#0e7490,#1d4ed8)' : 'rgba(255,255,255,0.08)' }} onClick={() => setBgOpen(!bgOpen)}><Wallpaper className="h-4 w-4" />Background</button>
             {isCustom && <>
@@ -644,15 +664,15 @@ function StudioEditor() {
                 </div>
               </>}
               {selItem.type === 'shape' && <Lbl t="Fill"><ColorField value={selItem.bg?.startsWith('#') ? selItem.bg : '#312e81'} onChange={(v) => setItem({ bg: v })} /></Lbl>}
-              {selItem.type === 'image' && <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', 'image/*', selItem.id)}><ImagePlus className="h-4 w-4" />Replace picture</button>}
+              {selItem.type === 'image' && <FileBtn accept="image/*" mode="replace" id={selItem.id} label="Replace picture" icon={<ImagePlus className="h-4 w-4" />} />}
               {selItem.type === 'model' && <>
-                <button className={btn} style={soft} disabled={busy} onClick={() => pick('replace', '.glb,model/gltf-binary', selItem.id)}><Box className="h-4 w-4" />Upload 3D model</button>
+                <FileBtn accept=".glb,model/gltf-binary" mode="replace" id={selItem.id} label="Upload 3D model" icon={<Box className="h-4 w-4" />} />
                 <Lbl t="Or model link (.glb)"><input className="rounded-md p-1.5 text-[12px]" style={field} defaultValue={selItem.src || ''} onBlur={(e) => setItem({ src: e.target.value.trim() })} placeholder="https://…/model.glb" /></Lbl>
                 <div className="flex gap-2">
                   <button className={btn} style={selItem.ar ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ ar: !selItem.ar })}>AR view</button>
                   <button className={btn} style={selItem.autoRotate !== false ? { background: 'linear-gradient(135deg,#0e7490,#1d4ed8)' } : soft} onClick={() => setItem({ autoRotate: selItem.autoRotate === false })}>Auto-rotate</button>
                 </div>
-                <button className={btn} style={soft} disabled={busy} onClick={() => pick('ios', '.usdz,model/vnd.usdz+zip', selItem.id)}><Box className="h-4 w-4" />{selItem.iosSrc ? 'Replace iPhone file' : 'iPhone file (.usdz, optional)'}</button>
+                <FileBtn accept=".usdz,model/vnd.usdz+zip" mode="ios" id={selItem.id} label={selItem.iosSrc ? 'Replace iPhone file' : 'iPhone file (.usdz, optional)'} icon={<Box className="h-4 w-4" />} />
                 <span className="text-[11px]" style={{ color: '#94a3b8' }}>With AR view on, visitors get a "View in your room" button. Phones place the model on the floor; computers show a QR code to open it on a phone.</span>
               </>}
               <Lbl t="Size"><Stepper v={Math.round(selItem.w)} set={(v) => setItem({ w: v })} step={1} min={3} max={150} fmt={(n) => `${n}%`} /></Lbl>
@@ -673,6 +693,22 @@ function StudioEditor() {
       )}
       {editing && modelsOpen && <ModelLibrary models={models} setModels={setModels} upload={upload} save={async (m) => { await call({ action: 'models', models: m }); }} onAdd={(m) => placeModel(m, curPage())} onClose={() => setModelsOpen(false)} />}
       {editing && layoutsOpen && <LayoutGallery canAddPage={isCustom} onClose={() => setLayoutsOpen(false)} onUse={(l) => placeLayout(l, curPage())} onNewPage={(l) => layoutAsPage(l)} onKit={(k) => applyKit(k)} />}
+      {nameAsk && (
+        <div data-bs-ui className="fixed inset-0 z-[90] flex items-center justify-center p-4" style={{ background: 'rgba(2,6,17,0.72)' }} onClick={() => setNameAsk(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-5" style={{ background: 'rgba(15,23,42,0.97)', border: '1px solid rgba(34,211,238,0.4)', color: '#e2e8f0' }} onClick={(e) => e.stopPropagation()}>
+            <p className="font-semibold text-[15px]">{nameAsk.kit ? `New brochure from "${nameAsk.kit.name}"` : 'New brochure'}</p>
+            <p className="text-[12px] mt-1" style={{ color: '#94a3b8' }}>Name for the new brochure (letters, numbers, dashes)</p>
+            <input autoFocus value={nameVal} onChange={(e) => setNameVal(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') submitNameAsk(); if (e.key === 'Escape') setNameAsk(null); }}
+              className="mt-3 w-full rounded-md p-2 text-[14px]" placeholder="my-brochure"
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.18)' }} />
+            <div className="flex gap-2 mt-4 justify-end">
+              <button className={btn} style={soft} onClick={() => setNameAsk(null)}>Cancel</button>
+              <button className={btn} style={{ background: 'linear-gradient(135deg,#06b6d4,#1d4ed8)' }} onClick={submitNameAsk}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
       {libAt !== null && <PageLibrary allowBlank={isCustom} onKit={(k) => applyKit(k, libAt !== null && libAt >= 0 ? libAt : undefined)} onClose={() => setLibAt(null)} onPick={insertPage} onLayout={isCustom ? (l) => layoutAsPage(l, libAt !== null && libAt >= 0 ? libAt : undefined) : (l) => { setLibAt(null); placeLayout(l, curPage()); }} />}
     </>
   );

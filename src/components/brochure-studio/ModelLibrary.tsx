@@ -4,7 +4,7 @@
  * The list is shared by every brochure and saved through brochure-publish.
  * Credits: Imagine Engine Studios Corp.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Box, Upload, Trash2, GripVertical, Pencil, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,7 +32,6 @@ export function ModelLibrary({ models, setModels, upload, save, onAdd, onClose }
   const [newCat, setNewCat] = useState('General');
   const [editId, setEditId] = useState<string | null>(null);
   const [draft, setDraft] = useState({ name: '', category: '' });
-  const file = useRef<HTMLInputElement>(null);
   useEffect(loadMV, []);
 
   const cats = Array.from(new Set(models.map((m) => m.category))).sort();
@@ -71,9 +70,14 @@ export function ModelLibrary({ models, setModels, upload, save, onAdd, onClose }
           <input list="bs-model-cats" className="rounded-md p-1.5 text-[12px]" style={field} value={newCat} onChange={(e) => setNewCat(e.target.value)} />
           <datalist id="bs-model-cats">{cats.map((c) => <option key={c} value={c} />)}</datalist>
         </label>
-        <button disabled={busy} onClick={() => file.current?.click()} className="flex items-center justify-center gap-1.5 rounded-lg py-2 text-[12px] font-bold disabled:opacity-50"
-          style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />{busy ? 'Uploading…' : 'Upload .glb models'}</button>
-        <input ref={file} type="file" multiple accept=".glb,model/gltf-binary" className="hidden" onChange={(e) => { if (e.target.files?.length) onFiles(e.target.files); e.target.value = ''; }} />
+        {/* The input sits on the button itself: a programmatic click on a
+            hidden input opens no picker on iPhone Safari. */}
+        <button disabled={busy} className="relative flex items-center justify-center gap-1.5 overflow-hidden rounded-lg py-2 text-[12px] font-bold disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg,#7c3aed,#0e7490)' }}><Upload className="h-4 w-4" />{busy ? 'Uploading…' : 'Upload .glb models'}
+          <input type="file" multiple accept=".glb,model/gltf-binary" aria-label="Upload .glb models"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+            onChange={(e) => { if (e.target.files?.length) onFiles(e.target.files); e.target.value = ''; }} />
+        </button>
       </div>
 
       <div className="flex flex-wrap gap-1 px-3 py-2">

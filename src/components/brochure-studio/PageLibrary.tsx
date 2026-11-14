@@ -22,11 +22,22 @@ const PARALLEL = 2; // live page previews loading at the same time
  *  the whole tab hung. */
 function LivePage({ src, title, go, onDone }: { src: string; title: string; go: boolean; onDone: () => void }) {
   const [ready, setReady] = useState(false);
+  const freed = React.useRef(false);
+  const free = () => { if (!freed.current) { freed.current = true; onDone(); } };
+  // Stall-breaker: a preview is a full flipbook app in an iframe; if it has
+  // not loaded in 20s the queue must still move on, or one heavy page
+  // wedges the whole library (and the tab) behind it. The iframe stays
+  // mounted and appears whenever it finishes.
+  useEffect(() => {
+    if (!go) return;
+    const t = setTimeout(free, 20000);
+    return () => clearTimeout(t);
+  }, [go]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!go) return <div className="w-full h-full grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Waiting…</div>;
   return <>
     {!ready && <div className="absolute inset-0 grid place-items-center text-[11px]" style={{ color: '#64748b' }}>Loading…</div>}
     <iframe title={title} src={src} className="w-full h-full pointer-events-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity .3s' }}
-      onLoad={() => setTimeout(() => { if (!ready) { setReady(true); onDone(); } }, 700)} />
+      onLoad={() => setTimeout(() => { setReady(true); free(); }, 700)} />
   </>;
 }
 
@@ -50,9 +61,12 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
   }, []);
 
   // Count missing brochures one at a time in the background (the open one
-  // first) — but only while a brochure tab is open: counting loads a full
-  // app per brochure, and it used to run even on the templates tabs.
-  const missing = route === 'kits' || route === 'layouts' ? undefined
+  // first) — but only while a brochure tab is open, and never while that
+  // tab's own previews are still loading: a counting iframe is another
+  // full app, and previews + counter together froze the tab solid on the
+  // 39-page APEX book.
+  const gridLoading = route !== 'kits' && route !== 'layouts' && counts[route] !== undefined && done < (counts[route] || 0);
+  const missing = route === 'kits' || route === 'layouts' || gridLoading ? undefined
     : [route, ...BROCHURES.map((b) => b.route)].find((r) => BROCHURES.some((b) => b.route === r) && counts[r] === undefined);
 
   const n = counts[route];
@@ -130,7 +144,7 @@ export function PageLibrary({ onPick, onClose, allowBlank, onLayout, onKit }: {
               <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))' }}>
                 {Array.from({ length: n }, (_, i) => (
                   <div key={i} className="group relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.12)', aspectRatio: '1 / 1.414', background: '#0b1220' }}>
-                    <LivePage src={templateEmbedUrl(route, i)} title={`${name} page ${i + 1}`} go={i < done + PARALLEL} onDone={() => setDone((d) => d + 1)} />
+                    <LivePage src={templateEmbedUrl(route, i)} title={`${name} page ${i + 1}`} go={i < done + (route === '/apex' ? 1 : PARALLEL)} onDone={() => setDone((d) => d + 1)} />
                     <span className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 font-mono text-[10px]" style={{ background: 'rgba(15,23,42,0.85)' }}>P/{String(i + 1).padStart(2, '0')}</span>
                     <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(8,47,73,0.45)' }}
                       onClick={() => onPick(templateEmbedUrl(route, i), `${name} P/${i + 1}`)}>
