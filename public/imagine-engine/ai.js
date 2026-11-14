@@ -891,12 +891,22 @@
     send("Auto-repair: the live app " + f + " crashed with this error. Fix it with patchFile on the exact broken code; keep every working feature and do not rebuild.\n\nError: " + String(d.message || "").slice(0, 800) + (d.stack ? "\nStack: " + String(d.stack).slice(0, 1200) : "") + (srcTxt ? "\n\nCurrent " + f + " (first 6000 chars):\n" + srcTxt.slice(0, 6000) : ""), { hidden: true, internal: true });
     return true;
   };
-  // Automatic repair: at most 2 tries per file every 5 minutes, waits while Genius is busy
+  // Automatic repair: per-file cap every 5 minutes, waits while Genius is
+  // busy. Plan-aware (finish plan Job 9): free stays at 2 tries; paying
+  // plans and admins get 8. The tier is window.__IEPlanTier, published by
+  // the credits module below from the imagine-ai credits action — the same
+  // paid test the server uses (plan set and not "free", or admin). It
+  // defaults to free until the first credits refresh lands.
+  var FREE_HEAL_CAP = 2, PRO_HEAL_CAP = 8, HEAL_WINDOW_MS = 300000;
+  function healCap() {
+    var t = String(window.__IEPlanTier || "free").toLowerCase();
+    return t && t !== "free" ? PRO_HEAL_CAP : FREE_HEAL_CAP;
+  }
   var healTries = {};
   function autoHeal(d, wait) {
     var f = String(d.file || ""); if (!f) return;
-    var t = healTries[f] = (healTries[f] || []).filter(function (x) { return Date.now() - x < 300000; });
-    if (t.length >= 2) return;
+    var t = healTries[f] = (healTries[f] || []).filter(function (x) { return Date.now() - x < HEAL_WINDOW_MS; });
+    if (t.length >= healCap()) return;
     if (busy) { if ((wait || 0) < 20) setTimeout(function () { autoHeal(d, (wait || 0) + 1); }, 3000); return; }
     if (window.__IEAutoHeal(d)) t.push(Date.now());
   }
@@ -978,6 +988,11 @@
       .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.error) throw new Error(j.error || "Request failed"); return j; }); });
   }
   var state = { balance: null, admin: false, plan: "free" };
+  // Finish plan Job 9: publish the plan tier so plan-aware features in the
+  // chat module (the auto-heal cap) can read it as window.__IEPlanTier.
+  // Admin counts as paid, matching the server's paid test in imagine-ai.
+  function publishTier() { try { window.__IEPlanTier = state.admin ? "admin" : String(state.plan || "free"); } catch (e) {} }
+  publishTier();
   function fmt(n) { return (Math.round(n * 10) / 10).toLocaleString(); }
   function paint() {
     var txt = !token() ? "Sign in for credits" : state.admin ? "Admin: unlimited" : state.balance == null ? "Credits" : fmt(state.balance) + " credits";
@@ -986,7 +1001,7 @@
   }
   function refresh() {
     if (!token()) { paint(); return; }
-    post(FN, { action: "credits" }).then(function (j) { state.balance = j.balance; state.admin = !!j.isAdmin; state.plan = j.plan; paint(); }).catch(function () {});
+    post(FN, { action: "credits" }).then(function (j) { state.balance = j.balance; state.admin = !!j.isAdmin; state.plan = j.plan || "free"; publishTier(); paint(); }).catch(function () {});
   }
   var modal = null;
   function openPlans() {
