@@ -14,6 +14,7 @@ import CRMBoard from "./CRMBoard";
 import LogoMaker from "./LogoMaker";
 import VideoMaker from "./VideoMaker";
 import BrochureCreator from "./BrochureCreator";
+import PrototypeStudio from "./PrototypeStudio";
 import {
   FileText,
   TrendingUp,
@@ -35,6 +36,7 @@ import {
   BookOpen,
   PenTool,
   Clapperboard,
+  CircuitBoard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +103,7 @@ type ToolId =
   | "brochure-studio"
   | "logo-maker"
   | "video-maker"
+  | "prototype-studio"
   | "crm";
 
 interface DeskTool {
@@ -189,6 +192,21 @@ const TOOLS: DeskTool[] = [
     accent: "from-amber-500 via-orange-500 to-red-500",
     glow: "hsl(25 90% 55%)",
     badge: "Marketing",
+    size: "lg",
+  },
+  {
+    id: "prototype-studio",
+    title: "Prototype Studio",
+    tagline: "Design a working device prototype — no code, no guesswork.",
+    capabilities: [
+      "Drag-and-drop controllers, sensors, power & radios",
+      "A live digital twin that checks your design as you build",
+      "Bill of materials and a path to manufacture",
+    ],
+    icon: CircuitBoard,
+    accent: "from-sky-500 via-blue-600 to-indigo-600",
+    glow: "hsl(210 90% 55%)",
+    badge: "Hardware",
     size: "lg",
   },
 ];
@@ -382,6 +400,24 @@ export default function AIFeaturesHub() {
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
             <SFHImageCreator />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Prototype Studio fullscreen ──────────────────────── */}
+      <Dialog open={openTool === "prototype-studio"} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <CircuitBoard className="h-5 w-5 text-sky-400" />
+              Prototype Studio
+            </DialogTitle>
+            <DialogDescription>
+              Design a connected-device prototype on a visual canvas — simulate it, export the parts list, take it to manufacture.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <PrototypeStudio />
           </div>
         </DialogContent>
       </Dialog>
