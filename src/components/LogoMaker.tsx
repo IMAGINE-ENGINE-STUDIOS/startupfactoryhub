@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,46 @@ export default function LogoMaker() {
   const [engineLabel, setEngineLabel] = useState("");
   const [refiningIdx, setRefiningIdx] = useState<number | null>(null);
   const [refineTexts, setRefineTexts] = useState<Record<number, string>>({});
+
+  // Concepts are paid work — they must survive the panel closing,
+  // a refresh, anything. The function writes every concept to the
+  // image_generation_usage ledger before it returns, so on mount
+  // the latest four logo rows are restored as the current concepts
+  // (live state from an in-panel generation always wins — the
+  // restore only fills an empty panel). Proven necessary
+  // 2026-11-14: generations succeeded server-side (12/12 HTTP 200)
+  // while the hosting dialog closed and the in-memory results
+  // were lost before the owner ever saw them.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData?.user?.id;
+      if (!uid || cancelled) return;
+      const { data: rows } = await supabase
+        .from("image_generation_usage")
+        .select("image_url, prompt, created_at")
+        .eq("user_id", uid)
+        .eq("style_preset", "logo")
+        .order("created_at", { ascending: false })
+        .limit(4);
+      if (cancelled || !rows || rows.length === 0) return;
+      const restored: LogoVariant[] = rows
+        .slice()
+        .reverse()
+        .map((r: any) => {
+          const m = /Composition: ([^.]+)\./.exec(r.prompt ?? "");
+          return { url: r.image_url, composition: m ? m[1] : "logo concept" };
+        })
+        .filter((v: LogoVariant) => !!v.url);
+      if (restored.length === 0) return;
+      setVariants((prev) => (prev.length ? prev : restored));
+      const nameMatch = /for the company "([^"]+)"/.exec(rows[0]?.prompt ?? "");
+      if (nameMatch) setBusinessName((prev) => prev || nameMatch[1]);
+      setEngineLabel((prev) => prev || "FLUX.1 [schnell] — open source (Apache-2.0), Cloudflare Workers AI");
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const buildPrompt = (composition: string) => {
     const style = LOGO_STYLES.find((s) => s.id === styleId) ?? LOGO_STYLES[0];
