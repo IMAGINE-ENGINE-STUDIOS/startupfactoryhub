@@ -121,8 +121,14 @@ export default function LogoMaker() {
     let limitSeen = false;
     let firstError: string | null = null;
     try {
-      // All four concepts generate in parallel — one wait, not four.
-      await Promise.all(COMPOSITIONS.map(async (composition, i) => {
+      // Two concepts at a time, not four in parallel: four
+      // simultaneous generations plus four full-size images landing
+      // at once made phones lag and killed the panel mid-run
+      // (founder's iPhone report, 2026-11-15). Two waves keep the
+      // wait short without the memory spike. Concepts are written
+      // to the ledger server-side before each call returns, so a
+      // panel that dies mid-run still restores them on reopen.
+      const runOne = async (composition: string, i: number) => {
         const { data, error } = await supabase.functions.invoke("generate-logo-image", {
           body: { prompt: buildPrompt(composition) },
         });
@@ -154,7 +160,15 @@ export default function LogoMaker() {
             return next;
           });
         }
-      }));
+      };
+      let nextIdx = 0;
+      const worker = async () => {
+        while (nextIdx < COMPOSITIONS.length) {
+          const i = nextIdx++;
+          await runOne(COMPOSITIONS[i], i);
+        }
+      };
+      await Promise.all([worker(), worker()]);
       if (limitSeen && made < COMPOSITIONS.length) setLimitHit(true);
       if (made) toast({ title: "Logos ready", description: `${made} concepts generated — download the ones you like or refine one.` });
       else if (!limitSeen && firstError) throw new Error(firstError);
@@ -285,6 +299,11 @@ export default function LogoMaker() {
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {generating ? `Designing… ${progress}/4` : "Generate 4 logo concepts"}
           </Button>
+          {generating && (
+            <p className="text-xs text-muted-foreground">
+              Each concept is saved to your account the moment it's made. If your phone closes this panel while it works, just reopen Logo Maker — your logos will be here.
+            </p>
+          )}
           {limitHit && (
             <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm flex gap-2">
               <Crown className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
@@ -313,7 +332,7 @@ export default function LogoMaker() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {variants.map((v, i) => (
               <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
-                <img src={v.url} alt={`Logo concept ${i + 1}`} className="w-full aspect-square object-cover" />
+                <img src={v.url} alt={`Logo concept ${i + 1}`} decoding="async" className="w-full aspect-square object-cover" />
                 <div className="p-3 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="secondary" className="text-[10px] capitalize">{v.composition.split(" ").slice(0, 3).join(" ")}…</Badge>
