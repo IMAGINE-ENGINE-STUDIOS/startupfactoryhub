@@ -71,17 +71,17 @@ export const useEventsForMap = (enabled = true) => {
             .eq('user_id', event.organizer_id)
             .single();
 
-          // Get attendee count
-          const { count } = await supabase
-            .from('event_attendees')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id)
-            .eq('status', 'going');
+          // Get registration count (external registrations + platform
+          // attendees) via the count-only RPC: registration rows are
+          // organizer-only under RLS, so table counts read as zero publicly.
+          const { data: regTotal } = await supabase.rpc('event_registration_count', {
+            p_event_id: event.id,
+          });
 
           return {
             ...event,
             organizer: organizer || undefined,
-            attendee_count: count || 0,
+            attendee_count: typeof regTotal === 'number' ? regTotal : 0,
           } as MapEvent;
         })
       );

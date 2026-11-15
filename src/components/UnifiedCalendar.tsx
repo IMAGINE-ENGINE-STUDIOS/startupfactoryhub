@@ -152,16 +152,13 @@ export default function UnifiedCalendar({
       return acc;
     }, {} as Record<string, any>);
 
-    // Get attendee counts
-    const eventIds = eventsData?.map(e => e.id) || [];
-    const { data: attendeesData } = await supabase
-      .from('event_attendees')
-      .select('event_id')
-      .in('event_id', eventIds)
-      .eq('status', 'going');
+    // Get registration counts (external registrations + platform attendees)
+    // via the count-only RPC: registration rows are organizer-only under
+    // RLS, so counting the tables directly reads as zero for everyone else.
+    const { data: countsData } = await supabase.rpc('event_registration_counts');
 
-    const attendeesCounts = (attendeesData || []).reduce((acc, att) => {
-      acc[att.event_id] = (acc[att.event_id] || 0) + 1;
+    const attendeesCounts = (countsData || []).reduce((acc, row) => {
+      acc[row.event_id] = row.total;
       return acc;
     }, {} as Record<string, number>);
 

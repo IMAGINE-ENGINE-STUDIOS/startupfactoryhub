@@ -46,6 +46,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Events, conferences & pitch nights');
   const [attendees, setAttendees] = useState<any[]>([]);
+  const [registrationCount, setRegistrationCount] = useState(0);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [externalEmails, setExternalEmails] = useState('');
@@ -162,6 +163,14 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       .eq('status', 'going');
 
     setAttendees(data || []);
+
+    // True registration total (external registrations + platform attendees)
+    // via the count-only RPC: registration rows are organizer-only under
+    // RLS, so counting the tables directly reads as zero for everyone else.
+    const { data: regTotal } = await supabase.rpc('event_registration_count', {
+      p_event_id: event.id,
+    });
+    if (typeof regTotal === 'number') setRegistrationCount(regTotal);
   };
 
   const fetchAllUsers = async () => {
@@ -221,7 +230,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   };
 
   const isOrganizer = user?.id === event.organizer_id;
-  const isFull = event.max_attendees && attendees.length >= event.max_attendees;
+  const isFull = event.max_attendees && registrationCount >= event.max_attendees;
   const isOnlineEvent = event.location?.match(/live-video|whereby\.com/);
   
   const timeData = useMemo(() => {
@@ -363,7 +372,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="h-5 w-5" />
               <span>
-                {attendees.length} attending
+                {registrationCount} registered
                 {event.max_attendees && ` / ${event.max_attendees} max`}
               </span>
             </div>
@@ -393,7 +402,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
           {/* Attendees */}
           {attendees.length > 0 && (
             <div>
-              <h3 className="font-semibold mb-3">Attendees ({attendees.length})</h3>
+              <h3 className="font-semibold mb-3">Platform attendees ({attendees.length})</h3>
               <div className="grid grid-cols-2 gap-2">
                 {attendees.slice(0, 8).map(attendee => (
                   <div key={attendee.id} className="flex items-center gap-2">
@@ -513,7 +522,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
                   <p className="font-semibold text-primary">Host Tip:</p>
                   <p className="text-muted-foreground">
-                    You can start the meeting anytime. Attendees will join the same Startup Factory Hub live video room automatically.
+                    You can start the meeting anytime. Attendees will join the same Whereby room automatically.
                   </p>
                 </div>
               )}

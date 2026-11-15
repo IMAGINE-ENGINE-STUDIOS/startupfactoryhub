@@ -56,6 +56,7 @@ export default function PublicUserPage() {
   const [media, setMedia] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sectionEdit, setSectionEdit] = useState<any | null>(null);
@@ -83,6 +84,10 @@ export default function PublicUserPage() {
         supabase.from('companies').select('id').eq('user_id', userId),
       ]);
       setProfile(p); setRole((r as any) || null); setPosts(fp || []); setEvents(ev || []);
+      // Registration totals via the count-only RPC (registration rows are
+      // organizer-only under RLS, so they cannot be counted directly).
+      const { data: counts } = await supabase.rpc('event_registration_counts');
+      if (counts) setEventCounts(Object.fromEntries((counts as any[]).map((c: any) => [c.event_id, c.total])));
       const ids = (comps || []).map((c: any) => c.id);
       if (ids.length) {
         const { data: j } = await supabase.from('jobs').select('id, title, location, job_type, status, created_at').in('company_id', ids).order('created_at', { ascending: false }).limit(30);
@@ -353,6 +358,7 @@ export default function PublicUserPage() {
                   <p className="truncate font-medium">{e.title}</p>
                   <p className="text-xs text-muted-foreground"><Clock className="mr-1 inline h-3 w-3" />{new Date(e.start_date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
                   <p className="truncate text-xs text-muted-foreground">{e.is_virtual ? 'Virtual' : e.location}</p>
+                  <p className="text-xs text-muted-foreground">{eventCounts[e.id] ?? 0} registered</p>
                 </div>
               </button>
             ))}
