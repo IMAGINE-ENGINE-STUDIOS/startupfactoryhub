@@ -62,6 +62,7 @@ const startupMemberships: {
       "In-residence workspace & dedicated hub desks at all SFH locations",
       "Venture studio acceleration: sprints, pitch advisory & roadmap reviews",
       "Complimentary Delaware C corporation registration",
+      "Interns included — human capital for your startup",
       "Strategic Business Intelligence suite",
       "Priority eligibility for the Accelerated Tier and cohort funding",
     ],
@@ -74,6 +75,8 @@ const startupMemberships: {
     bestFor: "Scaling startups, cross-border founders, and venture partners",
     features: [
       "All Venture Resident features included",
+      "Interns included — human capital for your startup",
+      "Delaware C Corporation included",
       "Private office & global hub access in 130+ countries (5,800+ locations)",
       "Executive mentorship & priority investor access",
       "International soft landing & cross-border expansion support",
