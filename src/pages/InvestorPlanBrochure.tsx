@@ -1,9 +1,12 @@
 /**
  * /investor-plan (alias /investor-priority) — Investor Priority brochure.
  *
- * Same editorial flipbook style and format as the Basic Plan brochure
- * (/basic-plan): A4 pages, institutional photography, platinum titles,
- * glass cards and animated data visuals.
+ * Magazine editorial flipbook in the partners brochure (/forpartners)
+ * register: A4 pages, serif display titles, institutional photography,
+ * platinum titles, glass cards and animated data visuals. 10 pages,
+ * including the Standard Program Valuation page (P.07): a signed investor
+ * invests $25K–$250K into a Hub-sourced startup at the standard 10%
+ * position, split 70% investor / 30% Startup Factory Hub.
  *
  * Pricing: $500 / month or $5,000 / year. Prices and benefits are read live
  * from public.subscription_plan_config (key = 'investor') via the
@@ -47,7 +50,12 @@ const NEON = {
   blue: '#1f2a44',
   emerald: '#059669',
   ink: '#0f172a',
+  gold: '#c9a227',
+  goldSoft: '#e7c65a',
 };
+
+/** Editorial serif display stack — the partners brochure's magazine voice. */
+const SERIF: React.CSSProperties = { fontFamily: "'Playfair Display', Georgia, serif" };
 
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
@@ -62,7 +70,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
 };
 
 /** Total pages in the flipbook. */
-const TOTAL = 8;
+const TOTAL = 10;
 
 /**
  * Strategic dealflow channels shown on page 05.
@@ -222,7 +230,7 @@ const ImagePlate = ({
   </div>
 );
 
-const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
+const PageTitle = ({ kicker, title, accent = NEON.cyan, serif }: { kicker: string; title: React.ReactNode; accent?: string; serif?: boolean }) => (
   <div className="mb-6">
     <div className="flex items-center gap-3 mb-3">
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
@@ -234,6 +242,7 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
       paddingBottom: '6px',
       ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
+      ...(serif ? { ...SERIF, fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.06 } : null),
     }}>
       {title}
     </h2>
@@ -775,9 +784,10 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
               <h1 className="font-black tracking-tight text-white" style={{
                 fontSize: 'clamp(54px, 9vw, 96px)', lineHeight: 0.94,
                 textShadow: `0 0 60px ${NEON.cyan}55`,
+                ...SERIF, fontWeight: 800, letterSpacing: '-0.02em',
               }}>
-                CAPITAL<br />MOVES<br />
-                <span style={{ color: '#67e8f9' }}>FIRST<br />INSIDE.</span>
+                Capital<br />moves<br />
+                <span style={{ color: '#67e8f9' }}>first<br />inside.</span>
               </h1>
               <motion.div
                 className="mt-8 h-[3px]"
@@ -789,6 +799,17 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
                 early allocation windows, shared-risk syndication, diligence intelligence and a
                 seat inside every Batch.
               </p>
+
+              <div className="mt-7 inline-flex items-center gap-3 self-start rounded-full px-5 py-2.5" style={{
+                background: `linear-gradient(120deg, ${NEON.gold}30, rgba(255,255,255,0.05))`,
+                border: `1px solid ${NEON.gold}88`,
+                boxShadow: `0 0 24px ${NEON.gold}33`,
+              }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: NEON.goldSoft, boxShadow: `0 0 10px ${NEON.gold}` }} />
+                <span className="font-mono text-[13px] tracking-[0.3em] uppercase" style={{ color: NEON.goldSoft }}>
+                  Inside · The Standard Program Valuation — P.07
+                </span>
+              </div>
 
               <div className="mt-10 flex flex-wrap gap-5">
                 <div className="rounded-2xl px-8 py-6" style={{
@@ -820,11 +841,60 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 02 · ACCESS MODEL ---------------- */}
+      {/* ---------------- 02 · THE PLATFORM (magazine intro) ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="01" label="THE ACCESS MODEL" pageNum={2}>
-            <PageTitle kicker="Access model" title={<>MEMBER TO BROWSE.<br />PRIORITY TO ALLOCATE.</>} />
+          <PageFrame code="01" label="THE PLATFORM" pageNum={2}>
+            <PageTitle kicker="Startup Factory Hub" serif title={<>The operating<br />system for capital.</>} />
+            <div className="grid grid-cols-5 gap-6 flex-1">
+              <div className="col-span-3 flex flex-col">
+                <p className="text-[19px] text-slate-700 leading-relaxed">
+                  Startup Factory Hub is a venture builder and accelerator with one job: turn
+                  frontier research into companies worth owning — then put its investors in
+                  the room before anyone else.
+                </p>
+                <p className="text-[17px] text-slate-600 leading-relaxed mt-4">
+                  We source, build and structure startups across the three areas where the
+                  next decade of value is decided — space, deep tech and quantum, software
+                  included. Every company is engineered inside the Hub first: team, product,
+                  first customers, data room. By the time a deal reaches this brochure, it has
+                  already been built.
+                </p>
+                <div className="grid grid-cols-3 gap-4 mt-auto pt-6">
+                  {[
+                    { v: '79', l: 'Firms in the network' },
+                    { v: '03', l: 'Frontier areas' },
+                    { v: '200+', l: 'Platform members' },
+                  ].map(s => (
+                    <div key={s.l} className="border-t-2 pt-3" style={{ borderColor: NEON.cyan }}>
+                      <div className="font-black text-slate-900" style={{ fontSize: 40, lineHeight: 1, ...SERIF }}>{s.v}</div>
+                      <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate-500 mt-2">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2 flex flex-col gap-4">
+                <ImagePlate src={imgCampus} alt="Inside the Startup Factory Hub innovation campus" caption="The Hub · Orlando & global" height={300} eager />
+                <GlassCard accent={NEON.gold} padding="p-5">
+                  <div className="font-mono text-[12px] tracking-[0.3em] uppercase mb-2" style={{ color: NEON.gold }}>
+                    The investor seat
+                  </div>
+                  <p className="text-[15.5px] text-slate-700 leading-snug">
+                    One membership puts you inside every Batch, every allocation window and
+                    the Standard Program — the same standard terms on every deal, page 07.
+                  </p>
+                </GlassCard>
+              </div>
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 03 · ACCESS MODEL ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="02" label="THE ACCESS MODEL" pageNum={3}>
+            <PageTitle kicker="Access model" serif title={<>Member to browse.<br />Priority to allocate.</>} />
             <ImagePlate src={imgSummit} alt="Investors reviewing deals at a private summit" caption="Private summits · allocation windows" height={230} className="mb-6" />
             <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
               Every paid member can explore the ecosystem. Investor Priority adds the layer
@@ -872,11 +942,11 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 03 · BENEFITS (1/2) ---------------- */}
+      {/* ---------------- 04 · BENEFITS (1/2) ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="02" label="ENTITLEMENTS" pageNum={3} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>{benefits.length} SERVICES,<br />ONE MEMBERSHIP</>} accent={NEON.emerald} />
+          <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
+            <PageTitle kicker="What you unlock" serif title={<>{benefits.length} services,<br />one membership</>} accent={NEON.emerald} />
             <ImagePlate src={imgLab} alt="Analysts reviewing venture data in a research lab" caption="Diligence intelligence · Signal Score" accent={NEON.emerald} height={200} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 flex-1 content-start">
               {benefits.slice(0, 6).map((b, i) => (
@@ -893,11 +963,11 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 04 · BENEFITS (2/2) ---------------- */}
+      {/* ---------------- 05 · BENEFITS (2/2) ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" title={<>PORTFOLIO, EVENTS<br />& CO-INVESTORS</>} accent={NEON.emerald} />
+          <PageFrame code="04" label="ENTITLEMENTS" pageNum={5} accent={NEON.emerald}>
+            <PageTitle kicker="What you unlock" serif title={<>Portfolio, events<br />& co-investors</>} accent={NEON.emerald} />
             <ImagePlate src={imgStudio} alt="Venture studio team building a product" caption="Venture studio · built before it is funded" accent={NEON.emerald} height={170} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 content-start">
               {benefits.slice(6).map((b, i) => (
@@ -919,11 +989,11 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · STRATEGIC DEALFLOW CHANNELS ---------------- */}
+      {/* ---------------- 06 · STRATEGIC DEALFLOW CHANNELS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="DEALFLOW CHANNELS" pageNum={5}>
-            <PageTitle kicker="Where the deals come from" title={<>NVIDIA. NASDAQ.<br />NASA. THE STUDIO.</>} />
+          <PageFrame code="05" label="DEALFLOW CHANNELS" pageNum={6}>
+            <PageTitle kicker="Where the deals come from" serif title={<>NVIDIA. NASDAQ.<br />NASA. The studio.</>} />
             <p className="text-[17px] text-slate-700 leading-relaxed mb-5">
               Investor Priority is fed by four sourcing engines. Three connect the Hub to the
               frontier ecosystems shaping the next decade of value; the fourth is our own venture
@@ -967,11 +1037,184 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · PRICING ---------------- */}
+      {/* ---------------- 07 · STANDARD PROGRAM VALUATION ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={6}>
-            <PageTitle kicker="Investor membership" title={<>PAY MONTHLY<br />OR SAVE {savings}%</>} />
+          <section className="absolute inset-0 overflow-hidden" style={{ background: '#070b14' }}>
+            <img
+              src={imgSpace}
+              alt="Satellite integration cleanroom with engineers"
+              width={1536}
+              height={1024}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ opacity: 0.32 }}
+            />
+            <div className="absolute inset-0" style={{
+              background: `linear-gradient(180deg, rgba(7,11,20,0.82) 0%, rgba(7,11,20,0.94) 60%, rgba(7,11,20,0.98) 100%), radial-gradient(ellipse at 50% 0%, ${NEON.gold}2e 0%, transparent 55%), radial-gradient(ellipse at 85% 100%, ${NEON.cyan}22 0%, transparent 55%)`,
+            }} />
+            <AmbientField accent={NEON.gold} />
+            <Frame />
+
+            <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[13px] tracking-[0.32em] uppercase pointer-events-none z-20">
+              <div className="flex items-center gap-2" style={{ color: NEON.goldSoft }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.gold, boxShadow: `0 0 8px ${NEON.gold}` }} />
+                <span>SEC // 06</span>
+              </div>
+              <div className="text-white/50">Standard Program Valuation</div>
+              <div style={{ color: NEON.goldSoft }}>P/07 · {TOTAL}</div>
+            </div>
+
+            <div className="absolute inset-0 z-10 flex flex-col justify-center px-14">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${NEON.gold})` }} />
+                <span className="font-mono text-[15px] uppercase tracking-[0.4em]" style={{ color: NEON.goldSoft }}>
+                  The Standard Program Valuation
+                </span>
+              </div>
+              <h2 className="text-white" style={{
+                fontSize: 'clamp(46px, 7vw, 74px)', lineHeight: 1.02,
+                textShadow: `0 0 60px ${NEON.gold}44`,
+                ...SERIF, fontWeight: 800, letterSpacing: '-0.02em',
+              }}>
+                One standard.<br />
+                <span style={{ color: NEON.goldSoft }}>Every deal.</span>
+              </h2>
+              <p className="mt-5 text-[19px] text-white/80 leading-relaxed max-w-3xl">
+                You sign once. We source and build the startup. You invest on the same
+                standard terms as every other company in the program — no per-deal
+                negotiation, ever.
+              </p>
+
+              {/* The split — the standard position, divided 70 / 30 */}
+              <div className="mt-8 rounded-3xl p-7" style={{
+                background: 'linear-gradient(150deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+                backdropFilter: 'blur(24px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+                border: `1px solid ${NEON.gold}66`,
+                boxShadow: `0 40px 90px -35px rgba(0,0,0,0.8), 0 0 60px ${NEON.gold}1f`,
+              }}>
+                <div className="flex items-baseline justify-between mb-4">
+                  <span className="font-mono text-[13px] tracking-[0.32em] uppercase text-white/60">
+                    The standard position
+                  </span>
+                  <span className="font-mono text-[13px] tracking-[0.32em] uppercase" style={{ color: NEON.goldSoft }}>
+                    10% of the startup
+                  </span>
+                </div>
+                <div className="flex h-[74px] rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.25)' }}>
+                  <motion.div
+                    className="h-full flex items-center justify-center"
+                    style={{ background: `linear-gradient(120deg, ${NEON.gold}, #8a6d1c)`, boxShadow: `inset 0 0 40px rgba(255,255,255,0.25)` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: '70%' }}
+                    transition={{ duration: 1.3, ease: 'easeOut', delay: 0.2 }}
+                  >
+                    <span className="font-black text-[#0b1220]" style={{ fontSize: 30, letterSpacing: '0.08em', ...SERIF }}>70% · YOURS</span>
+                  </motion.div>
+                  <motion.div
+                    className="h-full flex items-center justify-center"
+                    style={{ background: 'linear-gradient(120deg, #e5e7eb, #6b7280)' }}
+                    initial={{ width: 0 }}
+                    animate={{ width: '30%' }}
+                    transition={{ duration: 1.3, ease: 'easeOut', delay: 0.45 }}
+                  >
+                    <span className="font-black text-[#0b1220]" style={{ fontSize: 30, letterSpacing: '0.08em', ...SERIF }}>30%</span>
+                  </motion.div>
+                </div>
+                <div className="grid grid-cols-2 gap-6 mt-5">
+                  <div>
+                    <div className="font-black" style={{ fontSize: 54, lineHeight: 1, color: NEON.goldSoft, ...SERIF }}>70%</div>
+                    <div className="font-mono text-[12px] tracking-[0.26em] uppercase text-white/60 mt-2">The investor keeps</div>
+                    <p className="text-[15px] text-white/75 leading-snug mt-2">
+                      Seventy of every hundred shares in the position are yours — held
+                      directly, on the standard terms.
+                    </p>
+                  </div>
+                  <div>
+                    <div className="font-black text-white" style={{ fontSize: 54, lineHeight: 1, ...SERIF }}>30%</div>
+                    <div className="font-mono text-[12px] tracking-[0.26em] uppercase text-white/60 mt-2">Startup Factory Hub</div>
+                    <p className="text-[15px] text-white/75 leading-snug mt-2">
+                      Our compensation for sourcing, building and structuring the
+                      company before your check ever lands.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Check scale */}
+              <div className="mt-7">
+                <div className="flex items-baseline justify-between mb-3">
+                  <span className="font-mono text-[13px] tracking-[0.32em] uppercase text-white/60">Your check</span>
+                  <span className="font-mono text-[13px] tracking-[0.32em] uppercase" style={{ color: NEON.goldSoft }}>One standard valuation</span>
+                </div>
+                <div className="relative h-[10px] rounded-full" style={{ background: 'rgba(255,255,255,0.14)' }}>
+                  <motion.div
+                    className="absolute left-0 top-0 h-full rounded-full"
+                    style={{ background: `linear-gradient(90deg, ${NEON.gold}55, ${NEON.gold})`, boxShadow: `0 0 18px ${NEON.gold}66` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 1.4, ease: 'easeOut', delay: 0.3 }}
+                  />
+                </div>
+                <div className="flex justify-between mt-3">
+                  {[
+                    { v: '$25K', l: 'Minimum check' },
+                    { v: '$100K', l: 'Mid position' },
+                    { v: '$250K', l: 'Full standard position' },
+                  ].map(m => (
+                    <div key={m.v} className="text-center first:text-left last:text-right">
+                      <div className="font-black text-white" style={{ fontSize: 26, ...SERIF }}>{m.v}</div>
+                      <div className="font-mono text-[11px] tracking-[0.22em] uppercase text-white/50 mt-1">{m.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* How it runs */}
+              <div className="grid grid-cols-3 gap-4 mt-7">
+                {[
+                  { n: '01', t: 'You sign', d: 'One standard program agreement with the Hub.' },
+                  { n: '02', t: 'We build', d: 'We source and build the startup inside the studio.' },
+                  { n: '03', t: 'You invest', d: 'Your check lands — the 70 / 30 split applies.' },
+                ].map(s => (
+                  <div key={s.n} className="rounded-2xl p-5" style={{
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.16)',
+                  }}>
+                    <div className="font-mono text-[13px] tracking-[0.3em]" style={{ color: NEON.goldSoft }}>{s.n}</div>
+                    <div className="text-[19px] font-black text-white mt-1.5" style={SERIF}>{s.t}</div>
+                    <p className="text-[14px] text-white/65 leading-snug mt-1">{s.d}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                {['Space', 'Deep Tech', 'Quantum — software included', 'Same valuation for every company', 'No per-deal negotiation'].map(chip => (
+                  <span key={chip} className="px-4 py-2 rounded-full font-mono text-[12px] tracking-[0.2em] uppercase" style={{
+                    border: `1px solid ${NEON.gold}55`, color: NEON.goldSoft, background: `${NEON.gold}12`,
+                  }}>
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3">
+              <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${NEON.gold}55, transparent)` }} />
+              <div className="flex items-center justify-between gap-6 font-mono text-[11px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
+                <span className="text-white/45 truncate">Startup Factory Hub · Investor Priority</span>
+                <span className="shrink-0" style={{ color: NEON.goldSoft }}>Standard Program Valuation</span>
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 08 · PRICING ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="07" label="COMMERCIAL MODEL" pageNum={8}>
+            <PageTitle kicker="Investor membership" serif title={<>Pay monthly<br />or save {savings}%</>} />
             <div className="grid grid-cols-2 gap-6">
               <GlassCard accent={NEON.cyan} padding="p-8">
                 <div className="font-mono text-[13px] tracking-[0.32em] uppercase text-slate-500 mb-4">
@@ -1032,11 +1275,11 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 09 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="06" label="ONBOARDING" pageNum={7}>
-            <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO PRIORITY</>} />
+          <PageFrame code="08" label="ONBOARDING" pageNum={9}>
+            <PageTitle kicker="How it works" serif title={<>Four steps<br />to priority</>} />
             <ImagePlate src={imgCampus} alt="Investors and founders meeting inside the innovation campus" caption="Founder access · pitch calendars" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
               {[
@@ -1060,7 +1303,7 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · CHECKOUT (replaces the former FAQ page) ---------------- */}
+      {/* ---------------- 10 · CHECKOUT (replaces the former FAQ page) ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
