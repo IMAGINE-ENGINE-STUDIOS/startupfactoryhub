@@ -57,6 +57,7 @@ export const PARTNERS: Partner[] = [
   { name: "Abelssoft", logo: "https://www.google.com/s2/favicons?domain=abelssoft.com&sz=128", tier: "Software" },
   { name: "O&O Software", logo: "https://www.google.com/s2/favicons?domain=oo-software.com&sz=128", tier: "Software" },
   { name: "Carta", logo: "https://www.google.com/s2/favicons?domain=carta.com&sz=128", tier: "Cap Table" },
+  { name: "Multiplier", logo: "https://www.google.com/s2/favicons?domain=usemultiplier.com&sz=128", tier: "Global Hiring" },
   { name: "Defense Innovation Unit (DIU)", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/diu-logo.png", tier: "Defense" },
   { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },
   { name: "SpaceWERX", logo: "https://www.google.com/s2/favicons?domain=spacewerx.us&sz=128", tier: "Defense" },
