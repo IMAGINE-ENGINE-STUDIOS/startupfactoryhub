@@ -221,6 +221,9 @@ const PricingPlansSection = () => {
   const [planTab, setPlanTab] = useState<PlanTabKey>("featured");
   const [planOverlay, setPlanOverlay] = useState<PlanOverlayKind | null>(null);
 
+  // Stripe Checkout opens in this same tab: a window.open() after the await
+  // is treated as a popup by browsers and silently blocked, which made
+  // Subscribe look dead (fixed 2026-11-19).
   const handleSubscribe = async (key: string, priceId: string) => {
     if (!user) {
       navigate("/auth");
