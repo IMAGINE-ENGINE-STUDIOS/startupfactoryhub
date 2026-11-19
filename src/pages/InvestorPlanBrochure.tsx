@@ -1010,8 +1010,8 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
             <div className="absolute bottom-8 left-10 right-10 z-20">
               <div className="flex gap-4 mb-6">
                 {[
-                  { label: 'MONTHLY', price: monthlyLabel, sub: 'per month · cancel anytime' },
-                  { label: 'ANNUAL · BEST VALUE', price: yearlyLabel, sub: `per year · save ${savings}%` },
+                  { label: 'MONTHLY', price: monthly, sub: 'per month · cancel anytime' },
+                  { label: 'ANNUAL · BEST VALUE', price: yearly, sub: `per year · save ${savings}%` },
                 ].map(p => (
                   <div key={p.label} className="flex-1 rounded-2xl p-5" style={{
                     background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)',
