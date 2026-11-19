@@ -305,313 +305,53 @@ const SavingsChart = ({
   );
 };
 
-/** Animated radial gauge used for value metrics. */
-const RadialStat = ({
-  value, suffix = '', label, color = NEON.cyan, pct,
-}: { value: string; suffix?: string; label: string; color?: string; pct: number }) => {
-  const R = 46;
-  const C = 2 * Math.PI * R;
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative w-[120px] h-[120px]">
-        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-          <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(15,23,42,0.08)" strokeWidth="10" />
-          <motion.circle
-            cx="60" cy="60" r={R} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
-            strokeDasharray={C}
-            initial={{ strokeDashoffset: C }}
-            animate={{ strokeDashoffset: C * (1 - pct) }}
-            transition={{ duration: 1.4, ease: 'easeOut' }}
-            style={{ filter: `drop-shadow(0 0 8px ${color}80)` }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[26px] font-black text-slate-900">{value}<span className="text-[16px]">{suffix}</span></span>
-        </div>
+/** Dark chapter frame — folio chrome for the full-bleed dark pages. */
+const DarkFrame = ({ code, label, pageNum, accent = NEON.cyan, children }: {
+  code: string; label: string; pageNum: number; accent?: string; children: React.ReactNode;
+}) => (
+  <section className="absolute inset-0 overflow-hidden" style={{ background: '#070d18' }}>
+    <div className="absolute inset-0 pointer-events-none" style={{
+      background: `radial-gradient(ellipse at 18% 0%, ${accent}1f 0%, transparent 52%), radial-gradient(ellipse at 92% 100%, ${NEON.gold}14 0%, transparent 52%)`,
+    }} />
+    <AmbientField accent={accent} />
+    <Frame />
+    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[13px] tracking-[0.32em] uppercase pointer-events-none z-20">
+      <div className="flex items-center gap-2" style={{ color: accent }}>
+        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
+        <span>SEC // {code}</span>
       </div>
-      <div className="mt-2 font-mono text-[12px] uppercase tracking-[0.24em] text-slate-500">{label}</div>
+      <div className="text-white/50">{label}</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · {TOTAL}</div>
     </div>
-  );
-};
-
-/**
- * Rotating editorial imagery pool used by the entitlement tiles so every
- * benefit gets its own photographic plate instead of a flat glass card.
- */
-const TILE_IMAGES = [imgLab, imgStudio, imgSummit, imgCompute, imgMarkets, imgSpace, imgCampus, imgSkyline];
-
-/**
- * Entitlement tile — editorial dark plate with a duotone photograph, an
- * oversized ghost numeral and a hover sweep. Replaces the previous white
- * glass + icon-badge card for a more modern, original register.
- */
-const BenefitCard = ({
-  n, label, description, accent = NEON.emerald, delay = 0,
-}: { n: number; label: string; description: string; accent?: string; delay?: number }) => {
-  const img = TILE_IMAGES[(n - 1) % TILE_IMAGES.length];
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
-      whileHover={{ y: -6 }}
-      className="h-full group relative overflow-hidden rounded-2xl"
-      style={{
-        border: '1px solid rgba(255,255,255,0.14)',
-        boxShadow: `0 26px 50px -28px rgba(15,23,42,0.55), 0 0 0 1px ${accent}22`,
-      }}
-    >
-      <img
-        src={img}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-[1200ms] group-hover:scale-110"
-      />
-      <div className="absolute inset-0" style={{
-        background: `linear-gradient(135deg, ${NEON.ink}f2 0%, ${NEON.ink}e0 52%, ${accent}55 100%)`,
-      }} />
-      <div className="absolute inset-0 opacity-[0.35]" style={{
-        backgroundImage: `repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 4px)`,
-      }} />
-
-      <span className="absolute -top-3 right-3 font-mono font-black leading-none select-none pointer-events-none"
-        style={{ fontSize: 86, color: 'rgba(255,255,255,0.10)' }}>
-        {String(n).padStart(2, '0')}
-      </span>
-
-      <div className="relative p-5 h-full flex flex-col">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
-          <span className="font-mono text-[11px] uppercase tracking-[0.34em]" style={{ color: accent }}>
-            {String(n).padStart(2, '0')} · Entitlement
-          </span>
-        </div>
-        <div className="text-[19px] font-black text-white leading-tight">{label}</div>
-        <p className="text-[14.5px] text-white/70 leading-snug mt-2">{description}</p>
-        <motion.span
-          className="mt-auto pt-4 block h-[2px] rounded-full"
-          style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
-          initial={{ width: 0 }}
-          animate={{ width: '60%' }}
-          transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-
-/* =========================================================================
-   LAVA CAPABILITY MATRIX — interactive merging slime blobs
-   (lifted from the partners brochure, /forpartners page 8)
-   ========================================================================= */
-const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
-  const CAPS = [
-    { i: Building2, l: 'Corporate HQ', tag: 'SFH·01' },
-    { i: Globe2, l: 'Global Network', tag: 'SFH·02' },
-    { i: Handshake, l: 'Commercial Channels', tag: 'SFH·03' },
-    { i: ShieldCheck, l: 'Institutional Relationships', tag: 'SFH·04' },
-    { i: Award, l: 'Brand Authority', tag: 'SFH·05' },
-    { i: Users, l: 'Corporate Members', tag: 'SFH·06' },
-    { i: MapPin, l: 'Intl. Delegations', tag: 'SFH·07' },
-    { i: Briefcase, l: 'Executive Spaces', tag: 'SFH·08' },
-    { i: Rocket, l: 'Accelerator', tag: 'SFH·09' },
-    { i: Brain, l: 'AI Platform', tag: 'SFH·10' },
-    { i: GraduationCap, l: 'Mentor Network', tag: 'SFH·11' },
-    { i: DollarSign, l: 'Investment Operations', tag: 'SFH·12' },
-    { i: Lightbulb, l: 'Corporate Innovation', tag: 'SFH·13' },
-    { i: BarChart3, l: 'Executive Programs', tag: 'SFH·14' },
-    { i: Cpu, l: 'Digital Infrastructure', tag: 'SFH·15' },
-    { i: TrendingUp, l: 'Growth Engine', tag: 'SFH·16' },
-  ];
-  const BLOBS = [
-    { x: [14, 28, 18, 12], y: [20, 30, 48, 24], s: [1, 1.12, 0.95, 1.05], d: 14 },
-    { x: [34, 24, 38, 32], y: [14, 28, 20, 16], s: [1.05, 0.92, 1.1, 1], d: 16 },
-    { x: [55, 64, 50, 58], y: [18, 26, 32, 20], s: [0.95, 1.1, 1, 1.05], d: 13 },
-    { x: [78, 70, 84, 80], y: [22, 30, 20, 24], s: [1.1, 1, 0.95, 1.08], d: 15 },
-    { x: [20, 32, 24, 16], y: [44, 38, 52, 46], s: [1, 1.08, 0.94, 1.02], d: 17 },
-    { x: [42, 50, 38, 44], y: [42, 48, 42, 40], s: [1.05, 0.95, 1.1, 1], d: 14 },
-    { x: [62, 56, 68, 60], y: [44, 50, 40, 46], s: [0.95, 1.08, 1, 1.04], d: 18 },
-    { x: [82, 76, 86, 84], y: [46, 42, 52, 44], s: [1.08, 1, 0.95, 1.06], d: 13 },
-    { x: [16, 24, 18, 12], y: [66, 72, 62, 68], s: [1, 1.1, 0.95, 1.05], d: 16 },
-    { x: [34, 42, 30, 36], y: [68, 64, 74, 66], s: [1.08, 0.95, 1.1, 1], d: 15 },
-    { x: [50, 58, 46, 52], y: [66, 72, 68, 62], s: [0.95, 1.1, 1, 1.05], d: 17 },
-    { x: [70, 64, 74, 72], y: [68, 64, 74, 66], s: [1.1, 1, 0.94, 1.06], d: 14 },
-    { x: [86, 80, 88, 84], y: [66, 72, 64, 68], s: [1, 1.08, 0.95, 1.04], d: 19 },
-    { x: [28, 36, 24, 30], y: [86, 84, 90, 86], s: [1.05, 0.95, 1.1, 1], d: 13 },
-    { x: [52, 60, 48, 54], y: [88, 84, 90, 86], s: [0.95, 1.08, 1, 1.06], d: 16 },
-    { x: [76, 70, 80, 78], y: [86, 90, 84, 88], s: [1.08, 1, 0.95, 1.04], d: 15 },
-  ];
-  // Softer, more matte palette — desaturated jewel tones (less neon)
-  const SLIME = ['#4b8a7a', '#3b7a8c', '#7a5a96', '#a36584', '#7a8a52', '#5a8a6b'];
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative flex-1 rounded-3xl overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(ellipse at 35% 25%, #e8ecf2 0%, #d4dae3 45%, #b9c2cf 100%)',
-        border: `1px solid rgba(80,100,120,0.18)`,
-        boxShadow: 'inset 0 0 60px rgba(60,75,95,0.18)',
-      }}
-    >
-      {/* SVG goo filter */}
-      <svg className="absolute w-0 h-0" aria-hidden>
-        <defs>
-          <filter id="lavaGooInvestor">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"
-              result="goo"
-            />
-            <feBlend in="SourceGraphic" in2="goo" />
-          </filter>
-        </defs>
-      </svg>
-
-      {/* Slime layer — multiply blend for matte fusion against the light background */}
-      <div
-        className="absolute inset-0"
-        style={{ filter: 'url(#lavaGooInvestor)', mixBlendMode: 'multiply' }}
-      >
-        {BLOBS.map((b, idx) => (
-          <motion.div
-            key={`blob-${idx}`}
-            className="absolute rounded-full"
-            style={{
-              width: 130,
-              height: 130,
-              left: `${b.x[0]}%`,
-              top: `${b.y[0]}%`,
-              marginLeft: -65,
-              marginTop: -65,
-              background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 60%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
-              opacity: 0.88,
-            }}
-            animate={{
-              left: b.x.map((v) => `${v}%`),
-              top: b.y.map((v) => `${v}%`),
-              scale: b.s,
-            }}
-            transition={{
-              duration: b.d,
-              repeat: Infinity,
-              repeatType: 'mirror',
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Labels — centered on each blob */}
-      <div className="absolute inset-0">
-        {CAPS.map((cap, idx) => {
-          const b = BLOBS[idx];
-          const Icon = cap.i;
-          return (
-            <motion.div
-              key={`cap-${idx}`}
-              className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
-              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
-              initial={{ opacity: 0, scale: 0.6, x: '-50%', y: '-50%' }}
-              animate={{
-                left: b.x.map((v) => `${v}%`),
-                top: b.y.map((v) => `${v}%`),
-                opacity: 1,
-                scale: 1,
-                x: '-50%',
-                y: '-50%',
-              }}
-              transition={{
-                left: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
-                top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
-                opacity: { duration: 0.6, delay: idx * 0.04 },
-                scale: { duration: 0.6, delay: idx * 0.04 },
-                x: { duration: 0 },
-                y: { duration: 0 },
-              }}
-            >
-              <Icon
-                className="h-4 w-4 mb-1"
-                style={{ color: '#ffffff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }}
-              />
-              <div
-                className="font-black text-[10.5px] uppercase tracking-[0.12em] leading-[1.05]"
-                style={{
-                  color: '#ffffff',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.55), 0 0 6px rgba(0,0,0,0.35)',
-                }}
-              >
-                {cap.l}
-              </div>
-              <div
-                className="font-mono text-[16px] tracking-[0.3em] mt-1"
-                style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-              >
-                {cap.tag}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Soft vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, transparent 60%, rgba(40,55,75,0.22) 100%)',
-        }}
-      />
-
-      {/* HUD */}
-      <div
-        className="absolute top-4 left-4 font-mono text-[16px] uppercase tracking-[0.3em]"
-        style={{ color: '#3a5066' }}
-      >
-        ● LAVA · LIVE SYNTHESIS
-      </div>
-      <div
-        className="absolute top-4 right-4 font-mono text-[16px] uppercase tracking-[0.3em] text-right"
-        style={{ color: '#3a5066' }}
-      >
-        16 / 16 CAPABILITIES
-        <br />
-        <span style={{ color: accent, opacity: 0.85 }}>FUSED · ONE PLATFORM</span>
-      </div>
-      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[17px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
-        <span>SFH · FUSION CORE</span>
-        <span>STATUS: FLUID · MOVE THE CURSOR</span>
+    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '92px 56px 84px' }}>
+      {children}
+    </div>
+    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3">
+      <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
+      <div className="flex items-center justify-between gap-6 font-mono text-[11px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
+        <span className="text-white/45 truncate">Startup Factory Hub · Investor Priority</span>
+        <span className="shrink-0" style={{ color: accent }}>{label}</span>
       </div>
     </div>
-  );
-};
+  </section>
+);
 
-/** What compounds for the investor across a Batch — growth tree inputs. */
-const INVESTOR_GROWTH_BENEFITS: GrowthBenefit[] = [
-  { id: 'dealflow', stage: 0, label: 'Proprietary dealflow', line: 'Companies built in the studio, seen before any market does.' },
-  { id: 'diligence', stage: 0, label: 'Diligence intelligence', line: 'Signal Score data on every company, from day one.' },
-  { id: 'allocation', stage: 1, label: 'Allocation windows', line: 'Priority entry into every Batch round, before it opens wide.' },
-  { id: 'syndication', stage: 2, label: 'Syndication', line: 'Co-invest alongside the member network on shared-risk terms.' },
-  { id: 'standard', stage: 2, label: 'Standard positions', line: '70% of every standard 10% position, on identical terms.' },
-  { id: 'visibility', stage: 3, label: 'Portfolio visibility', line: 'Every company tracked in one investor dashboard.' },
-];
-
-const INVESTOR_GROWTH_ROOTS = ['Capital', 'Thesis', 'Sectors', 'Ticket'];
-
-const INVESTOR_GROWTH_MONTHS = [
-  'Your investor profile, thesis and ticket are set; dealflow unlocks.',
-  'Studio companies build on the platform — you watch the data live.',
-  'Allocation windows open; first standard positions are structured.',
-  'Demo Day: the Batch presents to you and the investor network.',
-];
-
+/** Serif display title for the dark chapter pages. */
+const DarkTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
+  <div className="mb-7">
+    <div className="flex items-center gap-3 mb-3">
+      <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
+      <span className="font-mono text-[14px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
+    </div>
+    <h2 className="text-white" style={{
+      fontSize: 'clamp(40px, 6vw, 58px)', lineHeight: 1.04,
+      ...SERIF, fontWeight: 800, letterSpacing: '-0.02em',
+      textShadow: `0 0 40px ${accent}33`,
+    }}>
+      {title}
+    </h2>
+  </div>
+);
 
 /* ============================ LAYOUT SUPPORT ============================ */
 const BASE_W = 842;
@@ -1473,102 +1213,178 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
                 </A4Wrapper>
               </BookPage>
 
-      {/* ---------------- 04 · ACCESS MODEL ---------------- */}
+      {/* ---------------- 04 · ACCESS MODEL — TWO DOORS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="03" label="THE ACCESS MODEL" pageNum={4}>
-            <PageTitle kicker="Access model" serif title={<>Member to browse.<br />Priority to allocate.</>} />
-            <ImagePlate src={imgSummit} alt="Investors reviewing deals at a private summit" caption="Private summits · allocation windows" height={230} className="mb-6" />
-            <p className="text-[18px] text-slate-700 leading-relaxed mb-6">
-              Every paid member can explore the ecosystem. Investor Priority adds the layer
-              capital needs: pre-market dealflow, structured syndication and continuous
-              diligence intelligence on every company in the Hub.
-            </p>
-            <div className="grid grid-cols-2 gap-5 flex-1">
-              <GlassCard accent="#94a3b8">
-                <div className="flex items-center gap-3 mb-4">
-                  <IndexPlate n="01" color="#94a3b8" />
-                  <div>
-                    <div className="font-mono text-[12px] tracking-[0.3em] uppercase text-slate-500">Tier 01</div>
-                    <div className="text-[24px] font-black text-slate-900 leading-tight">Membership</div>
+          <DarkFrame code="03" label="THE ACCESS MODEL" pageNum={4}>
+            <DarkTitle kicker="Access model" title={<>Two doors.<br />One building.</>} />
+            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
+              {/* The capital tier — the luminous door */}
+              <div className="col-span-7 relative rounded-[28px] overflow-hidden flex flex-col" style={{
+                background: 'linear-gradient(165deg, rgba(14,165,183,0.14) 0%, rgba(255,255,255,0.03) 55%)',
+                border: `1px solid ${NEON.cyan}66`,
+                boxShadow: `0 0 90px ${NEON.cyan}20, inset 0 0 70px rgba(14,165,183,0.05)`,
+              }}>
+                <div className="relative shrink-0" style={{ height: 208 }}>
+                  <img src={imgSummit} alt="Investors reviewing deals at a private summit" width={1536} height={1024} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(7,13,24,0.25) 0%, rgba(7,13,24,0.88) 88%)' }} />
+                  <div className="absolute bottom-4 left-7 right-7 flex items-end justify-between gap-4">
+                    <div>
+                      <div className="font-mono text-[12px] tracking-[0.32em] uppercase" style={{ color: '#67e8f9' }}>Tier 02 · The capital tier</div>
+                      <div className="text-white mt-1" style={{ fontSize: 36, lineHeight: 1.05, ...SERIF, fontWeight: 800 }}>Investor Priority</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div style={{ fontSize: 32, lineHeight: 1, color: NEON.goldSoft, ...SERIF, fontWeight: 800 }}>{monthly}</div>
+                      <div className="font-mono text-[11px] tracking-[0.24em] uppercase text-white/55 mt-1.5">per month · {yearly} / year</div>
+                    </div>
                   </div>
                 </div>
-                <ul className="space-y-3 text-[17px] text-slate-600">
-                  {['Community feed and resource map', 'Public program pages', 'Events and member directory', 'Standard meeting requests'].map(t => (
-                    <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 text-slate-400 shrink-0" />{t}</li>
+                <div className="flex-1 flex flex-col justify-center px-7 py-4">
+                  {['Proprietary, pre-market dealflow', 'Priority allocation windows', 'Shared-risk syndication', 'Signal Score diligence data', 'Batch participation as investing partner', 'Private pitch nights and Demo Days'].map((t, i) => (
+                    <motion.div
+                      key={t}
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.45, delay: 0.15 + i * 0.07, ease: 'easeOut' }}
+                      className="flex items-center gap-4 py-[13px]"
+                      style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.09)' }}
+                    >
+                      <span className="font-mono text-[13px] tracking-[0.2em]" style={{ color: NEON.cyan }}>{String(i + 1).padStart(2, '0')}</span>
+                      <span className="flex-1 text-[18.5px] text-white/90 leading-tight">{t}</span>
+                      <Check className="h-5 w-5 shrink-0" style={{ color: NEON.emerald }} />
+                    </motion.div>
                   ))}
-                </ul>
-                <div className="mt-5 pt-4 border-t border-slate-200 text-[15px] text-slate-500">
-                  General access. Dealflow priority and syndication are not included.
                 </div>
-              </GlassCard>
+                <div className="px-7 pb-6 font-mono text-[11px] tracking-[0.26em] uppercase text-white/45">
+                  Includes everything in the general membership
+                </div>
+              </div>
 
-              <GlassCard accent={NEON.cyan}>
-                <div className="flex items-center gap-3 mb-4">
-                  <IndexPlate n="02" />
-                  <div>
-                    <div className="font-mono text-[12px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Tier 02</div>
-                    <div className="text-[24px] font-black text-slate-900 leading-tight">Investor Priority</div>
-                  </div>
+              {/* The open door — quiet by design */}
+              <div className="col-span-5 relative rounded-[28px] overflow-hidden flex flex-col" style={{
+                background: 'rgba(255,255,255,0.035)',
+                border: '1px solid rgba(255,255,255,0.12)',
+              }}>
+                <div className="px-7 pt-8">
+                  <div className="font-mono text-[12px] tracking-[0.32em] uppercase text-slate-400">Tier 01 · The open door</div>
+                  <div className="text-white/90 mt-2" style={{ fontSize: 32, lineHeight: 1.05, ...SERIF, fontWeight: 800 }}>Membership</div>
+                  <p className="text-[15.5px] text-white/55 leading-relaxed mt-4">
+                    Every paid member can explore the ecosystem — the feed, the map, the
+                    rooms where founders gather. Capital, however, needs a different door.
+                  </p>
                 </div>
-                <ul className="space-y-3 text-[17px] text-slate-700">
-                  {['Proprietary, pre-market dealflow', 'Priority allocation windows', 'Shared-risk syndication', 'Signal Score diligence data', 'Batch participation as investing partner', 'Private pitch nights and Demo Days'].map(t => (
-                    <li key={t} className="flex gap-2"><Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: NEON.emerald }} />{t}</li>
+                <div className="flex-1 flex flex-col justify-center px-7 py-4">
+                  {['Community feed and resource map', 'Public program pages', 'Events and member directory', 'Standard meeting requests'].map((t, i) => (
+                    <motion.div
+                      key={t}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: 0.2 + i * 0.06, ease: 'easeOut' }}
+                      className="flex items-center gap-4 py-[13px]"
+                      style={{ borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      <span className="font-mono text-[13px] tracking-[0.2em] text-slate-500">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="flex-1 text-[17px] text-white/65 leading-tight">{t}</span>
+                    </motion.div>
                   ))}
-                </ul>
-                <div className="mt-5 pt-4 border-t border-slate-200 text-[15px] text-slate-600">
-                  Includes everything in the general membership.
                 </div>
-              </GlassCard>
+                <div className="px-7 pb-6 font-mono text-[11px] tracking-[0.26em] uppercase text-white/35">
+                  Dealflow priority & syndication not included
+                </div>
+              </div>
             </div>
-          </PageFrame>
+          </DarkFrame>
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · BENEFITS (1/2) ---------------- */}
+      {/* ---------------- 05 · BENEFITS (1/2) — THE INDEX ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="ENTITLEMENTS" pageNum={5} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" serif title={<>{benefits.length} services,<br />one membership</>} accent={NEON.emerald} />
-            <ImagePlate src={imgLab} alt="Analysts reviewing venture data in a research lab" caption="Diligence intelligence · Signal Score" accent={NEON.emerald} height={200} className="mb-5" />
-            <div className="grid grid-cols-2 gap-4 flex-1 content-start">
+          <DarkFrame code="04" label="ENTITLEMENTS" pageNum={5} accent={NEON.emerald}>
+            <DarkTitle kicker="What you unlock" accent={NEON.emerald} title={<>Everything capital needs.<br />Indexed.</>} />
+            <div className="flex-1 flex flex-col justify-between min-h-0">
               {benefits.slice(0, 6).map((b, i) => (
-                <BenefitCard
+                <motion.div
                   key={b.key}
-                  n={i + 1}
-                  label={b.label}
-                  description={b.description}
-                  delay={i * 0.06}
-                />
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.12 + i * 0.08, ease: 'easeOut' }}
+                  className="flex items-center gap-8 py-5"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.10)' }}
+                >
+                  <span aria-hidden style={{
+                    fontSize: 62, lineHeight: 1, width: 108, flexShrink: 0,
+                    color: 'transparent', WebkitTextStroke: `1.5px ${NEON.emerald}90`,
+                    ...SERIF, fontWeight: 800,
+                  }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white" style={{ fontSize: 28, lineHeight: 1.12, ...SERIF, fontWeight: 800 }}>{b.label}</div>
+                    <p className="text-[15.5px] text-white/55 leading-snug mt-1.5 max-w-2xl">{b.description}</p>
+                  </div>
+                  <span className="shrink-0 font-mono text-[11px] tracking-[0.26em] uppercase px-4 py-2 rounded-full" style={{
+                    color: NEON.emerald, border: `1px solid ${NEON.emerald}55`, background: `${NEON.emerald}10`,
+                  }}>
+                    {b.actionLabel}
+                  </span>
+                </motion.div>
               ))}
             </div>
-          </PageFrame>
+            <div className="pt-5 flex items-center justify-between font-mono text-[11px] tracking-[0.26em] uppercase text-white/40" style={{ borderTop: '1px solid rgba(255,255,255,0.10)' }}>
+              <span>Services 01 — 06 of {benefits.length}</span>
+              <span style={{ color: NEON.emerald }}>Continues on the next page</span>
+            </div>
+          </DarkFrame>
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · BENEFITS (2/2) ---------------- */}
+      {/* ---------------- 06 · BENEFITS (2/2) — PLATES + MONUMENTAL STATS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="ENTITLEMENTS" pageNum={6} accent={NEON.emerald}>
-            <PageTitle kicker="What you unlock" serif title={<>Portfolio, events<br />& co-investors</>} accent={NEON.emerald} />
-            <ImagePlate src={imgStudio} alt="Venture studio team building a product" caption="Venture studio · built before it is funded" accent={NEON.emerald} height={170} className="mb-5" />
-            <div className="grid grid-cols-2 gap-4 content-start">
-              {benefits.slice(6).map((b, i) => (
-                <BenefitCard
-                  key={b.key}
-                  n={i + 7}
-                  label={b.label}
-                  description={b.description}
-                  delay={i * 0.06}
-                />
-              ))}
+          <DarkFrame code="05" label="ENTITLEMENTS" pageNum={6} accent={NEON.emerald}>
+            <DarkTitle kicker="What you unlock" accent={NEON.emerald} title={<>Portfolio, events<br />& co-investors.</>} />
+            <div className="grid grid-cols-2 gap-5 content-start">
+              {benefits.slice(6).map((b, i) => {
+                const plates = [imgSkyline, imgCampus, imgAtrium, imgStudio];
+                return (
+                  <motion.div
+                    key={b.key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.55, delay: 0.12 + i * 0.09, ease: 'easeOut' }}
+                    className="relative rounded-[26px] overflow-hidden"
+                    style={{ height: 252, border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 34px 70px -34px rgba(0,0,0,0.85)' }}
+                  >
+                    <img src={plates[i % plates.length]} alt="" width={1536} height={1024} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(185deg, rgba(7,13,24,0.05) 30%, rgba(7,13,24,0.92) 82%)' }} />
+                    <div className="absolute top-4 right-5 font-mono text-[13px] tracking-[0.24em]" style={{ color: NEON.emerald }}>
+                      {String(i + 7).padStart(2, '0')}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <div className="text-white" style={{ fontSize: 25, lineHeight: 1.12, ...SERIF, fontWeight: 800 }}>{b.label}</div>
+                      <p className="text-[14.5px] text-white/65 leading-snug mt-1.5">{b.description}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-7">
-              <RadialStat value={String(benefits.length)} label="Investor services" pct={1} color={NEON.emerald} />
-              <RadialStat value="300" suffix="+" label="Platform members" pct={0.82} color={NEON.cyan} />
-              <RadialStat value="24" suffix="/7" label="Global dealflow" pct={0.95} color={NEON.blue} />
+            <div className="mt-auto pt-9">
+              <div className="h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald}66, ${NEON.gold}66, transparent)` }} />
+              <div className="grid grid-cols-3 gap-6 pt-7">
+                {[
+                  { v: String(benefits.length), l: 'Investor services' },
+                  { v: '300+', l: 'Platform members' },
+                  { v: '24/7', l: 'Global dealflow' },
+                ].map(s => (
+                  <div key={s.l}>
+                    <div className="text-white" style={{ fontSize: 58, lineHeight: 1, ...SERIF, fontWeight: 800 }}>{s.v}</div>
+                    <div className="font-mono text-[11.5px] tracking-[0.28em] uppercase text-white/45 mt-2.5">{s.l}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </PageFrame>
+          </DarkFrame>
         </A4Wrapper>
       </BookPage>
 
