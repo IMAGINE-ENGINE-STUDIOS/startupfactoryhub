@@ -235,7 +235,8 @@ const PricingPlansSection = () => {
         body: { priceId },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) window.location.href = data.url;
+      else throw new Error("Could not start checkout");
     } catch (err: any) {
       toast.error(err.message || "Could not start checkout");
     } finally {

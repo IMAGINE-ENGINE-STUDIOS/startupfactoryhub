@@ -361,7 +361,7 @@ const JoinButton = ({
     setBusy(true);
     try {
       const url = await createBasicPlanCheckout(cycle);
-      window.open(url, '_blank');
+      window.location.href = url;
     } catch (e) {
       toast({
         title: 'Checkout unavailable',
@@ -411,9 +411,9 @@ type CheckoutTierKey = 'network' | 'community' | 'resident' | 'partner';
 type CheckoutCycle = 'monthly' | 'yearly';
 
 const CheckoutPanel = ({
-  monthly, isMember, tier, cycle, onTier, onCycle,
+  monthly, isMember, currentTier, tier, cycle, onTier, onCycle,
 }: {
-  monthly: string; isMember: boolean;
+  monthly: string; isMember: boolean; currentTier: CheckoutTierKey | null;
   tier: CheckoutTierKey; cycle: CheckoutCycle;
   onTier: (t: CheckoutTierKey) => void; onCycle: (c: CheckoutCycle) => void;
 }) => {
@@ -454,6 +454,7 @@ const CheckoutPanel = ({
   const active = tiers.find((t) => t.key === tier) ?? tiers[0];
   const price = cycle === 'monthly' ? active.monthly : active.yearly;
   const cycleLabel = cycle === 'monthly' ? 'Monthly' : 'Annual';
+  const isCurrent = currentTier !== null && currentTier === tier;
 
   const pay = async () => {
     if (!user) {
@@ -479,7 +480,7 @@ const CheckoutPanel = ({
         url = data?.url ?? null;
       }
       if (!url) throw new Error('Checkout unavailable. Please try again.');
-      window.open(url, '_blank');
+      window.location.href = url;
     } catch (e) {
       toast({
         title: 'Checkout unavailable',
@@ -563,7 +564,7 @@ const CheckoutPanel = ({
 
       <button
         onClick={pay}
-        disabled={busy || isMember}
+        disabled={busy || isCurrent}
         className="mt-auto w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 transition hover:scale-[1.02] disabled:opacity-60"
         style={{
           background: 'linear-gradient(135deg, #0ea5b7, #0369a1)',
@@ -573,7 +574,7 @@ const CheckoutPanel = ({
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <CreditCard className="h-5 w-5 text-white" />}
         <span className="font-bold tracking-[0.16em] uppercase text-white text-lg">
-          {isMember ? 'Membership active' : `Pay ${price} · activate`}
+          {isCurrent ? 'Current plan · active' : isMember ? `Pay ${price} · switch plan` : `Pay ${price} · activate`}
         </span>
       </button>
 
@@ -1772,7 +1773,7 @@ export default function BasicPlanBrochure({ embedded = false }: { embedded?: boo
               </div>
 
               <div className="mt-4 flex-1 min-h-0">
-                <CheckoutPanel monthly={monthly} isMember={isMember} tier={checkoutTier} cycle={checkoutCycle} onTier={setCheckoutTier} onCycle={setCheckoutCycle} />
+                <CheckoutPanel monthly={monthly} isMember={isMember} currentTier={tier === 'basic' ? 'network' : tier === 'community' ? 'community' : tier === 'self_paced_office' ? 'resident' : tier === 'global_access' ? 'partner' : null} tier={checkoutTier} cycle={checkoutCycle} onTier={setCheckoutTier} onCycle={setCheckoutCycle} />
               </div>
 
               <div className="mt-6 flex items-center gap-5">

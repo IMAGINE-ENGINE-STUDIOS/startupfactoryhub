@@ -163,7 +163,8 @@ export default function ProfileSubscriptionTab() {
         body: { priceId },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, '_blank');
+      if (data?.url) window.location.href = data.url;
+      else throw new Error('Checkout session URL missing');
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -186,7 +187,7 @@ export default function ProfileSubscriptionTab() {
       const url = plan.action === 'basic'
         ? await createBasicPlanCheckout(billing)
         : await createInvestorPlanCheckout(billing);
-      window.open(url, '_blank');
+      window.location.href = url;
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
