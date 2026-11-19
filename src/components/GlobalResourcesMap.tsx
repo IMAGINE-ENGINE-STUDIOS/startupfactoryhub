@@ -3204,7 +3204,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   <img 
                     src={selectedResource.logo_url} 
                     alt="" 
-                    className="w-full h-32 rounded-2xl object-cover mb-3" 
+                    className="w-full h-32 rounded-2xl object-contain bg-white p-4 mb-3" 
                   />
                 ) : (
                   <div 
