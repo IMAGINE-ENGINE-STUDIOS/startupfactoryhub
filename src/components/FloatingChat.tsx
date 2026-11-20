@@ -1540,6 +1540,14 @@ You can help with:
     return acc;
   }, {} as Record<string, ToolItem[]>);
 
+  // Live video rooms are full-screen calls. The floating launcher is a
+  // 68px circle fixed at the bottom-right (sm:bottom-6 defeats the old
+  // bottom-24 lift), exactly over the room sidebar's chat Send button —
+  // clicks landed on the launcher and the host could not send chat
+  // messages (founder report 2026-11-20). The room has its own panels;
+  // only the in-call pill stays.
+  if (location.pathname.startsWith('/live-video')) return <VoiceCallPill />;
+
   return (
     <>
       {/* The live-call pill: a voice call runs in the session, outside

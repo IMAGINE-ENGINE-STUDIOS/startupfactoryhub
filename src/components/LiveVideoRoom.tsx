@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useTracks, useConnectionState, useDataChannel, useLocalParticipant } from '@livekit/components-react';
+import { LiveKitRoom, RoomAudioRenderer, VideoTrack, useParticipants, useConnectionState, useDataChannel, useLocalParticipant } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 import {
@@ -143,8 +143,11 @@ function CamFlipBridge({ register }: { register: (fn: () => void) => void }) {
 }
 
 function PeerCount({ onCount }: { onCount: (n: number) => void }) {
-  const tracks = useTracks([Track.Source.Camera, Track.Source.Microphone], { onlySubscribed: false });
-  const n = new Set(tracks.map((t) => t.participant.identity)).size;
+  // Count connected participants, not published tracks: a guest with
+  // camera and mic off publishes nothing and used to vanish from the
+  // count (the header read "1 in call" with two people on stage).
+  const participants = useParticipants();
+  const n = participants.length;
   useEffect(() => { onCount(Math.max(1, n)); }, [n, onCount]);
   return null;
 }
@@ -221,6 +224,13 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
   }, [user?.id, name, hostTick, isAdmin]); // eslint-disable-line
   // Guests without an account are never host.
   const isHost = !!user?.id && (hostId === id || (!hostId && isAdmin));
+  // Platform admins hold host powers (sell, speak, host UI) in every room,
+  // even when the invite link names another host or a signed-in attendee
+  // opened the room first and claimed it (founder report 2026-11-20: the
+  // owner entered her own event room as a guest and could not sell).
+  // Room-state sync (spotlight, audience mode) stays with the single named
+  // host above, so two hosts never overwrite each other's room state.
+  const hostPowers = isHost || isAdmin;
   const canClaimHost = !!user?.id && isAdmin;
   const claimHost = () => {
     if (!user?.id) return;
@@ -433,7 +443,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     setTimeout(() => setFloats((f) => f.filter((x) => x.key !== key)), 2600);
   };
   const react = (r: typeof REACTIONS[number]) => { showReaction(r); broadcast({ t: 'react', k: r.k }); };
-  const canSell = isHost || !rules.hostProducts;
+  const canSell = hostPowers || !rules.hostProducts;
   const pushToAll = (p: Product) => { setDrop(p); setStageOffer(true); broadcast({ t: 'push', p }); };
   const saveProduct = async () => {
     const price = parseFloat(draft.price);
@@ -469,7 +479,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
 
   // Stage control: who is on stage, who is pinned, audience mode.
   const audience = isHost ? rules.audience : roomAudience;
-  const canSpeak = isHost || camMode || !audience || allowed.includes(id);
+  const canSpeak = hostPowers || camMode || !audience || allowed.includes(id);
   const pinned = isHost ? spotlight : (localPin !== undefined ? localPin : spotlight);
   const roomRef = useRef({ spot: spotlight, audience: rules.audience, allowed, banned });
   roomRef.current = { spot: spotlight, audience: rules.audience, allowed, banned };
@@ -545,7 +555,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     const note = txLines.length > 400 ? `\n\n(Showing the last 400 of ${txLines.length} lines — the full record is in your session download/email.)` : '';
     appendToGenius(`📋 Transcript — live session "${name}" • ${new Date().toLocaleString()} • ${txLines.length} lines\nAsk me anything about this meeting.\n\n${body}${note}`);
   }, [left]); // eslint-disable-line
-  useEffect(() => { if (!isHost && banned.includes(id)) beKicked(); }, [banned, id, isHost]); // eslint-disable-line
+  useEffect(() => { if (!hostPowers && banned.includes(id)) beKicked(); }, [banned, id, hostPowers]); // eslint-disable-line
 
   // Removed people can knock; the host admits or denies them (works while they're out of the call).
   const [knocks, setKnocks] = useState<{ id: string; name: string }[]>([]);
@@ -928,8 +938,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
         <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{rules.hideCount ? 'hidden' : mobile ? totalPeers : `${totalPeers} in call`}</span>
         <div className="ml-auto flex items-center gap-2">
           {!isHost && canClaimHost && !mobile && <button onClick={claimHost} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-amber-300 text-amber-700"><Crown className="w-3.5 h-3.5" />Claim host</button>}
-          {isHost && <button onClick={toggleRec} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500 animate-pulse' : ''}`} />{rec ? `REC ${fmtTime(recSecs)}` : 'REC OFF'}</button>}
-          {mobile && <span className="text-[10px] px-2 py-1 rounded-full bg-zinc-100 text-zinc-700">{isHost ? 'HOST' : 'GUEST'}</span>}
+          {hostPowers && <button onClick={toggleRec} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${rec ? 'border-red-300 text-red-600' : 'border-zinc-200'}`}><Circle className={`w-3.5 h-3.5 ${rec ? 'fill-red-500 text-red-500 animate-pulse' : ''}`} />{rec ? `REC ${fmtTime(recSecs)}` : 'REC OFF'}</button>}
+          {mobile && <span className="text-[10px] px-2 py-1 rounded-full bg-zinc-100 text-zinc-700">{hostPowers ? 'HOST' : 'GUEST'}</span>}
           {!mobile && !sideHidden && <button aria-label="Hide side menu" title="Hide side menu" onClick={() => setSideHidden(true)} className="lg:hidden w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center"><PanelRightClose className="w-4 h-4" /></button>}
           {!mobile && sideHidden && <button aria-label="Show side menu" title="Show side menu" onClick={() => setSideHidden(false)} className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center"><PanelRightOpen className="w-4 h-4" /></button>}
           <span className={`flex items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 ${mobile ? 'px-2 py-1' : 'px-4 py-1.5'}`}>
@@ -1064,8 +1074,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
               {moreOpen && <div className="absolute bottom-14 right-0 z-40 w-56 rounded-2xl bg-zinc-900 border border-white/10 p-2 shadow-2xl space-y-1">
                 {rest.map((b) => <button key={b.label} onClick={() => { b.fn(); setMoreOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm ${b.on ? 'bg-white text-zinc-900' : 'text-zinc-100'}`}><b.icon className="w-4 h-4" />{b.label}</button>)}
                 <button onClick={() => { setTab('text'); setSheetOpen(true); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-100"><FileText className="w-4 h-4" />Transcript text</button>
-                {isHost && <button onClick={() => { setTab('rules'); setSheetOpen(true); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-100"><Sliders className="w-4 h-4" />Host rules</button>}
-                {isHost && <button onClick={() => { toggleRec(); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-100"><Circle className="w-4 h-4" />{rec ? 'Stop recording' : 'Record'}</button>}
+                {hostPowers && <button onClick={() => { setTab('rules'); setSheetOpen(true); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-100"><Sliders className="w-4 h-4" />Host rules</button>}
+                {hostPowers && <button onClick={() => { toggleRec(); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-100"><Circle className="w-4 h-4" />{rec ? 'Stop recording' : 'Record'}</button>}
                 {!isHost && canClaimHost && <button onClick={() => { claimHost(); setMoreOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-amber-300"><Crown className="w-4 h-4" />Claim host</button>}
               </div>}
             </span>
@@ -1082,7 +1092,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
     { k: 'shop', label: `SHOP • ${catalog.length}` },
     { k: 'text', label: 'TEXT' },
     { k: 'journal', label: 'JOURNAL' },
-    ...(isHost ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
+    ...(hostPowers ? [{ k: 'money', label: '$' }, { k: 'rules', label: 'RULES' }] : []),
   ] as const;
 
   const shop = (
@@ -1097,7 +1107,7 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
             <Thumb p={drop} className="w-24 h-24 rounded-2xl shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{drop.name}</p>
-              <p className="font-mono text-sm text-zinc-300 mt-1">${drop.price}</p>
+              <p className="font-mono text-sm text-zinc-300 mt-1">{priceLabel(drop)}</p>
               <button disabled={paying === drop.id} onClick={() => buy(drop)} className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-white text-zinc-900 font-mono text-sm disabled:opacity-60"><ShoppingBag className="w-4 h-4" />{drop.pkg ? (paying === drop.id ? 'Opening checkout…' : 'Subscribe now') : 'Add to Cart'}</button>
               {drop.brochure && <a href={drop.brochure} target="_blank" rel="noreferrer" className="mt-2 flex items-center justify-center gap-1.5 text-xs text-emerald-400 underline underline-offset-2"><BookOpen className="w-3.5 h-3.5" />View the brochure</a>}
             </div>
@@ -1259,8 +1269,8 @@ function LiveVideoRoomInner({ roomName, room, identity, guest, chosenName }: Liv
           <span className="font-mono text-xs px-3 py-1.5 rounded-full border border-zinc-200 text-zinc-500 truncate max-w-[150px]">ROOM {name}</span>
           <button onClick={copyInvite} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 font-mono text-xs text-white shadow-sm hover:bg-zinc-700 transition">{copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Copied' : 'Copy Invite'}</button>
           <button onClick={copyCamLink} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 font-mono text-xs text-zinc-700 hover:bg-zinc-50 transition"><SwitchCamera className="w-3.5 h-3.5" />Add camera</button>
-          {isHost && !camMode && <button onClick={openBroadcast} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 font-mono text-xs text-white shadow-sm hover:opacity-90 transition"><Radio className="w-3.5 h-3.5" />Broadcast{bcLive ? ' • LIVE' : ''}</button>}
-          <span className={`ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full ${isHost ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>{isHost ? 'HOST' : 'GUEST'}</span>
+          {hostPowers && !camMode && <button onClick={openBroadcast} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 font-mono text-xs text-white shadow-sm hover:opacity-90 transition"><Radio className="w-3.5 h-3.5" />Broadcast{bcLive ? ' • LIVE' : ''}</button>}
+          <span className={`ml-auto font-mono text-[10px] px-2.5 py-1 rounded-full ${hostPowers ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>{hostPowers ? 'HOST' : 'GUEST'}</span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="flex gap-1 p-1 rounded-2xl bg-zinc-100 font-mono text-[11px] max-w-full overflow-x-auto">
