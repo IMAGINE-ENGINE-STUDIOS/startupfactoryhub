@@ -353,6 +353,217 @@ const DarkTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
   </div>
 );
 
+/* =========================================================================
+   LAVA CAPABILITY MATRIX — interactive merging slime blobs
+   ========================================================================= */
+const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
+  const CAPS = [
+    { i: Building2, l: 'Corporate HQ', tag: 'SFH·01' },
+    { i: Globe2, l: 'Global Network', tag: 'SFH·02' },
+    { i: Handshake, l: 'Commercial Channels', tag: 'SFH·03' },
+    { i: ShieldCheck, l: 'Institutional Relationships', tag: 'SFH·04' },
+    { i: Award, l: 'Brand Authority', tag: 'SFH·05' },
+    { i: Users, l: 'Corporate Members', tag: 'SFH·06' },
+    { i: MapPin, l: 'Intl. Delegations', tag: 'SFH·07' },
+    { i: Briefcase, l: 'Executive Spaces', tag: 'SFH·08' },
+    { i: Rocket, l: 'Accelerator', tag: 'SFH·09' },
+    { i: Brain, l: 'AI Platform', tag: 'SFH·10' },
+    { i: GraduationCap, l: 'Mentor Network', tag: 'SFH·11' },
+    { i: DollarSign, l: 'Investment Operations', tag: 'SFH·12' },
+    { i: Lightbulb, l: 'Corporate Innovation', tag: 'SFH·13' },
+    { i: BarChart3, l: 'Executive Programs', tag: 'SFH·14' },
+    { i: Cpu, l: 'Digital Infrastructure', tag: 'SFH·15' },
+    { i: TrendingUp, l: 'Growth Engine', tag: 'SFH·16' },
+  ];
+  const BLOBS = [
+    { x: [14, 28, 18, 12], y: [20, 30, 48, 24], s: [1, 1.12, 0.95, 1.05], d: 14 },
+    { x: [34, 24, 38, 32], y: [14, 28, 20, 16], s: [1.05, 0.92, 1.1, 1], d: 16 },
+    { x: [55, 64, 50, 58], y: [18, 26, 32, 20], s: [0.95, 1.1, 1, 1.05], d: 13 },
+    { x: [78, 70, 84, 80], y: [22, 30, 20, 24], s: [1.1, 1, 0.95, 1.08], d: 15 },
+    { x: [20, 32, 24, 16], y: [44, 38, 52, 46], s: [1, 1.08, 0.94, 1.02], d: 17 },
+    { x: [42, 50, 38, 44], y: [42, 48, 42, 40], s: [1.05, 0.95, 1.1, 1], d: 14 },
+    { x: [62, 56, 68, 60], y: [44, 50, 40, 46], s: [0.95, 1.08, 1, 1.04], d: 18 },
+    { x: [82, 76, 86, 84], y: [46, 42, 52, 44], s: [1.08, 1, 0.95, 1.06], d: 13 },
+    { x: [16, 24, 18, 12], y: [66, 72, 62, 68], s: [1, 1.1, 0.95, 1.05], d: 16 },
+    { x: [34, 42, 30, 36], y: [68, 64, 74, 66], s: [1.08, 0.95, 1.1, 1], d: 15 },
+    { x: [50, 58, 46, 52], y: [66, 72, 68, 62], s: [0.95, 1.1, 1, 1.05], d: 17 },
+    { x: [70, 64, 74, 72], y: [68, 64, 74, 66], s: [1.1, 1, 0.94, 1.06], d: 14 },
+    { x: [86, 80, 88, 84], y: [66, 72, 64, 68], s: [1, 1.08, 0.95, 1.04], d: 19 },
+    { x: [28, 36, 24, 30], y: [86, 84, 90, 86], s: [1.05, 0.95, 1.1, 1], d: 13 },
+    { x: [52, 60, 48, 54], y: [88, 84, 90, 86], s: [0.95, 1.08, 1, 1.06], d: 16 },
+    { x: [76, 70, 80, 78], y: [86, 90, 84, 88], s: [1.08, 1, 0.95, 1.04], d: 15 },
+  ];
+  // Softer, more matte palette — desaturated jewel tones (less neon)
+  const SLIME = ['#4b8a7a', '#3b7a8c', '#7a5a96', '#a36584', '#7a8a52', '#5a8a6b'];
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative flex-1 rounded-3xl overflow-hidden"
+      style={{
+        // Lighter, matte slate background — no neon glow
+        background:
+          'radial-gradient(ellipse at 35% 25%, #e8ecf2 0%, #d4dae3 45%, #b9c2cf 100%)',
+        border: `1px solid rgba(80,100,120,0.18)`,
+        boxShadow: 'inset 0 0 60px rgba(60,75,95,0.18)',
+      }}
+    >
+      {/* SVG goo filter */}
+      <svg className="absolute w-0 h-0" aria-hidden>
+        <defs>
+          <filter id="lavaGooInvestor">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"
+              result="goo"
+            />
+            <feBlend in="SourceGraphic" in2="goo" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Slime layer — multiply blend for matte fusion against the light background */}
+      <div
+        className="absolute inset-0"
+        style={{ filter: 'url(#lavaGooInvestor)', mixBlendMode: 'multiply' }}
+      >
+        {BLOBS.map((b, idx) => (
+          <motion.div
+            key={`blob-${idx}`}
+            className="absolute rounded-full"
+            style={{
+              width: 130,
+              height: 130,
+              left: `${b.x[0]}%`,
+              top: `${b.y[0]}%`,
+              marginLeft: -65,
+              marginTop: -65,
+              background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 60%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
+              opacity: 0.88,
+            }}
+            animate={{
+              left: b.x.map((v) => `${v}%`),
+              top: b.y.map((v) => `${v}%`),
+              scale: b.s,
+            }}
+            transition={{
+              duration: b.d,
+              repeat: Infinity,
+              repeatType: 'mirror',
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+      </div>
+
+
+      {/* Labels — centered on each blob via transform offset (keeps goo blobs visible underneath) */}
+      <div className="absolute inset-0">
+        {CAPS.map((cap, idx) => {
+          const b = BLOBS[idx];
+          const Icon = cap.i;
+          return (
+            <motion.div
+              key={`cap-${idx}`}
+              className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
+              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
+              initial={{ opacity: 0, scale: 0.6, x: '-50%', y: '-50%' }}
+              animate={{
+                left: b.x.map((v) => `${v}%`),
+                top: b.y.map((v) => `${v}%`),
+                opacity: 1,
+                scale: 1,
+                x: '-50%',
+                y: '-50%',
+              }}
+              transition={{
+                left: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                opacity: { duration: 0.6, delay: idx * 0.04 },
+                scale: { duration: 0.6, delay: idx * 0.04 },
+                x: { duration: 0 },
+                y: { duration: 0 },
+              }}
+            >
+              <Icon
+                className="h-4 w-4 mb-1"
+                style={{ color: '#ffffff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }}
+              />
+              <div
+                className="font-futuristic font-black text-[10.5px] uppercase tracking-[0.12em] leading-[1.05]"
+                style={{
+                  color: '#ffffff',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.55), 0 0 6px rgba(0,0,0,0.35)',
+                }}
+              >
+                {cap.l}
+              </div>
+              <div
+                className="font-mono text-[16px] tracking-[0.3em] mt-1"
+                style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                {cap.tag}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+
+      {/* Soft vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 60%, rgba(40,55,75,0.22) 100%)',
+        }}
+      />
+
+      {/* HUD */}
+      <div
+        className="absolute top-4 left-4 font-mono text-[16px] uppercase tracking-[0.3em]"
+        style={{ color: '#3a5066' }}
+      >
+        ● LAVA · LIVE SYNTHESIS
+      </div>
+      <div
+        className="absolute top-4 right-4 font-mono text-[16px] uppercase tracking-[0.3em] text-right"
+        style={{ color: '#3a5066' }}
+      >
+        16 / 16 CAPABILITIES
+        <br />
+        <span style={{ color: accent, opacity: 0.85 }}>FUSED · ONE PLATFORM</span>
+      </div>
+      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[17px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
+        <span>SFH · FUSION CORE</span>
+        <span>STATUS: FLUID · MOVE THE CURSOR</span>
+      </div>
+    </div>
+  );
+};
+
+const INVESTOR_GROWTH_BENEFITS: GrowthBenefit[] = [
+  { id: 'dealflow', stage: 0, label: 'Proprietary dealflow', line: 'Companies built in the studio, seen before any market does.' },
+  { id: 'diligence', stage: 0, label: 'Diligence intelligence', line: 'Signal Score data on every company, from day one.' },
+  { id: 'allocation', stage: 1, label: 'Allocation windows', line: 'Priority entry into every Batch round, before it opens wide.' },
+  { id: 'syndication', stage: 2, label: 'Syndication', line: 'Co-invest alongside the member network on shared-risk terms.' },
+  { id: 'standard', stage: 2, label: 'Standard positions', line: '70% of every standard 10% position, on identical terms.' },
+  { id: 'visibility', stage: 3, label: 'Portfolio visibility', line: 'Every company tracked in one investor dashboard.' },
+];
+
+const INVESTOR_GROWTH_ROOTS = ['Capital', 'Thesis', 'Sectors', 'Ticket'];
+
+const INVESTOR_GROWTH_MONTHS = [
+  'Your investor profile, thesis and ticket are set; dealflow unlocks.',
+  'Studio companies build on the platform — you watch the data live.',
+  'Allocation windows open; first standard positions are structured.',
+  'Demo Day: the Batch presents to you and the investor network.',
+];
+
 /* ============================ LAYOUT SUPPORT ============================ */
 const BASE_W = 842;
 const BASE_H = 1190;
@@ -1346,7 +1557,7 @@ export default function InvestorPlanBrochure({ embedded = false }: { embedded?: 
             <DarkTitle kicker="What you unlock" accent={NEON.emerald} title={<>Portfolio, events<br />& co-investors.</>} />
             <div className="grid grid-cols-2 gap-5 content-start">
               {benefits.slice(6).map((b, i) => {
-                const plates = [imgSkyline, imgCampus, imgAtrium, imgStudio];
+                const plates = [imgSkyline, imgCampus, imgLab, imgStudio];
                 return (
                   <motion.div
                     key={b.key}
