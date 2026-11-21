@@ -7,7 +7,6 @@ export interface Partner {
 export const PARTNERS: Partner[] = [
   { name: "NASA", logo: "/partners/nasa-logo.png", tier: "Space Agency" },
   { name: "NASA Technology Transfer Program (T2)", logo: "/partners/nasa-t2-logo.webp", tier: "Commercialization" },
-  { name: "UK Space Agency", logo: "/partners/uksa-logo.png", tier: "Space Agency" },
   { name: "APEX Accelerators", logo: "/partners/apex-accelerators-logo.png", tier: "Accelerator" },
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
@@ -58,12 +57,9 @@ export const PARTNERS: Partner[] = [
   { name: "O&O Software", logo: "https://www.google.com/s2/favicons?domain=oo-software.com&sz=128", tier: "Software" },
   { name: "Carta", logo: "https://www.google.com/s2/favicons?domain=carta.com&sz=128", tier: "Cap Table" },
   { name: "Multiplier", logo: "https://www.google.com/s2/favicons?domain=usemultiplier.com&sz=128", tier: "Global Hiring" },
-  { name: "Defense Innovation Unit (DIU)", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/diu-logo.png", tier: "Defense" },
-  { name: "Lockheed Martin", logo: "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/resource-assets/lockheed-martin-logo.png", tier: "Defense" },
   { name: "SpaceWERX", logo: "https://www.google.com/s2/favicons?domain=spacewerx.us&sz=128", tier: "Defense" },
-  { name: "University of Central Florida", logo: "https://www.google.com/s2/favicons?domain=ucf.edu&sz=128", tier: "Academic" },
 ];
 
 /** Partners shown only on the pitch deck, hidden from website carousels. */
-const DECK_ONLY = new Set<string>([]); // UK Space Agency + APEX Accelerators moved onto the Partners and Collaborators wall (founder, 2026-11-04)
+const DECK_ONLY = new Set<string>([]); // UK Space Agency, DIU, Lockheed Martin and University of Central Florida removed from the wall (founder, 2026-11-21: they are not partners and must not be published as such)
 export const WEBSITE_PARTNERS: Partner[] = PARTNERS.filter(p => !DECK_ONLY.has(p.name));
