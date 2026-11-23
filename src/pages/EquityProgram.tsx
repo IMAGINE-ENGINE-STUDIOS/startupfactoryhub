@@ -12,7 +12,7 @@ const BENEFITS = [
   { code: 'BLD', icon: Hammer, title: 'Build your MVP', desc: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.' },
   { code: 'MTR', icon: Users, title: 'Mentorship & Advisory', desc: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.' },
   { code: 'VAL', icon: FlaskConical, title: 'Market Validation', desc: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.' },
-  { code: 'NET', icon: Globe, title: 'Global Network', desc: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.' },
+  { code: 'NET', icon: Globe, title: 'Global Network', desc: 'Plug into a worldwide mesh of partners, events, enterprise clients and distribution channels across three continents.' },
   { code: 'CAP', icon: DollarSign, title: 'Funding Access', desc: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.' },
   { code: 'DMO', icon: Presentation, title: 'Demo Day', desc: 'Pitch on a curated stage in front of investors, corporates and press with a polished narrative and live product demo.' },
   { code: 'RDY', icon: FileCheck2, title: 'Investor Readiness', desc: 'Leave the program with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.' },
