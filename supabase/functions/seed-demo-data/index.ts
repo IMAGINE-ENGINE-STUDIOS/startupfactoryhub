@@ -128,6 +128,38 @@ Deno.serve(async (req) => {
       }
     });
 
+    // Admin-only guard: this function creates and deletes users with the
+    // service role, so the caller must be a signed-in platform admin.
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller }, error: callerError } = await anonClient.auth.getUser();
+    if (callerError || !caller) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: adminRole } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', caller.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+    if (!adminRole) {
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden: admin only' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { action } = await req.json();
 
     if (action === 'clear') {
@@ -188,7 +220,7 @@ Deno.serve(async (req) => {
         // Create auth user
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email,
-          password: 'demo123456',
+          password: crypto.randomUUID() + crypto.randomUUID(),
           email_confirm: true,
           user_metadata: {
             full_name: persona.name,
