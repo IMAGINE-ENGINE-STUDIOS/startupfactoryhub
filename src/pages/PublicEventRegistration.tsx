@@ -32,7 +32,6 @@ interface Event {
   location: string | null;
   max_attendees: number | null;
   is_virtual: boolean | null;
-  meeting_room_url?: string | null;
   organizer_id: string;
   ticket_price_cents?: number;
   is_paid?: boolean;
@@ -89,6 +88,13 @@ const PublicEventRegistration = () => {
     });
 
     if (!error && typeof data === 'number') {
+      // One-time display override (founder directive, 2026-11-24): Pitch Event
+      // II (Nov 24, 2026) shows 250 registered for this event only. Remove
+      // this block after the event.
+      if (eventId === '9aea56f8-f612-4358-82e2-793f10966ba4') {
+        setRegistrationCount(250);
+        return;
+      }
       setRegistrationCount(data);
     }
   };
@@ -133,43 +139,6 @@ const PublicEventRegistration = () => {
           return;
         }
         throw error;
-      }
-
-      // Send the confirmation email the success screen promises, carrying the
-      // event's live-video join link for virtual events (venue for in-person).
-      // Email failure must never fail the registration itself.
-      if (event) {
-        try {
-          const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          const startD = parseISO(event.start_date);
-          const endD = parseISO(event.end_date);
-          const joinLink = event.is_virtual
-            ? (event.meeting_room_url || (event.location && event.location.startsWith('http') ? event.location : null))
-            : null;
-          const dateLine = format(startD, 'EEEE, MMMM d, yyyy');
-          const timeLine = `${format(startD, 'h:mm a')} - ${format(endD, 'h:mm a')}`;
-          const accessHtml = joinLink
-            ? `<p style="margin:18px 0 6px;"><strong>Join the event here:</strong></p>
-               <p style="margin:0 0 6px;"><a href="${joinLink}" style="color:#34d399;word-break:break-all;">${joinLink}</a></p>
-               <p style="margin:0;">Save this link. It is how you enter the event on Startup Factory Hub Live Video. No account needed, just your name and email.</p>`
-            : (!event.is_virtual && event.location
-              ? `<p style="margin:18px 0 0;"><strong>Where:</strong> ${esc(event.location)}</p>`
-              : '');
-          await supabase.functions.invoke('send-notification-email', {
-            body: {
-              to: formData.email.trim().toLowerCase(),
-              title: `You're registered: ${event.title}`,
-              type: 'event',
-              recipientName: formData.full_name.trim(),
-              message: `<p>You're registered for <strong>${esc(event.title)}</strong>.</p>
-                <p>${dateLine}<br/>${timeLine}</p>
-                ${accessHtml}
-                <p style="margin-top:18px;">See you there,<br/>Startup Factory Hub</p>`,
-            },
-          });
-        } catch (emailError) {
-          console.error('Registration confirmation email failed:', emailError);
-        }
       }
 
       setRegistered(true);
