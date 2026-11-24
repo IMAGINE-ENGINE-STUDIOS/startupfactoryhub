@@ -256,9 +256,11 @@ export default function EquityContractsManager() {
     setSaving(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
-      const title = `Accelerator Program Agreement — ${
-        values.companyName.trim() || recipient.name || recipient.email || "New company"
-      }`;
+      const title = `${
+        values.contractType === "international"
+          ? "International Equity Partnership & Acceleration Agreement"
+          : "Accelerator Program Agreement"
+      } — ${values.companyName.trim() || recipient.name || recipient.email || "New company"}`;
       // One file for both recipients (founder, 2026-11-06): when a second
       // recipient is given, the SAME contract record and signing link are
       // emailed to both — never two separate files. The library row names
@@ -412,11 +414,41 @@ export default function EquityContractsManager() {
             Equity Contracts
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Prepare the Startup Factory Hub Accelerator Program Participation Agreement, send it to platform members or
+            Prepare the Startup Factory Hub Accelerator Program Participation Agreement or the International
+            Equity Partnership &amp; Acceleration Agreement, send it to platform members or
             external companies, and collect legally binding electronic signatures.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label>Contract template</Label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={values.contractType !== "international" ? "default" : "outline"}
+                onClick={() => set("contractType")("accelerator")}
+              >
+                Accelerator Program Participation Agreement
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={values.contractType === "international" ? "default" : "outline"}
+                onClick={() => set("contractType")("international")}
+              >
+                International Contract
+              </Button>
+            </div>
+            {values.contractType === "international" && (
+              <p className="text-xs text-muted-foreground">
+                International Equity Partnership &amp; Acceleration Agreement: a Delaware U.S. Parent is created as
+                parent company and the founder's local company becomes its 100%-owned subsidiary. The ownership
+                split of the U.S. Parent is set per startup in Schedule A — the Equity % field below is SFH's
+                percentage; leave it blank to record the split as agreed in Schedule A.
+              </p>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label>Effective date</Label>
@@ -427,7 +459,7 @@ export default function EquityContractsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Company name (leave blank to let the company fill it in)</Label>
+              <Label>{values.contractType === "international" ? "Local company legal name (leave blank to let the company fill it in)" : "Company name (leave blank to let the company fill it in)"}</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companyName}
                 onChange={(e) => set("companyName")(e.target.value)}
@@ -435,13 +467,23 @@ export default function EquityContractsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Jurisdiction</Label>
+              <Label>{values.contractType === "international" ? "Country of incorporation" : "Jurisdiction"}</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.jurisdiction}
                 onChange={(e) => set("jurisdiction")(e.target.value)}
-                placeholder="Delaware, USA"
+                placeholder={values.contractType === "international" ? "Chile" : "Delaware, USA"}
               />
             </div>
+            {values.contractType === "international" && (
+              <div className="space-y-2">
+                <Label>U.S. Parent name (optional — if already chosen)</Label>
+                <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
+                  value={values.usParentName}
+                  onChange={(e) => set("usParentName")(e.target.value)}
+                  placeholder="To be formed in Delaware"
+                />
+              </div>
+            )}
             <div className="space-y-2 sm:col-span-2 lg:col-span-3">
               <Label>Company address</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
@@ -451,7 +493,7 @@ export default function EquityContractsManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Equity % (Section 2 right)</Label>
+              <Label>{values.contractType === "international" ? "SFH % of the U.S. Parent (Schedule A — blank = as agreed)" : "Equity % (Section 2 right)"}</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.equityPercent} onChange={(e) => set("equityPercent")(e.target.value)} />
             </div>
             <div className="space-y-2">
@@ -463,7 +505,7 @@ export default function EquityContractsManager() {
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.totalRaised} onChange={(e) => set("totalRaised")(e.target.value)} placeholder="0" />
             </div>
             <div className="space-y-2">
-              <Label>Company signer name</Label>
+              <Label>{values.contractType === "international" ? "Founder name" : "Company signer name"}</Label>
               <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50"
                 value={values.companySignerName}
                 onChange={(e) => set("companySignerName")(e.target.value)}
@@ -493,13 +535,12 @@ export default function EquityContractsManager() {
             <div>
               <Label className="text-base">Schedule A — custom terms for this company</Label>
               <p className="text-xs text-muted-foreground mt-1">
-                Set per startup. One milestone per agreement: enter the company's Phase 1
-                fundraising goal and the Phase One compensation appears automatically at the
-                standing ratio. The compensation is a flat fee — it accrues at the start of
-                Phase One and is payable only when the milestone financing closes; the
-                agreement never states it as a percentage of the amount raised.
+                {values.contractType === "international"
+                  ? "Set per startup. For the International Contract, Schedule A records the Local Company, the U.S. Parent and the ownership split (the Equity % field above is SFH's percentage of the U.S. Parent; the Founders hold the remainder). There are no Phase One amounts or add-ons in this agreement."
+                  : "Set per startup. One milestone per agreement: enter the company's Phase 1 fundraising goal and the Phase One compensation appears automatically at the standing ratio. The compensation is a flat fee — it accrues at the start of Phase One and is payable only when the milestone financing closes; the agreement never states it as a percentage of the amount raised."}
               </p>
             </div>
+            {values.contractType !== "international" && (<>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label>Phase 1 fundraising goal ($)</Label>
@@ -560,6 +601,53 @@ export default function EquityContractsManager() {
                 </div>
               )}
             </div>
+            </>)}
+          </div>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-emerald-500"
+                  checked={values.referred === "yes"}
+                  onChange={(e) => set("referred")(e.target.checked ? "yes" : "no")}
+                />
+                Referred? / ¿Hay referido?
+              </label>
+              <p className="text-xs text-muted-foreground">
+                If yes, the referral clause is generated automatically in the contract and in Schedule A.
+              </p>
+            </div>
+            {values.referred === "yes" && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-2">
+                  <Label>Referrer name</Label>
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.referrerName} onChange={(e) => set("referrerName")(e.target.value)} placeholder="Spacely (Chile)" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Referrer type</Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm focus:border-[#00E5FF]/50 outline-none"
+                    value={values.referrerType}
+                    onChange={(e) => set("referrerType")(e.target.value)}
+                  >
+                    <option value="advisor">Official advisor — 25% commission</option>
+                    <option value="standard">Standard partner — 20% commission</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Referrer equity %</Label>
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="decimal" value={values.referrerEquityPercent} onChange={(e) => set("referrerEquityPercent")(e.target.value)} placeholder="2" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Monthly commission ($)</Label>
+                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.referrerMonthlyCommission} onChange={(e) => set("referrerMonthlyCommission")(e.target.value)} placeholder="190" />
+                </div>
+              </div>
+            )}
           </div>
 
           <Separator />

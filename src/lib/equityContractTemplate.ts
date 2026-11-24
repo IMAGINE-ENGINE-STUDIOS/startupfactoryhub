@@ -43,6 +43,19 @@ export interface EquityContractClause {
 }
 
 export interface EquityContractValues {
+  /** Which agreement this contract is built from: "accelerator" (Accelerator
+   *  Program Participation Agreement) or "international" (International Equity
+   *  Partnership & Acceleration Agreement). Absent in older drafts = accelerator. */
+  contractType: string;
+  /** International template: name of the Delaware U.S. Parent, if already chosen. */
+  usParentName: string;
+  /** Referral (both templates): "yes" when a referrer introduced the company. */
+  referred: string;
+  referrerName: string;
+  /** "standard" = standard partner (20% commission); "advisor" = official advisor (25%). */
+  referrerType: string;
+  referrerEquityPercent: string;
+  referrerMonthlyCommission: string;
   effectiveDate: string;
   companyName: string;
   jurisdiction: string;
@@ -77,6 +90,13 @@ export interface EquityContractValues {
 }
 
 export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
+  contractType: "accelerator",
+  usParentName: "",
+  referred: "no",
+  referrerName: "",
+  referrerType: "advisor",
+  referrerEquityPercent: "",
+  referrerMonthlyCommission: "",
   effectiveDate: "",
   companyName: "",
   jurisdiction: "",
@@ -195,7 +215,44 @@ export const percentDisplay = (v: string): string => {
   return Number.isInteger(n) ? `${n}.0` : String(n);
 };
 
+/** Referral (founder, 2026-11-23): standard partner = 20% commission,
+ *  official advisor = 25% commission. */
+export const referrerRate = (t: string): string => (t === "standard" ? "20" : "25");
+export const referrerTypeLabel = (t: string): string =>
+  t === "standard" ? "standard partner" : "official advisor";
+
+/** One-line referral summary used in Schedule A, in the founder's format:
+ *  "Referral — Spacely (Chile), official advisor: 2% + $190/month". */
+export const referralSummary = (v: EquityContractValues): string => {
+  const parts: string[] = [];
+  if (v.referrerEquityPercent?.trim()) parts.push(`${percentDisplay(v.referrerEquityPercent)}%`);
+  if (v.referrerMonthlyCommission?.trim())
+    parts.push(`${money(v.referrerMonthlyCommission)}/month`);
+  return `Referral — ${v.referrerName?.trim() || "____________"}, ${referrerTypeLabel(
+    v.referrerType
+  )}${parts.length ? `: ${parts.join(" + ")}` : ""}`;
+};
+
+/** The generated referral clause body (both templates). `equityOf` names what
+ *  the referrer's equity percentage is an interest in — "the Company" for the
+ *  accelerator agreement, "the U.S. Parent" for the international agreement. */
+const referralClauseParas = (v: EquityContractValues, equityOf: string): string[] => [
+  `<strong>Referrer.</strong> The Company was introduced to IES by ${blank(
+    v.referrerName,
+    24
+  )} (the "<strong>Referrer</strong>"), acting as ${referrerTypeLabel(v.referrerType)}.`,
+  `<strong>Referral compensation.</strong> In consideration of the introduction, the Referrer is entitled to (i) an equity interest of ${
+    v.referrerEquityPercent?.trim() ? `${esc(percentDisplay(v.referrerEquityPercent))}%` : "______%"
+  } in ${equityOf}, and (ii) a monthly commission of ${money(
+    v.referrerMonthlyCommission
+  )}, at the ${referrerTypeLabel(v.referrerType)} commission rate of ${referrerRate(
+    v.referrerType
+  )}%. The referral terms are summarized in Schedule A.`,
+  `<strong>Entire referral terms.</strong> This Section and Schedule A state the entire referral compensation for this introduction; no other referral fee, commission or equity is owed in connection with the Company's admission.`,
+];
+
 export function buildEquityContractHtml(v: EquityContractValues): string {
+  if (v.contractType === "international") return buildInternationalContractHtml(v);
   const eqNum = esc(percentDisplay(v.equityPercent || ""));
   const addon = v.officeAddonElected === "yes";
   const row = (label: string, value: string, bold = false) =>
@@ -337,6 +394,19 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
           .join("")}`
     )
     .join("")}
+  ${
+    v.referred === "yes"
+      ? `${h(
+          String(
+            11 +
+              (v.customClauses || []).filter(
+                (c) => (c.title || "").trim() || (c.body || "").trim()
+              ).length
+          ),
+          "REFERRAL"
+        )}${referralClauseParas(v, "the Company").map((t) => p(t)).join("")}`
+      : ""
+  }
 
   <h3 style="font-size:15px;margin:32px 0 12px">SCHEDULE A — CUSTOM TERMS FOR THE COMPANY</h3>
   <table style="border-collapse:collapse;width:100%;font-size:13.5px">
@@ -370,6 +440,7 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
         : `☐ Elected — $950 per month &nbsp; ☑ Not elected`,
       true
     )}
+    ${v.referred === "yes" ? row("Referral", esc(referralSummary(v)), true) : ""}
   </table>
 
   <h3 style="font-size:15px;margin:32px 0 12px">AGREED AND ACCEPTED:</h3>
@@ -381,6 +452,178 @@ export function buildEquityContractHtml(v: EquityContractValues): string {
   ${p(`Date: ______________________________`)}
 
   <p style="margin:24px 0 6px;font-weight:600">The Company: ${blank(v.companyName, 26)}</p>
+  ${p(`By: ______________________________`)}
+  ${p(`Name: ${blank(v.companySignerName, 22)}`)}
+  ${p(`Title: ${blank(v.companySignerTitle, 22)}`)}
+  ${p(`Date: ______________________________`)}
+</div>`.trim();
+}
+
+/**
+ * International Equity Partnership & Acceleration Agreement (founder-approved
+ * draft v1, 2026-11-23): a Delaware U.S. Parent is created as parent company
+ * (empresa matriz); the founder's local company becomes its 100%-owned
+ * subsidiary (share exchange / flip, YC international model); ownership of
+ * the U.S. Parent is split per startup in Schedule A — NO fixed percentage;
+ * NO grants section and NO equity earn-in (both removed by the founder).
+ * Field mapping: companyName = Local Company legal name; jurisdiction =
+ * country of incorporation; companySignerName = the founder; equityPercent =
+ * SFH's percentage of the U.S. Parent per Schedule A (blank = to be agreed
+ * in Schedule A, never a template default).
+ */
+export function buildInternationalContractHtml(v: EquityContractValues): string {
+  const row = (label: string, value: string, bold = false) =>
+    `<tr><td style="padding:7px 10px;border:1px solid #d1d5db;${bold ? "font-weight:700" : ""}">${esc(
+      label
+    )}</td><td style="padding:7px 10px;border:1px solid #d1d5db;${bold ? "font-weight:700" : ""}">${value}</td></tr>`;
+  const sfhPct = v.equityPercent?.trim() ? Number(v.equityPercent) : NaN;
+  const foundersPct = Number.isFinite(sfhPct) ? 100 - sfhPct : NaN;
+  const splitText = Number.isFinite(sfhPct)
+    ? `SFH ${esc(percentDisplay(v.equityPercent))}% / Founders ${esc(
+        percentDisplay(String(foundersPct))
+      )}% of the U.S. Parent`
+    : "As agreed in writing in Schedule A before formation (no fixed percentage)";
+  const customCount = (v.customClauses || []).filter(
+    (c) => (c.title || "").trim() || (c.body || "").trim()
+  ).length;
+
+  return `
+<div style="font-family:Georgia,'Times New Roman',serif;color:#111827;font-size:14px">
+  <h2 style="text-align:center;font-size:20px;margin:0 0 4px">INTERNATIONAL EQUITY PARTNERSHIP &amp; ACCELERATION AGREEMENT</h2>
+  <p style="text-align:center;font-size:12px;color:#6b7280;margin:0 0 24px">
+    Imagine Engine Studios Corp d/b/a Startup Factory Hub · Orlando, Florida ·
+    <a href="${PARTNERS_URL}" style="color:#0ea270">Learn more about us</a>
+  </p>
+
+  ${p(
+    `This International Equity Partnership &amp; Acceleration Agreement (this "<strong>Agreement</strong>") is entered into as of the date set forth in Schedule A (the "<strong>Effective Date</strong>"), by and between <strong>Imagine Engine Studios Corp</strong>, a Florida corporation, doing business as <strong>Startup Factory Hub</strong> ("<strong>SFH</strong>"), and ${blank(
+      v.companySignerName,
+      24
+    )} and <strong>${blank(v.companyName, 30)}</strong> (the "<strong>Local Company</strong>"), incorporated in ${blank(
+      v.jurisdiction,
+      18
+    )} (together, the "<strong>Founders</strong>"). SFH and the Founders are each a "Party" and collectively the "Parties."`
+  )}
+  ${p(
+    `The Founders wish to expand into the United States. SFH will act as the Founders' United States partner and accelerator under the structure below.`
+  )}
+
+  ${h("1", "Formation of the U.S. Parent Company")}
+  ${p(
+    `<strong>1.1 Formation.</strong> The Parties will form a new corporation in the United States (Delaware)${v.usParentName?.trim() ? `, named <strong>${esc(v.usParentName.trim())}</strong>,` : ""} (the "<strong>U.S. Parent</strong>").`
+  )}
+  ${p(
+    `<strong>1.2 Parent company.</strong> The U.S. Parent is the parent company (empresa matriz) of the group. The Local Company becomes its local operating company and subsidiary.`
+  )}
+  ${p(
+    `<strong>1.3 Ownership.</strong> Ownership of the U.S. Parent at formation: SFH (or its designee) and the Founders hold shares as equity partners — <strong>${splitText}</strong>. The percentage varies by startup and is <strong>not</strong> fixed in this Agreement; the split for each company is agreed in writing in its Schedule A before formation.`
+  )}
+
+  ${h("2", "The Local Company as Subsidiary")}
+  ${p(
+    `<strong>2.1 Share exchange (flip).</strong> The Founders will transfer one hundred percent (100%) of the shares of the Local Company to the U.S. Parent (share exchange / "flip"), so the U.S. Parent owns the Local Company in full.`
+  )}
+  ${p(
+    `<strong>2.2 Local operations.</strong> The Local Company keeps operating in its home country, with its local team, contracts and obligations, as the group's local company.`
+  )}
+  ${p(
+    `<strong>2.3 Intellectual property.</strong> The group's intellectual property is held under the U.S. Parent as ultimate owner, or remains in the Local Company with an exclusive license to the U.S. Parent, at the Founders' election recorded in writing.`
+  )}
+
+  ${h("3", "United States Expansion")}
+  ${p(
+    `<strong>3.1 U.S. vehicle.</strong> The U.S. Parent is the vehicle for the group's United States operations and fundraising.`
+  )}
+  ${p(
+    `<strong>3.2 U.S. partner.</strong> SFH, as the U.S. equity partner, provides its U.S. presence, network and support for that expansion.`
+  )}
+
+  ${h("4", "Acceleration Services")}
+  ${p(
+    `<strong>4.1 Services.</strong> SFH provides the U.S. Parent and the Local Company its acceleration and venture-building services: company building, fundraising preparation, investor and partner introductions, and access to the Startup Factory Hub platform and programs.`
+  )}
+
+  ${h("5", "Governance")}
+  ${p(
+    `<strong>5.1 Board and major decisions.</strong> Board representation follows the ownership split agreed in Schedule A. Major decisions — sale of the company, new share issuance, debt above an agreed threshold, and changes to this structure — require both partners' consent.`
+  )}
+  ${p(
+    `<strong>5.2 Day-to-day operations.</strong> Day-to-day operations of the Local Company remain led by the Founders.`
+  )}
+
+  ${h("6", "Term and Exit")}
+  ${p(
+    `<strong>6.1 Term.</strong> This Agreement takes effect on signing and remains in force while both partners hold shares in the U.S. Parent.`
+  )}
+  ${p(
+    `<strong>6.2 Transfer restriction.</strong> Neither partner may sell or transfer U.S. Parent shares to a third party without the other partner's written consent (right of first refusal).`
+  )}
+
+  ${h("7", "General Provisions")}
+  ${p(
+    `<strong>7.1 Independent parties.</strong> Except for the equity partnership in the U.S. Parent expressly created by this Agreement, nothing in this Agreement creates an employment or agency relationship between the Parties.`
+  )}
+  ${p(
+    `<strong>7.2 Governing law.</strong> This Agreement is governed by the laws of the State of Florida, without regard to its conflict-of-laws principles.`
+  )}
+  ${p(
+    `<strong>7.3 Entire agreement; amendments.</strong> This Agreement (including Schedule A) is the entire agreement between the Parties regarding the structure described here and supersedes all prior or contemporaneous understandings. It may be amended only in a writing signed by both Parties.`
+  )}
+  ${p(
+    `<strong>7.4 Notices.</strong> Notices under this Agreement must be in writing and are deemed given when delivered by email (with confirmation of receipt) or three (3) business days after mailing, to the addresses set forth in Schedule A.`
+  )}
+  ${p(
+    `<strong>7.5 Counterparts; electronic signatures.</strong> This Agreement may be executed in counterparts, each of which is an original. Electronic and PDF signatures are binding to the same extent as handwritten signatures.`
+  )}
+  ${(v.customClauses || [])
+    .filter((c) => (c.title || "").trim() || (c.body || "").trim())
+    .map(
+      (c, i) =>
+        `${h(String(8 + i), (c.title || "ADDITIONAL TERMS").toUpperCase())}${(c.body || "")
+          .split(/\n{1,}/)
+          .filter((line) => line.trim())
+          .map((line) => p(esc(line.trim())))
+          .join("")}`
+    )
+    .join("")}
+  ${
+    v.referred === "yes"
+      ? `${h(String(8 + customCount), "REFERRAL")}${referralClauseParas(v, "the U.S. Parent")
+          .map((t) => p(t))
+          .join("")}`
+      : ""
+  }
+
+  <h3 style="font-size:15px;margin:32px 0 12px">SCHEDULE A — TERMS FOR THE COMPANY</h3>
+  <table style="border-collapse:collapse;width:100%;font-size:13.5px">
+    ${row("Local Company (legal name)", blank(v.companyName, 30))}
+    ${row("Country of incorporation", blank(v.jurisdiction, 20))}
+    ${row("Founder", blank(v.companySignerName, 24))}
+    ${row(
+      "Company address / notice email",
+      `${blank(v.companyAddress, 30)}${v.companyNoticeEmail?.trim() ? ` / ${esc(v.companyNoticeEmail.trim())}` : ""}`
+    )}
+    ${row(
+      "Company signatory (name / title)",
+      `${blank(v.companySignerName, 20)}${v.companySignerTitle?.trim() ? ` / ${esc(v.companySignerTitle.trim())}` : ""}`
+    )}
+    ${row("IES notice address / email", esc(IES_NOTICE))}
+    ${row("Effective Date", blank(v.effectiveDate, 20))}
+    ${row("U.S. Parent (Delaware)", v.usParentName?.trim() ? esc(v.usParentName.trim()) : "To be formed")}
+    ${row("Ownership of the U.S. Parent (Section 1.3)", splitText, true)}
+    ${row("Local Company ownership after the flip", "100% owned by the U.S. Parent")}
+    ${v.referred === "yes" ? row("Referral", esc(referralSummary(v)), true) : ""}
+  </table>
+
+  <h3 style="font-size:15px;margin:32px 0 12px">AGREED AND ACCEPTED:</h3>
+
+  <p style="margin:0 0 6px;font-weight:600">Imagine Engine Studios Corp d/b/a Startup Factory Hub</p>
+  ${p(`By: ______________________________`)}
+  ${p(`Name: ${blank(v.acceleratorSignerName, 22)}`)}
+  ${p(`Title: ${blank(v.acceleratorSignerTitle, 22)}`)}
+  ${p(`Date: ______________________________`)}
+
+  <p style="margin:24px 0 6px;font-weight:600">The Founders — ${blank(v.companyName, 26)}</p>
   ${p(`By: ______________________________`)}
   ${p(`Name: ${blank(v.companySignerName, 22)}`)}
   ${p(`Title: ${blank(v.companySignerTitle, 22)}`)}
