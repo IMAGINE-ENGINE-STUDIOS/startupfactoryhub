@@ -622,7 +622,7 @@ export default function EquityContractsManager() {
               </p>
             </div>
             {values.referred === "yes" && (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                   <Label>Referrer name</Label>
                   <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" value={values.referrerName} onChange={(e) => set("referrerName")(e.target.value)} placeholder="Spacely (Chile)" />
@@ -639,12 +639,12 @@ export default function EquityContractsManager() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Referrer equity %</Label>
+                  <Label>Referrer equity % (carved from SFH's share)</Label>
                   <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="decimal" value={values.referrerEquityPercent} onChange={(e) => set("referrerEquityPercent")(e.target.value)} placeholder="2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Monthly commission ($)</Label>
-                  <Input className="bg-white/[0.03] border-white/10 focus:border-[#00E5FF]/50" inputMode="numeric" value={values.referrerMonthlyCommission} onChange={(e) => set("referrerMonthlyCommission")(e.target.value)} placeholder="190" />
+                  <p className="text-xs text-muted-foreground">
+                    The commission is the type's percentage of the company's FIRST payment only — one
+                    time, never monthly.
+                  </p>
                 </div>
               </div>
             )}

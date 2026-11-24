@@ -55,7 +55,6 @@ export interface EquityContractValues {
   /** "standard" = standard partner (20% commission); "advisor" = official advisor (25%). */
   referrerType: string;
   referrerEquityPercent: string;
-  referrerMonthlyCommission: string;
   effectiveDate: string;
   companyName: string;
   jurisdiction: string;
@@ -96,7 +95,6 @@ export const DEFAULT_EQUITY_CONTRACT: EquityContractValues = {
   referrerName: "",
   referrerType: "advisor",
   referrerEquityPercent: "",
-  referrerMonthlyCommission: "",
   effectiveDate: "",
   companyName: "",
   jurisdiction: "",
@@ -222,32 +220,33 @@ export const referrerTypeLabel = (t: string): string =>
   t === "standard" ? "standard partner" : "official advisor";
 
 /** One-line referral summary used in Schedule A, in the founder's format:
- *  "Referral — Spacely (Chile), official advisor: 2% + $190/month". */
+ *  "Referral — Spacely (Chile), official advisor: 2% + 25% of the first
+ *  payment (one time)". The referrer's equity is carved out of SFH's equity
+ *  share, and the percentage commission applies to the FIRST PAYMENT ONLY —
+ *  one time, never monthly or recurring (founder corrections, 2026-11-23). */
 export const referralSummary = (v: EquityContractValues): string => {
   const parts: string[] = [];
-  if (v.referrerEquityPercent?.trim()) parts.push(`${percentDisplay(v.referrerEquityPercent)}%`);
-  if (v.referrerMonthlyCommission?.trim())
-    parts.push(`${money(v.referrerMonthlyCommission)}/month`);
+  if (v.referrerEquityPercent?.trim())
+    parts.push(`${percentDisplay(v.referrerEquityPercent)}% equity (carved from SFH's share)`);
+  parts.push(`${referrerRate(v.referrerType)}% of the first payment (one time)`);
   return `Referral — ${v.referrerName?.trim() || "____________"}, ${referrerTypeLabel(
     v.referrerType
-  )}${parts.length ? `: ${parts.join(" + ")}` : ""}`;
+  )}: ${parts.join(" + ")}`;
 };
 
 /** The generated referral clause body (both templates). `equityOf` names what
  *  the referrer's equity percentage is an interest in — "the Company" for the
  *  accelerator agreement, "the U.S. Parent" for the international agreement. */
-const referralClauseParas = (v: EquityContractValues, equityOf: string): string[] => [
-  `<strong>Referrer.</strong> The Company was introduced to IES by ${blank(
+const referralClauseParas = (v: EquityContractValues, equityOf: string, party = "IES"): string[] => [
+  `<strong>Referrer.</strong> The Company was introduced to ${party} by ${blank(
     v.referrerName,
     24
   )} (the "<strong>Referrer</strong>"), acting as ${referrerTypeLabel(v.referrerType)}.`,
   `<strong>Referral compensation.</strong> In consideration of the introduction, the Referrer is entitled to (i) an equity interest of ${
     v.referrerEquityPercent?.trim() ? `${esc(percentDisplay(v.referrerEquityPercent))}%` : "______%"
-  } in ${equityOf}, and (ii) a monthly commission of ${money(
-    v.referrerMonthlyCommission
-  )}, at the ${referrerTypeLabel(v.referrerType)} commission rate of ${referrerRate(
+  } in ${equityOf}, <strong>carved out of the equity share of ${party} under this Agreement</strong> — the Referrer's interest comes out of ${party}'s share and does not increase the total equity issued under this Agreement — and (ii) a one-time commission equal to ${referrerRate(
     v.referrerType
-  )}%. The referral terms are summarized in Schedule A.`,
+  )}% (the ${referrerTypeLabel(v.referrerType)} commission rate) of the Company's <strong>first payment</strong> under this Agreement. The commission is payable one time only, on that first payment; it is not a monthly or recurring commission. The referral terms are summarized in Schedule A.`,
   `<strong>Entire referral terms.</strong> This Section and Schedule A state the entire referral compensation for this introduction; no other referral fee, commission or equity is owed in connection with the Company's admission.`,
 ];
 
@@ -588,7 +587,7 @@ export function buildInternationalContractHtml(v: EquityContractValues): string 
     .join("")}
   ${
     v.referred === "yes"
-      ? `${h(String(8 + customCount), "REFERRAL")}${referralClauseParas(v, "the U.S. Parent")
+      ? `${h(String(8 + customCount), "REFERRAL")}${referralClauseParas(v, "the U.S. Parent", "SFH")
           .map((t) => p(t))
           .join("")}`
       : ""
