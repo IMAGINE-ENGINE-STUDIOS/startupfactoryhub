@@ -237,7 +237,20 @@ export const referralSummary = (v: EquityContractValues): string => {
 /** The generated referral clause body (both templates). `equityOf` names what
  *  the referrer's equity percentage is an interest in — "the Company" for the
  *  accelerator agreement, "the U.S. Parent" for the international agreement. */
-const referralClauseParas = (v: EquityContractValues, equityOf: string, party = "IES"): string[] => [
+const referralClauseParas = (v: EquityContractValues, equityOf: string, party = "IES"): string[] => {
+  const total = Number(v.equityPercent);
+  const refPct = Number(v.referrerEquityPercent);
+  const allocation =
+    Number.isFinite(total) && Number.isFinite(refPct) && total >= refPct
+      ? ` Of the ${esc(percentDisplay(v.equityPercent))}% ${
+          v.contractType === "international"
+            ? `share of the U.S. Parent held by ${party} under Section 1.3`
+            : "equity granted under Section 2"
+        }, ${esc(percentDisplay(v.referrerEquityPercent))}% is allocated to the Referrer and ${esc(
+          percentDisplay(String(total - refPct))
+        )}% to ${party}.`
+      : "";
+  return [
   `<strong>Referrer.</strong> The Company was introduced to ${party} by ${blank(
     v.referrerName,
     24
@@ -246,9 +259,10 @@ const referralClauseParas = (v: EquityContractValues, equityOf: string, party = 
     v.referrerEquityPercent?.trim() ? `${esc(percentDisplay(v.referrerEquityPercent))}%` : "______%"
   } in ${equityOf}, <strong>carved out of the equity share of ${party} under this Agreement</strong> — the Referrer's interest comes out of ${party}'s share and does not increase the total equity issued under this Agreement — and (ii) a one-time commission equal to ${referrerRate(
     v.referrerType
-  )}% (the ${referrerTypeLabel(v.referrerType)} commission rate) of the Company's <strong>first payment</strong> under this Agreement. The commission is payable one time only, on that first payment; it is not a monthly or recurring commission. The referral terms are summarized in Schedule A.`,
+  )}% (the ${referrerTypeLabel(v.referrerType)} commission rate) of the Company's <strong>first payment</strong> under this Agreement. The commission is payable one time only, on that first payment; it is not a monthly or recurring commission.${allocation} The referral terms are summarized in Schedule A.`,
   `<strong>Entire referral terms.</strong> This Section and Schedule A state the entire referral compensation for this introduction; no other referral fee, commission or equity is owed in connection with the Company's admission.`,
-];
+  ];
+};
 
 export function buildEquityContractHtml(v: EquityContractValues): string {
   if (v.contractType === "international") return buildInternationalContractHtml(v);
