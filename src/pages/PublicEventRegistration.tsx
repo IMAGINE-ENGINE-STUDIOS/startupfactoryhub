@@ -89,10 +89,10 @@ const PublicEventRegistration = () => {
 
     if (!error && typeof data === 'number') {
       // One-time display override (founder directive, 2026-11-24): Pitch Event
-      // II (Nov 24, 2026) shows 250 registered for this event only. Remove
+      // II (Nov 24, 2026) shows 333 registered for this event only. Remove
       // this block after the event.
       if (eventId === '9aea56f8-f612-4358-82e2-793f10966ba4') {
-        setRegistrationCount(250);
+        setRegistrationCount(333);
         return;
       }
       setRegistrationCount(data);
